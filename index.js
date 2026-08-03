@@ -666,8 +666,10 @@ function initFarm() {
           <textarea class="inp" id="sbPrompt" placeholder="Nhập ý tưởng pixel art (gõ tiếng Việt cũng được)..." style="height:60px"></textarea>
           <div style="display:flex;gap:8px;align-items:center">
             <span class="buy" id="sbGenerate">✨ Tạo bằng AI</span>
+            <span class="buy plain" id="sbPayloadBtn" style="display:none;padding:4px 8px;font-size:12px">🔍 Payload</span>
             <span id="sbStatus" style="font-size:12px;color:var(--accFg)"></span>
           </div>
+          <textarea class="inp" id="sbPayloadOut" style="display:none;height:120px;font-size:11px;font-family:monospace;margin-top:4px" readonly></textarea>
           <div class="shead">Mã Pixel (16x16)</div>
           <div class="note">Dấu . là trong suốt. Dán hoặc sửa mảng JSON vào đây để xem thử trên bảng vẽ.</div>
           <textarea class="inp" id="sbCode" style="height:200px;font-family:monospace;white-space:pre"></textarea>
@@ -709,6 +711,11 @@ function initFarm() {
     ta.addEventListener('input', render);
     sel.addEventListener('change', render);
 
+    $id('sbPayloadBtn').addEventListener('click', () => {
+      const out = $id('sbPayloadOut');
+      out.style.display = out.style.display === 'none' ? 'block' : 'none';
+    });
+
     $id('sbGenerate').addEventListener('click', async () => {
       const p = $id('sbPrompt').value.trim();
       if (!p) return toast('Vui lòng nhập ý tưởng!');
@@ -744,6 +751,9 @@ QUY TẮC BẮT BUỘC:
           ],
           max_tokens: 1500
         };
+
+        $id('sbPayloadOut').value = JSON.stringify(reqBody, null, 2);
+        $id('sbPayloadBtn').style.display = 'inline-block';
 
         const res = await fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
           method: 'POST',
