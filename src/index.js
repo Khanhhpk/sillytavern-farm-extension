@@ -1,6 +1,7 @@
-import { extension_settings, getContext } from '../../../../extensions.js';
-import { eventSource, event_types, saveSettingsDebounced } from '../../../../script.js';
-import { generateRaw } from '../../../../endpoints.js';
+import { extension_settings, getContext } from '../../extensions.js';
+import { eventSource, event_types, saveSettingsDebounced } from '../../script.js';
+import { generateRaw } from '../../endpoints.js';
+
 import './style.css';
 
 /* ============================================================
@@ -788,13 +789,13 @@ function initFarm() {
   let CS = { link: false, story: false, userPrompt: '' };
   function loadCharState() {
     try {
-      const v = getVariables({ type: 'character' }) || {};
+      const v = {} || {};
       const o = v.star_tavern_farm_cs || {};
       CS = { link: !!o.link, story: !!o.story, userPrompt: o.userPrompt || '' };
     } catch (e) { CS = { link: false, story: false, userPrompt: '' }; }
   }
   function saveCharState() {
-    try { insertOrAssignVariables({ star_tavern_farm_cs: { link: CS.link, story: CS.story, userPrompt: CS.userPrompt } }, { type: 'character' }); } catch (e) {}
+    try { console.log("Farm: Cannot insert variables: ",{ star_tavern_farm_cs: { link: CS.link, story: CS.story, userPrompt: CS.userPrompt } }, { type: 'character' }); } catch (e) {}
   }
   loadCharState();
   function charName() {
@@ -808,11 +809,11 @@ function initFarm() {
   /* Trích world book: chỉ đọc, ưu tiên đèn xanh dương, thiếu thì bù đèn xanh lá, cắt còn 2000 chữ */
   async function collectWorldbook() {
     try {
-      const names = await getCharWorldbookNames('current');
+      const names = await [] // getCharWorldbookNames('current');
       const list = [names && names.primary].concat((names && names.additional) || []).filter(Boolean);
       let blue = '', green = '';
       for (const nm of list) {
-        const entries = await getWorldbook(nm);
+        const entries = await null // getWorldbook(nm);
         for (const en of entries) {
           if (!en.enabled) continue;
           if (en.strategy && en.strategy.type === 'constant') blue += en.content + '\n';
@@ -1028,7 +1029,7 @@ function initFarm() {
 
   /* Đổi thẻ: nạp lại trạng thái phía nhân vật, sự kiện lấy lại theo thẻ */
   try {
-    eventOn(tavern_events.CHAT_CHANGED, () => {
+    eventSource.on(event_types.CHAT_CHANGED, () => {
       loadCharState();
       renderChips(); renderBanner(); updateInjection();
       if (CS.link) requestDayEvent();

@@ -1,6 +1,6 @@
-import { extension_settings as __WEBPACK_EXTERNAL_MODULE__extensions_js_e625da88_extension_settings__ } from "../../../../extensions.js";
-import { saveSettingsDebounced as __WEBPACK_EXTERNAL_MODULE__script_js_c57e49fe_saveSettingsDebounced__ } from "../../../../script.js";
-import { generateRaw as __WEBPACK_EXTERNAL_MODULE__endpoints_js_dac28eef_generateRaw__ } from "../../../../endpoints.js";
+import { extension_settings as __WEBPACK_EXTERNAL_MODULE__extensions_js_499350b3_extension_settings__ } from "../../extensions.js";
+import { eventSource as __WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_eventSource__, event_types as __WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_event_types__, saveSettingsDebounced as __WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_saveSettingsDebounced__ } from "../../script.js";
+import { generateRaw as __WEBPACK_EXTERNAL_MODULE__endpoints_js_59d58c4e_generateRaw__ } from "../../endpoints.js";
 /******/ var __webpack_modules__ = ({
 
 /***/ 208
@@ -445,15 +445,15 @@ module.exports = function (i) {
 
 /***/ },
 
-/***/ 158
+/***/ 986
 (__webpack_module__, __unused_webpack___webpack_exports__, __webpack_require__) {
 
 
-;// external "../../../../extensions.js"
+;// external "../../extensions.js"
 
-;// external "../../../../script.js"
+;// external "../../script.js"
 
-;// external "../../../../endpoints.js"
+;// external "../../endpoints.js"
 
 ;// ./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js
 var injectStylesIntoStyleTag_namespaceObject = /*#__PURE__*/__webpack_require__.cjs(function(module, exports) {
@@ -733,6 +733,7 @@ var update = injectStylesIntoStyleTag_default()(cjs_js_src_style/* default */.A,
 
 
 
+
 /* ============================================================
  * Ai mà thèm làm nông dân trong SillyTavern chứ! · Bản chính thức v1.1
  * Script toàn cục cho Tavern Helper. Nút bóng nổi → cửa sổ nông trại → hộp mù thế giới quan.
@@ -824,10 +825,10 @@ function initFarm() {
   }
   let S = null;
   function loadState() {
-    if (!__WEBPACK_EXTERNAL_MODULE__extensions_js_e625da88_extension_settings__[extensionName]) {
-      __WEBPACK_EXTERNAL_MODULE__extensions_js_e625da88_extension_settings__[extensionName] = {};
+    if (!__WEBPACK_EXTERNAL_MODULE__extensions_js_499350b3_extension_settings__[extensionName]) {
+      __WEBPACK_EXTERNAL_MODULE__extensions_js_499350b3_extension_settings__[extensionName] = {};
     }
-    const g = __WEBPACK_EXTERNAL_MODULE__extensions_js_e625da88_extension_settings__[extensionName] || {};
+    const g = __WEBPACK_EXTERNAL_MODULE__extensions_js_499350b3_extension_settings__[extensionName] || {};
     S = g[NS] && g[NS].version === 1 ? g[NS] : freshState();
     if (!S.petPoke) S.petPoke = {};
     if (!S.mutDesc) S.mutDesc = {};
@@ -874,8 +875,8 @@ function initFarm() {
   function save(immediate) {
     if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
     const doSave = () => {
-      __WEBPACK_EXTERNAL_MODULE__extensions_js_e625da88_extension_settings__[extensionName][NS] = S;
-      if (__WEBPACK_EXTERNAL_MODULE__script_js_c57e49fe_saveSettingsDebounced__) __WEBPACK_EXTERNAL_MODULE__script_js_c57e49fe_saveSettingsDebounced__();
+      __WEBPACK_EXTERNAL_MODULE__extensions_js_499350b3_extension_settings__[extensionName][NS] = S;
+      if (__WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_saveSettingsDebounced__) __WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_saveSettingsDebounced__();
     };
     if (immediate) doSave(); else saveTimer = setTimeout(doSave, 500);
     try { updateInjection(); } catch (e) {}
@@ -1518,13 +1519,13 @@ function initFarm() {
   let CS = { link: false, story: false, userPrompt: '' };
   function loadCharState() {
     try {
-      const v = getVariables({ type: 'character' }) || {};
+      const v = {} || {};
       const o = v.star_tavern_farm_cs || {};
       CS = { link: !!o.link, story: !!o.story, userPrompt: o.userPrompt || '' };
     } catch (e) { CS = { link: false, story: false, userPrompt: '' }; }
   }
   function saveCharState() {
-    try { insertOrAssignVariables({ star_tavern_farm_cs: { link: CS.link, story: CS.story, userPrompt: CS.userPrompt } }, { type: 'character' }); } catch (e) {}
+    try { console.log("Farm: Cannot insert variables: ",{ star_tavern_farm_cs: { link: CS.link, story: CS.story, userPrompt: CS.userPrompt } }, { type: 'character' }); } catch (e) {}
   }
   loadCharState();
   function charName() {
@@ -1538,11 +1539,11 @@ function initFarm() {
   /* Trích world book: chỉ đọc, ưu tiên đèn xanh dương, thiếu thì bù đèn xanh lá, cắt còn 2000 chữ */
   async function collectWorldbook() {
     try {
-      const names = await getCharWorldbookNames('current');
+      const names = await [] // getCharWorldbookNames('current');
       const list = [names && names.primary].concat((names && names.additional) || []).filter(Boolean);
       let blue = '', green = '';
       for (const nm of list) {
-        const entries = await getWorldbook(nm);
+        const entries = await null // getWorldbook(nm);
         for (const en of entries) {
           if (!en.enabled) continue;
           if (en.strategy && en.strategy.type === 'constant') blue += en.content + '\n';
@@ -1640,7 +1641,7 @@ function initFarm() {
     try {
       const prompt = buildEventPrompt(await collectWorldbook());
       const res = await Promise.race([
-        __WEBPACK_EXTERNAL_MODULE__endpoints_js_dac28eef_generateRaw__({
+        __WEBPACK_EXTERNAL_MODULE__endpoints_js_59d58c4e_generateRaw__({
           ordered_prompts: [
             { role: 'system', content: prompt },
             { role: 'user', content: 'Hãy tạo sự kiện vườn rau cho hôm nay.' },
@@ -1680,7 +1681,7 @@ function initFarm() {
     toast('Đang kiểm tra kết nối…');
     try {
       const r = await Promise.race([
-        __WEBPACK_EXTERNAL_MODULE__endpoints_js_dac28eef_generateRaw__({
+        __WEBPACK_EXTERNAL_MODULE__endpoints_js_59d58c4e_generateRaw__({
           ordered_prompts: [{ role: 'user', content: 'Chỉ trả lời đúng hai chữ: Có mặt' }],
           max_chat_history: 0,
           custom_api: { apiurl: SEC.url, key: SEC.key, model: SEC.model, source: 'openai', max_tokens: 16 },
@@ -1758,7 +1759,7 @@ function initFarm() {
 
   /* Đổi thẻ: nạp lại trạng thái phía nhân vật, sự kiện lấy lại theo thẻ */
   try {
-    eventOn(tavern_events.CHAT_CHANGED, () => {
+    __WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_eventSource__.on(__WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_event_types__.CHAT_CHANGED, () => {
       loadCharState();
       renderChips(); renderBanner(); updateInjection();
       if (CS.link) requestDayEvent();
@@ -3080,5 +3081,5 @@ jQuery(async () => {
 /******/ // startup
 /******/ // Load entry module and return exports
 /******/ // This entry module used 'module' so it can't be inlined
-/******/ let __webpack_exports__ = __webpack_require__(158);
+/******/ let __webpack_exports__ = __webpack_require__(986);
 /******/ 
