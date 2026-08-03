@@ -967,7 +967,11 @@ function initFarm() {
     if (!SEC.url || !SEC.model) { applyDayEvent(fallbackEvent(), 'fallback', 'Chưa cấu hình API phụ (điền xong trong cài đặt thì nhớ bấm "Lưu cấu hình")'); return; }
     eventPending = true; renderBanner();
     try {
-      const prompt = buildEventPrompt(await collectWorldbook());
+      const wb = await collectWorldbook();
+      console.log('====== [FARM DEBUG] WORLDBOOK EXTRACTED ======');
+      console.log(wb);
+      console.log('================================================');
+      const prompt = buildEventPrompt(wb);
       const reqBody = {
         model: SEC.model,
         messages: [
