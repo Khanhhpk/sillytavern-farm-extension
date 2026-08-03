@@ -780,17 +780,17 @@ function initFarm() {
   const clampN = (x, lo, hi, dflt) => { x = Number(x); return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt; };
   /* Cấu hình API phụ: lưu trong localStorage của host, khoá bị làm rối bằng base64, vĩnh viễn không vào cây biến (tránh rò rỉ khi xuất thẻ) */
   const SEC_LS_KEY = 'star_tavern_farm_sec';
-  let SEC = { url: '', key: '', model: '', autoReset: true, resetHours: 4 };
+  let SEC = { url: '', key: '', model: '', autoReset: true, resetHours: 4, wbLimit: 20000 };
   try {
     const raw = pwin.localStorage.getItem(SEC_LS_KEY);
     if (raw) {
       const o = JSON.parse(raw);
       SEC = { url: o.url || '', key: o.key ? atob(o.key) : '', model: o.model || '',
-        autoReset: o.autoReset !== false, resetHours: clampN(o.resetHours, 1, 24, 4) };
+        autoReset: o.autoReset !== false, resetHours: clampN(o.resetHours, 1, 24, 4), wbLimit: typeof o.wbLimit === 'number' ? o.wbLimit : 20000 };
     }
   } catch (e) {}
   function saveSec() {
-    try { pwin.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours })); } catch (e) {}
+    try { pwin.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit })); } catch (e) {}
   }
   /* Công tắc và prompt tự điền: lưu theo từng thẻ nhân vật */
   let CS = { link: false, story: false, userPrompt: '' };
@@ -932,7 +932,8 @@ function initFarm() {
       }
       
       const txt = blue.length >= 400 ? blue : blue + '\n' + green;
-      return txt.slice(0, 20000);
+      const limit = SEC.wbLimit !== undefined ? SEC.wbLimit : 20000;
+      return limit > 0 ? txt.slice(0, limit) : txt;
     } catch (e) { 
       return ''; 
     }
@@ -1817,7 +1818,11 @@ function initFarm() {
             <input type="checkbox" id="secAuto" ${SEC.autoReset ? 'checked' : ''}> Tự động đặt lại sự kiện, mỗi
             <input class="inp" id="secHours" type="number" min="1" max="24" value="${SEC.resetHours}" style="width:60px;padding:3px 6px"> giờ một lần (1~24; tắt thì sự kiện giữ nguyên, chỉ gieo lại thủ công)
           </label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:2px">
+            Giới hạn chữ Lorebook gửi cho AI:
+            <input class="inp" id="secWbLimit" type="number" min="0" max="1000000" value="${SEC.wbLimit !== undefined ? SEC.wbLimit : 20000}" style="width:80px;padding:3px 6px"> (0 = Không cắt, gửi toàn bộ)
+          </label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
             <span class="buy" id="secSave">Lưu cấu hình</span>
             <span class="buy plain" id="secModels">Lấy model</span>
             <span class="buy plain" id="secTest">Kiểm tra kết nối</span>
@@ -1838,6 +1843,7 @@ function initFarm() {
         SEC = {
           url: $id('secUrl').value.trim(), key: $id('secKey').value.trim(), model: $id('secModel').value.trim(),
           autoReset: $id('secAuto').checked, resetHours: clampN($id('secHours').value, 1, 24, 4),
+          wbLimit: parseInt($id('secWbLimit').value, 10) || 0,
         };
         saveSec(); toast('Đã lưu cấu hình API phụ');
       });
