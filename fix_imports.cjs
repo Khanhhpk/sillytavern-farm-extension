@@ -6,9 +6,13 @@ code = code.replace(/import \{ extension_settings.*?;\n/g, '');
 code = code.replace(/import \{ eventSource.*?;\n/g, '');
 code = code.replace(/import \{ generateRaw.*?;\n/g, '');
 
+// Clean up old globals we inserted earlier to avoid duplication
+const oldGlobalsRegex = /\/\/ Dynamically access ST variables[\s\S]*?const generateRaw = [^\n]*;\n/g;
+code = code.replace(oldGlobalsRegex, '');
+
 // Add global declarations
 const globals = `// Dynamically access ST variables to avoid ES module import path issues
-const getContext = () => window.getContext ? window.getContext() : (SillyTavern && SillyTavern.getContext ? SillyTavern.getContext() : {});
+const getContext = () => window.getContext ? window.getContext() : ((typeof window.SillyTavern !== 'undefined' && window.SillyTavern.getContext) ? window.SillyTavern.getContext() : {});
 const ST_context = getContext();
 
 const extension_settings = window.extension_settings || ST_context.extension_settings || {};
@@ -20,4 +24,4 @@ const generateRaw = window.generateRaw || ST_context.generateRaw;
 code = globals + code;
 
 fs.writeFileSync('src/index.js', code);
-console.log('Fixed src/index.js globals');
+console.log('Fixed src/index.js globals safe reference');

@@ -1,5 +1,5 @@
 // Dynamically access ST variables to avoid ES module import path issues
-const getContext = () => window.getContext ? window.getContext() : (SillyTavern && SillyTavern.getContext ? SillyTavern.getContext() : {});
+const getContext = () => window.getContext ? window.getContext() : ((typeof window.SillyTavern !== 'undefined' && window.SillyTavern.getContext) ? window.SillyTavern.getContext() : {});
 const ST_context = getContext();
 
 const extension_settings = window.extension_settings || ST_context.extension_settings || {};
