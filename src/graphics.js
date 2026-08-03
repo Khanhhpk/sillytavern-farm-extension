@@ -202,7 +202,7 @@ export const PET_P = {
         }
       }
     });
-    const out = `<img width="${px}" height="${px}" src="${canvas.toDataURL('image/png')}" style="display:block; image-rendering:pixelated;" />`;
+    const out = `<img draggable="false" width="${px}" height="${px}" src="${canvas.toDataURL('image/png')}" style="display:block; image-rendering:pixelated;" />`;
     petCache.set(key, out);
     return out;
   }
@@ -311,7 +311,7 @@ export const PETS = {
         }
       }
     });
-    const out = `<img width="${px}" height="${px}" src="${canvas.toDataURL('image/png')}" style="display:block; image-rendering:pixelated;" />`;
+    const out = `<img draggable="false" width="${px}" height="${px}" src="${canvas.toDataURL('image/png')}" style="display:block; image-rendering:pixelated;" />`;
     spriteCache.set(key, out);
     return out;
   }
@@ -399,3 +399,4 @@ export const LP = { '8':'#8ec8d8', '~':'#b8e0ea', '-':'#79b4c6', '_':'#6faabf', 
     });
     return `url("${canvas.toDataURL('image/png')}")`;
   }
+
