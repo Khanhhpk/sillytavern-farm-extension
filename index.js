@@ -1043,12 +1043,28 @@ function initFarm() {
   }
 
   /* ---------- Render ---------- */
+  let cacheWicon = '', cacheCoins = -1, cacheDayTxt = '', cacheBlockTxt = '';
   function renderStatus() {
-    $id('coins').textContent = S.coins.toLocaleString();
+    if (S.coins !== cacheCoins) {
+      $id('coins').textContent = S.coins.toLocaleString();
+      cacheCoins = S.coins;
+    }
     const w = weatherOf(gameDay());
-    $id('wicon').innerHTML = spriteSVG(w === 'Nắng' ? 'sun' : w === 'Mưa nhỏ' ? 'raincloud' : 'cloud', 22);   // Sửa #10
-    $id('daytxt').textContent = 'Ngày ' + gameDay() + ' · ' + w + (w === 'Mưa nhỏ' ? ' (sinh trưởng +10%)' : '');
-    $id('blocktxt').textContent = ZONE_NAME[S.page] + ' ' + curBlocks() + '/6';
+    const wiconHtml = spriteSVG(w === 'Nắng' ? 'sun' : w === 'Mưa nhỏ' ? 'raincloud' : 'cloud', 22);
+    if (cacheWicon !== wiconHtml) {
+      $id('wicon').innerHTML = wiconHtml;
+      cacheWicon = wiconHtml;
+    }
+    const dayStr = 'Ngày ' + gameDay() + ' · ' + w + (w === 'Mưa nhỏ' ? ' (sinh trưởng +10%)' : '');
+    if (cacheDayTxt !== dayStr) {
+      $id('daytxt').textContent = dayStr;
+      cacheDayTxt = dayStr;
+    }
+    const blockStr = ZONE_NAME[S.page] + ' ' + curBlocks() + '/6';
+    if (cacheBlockTxt !== blockStr) {
+      $id('blocktxt').textContent = blockStr;
+      cacheBlockTxt = blockStr;
+    }
   }
   function plotHTML(pi) {
     const c = curPlots()[pi].crop;
@@ -1211,7 +1227,13 @@ function initFarm() {
     $id('btxt').textContent = (ev.flavor || '') + (fx.length ? '(' + fx.join(' · ') + ')' : '') +
       (fb ? '〔Sự kiện ngoại tuyến' + (S.dayEvent.reason ? ': ' + S.dayEvent.reason : '') + '〕' : '');
   }
-  function renderDynamic() { settle(); renderStatus(); renderPlots(); }
+  function renderDynamic() { 
+    settle(); 
+    if (win.classList.contains('open')) {
+      renderStatus(); 
+      renderPlots(); 
+    }
+  }
   function renderAll() { applyPageSkin(); renderPager(); renderStatus(); renderPlots(); renderToolbar(); renderChips(); renderBanner(); renderPets(); try { renderWitch(); } catch (e) {} }
   $id('chipLink').addEventListener('click', () => {
     CS.link = !CS.link;
