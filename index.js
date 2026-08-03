@@ -1,13 +1,364 @@
+﻿// sillytavern-farm-extension – built by build.cjs (no Webpack)
 
-;// ./src/data.js
-const data_MIN = 60 * 1000;
-const data_DAY_MS = 4 * 60 * 60 * 1000;
-const REGROW_MAX = 3;
-const POKE_CD = 10 * data_MIN;
-const PETS_OUT_MAX = 8;
-const SNAP_EDGE = 48;
+// Shadow DOM style element – used by initFarm() via sh.appendChild(style)
+const style = document.createElement('style');
+style.textContent = `
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+    /* ===== v1.0: chủ đề giao diện (hồng anh đào / trời quang), đổi ở trang cài đặt, S.theme lưu toàn cục ===== */
+    .theme-sakura { --sky: radial-gradient(circle at 82% 40%, rgba(255,255,255,.55) 5px, transparent 6px), radial-gradient(circle at 12% 65%, rgba(255,255,255,.4) 4px, transparent 5px), linear-gradient(#f5c6d6, #e29ab8);
+      --skyLine: #c27a9a; --tint: rgba(150,70,100,.35); --tintSoft: rgba(150,70,100,.3); --frameOut: #9a7a54;
+      --buyBg: linear-gradient(#fdeef2,#f6d0da); --buyLine: #c77b96; --buyFg: #a34a63; --buyInset: #e8b3c2; --buyDeep: #a34a63;
+      --accBg: #fdeef2; --accLine: #d9718a; --accFg: #a34a63; --selGlowA: #ffd7e2; --selGlowB: #f2b8c9; --shead: #8a4a63;
+      --banBg: linear-gradient(#efe9fa,#e2d6f5); --banLine: #9a86c8; --banFg: #5d4a85; --banIn: #f8f4ff; --tagBg: #8a72c0; --tagFg: #f4edff; }
+    .theme-sky { --sky: radial-gradient(circle at 82% 40%, rgba(255,255,255,.55) 5px, transparent 6px), radial-gradient(circle at 12% 65%, rgba(255,255,255,.4) 4px, transparent 5px), linear-gradient(#7cc4f2, #4a90d9);
+      --skyLine: #2b5cae; --tint: rgba(30,60,120,.35); --tintSoft: rgba(30,60,120,.3); --frameOut: #3a6098;
+      --buyBg: linear-gradient(#eef6ff,#d2e6f8); --buyLine: #85aede; --buyFg: #2f66b8; --buyInset: #b4d2ee; --buyDeep: #5580b8;
+      --accBg: #eaf4ff; --accLine: #3a77cc; --accFg: #24549e; --selGlowA: #c8e2f8; --selGlowB: #9cc8ee; --shead: #2b5cae;
+      --banBg: linear-gradient(90deg, #24549e, #3a77cc 60%, #5da8e8); --banLine: #24549e; --banFg: #eaf4ff; --banIn: rgba(255,255,255,.18); --tagBg: #ffd94d; --tagFg: #6a4e10; }
+    #orb { position: fixed; width: 52px; height: 52px; z-index: 99998; cursor: pointer; touch-action: none;
+      border-radius: 50%; background: linear-gradient(#f7ead2,#eed9b8); border: 3px solid #b08a5c;
+      box-shadow: inset 0 2px 0 #fffaf0, 0 4px 10px rgba(0,0,0,.35);
+      display: flex; align-items: center; justify-content: center; user-select: none;
+      transition: transform .18s ease; }
+    #orb.dockL:not(:hover) { transform: translateX(-27px); }   /* Sửa #12: dán mép thì thu nửa, rê chuột thì bật ra */
+    #orb.dockR:not(:hover) { transform: translateX(27px); }
+    #win { position: fixed; z-index: 99997; width: min(760px, 96vw); max-height: 92vh; max-height: 92dvh; display: none;
+      flex-direction: column; background: #f8efe0;
+      background-image: repeating-linear-gradient(0deg, transparent 0 30px, rgba(170,130,80,.14) 30px 33px);
+      border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
+      box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }
+    #win.open { display: flex; }
+    .titlebar { background: var(--sky); border-bottom: 4px solid var(--skyLine); padding: 9px 14px;
+      display: flex; align-items: center; gap: 8px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.5);
+      cursor: move; touch-action: none; user-select: none; flex: none; }
+    .titlebar { justify-content: space-between; }
+    .titlebar h1 { font-size: 15px; color: #7a5c38; letter-spacing: 2px; text-shadow: 1px 1px 0 #fff3dd; flex: 0 1 auto;
+      display: flex; align-items: center; gap: 7px;
+      background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 8px; padding: 3px 12px;
+      box-shadow: 0 3px 0 var(--tint), inset 0 0 0 2px #fff6e0;
+      display: flex; align-items: center; gap: 8px; }
+    .close-x { width: 24px; height: 24px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 6px;
+      color: #7a5c38; box-shadow: 0 2px 0 var(--tintSoft); font-weight: bold; text-align: center; line-height: 18px; cursor: pointer; }
+    .statusbar { display: flex; align-items: center; gap: 12px; padding: 7px 14px; background: #f4e6cf;
+      border-bottom: 3px solid #ddc39a; font-size: 13px; font-weight: bold; color: #7a5c38; flex: none; flex-wrap: wrap; }
+    .stat { display: flex; align-items: center; gap: 5px; }
+    #scroll { overflow: auto; flex: 1; }
+    /* v0.8: thanh lật trang ba trang */
+    .pager { position: absolute; top: 7px; right: 7px; z-index: 7; display: flex; align-items: center; justify-content: center;
+      background: rgba(58,48,30,.4); border: 2px solid rgba(255,246,224,.4); border-radius: 14px; overflow: hidden;
+      width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: rgba(255,246,224,.8); user-select: none; }   /* Phương án 2 sửa: bình thường là quả cầu nhỏ mờ */
+    .pager.open { width: auto; height: auto; border-radius: 12px; cursor: default;
+      background: rgba(58,48,30,.55); border-color: rgba(255,246,224,.5); font-size: 0; }   /* Bấm mở = bung thành thanh viên nang */
+    .pager:not(.open) .ptab { display: none; }             /* Ở dạng quả cầu thì ẩn các tab trang */
+    .pager:not(.open)::after { content: '⇄'; }             /* Icon nhỏ trên mặt cầu */
+    .ptab { flex: none; font-size: 11px; font-weight: bold; padding: 4px 10px; background: transparent;
+      color: #f0e6cc; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 3px; }
+    .ptab + .ptab { border-left: 1px solid rgba(255,246,224,.35); }
+    .ptab.active { background: rgba(255,246,224,.92); color: #7a5c38; }
+    .ptab.lock { opacity: .6; }
+    .field { margin: 10px 12px; background-color: #a9c383; border: 4px solid #b08a5c; border-radius: 8px;
+      box-shadow: inset 0 0 0 3px #8aa86a; padding: 14px; position: relative; }
+    /* v0.8: da trang W1 ruộng nổi đầm sen / M1 mạch quặng kim cương */
+    .field.pg2 { background-color: #8ec8d8; border-color: #6a9ab0; box-shadow: inset 0 0 0 3px #79b4c6; }
+    .field.pg3 { background-color: #5f5870; border-color: #7a6a94; box-shadow: inset 0 0 0 3px #4e4860; }
+    .field.pg2 span.dside, .field.pg2 span.dbot, .field.pg3 span.dside, .field.pg3 span.dbot { display: none !important; }  /* Trang trí đồng cỏ không lội nước / không xuống mỏ */
+    .field.pg2 .plot { border-color: #c9a273;            /* v0.9: khung gỗ hai lớp —— gỗ nhạt ngoài + gỗ đậm trong, lấy lại cảm giác khung vuông của bản thiết kế */
+      box-shadow: inset 0 0 0 3px #a8845c, inset 0 -5px 0 rgba(40,70,90,.28); }
+    .field.pg2 .plot.watered { border-color: #b08a5c; box-shadow: inset 0 0 0 3px #8a6844, inset 0 -5px 0 rgba(30,55,75,.35); }
+    .field.pg2 .block:not(.locked) .plot::before {       /* v0.9 sửa lần 2: đinh góc màu đậm ở bốn góc (giống bản thiết kế) */
+      content: ''; position: absolute; inset: -3px; pointer-events: none; border-radius: 6px;
+      background: linear-gradient(#6a4a2c,#6a4a2c) left top / 7px 7px no-repeat,
+        linear-gradient(#6a4a2c,#6a4a2c) right top / 7px 7px no-repeat,
+        linear-gradient(#6a4a2c,#6a4a2c) left bottom / 7px 7px no-repeat,
+        linear-gradient(#6a4a2c,#6a4a2c) right bottom / 7px 7px no-repeat; }
+    .field.pg3 .plot { border-color: #3f8a9a; border-radius: 2px;   /* v0.9 sửa lần 3: luống ươm pha lê bớt bo góc, cạnh sắc rõ */
+      box-shadow: inset 0 0 0 1px rgba(138,224,234,.5), inset 0 -3px 0 rgba(20,20,40,.35); }
+    .field.pg3 .plot.watered { border-color: #5fc8d8; }
+    /* v0.9 sửa lần 4: đinh góc trắng ở khu mỏ thử thấy chói mắt, bỏ (luống ươm vẫn giữ góc vuông) */
+    .field.pg2 .block.locked .plot { border-color: #8ab4c2; box-shadow: inset 0 3px 0 rgba(255,255,255,.28), inset 0 -3px 0 rgba(30,60,80,.22); } /* Cảm giác nổi khối giống ô khoá bên đồng cỏ */
+    .field.pg3 .block.locked .plot { border-color: #6d657c; box-shadow: none; } /* Ô khoá khu mỏ giữ khung trơn (thử thanh sáng nổi khối hai lần đều thấy kỳ, wen chốt) */
+    .blocks { display: grid; grid-template-columns: repeat(3, max-content); gap: 14px; justify-content: center; }
+    @media (max-width: 640px) {
+      .blocks { grid-template-columns: repeat(2, max-content); }
+      .field { padding: 12px 12px 70px; }                       /* Sửa #7: dải cỏ riêng cho thanh công cụ / linh vật */
+      .titlebar h1 { font-size: 13px; letter-spacing: 0; }      /* Sửa #11: bố cục dọc gọn lại */
+      .titlebar h1 .sub { display: none; }
+      .statusbar { gap: 6px 10px; font-size: 12px; padding: 6px 10px; }
+      .bottombar { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; }
+      .btn { font-size: 13px; padding: 7px 6px; }
+      span.dside { display: none; }      /* Sửa #13: màn hẹp không đủ lề bên, chuyển trang trí xuống dải xanh dưới đáy */
+      span.dbot { display: inline; }     /* Nâng quyền cho span, đè lên quy tắc ẩn mặc định phía sau */
+    }
+    .block { display: grid; grid-template-columns: repeat(2, var(--plot, 74px)); grid-auto-rows: var(--plot, 74px);
+      gap: 6px; position: relative; }
+    .plot { background-color: #b99b84; border: 3px solid #937863; border-radius: 6px;
+      box-shadow: inset 0 3px 0 rgba(255,244,225,.35), inset 0 -3px 0 rgba(80,55,35,.18);
+      display: flex; align-items: flex-end; justify-content: center; padding-bottom: 3px;
+      position: relative; cursor: pointer; background-size: 100% 100%; }
+    .plot.watered { background-color: #9d7458; border-color: #7a5a40; }
+    .plot .bar { position: absolute; left: 6px; right: 6px; bottom: 3px; height: 5px;
+      background: rgba(60,35,15,.35); border-radius: 3px; overflow: hidden; }
+    .plot .bar i { display: block; height: 100%; background: #a4dc8c; border-radius: 3px; }
+    .plot .ripe { position: absolute; top: -10px; right: -6px; width: 20px; height: 20px; background: #ffd94d;
+      border: 3px solid #b8891f; border-radius: 50% 50% 50% 4px; color: #8a5f00; font-weight: bold; font-size: 13px;
+      text-align: center; line-height: 15px; z-index: 3; }
+    .block.locked .plot { background-color: #aecb87; border-color: #9aa378; cursor: default; }
+    .sign { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 92px;
+      background: linear-gradient(#f7ead2,#ecd6ae); border: 3px solid #b08a5c; border-radius: 6px;
+      box-shadow: 0 3px 0 #8a6844, inset 0 0 0 2px #fff6e0; padding: 6px 4px; font-size: 12px; font-weight: bold;
+      color: #7a5c38; text-align: center; line-height: 1.35; z-index: 4; cursor: pointer; }
+    .sign small { display: flex; align-items: center; justify-content: center; gap: 3px; font-size: 10px; color: #9a7a50; }
+    .sign.confirm { border-color: var(--accLine); color: var(--accFg); }
+    /* #26: lớp cho bé tròn tự do đi lại —— phủ toàn bộ khu ruộng, đi theo khu vực (loại làm việc = hàng dưới, loại đi dạo = bờ ruộng) */
+    .mascots { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+    .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute;
+      left: 0; bottom: 0; will-change: left, bottom; }
+    .pet:active { transform: scale(1.15, .85); }
+    .pbody { display: block; animation: petbob 1.8s ease-in-out infinite; }
+    .pet.walk .pbody { animation: pethop var(--hopd, .33s) linear infinite; }   /* v0.7①: đi bộ = nhảy liên tiếp theo đường parabol */
+    .pet[data-pet="cloudMallow"] .pbody,
+    .pet[data-pet="ghostBlob"] .pbody,
+    .pet[data-pet="bunny"] .pbody { animation: petfloat 3.2s ease-in-out infinite; }  /* Mây / ma / sứa: kiểu bay lơ lửng (đè lên walk) */
+    .pet.sleep .pbody { animation: petsleep 3.6s ease-in-out infinite; }   /* v0.7②: ngủ = thở chậm (đè lên bay, ma cũng phải hạ cánh mà ngủ) */
+    .pet.flip .pbody svg { transform: scaleX(-1); }
+    .zzz { position: absolute; bottom: calc(100% - 8px); left: 68%; font-size: 12px; font-weight: bold;
+      color: #7a90c8; text-shadow: 1px 1px 0 #fff; pointer-events: none; animation: zrise 2.6s linear infinite; }
+    .zzz.z2 { left: 52%; font-size: 10px; animation-delay: 1.3s; }
+    @keyframes zrise { 0% { opacity: 0; transform: translate(0, 2px) scale(.7); }
+      25% { opacity: 1; } 100% { opacity: 0; transform: translate(7px, -15px) scale(1.15); } }
+    @keyframes petsleep { 0%, 100% { transform: translateY(2px) scale(1.07, .93); }
+      50% { transform: translateY(2px) scale(1.03, .97); } }
+    @keyframes petbob { 0%, 100% { transform: translateY(0) scale(1, 1); }
+      30% { transform: translateY(1px) scale(1.05, .94); }
+      65% { transform: translateY(-4px) scale(.96, 1.05); } }
+    @keyframes petfloat { 0%, 100% { transform: translateY(-2px); } 50% { transform: translateY(-8px); } }
+    /* Một chu kỳ nhảy: lấy đà bẹt xuống → bay lên kéo dài → chạm đất nén nhẹ → về dáng chuẩn, độ cao do --hy quyết định (khác nhau theo dáng đi) */
+    @keyframes pethop { 0%, 100% { transform: translateY(0) scale(1.07, .93); }
+      40% { transform: translateY(var(--hy, -9px)) scale(.94, 1.06); }
+      80% { transform: translateY(-1px) scale(1.02, .99); } }
+    /* v0.8b: quầy hàng của phù thuỷ tròn (wen sửa lần 2: hàng dưới cùng bên trái, xếp cùng hàng với bé làm việc; bảng đơn hàng đội trên đầu) */
+    #witch { position: absolute; left: 12%; bottom: 2px; z-index: 6; cursor: pointer; display: none; text-align: center; }
+    #witch.show { display: block; }
+    #witch .wbody { display: block; animation: petfloat 3.2s ease-in-out infinite; }
+    #witch .wtag { display: inline-block; margin-bottom: 1px; font-size: 10px; font-weight: bold; color: #cfc9f2;
+      background: #2a2650; border: 2px solid #8f86d9; border-radius: 6px; padding: 1px 7px;
+      box-shadow: 0 0 8px rgba(143,134,217,.5); }
+    .pbubble.wb { border-color: #8f86d9; color: #5a52a0; background: #f4f2ff; }
+    /* v0.8b: trang đơn hàng quỹ đạo sao A (bản thiết kế chốt) */
+    .wzwrap { background: linear-gradient(160deg,#1c1b33,#232145 60%,#1a1e3d); border: 3px double #8f86d9;
+      border-radius: 10px; padding: 14px 12px 12px; box-shadow: 0 0 14px rgba(143,134,217,.3); }
+    .wzhead { color: #cfc9f2; text-align: center; letter-spacing: 3px; font-size: 14px; font-weight: bold; }
+    .wzsub { color: #7a72c0; font-size: 10px; text-align: center; letter-spacing: 2px; margin: 2px 0 10px; }
+    .wzord { border: 1px solid #4a4488; border-radius: 8px; padding: 9px 10px 7px; margin-bottom: 8px;
+      background: rgba(143,134,217,.08); position: relative; }
+    .wzord .star { position: absolute; left: -7px; top: 50%; transform: translateY(-50%); color: #ffd94d;
+      font-size: 13px; text-shadow: 0 0 6px #ffd94d; }
+    .wzwant { color: #e8e4ff; font-size: 13px; font-weight: bold; }
+    .wzwant em { font-style: normal; color: #ffd94d; }
+    .wzwant .mutq { color: #f2a8c8; }
+    .wzgive { color: #9a92d9; font-size: 11px; margin-top: 3px; }
+    .wzbtn { float: right; margin-top: -2px; font-size: 11px; font-weight: bold; color: #ffd94d;
+      border: 1px solid #b09a3a; border-radius: 6px; padding: 2px 10px; cursor: pointer; background: rgba(255,217,77,.08); }
+    .wzbtn.off { color: #6a63b0; border-color: #4a4488; cursor: default; }
+    .wzbtn.done { color: #7cd4a4; border-color: #3f8a5a; cursor: default; }
+    .wzleave { clear: both; color: #6a63b0; font-size: 10px; text-align: center; letter-spacing: 1px; margin-top: 8px; }
+    .pbubble { position: absolute; bottom: calc(100% + 3px); left: 50%; transform: translateX(-50%);
+      background: #fbfdff; border: 2px solid #7db8d8; border-radius: 8px 8px 8px 0;
+      font-size: 11px; font-weight: bold; color: #4a88aa; padding: 2px 7px; white-space: nowrap;
+      pointer-events: none; animation: pbfloat 1.6s ease forwards; z-index: 9; }
+    .pet[data-pet="octo"] .pbubble { border-color: #ab84dd; color: #7a54b5; background: #fdfbff; }
+    .emote { position: absolute; pointer-events: none; z-index: 8; animation: pbfloat 1.2s ease forwards; }
+    @keyframes pbfloat { 0% { opacity: 0; transform: translateY(4px); } 15% { opacity: 1; transform: translateY(0); }
+      70% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-10px); } }
+    .fdot { position: absolute; left: 4px; top: 4px; width: 7px; height: 7px; border-radius: 50%;
+      background: #6cb457; border: 1px solid #3e7d3a; z-index: 3; }
+    .dbot { display: none; }
+    .ctrlrow { display: flex; gap: 6px; align-items: stretch; padding: 7px 14px 0; flex-wrap: nowrap; }   /* Khoá một hàng: không đủ chỗ thì ép chữ chứ không ép khung */
+    .ctrlrow .chip { flex: 0 1 auto; min-width: 0; white-space: normal; line-height: 1.15; text-align: center; }
+    .chip.witchchip { background: #efe9fa; border-color: #9a6ad8; color: #6a4a9a;
+      box-shadow: inset 0 2px 0 #f8f4ff, 0 2px 0 rgba(122,74,184,.35); }
+    .chips { display: flex; gap: 6px; margin-left: auto; }
+    .chip { font-size: 11px; padding: 2px 8px 2px 6px; border-radius: 6px; border: 2px solid #c2a274;
+      background: #faf0dc; color: #8a6a42; font-weight: bold; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 5px; user-select: none;
+      box-shadow: inset 0 2px 0 #fffdf4, 0 2px 0 rgba(154,122,84,.3); }
+    .chip::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #d9c49a;
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,.15); }
+    .chip.on { background: #ead9f7; border-color: #9a6ad8; color: #6a4a9a; }
+    .chip.on::before { background: #b48ae0; box-shadow: inset 0 -2px 0 #8a5cc0, 0 0 4px #cdb0ef; }
+    .banner { margin: 9px 12px 0; padding: 7px 11px; background: var(--banBg);
+      border: 3px solid var(--banLine); border-radius: 8px; font-size: 12px; color: var(--banFg);
+      display: none; align-items: center; gap: 9px; box-shadow: inset 0 2px 0 var(--banIn); cursor: pointer; }
+    .banner #btxt { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* Mặc định một dòng, bấm vào banner thì mở rộng */
+    .banner.expand #btxt { white-space: normal; }
+    .banner.show { display: flex; }
+    .banner .btag { background: var(--tagBg); color: var(--tagFg); font-weight: bold; padding: 1px 7px;
+      border-radius: 5px; font-size: 11px; white-space: nowrap; }
+    .mdrop { flex-direction: column; gap: 2px; max-height: 150px; overflow: auto; background: #fffdf4;
+      border: 2px solid #c2a274; border-radius: 6px; padding: 5px; }
+    .mdrop span { padding: 4px 9px; font-size: 12px; font-weight: bold; color: #6b4f2e; border-radius: 5px; cursor: pointer; }
+    .mdrop span:hover { background: var(--accBg); color: var(--accFg); }
+    .inp { width: 100%; background: #fffdf4; border: 2px solid #c2a274; border-radius: 6px;
+      padding: 6px 9px; font-size: 12px; color: #6b4f2e; font-family: inherit;
+      box-shadow: inset 0 2px 3px rgba(154,122,84,.18); }
+    textarea.inp { resize: vertical; min-height: 60px; }
+    .shead { font-size: 13px; font-weight: bold; color: var(--shead); margin: 10px 0 6px; }
+    /* ===== Vé giấy phong cách hoài cổ (chuyển từ bản xem trước của vé) ===== */
+    .tk { position: relative; width: 100%; display: flex; border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.3); margin: 4px 0 10px; }
+    .tk.water { --paper: #e9f0e4; --ink: #3f7a8a; --stamp: #4a90a8; --curlD: #b9cfc4; --curlL: #dce8dd; transform: rotate(-1deg); }
+    .tk.mine  { --paper: #ece4f0; --ink: #6a4a8a; --stamp: #8a5cc0; --curlD: #c4b3d4; --curlL: #ded2ea; transform: rotate(0.8deg); }
+    .tk .stub { flex: none; width: 96px; border-radius: 8px 0 0 8px; border: 3px solid var(--ink); border-right: none;
+      background: var(--paper);
+      background-image: radial-gradient(circle at 25% 18%, rgba(160,120,60,.1) 0 18%, transparent 19%),
+        repeating-linear-gradient(0deg, transparent 0 6px, rgba(120,90,50,.05) 6px 7px);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 10px 4px; }
+    .tk .no { font-size: 9px; letter-spacing: 1px; color: var(--ink); opacity: .75; font-weight: bold; }
+    .tk .perf { flex: none; width: 0; border-left: 3px dashed var(--ink); opacity: .8; position: relative; }
+    .tk .perf::before, .tk .perf::after { content: ''; position: absolute; left: -8px; width: 14px; height: 14px;
+      border-radius: 50%; background: #f8efe0; }
+    .tk .perf::before { top: -10px; } .tk .perf::after { bottom: -10px; }
+    .tk .tmain { flex: 1; border-radius: 0 8px 8px 0; border: 3px solid var(--ink); border-left: none;
+      background: var(--paper);
+      background-image: radial-gradient(circle at 80% 25%, rgba(160,120,60,.1) 0 15%, transparent 16%),
+        repeating-linear-gradient(0deg, transparent 0 6px, rgba(120,90,50,.05) 6px 7px);
+      padding: 12px 12px 10px; position: relative; overflow: hidden; }
+    .tk .inner { border: 1px solid var(--ink); border-radius: 4px; padding: 7px 10px 8px; }
+    .tk .eyebrow { font-size: 8px; letter-spacing: 2px; color: var(--ink); opacity: .7; font-weight: bold; }
+    .tk .tname { font-size: 17px; font-weight: bold; color: var(--ink); letter-spacing: 3px; margin: 2px 0; }
+    .tk .tsub { font-size: 10px; color: var(--ink); opacity: .85; line-height: 1.7; }
+    .tk .trow { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 6px; }
+    .tk .serial { font-family: Consolas, monospace; font-size: 11px; font-weight: bold; letter-spacing: 2px; color: var(--ink); }
+    .tk .valid { font-size: 8px; color: var(--ink); opacity: .65; letter-spacing: 1px; }
+    .tk .curl { position: absolute; right: -1px; bottom: -1px; width: 28px; height: 28px;
+      background: linear-gradient(315deg, transparent 47%, var(--curlD) 48%, var(--curlL) 60%, var(--paper) 90%);
+      border-radius: 0 0 8px 0; box-shadow: -3px -3px 6px rgba(60,40,15,.18);
+      clip-path: polygon(100% 0, 0 100%, 100% 100%); }
+    .tk .stamp { position: absolute; right: 36px; top: -5px; width: 44px; height: 44px; border-radius: 50%;
+      border: 2px solid var(--stamp); color: var(--stamp); display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: bold; transform: rotate(14deg); opacity: .55;
+      box-shadow: inset 0 0 0 1px var(--stamp); pointer-events: none; text-align: center; }
+    .tk.mine .tmain::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 8px;
+      background: repeating-linear-gradient(45deg, #d8b13a 0 6px, #4a3a52 6px 12px); opacity: .85; }
+    .cnt2 { position: absolute; right: 3px; top: 3px; font-size: 9px; background: rgba(255,253,244,.9);
+      border: 1px solid #c2a274; border-radius: 4px; padding: 0 3px; color: #7a5c38; font-weight: bold; z-index: 3; }
+    .sign.poor { opacity: .6; }
+    /* Thanh công cụ bản mới: bình thường = tai nhỏ thu nửa dán mép trái (không chiếm đồng cỏ, không che bé tròn đi dạo); bấm mở = bung ra một cột dọc theo bờ ruộng */
+    .toolbar { position: absolute; display: flex; z-index: 7; transition: left .22s ease; }
+    .toolbar:not(.open) { left: -14px; bottom: 12px; padding: 5px 5px 5px 14px;
+      background: linear-gradient(#f7ead2,#eed9b8); border: 3px solid #b08a5c; border-left: none;
+      border-radius: 0 10px 10px 0; box-shadow: 0 3px 0 #8a6844, inset 0 0 0 2px #fff6e0; }
+    .toolbar.open { left: 0; top: 0; bottom: 0; flex-direction: column; justify-content: center;
+      align-items: center; gap: 6px; padding: 10px 6px; background: linear-gradient(90deg,#f7ead2,#eed9b8);
+      border-right: 3px solid #b08a5c; border-radius: 0 10px 10px 0;
+      box-shadow: 3px 0 0 rgba(138,104,68,.35), inset 0 0 0 2px #fff6e0; }
+    @media (max-width: 640px) {
+      .toolbar.open { flex-direction: row; top: auto; left: 0; right: 0; bottom: 0;
+        border-right: none; border-top: 3px solid #b08a5c; border-radius: 10px 10px 0 0; padding: 6px 10px;
+        box-shadow: 0 -3px 0 rgba(138,104,68,.35), inset 0 0 0 2px #fff6e0; }
+      .mode-tip { left: 10px; bottom: 70px; }
+    }
+    .tool { width: 40px; height: 40px; background: #faf0dc; border: 2px solid #c2a274; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      box-shadow: inset 0 2px 0 #fffdf4, inset 0 -2px 0 #e3c795; }
+    .tool.selected { border-color: var(--accLine); background: var(--accBg); box-shadow: inset 0 0 0 2px var(--selGlowA), 0 0 8px var(--selGlowB); }
+    .tool.mini { width: 40px; height: 20px; color: #8a6a42; font-weight: bold; font-size: 11px; background: #f0dfc0; }
+    .mode-tip { position: absolute; left: 62px; bottom: 14px; background: var(--accBg); border: 2px solid var(--accLine);
+      border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: bold; color: var(--accFg); z-index: 7; display: none; }
+    .bottombar { display: flex; align-items: center; gap: 10px; padding: 10px 14px 12px; flex: none; }
+    .btn { flex: 1; padding: 8px 10px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #b08a5c;
+      border-radius: 8px; box-shadow: inset 0 0 0 2px #fff6e0, inset 0 3px 0 #fffaf0, inset 0 -4px 0 #d9ba8a, 0 4px 0 #9a7a54;
+      font-size: 14px; font-weight: bold; color: #7a5c38; text-shadow: 1px 1px 0 #fff3dd; text-align: center;
+      display: flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; user-select: none; }
+    .modal { position: absolute; inset: 0; background: rgba(60,40,20,.35); display: none; align-items: center;
+      justify-content: center; z-index: 20; padding: 14px; }
+    .modal.open { display: flex; }
+    .mpanel { width: min(480px, 96%); max-height: 90%; overflow: auto; background: #f8efe0; border: 4px solid #c9a273;
+      border-radius: 10px; box-shadow: inset 0 0 0 4px #fff6e8, 0 10px 30px rgba(0,0,0,.45); }
+    .mtitle { background: var(--sky); border-bottom: 3px solid var(--skyLine); padding: 8px 12px;
+      display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: bold; color: #7a5c38; }
+    .mtitle > span:first-child { background: linear-gradient(#faf0dc,#eed9b8); border: 2px solid #8a6844; border-radius: 7px;
+      padding: 2px 10px; text-shadow: 1px 1px 0 #fff3dd; box-shadow: 0 2px 0 var(--tintSoft), inset 0 0 0 2px #fff6e0; }
+    .mtitle .grow { flex: 1; }
+    .mbody { padding: 10px 12px 12px; }
+    .tabs { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+    .tab { padding: 4px 12px; border-radius: 7px; background: #f0dfc0; border: 2px solid #c2a274; color: #8a6a42;
+      font-size: 12px; font-weight: bold; cursor: pointer; }
+    .tab.active { background: var(--accBg); border-color: var(--accLine); color: var(--accFg); }
+    .items { display: flex; flex-direction: column; gap: 7px; }
+    .item { display: flex; align-items: center; gap: 9px; padding: 5px 9px; background: #faf0dc;
+      border: 2px solid #c2a274; border-radius: 8px; }
+    .item .icon { width: 40px; height: 40px; flex: none; background: #f4e6cf; border: 2px solid #d9c49a;
+      border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+    .item .info { flex: 1; min-width: 0; }
+    .item .name { font-size: 13px; font-weight: bold; color: #6b4f2e; }
+    .selrow { cursor: pointer; }
+    .selrow.selon { border-color: var(--accLine); box-shadow: inset 0 0 0 2px var(--accBg); }
+    .selmark { width: 22px; text-align: center; font-size: 16px; font-weight: bold; color: var(--accFg); flex: none; }
+    .item .meta { font-size: 11px; color: #a3763d; margin-top: 1px; line-height: 1.5; }   /* M-2: mô tả không cắt ngắn, xuống dòng đầy đủ (mô tả chức năng đột biến là thông tin cốt lõi) */
+    .acts { display: flex; gap: 5px; flex: none; }
+    .ibtn { width: 30px; height: 30px; background: #faf0dc; border: 2px solid #b08a5c; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      font-size: 15px; font-weight: bold; color: #7a5c38; user-select: none;
+      box-shadow: inset 0 2px 0 #fffdf4, inset 0 -2px 0 #e3c795; }
+    .price { display: flex; align-items: center; gap: 3px; font-size: 13px; font-weight: bold; color: #a3763d; }
+    .buy { padding: 5px 12px; background: var(--buyBg); border: 3px solid var(--buyLine);
+      border-radius: 7px; box-shadow: inset 0 -3px 0 var(--buyInset), 0 3px 0 var(--buyDeep); font-size: 12px; font-weight: bold;
+      color: var(--buyFg); cursor: pointer; white-space: nowrap; user-select: none; }
+    .buy.plain { background: linear-gradient(#faf0dc,#eed9b8); border-color: #b08a5c; color: #7a5c38;
+      box-shadow: inset 0 -3px 0 #d9ba8a, 0 3px 0 #9a7a54; }
+    .buy.witchy { background: linear-gradient(#efe9fa,#e2d6f5); border-color: #9a6ad8; color: #6a4a9a;
+      box-shadow: inset 0 -3px 0 #cdb0ef, 0 3px 0 #7a4ab8; }   /* #53: gieo lại = phù thuỷ bói toán, mặc màu tím của cô ấy */
+    .buy.off { background: #e8dcc2; border-color: #bfa984; color: #a99a78; box-shadow: 0 3px 0 #9a8a68; cursor: default; }
+    .note { font-size: 11px; color: #a3763d; line-height: 1.7; background: #f4e6cf; border: 2px solid #ddc39a;
+      border-radius: 7px; padding: 7px 10px; }
+    .toast { position: absolute; left: 50%; top: 52px; transform: translateX(-50%); background: var(--accBg);
+      border: 2px solid var(--accLine); color: var(--accFg); font-size: 12px; font-weight: bold; border-radius: 7px;
+      padding: 4px 12px; z-index: 30; display: none; }
+    .picker { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .pick { display: flex; align-items: center; gap: 5px; padding: 4px 9px; background: #faf0dc;
+      border: 2px solid #c2a274; border-radius: 7px; font-size: 12px; font-weight: bold; color: #6b4f2e; cursor: pointer; }
+    .pick.active { border-color: var(--accLine); background: var(--accBg); color: var(--accFg); }
+  `;
 
-  const data_CROPS = {
+// ST globals – declared as 'let' at module scope so initFarm() can close over them.
+let extension_settings, eventSource, event_types, saveSettingsDebounced, generateRaw;
+
+
+/* ============================================================
+ * Ai mà thèm làm nông dân trong SillyTavern chứ! · Bản chính thức v1.1
+ * Script toàn cục cho Tavern Helper. Nút bóng nổi → cửa sổ nông trại → hộp mù thế giới quan.
+ * Lưu game: biến toàn cục star_tavern_farm của Tavern Helper (không dùng localStorage/world book; tên khoá không bao giờ đổi, cập nhật hay nhập lại đều không mất dữ liệu)
+ * Giữ lại công tắc TEST_MODE (true = số liệu test nhanh), bản chính thức luôn là false
+ * ============================================================ */
+
+
+function initFarm() {
+  const TEST_MODE = false;   // v1.0: bản chính thức
+  const NS = "star_tavern_farm";
+  const extensionName = "sillytavern-farm-extension";
+  const RUNTIME_KEY = '__STAR_TAVERN_FARM__';
+  const pwin = window, pdoc = document;
+
+  /* ---------- Đơn thể: diệt bản cũ trước ---------- */
+  try { pwin[RUNTIME_KEY]?.destroy?.(); } catch (e) {}
+  pdoc.getElementById('star-tavern-farm-root')?.remove();
+
+  /* ---------- Số liệu (TEST_MODE là chỗ giữ chỗ) ---------- */
+  const MIN = 60 * 1000;
+  const GROW = TEST_MODE ? 5 * MIN : null;
+  const REGROW = TEST_MODE ? 2 * MIN : null;
+  const DAY_MS = 4 * 60 * 60 * 1000;                 // Một ngày trong game = 4 giờ thực (hằng số nội bộ)
+  const WATER_CD = TEST_MODE ? 10 * MIN : 2 * 60 * 60 * 1000;   // Sửa #3: hồi chiêu tưới nước 10 phút
+  const REGROW_MAX = 3;                                          // Sửa #4: tái sinh tối đa 3 vụ
+  const POKE_CD = 10 * MIN;                                      // Sửa #9: hồi chiêu chọc thú cưng rơi tiền
+  const TREASURE_CD = TEST_MODE ? 10 * MIN : 2 * 60 * 60 * 1000; // v0.6b: chu kỳ tìm kho báu
+  const PETS_OUT_MAX = 8;                                        // Giới hạn số thú ra sân (#25: bỏ điều phái, ra sân = có hiệu lực trên mọi trang)
+  const WITCH_STAY = TEST_MODE ? 10 * MIN : 20 * MIN;            // Phù thuỷ ở lại 20 phút (do wen chốt, định vị trứng phục sinh)
+  const witchGap = () => TEST_MODE ? 15 * MIN + Math.random() * 20 * MIN : 100 * MIN + Math.random() * 80 * MIN;   // Bản chính thức ≈ mỗi chu kỳ 4h có 1~2 lần
+  const SNAP_EDGE = 48;                                          // Sửa #1: lại gần mép mới hít vào
+  /* zone: 1 đồng cỏ, 2 vùng nước, 3 khu mỏ (mặc định = 1); hidden: cửa hàng không bán / tìm kho báu không rơi (#34); họ mystery xem plant() */
+  const CROPS = {
     /* Số liệu chính thức v1.0 (chốt theo "Bảng số liệu chính thức - chờ duyệt.md"): grow/regrowM tính bằng phút thực */
     douya:     { name: 'Giá đỗ',        grow: 5,   seed: 5,    sell: 12,   sp: 'sprout' },
     radish:    { name: 'Củ cải cherry', grow: 10,  seed: 25,   sell: 45,   sp: 'radish' },
@@ -38,51 +389,91 @@ const SNAP_EDGE = 48;
     fangW:     { name: 'Hoa bá vương',  grow: 30, seed: 0, sell: 800,  sp: 'fangW', hidden: true, zone: 2 },
     fangM:     { name: 'Hoa nanh rồng', grow: 30, seed: 0, sell: 1200, sp: 'fangM', hidden: true, zone: 3 },
   };
-
   const ZONE_NAME = { 1: 'Đồng cỏ', 2: 'Vùng nước', 3: 'Khu mỏ' };
-  const data_FERTS = (/* unused pure expression or super */ null && ({
+  const FERTS = {
     compost: { name: 'Phân ủ',       price: 50,  desc: 'Thời gian còn lại của vụ này ×0.75' },
     shiny:   { name: 'Phân lấp lánh', price: 100, desc: 'Khi thu hoạch vụ này rơi thêm số vàng bằng 25% giá bán' },
-  }));
-
-  const BLOCK_PRICE_PG = (/* unused pure expression or super */ null && ({   // v1.0: giá khai hoang riêng cho từng trang (chốt theo bảng B)
+  };
+  const BLOCK_PRICE_PG = {   // v1.0: giá khai hoang riêng cho từng trang (chốt theo bảng B)
     1: [0, 0, 800, 3000, 12000, 30000],
     2: [0, 2000, 6000, 18000, 45000, 90000],
     3: [0, 5000, 15000, 40000, 90000, 180000],
-  }));
-
-const data_WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ'];
-
-  const PETS = {
-    /* —— Trang 1 —— */
-    slime:      { name: 'Slime xanh',    page: 1, price: 0,    starter: true, cry: ['Bụp bụp~', 'Bựppp!', 'Grù grù…', 'Bụp?', 'Nhảy nhảy!'], desc: 'Loại tìm kho báu · bé tròn tổ tiên, bạn đồng hành từ đầu' },
-    octo:       { name: 'Bạch tuộc tím', page: 1, price: 500,  cry: ['Ục bốp?', 'Ục ực!', 'Chíu mi!', 'Bóp bóp…', 'Ục bốp bốp!'], desc: 'Loại tìm kho báu · thích chồng lên đầu người khác' },
-    slimePink:  { name: 'Slime hồng',    page: 1, price: 600,  cry: ['Bụp hì~', 'Bụp bụp!', 'Hì hì…', 'Bụp chíu~'], desc: 'Loại tìm kho báu · vị dâu (nhưng không ăn được)' },
-    octoCream:  { name: 'Bạch tuộc kem', page: 1, price: 700,  cry: ['Bốp…', 'Ục…', '(chậm rì rì) bóp~'], desc: 'Loại tìm kho báu · bậc thầy nguỵ trang, trùng màu với bảng điều khiển' },
-    dewSprout:  { job: 'plant', name: 'Bé mầm sương', page: 1, price: 1200, cry: ['Tí tách~', 'Mầm!', '(đội lá lên)'], desc: 'Loại làm việc · chọc một cái là gieo khắp ruộng, hạt xuống đất là nảy mầm' },
-    cloudMallow:{ job: 'water', name: 'Bé bông mây',  page: 1, price: 1500,  cry: ['Bông bông~', 'Vù——', '(bay lơ lửng)'], desc: 'Loại làm việc · ra sân là mây mưa nhỏ tự động tưới' },
-    /* —— Trang 2 (vé vùng nước) —— */
-    ghostBlob:  { name: 'Bé ma nhỏ',     page: 2, price: 1500, cry: ['Uuu~', 'Bay bay…', '(xuyên qua tay bạn)'], desc: 'Loại tìm kho báu · bay được vào những chỗ người khác không vào nổi' },
-    batBlob:    { job: 'fert', name: 'Bé bí ẩn',      page: 2, price: 1800, cry: ['……?', '(nghiêng đầu)', '?!'], desc: 'Loại làm việc · chọc một cái là bón phân hàng loạt · phân của nó bón ra cái gì thì không ai đoán nổi' },
-    bunny:      { job: 'harvest', name: 'Bé sứa xoăn', page: 2, price: 2200, cry: ['Ục grù~', '(cuộn cuộn xúc tu)', 'Bốp ục!'], desc: 'Loại làm việc · chọc một cái là xúc tu nhẹ nhàng cuộn rau chín vào balo' },   // #43: giữ id bunny để không hỏng save
-    impBlob:    { name: 'Bé quỷ nhỏ',    page: 2, price: 3000, cry: ['Hì hì.', 'Hư!', '(giấu cái gì đó đi)'], desc: 'Loại tìm kho báu · khi tìm kho báu sẽ tha về hạt giống bí ẩn đen sì' },
-    angelBlob:  { name: 'Bé thiên thần', page: 2, price: 3000, cry: ['Ting~', '(phát sáng dịu dàng)', 'Chúc phúc cho bạn.'], desc: 'Loại tìm kho báu · khi tìm kho báu sẽ ngậm về hạt giống bí ẩn ánh lấp lánh' },
-    /* —— Trang 3 (vé khu mỏ) —— */
-    prismBlob:  { name: 'Bé lăng quang', page: 3, price: 8000, cry: ['Keng~', '(khúc xạ ra một dải cầu vồng)', 'Kengg!'], desc: 'Loại sản xuất · tìm kho báu mang về mảnh lăng quang (đổi được một đơn ở trang đơn hàng phù thuỷ)' },
-    starBell:   { name: 'Bé chuông sao', page: 3, price: 8000, cry: ['Leng keng~', '☆!', '(lắc lắc nhẹ)'], desc: 'Loại sản xuất · tìm kho báu rung rơi mảnh ngôi sao (triệu hồi được phù thuỷ tròn)' },
-    /* —— Át chủ bài (#43: giữ id slimeNight để không hỏng save; page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
-    slimeNight: { name: 'Bé soda đào',   page: 1, price: 9999, cry: ['Bốp——!', '(nổi một bong bóng nhỏ)', 'Xì~', '(vị ngòn ngọt)'], desc: 'Loại tìm kho báu · tinh linh soda vị đào · dễ thương quá mức nên đắt nhất' },
   };
+  const blockPrice = bi => BLOCK_PRICE_PG[S.page][bi];
+  const WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ'];
 
-  const FLOATY = (/* unused pure expression or super */ null && ({ cloudMallow: 1, ghostBlob: 1, bunny: 1 }));   // Danh sách bay: không nhảy, trượt đều (#43: bé sứa xoăn nhập hội, thành bộ ba bay lơ lửng)
-  const GAITS = (/* unused pure expression or super */ null && ({                                          // Dáng đi: len = độ dài một bước nhảy, dur = chu kỳ một cú nhảy (ms), hy = độ cao nhảy
-    octo:      { len: 8,  dur: 260, hy: -4 },              // Bạch tuộc: bước lắt nhắt bò sát đất
-    octoCream: { len: 8,  dur: 290, hy: -4 },              // Bạch tuộc kem: bò còn chậm rì hơn nữa
-    _:         { len: 14, dur: 330, hy: -9 },              // Mặc định: kiểu nảy chuẩn của dòng slime
-  }));
-
-
-;// ./src/graphics.js
+  /* ---------- Lưu game ---------- */
+  const now = () => Date.now();
+  const emptyPlots = () => { const a = []; for (let i = 0; i < 24; i++) a.push({ crop: null }); return a; };
+  function freshState() {
+    return {
+      version: 1, coins: TEST_MODE ? 9999 : 999, totalSales: 0, unlockedBlocks: 2,
+      plots: emptyPlots(), seeds: { douya: 4, mystery: 1 }, ferts: {}, bag: {}, petPoke: {},   // Quà khởi đầu: 4 giá đỗ + 1 hạt giống bí ẩn (popup dạy chơi hộp mù)
+      pets: ['slime'], passes: {}, petsOut: ['slime'], jobCfg: {}, petFind: {},   // Tặng slime xanh lúc mở đầu (thực hiện phương án #9)
+      page: 1, plots2: emptyPlots(), plots3: emptyPlots(), unlockedBlocks2: 1, unlockedBlocks3: 1,   // v0.8: ba trang (vé vào trang 2/3 tặng kèm ô đất đầu tiên)
+      day0: now(), orb: { fx: 0.94, fy: 0.6 }, win: null,
+    };
+  }
+  let S = null;
+  function loadState() {
+    if (!extension_settings[extensionName]) {
+      extension_settings[extensionName] = {};
+    }
+    const g = extension_settings[extensionName] || {};
+    S = g[NS] && g[NS].version === 1 ? g[NS] : freshState();
+    if (!S.petPoke) S.petPoke = {};
+    if (!S.mutDesc) S.mutDesc = {};
+    if (!S.passes) S.passes = {};
+    if (!S.pets) S.pets = ['slime', 'octo'];
+    if (!S.petsOut) S.petsOut = S.pets.slice(0, 6);
+    if (!S.jobCfg) S.jobCfg = {};
+    if (!S.petFind) S.petFind = {};
+    if (!S.theme) S.theme = 'sakura';
+    if (!S.page) S.page = 1;
+    
+    Object.keys(S.bag || {}).forEach(k => {
+      const base = k.split('@')[0];
+      if (base === 'mysbG' || base === 'mysbW' || base === 'mysbM') {
+        const nk = k.replace(base, 'moonberry');
+        S.bag[nk] = (S.bag[nk] || 0) + S.bag[k];
+        delete S.bag[k];
+      }
+    });
+    [S.plots, S.plots2, S.plots3].forEach(arr => (arr || []).forEach(p => {
+      if (p.crop && (p.crop.id === 'mysbG' || p.crop.id === 'mysbW' || p.crop.id === 'mysbM')) p.crop.id = 'moonberry';
+    }));
+    
+    if (!S.witch) S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
+    if (!S.shards) S.shards = { prism: 0, star: 0 };
+    if (!S.plots2) S.plots2 = emptyPlots();
+    if (!S.plots3) S.plots3 = emptyPlots();
+    if (S.unlockedBlocks2 == null) S.unlockedBlocks2 = 1;
+    if (S.unlockedBlocks3 == null) S.unlockedBlocks3 = 1;
+    
+    [S.plots, S.plots2, S.plots3].forEach(arr => arr.forEach(p => {
+      const c = p.crop; if (!c) return;
+      if (!c.fertUsed) c.fertUsed = {};
+      if (CROPS[c.id].regrow && c.left == null) c.left = REGROW_MAX;
+    }));
+  }
+  /* v0.8: hàm hỗ trợ cho trang */
+  const pagePlots = pg => pg === 2 ? S.plots2 : pg === 3 ? S.plots3 : S.plots;
+  const curPlots = () => pagePlots(S.page);
+  const curBlocks = () => S.page === 2 ? S.unlockedBlocks2 : S.page === 3 ? S.unlockedBlocks3 : S.unlockedBlocks;
+  const addBlock = () => { if (S.page === 2) S.unlockedBlocks2++; else if (S.page === 3) S.unlockedBlocks3++; else S.unlockedBlocks++; };
+  const eachPage = fn => [1, 2, 3].forEach(pg => fn(pagePlots(pg), pg));
+  let saveTimer = null;
+  function save(immediate) {
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+    const doSave = () => {
+      if (!extension_settings[extensionName]) extension_settings[extensionName] = {};
+      extension_settings[extensionName][NS] = S;
+      if (saveSettingsDebounced) saveSettingsDebounced();
+    };
+    if (immediate) doSave(); else saveTimer = setTimeout(doSave, 500);
+    try { updateInjection(); } catch (e) {}
+  }
+  /* ---------- Tiện ích ---------- */
   function mulberry32(a) {
     return function () {
       a |= 0; a = (a + 0x6D2B79F5) | 0;
@@ -133,7 +524,7 @@ const data_WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ
     /* #27: thu hoạch đổi sang kích hoạt bằng cách chọc (xem petHarvest) — rau chín nằm lại ruộng chờ user quay lại xem, không bị tim đập lén cuốn đi nữa */
     let tGain = 0, tSeed = null, tMyst = null, tPrism = 0, tStar = 0;            // Loại tìm kho báu (thú ra sân không có job): định kỳ nhặt tiền, thỉnh thoảng tha hạt giống về
     S.petsOut.forEach(id => {
-      const pd = graphics_PETS[id];
+      const pd = PETS[id];
       if (!pd || pd.job) return;
       if (S.petFind[id] == null) { S.petFind[id] = now(); wChanged = true; return; }   // Lần đầu chỉ khởi động bộ đếm
       if (now() - S.petFind[id] < TREASURE_CD) return;
@@ -371,7 +762,7 @@ const data_WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ
   }
 
   /* ===== Bảng dữ liệu thú cưng (giá là chỗ giữ chỗ để test; page = trang mở khoá, 2/3 cần vé tương ứng) ===== */
-  const graphics_PETS = (/* unused pure expression or super */ null && ({
+  const PETS = {
     /* —— Trang 1 —— */
     slime:      { name: 'Slime xanh',    page: 1, price: 0,    starter: true, cry: ['Bụp bụp~', 'Bựppp!', 'Grù grù…', 'Bụp?', 'Nhảy nhảy!'], desc: 'Loại tìm kho báu · bé tròn tổ tiên, bạn đồng hành từ đầu' },
     octo:       { name: 'Bạch tuộc tím', page: 1, price: 500,  cry: ['Ục bốp?', 'Ục ực!', 'Chíu mi!', 'Bóp bóp…', 'Ục bốp bốp!'], desc: 'Loại tìm kho báu · thích chồng lên đầu người khác' },
@@ -390,11 +781,11 @@ const data_WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ
     starBell:   { name: 'Bé chuông sao', page: 3, price: 8000, cry: ['Leng keng~', '☆!', '(lắc lắc nhẹ)'], desc: 'Loại sản xuất · tìm kho báu rung rơi mảnh ngôi sao (triệu hồi được phù thuỷ tròn)' },
     /* —— Át chủ bài (#43: giữ id slimeNight để không hỏng save; page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
     slimeNight: { name: 'Bé soda đào',   page: 1, price: 9999, cry: ['Bốp——!', '(nổi một bong bóng nhỏ)', 'Xì~', '(vị ngòn ngọt)'], desc: 'Loại tìm kho báu · tinh linh soda vị đào · dễ thương quá mức nên đắt nhất' },
-  }));
-  const graphics_PASSES = (/* unused pure expression or super */ null && ({
+  };
+  const PASSES = {
     water: { name: 'Vé vùng nước', price: 6000,  desc: 'Mở khoá ruộng vùng nước (trang 2) + quyền mua bé tròn trang 2 và hạt giống thuỷ sinh, tặng kèm ô ruộng nổi đầu tiên' },
     mine:  { name: 'Vé khu mỏ',    price: 35000, desc: 'Mở khoá ruộng khu mỏ (trang 3) + quyền mua bé tròn trang 3 và hạt giống khu mỏ, tặng kèm luống ươm đầu tiên' },
-  }));
+  };
   /* ===== v0.8: cây trồng mới trang 2-3 + tinh linh hạt giống bí ẩn (chuyển từ bản thiết kế chốt; namespace riêng, mỗi hình mang bảng màu của mình) ===== */
   const C2 = {
     chuncai: { p: { g:'#2e6a50', G:'#4d9a6e', W:'#a8d8bc', o:'#8a5540' }, m: [
@@ -456,7 +847,7 @@ const data_WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ
     mysbM: { p: { g:'#5a3f78', G:'#8a5cc0', K:'#3a2258', r:'#9a6ac8', R:'#c4a2e8', W:'#e8d8f8' }, m: [
       '.....G..g.......','....gGGGGg......','......GG........','....KrrrrK......','...KrRrWrrK.....','...KrrRrrrK.....','...KRrrrRrK.....','....KrrRrK......','.....KrrK.......','......KK........','................','................','................','................','................','................'] },
   };
-  const graphics_pageUnlocked = p => p === 1 || (p === 2 && S.passes.water) || (p === 3 && S.passes.mine);
+  const pageUnlocked = p => p === 1 || (p === 2 && S.passes.water) || (p === 3 && S.passes.mine);
 
 
   const spriteCache = new Map();
@@ -547,214 +938,13 @@ const data_WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ
     return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${SZ}" height="${SZ}" viewBox="0 0 ${SZ} ${SZ}" shape-rendering="crispEdges">${r}</svg>`)}")`;
   }
 
-;// ./src/style.css
-const style_namespaceObject = "\n    * { box-sizing: border-box; margin: 0; padding: 0; font-family: \"Microsoft YaHei\", \"PingFang SC\", sans-serif; }\n    /* ===== v1.0: chủ đề giao diện (hồng anh đào / trời quang), đổi ở trang cài đặt, S.theme lưu toàn cục ===== */\n    .theme-sakura { --sky: radial-gradient(circle at 82% 40%, rgba(255,255,255,.55) 5px, transparent 6px), radial-gradient(circle at 12% 65%, rgba(255,255,255,.4) 4px, transparent 5px), linear-gradient(#f5c6d6, #e29ab8);\n      --skyLine: #c27a9a; --tint: rgba(150,70,100,.35); --tintSoft: rgba(150,70,100,.3); --frameOut: #9a7a54;\n      --buyBg: linear-gradient(#fdeef2,#f6d0da); --buyLine: #c77b96; --buyFg: #a34a63; --buyInset: #e8b3c2; --buyDeep: #a34a63;\n      --accBg: #fdeef2; --accLine: #d9718a; --accFg: #a34a63; --selGlowA: #ffd7e2; --selGlowB: #f2b8c9; --shead: #8a4a63;\n      --banBg: linear-gradient(#efe9fa,#e2d6f5); --banLine: #9a86c8; --banFg: #5d4a85; --banIn: #f8f4ff; --tagBg: #8a72c0; --tagFg: #f4edff; }\n    .theme-sky { --sky: radial-gradient(circle at 82% 40%, rgba(255,255,255,.55) 5px, transparent 6px), radial-gradient(circle at 12% 65%, rgba(255,255,255,.4) 4px, transparent 5px), linear-gradient(#7cc4f2, #4a90d9);\n      --skyLine: #2b5cae; --tint: rgba(30,60,120,.35); --tintSoft: rgba(30,60,120,.3); --frameOut: #3a6098;\n      --buyBg: linear-gradient(#eef6ff,#d2e6f8); --buyLine: #85aede; --buyFg: #2f66b8; --buyInset: #b4d2ee; --buyDeep: #5580b8;\n      --accBg: #eaf4ff; --accLine: #3a77cc; --accFg: #24549e; --selGlowA: #c8e2f8; --selGlowB: #9cc8ee; --shead: #2b5cae;\n      --banBg: linear-gradient(90deg, #24549e, #3a77cc 60%, #5da8e8); --banLine: #24549e; --banFg: #eaf4ff; --banIn: rgba(255,255,255,.18); --tagBg: #ffd94d; --tagFg: #6a4e10; }\n    #orb { position: fixed; width: 52px; height: 52px; z-index: 99998; cursor: pointer; touch-action: none;\n      border-radius: 50%; background: linear-gradient(#f7ead2,#eed9b8); border: 3px solid #b08a5c;\n      box-shadow: inset 0 2px 0 #fffaf0, 0 4px 10px rgba(0,0,0,.35);\n      display: flex; align-items: center; justify-content: center; user-select: none;\n      transition: transform .18s ease; }\n    #orb.dockL:not(:hover) { transform: translateX(-27px); }   /* Sửa #12: dán mép thì thu nửa, rê chuột thì bật ra */\n    #orb.dockR:not(:hover) { transform: translateX(27px); }\n    #win { position: fixed; z-index: 99997; width: min(760px, 96vw); max-height: 92vh; max-height: 92dvh; display: none;\n      flex-direction: column; background: #f8efe0;\n      background-image: repeating-linear-gradient(0deg, transparent 0 30px, rgba(170,130,80,.14) 30px 33px);\n      border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;\n      box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }\n    #win.open { display: flex; }\n    .titlebar { background: var(--sky); border-bottom: 4px solid var(--skyLine); padding: 9px 14px;\n      display: flex; align-items: center; gap: 8px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.5);\n      cursor: move; touch-action: none; user-select: none; flex: none; }\n    .titlebar { justify-content: space-between; }\n    .titlebar h1 { font-size: 15px; color: #7a5c38; letter-spacing: 2px; text-shadow: 1px 1px 0 #fff3dd; flex: 0 1 auto;\n      display: flex; align-items: center; gap: 7px;\n      background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 8px; padding: 3px 12px;\n      box-shadow: 0 3px 0 var(--tint), inset 0 0 0 2px #fff6e0;\n      display: flex; align-items: center; gap: 8px; }\n    .close-x { width: 24px; height: 24px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 6px;\n      color: #7a5c38; box-shadow: 0 2px 0 var(--tintSoft); font-weight: bold; text-align: center; line-height: 18px; cursor: pointer; }\n    .statusbar { display: flex; align-items: center; gap: 12px; padding: 7px 14px; background: #f4e6cf;\n      border-bottom: 3px solid #ddc39a; font-size: 13px; font-weight: bold; color: #7a5c38; flex: none; flex-wrap: wrap; }\n    .stat { display: flex; align-items: center; gap: 5px; }\n    #scroll { overflow: auto; flex: 1; }\n    /* v0.8: thanh lật trang ba trang */\n    .pager { position: absolute; top: 7px; right: 7px; z-index: 7; display: flex; align-items: center; justify-content: center;\n      background: rgba(58,48,30,.4); border: 2px solid rgba(255,246,224,.4); border-radius: 14px; overflow: hidden;\n      width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: rgba(255,246,224,.8); user-select: none; }   /* Phương án 2 sửa: bình thường là quả cầu nhỏ mờ */\n    .pager.open { width: auto; height: auto; border-radius: 12px; cursor: default;\n      background: rgba(58,48,30,.55); border-color: rgba(255,246,224,.5); font-size: 0; }   /* Bấm mở = bung thành thanh viên nang */\n    .pager:not(.open) .ptab { display: none; }             /* Ở dạng quả cầu thì ẩn các tab trang */\n    .pager:not(.open)::after { content: '⇄'; }             /* Icon nhỏ trên mặt cầu */\n    .ptab { flex: none; font-size: 11px; font-weight: bold; padding: 4px 10px; background: transparent;\n      color: #f0e6cc; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 3px; }\n    .ptab + .ptab { border-left: 1px solid rgba(255,246,224,.35); }\n    .ptab.active { background: rgba(255,246,224,.92); color: #7a5c38; }\n    .ptab.lock { opacity: .6; }\n    .field { margin: 10px 12px; background-color: #a9c383; border: 4px solid #b08a5c; border-radius: 8px;\n      box-shadow: inset 0 0 0 3px #8aa86a; padding: 14px; position: relative; }\n    /* v0.8: da trang W1 ruộng nổi đầm sen / M1 mạch quặng kim cương */\n    .field.pg2 { background-color: #8ec8d8; border-color: #6a9ab0; box-shadow: inset 0 0 0 3px #79b4c6; }\n    .field.pg3 { background-color: #5f5870; border-color: #7a6a94; box-shadow: inset 0 0 0 3px #4e4860; }\n    .field.pg2 span.dside, .field.pg2 span.dbot, .field.pg3 span.dside, .field.pg3 span.dbot { display: none !important; }  /* Trang trí đồng cỏ không lội nước / không xuống mỏ */\n    .field.pg2 .plot { border-color: #c9a273;            /* v0.9: khung gỗ hai lớp —— gỗ nhạt ngoài + gỗ đậm trong, lấy lại cảm giác khung vuông của bản thiết kế */\n      box-shadow: inset 0 0 0 3px #a8845c, inset 0 -5px 0 rgba(40,70,90,.28); }\n    .field.pg2 .plot.watered { border-color: #b08a5c; box-shadow: inset 0 0 0 3px #8a6844, inset 0 -5px 0 rgba(30,55,75,.35); }\n    .field.pg2 .block:not(.locked) .plot::before {       /* v0.9 sửa lần 2: đinh góc màu đậm ở bốn góc (giống bản thiết kế) */\n      content: ''; position: absolute; inset: -3px; pointer-events: none; border-radius: 6px;\n      background: linear-gradient(#6a4a2c,#6a4a2c) left top / 7px 7px no-repeat,\n        linear-gradient(#6a4a2c,#6a4a2c) right top / 7px 7px no-repeat,\n        linear-gradient(#6a4a2c,#6a4a2c) left bottom / 7px 7px no-repeat,\n        linear-gradient(#6a4a2c,#6a4a2c) right bottom / 7px 7px no-repeat; }\n    .field.pg3 .plot { border-color: #3f8a9a; border-radius: 2px;   /* v0.9 sửa lần 3: luống ươm pha lê bớt bo góc, cạnh sắc rõ */\n      box-shadow: inset 0 0 0 1px rgba(138,224,234,.5), inset 0 -3px 0 rgba(20,20,40,.35); }\n    .field.pg3 .plot.watered { border-color: #5fc8d8; }\n    /* v0.9 sửa lần 4: đinh góc trắng ở khu mỏ thử thấy chói mắt, bỏ (luống ươm vẫn giữ góc vuông) */\n    .field.pg2 .block.locked .plot { border-color: #8ab4c2; box-shadow: inset 0 3px 0 rgba(255,255,255,.28), inset 0 -3px 0 rgba(30,60,80,.22); } /* Cảm giác nổi khối giống ô khoá bên đồng cỏ */\n    .field.pg3 .block.locked .plot { border-color: #6d657c; box-shadow: none; } /* Ô khoá khu mỏ giữ khung trơn (thử thanh sáng nổi khối hai lần đều thấy kỳ, wen chốt) */\n    .blocks { display: grid; grid-template-columns: repeat(3, max-content); gap: 14px; justify-content: center; }\n    @media (max-width: 640px) {\n      .blocks { grid-template-columns: repeat(2, max-content); }\n      .field { padding: 12px 12px 70px; }                       /* Sửa #7: dải cỏ riêng cho thanh công cụ / linh vật */\n      .titlebar h1 { font-size: 13px; letter-spacing: 0; }      /* Sửa #11: bố cục dọc gọn lại */\n      .titlebar h1 .sub { display: none; }\n      .statusbar { gap: 6px 10px; font-size: 12px; padding: 6px 10px; }\n      .bottombar { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; }\n      .btn { font-size: 13px; padding: 7px 6px; }\n      span.dside { display: none; }      /* Sửa #13: màn hẹp không đủ lề bên, chuyển trang trí xuống dải xanh dưới đáy */\n      span.dbot { display: inline; }     /* Nâng quyền cho span, đè lên quy tắc ẩn mặc định phía sau */\n    }\n    .block { display: grid; grid-template-columns: repeat(2, var(--plot, 74px)); grid-auto-rows: var(--plot, 74px);\n      gap: 6px; position: relative; }\n    .plot { background-color: #b99b84; border: 3px solid #937863; border-radius: 6px;\n      box-shadow: inset 0 3px 0 rgba(255,244,225,.35), inset 0 -3px 0 rgba(80,55,35,.18);\n      display: flex; align-items: flex-end; justify-content: center; padding-bottom: 3px;\n      position: relative; cursor: pointer; background-size: 100% 100%; }\n    .plot.watered { background-color: #9d7458; border-color: #7a5a40; }\n    .plot .bar { position: absolute; left: 6px; right: 6px; bottom: 3px; height: 5px;\n      background: rgba(60,35,15,.35); border-radius: 3px; overflow: hidden; }\n    .plot .bar i { display: block; height: 100%; background: #a4dc8c; border-radius: 3px; }\n    .plot .ripe { position: absolute; top: -10px; right: -6px; width: 20px; height: 20px; background: #ffd94d;\n      border: 3px solid #b8891f; border-radius: 50% 50% 50% 4px; color: #8a5f00; font-weight: bold; font-size: 13px;\n      text-align: center; line-height: 15px; z-index: 3; }\n    .block.locked .plot { background-color: #aecb87; border-color: #9aa378; cursor: default; }\n    .sign { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 92px;\n      background: linear-gradient(#f7ead2,#ecd6ae); border: 3px solid #b08a5c; border-radius: 6px;\n      box-shadow: 0 3px 0 #8a6844, inset 0 0 0 2px #fff6e0; padding: 6px 4px; font-size: 12px; font-weight: bold;\n      color: #7a5c38; text-align: center; line-height: 1.35; z-index: 4; cursor: pointer; }\n    .sign small { display: flex; align-items: center; justify-content: center; gap: 3px; font-size: 10px; color: #9a7a50; }\n    .sign.confirm { border-color: var(--accLine); color: var(--accFg); }\n    /* #26: lớp cho bé tròn tự do đi lại —— phủ toàn bộ khu ruộng, đi theo khu vực (loại làm việc = hàng dưới, loại đi dạo = bờ ruộng) */\n    .mascots { position: absolute; inset: 0; z-index: 6; pointer-events: none; }\n    .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute;\n      left: 0; bottom: 0; will-change: left, bottom; }\n    .pet:active { transform: scale(1.15, .85); }\n    .pbody { display: block; animation: petbob 1.8s ease-in-out infinite; }\n    .pet.walk .pbody { animation: pethop var(--hopd, .33s) linear infinite; }   /* v0.7①: đi bộ = nhảy liên tiếp theo đường parabol */\n    .pet[data-pet=\"cloudMallow\"] .pbody,\n    .pet[data-pet=\"ghostBlob\"] .pbody,\n    .pet[data-pet=\"bunny\"] .pbody { animation: petfloat 3.2s ease-in-out infinite; }  /* Mây / ma / sứa: kiểu bay lơ lửng (đè lên walk) */\n    .pet.sleep .pbody { animation: petsleep 3.6s ease-in-out infinite; }   /* v0.7②: ngủ = thở chậm (đè lên bay, ma cũng phải hạ cánh mà ngủ) */\n    .pet.flip .pbody svg { transform: scaleX(-1); }\n    .zzz { position: absolute; bottom: calc(100% - 8px); left: 68%; font-size: 12px; font-weight: bold;\n      color: #7a90c8; text-shadow: 1px 1px 0 #fff; pointer-events: none; animation: zrise 2.6s linear infinite; }\n    .zzz.z2 { left: 52%; font-size: 10px; animation-delay: 1.3s; }\n    @keyframes zrise { 0% { opacity: 0; transform: translate(0, 2px) scale(.7); }\n      25% { opacity: 1; } 100% { opacity: 0; transform: translate(7px, -15px) scale(1.15); } }\n    @keyframes petsleep { 0%, 100% { transform: translateY(2px) scale(1.07, .93); }\n      50% { transform: translateY(2px) scale(1.03, .97); } }\n    @keyframes petbob { 0%, 100% { transform: translateY(0) scale(1, 1); }\n      30% { transform: translateY(1px) scale(1.05, .94); }\n      65% { transform: translateY(-4px) scale(.96, 1.05); } }\n    @keyframes petfloat { 0%, 100% { transform: translateY(-2px); } 50% { transform: translateY(-8px); } }\n    /* Một chu kỳ nhảy: lấy đà bẹt xuống → bay lên kéo dài → chạm đất nén nhẹ → về dáng chuẩn, độ cao do --hy quyết định (khác nhau theo dáng đi) */\n    @keyframes pethop { 0%, 100% { transform: translateY(0) scale(1.07, .93); }\n      40% { transform: translateY(var(--hy, -9px)) scale(.94, 1.06); }\n      80% { transform: translateY(-1px) scale(1.02, .99); } }\n    /* v0.8b: quầy hàng của phù thuỷ tròn (wen sửa lần 2: hàng dưới cùng bên trái, xếp cùng hàng với bé làm việc; bảng đơn hàng đội trên đầu) */\n    #witch { position: absolute; left: 12%; bottom: 2px; z-index: 6; cursor: pointer; display: none; text-align: center; }\n    #witch.show { display: block; }\n    #witch .wbody { display: block; animation: petfloat 3.2s ease-in-out infinite; }\n    #witch .wtag { display: inline-block; margin-bottom: 1px; font-size: 10px; font-weight: bold; color: #cfc9f2;\n      background: #2a2650; border: 2px solid #8f86d9; border-radius: 6px; padding: 1px 7px;\n      box-shadow: 0 0 8px rgba(143,134,217,.5); }\n    .pbubble.wb { border-color: #8f86d9; color: #5a52a0; background: #f4f2ff; }\n    /* v0.8b: trang đơn hàng quỹ đạo sao A (bản thiết kế chốt) */\n    .wzwrap { background: linear-gradient(160deg,#1c1b33,#232145 60%,#1a1e3d); border: 3px double #8f86d9;\n      border-radius: 10px; padding: 14px 12px 12px; box-shadow: 0 0 14px rgba(143,134,217,.3); }\n    .wzhead { color: #cfc9f2; text-align: center; letter-spacing: 3px; font-size: 14px; font-weight: bold; }\n    .wzsub { color: #7a72c0; font-size: 10px; text-align: center; letter-spacing: 2px; margin: 2px 0 10px; }\n    .wzord { border: 1px solid #4a4488; border-radius: 8px; padding: 9px 10px 7px; margin-bottom: 8px;\n      background: rgba(143,134,217,.08); position: relative; }\n    .wzord .star { position: absolute; left: -7px; top: 50%; transform: translateY(-50%); color: #ffd94d;\n      font-size: 13px; text-shadow: 0 0 6px #ffd94d; }\n    .wzwant { color: #e8e4ff; font-size: 13px; font-weight: bold; }\n    .wzwant em { font-style: normal; color: #ffd94d; }\n    .wzwant .mutq { color: #f2a8c8; }\n    .wzgive { color: #9a92d9; font-size: 11px; margin-top: 3px; }\n    .wzbtn { float: right; margin-top: -2px; font-size: 11px; font-weight: bold; color: #ffd94d;\n      border: 1px solid #b09a3a; border-radius: 6px; padding: 2px 10px; cursor: pointer; background: rgba(255,217,77,.08); }\n    .wzbtn.off { color: #6a63b0; border-color: #4a4488; cursor: default; }\n    .wzbtn.done { color: #7cd4a4; border-color: #3f8a5a; cursor: default; }\n    .wzleave { clear: both; color: #6a63b0; font-size: 10px; text-align: center; letter-spacing: 1px; margin-top: 8px; }\n    .pbubble { position: absolute; bottom: calc(100% + 3px); left: 50%; transform: translateX(-50%);\n      background: #fbfdff; border: 2px solid #7db8d8; border-radius: 8px 8px 8px 0;\n      font-size: 11px; font-weight: bold; color: #4a88aa; padding: 2px 7px; white-space: nowrap;\n      pointer-events: none; animation: pbfloat 1.6s ease forwards; z-index: 9; }\n    .pet[data-pet=\"octo\"] .pbubble { border-color: #ab84dd; color: #7a54b5; background: #fdfbff; }\n    .emote { position: absolute; pointer-events: none; z-index: 8; animation: pbfloat 1.2s ease forwards; }\n    @keyframes pbfloat { 0% { opacity: 0; transform: translateY(4px); } 15% { opacity: 1; transform: translateY(0); }\n      70% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-10px); } }\n    .fdot { position: absolute; left: 4px; top: 4px; width: 7px; height: 7px; border-radius: 50%;\n      background: #6cb457; border: 1px solid #3e7d3a; z-index: 3; }\n    .dbot { display: none; }\n    .ctrlrow { display: flex; gap: 6px; align-items: stretch; padding: 7px 14px 0; flex-wrap: nowrap; }   /* Khoá một hàng: không đủ chỗ thì ép chữ chứ không ép khung */\n    .ctrlrow .chip { flex: 0 1 auto; min-width: 0; white-space: normal; line-height: 1.15; text-align: center; }\n    .chip.witchchip { background: #efe9fa; border-color: #9a6ad8; color: #6a4a9a;\n      box-shadow: inset 0 2px 0 #f8f4ff, 0 2px 0 rgba(122,74,184,.35); }\n    .chips { display: flex; gap: 6px; margin-left: auto; }\n    .chip { font-size: 11px; padding: 2px 8px 2px 6px; border-radius: 6px; border: 2px solid #c2a274;\n      background: #faf0dc; color: #8a6a42; font-weight: bold; cursor: pointer;\n      display: inline-flex; align-items: center; gap: 5px; user-select: none;\n      box-shadow: inset 0 2px 0 #fffdf4, 0 2px 0 rgba(154,122,84,.3); }\n    .chip::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #d9c49a;\n      box-shadow: inset 0 -2px 0 rgba(0,0,0,.15); }\n    .chip.on { background: #ead9f7; border-color: #9a6ad8; color: #6a4a9a; }\n    .chip.on::before { background: #b48ae0; box-shadow: inset 0 -2px 0 #8a5cc0, 0 0 4px #cdb0ef; }\n    .banner { margin: 9px 12px 0; padding: 7px 11px; background: var(--banBg);\n      border: 3px solid var(--banLine); border-radius: 8px; font-size: 12px; color: var(--banFg);\n      display: none; align-items: center; gap: 9px; box-shadow: inset 0 2px 0 var(--banIn); cursor: pointer; }\n    .banner #btxt { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* Mặc định một dòng, bấm vào banner thì mở rộng */\n    .banner.expand #btxt { white-space: normal; }\n    .banner.show { display: flex; }\n    .banner .btag { background: var(--tagBg); color: var(--tagFg); font-weight: bold; padding: 1px 7px;\n      border-radius: 5px; font-size: 11px; white-space: nowrap; }\n    .mdrop { flex-direction: column; gap: 2px; max-height: 150px; overflow: auto; background: #fffdf4;\n      border: 2px solid #c2a274; border-radius: 6px; padding: 5px; }\n    .mdrop span { padding: 4px 9px; font-size: 12px; font-weight: bold; color: #6b4f2e; border-radius: 5px; cursor: pointer; }\n    .mdrop span:hover { background: var(--accBg); color: var(--accFg); }\n    .inp { width: 100%; background: #fffdf4; border: 2px solid #c2a274; border-radius: 6px;\n      padding: 6px 9px; font-size: 12px; color: #6b4f2e; font-family: inherit;\n      box-shadow: inset 0 2px 3px rgba(154,122,84,.18); }\n    textarea.inp { resize: vertical; min-height: 60px; }\n    .shead { font-size: 13px; font-weight: bold; color: var(--shead); margin: 10px 0 6px; }\n    /* ===== Vé giấy phong cách hoài cổ (chuyển từ bản xem trước của vé) ===== */\n    .tk { position: relative; width: 100%; display: flex; border-radius: 8px;\n      box-shadow: 0 8px 20px rgba(0,0,0,.3); margin: 4px 0 10px; }\n    .tk.water { --paper: #e9f0e4; --ink: #3f7a8a; --stamp: #4a90a8; --curlD: #b9cfc4; --curlL: #dce8dd; transform: rotate(-1deg); }\n    .tk.mine  { --paper: #ece4f0; --ink: #6a4a8a; --stamp: #8a5cc0; --curlD: #c4b3d4; --curlL: #ded2ea; transform: rotate(0.8deg); }\n    .tk .stub { flex: none; width: 96px; border-radius: 8px 0 0 8px; border: 3px solid var(--ink); border-right: none;\n      background: var(--paper);\n      background-image: radial-gradient(circle at 25% 18%, rgba(160,120,60,.1) 0 18%, transparent 19%),\n        repeating-linear-gradient(0deg, transparent 0 6px, rgba(120,90,50,.05) 6px 7px);\n      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 10px 4px; }\n    .tk .no { font-size: 9px; letter-spacing: 1px; color: var(--ink); opacity: .75; font-weight: bold; }\n    .tk .perf { flex: none; width: 0; border-left: 3px dashed var(--ink); opacity: .8; position: relative; }\n    .tk .perf::before, .tk .perf::after { content: ''; position: absolute; left: -8px; width: 14px; height: 14px;\n      border-radius: 50%; background: #f8efe0; }\n    .tk .perf::before { top: -10px; } .tk .perf::after { bottom: -10px; }\n    .tk .tmain { flex: 1; border-radius: 0 8px 8px 0; border: 3px solid var(--ink); border-left: none;\n      background: var(--paper);\n      background-image: radial-gradient(circle at 80% 25%, rgba(160,120,60,.1) 0 15%, transparent 16%),\n        repeating-linear-gradient(0deg, transparent 0 6px, rgba(120,90,50,.05) 6px 7px);\n      padding: 12px 12px 10px; position: relative; overflow: hidden; }\n    .tk .inner { border: 1px solid var(--ink); border-radius: 4px; padding: 7px 10px 8px; }\n    .tk .eyebrow { font-size: 8px; letter-spacing: 2px; color: var(--ink); opacity: .7; font-weight: bold; }\n    .tk .tname { font-size: 17px; font-weight: bold; color: var(--ink); letter-spacing: 3px; margin: 2px 0; }\n    .tk .tsub { font-size: 10px; color: var(--ink); opacity: .85; line-height: 1.7; }\n    .tk .trow { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 6px; }\n    .tk .serial { font-family: Consolas, monospace; font-size: 11px; font-weight: bold; letter-spacing: 2px; color: var(--ink); }\n    .tk .valid { font-size: 8px; color: var(--ink); opacity: .65; letter-spacing: 1px; }\n    .tk .curl { position: absolute; right: -1px; bottom: -1px; width: 28px; height: 28px;\n      background: linear-gradient(315deg, transparent 47%, var(--curlD) 48%, var(--curlL) 60%, var(--paper) 90%);\n      border-radius: 0 0 8px 0; box-shadow: -3px -3px 6px rgba(60,40,15,.18);\n      clip-path: polygon(100% 0, 0 100%, 100% 100%); }\n    .tk .stamp { position: absolute; right: 36px; top: -5px; width: 44px; height: 44px; border-radius: 50%;\n      border: 2px solid var(--stamp); color: var(--stamp); display: flex; align-items: center; justify-content: center;\n      font-size: 11px; font-weight: bold; transform: rotate(14deg); opacity: .55;\n      box-shadow: inset 0 0 0 1px var(--stamp); pointer-events: none; text-align: center; }\n    .tk.mine .tmain::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 8px;\n      background: repeating-linear-gradient(45deg, #d8b13a 0 6px, #4a3a52 6px 12px); opacity: .85; }\n    .cnt2 { position: absolute; right: 3px; top: 3px; font-size: 9px; background: rgba(255,253,244,.9);\n      border: 1px solid #c2a274; border-radius: 4px; padding: 0 3px; color: #7a5c38; font-weight: bold; z-index: 3; }\n    .sign.poor { opacity: .6; }\n    /* Thanh công cụ bản mới: bình thường = tai nhỏ thu nửa dán mép trái (không chiếm đồng cỏ, không che bé tròn đi dạo); bấm mở = bung ra một cột dọc theo bờ ruộng */\n    .toolbar { position: absolute; display: flex; z-index: 7; transition: left .22s ease; }\n    .toolbar:not(.open) { left: -14px; bottom: 12px; padding: 5px 5px 5px 14px;\n      background: linear-gradient(#f7ead2,#eed9b8); border: 3px solid #b08a5c; border-left: none;\n      border-radius: 0 10px 10px 0; box-shadow: 0 3px 0 #8a6844, inset 0 0 0 2px #fff6e0; }\n    .toolbar.open { left: 0; top: 0; bottom: 0; flex-direction: column; justify-content: center;\n      align-items: center; gap: 6px; padding: 10px 6px; background: linear-gradient(90deg,#f7ead2,#eed9b8);\n      border-right: 3px solid #b08a5c; border-radius: 0 10px 10px 0;\n      box-shadow: 3px 0 0 rgba(138,104,68,.35), inset 0 0 0 2px #fff6e0; }\n    @media (max-width: 640px) {\n      .toolbar.open { flex-direction: row; top: auto; left: 0; right: 0; bottom: 0;\n        border-right: none; border-top: 3px solid #b08a5c; border-radius: 10px 10px 0 0; padding: 6px 10px;\n        box-shadow: 0 -3px 0 rgba(138,104,68,.35), inset 0 0 0 2px #fff6e0; }\n      .mode-tip { left: 10px; bottom: 70px; }\n    }\n    .tool { width: 40px; height: 40px; background: #faf0dc; border: 2px solid #c2a274; border-radius: 6px;\n      display: flex; align-items: center; justify-content: center; cursor: pointer;\n      box-shadow: inset 0 2px 0 #fffdf4, inset 0 -2px 0 #e3c795; }\n    .tool.selected { border-color: var(--accLine); background: var(--accBg); box-shadow: inset 0 0 0 2px var(--selGlowA), 0 0 8px var(--selGlowB); }\n    .tool.mini { width: 40px; height: 20px; color: #8a6a42; font-weight: bold; font-size: 11px; background: #f0dfc0; }\n    .mode-tip { position: absolute; left: 62px; bottom: 14px; background: var(--accBg); border: 2px solid var(--accLine);\n      border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: bold; color: var(--accFg); z-index: 7; display: none; }\n    .bottombar { display: flex; align-items: center; gap: 10px; padding: 10px 14px 12px; flex: none; }\n    .btn { flex: 1; padding: 8px 10px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #b08a5c;\n      border-radius: 8px; box-shadow: inset 0 0 0 2px #fff6e0, inset 0 3px 0 #fffaf0, inset 0 -4px 0 #d9ba8a, 0 4px 0 #9a7a54;\n      font-size: 14px; font-weight: bold; color: #7a5c38; text-shadow: 1px 1px 0 #fff3dd; text-align: center;\n      display: flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; user-select: none; }\n    .modal { position: absolute; inset: 0; background: rgba(60,40,20,.35); display: none; align-items: center;\n      justify-content: center; z-index: 20; padding: 14px; }\n    .modal.open { display: flex; }\n    .mpanel { width: min(480px, 96%); max-height: 90%; overflow: auto; background: #f8efe0; border: 4px solid #c9a273;\n      border-radius: 10px; box-shadow: inset 0 0 0 4px #fff6e8, 0 10px 30px rgba(0,0,0,.45); }\n    .mtitle { background: var(--sky); border-bottom: 3px solid var(--skyLine); padding: 8px 12px;\n      display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: bold; color: #7a5c38; }\n    .mtitle > span:first-child { background: linear-gradient(#faf0dc,#eed9b8); border: 2px solid #8a6844; border-radius: 7px;\n      padding: 2px 10px; text-shadow: 1px 1px 0 #fff3dd; box-shadow: 0 2px 0 var(--tintSoft), inset 0 0 0 2px #fff6e0; }\n    .mtitle .grow { flex: 1; }\n    .mbody { padding: 10px 12px 12px; }\n    .tabs { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }\n    .tab { padding: 4px 12px; border-radius: 7px; background: #f0dfc0; border: 2px solid #c2a274; color: #8a6a42;\n      font-size: 12px; font-weight: bold; cursor: pointer; }\n    .tab.active { background: var(--accBg); border-color: var(--accLine); color: var(--accFg); }\n    .items { display: flex; flex-direction: column; gap: 7px; }\n    .item { display: flex; align-items: center; gap: 9px; padding: 5px 9px; background: #faf0dc;\n      border: 2px solid #c2a274; border-radius: 8px; }\n    .item .icon { width: 40px; height: 40px; flex: none; background: #f4e6cf; border: 2px solid #d9c49a;\n      border-radius: 6px; display: flex; align-items: center; justify-content: center; }\n    .item .info { flex: 1; min-width: 0; }\n    .item .name { font-size: 13px; font-weight: bold; color: #6b4f2e; }\n    .selrow { cursor: pointer; }\n    .selrow.selon { border-color: var(--accLine); box-shadow: inset 0 0 0 2px var(--accBg); }\n    .selmark { width: 22px; text-align: center; font-size: 16px; font-weight: bold; color: var(--accFg); flex: none; }\n    .item .meta { font-size: 11px; color: #a3763d; margin-top: 1px; line-height: 1.5; }   /* M-2: mô tả không cắt ngắn, xuống dòng đầy đủ (mô tả chức năng đột biến là thông tin cốt lõi) */\n    .acts { display: flex; gap: 5px; flex: none; }\n    .ibtn { width: 30px; height: 30px; background: #faf0dc; border: 2px solid #b08a5c; border-radius: 6px;\n      display: flex; align-items: center; justify-content: center; cursor: pointer;\n      font-size: 15px; font-weight: bold; color: #7a5c38; user-select: none;\n      box-shadow: inset 0 2px 0 #fffdf4, inset 0 -2px 0 #e3c795; }\n    .price { display: flex; align-items: center; gap: 3px; font-size: 13px; font-weight: bold; color: #a3763d; }\n    .buy { padding: 5px 12px; background: var(--buyBg); border: 3px solid var(--buyLine);\n      border-radius: 7px; box-shadow: inset 0 -3px 0 var(--buyInset), 0 3px 0 var(--buyDeep); font-size: 12px; font-weight: bold;\n      color: var(--buyFg); cursor: pointer; white-space: nowrap; user-select: none; }\n    .buy.plain { background: linear-gradient(#faf0dc,#eed9b8); border-color: #b08a5c; color: #7a5c38;\n      box-shadow: inset 0 -3px 0 #d9ba8a, 0 3px 0 #9a7a54; }\n    .buy.witchy { background: linear-gradient(#efe9fa,#e2d6f5); border-color: #9a6ad8; color: #6a4a9a;\n      box-shadow: inset 0 -3px 0 #cdb0ef, 0 3px 0 #7a4ab8; }   /* #53: gieo lại = phù thuỷ bói toán, mặc màu tím của cô ấy */\n    .buy.off { background: #e8dcc2; border-color: #bfa984; color: #a99a78; box-shadow: 0 3px 0 #9a8a68; cursor: default; }\n    .note { font-size: 11px; color: #a3763d; line-height: 1.7; background: #f4e6cf; border: 2px solid #ddc39a;\n      border-radius: 7px; padding: 7px 10px; }\n    .toast { position: absolute; left: 50%; top: 52px; transform: translateX(-50%); background: var(--accBg);\n      border: 2px solid var(--accLine); color: var(--accFg); font-size: 12px; font-weight: bold; border-radius: 7px;\n      padding: 4px 12px; z-index: 30; display: none; }\n    .picker { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }\n    .pick { display: flex; align-items: center; gap: 5px; padding: 4px 9px; background: #faf0dc;\n      border: 2px solid #c2a274; border-radius: 7px; font-size: 12px; font-weight: bold; color: #6b4f2e; cursor: pointer; }\n    .pick.active { border-color: var(--accLine); background: var(--accBg); color: var(--accFg); }\n  ";
-;// ./src/index.js
-
-
-
-
-// ST globals – dùng `let` để init() có thể reassign sau khi ST load xong
-let extension_settings = {};
-let eventSource        = null;
-let event_types        = null;
-let saveSettingsDebounced = null;
-let generateRaw        = null;
-
-/* ============================================================
- * Ai mà thèm làm nông dân trong SillyTavern chứ! · Bản chính thức v1.1
- * Script toàn cục cho Tavern Helper. Nút bóng nổi → cửa sổ nông trại → hộp mù thế giới quan.
- * Lưu game: biến toàn cục star_tavern_farm của Tavern Helper (không dùng localStorage/world book; tên khoá không bao giờ đổi, cập nhật hay nhập lại đều không mất dữ liệu)
- * Giữ lại công tắc TEST_MODE (true = số liệu test nhanh), bản chính thức luôn là false
- * ============================================================ */
-
-
-function initFarm() {
-  const TEST_MODE = false;   // v1.0: bản chính thức
-  const NS = "star_tavern_farm";
-  const extensionName = "sillytavern-farm-extension";
-  const RUNTIME_KEY = '__STAR_TAVERN_FARM__';
-  const pwin = window, pdoc = document;
-
-  /* ---------- Đơn thể: diệt bản cũ trước ---------- */
-  try { pwin[RUNTIME_KEY]?.destroy?.(); } catch (e) {}
-  pdoc.getElementById('star-tavern-farm-root')?.remove();
-
-  /* ---------- Số liệu (TEST_MODE là chỗ giữ chỗ) ---------- */
-
-  /* ---------- Lưu game ---------- */
-  const now = () => Date.now();
-  const emptyPlots = () => { const a = []; for (let i = 0; i < 24; i++) a.push({ crop: null }); return a; };
-  function freshState() {
-    return {
-      version: 1, coins: TEST_MODE ? 9999 : 999, totalSales: 0, unlockedBlocks: 2,
-      plots: emptyPlots(), seeds: { douya: 4, mystery: 1 }, ferts: {}, bag: {}, petPoke: {},   // Quà khởi đầu: 4 giá đỗ + 1 hạt giống bí ẩn (popup dạy chơi hộp mù)
-      pets: ['slime'], passes: {}, petsOut: ['slime'], jobCfg: {}, petFind: {},   // Tặng slime xanh lúc mở đầu (thực hiện phương án #9)
-      page: 1, plots2: emptyPlots(), plots3: emptyPlots(), unlockedBlocks2: 1, unlockedBlocks3: 1,   // v0.8: ba trang (vé vào trang 2/3 tặng kèm ô đất đầu tiên)
-      day0: now(), orb: { fx: 0.94, fy: 0.6 }, win: null,
-    };
-  }
-  let S = null;
-  function loadState() {
-    if (!extension_settings[extensionName]) {
-      extension_settings[extensionName] = {};
-    }
-    const g = extension_settings[extensionName] || {};
-    S = g[NS] && g[NS].version === 1 ? g[NS] : freshState();
-    if (!S.petPoke) S.petPoke = {};
-    if (!S.mutDesc) S.mutDesc = {};
-    if (!S.passes) S.passes = {};
-    if (!S.pets) S.pets = ['slime', 'octo'];
-    if (!S.petsOut) S.petsOut = S.pets.slice(0, 6);
-    if (!S.jobCfg) S.jobCfg = {};
-    if (!S.petFind) S.petFind = {};
-    if (!S.theme) S.theme = 'sakura';
-    if (!S.page) S.page = 1;
-    
-    Object.keys(S.bag || {}).forEach(k => {
-      const base = k.split('@')[0];
-      if (base === 'mysbG' || base === 'mysbW' || base === 'mysbM') {
-        const nk = k.replace(base, 'moonberry');
-        S.bag[nk] = (S.bag[nk] || 0) + S.bag[k];
-        delete S.bag[k];
-      }
-    });
-    [S.plots, S.plots2, S.plots3].forEach(arr => (arr || []).forEach(p => {
-      if (p.crop && (p.crop.id === 'mysbG' || p.crop.id === 'mysbW' || p.crop.id === 'mysbM')) p.crop.id = 'moonberry';
-    }));
-    
-    if (!S.witch) S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
-    if (!S.shards) S.shards = { prism: 0, star: 0 };
-    if (!S.plots2) S.plots2 = emptyPlots();
-    if (!S.plots3) S.plots3 = emptyPlots();
-    if (S.unlockedBlocks2 == null) S.unlockedBlocks2 = 1;
-    if (S.unlockedBlocks3 == null) S.unlockedBlocks3 = 1;
-    
-    [S.plots, S.plots2, S.plots3].forEach(arr => arr.forEach(p => {
-      const c = p.crop; if (!c) return;
-      if (!c.fertUsed) c.fertUsed = {};
-      if (data_CROPS[c.id].regrow && c.left == null) c.left = (/* inlined export .REGROW_MAX */3);
-    }));
-  }
-  /* v0.8: hàm hỗ trợ cho trang */
-  const pagePlots = pg => pg === 2 ? S.plots2 : pg === 3 ? S.plots3 : S.plots;
-  const curPlots = () => pagePlots(S.page);
-  const curBlocks = () => S.page === 2 ? S.unlockedBlocks2 : S.page === 3 ? S.unlockedBlocks3 : S.unlockedBlocks;
-  const addBlock = () => { if (S.page === 2) S.unlockedBlocks2++; else if (S.page === 3) S.unlockedBlocks3++; else S.unlockedBlocks++; };
-  const eachPage = fn => [1, 2, 3].forEach(pg => fn(pagePlots(pg), pg));
-  let saveTimer = null;
-  function save(immediate) {
-    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
-    const doSave = () => {
-      if (!extension_settings[extensionName]) extension_settings[extensionName] = {};
-      extension_settings[extensionName][NS] = S;
-      if (saveSettingsDebounced) saveSettingsDebounced();
-    };
-    if (immediate) doSave(); else saveTimer = setTimeout(doSave, 500);
-    try { updateInjection(); } catch (e) {}
-  }
-  /* ---------- Tiện ích ---------- */
-  function mulberry32(a) {
-    return function () {
-      a |= 0; a = (a + 0x6D2B79F5) | 0;
-      let t = Math.imul(a ^ (a >>> 15), 1 | a);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-  const gameDay = () => Math.floor((now() - S.day0) / data_DAY_MS) + 1;
-  const weatherOf = d => data_WEATHERS[Math.floor(mulberry32(d * 7919)() * data_WEATHERS.length)];
-  const isRain = () => weatherOf(gameDay()) === 'Mưa nhỏ';
-  function settle() {
-    if (CS.link && !eventFresh() && !eventPending) requestDayEvent();   // #17: sự kiện hết hạn là gieo lại ngay (tính giờ theo mốc neo)
-    /* v0.8b: lịch ghé thăm của phù thuỷ tròn (cần vé vùng nước; đến giờ thì rời đi; lỡ 2 lượt thì bảo hiểm) */
-    if (S.passes.water && S.witch) {
-      const wz = S.witch;
-      if (wz.leaveAt && now() >= wz.leaveAt) {            // Đến giờ dọn hàng
-        wz.leaveAt = 0;
-        if (wz.order && !wz.order.done) wz.missed++;      // Không nhận đơn tính là lỡ (đếm cho cơ chế bảo hiểm)
-        wz.order = null;
-        wz.nextAt = now() + witchGap();
-        save(); try { renderWitch(); } catch (e) {}
-      }
-      const open = (() => { try { return sh.getElementById('win').classList.contains('open'); } catch (e) { return false; } })();
-      if (!wz.leaveAt && open && (now() >= wz.nextAt || wz.missed >= 2)) witchArrive();   // Chỉ ghé khi bảng đang mở (đã ghé thì phải được nhìn thấy)
-    }
-    /* Xét đột biến: công bố ngay lúc chín, mỗi vụ một lần; bón phân là bộ khuếch đại (0/1/2 loại phân → xác suất ×0.3/0.65/1.0); v0.8 tính cho cả ba trang */
-    let mutChanged = false;
-    eachPage((plots, pg) => plots.forEach((p, pi) => {
-      const c = p.crop;
-      if (!c || now() < c.matureAt || c.mutRolled) return;
-      mutChanged = true;
-      rollMutation(c, pg === S.page ? pi : null);         // Bong bóng chỉ nổi ở trang hiện tại
-    }));
-    if (mutChanged) save();
-    /* ===== v0.6b: thú làm việc (chỉ có hiệu lực khi ra sân) + tìm kho báu ===== */
-    let wChanged = false;
-    const outed = id => S.petsOut.indexOf(id) >= 0;
-    if (outed('cloudMallow')) {                           // Bé bông mây: mây mưa nhỏ tự động tưới (miễn phí, hoàn toàn tự động, v0.8 tưới cả ba trang)
-      eachPage(plots => plots.forEach(p => {
-        const c = p.crop;
-        if (!c || now() >= c.matureAt || now() < c.wateredUntil) return;
-        c.matureAt = now() + (c.matureAt - now()) * 0.75;
-        c.wateredUntil = now() + WATER_CD;
-        wChanged = true;
-      }));
-    }
-    /* #27: thu hoạch đổi sang kích hoạt bằng cách chọc (xem petHarvest) — rau chín nằm lại ruộng chờ user quay lại xem, không bị tim đập lén cuốn đi nữa */
-    let tGain = 0, tSeed = null, tMyst = null, tPrism = 0, tStar = 0;            // Loại tìm kho báu (thú ra sân không có job): định kỳ nhặt tiền, thỉnh thoảng tha hạt giống về
-    S.petsOut.forEach(id => {
-      const pd = PETS[id];
-      if (!pd || pd.job) return;
-      if (S.petFind[id] == null) { S.petFind[id] = now(); wChanged = true; return; }   // Lần đầu chỉ khởi động bộ đếm
-      if (now() - S.petFind[id] < TREASURE_CD) return;
-      S.petFind[id] = now();
-      tGain += 10 + Math.floor(Math.random() * 41);      // v1.0:10~50G
-      if ((id === 'impBlob' || id === 'angelBlob') && Math.random() < 0.2) {    // #29: quỷ/thiên thần độc quyền · hạt giống bí ẩn (v1.0: 20%)
-        S.seeds.mystery = (S.seeds.mystery || 0) + 1;
-        tMyst = id;
-      }
-      if (id === 'prismBlob' && Math.random() < 0.2) { S.shards.prism++; tPrism++; }   // v1.0: mảnh lăng quang (đổi đơn)
-      if (id === 'starBell' && Math.random() < 0.15) { S.shards.star++; tStar++; }     // v1.0: mảnh ngôi sao (triệu hồi phù thuỷ, quý hơn)
-      if (!tSeed && !tMyst && Math.random() < 0.1) {
-        const ids = Object.keys(data_CROPS).filter(k => !data_CROPS[k].hidden);   // #34: họ bí ẩn không đi theo đường tìm kho báu thường
-        tSeed = ids[Math.floor(Math.random() * ids.length)];
-        S.seeds[tSeed] = (S.seeds[tSeed] || 0) + 1;
-      }
-      wChanged = true;
-    });
-    if (tGain) {
-      S.coins += tGain;
-      toast('Các bé tròn đi tìm kho báu về: +' + tGain + ' G' + (tSeed ? ', còn tha về cả hạt giống ' + data_CROPS[tSeed].name + '!' : '') +
-        (tMyst ? (tMyst === 'impBlob' ? ', bé quỷ nhỏ tha về một hạt giống bí ẩn đen sì…' : ', bé thiên thần ngậm về một hạt giống bí ẩn ánh lên lấp lánh…') : '') +
-        (tPrism ? ', bé lăng quang nhả ra ' + tPrism + ' mảnh lăng quang' : '') + (tStar ? ', bé chuông sao rung rơi ' + tStar + ' mảnh ngôi sao✦' : ''));
-      renderStatus();
-    }
-    if (wChanged) save();
-    /* Sửa #10: ngày mưa giảm một lần 10% thời gian còn lại của cây chưa chín (#27 sửa kèm: bù lại const d bị mất); v0.8 ba trang cùng mưa */
-    if (!isRain()) return;
-    const d = gameDay();
-    eachPage(plots => plots.forEach(p => {
-      const c = p.crop;
-      if (!c || now() >= c.matureAt || c.rainDay === d) return;
-      c.matureAt = now() + (c.matureAt - now()) * 0.9;
-      c.rainDay = d;
-    }));
-  }
-  const fmtLeft = ms => {
-    if (ms <= 0) return 'Thu hoạch được';
-    const m = Math.ceil(ms / (/* inlined export .MIN */60000));
-    return m >= 60 ? Math.floor(m / 60) + 'g' + (m % 60) + 'p' : m + 'p';
-  };
-
   /* ---------- DOM:Shadow root ---------- */
   const root = pdoc.createElement('div');
   root.id = 'star-tavern-farm-root';
   pdoc.body.appendChild(root);
   const sh = root.attachShadow({ mode: 'open' });
-  // CSS imported via Webpack
-  const style = pdoc.createElement('style');
-  style.textContent = style_namespaceObject;
+  // CSS moved to style.css
+
   sh.appendChild(style);
 
   const ui = pdoc.createElement('div');
@@ -1073,7 +1263,7 @@ function initFarm() {
     /* v1.1 (wen chốt, thay cho danh sách điều kiện #19/#34/#61): roll một lần cho cả 24 loại cây (chỉ trừ bản thân hạt giống) ——
        không xét mở khoá, không xét đang sở hữu, mô tả chuẩn bị sẵn hết ở nền; giữa chừng mua vé / mở hộp mù ra họ mới đều không bị dính vạch trắng "ngoài danh sách nên không có mô tả".
        Tính chi phí: mỗi 4h tạo tối đa một lần, phần tăng thêm không đáng kể, timeout 90s là thừa dư */
-    const cropList = Object.entries(data_CROPS)
+    const cropList = Object.entries(CROPS)
       .filter(([id, c]) => !c.seedOnly)
       .map(([id, c]) => c.name).join(', ');
     return ('Bạn là "trình tạo sự kiện thế giới quan" cho một game nông trại nhỏ. Người chơi đang trồng một mảnh vườn rau nhỏ trong một thế giới nhập vai nào đó, và bạn sẽ nhận được phần trích world book của thế giới đó. Hãy tạo 1 sự kiện nhỏ ngẫu nhiên xảy ra ở vườn rau hôm nay.\n\nQuy tắc:\n' +
@@ -1107,7 +1297,7 @@ function initFarm() {
         : (typeof o.mutate_desc === 'string' && o.mutate_desc ? { '*': String(o.mutate_desc).slice(0, 100) } : {}),
       favored_crop: (() => {                              // #20: sự kiện có thể chỉ ưu ái một loại cây
         const f = String(o.favored_crop || '');
-        return Object.values(data_CROPS).some(c => c.name === f) ? f : '';
+        return Object.values(CROPS).some(c => c.name === f) ? f : '';
       })(),
       flavor: String(o.flavor || ''),
     };
@@ -1159,7 +1349,7 @@ function initFarm() {
           { role: 'system', content: prompt },
           { role: 'user', content: 'Hãy tạo sự kiện vườn rau cho hôm nay.' }
         ],
-        max_tokens: 2000 + Object.keys(data_CROPS).length * 100
+        max_tokens: 2000 + Object.keys(CROPS).length * 100
       };
       const resPromise = fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
         method: 'POST',
@@ -1190,7 +1380,7 @@ function initFarm() {
       eachPage(plots => plots.forEach(p => {              // v0.8: sự kiện dùng chung cho ba trang
         const c = p.crop;
         if (!c || now() >= c.matureAt || c.evDay === d) return;
-        if (ev.favored_crop && data_CROPS[c.id].name !== ev.favored_crop) return;   // #20: giới hạn theo cây được ưu ái
+        if (ev.favored_crop && CROPS[c.id].name !== ev.favored_crop) return;   // #20: giới hạn theo cây được ưu ái
         c.matureAt = now() + Math.round((c.matureAt - now()) * ev.time_mult);   // Có hiệu lực một lần trong ngày (hệ số thời lượng, <1 = nhanh hơn)
         c.evDay = d;
       }));
@@ -1266,7 +1456,7 @@ function initFarm() {
       counts[c.id] = (counts[c.id] || 0) + 1;
       if (now() >= c.matureAt) ripe++;
     }));
-    const field = Object.keys(counts).map(id => data_CROPS[id].name + '×' + counts[id]).join(', ') || 'đang để trống';
+    const field = Object.keys(counts).map(id => CROPS[id].name + '×' + counts[id]).join(', ') || 'đang để trống';
     const bagTxt = Object.keys(S.bag).map(k => {
       const d = mutDescOf(k);
       return bagName(k) + '×' + S.bag[k] + (d ? '(' + d + ')' : '');
@@ -1337,8 +1527,8 @@ function initFarm() {
     if (wasDrag) {
       let nx = Math.min(Math.max(orb.offsetLeft, 4), vw - 56);    // Sửa #1: lại gần mép mới hít, còn lại đứng nguyên chỗ
       let dock = null;
-      if (nx < (/* inlined export .SNAP_EDGE */48)) { nx = 4; dock = 'L'; }
-      else if (nx > vw - 56 - (/* inlined export .SNAP_EDGE */48)) { nx = vw - 56; dock = 'R'; }
+      if (nx < SNAP_EDGE) { nx = 4; dock = 'L'; }
+      else if (nx > vw - 56 - SNAP_EDGE) { nx = vw - 56; dock = 'R'; }
       orb.style.left = nx + 'px';
       S.orb = { fx: nx / vw, fy: Math.min(Math.max(orb.offsetTop, 4), vh - 56) / vh, dock };   // Sửa #12
       orb.classList.toggle('dockL', dock === 'L');
@@ -1417,8 +1607,8 @@ function initFarm() {
 
   /* ---------- Logic game ---------- */
   const fmtDur = m => m < 60 ? m + ' phút' : (m % 60 === 0 ? (m / 60) + ' giờ' : (m / 60).toFixed(1) + ' giờ');
-  function growMs(cropId) { return TEST_MODE ? GROW : data_CROPS[cropId].grow * (/* inlined export .MIN */60000); }   // v1.0: tra bảng A
-  function regrowMs(cropId) { const c = data_CROPS[cropId]; return TEST_MODE ? REGROW : (c.regrowM || Math.round(c.grow * 0.6)) * (/* inlined export .MIN */60000); }
+  function growMs(cropId) { return TEST_MODE ? GROW : CROPS[cropId].grow * MIN; }   // v1.0: tra bảng A
+  function regrowMs(cropId) { const c = CROPS[cropId]; return TEST_MODE ? REGROW : (c.regrowM || Math.round(c.grow * 0.6)) * MIN; }
   function plant(pi, cropId) {
     if ((S.seeds[cropId] || 0) <= 0) return toast('Hết hạt giống này rồi');
     let realId = cropId;
@@ -1427,16 +1617,16 @@ function initFarm() {
       realId = fam + (S.page === 2 ? 'W' : S.page === 3 ? 'M' : 'G');
     }
     else {
-      const z = data_CROPS[cropId].zone || 1;                  // v0.8: cây kén đất
-      if (z !== S.page) return toast(data_CROPS[cropId].name + ' phải trồng ở ' + ZONE_NAME[z] + ' (trang ' + z + ')');
+      const z = CROPS[cropId].zone || 1;                  // v0.8: cây kén đất
+      if (z !== S.page) return toast(CROPS[cropId].name + ' phải trồng ở ' + ZONE_NAME[z] + ' (trang ' + z + ')');
     }
     S.seeds[cropId]--;
     const g = growMs(realId);
     const c = { id: realId, matureAt: now() + g, yieldBonus: 0, wateredUntil: 0, fertUsed: {} };
-    if (data_CROPS[realId].regrow) c.left = (/* inlined export .REGROW_MAX */3);
+    if (CROPS[realId].regrow) c.left = REGROW_MAX;
     if (isRain()) { c.matureAt = now() + g * 0.9; c.rainDay = gameDay(); }   // Sửa #10: trồng vào ngày mưa được giảm thẳng 10%
     const ev = todayEvent();                                                  // Sự kiện thế giới quan: trồng trong ngày cũng được hưởng
-    if (ev && ev.time_mult !== 1 && (!ev.favored_crop || data_CROPS[realId].name === ev.favored_crop)) {
+    if (ev && ev.time_mult !== 1 && (!ev.favored_crop || CROPS[realId].name === ev.favored_crop)) {
       c.matureAt = now() + Math.round((c.matureAt - now()) * ev.time_mult);   // Sự kiện thế giới quan: hệ số thời gian sinh trưởng (<1 = nhanh hơn = tích cực)
       c.evDay = gameDay();
     }
@@ -1478,7 +1668,7 @@ function initFarm() {
     if (Math.random() < ev.mutate_on_fert * (0.3 + 0.35 * fertN)) {
       c.mut = (ev.mutate_prefix || 'đột biến').slice(0, 20);
       if (!S.mutDesc) S.mutDesc = {};
-      const cname = data_CROPS[c.id].name;                     // #19: mô tả chức năng lưu theo cây (tiền tố@cây)
+      const cname = CROPS[c.id].name;                     // #19: mô tả chức năng lưu theo cây (tiền tố@cây)
       const dsc = ev.mutate_desc && (ev.mutate_desc[cname] || ev.mutate_desc['*']);
       if (dsc) S.mutDesc[c.mut + '@' + cname] = dsc;
       if (pi != null) { try { plotEmote(pi, 'emStar'); } catch (e) {} }
@@ -1486,22 +1676,22 @@ function initFarm() {
   }
   function bagName(key) {
     const parts = key.split('@');
-    return (parts[1] ? parts[1] + '·' : '') + (data_CROPS[parts[0]] || { name: '?' }).name;   // Dự phòng: id lạ cũng không làm nổ balo
+    return (parts[1] ? parts[1] + '·' : '') + (CROPS[parts[0]] || { name: '?' }).name;   // Dự phòng: id lạ cũng không làm nổ balo
   }
   function bagPrice(key) {
     const parts = key.split('@');
-    return Math.round((data_CROPS[parts[0]] || { sell: 0 }).sell * (parts[1] ? 1.25 : 1));   // Hàng đột biến bán được ×1.25
+    return Math.round((CROPS[parts[0]] || { sell: 0 }).sell * (parts[1] ? 1.25 : 1));   // Hàng đột biến bán được ×1.25
   }
   function mutDescOf(bagKey) {                            // #19: lấy mô tả chức năng (tương thích khoá chỉ có tiền tố của save cũ)
     const parts = bagKey.split('@');
     if (!parts[1] || !S.mutDesc) return '';
-    return S.mutDesc[parts[1] + '@' + (data_CROPS[parts[0]] || { name: '' }).name] || S.mutDesc[parts[1]] || '';
+    return S.mutDesc[parts[1] + '@' + (CROPS[parts[0]] || { name: '' }).name] || S.mutDesc[parts[1]] || '';
   }
   function harvest(pi, quiet) {
     const c = curPlots()[pi].crop;
     if (!c || now() < c.matureAt) return null;
     rollMutation(c, pi);                                  // Cửa thu hoạch gieo bù (chống việc bấm quá nhanh trong 1 giây sau khi chín làm bỏ qua bước xét)
-    const def = data_CROPS[c.id];
+    const def = CROPS[c.id];
     let n = 1 + (c.yieldBonus || 0);                      // v1.1: hệ số sản lượng nghỉ hưu (sự kiện chỉ ảnh hưởng thời gian sinh trưởng)
     const dev = todayEvent();
     if (dev && dev.double_yield && (!dev.favored_crop || def.name === dev.favored_crop)) n *= 2;   // v1.1: ngày bội thu gấp đôi (phúc lợi dân may)
@@ -1511,7 +1701,7 @@ function initFarm() {
     let shinyGain = 0;                                    // Phân lấp lánh v1.0 B′: khi thu hoạch kết toán 25% giá bán thành vàng
     if (c.shiny) { shinyGain = Math.ceil(def.sell * 0.25) * n; S.coins += shinyGain; delete c.shiny; }
     c.yieldBonus = 0;
-    if (c.left == null && def.regrow) c.left = (/* inlined export .REGROW_MAX */3);
+    if (c.left == null && def.regrow) c.left = REGROW_MAX;
     if (def.regrow && c.left - 1 > 0) {                 // Sửa #4: tối đa 3 vụ
       c.left--;
       c.matureAt = now() + regrowMs(c.id);
@@ -1572,7 +1762,7 @@ function initFarm() {
     if (mode) {
       const names = { seed: 'Gieo hạt', water: 'Tưới nước', fert: 'Bón phân', harvest: 'Thu hoạch', shovel: 'Xới bỏ' };
       let txt = 'Chế độ ' + names[mode.t];
-      if (mode.t === 'seed') txt += ' · ' + data_CROPS[mode.id].name;
+      if (mode.t === 'seed') txt += ' · ' + CROPS[mode.id].name;
       if (mode.t === 'fert') txt += ' · ' + FERTS[mode.id].name;
       if (mode.t === 'shovel') txt += ' · bấm hai lần để xác nhận';
       tip.textContent = txt + ' · bấm vào ô ruộng để thực hiện';
@@ -1585,7 +1775,7 @@ function initFarm() {
     if (k === 'expand') { toolbarOpen = true; renderToolbar(); return; }
     if (k === 'collapse') { toolbarOpen = false; mode = null; renderToolbar(); return; }
     if (mode && mode.t === k) { mode = null; renderToolbar(); return; }
-    if (k === 'seed') return pickFrom('Chọn hạt giống để gieo', S.seeds, id => data_CROPS[id].name, id => { mode = { t: 'seed', id }; renderToolbar(); });
+    if (k === 'seed') return pickFrom('Chọn hạt giống để gieo', S.seeds, id => CROPS[id].name, id => { mode = { t: 'seed', id }; renderToolbar(); });
     if (k === 'fert') return pickFrom('Chọn phân bón', S.ferts, id => FERTS[id].name, id => { mode = { t: 'fert', id }; renderToolbar(); });
     mode = { t: k };
     renderToolbar();
@@ -1611,10 +1801,10 @@ function initFarm() {
     const c = curPlots()[pi].crop;
     if (!c) return '';
     const left = c.matureAt - now();
-    const chip = data_CROPS[c.id].regrow && c.left != null ? `<span class="cnt2">${c.left}/${(/* inlined export .REGROW_MAX */3)}</span>` : '';   // Sửa #4: số góc hiển thị số vụ
+    const chip = CROPS[c.id].regrow && c.left != null ? `<span class="cnt2">${c.left}/${REGROW_MAX}</span>` : '';   // Sửa #4: số góc hiển thị số vụ
     const fdot = c.fertUsed && (c.fertUsed.compost || c.fertUsed.shiny) ? '<span class="fdot" title="Đã bón phân"></span>' : '';   // Dấu shiny ghi theo fertUsed, logic số góc không đổi   // Sửa #15: số góc bón phân hiển thị thường trực
     const mut = c.mut ? `<span class="cnt2" style="left:3px;right:auto;background:#ead9f7;border-color:#9a6ad8;color:#6a4a9a" title="${c.mut}·đột biến">✦</span>` : '';
-    if (left <= 0) return spriteSVG(data_CROPS[c.id].sp, SPRITE_PX) + `<span class="ripe">!</span>` + chip + fdot + mut;
+    if (left <= 0) return spriteSVG(CROPS[c.id].sp, SPRITE_PX) + `<span class="ripe">!</span>` + chip + fdot + mut;
     const total = growMs(c.id);
     const prog = Math.min(0.99, 1 - left / total);
     return spriteSVG('seedling', SPRITE_PX) + `<div class="bar"><i style="width:${(prog * 100) | 0}%"></i></div>` + chip + fdot + mut;
@@ -1801,7 +1991,7 @@ function initFarm() {
     const pi = +p.dataset.pi;
     const c = curPlots()[pi].crop;
     if (c && now() >= c.matureAt && (!mode || mode.t !== 'shovel')) { harvest(pi); return; }   // Sửa #6: rau chín bấm thẳng là thu ngay
-    if (!mode) { if (c) toast(data_CROPS[c.id].name + ' · còn ' + fmtLeft(c.matureAt - now())); return; }
+    if (!mode) { if (c) toast(CROPS[c.id].name + ' · còn ' + fmtLeft(c.matureAt - now())); return; }
     if (mode.t === 'seed') { if (c) return toast('Ô này trồng rồi'); plant(pi, mode.id); if ((S.seeds[mode.id] || 0) <= 0) { mode = null; renderToolbar(); } return; }
     if (mode.t === 'water') return water(pi);
     if (mode.t === 'fert') { fertilize(pi, mode.id); if ((S.ferts[mode.id] || 0) <= 0) { mode = null; renderToolbar(); } return; }
@@ -1809,7 +1999,7 @@ function initFarm() {
     if (mode.t === 'shovel') {
       if (!c) return;
       if (mode.confirmPi === pi) { shovel(pi); mode.confirmPi = null; }
-      else { mode.confirmPi = pi; toast('Bấm lần nữa để xác nhận xới bỏ ' + data_CROPS[c.id].name); }
+      else { mode.confirmPi = pi; toast('Bấm lần nữa để xác nhận xới bỏ ' + CROPS[c.id].name); }
     }
   });
 
@@ -1838,7 +2028,7 @@ function initFarm() {
       let items = '';
       if (shopTab === 'seed') {
         items = [1, 2, 3].map(z => {                      // v0.8: chia nhóm theo khu, họ hidden không bày bán
-          const list = Object.entries(data_CROPS).filter(([id, c]) => !c.hidden && (c.zone || 1) === z);
+          const list = Object.entries(CROPS).filter(([id, c]) => !c.hidden && (c.zone || 1) === z);
           if (!list.length) return '';
           const un = pageUnlocked(z);
           const head = `<div class="note" style="margin:8px 0 6px">Cây ${ZONE_NAME[z]} (trang ${z})${un ? '' : ' · 🔒 cần vé ' + (z === 2 ? 'vùng nước' : 'khu mỏ')}</div>`;
@@ -1895,7 +2085,7 @@ function initFarm() {
         if (S.pets.indexOf(id) >= 0) return;
         if (S.coins < pd.price) return toast('Còn thiếu ' + (pd.price - S.coins).toLocaleString() + ' G');
         S.coins -= pd.price; S.pets.push(id);
-        if (S.petsOut.length < (/* inlined export .PETS_OUT_MAX */8)) { S.petsOut.push(id); toast(pd.name + ' đã dọn ra bờ ruộng nhà bạn!'); }
+        if (S.petsOut.length < PETS_OUT_MAX) { S.petsOut.push(id); toast(pd.name + ' đã dọn ra bờ ruộng nhà bạn!'); }
         else toast(pd.name + ' đã về nhà! Bờ ruộng chật rồi, bé đang nghỉ ở trang Balo · Bé tròn');
         save(); renderStatus(); renderPets(); openPanel('shop');
       }));
@@ -1931,14 +2121,14 @@ function initFarm() {
             ${cfgBtn}
             <span class="buy${out ? ' plain' : ''}" data-petout="${id}">${out ? 'Thu về' : 'Ra sân'}</span></div>`;
         }).join('') || '<div class="note">Chưa có bé tròn nào, ra cửa hàng ngắm thử đi</div>';
-        openModal('Balo', btabs + `<div class="note" style="margin-bottom:8px">Bờ ruộng cùng lúc đứng được tối đa ${(/* inlined export .PETS_OUT_MAX */8)} bé; bé được thu về sẽ nghỉ ở đây, không làm việc cũng không tìm kho báu</div>` + prow);
+        openModal('Balo', btabs + `<div class="note" style="margin-bottom:8px">Bờ ruộng cùng lúc đứng được tối đa ${PETS_OUT_MAX} bé; bé được thu về sẽ nghỉ ở đây, không làm việc cũng không tìm kho báu</div>` + prow);
         $id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
         $id('mbody').querySelectorAll('[data-petout]').forEach(b => b.addEventListener('click', () => {
           const id = b.dataset.petout;
           const i = S.petsOut.indexOf(id);
           if (i >= 0) S.petsOut.splice(i, 1);
           else {
-            if (S.petsOut.length >= (/* inlined export .PETS_OUT_MAX */8)) return toast('Bờ ruộng chỉ đứng được ' + (/* inlined export .PETS_OUT_MAX */8) + ' bé, thu một bé về đã');
+            if (S.petsOut.length >= PETS_OUT_MAX) return toast('Bờ ruộng chỉ đứng được ' + PETS_OUT_MAX + ' bé, thu một bé về đã');
             S.petsOut.push(id);
           }
           save(); renderPets(); openPanel('bag');
@@ -1952,12 +2142,12 @@ function initFarm() {
         if (bagSellMode) {
           const on = !!bagSel[key];
           return `
-        <div class="item selrow${on ? ' selon' : ''}" data-selkey="${key}"><span class="icon">${spriteSVG(data_CROPS[id].sp, 32)}</span>
+        <div class="item selrow${on ? ' selon' : ''}" data-selkey="${key}"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
           <span class="info"><div class="name">${bagName(key)} ×${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">✦</span>' : ''}</div><div class="meta">${bagPrice(key)} G/cái${esc(mdesc)}</div></span>
           <span class="selmark">${on ? '✓' : ''}</span></div>`;
         }
         return `
-        <div class="item"><span class="icon">${spriteSVG(data_CROPS[id].sp, 32)}</span>
+        <div class="item"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
           <span class="info"><div class="name">${bagName(key)} ×${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">✦</span>' : ''}</div><div class="meta">${bagPrice(key)} G/cái${esc(mdesc)}</div></span>
           <span class="acts">
             <span class="ibtn" data-takeout="${key}" title="Lấy ra (mang vào cốt truyện, không quy ra tiền)">${spriteSVG('emBang', 16)}</span>
@@ -2171,7 +2361,7 @@ function initFarm() {
   const pileWith = {};                                     // Bảng ghép cặp bạn ngủ chung
   const petTouch = {}, touchBase = now();                  // Thời điểm bị chọc gần nhất (bé làm việc 5 phút không ai đoái hoài → cho phép ngủ gật)
   let scene = null, lastScene = '';
-  let nextSceneAt = now() + (TEST_MODE ? 30 * 1000 : 45 * (/* inlined export .MIN */60000));
+  let nextSceneAt = now() + (TEST_MODE ? 30 * 1000 : 45 * MIN);
   const sceneBusy = id => !!(scene && scene.ids.indexOf(id) >= 0);
   const sceneTimer = (fn, ms) => { if (scene) scene.timers.push(pwin.setTimeout(fn, ms)); };
   function endScene() { if (!scene) return; scene.timers.forEach(t => pwin.clearTimeout(t)); scene = null; }
@@ -2206,7 +2396,7 @@ function initFarm() {
     if (!picks.length) return;                             // Không gom đủ diễn viên, nhịp sau thử lại (không tốn hồi chiêu)
     const act = picks[Math.floor(Math.random() * picks.length)];
     lastScene = act;
-    nextSceneAt = now() + (TEST_MODE ? 45 * 1000 + Math.random() * 90 * 1000 : 60 * (/* inlined export .MIN */60000) + Math.random() * 120 * (/* inlined export .MIN */60000));
+    nextSceneAt = now() + (TEST_MODE ? 45 * 1000 + Math.random() * 90 * 1000 : 60 * MIN + Math.random() * 120 * MIN);
     const shuffle = a => a.sort(() => Math.random() - .5);
     const ov = $id('mascots'), W = ov.clientWidth, H = ov.clientHeight;
     const clampX = x => Math.max(4, Math.min(W - 60, x));
@@ -2278,13 +2468,12 @@ function initFarm() {
     });
   }
   const wander = pwin.setInterval(() => {                  // Nhịp tuần tra: cứ 7s lại giao điểm đến / ru ngủ / mở tiểu phẩm cho các bé đang rảnh
-    if (!win.classList.contains('open')) return;           // Tối ưu: Dừng tuần tra và tính toán vị trí khi bảng bị ẩn
     if (!scene && now() >= nextSceneAt) tryScene();
     sh.querySelectorAll('#mascots .pet').forEach(el => {
       const id = el.dataset.pet;
       if (sceneBusy(id) || petTgt[id] || el.classList.contains('sleep')) return;   // Đang diễn / đang đi / đang ngủ thì đừng làm phiền
       if (!PETS[id].job && Math.random() < 0.08) return sleepPet(el);   // Rảnh lâu quá thì chợp mắt một giấc
-      if (PETS[id].job && now() - (petTouch[id] || touchBase) > 5 * (/* inlined export .MIN */60000) && Math.random() < 0.08) return sleepPet(el);   // Bé làm việc 5 phút không ai đoái hoài thì đứng ngủ (tưới tự động không bị ảnh hưởng, mây ngủ vẫn mưa nhé)
+      if (PETS[id].job && now() - (petTouch[id] || touchBase) > 5 * MIN && Math.random() < 0.08) return sleepPet(el);   // Bé làm việc 5 phút không ai đoái hoài thì đứng ngủ (tưới tự động không bị ảnh hưởng, mây ngủ vẫn mưa nhé)
       if (Math.random() < 0.35) moveTo(el, petSpot(id));
     });
   }, 7000);
@@ -2300,7 +2489,7 @@ function initFarm() {
     if (def.job === 'harvest') return petHarvest(el, cry);// #27: thu hoạch cũng đổi sang chọc mới chạy, khỏi quay lại mà ngơ ngác
     if (def.job) return petBubble(el, cry);               // Loại tưới nước: bị động trong ca, chọc = chào hỏi
     let txt = cry;                                        // Loại tìm kho báu: chọc chọc là rơi tiền
-    if (now() - (S.petPoke[id] || 0) >= (/* inlined export .POKE_CD */600000)) {
+    if (now() - (S.petPoke[id] || 0) >= POKE_CD) {
       S.petPoke[id] = now();
       const gain = 1 + Math.floor(Math.random() * 5);
       S.coins += gain;
@@ -2317,15 +2506,15 @@ function initFarm() {
     if (!empty.length) return petBubble(el, cry + ' hết chỗ trống rồi');
     const usable = {};
     Object.keys(S.seeds).forEach(id => {
-      if (!(S.seeds[id] > 0) || !data_CROPS[id]) return;
-      if (id === 'mystery' || (data_CROPS[id].zone || 1) === S.page) usable[id] = S.seeds[id];
+      if (!(S.seeds[id] > 0) || !CROPS[id]) return;
+      if (id === 'mystery' || (CROPS[id].zone || 1) === S.page) usable[id] = S.seeds[id];
     });
     if (!Object.keys(usable).length) return petBubble(el, cry + ' không có hạt nào trồng được ở ' + ZONE_NAME[S.page] + '…');
-    pickFrom('Bé mầm sương: lần này trồng gì đây?', usable, x => data_CROPS[x].name, sid => {
+    pickFrom('Bé mầm sương: lần này trồng gì đây?', usable, x => CROPS[x].name, sid => {
       let k = 0;
       for (const pi of empty) { if (!(S.seeds[sid] > 0)) break; if (plant(pi, sid)) k++; }
       const pe = sh.querySelector('.pet[data-pet="dewSprout"]') || el;
-      petBubble(pe, cry + ' đã trồng ' + k + ' ô ' + data_CROPS[sid].name + (k < empty.length ? ' (hết hạt giống rồi)' : '!'));
+      petBubble(pe, cry + ' đã trồng ' + k + ' ô ' + CROPS[sid].name + (k < empty.length ? ' (hết hạt giống rồi)' : '!'));
     });
   }
   function petHarvest(el, cry) {                          // Bé sứa xoăn: chọc một cái là xúc tu cuộn rau chín vào balo (#27; v0.8 chỉ thu ở trang hiện tại)
@@ -2364,7 +2553,7 @@ function initFarm() {
     toast('Phù thuỷ tròn tới rồi! Quầy hàng ngôi sao ở góc dưới trái bờ ruộng đã sáng đèn');
   }
   function makeWitchOrder() {
-    const pool = Object.entries(data_CROPS).filter(([id, c]) => !c.hidden && pageUnlocked(c.zone || 1));
+    const pool = Object.entries(CROPS).filter(([id, c]) => !c.hidden && pageUnlocked(c.zone || 1));
     const pick = () => pool[Math.floor(Math.random() * pool.length)][0];
     const lines = [{ id: pick(), n: 2 + Math.floor(Math.random() * 3), mut: false, reward: 1, done: false }];
     if (CS.link && Math.random() < 0.5) {                 // Đơn đột biến: chỉ có thể xuất hiện khi đã bật liên kết (§2.65 ô ①, tắt liên kết thì tự hạ cấp)
@@ -2378,10 +2567,10 @@ function initFarm() {
     const wz = S.witch; if (!wz || !wz.order) return;
     const line = wz.order.lines[li]; if (!line || line.done) return;
     if (!line.mut) {
-      if ((S.bag[line.id] || 0) < line.n) return toast('Còn thiếu ' + (line.n - (S.bag[line.id] || 0)) + ' quả ' + data_CROPS[line.id].name);
+      if ((S.bag[line.id] || 0) < line.n) return toast('Còn thiếu ' + (line.n - (S.bag[line.id] || 0)) + ' quả ' + CROPS[line.id].name);
       S.bag[line.id] -= line.n; if (!S.bag[line.id]) delete S.bag[line.id];
     } else {
-      if (mutCountOf(line.id) < line.n) return toast('Loại ' + data_CROPS[line.id].name + ' có tiền tố còn thiếu ' + (line.n - mutCountOf(line.id)) + ' quả');
+      if (mutCountOf(line.id) < line.n) return toast('Loại ' + CROPS[line.id].name + ' có tiền tố còn thiếu ' + (line.n - mutCountOf(line.id)) + ' quả');
       let need = line.n;
       for (const k of mutKeysOf(line.id)) {
         const take = Math.min(need, S.bag[k]);
@@ -2403,7 +2592,7 @@ function initFarm() {
     const wz = S.witch;
     if (!wz || !wz.leaveAt || now() > wz.leaveAt || !wz.order) return;
     const rows = wz.order.lines.map((l, i) => {
-      const nm = data_CROPS[l.id].name;
+      const nm = CROPS[l.id].name;
       const have = l.mut ? mutCountOf(l.id) : (S.bag[l.id] || 0);
       const btn = l.done ? '<span class="wzbtn done">Đã giao</span>'
         : have >= l.n ? `<span class="wzbtn" data-wdeliver="${i}">Giao</span>` : '<span class="wzbtn off">Chưa đủ</span>';
@@ -2472,7 +2661,7 @@ function initFarm() {
       if (S.bag[key] <= 0) delete S.bag[key];
       const d = mutDescOf(key);
       takeoutNote = ((takeoutNote || []).filter(t => now() < t.until))
-        .concat({ txt: n + ' ' + bagName(key) + (d ? ' (hiệu ứng đã định: ' + d + ')' : ''), until: now() + 10 * (/* inlined export .MIN */60000) })
+        .concat({ txt: n + ' ' + bagName(key) + (d ? ' (hiệu ứng đã định: ' + d + ')' : ''), until: now() + 10 * MIN })
         .slice(-3);
       save(); renderStatus();
       toast('Đã lấy ra ' + n + ' ' + bagName(key));
@@ -2542,7 +2731,7 @@ function initFarm() {
 
   /* v0.9 (#47): popup mua hàng loạt —— bấm mua hạt giống/phân bón → nhập số lượng → xác nhận, cảm giác giống hệt lúc bán (thời 72 ô thì đây là nhu cầu thiết yếu) */
   function openBuyDlg(kind, id) {
-    const def = kind === 'seed' ? data_CROPS[id] : FERTS[id];
+    const def = kind === 'seed' ? CROPS[id] : FERTS[id];
     const price = kind === 'seed' ? def.seed : def.price;
     const name = kind === 'seed' ? 'Hạt ' + def.name : def.name;
     if (S.coins < price) return toast('Còn thiếu ' + (price - S.coins).toLocaleString() + ' G');
@@ -2600,20 +2789,26 @@ function initFarm() {
   if (CS.link) requestDayEvent();                          // Không mở bảng cũng phải có sự kiện trong ngày (để phục vụ phần tiêm)
 }
 
-async function init() {
-  // Lấy đúng ST context lúc runtime, KHÔNG phải lúc parse module
+
+// ST Extension Hook
+export async function init() {
+  // Thay vì import phức tạp dễ gây lỗi 404, chúng ta dùng chuẩn SillyTavern.getContext()
+  // Đây là cách chính thống và an toàn nhất để lấy các biến toàn cục của ST.
   try {
     const ctx = window.SillyTavern && window.SillyTavern.getContext ? window.SillyTavern.getContext() : {};
+    
+    // Gán các hàm/biến từ context
     extension_settings    = ctx.extensionSettings || window.extension_settings || {};
     saveSettingsDebounced = ctx.saveSettingsDebounced || window.saveSettingsDebounced || (() => {});
     eventSource           = ctx.eventSource || window.eventSource;
-    event_types           = ctx.eventTypes  || window.event_types;
+    event_types           = ctx.eventTypes || window.event_types;
     generateRaw           = ctx.generateRaw || window.generateRaw;
-    console.log('[Farm] Kết nối ST Context thành công!');
+    
+    console.log('[Farm] Đã kết nối ST Context thành công!');
   } catch (e) {
     console.error('[Farm] Lỗi khi kết nối ST Context:', e);
   }
+
+  // Khởi tạo game
   initFarm();
 }
-
-export { init };
