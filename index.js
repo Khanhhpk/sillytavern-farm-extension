@@ -1135,7 +1135,7 @@ function initFarm() {
         if (locked) {
           if (pEl.dataset.deco !== 'lock') {
              pEl.dataset.deco = 'lock';
-             pEl.innerHTML = '';
+             if (pEl.innerHTML !== '') pEl.innerHTML = '';
           }
         } else {
           if (pEl.dataset.deco === 'lock') delete pEl.dataset.deco;
@@ -1148,7 +1148,7 @@ function initFarm() {
           
           if (!c) {
              if (pEl.dataset.state !== 'empty') {
-               pEl.innerHTML = '';
+               if (pEl.innerHTML !== '') pEl.innerHTML = '';
                pEl.dataset.state = 'empty';
              }
           } else {
@@ -1156,7 +1156,7 @@ function initFarm() {
              const stateStr = `${c.id}|${c.left}|${c.mut}|${c.fertUsed ? Object.keys(c.fertUsed).join(',') : ''}|${left <= 0 ? 'ripe' : 'grow'}`;
              
              if (pEl.dataset.state !== stateStr) {
-               pEl.innerHTML = plotHTML(pi);
+               const expected = plotHTML(pi); if (pEl.innerHTML !== expected) pEl.innerHTML = expected;
                pEl.dataset.state = stateStr;
              } else {
                // Đang lớn và không có thay đổi về phân bón/đột biến -> Chỉ kéo dài thanh progress (O(1) reflow)
