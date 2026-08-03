@@ -18,7 +18,7 @@ export const styleCSS = `
       transition: transform .18s ease; }
     #orb.dockL:not(:hover) { transform: translateX(-27px); }   /* Sửa #12: dán mép thì thu nửa, rê chuột thì bật ra */
     #orb.dockR:not(:hover) { transform: translateX(27px); }
-    #win { position: fixed; z-index: 99997; width: min(760px, 96vw); height: 92vh; height: 92dvh; max-height: 92vh; max-height: 92dvh; display: none;
+    #win { position: fixed; z-index: 99997; width: min(760px, 96vw); max-height: 92vh; max-height: 92dvh; display: none;
       flex-direction: column; background: #f8efe0;
       background-image: repeating-linear-gradient(0deg, transparent 0 30px, rgba(170,130,80,.14) 30px 33px);
       border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
@@ -38,7 +38,7 @@ export const styleCSS = `
     .statusbar { display: flex; align-items: center; gap: 12px; padding: 7px 14px; background: #f4e6cf;
       border-bottom: 3px solid #ddc39a; font-size: 13px; font-weight: bold; color: #7a5c38; flex: none; flex-wrap: wrap; }
     .stat { display: flex; align-items: center; gap: 5px; }
-    #scroll { overflow: auto; flex: 1; min-height: 0; }
+    #scroll { overflow: auto; flex: 1; }
     /* v0.8: thanh lật trang ba trang */
     .pager { position: absolute; top: 7px; right: 7px; z-index: 7; display: flex; align-items: center; justify-content: center;
       background: rgba(58,48,30,.4); border: 2px solid rgba(255,246,224,.4); border-radius: 14px; overflow: hidden;
