@@ -1,4 +1,4 @@
-﻿// sillytavern-farm-extension – built by build.cjs (no Webpack)
+// sillytavern-farm-extension – built by build.cjs (no Webpack)
 
 // Shadow DOM style element – used by initFarm() via sh.appendChild(style)
 const style = document.createElement('style');
@@ -2468,6 +2468,7 @@ function initFarm() {
     });
   }
   const wander = pwin.setInterval(() => {                  // Nhịp tuần tra: cứ 7s lại giao điểm đến / ru ngủ / mở tiểu phẩm cho các bé đang rảnh
+    if (!win.classList.contains('open')) return;           // Tối ưu: Dừng tuần tra và tính toán vị trí khi bảng bị ẩn
     if (!scene && now() >= nextSceneAt) tryScene();
     sh.querySelectorAll('#mascots .pet').forEach(el => {
       const id = el.dataset.pet;
