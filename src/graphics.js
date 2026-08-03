@@ -400,3 +400,28 @@ export const LP = { '8':'#8ec8d8', '~':'#b8e0ea', '-':'#79b4c6', '_':'#6faabf', 
     return `url("${canvas.toDataURL('image/png')}")`;
   }
 
+  // Pre-warm the canvas cache asynchronously to guarantee 0-stutter when opening the UI
+  export function warmUpCache(CROPS) {
+    const tasks = [];
+    Object.keys(PETS).forEach(p => tasks.push(() => petSVG(p, 48)));
+    Object.keys(SPRITES).forEach(s => tasks.push(() => spriteSVG(s, s === 'emBang' ? 48 : 24)));
+    if (CROPS) {
+      Object.keys(CROPS).forEach(c => {
+        tasks.push(() => spriteSVG(CROPS[c].sp, 24));
+      });
+    }
+    ['grass', 'water', 'mine'].forEach(bg => tasks.push(() => tileURI(bg, 0)));
+    
+    let i = 0;
+    function next() {
+      const end = performance.now() + 10;
+      while (i < tasks.length && performance.now() < end) {
+        try { tasks[i](); } catch (e) {}
+        i++;
+      }
+      if (i < tasks.length) setTimeout(next, 20);
+    }
+    setTimeout(next, 1000); // Wait 1 second before starting to let ST settle
+  }
+
+
