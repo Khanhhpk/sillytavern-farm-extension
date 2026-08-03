@@ -1113,7 +1113,7 @@ function initFarm() {
           if (!next) signEl.style.opacity = '0.55';
           if (next) signEl.dataset.buy = String(b);
           signEl.innerHTML = shtml;
-          blockEl.appendChild(signEl);
+          blockEl.appendChild(signEl); console.log('[Farm] Added sign to block', b);
         } else {
           if (signEl.className !== sclassName) signEl.className = sclassName;
           if (!next && signEl.style.opacity !== '0.55') signEl.style.opacity = '0.55';
