@@ -1,6 +1,3 @@
-import { extension_settings as __WEBPACK_EXTERNAL_MODULE__extensions_js_499350b3_extension_settings__ } from "../../extensions.js";
-import { eventSource as __WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_eventSource__, event_types as __WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_event_types__, saveSettingsDebounced as __WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_saveSettingsDebounced__ } from "../../script.js";
-import { generateRaw as __WEBPACK_EXTERNAL_MODULE__endpoints_js_59d58c4e_generateRaw__ } from "../../endpoints.js";
 /******/ var __webpack_modules__ = ({
 
 /***/ 208
@@ -445,7 +442,7 @@ module.exports = function (i) {
 
 /***/ },
 
-/***/ 986
+/***/ 536
 (__webpack_module__, __webpack_exports__, __webpack_require__) {
 
 
@@ -453,12 +450,6 @@ module.exports = function (i) {
 __webpack_require__.d(__webpack_exports__, {
   T: () => (/* binding */ init)
 });
-
-;// external "../../extensions.js"
-
-;// external "../../script.js"
-
-;// external "../../endpoints.js"
 
 ;// ./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js
 var injectStylesIntoStyleTag_namespaceObject = /*#__PURE__*/__webpack_require__.cjs(function(module, exports) {
@@ -733,9 +724,15 @@ var update = injectStylesIntoStyleTag_default()(cjs_js_src_style/* default */.A,
        /* harmony default export */ const src_style = (cjs_js_src_style/* default */.A && cjs_js_src_style/* default */.A.locals ? cjs_js_src_style/* default */.A.locals : undefined);
 
 ;// ./src/index.js
+// Dynamically access ST variables to avoid ES module import path issues
+const getContext = () => window.getContext ? window.getContext() : (SillyTavern && SillyTavern.getContext ? SillyTavern.getContext() : {});
+const ST_context = getContext();
 
-
-
+const extension_settings = window.extension_settings || ST_context.extension_settings || {};
+const eventSource = window.eventSource || ST_context.eventSource;
+const event_types = window.event_types || ST_context.event_types;
+const saveSettingsDebounced = window.saveSettingsDebounced || ST_context.saveSettingsDebounced;
+const generateRaw = window.generateRaw || ST_context.generateRaw;
 
 
 
@@ -830,10 +827,10 @@ function initFarm() {
   }
   let S = null;
   function loadState() {
-    if (!__WEBPACK_EXTERNAL_MODULE__extensions_js_499350b3_extension_settings__[extensionName]) {
-      __WEBPACK_EXTERNAL_MODULE__extensions_js_499350b3_extension_settings__[extensionName] = {};
+    if (!extension_settings[extensionName]) {
+      extension_settings[extensionName] = {};
     }
-    const g = __WEBPACK_EXTERNAL_MODULE__extensions_js_499350b3_extension_settings__[extensionName] || {};
+    const g = extension_settings[extensionName] || {};
     S = g[NS] && g[NS].version === 1 ? g[NS] : freshState();
     if (!S.petPoke) S.petPoke = {};
     if (!S.mutDesc) S.mutDesc = {};
@@ -880,8 +877,8 @@ function initFarm() {
   function save(immediate) {
     if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
     const doSave = () => {
-      __WEBPACK_EXTERNAL_MODULE__extensions_js_499350b3_extension_settings__[extensionName][NS] = S;
-      if (__WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_saveSettingsDebounced__) __WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_saveSettingsDebounced__();
+      extension_settings[extensionName][NS] = S;
+      if (saveSettingsDebounced) saveSettingsDebounced();
     };
     if (immediate) doSave(); else saveTimer = setTimeout(doSave, 500);
     try { updateInjection(); } catch (e) {}
@@ -1646,7 +1643,7 @@ function initFarm() {
     try {
       const prompt = buildEventPrompt(await collectWorldbook());
       const res = await Promise.race([
-        __WEBPACK_EXTERNAL_MODULE__endpoints_js_59d58c4e_generateRaw__({
+        generateRaw({
           ordered_prompts: [
             { role: 'system', content: prompt },
             { role: 'user', content: 'Hãy tạo sự kiện vườn rau cho hôm nay.' },
@@ -1686,7 +1683,7 @@ function initFarm() {
     toast('Đang kiểm tra kết nối…');
     try {
       const r = await Promise.race([
-        __WEBPACK_EXTERNAL_MODULE__endpoints_js_59d58c4e_generateRaw__({
+        generateRaw({
           ordered_prompts: [{ role: 'user', content: 'Chỉ trả lời đúng hai chữ: Có mặt' }],
           max_chat_history: 0,
           custom_api: { apiurl: SEC.url, key: SEC.key, model: SEC.model, source: 'openai', max_tokens: 16 },
@@ -1764,7 +1761,7 @@ function initFarm() {
 
   /* Đổi thẻ: nạp lại trạng thái phía nhân vật, sự kiện lấy lại theo thẻ */
   try {
-    __WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_eventSource__.on(__WEBPACK_EXTERNAL_MODULE__script_js_77498c2f_event_types__.CHAT_CHANGED, () => {
+    eventSource.on(event_types.CHAT_CHANGED, () => {
       loadCharState();
       renderChips(); renderBanner(); updateInjection();
       if (CS.link) requestDayEvent();
@@ -3084,7 +3081,7 @@ async function init() { initFarm(); }
 /******/ // startup
 /******/ // Load entry module and return exports
 /******/ // This entry module used 'module' so it can't be inlined
-/******/ let __webpack_exports__ = __webpack_require__(986);
+/******/ let __webpack_exports__ = __webpack_require__(536);
 /******/ const __webpack_exports__init = __webpack_exports__.T;
 /******/ export { __webpack_exports__init as init };
 /******/ 

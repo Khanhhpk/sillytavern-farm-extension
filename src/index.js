@@ -1,6 +1,12 @@
-import { extension_settings, getContext } from '../../extensions.js';
-import { eventSource, event_types, saveSettingsDebounced } from '../../script.js';
-import { generateRaw } from '../../endpoints.js';
+// Dynamically access ST variables to avoid ES module import path issues
+const getContext = () => window.getContext ? window.getContext() : (SillyTavern && SillyTavern.getContext ? SillyTavern.getContext() : {});
+const ST_context = getContext();
+
+const extension_settings = window.extension_settings || ST_context.extension_settings || {};
+const eventSource = window.eventSource || ST_context.eventSource;
+const event_types = window.event_types || ST_context.event_types;
+const saveSettingsDebounced = window.saveSettingsDebounced || ST_context.saveSettingsDebounced;
+const generateRaw = window.generateRaw || ST_context.generateRaw;
 
 import './style.css';
 

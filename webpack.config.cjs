@@ -15,11 +15,7 @@ module.exports = {
     outputModule: true
   },
   externalsType: 'module',
-  externals: {
-    '../../extensions.js': '../../extensions.js',
-    '../../script.js': '../../script.js',
-    '../../endpoints.js': '../../endpoints.js'
-  },
+  
   module: {
     rules: [
       {
