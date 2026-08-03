@@ -1648,6 +1648,10 @@ QUY TẮC BẮT BUỘC:
         <div class="shead">Sự kiện thế giới quan · prompt tuỳ chỉnh (chỉ lưu ở thẻ nhân vật hiện tại)</div>
         <textarea class="inp" id="csPrompt" placeholder="Ví dụ: thế giới này linh khí mỏng, bớt sự kiện tích cực đi; lời văn sự kiện viết theo lối cổ.">${esc(CS.userPrompt)}</textarea>
         <div style="display:flex;gap:8px;margin-top:6px"><span class="buy" id="csPromptSave">Lưu (chỉ thẻ này)</span></div>
+        <div class="shead">Công cụ dành cho Giám đốc Đồ hoạ</div>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <span class="buy plain" id="openSandboxBtn">🎨 Mở Xưởng Chế Tác AI</span>
+        </div>
         <div class="note" style="margin:12px 0 8px">
           <b>Hướng dẫn chơi</b><br>· Liên kết thẻ nhân vật: bật lên sẽ tạo sự kiện dựa theo thẻ nhân vật hiện tại<br>
           · Ảnh hưởng cốt truyện: bật lên có thể tác động ngược vào cốt truyện hiện tại<br>
@@ -1666,6 +1670,7 @@ QUY TẮC BẮT BUỘC:
       });
       $id('secTest').addEventListener('click', () => testSecApi());
       $id('secModels').addEventListener('click', () => fetchModelList());
+      if ($id('openSandboxBtn')) $id('openSandboxBtn').addEventListener('click', openSandbox);
       $id('mbody').querySelectorAll('[data-settheme]').forEach(b => b.addEventListener('click', () => {
         S.theme = b.dataset.settheme; save(); applyTheme(); openPanel('cfg');
         toast(S.theme === 'sky' ? 'Đổi sang giao diện trời quang~' : 'Về lại giao diện hồng anh đào~');
