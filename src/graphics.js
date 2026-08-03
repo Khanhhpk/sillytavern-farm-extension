@@ -179,22 +179,30 @@ export const PET_P = {
     if (petCache.has(key)) return petCache.get(key);
     const map = PET_SPR[name]; if (!map) return '';
     const fx = PET_FX[name];
-    let defs = '';
+    const canvas = document.createElement('canvas');
+    canvas.width = 16;
+    canvas.height = 16;
+    const ctx = canvas.getContext('2d');
     const fills = {};
     if (fx) for (const ch in fx) {
       const v = fx[ch];
       if (v && typeof v === 'object') {
-        const gid = 'pfx_' + name + '_' + ch.charCodeAt(0);
-        defs += `<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${v.x1}" y1="${v.y1}" x2="${v.x2}" y2="${v.y2}">` +
-          v.stops.map(s => `<stop offset="${s[0]}" stop-color="${s[1]}"/>`).join('') + '</linearGradient>';
-        fills[ch] = `url(#${gid})`;
+        const grad = ctx.createLinearGradient(v.x1, v.y1, v.x2, v.y2);
+        v.stops.forEach(s => grad.addColorStop(parseFloat(s[0]) / 100, s[1]));
+        fills[ch] = grad;
       } else fills[ch] = v;
     }
-    let r = '';
     map.forEach((row, y) => {
-      for (let x = 0; x < row.length; x++) { const ch = row[x]; const c = fills[ch] || PET_P[ch]; if (c) r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${c}"/>`; }
+      for (let x = 0; x < row.length; x++) { 
+        const ch = row[x]; 
+        const c = fills[ch] || PET_P[ch]; 
+        if (c) {
+          ctx.fillStyle = c;
+          ctx.fillRect(x, y, 1, 1);
+        }
+      }
     });
-    const out = `<svg width="${px}" height="${px}" viewBox="0 0 16 16" shape-rendering="crispEdges" style="display:block">${defs ? '<defs>' + defs + '</defs>' : ''}${r}</svg>`;
+    const out = `<img width="${px}" height="${px}" src="${canvas.toDataURL('image/png')}" style="display:block; image-rendering:pixelated;" />`;
     petCache.set(key, out);
     return out;
   }
@@ -289,12 +297,21 @@ export const PETS = {
     const key = name + '@' + px;
     if (spriteCache.has(key)) return spriteCache.get(key);
     const map = SPR[name] || (C2[name] && C2[name].m); if (!map) return '';
-    const pal = SPR[name] ? P : C2[name].p;               // v0.8: cây trồng mới dùng bảng màu riêng của nó
-    let r = '';
+    const pal = SPR[name] ? P : C2[name].p;
+    const canvas = document.createElement('canvas');
+    canvas.width = 16;
+    canvas.height = 16;
+    const ctx = canvas.getContext('2d');
     map.forEach((row, y) => {
-      for (let x = 0; x < row.length; x++) { const c = pal[row[x]]; if (c) r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${c}"/>`; }
+      for (let x = 0; x < row.length; x++) { 
+        const c = pal[row[x]]; 
+        if (c) {
+            ctx.fillStyle = c;
+            ctx.fillRect(x, y, 1, 1);
+        }
+      }
     });
-    const out = `<svg width="${px}" height="${px}" viewBox="0 0 16 16" shape-rendering="crispEdges" style="display:block">${r}</svg>`;
+    const out = `<img width="${px}" height="${px}" src="${canvas.toDataURL('image/png')}" style="display:block; image-rendering:pixelated;" />`;
     spriteCache.set(key, out);
     return out;
   }
@@ -367,7 +384,18 @@ export const LP = { '8':'#8ec8d8', '~':'#b8e0ea', '-':'#79b4c6', '_':'#6faabf', 
       for (let y = 0; y < 32; y++) { if (y % 4 === 0) g[y].fill(top); if (y % 4 === 3) g[y].fill(dark); }
       for (let i = 0; i < 5; i++) { const y = 4 * ((rnd() * 8) | 0) + 1 + ((rnd() * 2) | 0); g[y][(rnd() * 32) | 0] = speck; }
     }
-    let r = '';
-    g.forEach((row, y) => row.forEach((ch, x) => { const c = P[ch] || LP[ch]; if (c) r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${c}"/>`; }));
-    return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${SZ}" height="${SZ}" viewBox="0 0 ${SZ} ${SZ}" shape-rendering="crispEdges">${r}</svg>`)}")`;
+    const canvas = document.createElement('canvas');
+    canvas.width = SZ;
+    canvas.height = SZ;
+    const ctx = canvas.getContext('2d');
+    g.forEach((row, y) => {
+      row.forEach((ch, x) => { 
+        const c = P[ch] || LP[ch]; 
+        if (c) {
+          ctx.fillStyle = c;
+          ctx.fillRect(x, y, 1, 1);
+        }
+      });
+    });
+    return `url("${canvas.toDataURL('image/png')}")`;
   }
