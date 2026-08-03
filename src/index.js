@@ -887,7 +887,7 @@ function initFarm() {
         const f = String(o.favored_crop || '').slice(0, 8);
         return Object.values(CROPS).some(c => c.name === f) ? f : '';
       })(),
-      flavor: (f => f.length > 48 ? f.slice(0, 47) + '…' : f)(String(o.flavor || '')),
+      flavor: String(o.flavor || ''),
     };
     // Danh sách trắng các trường đã thu về còn time_mult + mutate_on_fert, không cần cắt thêm   // Danh sách trắng: tối đa hai trường số
     return ev;
