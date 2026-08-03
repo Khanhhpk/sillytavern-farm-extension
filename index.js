@@ -446,8 +446,13 @@ module.exports = function (i) {
 /***/ },
 
 /***/ 986
-(__webpack_module__, __unused_webpack___webpack_exports__, __webpack_require__) {
+(__webpack_module__, __webpack_exports__, __webpack_require__) {
 
+
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, {
+  T: () => (/* binding */ init)
+});
 
 ;// external "../../extensions.js"
 
@@ -2983,9 +2988,7 @@ function initFarm() {
   if (CS.link) requestDayEvent();                          // Không mở bảng cũng phải có sự kiện trong ngày (để phục vụ phần tiêm)
 }
 
-jQuery(async () => {
-    initFarm();
-});
+async function init() { initFarm(); }
 
 
 /***/ }
@@ -3082,4 +3085,6 @@ jQuery(async () => {
 /******/ // Load entry module and return exports
 /******/ // This entry module used 'module' so it can't be inlined
 /******/ let __webpack_exports__ = __webpack_require__(986);
+/******/ const __webpack_exports__init = __webpack_exports__.T;
+/******/ export { __webpack_exports__init as init };
 /******/ 

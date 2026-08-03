@@ -2253,6 +2253,4 @@ function initFarm() {
   if (CS.link) requestDayEvent();                          // Không mở bảng cũng phải có sự kiện trong ngày (để phục vụ phần tiêm)
 }
 
-jQuery(async () => {
-    initFarm();
-});
+export async function init() { initFarm(); }
