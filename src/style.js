@@ -102,7 +102,7 @@ export const styleCSS = `
     .sign { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 92px;
       background: linear-gradient(#f7ead2,#ecd6ae); border: 3px solid #b08a5c; border-radius: 6px;
       box-shadow: 0 3px 0 #8a6844, inset 0 0 0 2px #fff6e0; padding: 6px 4px; font-size: 12px; font-weight: bold;
-      color: #7a5c38; text-align: center; line-height: 1.35; z-index: 99 !important; display: block !important; cursor: pointer; }
+      color: #7a5c38; text-align: center; line-height: 1.35; z-index: 4; cursor: pointer; }
     .sign small { display: flex; align-items: center; justify-content: center; gap: 3px; font-size: 10px; color: #9a7a50; }
     .sign.confirm { border-color: var(--accLine); color: var(--accFg); }
     /* #26: lớp cho bé tròn tự do đi lại —— phủ toàn bộ khu ruộng, đi theo khu vực (loại làm việc = hàng dưới, loại đi dạo = bờ ruộng) */
