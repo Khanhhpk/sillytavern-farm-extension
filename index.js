@@ -1,13 +1,13 @@
 
 ;// ./src/data.js
-const MIN = 60 * 1000;
-const DAY_MS = 4 * 60 * 60 * 1000;
+const data_MIN = 60 * 1000;
+const data_DAY_MS = 4 * 60 * 60 * 1000;
 const REGROW_MAX = 3;
-const POKE_CD = 10 * MIN;
+const POKE_CD = 10 * data_MIN;
 const PETS_OUT_MAX = 8;
 const SNAP_EDGE = 48;
 
-  const CROPS = {
+  const data_CROPS = {
     /* Số liệu chính thức v1.0 (chốt theo "Bảng số liệu chính thức - chờ duyệt.md"): grow/regrowM tính bằng phút thực */
     douya:     { name: 'Giá đỗ',        grow: 5,   seed: 5,    sell: 12,   sp: 'sprout' },
     radish:    { name: 'Củ cải cherry', grow: 10,  seed: 25,   sell: 45,   sp: 'radish' },
@@ -51,7 +51,7 @@ const SNAP_EDGE = 48;
     3: [0, 5000, 15000, 40000, 90000, 180000],
   }));
 
-const WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ'];
+const data_WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ'];
 
   const PETS = {
     /* —— Trang 1 —— */
@@ -83,7 +83,100 @@ const WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ'];
 
 
 ;// ./src/graphics.js
-  // Bảng màu pixel chính
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const gameDay = () => Math.floor((now() - S.day0) / DAY_MS) + 1;
+  const weatherOf = d => WEATHERS[Math.floor(mulberry32(d * 7919)() * WEATHERS.length)];
+  const isRain = () => weatherOf(gameDay()) === 'Mưa nhỏ';
+  function settle() {
+    if (CS.link && !eventFresh() && !eventPending) requestDayEvent();   // #17: sự kiện hết hạn là gieo lại ngay (tính giờ theo mốc neo)
+    /* v0.8b: lịch ghé thăm của phù thuỷ tròn (cần vé vùng nước; đến giờ thì rời đi; lỡ 2 lượt thì bảo hiểm) */
+    if (S.passes.water && S.witch) {
+      const wz = S.witch;
+      if (wz.leaveAt && now() >= wz.leaveAt) {            // Đến giờ dọn hàng
+        wz.leaveAt = 0;
+        if (wz.order && !wz.order.done) wz.missed++;      // Không nhận đơn tính là lỡ (đếm cho cơ chế bảo hiểm)
+        wz.order = null;
+        wz.nextAt = now() + witchGap();
+        save(); try { renderWitch(); } catch (e) {}
+      }
+      const open = (() => { try { return sh.getElementById('win').classList.contains('open'); } catch (e) { return false; } })();
+      if (!wz.leaveAt && open && (now() >= wz.nextAt || wz.missed >= 2)) witchArrive();   // Chỉ ghé khi bảng đang mở (đã ghé thì phải được nhìn thấy)
+    }
+    /* Xét đột biến: công bố ngay lúc chín, mỗi vụ một lần; bón phân là bộ khuếch đại (0/1/2 loại phân → xác suất ×0.3/0.65/1.0); v0.8 tính cho cả ba trang */
+    let mutChanged = false;
+    eachPage((plots, pg) => plots.forEach((p, pi) => {
+      const c = p.crop;
+      if (!c || now() < c.matureAt || c.mutRolled) return;
+      mutChanged = true;
+      rollMutation(c, pg === S.page ? pi : null);         // Bong bóng chỉ nổi ở trang hiện tại
+    }));
+    if (mutChanged) save();
+    /* ===== v0.6b: thú làm việc (chỉ có hiệu lực khi ra sân) + tìm kho báu ===== */
+    let wChanged = false;
+    const outed = id => S.petsOut.indexOf(id) >= 0;
+    if (outed('cloudMallow')) {                           // Bé bông mây: mây mưa nhỏ tự động tưới (miễn phí, hoàn toàn tự động, v0.8 tưới cả ba trang)
+      eachPage(plots => plots.forEach(p => {
+        const c = p.crop;
+        if (!c || now() >= c.matureAt || now() < c.wateredUntil) return;
+        c.matureAt = now() + (c.matureAt - now()) * 0.75;
+        c.wateredUntil = now() + WATER_CD;
+        wChanged = true;
+      }));
+    }
+    /* #27: thu hoạch đổi sang kích hoạt bằng cách chọc (xem petHarvest) — rau chín nằm lại ruộng chờ user quay lại xem, không bị tim đập lén cuốn đi nữa */
+    let tGain = 0, tSeed = null, tMyst = null, tPrism = 0, tStar = 0;            // Loại tìm kho báu (thú ra sân không có job): định kỳ nhặt tiền, thỉnh thoảng tha hạt giống về
+    S.petsOut.forEach(id => {
+      const pd = graphics_PETS[id];
+      if (!pd || pd.job) return;
+      if (S.petFind[id] == null) { S.petFind[id] = now(); wChanged = true; return; }   // Lần đầu chỉ khởi động bộ đếm
+      if (now() - S.petFind[id] < TREASURE_CD) return;
+      S.petFind[id] = now();
+      tGain += 10 + Math.floor(Math.random() * 41);      // v1.0:10~50G
+      if ((id === 'impBlob' || id === 'angelBlob') && Math.random() < 0.2) {    // #29: quỷ/thiên thần độc quyền · hạt giống bí ẩn (v1.0: 20%)
+        S.seeds.mystery = (S.seeds.mystery || 0) + 1;
+        tMyst = id;
+      }
+      if (id === 'prismBlob' && Math.random() < 0.2) { S.shards.prism++; tPrism++; }   // v1.0: mảnh lăng quang (đổi đơn)
+      if (id === 'starBell' && Math.random() < 0.15) { S.shards.star++; tStar++; }     // v1.0: mảnh ngôi sao (triệu hồi phù thuỷ, quý hơn)
+      if (!tSeed && !tMyst && Math.random() < 0.1) {
+        const ids = Object.keys(CROPS).filter(k => !CROPS[k].hidden);   // #34: họ bí ẩn không đi theo đường tìm kho báu thường
+        tSeed = ids[Math.floor(Math.random() * ids.length)];
+        S.seeds[tSeed] = (S.seeds[tSeed] || 0) + 1;
+      }
+      wChanged = true;
+    });
+    if (tGain) {
+      S.coins += tGain;
+      toast('Các bé tròn đi tìm kho báu về: +' + tGain + ' G' + (tSeed ? ', còn tha về cả hạt giống ' + CROPS[tSeed].name + '!' : '') +
+        (tMyst ? (tMyst === 'impBlob' ? ', bé quỷ nhỏ tha về một hạt giống bí ẩn đen sì…' : ', bé thiên thần ngậm về một hạt giống bí ẩn ánh lên lấp lánh…') : '') +
+        (tPrism ? ', bé lăng quang nhả ra ' + tPrism + ' mảnh lăng quang' : '') + (tStar ? ', bé chuông sao rung rơi ' + tStar + ' mảnh ngôi sao✦' : ''));
+      renderStatus();
+    }
+    if (wChanged) save();
+    /* Sửa #10: ngày mưa giảm một lần 10% thời gian còn lại của cây chưa chín (#27 sửa kèm: bù lại const d bị mất); v0.8 ba trang cùng mưa */
+    if (!isRain()) return;
+    const d = gameDay();
+    eachPage(plots => plots.forEach(p => {
+      const c = p.crop;
+      if (!c || now() >= c.matureAt || c.rainDay === d) return;
+      c.matureAt = now() + (c.matureAt - now()) * 0.9;
+      c.rainDay = d;
+    }));
+  }
+  const fmtLeft = ms => {
+    if (ms <= 0) return 'Thu hoạch được';
+    const m = Math.ceil(ms / MIN);
+    return m >= 60 ? Math.floor(m / 60) + 'g' + (m % 60) + 'p' : m + 'p';
+  };
+
+  /* ---------- Tài nguyên pixel (cùng nguồn với bản xem trước) ---------- */
   const P = {
     G:'#6cb457', D:'#3e7d3a', E:'#a4dc8c', R:'#dd5548', x:'#a33528',
     F:'#e06578', f:'#a83a52', p:'#ffb8c4', O:'#e89a4e', Q:'#c9772e',
@@ -95,12 +188,6 @@ const WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ'];
     a:'#b99b84', c:'#9c7d66', d:'#cbb096', e:'#8a6a52',
     w:'#9d7458', g:'#b08a6d', m:'#7d5a42', s:'#684a36',
   };
-  // Bảng màu pixel lớp nền (land palette)
-  const LP = { '8':'#8ec8d8', '~':'#b8e0ea', '-':'#79b4c6', '_':'#6faabf', '9':'#3f7290', '!':'#35617d',
-    '6':'#5f5870', '^':'#6d657c', '&':'#4e4860', '7':'#433c54', '5':'#8ae0ea', '*':'#e8fcff', '%':'#5fc8d8', '#':'#3a3450',
-    'l':'#5aa06a', 'L':'#7cc48a',
-    '=':'#b9d194', '0':'#ffe9b8', '+':'#fff2b0' };
-
   const SPR = {
     sprout:["................","................","................","................","...DD......DD...","..DEED....DEED..",".DEGGGD..DGGGED.",".DGGGGD..DGGGGD.","..DGGGGDDGGGGD..","...DGGGDDGGGD...","....DGGGGGGD....","......DGGD......","...TTTDGGDTTT...","..TTTTTTTTTTTT..","................","................"],
     seedling:["................","................","................","................","................","................","................","......EE........",".....DGE........","......DG........","......GD........","......GG........","....TTGGTT......","...TTTTTTTT.....","................","................"],
@@ -394,7 +481,12 @@ const WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ'];
     tileCache.set(tkey, out);
     return out;
   }
-  /* v0.8: màu riêng cho nền đất trang 2-3 (W1 ruộng nổi đầm sen / M1 mạch quặng kim cương; W3 ruộng bậc thang khe suối thử xong bị loại #71) */
+  /* v0.8: màu riêng cho nền đất trang 2-3 (W1 ruộng nổi đầm sen / M1 mạch quặng kim cương, bản thiết kế chốt) */
+  /* v0.8: màu riêng cho nền đất trang 2-3 (W1 ruộng nổi đầm sen / M1 mạch quặng kim cương, bản thiết kế chốt; W3 ruộng bậc thang khe suối thử xong bị loại #71) */
+  const LP = { '8':'#8ec8d8', '~':'#b8e0ea', '-':'#79b4c6', '_':'#6faabf', '9':'#3f7290', '!':'#35617d',
+    '6':'#5f5870', '^':'#6d657c', '&':'#4e4860', '7':'#433c54', '5':'#8ae0ea', '*':'#e8fcff', '%':'#5fc8d8', '#':'#3a3450',
+    'l':'#5aa06a', 'L':'#7cc48a',
+    '=':'#b9d194', '0':'#ffe9b8', '+':'#fff2b0' };   // v1.0 G2: đốm cỏ nhạt (=, tránh h của bảng chính = cam bí ngô!) / cánh hoa vàng kem / nhuỵ vàng nhạt
   function buildTile(kind, seedNum) {
     const rnd = mulberry32(seedNum);
     const base = { grass:'1', wet:'w', soil:'a', water:'8', wplot:'9', wplotwet:'!', mine:'6', mplot:'7', mplotwet:'#' }[kind] || 'a';
@@ -545,7 +637,7 @@ function initFarm() {
     [S.plots, S.plots2, S.plots3].forEach(arr => arr.forEach(p => {
       const c = p.crop; if (!c) return;
       if (!c.fertUsed) c.fertUsed = {};
-      if (CROPS[c.id].regrow && c.left == null) c.left = (/* inlined export .REGROW_MAX */3);
+      if (data_CROPS[c.id].regrow && c.left == null) c.left = (/* inlined export .REGROW_MAX */3);
     }));
   }
   /* v0.8: hàm hỗ trợ cho trang */
@@ -574,8 +666,8 @@ function initFarm() {
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   }
-  const gameDay = () => Math.floor((now() - S.day0) / DAY_MS) + 1;
-  const weatherOf = d => WEATHERS[Math.floor(mulberry32(d * 7919)() * WEATHERS.length)];
+  const gameDay = () => Math.floor((now() - S.day0) / data_DAY_MS) + 1;
+  const weatherOf = d => data_WEATHERS[Math.floor(mulberry32(d * 7919)() * data_WEATHERS.length)];
   const isRain = () => weatherOf(gameDay()) === 'Mưa nhỏ';
   function settle() {
     if (CS.link && !eventFresh() && !eventPending) requestDayEvent();   // #17: sự kiện hết hạn là gieo lại ngay (tính giờ theo mốc neo)
@@ -629,7 +721,7 @@ function initFarm() {
       if (id === 'prismBlob' && Math.random() < 0.2) { S.shards.prism++; tPrism++; }   // v1.0: mảnh lăng quang (đổi đơn)
       if (id === 'starBell' && Math.random() < 0.15) { S.shards.star++; tStar++; }     // v1.0: mảnh ngôi sao (triệu hồi phù thuỷ, quý hơn)
       if (!tSeed && !tMyst && Math.random() < 0.1) {
-        const ids = Object.keys(CROPS).filter(k => !CROPS[k].hidden);   // #34: họ bí ẩn không đi theo đường tìm kho báu thường
+        const ids = Object.keys(data_CROPS).filter(k => !data_CROPS[k].hidden);   // #34: họ bí ẩn không đi theo đường tìm kho báu thường
         tSeed = ids[Math.floor(Math.random() * ids.length)];
         S.seeds[tSeed] = (S.seeds[tSeed] || 0) + 1;
       }
@@ -637,7 +729,7 @@ function initFarm() {
     });
     if (tGain) {
       S.coins += tGain;
-      toast('Các bé tròn đi tìm kho báu về: +' + tGain + ' G' + (tSeed ? ', còn tha về cả hạt giống ' + CROPS[tSeed].name + '!' : '') +
+      toast('Các bé tròn đi tìm kho báu về: +' + tGain + ' G' + (tSeed ? ', còn tha về cả hạt giống ' + data_CROPS[tSeed].name + '!' : '') +
         (tMyst ? (tMyst === 'impBlob' ? ', bé quỷ nhỏ tha về một hạt giống bí ẩn đen sì…' : ', bé thiên thần ngậm về một hạt giống bí ẩn ánh lên lấp lánh…') : '') +
         (tPrism ? ', bé lăng quang nhả ra ' + tPrism + ' mảnh lăng quang' : '') + (tStar ? ', bé chuông sao rung rơi ' + tStar + ' mảnh ngôi sao✦' : ''));
       renderStatus();
@@ -985,7 +1077,7 @@ function initFarm() {
     /* v1.1 (wen chốt, thay cho danh sách điều kiện #19/#34/#61): roll một lần cho cả 24 loại cây (chỉ trừ bản thân hạt giống) ——
        không xét mở khoá, không xét đang sở hữu, mô tả chuẩn bị sẵn hết ở nền; giữa chừng mua vé / mở hộp mù ra họ mới đều không bị dính vạch trắng "ngoài danh sách nên không có mô tả".
        Tính chi phí: mỗi 4h tạo tối đa một lần, phần tăng thêm không đáng kể, timeout 90s là thừa dư */
-    const cropList = Object.entries(CROPS)
+    const cropList = Object.entries(data_CROPS)
       .filter(([id, c]) => !c.seedOnly)
       .map(([id, c]) => c.name).join(', ');
     return ('Bạn là "trình tạo sự kiện thế giới quan" cho một game nông trại nhỏ. Người chơi đang trồng một mảnh vườn rau nhỏ trong một thế giới nhập vai nào đó, và bạn sẽ nhận được phần trích world book của thế giới đó. Hãy tạo 1 sự kiện nhỏ ngẫu nhiên xảy ra ở vườn rau hôm nay.\n\nQuy tắc:\n' +
@@ -1019,7 +1111,7 @@ function initFarm() {
         : (typeof o.mutate_desc === 'string' && o.mutate_desc ? { '*': String(o.mutate_desc).slice(0, 100) } : {}),
       favored_crop: (() => {                              // #20: sự kiện có thể chỉ ưu ái một loại cây
         const f = String(o.favored_crop || '');
-        return Object.values(CROPS).some(c => c.name === f) ? f : '';
+        return Object.values(data_CROPS).some(c => c.name === f) ? f : '';
       })(),
       flavor: String(o.flavor || ''),
     };
@@ -1071,7 +1163,7 @@ function initFarm() {
           { role: 'system', content: prompt },
           { role: 'user', content: 'Hãy tạo sự kiện vườn rau cho hôm nay.' }
         ],
-        max_tokens: 2000 + Object.keys(CROPS).length * 100
+        max_tokens: 2000 + Object.keys(data_CROPS).length * 100
       };
       const resPromise = fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
         method: 'POST',
@@ -1102,7 +1194,7 @@ function initFarm() {
       eachPage(plots => plots.forEach(p => {              // v0.8: sự kiện dùng chung cho ba trang
         const c = p.crop;
         if (!c || now() >= c.matureAt || c.evDay === d) return;
-        if (ev.favored_crop && CROPS[c.id].name !== ev.favored_crop) return;   // #20: giới hạn theo cây được ưu ái
+        if (ev.favored_crop && data_CROPS[c.id].name !== ev.favored_crop) return;   // #20: giới hạn theo cây được ưu ái
         c.matureAt = now() + Math.round((c.matureAt - now()) * ev.time_mult);   // Có hiệu lực một lần trong ngày (hệ số thời lượng, <1 = nhanh hơn)
         c.evDay = d;
       }));
@@ -1178,7 +1270,7 @@ function initFarm() {
       counts[c.id] = (counts[c.id] || 0) + 1;
       if (now() >= c.matureAt) ripe++;
     }));
-    const field = Object.keys(counts).map(id => CROPS[id].name + '×' + counts[id]).join(', ') || 'đang để trống';
+    const field = Object.keys(counts).map(id => data_CROPS[id].name + '×' + counts[id]).join(', ') || 'đang để trống';
     const bagTxt = Object.keys(S.bag).map(k => {
       const d = mutDescOf(k);
       return bagName(k) + '×' + S.bag[k] + (d ? '(' + d + ')' : '');
@@ -1335,8 +1427,8 @@ function initFarm() {
 
   /* ---------- Logic game ---------- */
   const fmtDur = m => m < 60 ? m + ' phút' : (m % 60 === 0 ? (m / 60) + ' giờ' : (m / 60).toFixed(1) + ' giờ');
-  function growMs(cropId) { return TEST_MODE ? GROW : CROPS[cropId].grow * (/* inlined export .MIN */60000); }   // v1.0: tra bảng A
-  function regrowMs(cropId) { const c = CROPS[cropId]; return TEST_MODE ? REGROW : (c.regrowM || Math.round(c.grow * 0.6)) * (/* inlined export .MIN */60000); }
+  function growMs(cropId) { return TEST_MODE ? GROW : data_CROPS[cropId].grow * (/* inlined export .MIN */60000); }   // v1.0: tra bảng A
+  function regrowMs(cropId) { const c = data_CROPS[cropId]; return TEST_MODE ? REGROW : (c.regrowM || Math.round(c.grow * 0.6)) * (/* inlined export .MIN */60000); }
   function plant(pi, cropId) {
     if ((S.seeds[cropId] || 0) <= 0) return toast('Hết hạt giống này rồi');
     let realId = cropId;
@@ -1345,16 +1437,16 @@ function initFarm() {
       realId = fam + (S.page === 2 ? 'W' : S.page === 3 ? 'M' : 'G');
     }
     else {
-      const z = CROPS[cropId].zone || 1;                  // v0.8: cây kén đất
-      if (z !== S.page) return toast(CROPS[cropId].name + ' phải trồng ở ' + ZONE_NAME[z] + ' (trang ' + z + ')');
+      const z = data_CROPS[cropId].zone || 1;                  // v0.8: cây kén đất
+      if (z !== S.page) return toast(data_CROPS[cropId].name + ' phải trồng ở ' + ZONE_NAME[z] + ' (trang ' + z + ')');
     }
     S.seeds[cropId]--;
     const g = growMs(realId);
     const c = { id: realId, matureAt: now() + g, yieldBonus: 0, wateredUntil: 0, fertUsed: {} };
-    if (CROPS[realId].regrow) c.left = (/* inlined export .REGROW_MAX */3);
+    if (data_CROPS[realId].regrow) c.left = (/* inlined export .REGROW_MAX */3);
     if (isRain()) { c.matureAt = now() + g * 0.9; c.rainDay = gameDay(); }   // Sửa #10: trồng vào ngày mưa được giảm thẳng 10%
     const ev = todayEvent();                                                  // Sự kiện thế giới quan: trồng trong ngày cũng được hưởng
-    if (ev && ev.time_mult !== 1 && (!ev.favored_crop || CROPS[realId].name === ev.favored_crop)) {
+    if (ev && ev.time_mult !== 1 && (!ev.favored_crop || data_CROPS[realId].name === ev.favored_crop)) {
       c.matureAt = now() + Math.round((c.matureAt - now()) * ev.time_mult);   // Sự kiện thế giới quan: hệ số thời gian sinh trưởng (<1 = nhanh hơn = tích cực)
       c.evDay = gameDay();
     }
@@ -1396,7 +1488,7 @@ function initFarm() {
     if (Math.random() < ev.mutate_on_fert * (0.3 + 0.35 * fertN)) {
       c.mut = (ev.mutate_prefix || 'đột biến').slice(0, 20);
       if (!S.mutDesc) S.mutDesc = {};
-      const cname = CROPS[c.id].name;                     // #19: mô tả chức năng lưu theo cây (tiền tố@cây)
+      const cname = data_CROPS[c.id].name;                     // #19: mô tả chức năng lưu theo cây (tiền tố@cây)
       const dsc = ev.mutate_desc && (ev.mutate_desc[cname] || ev.mutate_desc['*']);
       if (dsc) S.mutDesc[c.mut + '@' + cname] = dsc;
       if (pi != null) { try { plotEmote(pi, 'emStar'); } catch (e) {} }
@@ -1404,22 +1496,22 @@ function initFarm() {
   }
   function bagName(key) {
     const parts = key.split('@');
-    return (parts[1] ? parts[1] + '·' : '') + (CROPS[parts[0]] || { name: '?' }).name;   // Dự phòng: id lạ cũng không làm nổ balo
+    return (parts[1] ? parts[1] + '·' : '') + (data_CROPS[parts[0]] || { name: '?' }).name;   // Dự phòng: id lạ cũng không làm nổ balo
   }
   function bagPrice(key) {
     const parts = key.split('@');
-    return Math.round((CROPS[parts[0]] || { sell: 0 }).sell * (parts[1] ? 1.25 : 1));   // Hàng đột biến bán được ×1.25
+    return Math.round((data_CROPS[parts[0]] || { sell: 0 }).sell * (parts[1] ? 1.25 : 1));   // Hàng đột biến bán được ×1.25
   }
   function mutDescOf(bagKey) {                            // #19: lấy mô tả chức năng (tương thích khoá chỉ có tiền tố của save cũ)
     const parts = bagKey.split('@');
     if (!parts[1] || !S.mutDesc) return '';
-    return S.mutDesc[parts[1] + '@' + (CROPS[parts[0]] || { name: '' }).name] || S.mutDesc[parts[1]] || '';
+    return S.mutDesc[parts[1] + '@' + (data_CROPS[parts[0]] || { name: '' }).name] || S.mutDesc[parts[1]] || '';
   }
   function harvest(pi, quiet) {
     const c = curPlots()[pi].crop;
     if (!c || now() < c.matureAt) return null;
     rollMutation(c, pi);                                  // Cửa thu hoạch gieo bù (chống việc bấm quá nhanh trong 1 giây sau khi chín làm bỏ qua bước xét)
-    const def = CROPS[c.id];
+    const def = data_CROPS[c.id];
     let n = 1 + (c.yieldBonus || 0);                      // v1.1: hệ số sản lượng nghỉ hưu (sự kiện chỉ ảnh hưởng thời gian sinh trưởng)
     const dev = todayEvent();
     if (dev && dev.double_yield && (!dev.favored_crop || def.name === dev.favored_crop)) n *= 2;   // v1.1: ngày bội thu gấp đôi (phúc lợi dân may)
@@ -1490,7 +1582,7 @@ function initFarm() {
     if (mode) {
       const names = { seed: 'Gieo hạt', water: 'Tưới nước', fert: 'Bón phân', harvest: 'Thu hoạch', shovel: 'Xới bỏ' };
       let txt = 'Chế độ ' + names[mode.t];
-      if (mode.t === 'seed') txt += ' · ' + CROPS[mode.id].name;
+      if (mode.t === 'seed') txt += ' · ' + data_CROPS[mode.id].name;
       if (mode.t === 'fert') txt += ' · ' + FERTS[mode.id].name;
       if (mode.t === 'shovel') txt += ' · bấm hai lần để xác nhận';
       tip.textContent = txt + ' · bấm vào ô ruộng để thực hiện';
@@ -1503,7 +1595,7 @@ function initFarm() {
     if (k === 'expand') { toolbarOpen = true; renderToolbar(); return; }
     if (k === 'collapse') { toolbarOpen = false; mode = null; renderToolbar(); return; }
     if (mode && mode.t === k) { mode = null; renderToolbar(); return; }
-    if (k === 'seed') return pickFrom('Chọn hạt giống để gieo', S.seeds, id => CROPS[id].name, id => { mode = { t: 'seed', id }; renderToolbar(); });
+    if (k === 'seed') return pickFrom('Chọn hạt giống để gieo', S.seeds, id => data_CROPS[id].name, id => { mode = { t: 'seed', id }; renderToolbar(); });
     if (k === 'fert') return pickFrom('Chọn phân bón', S.ferts, id => FERTS[id].name, id => { mode = { t: 'fert', id }; renderToolbar(); });
     mode = { t: k };
     renderToolbar();
@@ -1529,10 +1621,10 @@ function initFarm() {
     const c = curPlots()[pi].crop;
     if (!c) return '';
     const left = c.matureAt - now();
-    const chip = CROPS[c.id].regrow && c.left != null ? `<span class="cnt2">${c.left}/${(/* inlined export .REGROW_MAX */3)}</span>` : '';   // Sửa #4: số góc hiển thị số vụ
+    const chip = data_CROPS[c.id].regrow && c.left != null ? `<span class="cnt2">${c.left}/${(/* inlined export .REGROW_MAX */3)}</span>` : '';   // Sửa #4: số góc hiển thị số vụ
     const fdot = c.fertUsed && (c.fertUsed.compost || c.fertUsed.shiny) ? '<span class="fdot" title="Đã bón phân"></span>' : '';   // Dấu shiny ghi theo fertUsed, logic số góc không đổi   // Sửa #15: số góc bón phân hiển thị thường trực
     const mut = c.mut ? `<span class="cnt2" style="left:3px;right:auto;background:#ead9f7;border-color:#9a6ad8;color:#6a4a9a" title="${c.mut}·đột biến">✦</span>` : '';
-    if (left <= 0) return spriteSVG(CROPS[c.id].sp, SPRITE_PX) + `<span class="ripe">!</span>` + chip + fdot + mut;
+    if (left <= 0) return spriteSVG(data_CROPS[c.id].sp, SPRITE_PX) + `<span class="ripe">!</span>` + chip + fdot + mut;
     const total = growMs(c.id);
     const prog = Math.min(0.99, 1 - left / total);
     return spriteSVG('seedling', SPRITE_PX) + `<div class="bar"><i style="width:${(prog * 100) | 0}%"></i></div>` + chip + fdot + mut;
@@ -1719,7 +1811,7 @@ function initFarm() {
     const pi = +p.dataset.pi;
     const c = curPlots()[pi].crop;
     if (c && now() >= c.matureAt && (!mode || mode.t !== 'shovel')) { harvest(pi); return; }   // Sửa #6: rau chín bấm thẳng là thu ngay
-    if (!mode) { if (c) toast(CROPS[c.id].name + ' · còn ' + fmtLeft(c.matureAt - now())); return; }
+    if (!mode) { if (c) toast(data_CROPS[c.id].name + ' · còn ' + fmtLeft(c.matureAt - now())); return; }
     if (mode.t === 'seed') { if (c) return toast('Ô này trồng rồi'); plant(pi, mode.id); if ((S.seeds[mode.id] || 0) <= 0) { mode = null; renderToolbar(); } return; }
     if (mode.t === 'water') return water(pi);
     if (mode.t === 'fert') { fertilize(pi, mode.id); if ((S.ferts[mode.id] || 0) <= 0) { mode = null; renderToolbar(); } return; }
@@ -1727,7 +1819,7 @@ function initFarm() {
     if (mode.t === 'shovel') {
       if (!c) return;
       if (mode.confirmPi === pi) { shovel(pi); mode.confirmPi = null; }
-      else { mode.confirmPi = pi; toast('Bấm lần nữa để xác nhận xới bỏ ' + CROPS[c.id].name); }
+      else { mode.confirmPi = pi; toast('Bấm lần nữa để xác nhận xới bỏ ' + data_CROPS[c.id].name); }
     }
   });
 
@@ -1756,7 +1848,7 @@ function initFarm() {
       let items = '';
       if (shopTab === 'seed') {
         items = [1, 2, 3].map(z => {                      // v0.8: chia nhóm theo khu, họ hidden không bày bán
-          const list = Object.entries(CROPS).filter(([id, c]) => !c.hidden && (c.zone || 1) === z);
+          const list = Object.entries(data_CROPS).filter(([id, c]) => !c.hidden && (c.zone || 1) === z);
           if (!list.length) return '';
           const un = pageUnlocked(z);
           const head = `<div class="note" style="margin:8px 0 6px">Cây ${ZONE_NAME[z]} (trang ${z})${un ? '' : ' · 🔒 cần vé ' + (z === 2 ? 'vùng nước' : 'khu mỏ')}</div>`;
@@ -1870,12 +1962,12 @@ function initFarm() {
         if (bagSellMode) {
           const on = !!bagSel[key];
           return `
-        <div class="item selrow${on ? ' selon' : ''}" data-selkey="${key}"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
+        <div class="item selrow${on ? ' selon' : ''}" data-selkey="${key}"><span class="icon">${spriteSVG(data_CROPS[id].sp, 32)}</span>
           <span class="info"><div class="name">${bagName(key)} ×${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">✦</span>' : ''}</div><div class="meta">${bagPrice(key)} G/cái${esc(mdesc)}</div></span>
           <span class="selmark">${on ? '✓' : ''}</span></div>`;
         }
         return `
-        <div class="item"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
+        <div class="item"><span class="icon">${spriteSVG(data_CROPS[id].sp, 32)}</span>
           <span class="info"><div class="name">${bagName(key)} ×${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">✦</span>' : ''}</div><div class="meta">${bagPrice(key)} G/cái${esc(mdesc)}</div></span>
           <span class="acts">
             <span class="ibtn" data-takeout="${key}" title="Lấy ra (mang vào cốt truyện, không quy ra tiền)">${spriteSVG('emBang', 16)}</span>
@@ -2235,15 +2327,15 @@ function initFarm() {
     if (!empty.length) return petBubble(el, cry + ' hết chỗ trống rồi');
     const usable = {};
     Object.keys(S.seeds).forEach(id => {
-      if (!(S.seeds[id] > 0) || !CROPS[id]) return;
-      if (id === 'mystery' || (CROPS[id].zone || 1) === S.page) usable[id] = S.seeds[id];
+      if (!(S.seeds[id] > 0) || !data_CROPS[id]) return;
+      if (id === 'mystery' || (data_CROPS[id].zone || 1) === S.page) usable[id] = S.seeds[id];
     });
     if (!Object.keys(usable).length) return petBubble(el, cry + ' không có hạt nào trồng được ở ' + ZONE_NAME[S.page] + '…');
-    pickFrom('Bé mầm sương: lần này trồng gì đây?', usable, x => CROPS[x].name, sid => {
+    pickFrom('Bé mầm sương: lần này trồng gì đây?', usable, x => data_CROPS[x].name, sid => {
       let k = 0;
       for (const pi of empty) { if (!(S.seeds[sid] > 0)) break; if (plant(pi, sid)) k++; }
       const pe = sh.querySelector('.pet[data-pet="dewSprout"]') || el;
-      petBubble(pe, cry + ' đã trồng ' + k + ' ô ' + CROPS[sid].name + (k < empty.length ? ' (hết hạt giống rồi)' : '!'));
+      petBubble(pe, cry + ' đã trồng ' + k + ' ô ' + data_CROPS[sid].name + (k < empty.length ? ' (hết hạt giống rồi)' : '!'));
     });
   }
   function petHarvest(el, cry) {                          // Bé sứa xoăn: chọc một cái là xúc tu cuộn rau chín vào balo (#27; v0.8 chỉ thu ở trang hiện tại)
@@ -2282,7 +2374,7 @@ function initFarm() {
     toast('Phù thuỷ tròn tới rồi! Quầy hàng ngôi sao ở góc dưới trái bờ ruộng đã sáng đèn');
   }
   function makeWitchOrder() {
-    const pool = Object.entries(CROPS).filter(([id, c]) => !c.hidden && pageUnlocked(c.zone || 1));
+    const pool = Object.entries(data_CROPS).filter(([id, c]) => !c.hidden && pageUnlocked(c.zone || 1));
     const pick = () => pool[Math.floor(Math.random() * pool.length)][0];
     const lines = [{ id: pick(), n: 2 + Math.floor(Math.random() * 3), mut: false, reward: 1, done: false }];
     if (CS.link && Math.random() < 0.5) {                 // Đơn đột biến: chỉ có thể xuất hiện khi đã bật liên kết (§2.65 ô ①, tắt liên kết thì tự hạ cấp)
@@ -2296,10 +2388,10 @@ function initFarm() {
     const wz = S.witch; if (!wz || !wz.order) return;
     const line = wz.order.lines[li]; if (!line || line.done) return;
     if (!line.mut) {
-      if ((S.bag[line.id] || 0) < line.n) return toast('Còn thiếu ' + (line.n - (S.bag[line.id] || 0)) + ' quả ' + CROPS[line.id].name);
+      if ((S.bag[line.id] || 0) < line.n) return toast('Còn thiếu ' + (line.n - (S.bag[line.id] || 0)) + ' quả ' + data_CROPS[line.id].name);
       S.bag[line.id] -= line.n; if (!S.bag[line.id]) delete S.bag[line.id];
     } else {
-      if (mutCountOf(line.id) < line.n) return toast('Loại ' + CROPS[line.id].name + ' có tiền tố còn thiếu ' + (line.n - mutCountOf(line.id)) + ' quả');
+      if (mutCountOf(line.id) < line.n) return toast('Loại ' + data_CROPS[line.id].name + ' có tiền tố còn thiếu ' + (line.n - mutCountOf(line.id)) + ' quả');
       let need = line.n;
       for (const k of mutKeysOf(line.id)) {
         const take = Math.min(need, S.bag[k]);
@@ -2321,7 +2413,7 @@ function initFarm() {
     const wz = S.witch;
     if (!wz || !wz.leaveAt || now() > wz.leaveAt || !wz.order) return;
     const rows = wz.order.lines.map((l, i) => {
-      const nm = CROPS[l.id].name;
+      const nm = data_CROPS[l.id].name;
       const have = l.mut ? mutCountOf(l.id) : (S.bag[l.id] || 0);
       const btn = l.done ? '<span class="wzbtn done">Đã giao</span>'
         : have >= l.n ? `<span class="wzbtn" data-wdeliver="${i}">Giao</span>` : '<span class="wzbtn off">Chưa đủ</span>';
@@ -2460,7 +2552,7 @@ function initFarm() {
 
   /* v0.9 (#47): popup mua hàng loạt —— bấm mua hạt giống/phân bón → nhập số lượng → xác nhận, cảm giác giống hệt lúc bán (thời 72 ô thì đây là nhu cầu thiết yếu) */
   function openBuyDlg(kind, id) {
-    const def = kind === 'seed' ? CROPS[id] : FERTS[id];
+    const def = kind === 'seed' ? data_CROPS[id] : FERTS[id];
     const price = kind === 'seed' ? def.seed : def.price;
     const name = kind === 'seed' ? 'Hạt ' + def.name : def.name;
     if (S.coins < price) return toast('Còn thiếu ' + (price - S.coins).toLocaleString() + ' G');

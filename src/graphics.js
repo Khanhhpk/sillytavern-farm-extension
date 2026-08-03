@@ -1,4 +1,97 @@
-  // Bảng màu pixel chính
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const gameDay = () => Math.floor((now() - S.day0) / DAY_MS) + 1;
+  const weatherOf = d => WEATHERS[Math.floor(mulberry32(d * 7919)() * WEATHERS.length)];
+  const isRain = () => weatherOf(gameDay()) === 'Mưa nhỏ';
+  function settle() {
+    if (CS.link && !eventFresh() && !eventPending) requestDayEvent();   // #17: sự kiện hết hạn là gieo lại ngay (tính giờ theo mốc neo)
+    /* v0.8b: lịch ghé thăm của phù thuỷ tròn (cần vé vùng nước; đến giờ thì rời đi; lỡ 2 lượt thì bảo hiểm) */
+    if (S.passes.water && S.witch) {
+      const wz = S.witch;
+      if (wz.leaveAt && now() >= wz.leaveAt) {            // Đến giờ dọn hàng
+        wz.leaveAt = 0;
+        if (wz.order && !wz.order.done) wz.missed++;      // Không nhận đơn tính là lỡ (đếm cho cơ chế bảo hiểm)
+        wz.order = null;
+        wz.nextAt = now() + witchGap();
+        save(); try { renderWitch(); } catch (e) {}
+      }
+      const open = (() => { try { return sh.getElementById('win').classList.contains('open'); } catch (e) { return false; } })();
+      if (!wz.leaveAt && open && (now() >= wz.nextAt || wz.missed >= 2)) witchArrive();   // Chỉ ghé khi bảng đang mở (đã ghé thì phải được nhìn thấy)
+    }
+    /* Xét đột biến: công bố ngay lúc chín, mỗi vụ một lần; bón phân là bộ khuếch đại (0/1/2 loại phân → xác suất ×0.3/0.65/1.0); v0.8 tính cho cả ba trang */
+    let mutChanged = false;
+    eachPage((plots, pg) => plots.forEach((p, pi) => {
+      const c = p.crop;
+      if (!c || now() < c.matureAt || c.mutRolled) return;
+      mutChanged = true;
+      rollMutation(c, pg === S.page ? pi : null);         // Bong bóng chỉ nổi ở trang hiện tại
+    }));
+    if (mutChanged) save();
+    /* ===== v0.6b: thú làm việc (chỉ có hiệu lực khi ra sân) + tìm kho báu ===== */
+    let wChanged = false;
+    const outed = id => S.petsOut.indexOf(id) >= 0;
+    if (outed('cloudMallow')) {                           // Bé bông mây: mây mưa nhỏ tự động tưới (miễn phí, hoàn toàn tự động, v0.8 tưới cả ba trang)
+      eachPage(plots => plots.forEach(p => {
+        const c = p.crop;
+        if (!c || now() >= c.matureAt || now() < c.wateredUntil) return;
+        c.matureAt = now() + (c.matureAt - now()) * 0.75;
+        c.wateredUntil = now() + WATER_CD;
+        wChanged = true;
+      }));
+    }
+    /* #27: thu hoạch đổi sang kích hoạt bằng cách chọc (xem petHarvest) — rau chín nằm lại ruộng chờ user quay lại xem, không bị tim đập lén cuốn đi nữa */
+    let tGain = 0, tSeed = null, tMyst = null, tPrism = 0, tStar = 0;            // Loại tìm kho báu (thú ra sân không có job): định kỳ nhặt tiền, thỉnh thoảng tha hạt giống về
+    S.petsOut.forEach(id => {
+      const pd = PETS[id];
+      if (!pd || pd.job) return;
+      if (S.petFind[id] == null) { S.petFind[id] = now(); wChanged = true; return; }   // Lần đầu chỉ khởi động bộ đếm
+      if (now() - S.petFind[id] < TREASURE_CD) return;
+      S.petFind[id] = now();
+      tGain += 10 + Math.floor(Math.random() * 41);      // v1.0:10~50G
+      if ((id === 'impBlob' || id === 'angelBlob') && Math.random() < 0.2) {    // #29: quỷ/thiên thần độc quyền · hạt giống bí ẩn (v1.0: 20%)
+        S.seeds.mystery = (S.seeds.mystery || 0) + 1;
+        tMyst = id;
+      }
+      if (id === 'prismBlob' && Math.random() < 0.2) { S.shards.prism++; tPrism++; }   // v1.0: mảnh lăng quang (đổi đơn)
+      if (id === 'starBell' && Math.random() < 0.15) { S.shards.star++; tStar++; }     // v1.0: mảnh ngôi sao (triệu hồi phù thuỷ, quý hơn)
+      if (!tSeed && !tMyst && Math.random() < 0.1) {
+        const ids = Object.keys(CROPS).filter(k => !CROPS[k].hidden);   // #34: họ bí ẩn không đi theo đường tìm kho báu thường
+        tSeed = ids[Math.floor(Math.random() * ids.length)];
+        S.seeds[tSeed] = (S.seeds[tSeed] || 0) + 1;
+      }
+      wChanged = true;
+    });
+    if (tGain) {
+      S.coins += tGain;
+      toast('Các bé tròn đi tìm kho báu về: +' + tGain + ' G' + (tSeed ? ', còn tha về cả hạt giống ' + CROPS[tSeed].name + '!' : '') +
+        (tMyst ? (tMyst === 'impBlob' ? ', bé quỷ nhỏ tha về một hạt giống bí ẩn đen sì…' : ', bé thiên thần ngậm về một hạt giống bí ẩn ánh lên lấp lánh…') : '') +
+        (tPrism ? ', bé lăng quang nhả ra ' + tPrism + ' mảnh lăng quang' : '') + (tStar ? ', bé chuông sao rung rơi ' + tStar + ' mảnh ngôi sao✦' : ''));
+      renderStatus();
+    }
+    if (wChanged) save();
+    /* Sửa #10: ngày mưa giảm một lần 10% thời gian còn lại của cây chưa chín (#27 sửa kèm: bù lại const d bị mất); v0.8 ba trang cùng mưa */
+    if (!isRain()) return;
+    const d = gameDay();
+    eachPage(plots => plots.forEach(p => {
+      const c = p.crop;
+      if (!c || now() >= c.matureAt || c.rainDay === d) return;
+      c.matureAt = now() + (c.matureAt - now()) * 0.9;
+      c.rainDay = d;
+    }));
+  }
+  const fmtLeft = ms => {
+    if (ms <= 0) return 'Thu hoạch được';
+    const m = Math.ceil(ms / MIN);
+    return m >= 60 ? Math.floor(m / 60) + 'g' + (m % 60) + 'p' : m + 'p';
+  };
+
+  /* ---------- Tài nguyên pixel (cùng nguồn với bản xem trước) ---------- */
   const P = {
     G:'#6cb457', D:'#3e7d3a', E:'#a4dc8c', R:'#dd5548', x:'#a33528',
     F:'#e06578', f:'#a83a52', p:'#ffb8c4', O:'#e89a4e', Q:'#c9772e',
@@ -10,12 +103,6 @@
     a:'#b99b84', c:'#9c7d66', d:'#cbb096', e:'#8a6a52',
     w:'#9d7458', g:'#b08a6d', m:'#7d5a42', s:'#684a36',
   };
-  // Bảng màu pixel lớp nền (land palette)
-  const LP = { '8':'#8ec8d8', '~':'#b8e0ea', '-':'#79b4c6', '_':'#6faabf', '9':'#3f7290', '!':'#35617d',
-    '6':'#5f5870', '^':'#6d657c', '&':'#4e4860', '7':'#433c54', '5':'#8ae0ea', '*':'#e8fcff', '%':'#5fc8d8', '#':'#3a3450',
-    'l':'#5aa06a', 'L':'#7cc48a',
-    '=':'#b9d194', '0':'#ffe9b8', '+':'#fff2b0' };
-
   const SPR = {
     sprout:["................","................","................","................","...DD......DD...","..DEED....DEED..",".DEGGGD..DGGGED.",".DGGGGD..DGGGGD.","..DGGGGDDGGGGD..","...DGGGDDGGGD...","....DGGGGGGD....","......DGGD......","...TTTDGGDTTT...","..TTTTTTTTTTTT..","................","................"],
     seedling:["................","................","................","................","................","................","................","......EE........",".....DGE........","......DG........","......GD........","......GG........","....TTGGTT......","...TTTTTTTT.....","................","................"],
@@ -309,7 +396,12 @@
     tileCache.set(tkey, out);
     return out;
   }
-  /* v0.8: màu riêng cho nền đất trang 2-3 (W1 ruộng nổi đầm sen / M1 mạch quặng kim cương; W3 ruộng bậc thang khe suối thử xong bị loại #71) */
+  /* v0.8: màu riêng cho nền đất trang 2-3 (W1 ruộng nổi đầm sen / M1 mạch quặng kim cương, bản thiết kế chốt) */
+  /* v0.8: màu riêng cho nền đất trang 2-3 (W1 ruộng nổi đầm sen / M1 mạch quặng kim cương, bản thiết kế chốt; W3 ruộng bậc thang khe suối thử xong bị loại #71) */
+  const LP = { '8':'#8ec8d8', '~':'#b8e0ea', '-':'#79b4c6', '_':'#6faabf', '9':'#3f7290', '!':'#35617d',
+    '6':'#5f5870', '^':'#6d657c', '&':'#4e4860', '7':'#433c54', '5':'#8ae0ea', '*':'#e8fcff', '%':'#5fc8d8', '#':'#3a3450',
+    'l':'#5aa06a', 'L':'#7cc48a',
+    '=':'#b9d194', '0':'#ffe9b8', '+':'#fff2b0' };   // v1.0 G2: đốm cỏ nhạt (=, tránh h của bảng chính = cam bí ngô!) / cánh hoa vàng kem / nhuỵ vàng nhạt
   function buildTile(kind, seedNum) {
     const rnd = mulberry32(seedNum);
     const base = { grass:'1', wet:'w', soil:'a', water:'8', wplot:'9', wplotwet:'!', mine:'6', mplot:'7', mplotwet:'#' }[kind] || 'a';
