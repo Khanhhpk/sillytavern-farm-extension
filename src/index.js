@@ -831,6 +831,18 @@ function initFarm() {
       
       const ctx = (window.SillyTavern && window.SillyTavern.getContext) ? window.SillyTavern.getContext() : {};
       
+      // 0. Use native ST functions if available
+      try {
+          if (typeof window.getCharWorldbookNames === 'function' && typeof window.getWorldbook === 'function') {
+              const names = await window.getCharWorldbookNames('current');
+              const list = [names && names.primary].concat((names && names.additional) || []).filter(Boolean);
+              for (const nm of list) {
+                  const ents = await window.getWorldbook(nm);
+                  if (Array.isArray(ents)) entries = entries.concat(ents);
+              }
+          }
+      } catch (e) {}
+
       // 1. Try ctx.worldInfo
       if (ctx.worldInfo && Array.isArray(ctx.worldInfo.entries)) {
         entries = entries.concat(ctx.worldInfo.entries);
@@ -841,14 +853,20 @@ function initFarm() {
          });
       }
 
-      // 2. Try window.world_info
-      if (window.world_info && typeof window.world_info === 'object') {
+      // 2. Try window.world_info (make sure it's NOT an HTML element)
+      if (window.world_info && typeof window.world_info === 'object' && !(window.world_info instanceof HTMLElement)) {
          Object.values(window.world_info).forEach(book => {
            if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-           else if (book && typeof book === 'object' && !Array.isArray(book)) {
-               // Sometimes book itself is just the entry or has an entries list
+           else if (book && typeof book === 'object' && !Array.isArray(book) && !(book instanceof HTMLElement)) {
                if (book.content || book.text) entries.push(book);
            }
+         });
+      }
+
+      // 2b. Try window.world_info_data
+      if (window.world_info_data && typeof window.world_info_data === 'object') {
+         Object.values(window.world_info_data).forEach(book => {
+           if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
          });
       }
 
