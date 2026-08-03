@@ -219,7 +219,7 @@ export const PETS = {
     /* —— Át chủ bài (#43: giữ id slimeNight để không hỏng save; page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
     slimeNight: { name: 'Bé soda đào',   page: 1, price: 9999, cry: ['Bốp——!', '(nổi một bong bóng nhỏ)', 'Xì~', '(vị ngòn ngọt)'], desc: 'Loại tìm kho báu · tinh linh soda vị đào · dễ thương quá mức nên đắt nhất' },
   };
-  const PASSES = {
+  export const PASSES = {
     water: { name: 'Vé vùng nước', price: 6000,  desc: 'Mở khoá ruộng vùng nước (trang 2) + quyền mua bé tròn trang 2 và hạt giống thuỷ sinh, tặng kèm ô ruộng nổi đầu tiên' },
     mine:  { name: 'Vé khu mỏ',    price: 35000, desc: 'Mở khoá ruộng khu mỏ (trang 3) + quyền mua bé tròn trang 3 và hạt giống khu mỏ, tặng kèm luống ươm đầu tiên' },
   };
