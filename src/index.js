@@ -151,6 +151,7 @@ function initFarm() {
   function save(immediate) {
     if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
     const doSave = () => {
+      if (!extension_settings[extensionName]) extension_settings[extensionName] = {};
       extension_settings[extensionName][NS] = S;
       if (saveSettingsDebounced) saveSettingsDebounced();
     };
@@ -795,17 +796,27 @@ function initFarm() {
   let CS = { link: false, story: false, userPrompt: '' };
   function loadCharState() {
     try {
-      const v = {} || {};
-      const o = v.star_tavern_farm_cs || {};
+      const cn = charName();
+      const key = 'cs_' + cn;
+      const o = (extension_settings[extensionName] || {})[key] || {};
       CS = { link: !!o.link, story: !!o.story, userPrompt: o.userPrompt || '' };
     } catch (e) { CS = { link: false, story: false, userPrompt: '' }; }
   }
   function saveCharState() {
-    try { console.log("Farm: Cannot insert variables: ",{ star_tavern_farm_cs: { link: CS.link, story: CS.story, userPrompt: CS.userPrompt } }, { type: 'character' }); } catch (e) {}
+    try {
+      const cn = charName();
+      const key = 'cs_' + cn;
+      if (!extension_settings[extensionName]) extension_settings[extensionName] = {};
+      extension_settings[extensionName][key] = { link: CS.link, story: CS.story, userPrompt: CS.userPrompt };
+      if (saveSettingsDebounced) saveSettingsDebounced();
+    } catch (e) {}
   }
   loadCharState();
   function charName() {
-    try { const c = (SillyTavern.getContext && SillyTavern.getContext()) || {}; return c.name2 || String(c.characterId || ''); } catch (e) { return ''; }
+    try {
+      const ctx = (window.SillyTavern && window.SillyTavern.getContext) ? window.SillyTavern.getContext() : {};
+      return ctx.name2 || String(ctx.characterId || '');
+    } catch (e) { return ''; }
   }
   /* #17: vòng đời sự kiện do bộ đếm mốc neo quản lý —— lastEventAt + resetHours quyết định hết hạn, tách rời khỏi lịch trong game */
   const eventFresh = () => S.dayEvent && S.dayEvent.who === charName() &&
