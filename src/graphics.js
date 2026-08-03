@@ -1,3 +1,21 @@
+  // Bảng màu pixel chính
+  const P = {
+    G:'#6cb457', D:'#3e7d3a', E:'#a4dc8c', R:'#dd5548', x:'#a33528',
+    F:'#e06578', f:'#a83a52', p:'#ffb8c4', O:'#e89a4e', Q:'#c9772e',
+    q:'#96551f', S:'#8a6844', h:'#f7c07a', B:'#9ed8f2', b:'#5fa8cc',
+    u:'#3f7ea6', T:'#8a6a52', Y:'#c2b878', y:'#9a915c', L:'#b8b0a2',
+    M:'#8a8274', C:'#f2c231', U:'#bf8a1a', W:'#fffdf4', K:'#3a2c22',
+    n:'#ffb0bc', V:'#b48ae0', v:'#8a5cc0',
+    '1':'#aecb87', '2':'#a0bd77', '3':'#c6dfa0', '4':'#8dab68',
+    a:'#b99b84', c:'#9c7d66', d:'#cbb096', e:'#8a6a52',
+    w:'#9d7458', g:'#b08a6d', m:'#7d5a42', s:'#684a36',
+  };
+  // Bảng màu pixel lớp nền (land palette)
+  const LP = { '8':'#8ec8d8', '~':'#b8e0ea', '-':'#79b4c6', '_':'#6faabf', '9':'#3f7290', '!':'#35617d',
+    '6':'#5f5870', '^':'#6d657c', '&':'#4e4860', '7':'#433c54', '5':'#8ae0ea', '*':'#e8fcff', '%':'#5fc8d8', '#':'#3a3450',
+    'l':'#5aa06a', 'L':'#7cc48a',
+    '=':'#b9d194', '0':'#ffe9b8', '+':'#fff2b0' };
+
   const SPR = {
     sprout:["................","................","................","................","...DD......DD...","..DEED....DEED..",".DEGGGD..DGGGED.",".DGGGGD..DGGGGD.","..DGGGGDDGGGGD..","...DGGGDDGGGD...","....DGGGGGGD....","......DGGD......","...TTTDGGDTTT...","..TTTTTTTTTTTT..","................","................"],
     seedling:["................","................","................","................","................","................","................","......EE........",".....DGE........","......DG........","......GD........","......GG........","....TTGGTT......","...TTTTTTTT.....","................","................"],
@@ -291,12 +309,7 @@
     tileCache.set(tkey, out);
     return out;
   }
-  /* v0.8: màu riêng cho nền đất trang 2-3 (W1 ruộng nổi đầm sen / M1 mạch quặng kim cương, bản thiết kế chốt) */
-  /* v0.8: màu riêng cho nền đất trang 2-3 (W1 ruộng nổi đầm sen / M1 mạch quặng kim cương, bản thiết kế chốt; W3 ruộng bậc thang khe suối thử xong bị loại #71) */
-  const LP = { '8':'#8ec8d8', '~':'#b8e0ea', '-':'#79b4c6', '_':'#6faabf', '9':'#3f7290', '!':'#35617d',
-    '6':'#5f5870', '^':'#6d657c', '&':'#4e4860', '7':'#433c54', '5':'#8ae0ea', '*':'#e8fcff', '%':'#5fc8d8', '#':'#3a3450',
-    'l':'#5aa06a', 'L':'#7cc48a',
-    '=':'#b9d194', '0':'#ffe9b8', '+':'#fff2b0' };   // v1.0 G2: đốm cỏ nhạt (=, tránh h của bảng chính = cam bí ngô!) / cánh hoa vàng kem / nhuỵ vàng nhạt
+  /* v0.8: màu riêng cho nền đất trang 2-3 (W1 ruộng nổi đầm sen / M1 mạch quặng kim cương; W3 ruộng bậc thang khe suối thử xong bị loại #71) */
   function buildTile(kind, seedNum) {
     const rnd = mulberry32(seedNum);
     const base = { grass:'1', wet:'w', soil:'a', water:'8', wplot:'9', wplotwet:'!', mine:'6', mplot:'7', mplotwet:'#' }[kind] || 'a';
