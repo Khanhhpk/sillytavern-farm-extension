@@ -1151,8 +1151,9 @@ function initFarm() {
           const ST_WorldInfo = await new Function("return import('/scripts/world-info.js')")().catch(()=>null);
           const activeNames = new Set();
           try {
-              const charData = window.characters?.[window.this_character]?.data;
-              console.log('[FARM DEBUG] Character Data:', charData ? 'Found' : 'Null', 'charId:', window.this_character);
+              const charId = ctx.characterId !== undefined ? ctx.characterId : window.this_character;
+              const charData = ctx.characters?.[charId]?.data || window.characters?.[charId]?.data;
+              console.log('[FARM DEBUG] Character Data:', charData ? 'Found' : 'Null', 'charId:', charId);
               if (charData) {
                   if (charData.extensions?.world) activeNames.add(charData.extensions.world);
                   if (charData.world) activeNames.add(charData.world);
@@ -1222,13 +1223,14 @@ function initFarm() {
 
       // 3. Try embedded character_book
       try {
-        if (window.characters && typeof window.this_character !== 'undefined') {
-          const charData = window.characters[window.this_character]?.data;
+        const charId = ctx.characterId !== undefined ? ctx.characterId : window.this_character;
+        if (typeof charId !== 'undefined') {
+          const charData = ctx.characters?.[charId]?.data || window.characters?.[charId]?.data;
           if (charData && charData.character_book && Array.isArray(charData.character_book.entries)) {
              entries = entries.concat(charData.character_book.entries);
           }
         }
-      } catch(e) {}
+      } catch(e) { console.log('[FARM DEBUG] Embedded Book Exception:', e); }
       
       if (!entries || entries.length === 0) return '';
       
