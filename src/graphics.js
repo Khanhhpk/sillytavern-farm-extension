@@ -404,7 +404,7 @@ export const LP = { '8':'#8ec8d8', '~':'#b8e0ea', '-':'#79b4c6', '_':'#6faabf', 
   export function warmUpCache(CROPS) {
     const tasks = [];
     Object.keys(PETS).forEach(p => tasks.push(() => petSVG(p, 48)));
-    Object.keys(SPRITES).forEach(s => tasks.push(() => spriteSVG(s, s === 'emBang' ? 48 : 24)));
+    Object.keys(SPR).forEach(s => tasks.push(() => spriteSVG(s, s === 'emBang' ? 48 : 24)));
     if (CROPS) {
       Object.keys(CROPS).forEach(c => {
         tasks.push(() => spriteSVG(CROPS[c].sp, 24));
