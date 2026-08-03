@@ -1,47 +1,44 @@
 /**
  * build.cjs – Builds index.js directly without Webpack.
- * Inlines CSS as a <style> tag injection, strips import statement.
+ * The game uses Shadow DOM. The 'style' variable must be a <style> element
+ * at module scope so initFarm() can do: sh.appendChild(style)
  */
 const fs = require('fs');
 const path = require('path');
 
-// 1. Read CSS, escape for use inside a JS template literal
+// 1. Read CSS, escape for template literal embedding
 let css = fs.readFileSync(path.join(__dirname, 'src/style.css'), 'utf8');
-// Escape backticks and backslashes so the CSS can be embedded in a template literal
 css = css.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
 
 // 2. Read JS source
 let js = fs.readFileSync(path.join(__dirname, 'src/index.js'), 'utf8');
 
-// Strip any injected globals header we added earlier
+// Strip injected globals header (if present)
 js = js.replace(/\/\/ Dynamically access ST variables[\s\S]*?const generateRaw = [^\n]*;\n\n?/g, '');
 
-// Strip the CSS import line
+// Strip CSS import line
 js = js.replace(/^import '\.\/style\.css';\n?/m, '');
 
-// Strip the existing export init (we'll add a clean one at the end)
-js = js.replace(/\nexport async function init\(\) \{[^}]*\}\s*$/m, '');
+// Strip existing export init (we add our own cleaner one at the end)
+js = js.replace(/\nexport async function init\(\) \{[^}]*\}\s*$/, '');
 
 // 3. Build final output
-const output = `// sillytavern-farm-extension – built by build.cjs (no webpack)
-// === CSS injection ===
-(function injectFarmCSS() {
-  if (document.getElementById('star-farm-style')) return;
-  const el = document.createElement('style');
-  el.id = 'star-farm-style';
-  el.textContent = \`${css}\`;
-  document.head.appendChild(el);
-})();
+// Key insight: initFarm() does sh.appendChild(style) where sh is a Shadow Root.
+// The 'style' variable must exist at module scope as a <style> DOM element.
+const output = `// sillytavern-farm-extension – built by build.cjs (no Webpack)
 
-// === Game code ===
+// Shadow DOM needs a <style> element. initFarm() calls sh.appendChild(style).
+const style = document.createElement('style');
+style.textContent = \`${css}\`;
+
 ${js}
 
-// === ST Extension Hook ===
+// ST Extension Hook
 export async function init() {
-  console.log('[Farm] init() called by SillyTavern hook');
+  console.log('[Farm] init() called by SillyTavern');
   initFarm();
 }
 `;
 
 fs.writeFileSync(path.join(__dirname, 'index.js'), output, 'utf8');
-console.log('Built index.js successfully (' + Buffer.byteLength(output) + ' bytes)');
+console.log('Built index.js (' + Buffer.byteLength(output) + ' bytes)');

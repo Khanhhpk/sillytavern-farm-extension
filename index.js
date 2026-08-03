@@ -1,10 +1,8 @@
-// sillytavern-farm-extension – built by build.cjs (no webpack)
-// === CSS injection ===
-(function injectFarmCSS() {
-  if (document.getElementById('star-farm-style')) return;
-  const el = document.createElement('style');
-  el.id = 'star-farm-style';
-  el.textContent = `
+// sillytavern-farm-extension – built by build.cjs (no Webpack)
+
+// Shadow DOM needs a <style> element. initFarm() calls sh.appendChild(style).
+const style = document.createElement('style');
+style.textContent = `
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
     /* ===== v1.0: chủ đề giao diện (hồng anh đào / trời quang), đổi ở trang cài đặt, S.theme lưu toàn cục ===== */
     .theme-sakura { --sky: radial-gradient(circle at 82% 40%, rgba(255,255,255,.55) 5px, transparent 6px), radial-gradient(circle at 12% 65%, rgba(255,255,255,.4) 4px, transparent 5px), linear-gradient(#f5c6d6, #e29ab8);
@@ -322,10 +320,7 @@
       border: 2px solid #c2a274; border-radius: 7px; font-size: 12px; font-weight: bold; color: #6b4f2e; cursor: pointer; }
     .pick.active { border-color: var(--accLine); background: var(--accBg); color: var(--accFg); }
   `;
-  document.head.appendChild(el);
-})();
 
-// === Game code ===
 
 /* ============================================================
  * Ai mà thèm làm nông dân trong SillyTavern chứ! · Bản chính thức v1.1
@@ -2577,8 +2572,8 @@ function initFarm() {
 }
 
 
-// === ST Extension Hook ===
+// ST Extension Hook
 export async function init() {
-  console.log('[Farm] init() called by SillyTavern hook');
+  console.log('[Farm] init() called by SillyTavern');
   initFarm();
 }
