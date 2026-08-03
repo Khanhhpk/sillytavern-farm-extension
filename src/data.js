@@ -37,4 +37,4 @@ export const MIN = 60 * 1000;export const GROW = TEST_MODE ? 5 * MIN : null;ex
     1: [0, 0, 800, 3000, 12000, 30000],
     2: [0, 2000, 6000, 18000, 45000, 90000],
     3: [0, 5000, 15000, 40000, 90000, 180000],
-  };export const blockPrice = bi => BLOCK_PRICE_PG[S.page][bi];export const WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ'];
+  };export const WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ'];

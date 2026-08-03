@@ -2051,7 +2051,7 @@ function initFarm() {
     try { Object.keys(petHopT).forEach(k => pwin.clearTimeout(petHopT[k])); } catch (e) {}
     try { Object.keys(petSleepT).forEach(k => pwin.clearTimeout(petSleepT[k])); } catch (e) {}
     try { endScene(); } catch (e) {}
-    try { if (saveTimer) { clearTimeout(saveTimer); updateVariablesWith(v => { v[NS] = S; return v; }, { type: 'global' }); } } catch (e) {}
+    try { if (saveTimer) { clearTimeout(saveTimer); save(true); } } catch (e) {}
     try { if (toastTimer) pwin.clearTimeout(toastTimer); } catch (e) {}
     while (disposers.length) { try { disposers.pop()(); } catch (e) {} }
     try { setInjection(''); } catch (e) {}
