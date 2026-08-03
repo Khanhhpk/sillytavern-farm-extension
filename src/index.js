@@ -837,17 +837,22 @@ function initFarm() {
           const activeNames = new Set();
           try {
               const charData = window.characters?.[window.this_character]?.data;
+              console.log('[FARM DEBUG] Character Data:', charData ? 'Found' : 'Null', 'charId:', window.this_character);
               if (charData) {
                   if (charData.extensions?.world) activeNames.add(charData.extensions.world);
                   if (charData.world) activeNames.add(charData.world);
               }
               const wiKey = ST_WorldInfo?.METADATA_KEY || window.WI_METADATA_KEY || 'world_info';
               const chatWorldName = ctx.chatMetadata?.[wiKey];
+              console.log('[FARM DEBUG] Chat World Name:', chatWorldName);
               if (chatWorldName && typeof chatWorldName === 'string') activeNames.add(chatWorldName);
-          } catch(e) {}
+          } catch(e) { console.log('[FARM DEBUG] Error getting active names:', e); }
           
+          console.log('[FARM DEBUG] Active Worldbook Names to Fetch:', Array.from(activeNames));
+
           for (const name of activeNames) {
               try {
+                  console.log('[FARM DEBUG] Fetching API for:', name);
                   const res = await fetch('/api/worldinfo/get', {
                       method: 'POST',
                       headers: {
@@ -858,17 +863,20 @@ function initFarm() {
                   });
                   if (res.ok) {
                       const data = await res.json();
+                      console.log('[FARM DEBUG] Fetched API data entries length:', Array.isArray(data.entries) ? data.entries.length : 'Not Array');
                       if (data && Array.isArray(data.entries)) entries = entries.concat(data.entries);
                   } else {
+                      console.log('[FARM DEBUG] API Failed, status:', res.status);
                       const book = ST_WorldInfo?.world_info?.[name];
                       if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
                   }
               } catch(e) {
+                  console.log('[FARM DEBUG] Fetch Exception:', e);
                   const book = ST_WorldInfo?.world_info?.[name];
                   if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
               }
           }
-      } catch (e) {}
+      } catch (e) { console.log('[FARM DEBUG] Outer Exception:', e); }
 
       // 1. Try ctx.worldInfo
       if (ctx.worldInfo && Array.isArray(ctx.worldInfo.entries)) {
