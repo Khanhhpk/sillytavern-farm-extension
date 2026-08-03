@@ -1819,7 +1819,7 @@ function initFarm() {
         for (let j = 0; j < 4; j++) {
           html += `<div class="plot" data-pi="${b * 4 + j}"></div>`;
         }
-        html += `<div class="sign-wrap"></div></div>`;
+        html += `</div>`;
       }
       wrap.innerHTML = html;
     }
@@ -1836,19 +1836,40 @@ function initFarm() {
         blockEl.classList.toggle('locked', locked);
       }
       
-      const signWrap = blockEl.lastElementChild;
+      let signEl = blockEl.lastElementChild;
+      const hasSign = signEl && signEl.classList.contains('sign');
+      
       if (locked) {
         const next = b === nb;
         const confirming = buyConfirm.b === b && now() < buyConfirm.until;
         const poor = S.coins < blockPrice(b);
+        
+        const sclassName = next ? (confirming ? "sign confirm" : (poor ? "sign poor" : "sign")) : "sign";
         const shtml = next
           ? (confirming
-            ? `<div class="sign confirm" data-buy="${b}">Bấm lần nữa<small>xác nhận chi ${blockPrice(b).toLocaleString()} G</small></div>`
-            : `<div class="sign${poor ? ' poor' : ''}" data-buy="${b}">Khai hoang<small>${spriteSVG('coin', 13)}${blockPrice(b).toLocaleString()} G</small></div>`)
-          : `<div class="sign" style="opacity:.55">Chưa mở<small>khai hoang ô trước đã</small></div>`;
-        if (signWrap.innerHTML !== shtml) signWrap.innerHTML = shtml;
+            ? `Bấm lần nữa<small>xác nhận chi ${blockPrice(b).toLocaleString()} G</small>`
+            : `Khai hoang<small>${spriteSVG('coin', 13)}${blockPrice(b).toLocaleString()} G</small>`)
+          : `Chưa mở<small>khai hoang ô trước đã</small>`;
+          
+        if (!hasSign) {
+          signEl = document.createElement('div');
+          signEl.className = sclassName;
+          if (!next) signEl.style.opacity = '0.55';
+          if (next) signEl.dataset.buy = String(b);
+          signEl.innerHTML = shtml;
+          blockEl.appendChild(signEl);
+        } else {
+          if (signEl.className !== sclassName) signEl.className = sclassName;
+          if (!next && signEl.style.opacity !== '0.55') signEl.style.opacity = '0.55';
+          if (next && signEl.style.opacity === '0.55') signEl.style.opacity = '';
+          
+          if (next && signEl.dataset.buy !== String(b)) signEl.dataset.buy = String(b);
+          if (!next && signEl.dataset.buy !== undefined) delete signEl.dataset.buy;
+          
+          if (signEl.innerHTML !== shtml) signEl.innerHTML = shtml;
+        }
       } else {
-        if (signWrap.innerHTML !== '') signWrap.innerHTML = '';
+        if (hasSign) signEl.remove();
       }
 
       for (let j = 0; j < 4; j++) {
