@@ -2219,8 +2219,22 @@ QUY TẮC BẮT BUỘC:
     while (disposers.length) { try { disposers.pop()(); } catch (e) {} }
     try { setInjection(''); } catch (e) {}
     try { root.remove(); } catch (e) {}
+    try { if (extMenuBtn) extMenuBtn.remove(); } catch (e) {}
     try { if (pwin[RUNTIME_KEY] === api) delete pwin[RUNTIME_KEY]; } catch (e) {}
   }
+
+  // Thêm nút mở nông trại vào menu công cụ (magic wand) của SillyTavern
+  const extMenu = pdoc.getElementById('rm_extensions_block') || pdoc.getElementById('extensions_menu');
+  let extMenuBtn = null;
+  if (extMenu) {
+    extMenuBtn = pdoc.createElement('div');
+    extMenuBtn.className = 'list-group-item flex-container flexGap5';
+    extMenuBtn.style.cursor = 'pointer';
+    extMenuBtn.innerHTML = '<div class="fa-solid fa-leaf"></div>Nông Trại';
+    extMenuBtn.addEventListener('click', toggleWin);
+    extMenu.appendChild(extMenuBtn);
+  }
+
   const api = { destroy };
   pwin[RUNTIME_KEY] = api;
   renderToolbar();
