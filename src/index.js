@@ -927,18 +927,27 @@ function initFarm() {
     eventPending = true; renderBanner();
     try {
       const prompt = buildEventPrompt(await collectWorldbook());
-      const res = await Promise.race([
-        generateRaw({
-          ordered_prompts: [
-            { role: 'system', content: prompt },
-            { role: 'user', content: 'Hãy tạo sự kiện vườn rau cho hôm nay.' },
-          ],
-          max_chat_history: 0,
-          custom_api: { apiurl: SEC.url, key: SEC.key, model: SEC.model, source: 'openai', max_tokens: 800 + Object.keys(CROPS).length * 100 },
-        }),
-        new Promise((_, rej) => pwin.setTimeout(() => rej(new Error('timeout')), 90000)),   // v0.8: 15 mô tả nên lượng sinh ra lớn, 30s→90s (model biết suy nghĩ cũng đủ thở)
+      const reqBody = {
+        model: SEC.model,
+        messages: [
+          { role: 'system', content: prompt },
+          { role: 'user', content: 'Hãy tạo sự kiện vườn rau cho hôm nay.' }
+        ],
+        max_tokens: 800 + Object.keys(CROPS).length * 100
+      };
+      const resPromise = fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(SEC.key ? { Authorization: 'Bearer ' + SEC.key } : {}) },
+        body: JSON.stringify(reqBody)
+      }).then(r => r.json());
+
+      const data = await Promise.race([
+        resPromise,
+        new Promise((_, rej) => pwin.setTimeout(() => rej(new Error('timeout')), 90000)),   // v0.8: 15 mô tả nên lượng sinh ra lớn, 30s→90s
       ]);
-      const raw = String(res == null ? '' : res);
+      
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      const raw = data.choices && data.choices[0] && data.choices[0].message ? String(data.choices[0].message.content) : '';
       const jtxt = extractJson(raw);                      // Trích theo cặp ngoặc (hỗ trợ đối tượng lồng nhau, regex không tham lam sẽ cắt cụt mutate_desc)
       if (!jtxt) throw new Error(raw.trim() ? 'Không có JSON, model trả về: ' + raw.trim().slice(0, 40) : 'Model trả về rỗng (có thể max_tokens bị phần suy nghĩ ăn hết / API không xuất gì)');
       const ev = sanitizeEvent(JSON.parse(jtxt));
@@ -967,15 +976,25 @@ function initFarm() {
     if (!SEC.url || !SEC.model) return toast('Hãy điền địa chỉ API và tên model trước');
     toast('Đang kiểm tra kết nối…');
     try {
-      const r = await Promise.race([
-        generateRaw({
-          ordered_prompts: [{ role: 'user', content: 'Chỉ trả lời đúng hai chữ: Có mặt' }],
-          max_chat_history: 0,
-          custom_api: { apiurl: SEC.url, key: SEC.key, model: SEC.model, source: 'openai', max_tokens: 16 },
-        }),
+      const reqBody = {
+        model: SEC.model,
+        messages: [{ role: 'user', content: 'Chỉ trả lời đúng hai chữ: Có mặt' }],
+        max_tokens: 16
+      };
+      const resPromise = fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(SEC.key ? { Authorization: 'Bearer ' + SEC.key } : {}) },
+        body: JSON.stringify(reqBody)
+      }).then(r => r.json());
+
+      const data = await Promise.race([
+        resPromise,
         new Promise((_, rej) => pwin.setTimeout(() => rej(new Error('Quá thời gian chờ (20s)')), 20000)),
       ]);
-      toast('Kết nối thành công: ' + String(r).trim().slice(0, 20));
+      
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      const raw = data.choices && data.choices[0] && data.choices[0].message ? String(data.choices[0].message.content) : '';
+      toast('Kết nối thành công: ' + raw.trim().slice(0, 20));
     } catch (e) { toast('Kết nối thất bại: ' + ((e && e.message) || e)); }
   }
 
