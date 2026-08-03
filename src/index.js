@@ -1246,7 +1246,7 @@ function initFarm() {
     if (!ev || !(ev.mutate_on_fert > 0)) return;
     const fertN = (c.fertUsed && c.fertUsed.compost ? 1 : 0) + (c.fertUsed && c.fertUsed.shiny ? 1 : 0);
     if (Math.random() < ev.mutate_on_fert * (0.3 + 0.35 * fertN)) {
-      c.mut = (ev.mutate_prefix || 'đột biến').slice(0, 5);
+      c.mut = (ev.mutate_prefix || 'đột biến').slice(0, 20);
       if (!S.mutDesc) S.mutDesc = {};
       const cname = CROPS[c.id].name;                     // #19: mô tả chức năng lưu theo cây (tiền tố@cây)
       const dsc = ev.mutate_desc && (ev.mutate_desc[cname] || ev.mutate_desc['*']);
