@@ -626,6 +626,154 @@ function initFarm() {
       applyDayEvent(fallbackEvent(), 'fallback', ((e && e.message) || String(e)).slice(0, 60));
     } finally { eventPending = false; renderBanner(); }
   }
+
+  async function secTest() {
+    const p = $id('secTest');
+    const ori = p.textContent;
+    p.textContent = 'Đang gọi…'; p.style.pointerEvents = 'none';
+    try {
+      const reqBody = {
+        model: SEC.model,
+        messages: [{ role: 'user', content: 'Chỉ trả lời đúng hai chữ: Có mặt' }],
+        max_tokens: 16
+      };
+      const resPromise = fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(SEC.key ? { Authorization: 'Bearer ' + SEC.key } : {}) },
+        body: JSON.stringify(reqBody)
+      }).then(r => r.json());
+
+      const res = await Promise.race([ resPromise, new Promise((_, rj) => pwin.setTimeout(() => rj(new Error('Timeout 10s')), 10000)) ]);
+      if (res.error) throw new Error(res.error.message || JSON.stringify(res.error));
+      const text = (res.choices?.[0]?.message?.content || '').trim();
+      toast('Kết nối OK! AI đáp: ' + text);
+    } catch (e) {
+      toast('Lỗi kết nối API: ' + e.message);
+    }
+    p.textContent = ori; p.style.pointerEvents = '';
+  }
+
+  function openSandbox() {
+    const html = `
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px;display:flex;flex-direction:column;gap:8px">
+          <div class="shead" style="margin-top:0">Tạo Sprite bằng AI</div>
+          <div class="note">Nhập ý tưởng (VD: Thanh kiếm lửa, bình mana) để AI tự động xếp mã 16x16. Dùng chung API ở phần cài đặt.</div>
+          <select class="inp" id="sbPalette" style="padding:6px;width:100%">
+            <option value="SPRITES">Bảng màu Nông sản/Vật phẩm (P)</option>
+            <option value="PETS">Bảng màu Thú cưng (PET_P)</option>
+          </select>
+          <textarea class="inp" id="sbPrompt" placeholder="Nhập ý tưởng pixel art (gõ tiếng Việt cũng được)..." style="height:60px"></textarea>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="buy" id="sbGenerate">✨ Tạo bằng AI</span>
+            <span id="sbStatus" style="font-size:12px;color:var(--accFg)"></span>
+          </div>
+          <div class="shead">Mã Pixel (16x16)</div>
+          <div class="note">Dấu . là trong suốt. Dán hoặc sửa mảng JSON vào đây để xem thử trên bảng vẽ.</div>
+          <textarea class="inp" id="sbCode" style="height:200px;font-family:monospace;white-space:pre"></textarea>
+        </div>
+        <div style="width:256px;display:flex;flex-direction:column;gap:8px">
+          <div class="shead" style="margin-top:0">Bản xem trước</div>
+          <canvas id="sbCanvas" width="256" height="256" style="background:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAHElEQVQYV2N89erVfwY0wAgSVBVE1ThqOCrcCwCPpBzhjVq6gQAAAABJRU5ErkJggg==');image-rendering:pixelated;border:2px solid var(--st-border-color);border-radius:4px;width:100%"></canvas>
+        </div>
+      </div>
+    `;
+    openModal('Xưởng Chế Tác', html);
+
+    const ta = $id('sbCode');
+    const sel = $id('sbPalette');
+    const ctx = $id('sbCanvas').getContext('2d');
+    
+    function render() {
+      const isPet = sel.value === 'PETS';
+      const palette = isPet ? PET_P : P;
+      ctx.clearRect(0, 0, 256, 256);
+      
+      const lines = ta.value.split('\n').map(l => l.trim().replace(/['",\[\]]/g, '')).filter(l => l.length > 0);
+      const pxSize = 256 / 16;
+      for (let y = 0; y < Math.min(16, lines.length); y++) {
+        const row = lines[y];
+        for (let x = 0; x < Math.min(16, row.length); x++) {
+          const char = row[x];
+          if (char !== '.') {
+            const color = palette[char];
+            if (color && typeof color === 'string') { // exclude gradients for now
+              ctx.fillStyle = color;
+              ctx.fillRect(x * pxSize, y * pxSize, pxSize, pxSize);
+            }
+          }
+        }
+      }
+    }
+
+    ta.addEventListener('input', render);
+    sel.addEventListener('change', render);
+
+    $id('sbGenerate').addEventListener('click', async () => {
+      const p = $id('sbPrompt').value.trim();
+      if (!p) return toast('Vui lòng nhập ý tưởng!');
+      if (!SEC.url) return toast('Vui lòng cấu hình API trong Cài đặt trước!');
+      
+      $id('sbGenerate').style.pointerEvents = 'none';
+      $id('sbGenerate').style.opacity = '0.5';
+      $id('sbStatus').textContent = 'Đang gọi AI...';
+      
+      try {
+        const isPet = sel.value === 'PETS';
+        const palette = isPet ? PET_P : P;
+        // Filter out gradient objects, only send simple colors
+        const simpleColors = Object.entries(palette).filter(e => typeof e[1] === 'string');
+        const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(', ');
+        
+        const sysPrompt = `Bạn là một chuyên gia Pixel Art 16x16.
+Nhiệm vụ: Vẽ một đồ vật dựa trên yêu cầu của người dùng, sử dụng CHỈ CÁC MÃ MÀU TRONG BẢNG MÀU SAU ĐÂY:
+${paletteStr}
+
+QUY TẮC BẮT BUỘC:
+1. Bản vẽ là một mảng JSON gồm 16 chuỗi. Mỗi chuỗi DÀI CHÍNH XÁC 16 KÝ TỰ.
+2. Dùng dấu chấm '.' cho vùng trong suốt (không có màu).
+3. Dùng CHỈ CÁC KÝ TỰ trong bảng màu được cung cấp để tô màu.
+4. KHÔNG dùng ký tự nào nằm ngoài bảng màu.
+5. Cấm viết bất kỳ giải thích nào. CHỈ trả về mảng JSON hợp lệ. Bắt đầu bằng [ và kết thúc bằng ].`;
+
+        const reqBody = {
+          model: SEC.model,
+          messages: [
+            { role: 'system', content: sysPrompt },
+            { role: 'user', content: 'Vẽ: ' + p }
+          ],
+          max_tokens: 1500
+        };
+
+        const res = await fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...(SEC.key ? { Authorization: 'Bearer ' + SEC.key } : {}) },
+          body: JSON.stringify(reqBody)
+        });
+        
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const content = data.choices?.[0]?.message?.content || '';
+        
+        const match = content.match(/\[[\s\S]*?\]/);
+        if (match) {
+          ta.value = match[0];
+          render();
+          $id('sbStatus').textContent = 'Hoàn tất!';
+        } else {
+          throw new Error('AI không trả về mảng JSON');
+        }
+      } catch (e) {
+        console.error(e);
+        $id('sbStatus').textContent = 'Lỗi!';
+        toast('Lỗi AI: ' + e.message);
+      } finally {
+        $id('sbGenerate').style.pointerEvents = '';
+        $id('sbGenerate').style.opacity = '1';
+      }
+    });
+  }
+
   function applyDayEvent(ev, source, reason) {
     const d = gameDay();
     S.dayEvent = { day: d, at: now(), who: charName(), ev, source, reason: reason || '' };   // at = mốc neo tính giờ, gieo lại thủ công cũng dời theo
