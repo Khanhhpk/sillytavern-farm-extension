@@ -322,7 +322,6 @@ style.textContent = `
   `;
 
 // ST globals – declared as 'let' at module scope so initFarm() can close over them.
-// Populated inside init() via dynamic import (extension_settings is NOT on window).
 let extension_settings, eventSource, event_types, saveSettingsDebounced, generateRaw;
 
 
@@ -2589,42 +2588,52 @@ function initFarm() {
 
 // ST Extension Hook
 export async function init() {
-  // Dynamic import of ST's own module exports (not available on window)
+  // The extension is served from:
+  //   /scripts/extensions/third-party/sillytavern-farm-extension/index.js
+  // So '../../../' resolves to /scripts/ which is where extensions.js and script.js live.
+
   try {
-    const extMod = await import('../../extensions.js');
-    extension_settings   = extMod.extension_settings;
+    const extMod = await import('../../../extensions.js');
+    extension_settings    = extMod.extension_settings;
     saveSettingsDebounced = extMod.saveSettingsDebounced;
-    eventSource          = extMod.eventSource;
-    event_types          = extMod.event_types;
+    eventSource           = extMod.eventSource;
+    event_types           = extMod.event_types;
+    console.log('[Farm] Loaded from extensions.js – ext_settings:', typeof extension_settings, '| save:', typeof saveSettingsDebounced);
   } catch (e) {
-    console.warn('[Farm] Could not import extensions.js:', e.message);
+    console.warn('[Farm] extensions.js import failed:', e.message);
   }
 
-  // saveSettingsDebounced may live in script.js instead
   if (typeof saveSettingsDebounced !== 'function') {
     try {
-      const scriptMod = await import('../../script.js');
-      saveSettingsDebounced = scriptMod.saveSettingsDebounced;
-      if (!eventSource)    eventSource   = scriptMod.eventSource;
-      if (!event_types)    event_types   = scriptMod.event_types;
-      if (!generateRaw)    generateRaw   = scriptMod.generateRaw;
+      const scriptMod = await import('../../../script.js');
+      if (!saveSettingsDebounced) saveSettingsDebounced = scriptMod.saveSettingsDebounced;
+      if (!eventSource)           eventSource           = scriptMod.eventSource;
+      if (!event_types)           event_types           = scriptMod.event_types;
+      if (!generateRaw)           generateRaw           = scriptMod.generateRaw;
+      console.log('[Farm] Loaded from script.js – save:', typeof saveSettingsDebounced);
     } catch (e) {
-      console.warn('[Farm] Could not import script.js:', e.message);
+      console.warn('[Farm] script.js import failed:', e.message);
     }
   }
 
-  // Absolute fallback: use SillyTavern.getContext()
-  if (!extension_settings) {
+  // Fallback: SillyTavern.getContext()
+  if (!extension_settings || typeof saveSettingsDebounced !== 'function') {
     try {
       const ctx = window.SillyTavern?.getContext?.() || {};
-      extension_settings    = ctx.extensionSettings || ctx.extension_settings || {};
-      saveSettingsDebounced = ctx.saveSettingsDebounced || (() => {});
+      if (!extension_settings)                  extension_settings    = ctx.extensionSettings || ctx.extension_settings;
+      if (typeof saveSettingsDebounced !== 'function') saveSettingsDebounced = ctx.saveSettingsDebounced;
+      if (!eventSource)                         eventSource           = ctx.eventSource;
+      if (!event_types)                         event_types           = ctx.eventTypes || ctx.event_types;
+      if (!generateRaw)                         generateRaw           = ctx.generateRaw;
+      console.log('[Farm] Fallback getContext() – ext_settings:', typeof extension_settings, '| save:', typeof saveSettingsDebounced);
     } catch (e) {}
   }
-  if (!extension_settings) extension_settings = {};
-  if (typeof saveSettingsDebounced !== 'function') saveSettingsDebounced = () => {};
 
-  console.log('[Farm] init() – extension_settings ok:', !!extension_settings,
-              '| saveSettingsDebounced ok:', typeof saveSettingsDebounced === 'function');
+  if (!extension_settings) extension_settings = {};
+  if (typeof saveSettingsDebounced !== 'function') saveSettingsDebounced = () => console.warn('[Farm] saveSettingsDebounced not available!');
+
+  // Debug: confirm what we actually have
+  console.log('[Farm] init() READY – ext_settings keys:', Object.keys(extension_settings).length, '| save fn:', typeof saveSettingsDebounced);
+
   initFarm();
 }
