@@ -1,17 +1,13 @@
 import { MIN, DAY_MS, REGROW_MAX, POKE_CD, PETS_OUT_MAX, SNAP_EDGE, CROPS, ZONE_NAME, BLOCK_PRICE_PG, WEATHERS, PETS, FLOATY } from './data.js';
 import { petSVG, spriteSVG, tileURI, getWitchSVG, getPetWitchSVG } from './graphics.js';
-
-// Dynamically access ST variables to avoid ES module import path issues
-const getContext = () => window.getContext ? window.getContext() : ((typeof window.SillyTavern !== 'undefined' && window.SillyTavern.getContext) ? window.SillyTavern.getContext() : {});
-const ST_context = getContext();
-
-const extension_settings = window.extension_settings || ST_context.extension_settings || {};
-const eventSource = window.eventSource || ST_context.eventSource;
-const event_types = window.event_types || ST_context.event_types;
-const saveSettingsDebounced = window.saveSettingsDebounced || ST_context.saveSettingsDebounced;
-const generateRaw = window.generateRaw || ST_context.generateRaw;
-
 import styleCSS from './style.css';
+
+// ST globals – dùng `let` để init() có thể reassign sau khi ST load xong
+let extension_settings = {};
+let eventSource        = null;
+let event_types        = null;
+let saveSettingsDebounced = null;
+let generateRaw        = null;
 
 /* ============================================================
  * Ai mà thèm làm nông dân trong SillyTavern chứ! · Bản chính thức v1.1
@@ -838,13 +834,7 @@ function initFarm() {
   function toggleWin() {
     if (win.classList.contains('open')) { closeWin(); return; }
     win.classList.add('open');
-    layout(); placeWin(); settle();
-    
-    // Tối ưu hiệu năng: Đợi CSS animation mở cửa sổ bắt đầu rồi mới render SVG nặng, tránh khựng lúc bấm bóng
-    pwin.requestAnimationFrame(() => pwin.requestAnimationFrame(() => {
-      if (!win.classList.contains('open')) return;
-      renderAll();
-    }));
+    layout(); placeWin(); settle(); renderAll();
     tick = pwin.setInterval(() => { renderDynamic(); }, 1000);
   }
   function closeWin() {
@@ -2058,4 +2048,18 @@ function initFarm() {
   if (CS.link) requestDayEvent();                          // Không mở bảng cũng phải có sự kiện trong ngày (để phục vụ phần tiêm)
 }
 
-export async function init() { initFarm(); }
+export async function init() {
+  // Lấy đúng ST context lúc runtime, KHÔNG phải lúc parse module
+  try {
+    const ctx = window.SillyTavern && window.SillyTavern.getContext ? window.SillyTavern.getContext() : {};
+    extension_settings    = ctx.extensionSettings || window.extension_settings || {};
+    saveSettingsDebounced = ctx.saveSettingsDebounced || window.saveSettingsDebounced || (() => {});
+    eventSource           = ctx.eventSource || window.eventSource;
+    event_types           = ctx.eventTypes  || window.event_types;
+    generateRaw           = ctx.generateRaw || window.generateRaw;
+    console.log('[Farm] Kết nối ST Context thành công!');
+  } catch (e) {
+    console.error('[Farm] Lỗi khi kết nối ST Context:', e);
+  }
+  initFarm();
+}
