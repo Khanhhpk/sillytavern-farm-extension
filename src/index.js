@@ -831,24 +831,41 @@ function initFarm() {
       
       const ctx = (window.SillyTavern && window.SillyTavern.getContext) ? window.SillyTavern.getContext() : {};
       
-      // 0. Use native ST ES Module if available
+      // 0. Use native ST ES Module and Backend API (Kaiz-Agent Method)
       try {
-          const ST_WorldInfo = await new Function("return import('/scripts/world-info.js')")();
-          if (ST_WorldInfo) {
-              const activeNames = new Set();
+          const ST_WorldInfo = await new Function("return import('/scripts/world-info.js')")().catch(()=>null);
+          const activeNames = new Set();
+          try {
+              const charData = window.characters?.[window.this_character]?.data;
+              if (charData) {
+                  if (charData.extensions?.world) activeNames.add(charData.extensions.world);
+                  if (charData.world) activeNames.add(charData.world);
+              }
+              const wiKey = ST_WorldInfo?.METADATA_KEY || window.WI_METADATA_KEY || 'world_info';
+              const chatWorldName = ctx.chatMetadata?.[wiKey];
+              if (chatWorldName && typeof chatWorldName === 'string') activeNames.add(chatWorldName);
+          } catch(e) {}
+          
+          for (const name of activeNames) {
               try {
-                  const charData = window.characters?.[window.this_character]?.data;
-                  if (charData) {
-                      if (charData.extensions?.world) activeNames.add(charData.extensions.world);
-                      if (charData.world) activeNames.add(charData.world);
-                  }
-              } catch(e) {}
-              
-              if (ST_WorldInfo.world_info) {
-                  activeNames.forEach(name => {
-                      const book = ST_WorldInfo.world_info[name];
-                      if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+                  const res = await fetch('/api/worldinfo/get', {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json',
+                          ...(typeof ctx.getRequestHeaders === 'function' ? ctx.getRequestHeaders() : {})
+                      },
+                      body: JSON.stringify({ name })
                   });
+                  if (res.ok) {
+                      const data = await res.json();
+                      if (data && Array.isArray(data.entries)) entries = entries.concat(data.entries);
+                  } else {
+                      const book = ST_WorldInfo?.world_info?.[name];
+                      if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+                  }
+              } catch(e) {
+                  const book = ST_WorldInfo?.world_info?.[name];
+                  if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
               }
           }
       } catch (e) {}
