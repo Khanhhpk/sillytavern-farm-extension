@@ -831,14 +831,24 @@ function initFarm() {
       
       const ctx = (window.SillyTavern && window.SillyTavern.getContext) ? window.SillyTavern.getContext() : {};
       
-      // 0. Use native ST functions if available
+      // 0. Use native ST ES Module if available
       try {
-          if (typeof window.getCharWorldbookNames === 'function' && typeof window.getWorldbook === 'function') {
-              const names = await window.getCharWorldbookNames('current');
-              const list = [names && names.primary].concat((names && names.additional) || []).filter(Boolean);
-              for (const nm of list) {
-                  const ents = await window.getWorldbook(nm);
-                  if (Array.isArray(ents)) entries = entries.concat(ents);
+          const ST_WorldInfo = await new Function("return import('/scripts/world-info.js')")();
+          if (ST_WorldInfo) {
+              const activeNames = new Set(ST_WorldInfo.selected_world_info || window.selected_world_info || []);
+              try {
+                  const charData = window.characters?.[window.this_character]?.data;
+                  if (charData) {
+                      if (charData.extensions?.world) activeNames.add(charData.extensions.world);
+                      if (charData.world) activeNames.add(charData.world);
+                  }
+              } catch(e) {}
+              
+              if (ST_WorldInfo.world_info) {
+                  activeNames.forEach(name => {
+                      const book = ST_WorldInfo.world_info[name];
+                      if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+                  });
               }
           }
       } catch (e) {}
