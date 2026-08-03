@@ -838,7 +838,7 @@ function initFarm() {
         }
       }
       const txt = blue.length >= 400 ? blue : blue + '\n' + green;
-      return txt.slice(0, 2000);
+      return txt.slice(0, 20000);
     } catch (e) { return ''; }
   }
 
@@ -933,7 +933,7 @@ function initFarm() {
           { role: 'system', content: prompt },
           { role: 'user', content: 'Hãy tạo sự kiện vườn rau cho hôm nay.' }
         ],
-        max_tokens: 800 + Object.keys(CROPS).length * 100
+        max_tokens: 2000 + Object.keys(CROPS).length * 100
       };
       const resPromise = fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
         method: 'POST',
@@ -1748,7 +1748,7 @@ function initFarm() {
         toast(S.theme === 'sky' ? 'Đổi sang giao diện trời quang~' : 'Về lại giao diện hồng anh đào~');
       }));
       $id('csPromptSave').addEventListener('click', () => {
-        CS.userPrompt = $id('csPrompt').value.slice(0, 500);
+        CS.userPrompt = $id('csPrompt').value.slice(0, 3000);
         saveCharState(); toast('Đã lưu vào thẻ nhân vật hiện tại');
       });
       let armed = false;
