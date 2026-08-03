@@ -1141,20 +1141,61 @@ function initFarm() {
   /* Trích world book: chỉ đọc, ưu tiên đèn xanh dương, thiếu thì bù đèn xanh lá, cắt còn 2000 chữ */
   async function collectWorldbook() {
     try {
-      const names = await [] // getCharWorldbookNames('current');
-      const list = [names && names.primary].concat((names && names.additional) || []).filter(Boolean);
       let blue = '', green = '';
-      for (const nm of list) {
-        const entries = await null // getWorldbook(nm);
-        for (const en of entries) {
-          if (!en.enabled) continue;
-          if (en.strategy && en.strategy.type === 'constant') blue += en.content + '\n';
-          else green += en.content + '\n';
-        }
+      let entries = [];
+      
+      const ctx = (window.SillyTavern && window.SillyTavern.getContext) ? window.SillyTavern.getContext() : {};
+      
+      // 1. Try ctx.worldInfo
+      if (ctx.worldInfo && Array.isArray(ctx.worldInfo.entries)) {
+        entries = entries.concat(ctx.worldInfo.entries);
+      } 
+      else if (ctx.worldInfo && typeof ctx.worldInfo === 'object') {
+         Object.values(ctx.worldInfo).forEach(book => {
+           if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+         });
       }
+
+      // 2. Try window.world_info
+      if (window.world_info && typeof window.world_info === 'object') {
+         Object.values(window.world_info).forEach(book => {
+           if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+           else if (book && typeof book === 'object' && !Array.isArray(book)) {
+               // Sometimes book itself is just the entry or has an entries list
+               if (book.content || book.text) entries.push(book);
+           }
+         });
+      }
+
+      // 3. Try embedded character_book
+      try {
+        if (window.characters && typeof window.this_character !== 'undefined') {
+          const charData = window.characters[window.this_character]?.data;
+          if (charData && charData.character_book && Array.isArray(charData.character_book.entries)) {
+             entries = entries.concat(charData.character_book.entries);
+          }
+        }
+      } catch(e) {}
+      
+      if (!entries || entries.length === 0) return '';
+      
+      const seen = new Set();
+      for (const en of entries) {
+        if (en.enabled === false) continue;
+        const content = (en.content || en.text || '').trim();
+        if (!content || seen.has(content)) continue;
+        seen.add(content);
+        
+        const isConstant = (en.strategy && en.strategy.type === 'constant') || en.constant === true || en.position === 'before_char';
+        if (isConstant) blue += content + '\n';
+        else green += content + '\n';
+      }
+      
       const txt = blue.length >= 400 ? blue : blue + '\n' + green;
       return txt.slice(0, 20000);
-    } catch (e) { return ''; }
+    } catch (e) { 
+      return ''; 
+    }
   }
 
   /* Prompt cài sẵn (lớp khoá, phương án thi công §3); TENDENCY random ở phía code: tích cực 60 / trung tính 30 / tiêu cực 10 */
