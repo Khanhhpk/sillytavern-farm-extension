@@ -1,6 +1,6 @@
 // sillytavern-farm-extension – built by build.cjs (no Webpack)
 
-// Shadow DOM needs a <style> element. initFarm() calls sh.appendChild(style).
+// Shadow DOM style element – used by initFarm() via sh.appendChild(style)
 const style = document.createElement('style');
 style.textContent = `
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
@@ -320,6 +320,10 @@ style.textContent = `
       border: 2px solid #c2a274; border-radius: 7px; font-size: 12px; font-weight: bold; color: #6b4f2e; cursor: pointer; }
     .pick.active { border-color: var(--accLine); background: var(--accBg); color: var(--accFg); }
   `;
+
+// ST globals – declared here as 'let' so initFarm() can close over them.
+// Assigned in init() when ST is guaranteed to have loaded them onto window.
+let extension_settings, eventSource, event_types, saveSettingsDebounced, generateRaw;
 
 
 /* ============================================================
@@ -2574,6 +2578,13 @@ function initFarm() {
 
 // ST Extension Hook
 export async function init() {
+  // Grab ST globals from window (ST is fully ready by the time init() fires)
+  extension_settings = window.extension_settings || {};
+  eventSource       = window.eventSource;
+  event_types       = window.event_types;
+  saveSettingsDebounced = window.saveSettingsDebounced;
+  generateRaw       = window.generateRaw;
+
   console.log('[Farm] init() called by SillyTavern');
   initFarm();
 }
