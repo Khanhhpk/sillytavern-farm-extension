@@ -168,8 +168,8 @@ style.textContent = `
       pointer-events: none; animation: pbfloat 1.6s ease forwards; z-index: 9; }
     .pet[data-pet="octo"] .pbubble { border-color: #ab84dd; color: #7a54b5; background: #fdfbff; }
     .emote { position: absolute; pointer-events: none; z-index: 8; animation: pbfloat 1.2s ease forwards; }
-    @keyframes pbfloat { 0% { opacity: 0; margin-bottom: -4px; } 15% { opacity: 1; margin-bottom: 0; }
-      70% { opacity: 1; } 100% { opacity: 0; margin-bottom: 10px; } }
+    @keyframes pbfloat { 0% { opacity: 0; transform: translateY(4px); } 15% { opacity: 1; transform: translateY(0); }
+      70% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-10px); } }
     .fdot { position: absolute; left: 4px; top: 4px; width: 7px; height: 7px; border-radius: 50%;
       background: #6cb457; border: 1px solid #3e7d3a; z-index: 3; }
     .dbot { display: none; }
@@ -1540,9 +1540,13 @@ function initFarm() {
   orb.addEventListener('pointermove', onOrbMove);
   orb.addEventListener('pointerup', e => onOrbUp(e, false));
   orb.addEventListener('pointercancel', e => onOrbUp(e, true));
+  let resizeTimer = null;
   const onResize = () => {
-    placeOrb();
-    if (win.classList.contains('open')) { layout(); placeWin(); renderPlots(); }
+    if (resizeTimer) pwin.clearTimeout(resizeTimer);
+    resizeTimer = pwin.setTimeout(() => {
+      placeOrb();
+      if (win.classList.contains('open')) { layout(); placeWin(); renderPlots(); }
+    }, 150);
   };
   pwin.addEventListener('resize', onResize);
   disposers.push(() => pwin.removeEventListener('resize', onResize));

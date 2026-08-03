@@ -1225,9 +1225,13 @@ function initFarm() {
   orb.addEventListener('pointermove', onOrbMove);
   orb.addEventListener('pointerup', e => onOrbUp(e, false));
   orb.addEventListener('pointercancel', e => onOrbUp(e, true));
+  let resizeTimer = null;
   const onResize = () => {
-    placeOrb();
-    if (win.classList.contains('open')) { layout(); placeWin(); renderPlots(); }
+    if (resizeTimer) pwin.clearTimeout(resizeTimer);
+    resizeTimer = pwin.setTimeout(() => {
+      placeOrb();
+      if (win.classList.contains('open')) { layout(); placeWin(); renderPlots(); }
+    }, 150);
   };
   pwin.addEventListener('resize', onResize);
   disposers.push(() => pwin.removeEventListener('resize', onResize));
