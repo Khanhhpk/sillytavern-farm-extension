@@ -27,22 +27,51 @@ const output = `// sillytavern-farm-extension – built by build.cjs (no Webpack
 const style = document.createElement('style');
 style.textContent = \`${css}\`;
 
-// ST globals – declared here as 'let' so initFarm() can close over them.
-// Assigned in init() when ST is guaranteed to have loaded them onto window.
+// ST globals – declared as 'let' at module scope so initFarm() can close over them.
+// Populated inside init() via dynamic import (extension_settings is NOT on window).
 let extension_settings, eventSource, event_types, saveSettingsDebounced, generateRaw;
 
 ${js}
 
 // ST Extension Hook
 export async function init() {
-  // Grab ST globals from window (ST is fully ready by the time init() fires)
-  extension_settings = window.extension_settings || {};
-  eventSource       = window.eventSource;
-  event_types       = window.event_types;
-  saveSettingsDebounced = window.saveSettingsDebounced;
-  generateRaw       = window.generateRaw;
+  // Dynamic import of ST's own module exports (not available on window)
+  try {
+    const extMod = await import('../../extensions.js');
+    extension_settings   = extMod.extension_settings;
+    saveSettingsDebounced = extMod.saveSettingsDebounced;
+    eventSource          = extMod.eventSource;
+    event_types          = extMod.event_types;
+  } catch (e) {
+    console.warn('[Farm] Could not import extensions.js:', e.message);
+  }
 
-  console.log('[Farm] init() called by SillyTavern');
+  // saveSettingsDebounced may live in script.js instead
+  if (typeof saveSettingsDebounced !== 'function') {
+    try {
+      const scriptMod = await import('../../script.js');
+      saveSettingsDebounced = scriptMod.saveSettingsDebounced;
+      if (!eventSource)    eventSource   = scriptMod.eventSource;
+      if (!event_types)    event_types   = scriptMod.event_types;
+      if (!generateRaw)    generateRaw   = scriptMod.generateRaw;
+    } catch (e) {
+      console.warn('[Farm] Could not import script.js:', e.message);
+    }
+  }
+
+  // Absolute fallback: use SillyTavern.getContext()
+  if (!extension_settings) {
+    try {
+      const ctx = window.SillyTavern?.getContext?.() || {};
+      extension_settings    = ctx.extensionSettings || ctx.extension_settings || {};
+      saveSettingsDebounced = ctx.saveSettingsDebounced || (() => {});
+    } catch (e) {}
+  }
+  if (!extension_settings) extension_settings = {};
+  if (typeof saveSettingsDebounced !== 'function') saveSettingsDebounced = () => {};
+
+  console.log('[Farm] init() – extension_settings ok:', !!extension_settings,
+              '| saveSettingsDebounced ok:', typeof saveSettingsDebounced === 'function');
   initFarm();
 }
 `;
