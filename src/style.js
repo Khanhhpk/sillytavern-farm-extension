@@ -38,7 +38,7 @@ export const styleCSS = `
     .statusbar { display: flex; align-items: center; gap: 12px; padding: 7px 14px; background: #f4e6cf;
       border-bottom: 3px solid #ddc39a; font-size: 13px; font-weight: bold; color: #7a5c38; flex: none; flex-wrap: wrap; }
     .stat { display: flex; align-items: center; gap: 5px; }
-    #scroll { overflow: auto; flex: 1; }
+    #scroll { overflow: auto; flex: 1; min-height: 0; }
     /* v0.8: thanh lật trang ba trang */
     .pager { position: absolute; top: 7px; right: 7px; z-index: 7; display: flex; align-items: center; justify-content: center;
       background: rgba(58,48,30,.4); border: 2px solid rgba(255,246,224,.4); border-radius: 14px; overflow: hidden;
