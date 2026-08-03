@@ -1,5 +1,6 @@
 export const styleCSS = `
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+    img { -webkit-user-drag: none; user-select: none; }
     /* ===== v1.0: chủ đề giao diện (hồng anh đào / trời quang), đổi ở trang cài đặt, S.theme lưu toàn cục ===== */
     .theme-sakura { --sky: radial-gradient(circle at 82% 40%, rgba(255,255,255,.55) 5px, transparent 6px), radial-gradient(circle at 12% 65%, rgba(255,255,255,.4) 4px, transparent 5px), linear-gradient(#f5c6d6, #e29ab8);
       --skyLine: #c27a9a; --tint: rgba(150,70,100,.35); --tintSoft: rgba(150,70,100,.3); --frameOut: #9a7a54;
@@ -316,3 +317,4 @@ export const styleCSS = `
       border: 2px solid #c2a274; border-radius: 7px; font-size: 12px; font-weight: bold; color: #6b4f2e; cursor: pointer; }
     .pick.active { border-color: var(--accLine); background: var(--accBg); color: var(--accFg); }
 `;
+
