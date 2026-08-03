@@ -2224,16 +2224,22 @@ QUY TẮC BẮT BUỘC:
   }
 
   // Thêm nút mở nông trại vào menu công cụ (magic wand) của SillyTavern
-  const extMenu = pdoc.getElementById('rm_extensions_block') || pdoc.getElementById('extensions_menu');
   let extMenuBtn = null;
-  if (extMenu) {
+  function setupExtButton() {
+    if (extMenuBtn) { try { extMenuBtn.remove(); } catch(e){} }
+    const extMenu = pdoc.querySelector('#extensionsMenu');
+    if (!extMenu) { pwin.setTimeout(setupExtButton, 500); return; }
+    
     extMenuBtn = pdoc.createElement('div');
-    extMenuBtn.className = 'list-group-item flex-container flexGap5';
+    extMenuBtn.id = 'farm-wand-btn';
+    extMenuBtn.className = 'list-group-item flex-container flexGap5 interactable';
+    extMenuBtn.tabIndex = 0;
+    extMenuBtn.innerHTML = '<div class="fa-fw fa-solid fa-leaf extensionsMenuExtensionButton"></div> Nông Trại';
     extMenuBtn.style.cursor = 'pointer';
-    extMenuBtn.innerHTML = '<div class="fa-solid fa-leaf"></div>Nông Trại';
     extMenuBtn.addEventListener('click', toggleWin);
     extMenu.appendChild(extMenuBtn);
   }
+  setupExtButton();
 
   const api = { destroy };
   pwin[RUNTIME_KEY] = api;
