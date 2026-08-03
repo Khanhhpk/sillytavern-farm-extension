@@ -21,13 +21,6 @@ js = js.replace(/^import '\.\/style\.css';\n?/m, '');
 js = js.replace(/\nexport async function init\(\) \{[^}]*\}\s*$/, '');
 
 // 3. Build final output
-//
-// Path layout (from browser's perspective):
-//   Extension:           /scripts/extensions/third-party/sillytavern-farm-extension/index.js
-//   ST extensions.js:    /scripts/extensions.js
-//   ST script.js:        /scripts/script.js
-//
-//   So from our file: ../../../ goes up to /scripts/ level, then append filename.
 const output = `// sillytavern-farm-extension – built by build.cjs (no Webpack)
 
 // Shadow DOM style element – used by initFarm() via sh.appendChild(style)
@@ -41,53 +34,24 @@ ${js}
 
 // ST Extension Hook
 export async function init() {
-  // The extension is served from:
-  //   /scripts/extensions/third-party/sillytavern-farm-extension/index.js
-  // So '../../../' resolves to /scripts/ which is where extensions.js and script.js live.
-
+  // Thay vì import phức tạp dễ gây lỗi 404, chúng ta dùng chuẩn SillyTavern.getContext()
+  // Đây là cách chính thống và an toàn nhất để lấy các biến toàn cục của ST.
   try {
-    const extMod = await import('../../../extensions.js');
-    extension_settings    = extMod.extension_settings;
-    saveSettingsDebounced = extMod.saveSettingsDebounced;
-    eventSource           = extMod.eventSource;
-    event_types           = extMod.event_types;
-    console.log('[Farm] Loaded from extensions.js – ext_settings:', typeof extension_settings, '| save:', typeof saveSettingsDebounced);
+    const ctx = window.SillyTavern && window.SillyTavern.getContext ? window.SillyTavern.getContext() : {};
+    
+    // Gán các hàm/biến từ context
+    extension_settings    = ctx.extensionSettings || window.extension_settings || {};
+    saveSettingsDebounced = ctx.saveSettingsDebounced || window.saveSettingsDebounced || (() => {});
+    eventSource           = ctx.eventSource || window.eventSource;
+    event_types           = ctx.eventTypes || window.event_types;
+    generateRaw           = ctx.generateRaw || window.generateRaw;
+    
+    console.log('[Farm] Đã kết nối ST Context thành công!');
   } catch (e) {
-    console.warn('[Farm] extensions.js import failed:', e.message);
+    console.error('[Farm] Lỗi khi kết nối ST Context:', e);
   }
 
-  if (typeof saveSettingsDebounced !== 'function') {
-    try {
-      const scriptMod = await import('../../../script.js');
-      if (!saveSettingsDebounced) saveSettingsDebounced = scriptMod.saveSettingsDebounced;
-      if (!eventSource)           eventSource           = scriptMod.eventSource;
-      if (!event_types)           event_types           = scriptMod.event_types;
-      if (!generateRaw)           generateRaw           = scriptMod.generateRaw;
-      console.log('[Farm] Loaded from script.js – save:', typeof saveSettingsDebounced);
-    } catch (e) {
-      console.warn('[Farm] script.js import failed:', e.message);
-    }
-  }
-
-  // Fallback: SillyTavern.getContext()
-  if (!extension_settings || typeof saveSettingsDebounced !== 'function') {
-    try {
-      const ctx = window.SillyTavern?.getContext?.() || {};
-      if (!extension_settings)                  extension_settings    = ctx.extensionSettings || ctx.extension_settings;
-      if (typeof saveSettingsDebounced !== 'function') saveSettingsDebounced = ctx.saveSettingsDebounced;
-      if (!eventSource)                         eventSource           = ctx.eventSource;
-      if (!event_types)                         event_types           = ctx.eventTypes || ctx.event_types;
-      if (!generateRaw)                         generateRaw           = ctx.generateRaw;
-      console.log('[Farm] Fallback getContext() – ext_settings:', typeof extension_settings, '| save:', typeof saveSettingsDebounced);
-    } catch (e) {}
-  }
-
-  if (!extension_settings) extension_settings = {};
-  if (typeof saveSettingsDebounced !== 'function') saveSettingsDebounced = () => console.warn('[Farm] saveSettingsDebounced not available!');
-
-  // Debug: confirm what we actually have
-  console.log('[Farm] init() READY – ext_settings keys:', Object.keys(extension_settings).length, '| save fn:', typeof saveSettingsDebounced);
-
+  // Khởi tạo game
   initFarm();
 }
 `;
