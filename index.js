@@ -1,5 +1,5 @@
 import { TEST_MODE, MIN, GROW, REGROW, DAY_MS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, CROPS, ZONE_NAME, FERTS, BLOCK_PRICE_PG, blockPrice, WEATHERS } from './src/data.js';
-import { petSVG, spriteSVG, tileURI, PETS } from './src/graphics.js';
+import { petSVG, spriteSVG, tileURI, PETS, mulberry32, P, LP, PET_P } from './src/graphics.js';
 import { styleCSS } from './src/style.js';
 // sillytavern-farm-extension – built by build.cjs (no Webpack)
 

@@ -1,5 +1,4 @@
 import { CROPS } from './data.js';
-
   export function mulberry32(a) {
     return function () {
       a |= 0; a = (a + 0x6D2B79F5) | 0;
@@ -92,8 +91,8 @@ import { CROPS } from './data.js';
     const m = Math.ceil(ms / MIN);
     return m >= 60 ? Math.floor(m / 60) + 'g' + (m % 60) + 'p' : m + 'p';
   };
-
-  /* ---------- Tài nguyên pixel (cùng nguồn với bản xem trước) ---------- */export const P = {
+  /* ---------- Tài nguyên pixel (cùng nguồn với bản xem trước) ---------- */
+export const P = {
     G:'#6cb457', D:'#3e7d3a', E:'#a4dc8c', R:'#dd5548', x:'#a33528',
     F:'#e06578', f:'#a83a52', p:'#ffb8c4', O:'#e89a4e', Q:'#c9772e',
     q:'#96551f', S:'#8a6844', h:'#f7c07a', B:'#9ed8f2', b:'#5fa8cc',
@@ -140,8 +139,8 @@ import { CROPS } from './data.js';
   };
   /* Nếu bảng màu thiếu màu xanh k/i trong toolWater thì bù vào */
   P.k = P.k || '#c4e3f0'; P.i = P.i || '#a9cede';
-
-  /* ===== Chuyển bộ sưu tập bé tròn (14+1): namespace riêng, tránh đụng chữ cái với bảng màu của game ===== */export const PET_P = {
+  /* ===== Chuyển bộ sưu tập bé tròn (14+1): namespace riêng, tránh đụng chữ cái với bảng màu của game ===== */
+export const PET_P = {
     B:'#9ed8f2', b:'#5fa8cc', W:'#fffdf4', K:'#3a2c22', n:'#ffb0bc', '3':'#4a7ba6',   // '3' = ngũ quan của slime xanh (xanh xám, thay cho K nâu đen gốc)
     V:'#b48ae0', v:'#8a5cc0',
     p:'#ffb8c4', F:'#e06578', f:'#a83a52',
@@ -236,7 +235,6 @@ import { CROPS } from './data.js';
   ".xiiQQiiiiQQiix.",".xiriiiiQiiiirx.",".xiiiiiiiiiiiix.","..xiiiiiiiiix...",
   "...xiiiiiiix....","....xxxxxxxx....","......jjjj......","................"],
   };
-
   /* ===== v0.8c (#43): hệ thống da chuyển sắc (bộ sưu tập codex 0718) —— màu phủ theo từng sprite, giá trị có thể là màu đơn hoặc gradient tuyến tính ===== */
   const petLinear = (x1, y1, x2, y2, stops) => ({ type: 'linear', x1, y1, x2, y2, stops });
   const PET_FX = {
@@ -284,8 +282,8 @@ import { CROPS } from './data.js';
     petCache.set(key, out);
     return out;
   }
-
-  /* ===== Bảng dữ liệu thú cưng (giá là chỗ giữ chỗ để test; page = trang mở khoá, 2/3 cần vé tương ứng) ===== */export const PETS = {
+  /* ===== Bảng dữ liệu thú cưng (giá là chỗ giữ chỗ để test; page = trang mở khoá, 2/3 cần vé tương ứng) ===== */
+export const PETS = {
     /* —— Trang 1 —— */
     slime:      { name: 'Slime xanh',    page: 1, price: 0,    starter: true, cry: ['Bụp bụp~', 'Bựppp!', 'Grù grù…', 'Bụp?', 'Nhảy nhảy!'], desc: 'Loại tìm kho báu · bé tròn tổ tiên, bạn đồng hành từ đầu' },
     octo:       { name: 'Bạch tuộc tím', page: 1, price: 500,  cry: ['Ục bốp?', 'Ục ực!', 'Chíu mi!', 'Bóp bóp…', 'Ục bốp bốp!'], desc: 'Loại tìm kho báu · thích chồng lên đầu người khác' },
@@ -371,8 +369,6 @@ import { CROPS } from './data.js';
       '.....G..g.......','....gGGGGg......','......GG........','....KrrrrK......','...KrRrWrrK.....','...KrrRrrrK.....','...KRrrrRrK.....','....KrrRrK......','.....KrrK.......','......KK........','................','................','................','................','................','................'] },
   };
   const pageUnlocked = p => p === 1 || (p === 2 && S.passes.water) || (p === 3 && S.passes.mine);
-
-
   const spriteCache = new Map();
   export function spriteSVG(name, px) {
     const key = name + '@' + px;
@@ -396,7 +392,8 @@ import { CROPS } from './data.js';
     return out;
   }
   /* v0.8: màu riêng cho nền đất trang 2-3 (W1 ruộng nổi đầm sen / M1 mạch quặng kim cương, bản thiết kế chốt) */
-  /* v0.8: màu riêng cho nền đất trang 2-3 (W1 ruộng nổi đầm sen / M1 mạch quặng kim cương, bản thiết kế chốt; W3 ruộng bậc thang khe suối thử xong bị loại #71) */export const LP = { '8':'#8ec8d8', '~':'#b8e0ea', '-':'#79b4c6', '_':'#6faabf', '9':'#3f7290', '!':'#35617d',
+  /* v0.8: màu riêng cho nền đất trang 2-3 (W1 ruộng nổi đầm sen / M1 mạch quặng kim cương, bản thiết kế chốt; W3 ruộng bậc thang khe suối thử xong bị loại #71) */
+export const LP = { '8':'#8ec8d8', '~':'#b8e0ea', '-':'#79b4c6', '_':'#6faabf', '9':'#3f7290', '!':'#35617d',
     '6':'#5f5870', '^':'#6d657c', '&':'#4e4860', '7':'#433c54', '5':'#8ae0ea', '*':'#e8fcff', '%':'#5fc8d8', '#':'#3a3450',
     'l':'#5aa06a', 'L':'#7cc48a',
     '=':'#b9d194', '0':'#ffe9b8', '+':'#fff2b0' };   // v1.0 G2: đốm cỏ nhạt (=, tránh h của bảng chính = cam bí ngô!) / cánh hoa vàng kem / nhuỵ vàng nhạt
@@ -459,4 +456,3 @@ import { CROPS } from './data.js';
     g.forEach((row, y) => row.forEach((ch, x) => { const c = P[ch] || LP[ch]; if (c) r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${c}"/>`; }));
     return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${SZ}" height="${SZ}" viewBox="0 0 ${SZ} ${SZ}" shape-rendering="crispEdges">${r}</svg>`)}")`;
   }
-
