@@ -1809,44 +1809,98 @@ function initFarm() {
   function renderPlots() {
     const wrap = $id('blocks');
     const pg = S.page, plots = curPlots(), nb = curBlocks();
-    let html = '';
-    for (let b = 0; b < 6; b++) {
-      const locked = b >= nb;
-      html += `<div class="block${locked ? ' locked' : ''}" data-block="${b}">`;
-      for (let j = 0; j < 4; j++) {
-        const pi = b * 4 + j;
-        if (locked) {
-          html += `<div class="plot" data-deco="lock" data-pi="${pi}"></div>`;   // data-deco chỉ dùng làm dấu chặn click, không render trang trí nữa
-        } else {
-          const c = plots[pi].crop;
-          const wet = c && now() < c.wateredUntil;
-          html += `<div class="plot${wet ? ' watered' : ''}" data-pi="${pi}">${plotHTML(pi)}</div>`;
+    
+    // 1. Dựng khung tĩnh (Skeleton) nếu chưa có hoặc chuyển trang
+    if (wrap.children.length !== 6 || wrap.dataset.pg !== String(pg)) {
+      wrap.dataset.pg = pg;
+      let html = '';
+      for (let b = 0; b < 6; b++) {
+        html += `<div class="block" data-block="${b}">`;
+        for (let j = 0; j < 4; j++) {
+          html += `<div class="plot" data-pi="${b * 4 + j}"></div>`;
         }
+        html += `<div class="sign-wrap"></div></div>`;
       }
+      wrap.innerHTML = html;
+    }
+
+    const groundKind = pg === 2 ? 'water' : pg === 3 ? 'mine' : 'grass';
+    const plotKind = pg === 2 ? 'wplot' : pg === 3 ? 'mplot' : 'soil';
+    const wetKind = pg === 2 ? 'wplotwet' : pg === 3 ? 'mplotwet' : 'wet';
+
+    // 2. Surgical Update: Chỉ thay đổi những chỗ cần thiết
+    for (let b = 0; b < 6; b++) {
+      const blockEl = wrap.children[b];
+      const locked = b >= nb;
+      if (locked !== blockEl.classList.contains('locked')) {
+        blockEl.classList.toggle('locked', locked);
+      }
+      
+      const signWrap = blockEl.lastElementChild;
       if (locked) {
         const next = b === nb;
         const confirming = buyConfirm.b === b && now() < buyConfirm.until;
         const poor = S.coins < blockPrice(b);
-        html += next
+        const shtml = next
           ? (confirming
             ? `<div class="sign confirm" data-buy="${b}">Bấm lần nữa<small>xác nhận chi ${blockPrice(b).toLocaleString()} G</small></div>`
             : `<div class="sign${poor ? ' poor' : ''}" data-buy="${b}">Khai hoang<small>${spriteSVG('coin', 13)}${blockPrice(b).toLocaleString()} G</small></div>`)
           : `<div class="sign" style="opacity:.55">Chưa mở<small>khai hoang ô trước đã</small></div>`;
+        if (signWrap.innerHTML !== shtml) signWrap.innerHTML = shtml;
+      } else {
+        if (signWrap.innerHTML !== '') signWrap.innerHTML = '';
       }
-      html += '</div>';
+
+      for (let j = 0; j < 4; j++) {
+        const pi = b * 4 + j;
+        const pEl = blockEl.children[j];
+        
+        if (locked) {
+          if (pEl.dataset.deco !== 'lock') {
+             pEl.dataset.deco = 'lock';
+             pEl.innerHTML = '';
+          }
+        } else {
+          if (pEl.dataset.deco === 'lock') delete pEl.dataset.deco;
+          
+          const c = plots[pi].crop;
+          const wet = c && now() < c.wateredUntil;
+          if (wet !== pEl.classList.contains('watered')) {
+             pEl.classList.toggle('watered', wet);
+          }
+          
+          if (!c) {
+             if (pEl.dataset.state !== 'empty') {
+               pEl.innerHTML = '';
+               pEl.dataset.state = 'empty';
+             }
+          } else {
+             const left = c.matureAt - now();
+             const stateStr = `${c.id}|${c.left}|${c.mut}|${c.fertUsed ? Object.keys(c.fertUsed).join(',') : ''}|${left <= 0 ? 'ripe' : 'grow'}`;
+             
+             if (pEl.dataset.state !== stateStr) {
+               pEl.innerHTML = plotHTML(pi);
+               pEl.dataset.state = stateStr;
+             } else {
+               // Đang lớn và không có thay đổi về phân bón/đột biến -> Chỉ kéo dài thanh progress (O(1) reflow)
+               if (left > 0) {
+                 const prog = Math.min(0.99, 1 - left / growMs(c.id));
+                 const w = ((prog * 100) | 0) + '%';
+                 const barI = pEl.querySelector('.bar i');
+                 if (barI && barI.style.width !== w) barI.style.width = w;
+               }
+             }
+          }
+        }
+        
+        const isLocked = pi >= nb * 4;
+        const bg = isLocked ? tileURI(groundKind, pi * 31 + 5)
+          : pEl.classList.contains('watered') ? tileURI(wetKind, pi * 31 + 5) : tileURI(plotKind, pi * 31 + 5);
+        if (pEl.style.backgroundImage !== bg) pEl.style.backgroundImage = bg;
+        const bgSz = isLocked ? '144px 144px' : '100% 100%';
+        if (pEl.style.backgroundSize !== bgSz) pEl.style.backgroundSize = bgSz;
+      }
     }
-    wrap.innerHTML = html;
-    const groundKind = pg === 2 ? 'water' : pg === 3 ? 'mine' : 'grass';
-    const plotKind = pg === 2 ? 'wplot' : pg === 3 ? 'mplot' : 'soil';
-    const wetKind = pg === 2 ? 'wplotwet' : pg === 3 ? 'mplotwet' : 'wet';
-    wrap.querySelectorAll('.plot').forEach(p => {
-      const pi = +p.dataset.pi;
-      const locked = pi >= nb * 4;
-      // Ô khoá không đặt sprite trang trí nữa (v1.1)
-      p.style.backgroundImage = locked ? tileURI(groundKind, pi * 31 + 5)
-        : p.classList.contains('watered') ? tileURI(wetKind, pi * 31 + 5) : tileURI(plotKind, pi * 31 + 5);
-      p.style.backgroundSize = locked ? '144px 144px' : '100% 100%';   // Sửa #5: nền ô khoá lát đều chứ không kéo giãn (khung vẽ 96 ×1.5)
-    });
   }
   function renderChips() {
     const cl = $id('chipLink'), cs2 = $id('chipStory');
