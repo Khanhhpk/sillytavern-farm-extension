@@ -874,17 +874,17 @@ function initFarm() {
   function sanitizeEvent(o) {
     if (!o || typeof o !== 'object') return null;
     const ev = {
-      name: String(o.name || 'Chuyện lạ').slice(0, 6),
+      name: String(o.name || 'Chuyện lạ').slice(0, 40),
       type: ['buff', 'debuff', 'neutral'].indexOf(o.type) >= 0 ? o.type : 'neutral',
       time_mult: clampN(o.time_mult != null ? o.time_mult : (o.growth_mult && o.growth_mult !== 1 ? 1 / o.growth_mult : 1), 0.7, 1.1, 1),   // growth_mult cũ (tốc độ) tự động quy đổi (yield_mult đã nghỉ hưu, bỏ qua thẳng)
       double_yield: o.double_yield === true,               // v1.1: phúc lợi dân may, số quả ×2 (kiểu boolean, nghiêm cấm số thập phân)
       mutate_on_fert: clampN(o.mutate_on_fert, 0, 0.5, 0),
-      mutate_prefix: String(o.mutate_prefix || 'đột biến').slice(0, 5),
+      mutate_prefix: String(o.mutate_prefix || 'đột biến').slice(0, 20),
       mutate_desc: (o.mutate_desc && typeof o.mutate_desc === 'object')
-        ? Object.keys(o.mutate_desc).slice(0, 30).reduce((a, k) => { a[String(k).slice(0, 8)] = String(o.mutate_desc[k]).slice(0, 40); return a; }, {})
-        : (typeof o.mutate_desc === 'string' && o.mutate_desc ? { '*': String(o.mutate_desc).slice(0, 40) } : {}),
+        ? Object.keys(o.mutate_desc).slice(0, 30).reduce((a, k) => { a[String(k).slice(0, 30)] = String(o.mutate_desc[k]).slice(0, 100); return a; }, {})
+        : (typeof o.mutate_desc === 'string' && o.mutate_desc ? { '*': String(o.mutate_desc).slice(0, 100) } : {}),
       favored_crop: (() => {                              // #20: sự kiện có thể chỉ ưu ái một loại cây
-        const f = String(o.favored_crop || '').slice(0, 8);
+        const f = String(o.favored_crop || '');
         return Object.values(CROPS).some(c => c.name === f) ? f : '';
       })(),
       flavor: String(o.flavor || ''),
