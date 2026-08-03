@@ -11,7 +11,7 @@ const event_types = window.event_types || ST_context.event_types;
 const saveSettingsDebounced = window.saveSettingsDebounced || ST_context.saveSettingsDebounced;
 const generateRaw = window.generateRaw || ST_context.generateRaw;
 
-import './style.css';
+import styleCSS from './style.css';
 
 /* ============================================================
  * Ai mà thèm làm nông dân trong SillyTavern chứ! · Bản chính thức v1.1
@@ -204,8 +204,9 @@ function initFarm() {
   root.id = 'star-tavern-farm-root';
   pdoc.body.appendChild(root);
   const sh = root.attachShadow({ mode: 'open' });
-  // CSS moved to style.css
-
+  // CSS imported via Webpack
+  const style = pdoc.createElement('style');
+  style.textContent = styleCSS;
   sh.appendChild(style);
 
   const ui = pdoc.createElement('div');
@@ -837,7 +838,13 @@ function initFarm() {
   function toggleWin() {
     if (win.classList.contains('open')) { closeWin(); return; }
     win.classList.add('open');
-    layout(); placeWin(); settle(); renderAll();
+    layout(); placeWin(); settle();
+    
+    // Tối ưu hiệu năng: Đợi CSS animation mở cửa sổ bắt đầu rồi mới render SVG nặng, tránh khựng lúc bấm bóng
+    pwin.requestAnimationFrame(() => pwin.requestAnimationFrame(() => {
+      if (!win.classList.contains('open')) return;
+      renderAll();
+    }));
     tick = pwin.setInterval(() => { renderDynamic(); }, 1000);
   }
   function closeWin() {
@@ -1729,6 +1736,7 @@ function initFarm() {
     });
   }
   const wander = pwin.setInterval(() => {                  // Nhịp tuần tra: cứ 7s lại giao điểm đến / ru ngủ / mở tiểu phẩm cho các bé đang rảnh
+    if (!win.classList.contains('open')) return;           // Tối ưu: Dừng tuần tra và tính toán vị trí khi bảng bị ẩn
     if (!scene && now() >= nextSceneAt) tryScene();
     sh.querySelectorAll('#mascots .pet').forEach(el => {
       const id = el.dataset.pet;
