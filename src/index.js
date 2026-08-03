@@ -835,7 +835,7 @@ function initFarm() {
       try {
           const ST_WorldInfo = await new Function("return import('/scripts/world-info.js')")();
           if (ST_WorldInfo) {
-              const activeNames = new Set(ST_WorldInfo.selected_world_info || window.selected_world_info || []);
+              const activeNames = new Set();
               try {
                   const charData = window.characters?.[window.this_character]?.data;
                   if (charData) {
