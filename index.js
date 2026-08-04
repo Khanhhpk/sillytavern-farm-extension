@@ -1673,6 +1673,7 @@ var root2 = document.createElement("div");
 root2.id = "star-tavern-farm-root";
 document.body.appendChild(root2);
 var sh2 = root2.attachShadow({ mode: "open" });
+var $id = (id) => sh2.getElementById(id);
 var style = document.createElement("style");
 style.textContent = styleCSS;
 sh2.appendChild(style);
@@ -1720,7 +1721,6 @@ ctx.ui.innerHTML = `
     <div class="toast" id="toast"></div>
   </div>`;
 sh2.appendChild(ctx.ui);
-var $id2 = (x) => sh2.getElementById(x);
 function applyTheme2() {
   ctx.ui.classList.remove("theme-sakura", "theme-sky");
   ctx.ui.classList.add("theme-" + (ctx.S && ctx.S.theme === "sky" ? "sky" : "sakura"));
@@ -1735,17 +1735,17 @@ function applyPageSkin2() {
 }
 function renderPager2() {
   const names = { 1: "\u0110\u1ED3ng c\u1ECF", 2: "V\xF9ng n\u01B0\u1EDBc", 3: "Khu m\u1ECF" };
-  $id2("pager").innerHTML = [1, 2, 3].map((pg) => {
+  $id("pager").innerHTML = [1, 2, 3].map((pg) => {
     const un = pageUnlocked(pg);
     return `<span class="ptab p${pg}${ctx.S.page === pg ? " active" : ""}${un ? "" : " lock"}" data-pg="${pg}">${names[pg]}${un ? "" : " \u{1F512}"}</span>`;
   }).join("");
 }
 ctx.ui.addEventListener("click", (e) => {
-  const pager = $id2("pager");
+  const pager = $id("pager");
   if (pager && pager.classList.contains("open") && !e.target.closest("#pager")) pager.classList.remove("open");
 }, true);
-$id2("pager") && $id2("pager").addEventListener("click", (e) => {
-  const pager = $id2("pager");
+$id("pager") && $id("pager").addEventListener("click", (e) => {
+  const pager = $id("pager");
   const t = e.target.closest("[data-pg]");
   if (!t) {
     pager.classList.toggle("open");
@@ -3355,7 +3355,6 @@ function initFarm() {
     window[RUNTIME_KEY2]?.destroy?.();
   } catch (e) {
   }
-  document.getElementById("star-tavern-farm-root")?.remove();
   loadState();
   applyTheme2();
   placeOrb();
