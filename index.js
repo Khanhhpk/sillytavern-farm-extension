@@ -3180,6 +3180,7 @@ function renderBanner() {
 }
 function renderDynamic() {
   if (ctx.win.classList.contains("open")) {
+    settle();
     renderStatus();
     renderPlots();
   }

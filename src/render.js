@@ -294,6 +294,7 @@ export function renderBanner() {
 }
 export function renderDynamic() { 
   if (ctx.win.classList.contains('open')) {
+    settle();
     renderStatus(); 
     renderPlots(); 
   }
