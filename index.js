@@ -1284,7 +1284,7 @@ function freshState2() {
   };
 }
 ctx.S = null;
-function loadState2() {
+function loadState() {
   if (!ctx.extension_settings[extensionName]) {
     ctx.extension_settings[extensionName] = {};
   }
@@ -1818,8 +1818,6 @@ fxLayer.style.cssText = "position:absolute;inset:0;overflow:visible;pointer-even
 fieldEl.appendChild(fxLayer);
 
 // src/events.js
-loadState();
-applyTheme();
 var clampN2 = (x, lo, hi, dflt) => {
   x = Number(x);
   return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt;
@@ -3358,7 +3356,7 @@ function initFarm() {
   } catch (e) {
   }
   document.getElementById("star-tavern-farm-root")?.remove();
-  loadState2();
+  loadState();
   applyTheme2();
   placeOrb();
   initEvents();
