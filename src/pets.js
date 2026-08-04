@@ -107,9 +107,9 @@ export function wakePet(el, startled) {
    chọn diễn viên rồi khoá lại (tuần tra không giành người), diễn xong ai về nhà nấy; render lại bảng = tắt đèn giải tán; cùng một vở không diễn liên tiếp */
 export const petArrive = {};                                    // Callback khi nhảy tới nơi
 export const pileWith = {};                                     // Bảng ghép cặp bạn ngủ chung
-export const petTouch = {}, touchBase = now();                  // Thời điểm bị chọc gần nhất (bé làm việc 5 phút không ai đoái hoài → cho phép ngủ gật)
+export const petTouch = {}, touchBase = Date.now();                  // Thời điểm bị chọc gần nhất (bé làm việc 5 phút không ai đoái hoài → cho phép ngủ gật)
 export let scene = null, lastScene = '';
-export let nextSceneAt = now() + (TEST_MODE ? 30 * 1000 : 45 * MIN);
+export let nextSceneAt = Date.now() + (TEST_MODE ? 30 * 1000 : 45 * MIN);
 export const sceneBusy = id => !!(scene && scene.ids.indexOf(id) >= 0);
 export const sceneTimer = (fn, ms) => { if (scene) scene.timers.push(window.setTimeout(fn, ms)); };
 export function endScene() { if (!scene) return; scene.timers.forEach(t => window.clearTimeout(t)); scene = null; }

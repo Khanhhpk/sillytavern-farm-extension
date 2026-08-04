@@ -2129,10 +2129,10 @@ function wakePet(el, startled) {
 var petArrive = {};
 var pileWith = {};
 var petTouch = {};
-var touchBase = now();
+var touchBase = Date.now();
 var scene = null;
 var lastScene = "";
-var nextSceneAt = now() + (TEST_MODE ? 30 * 1e3 : 45 * MIN);
+var nextSceneAt = Date.now() + (TEST_MODE ? 30 * 1e3 : 45 * MIN);
 var sceneBusy = (id) => !!(scene && scene.ids.indexOf(id) >= 0);
 var sceneTimer = (fn, ms) => {
   if (scene) scene.timers.push(window.setTimeout(fn, ms));
