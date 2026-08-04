@@ -165,21 +165,23 @@ async function collectWorldbook() {
     } catch(e) { console.log('[FARM DEBUG] Chat History Exception:', e); }
 
     const seen = new Set();
-    for (const en of entries) {
-      if (en.enabled === false || en.disabled === true) continue;
+    for (let i = entries.length - 1; i >= 0; i--) {
+      const en = entries[i];
       const content = (en.content || en.text || '').trim();
       if (!content || seen.has(content)) continue;
       seen.add(content);
+      
+      if (en.enabled === false || en.disabled === true || String(en.enabled).toLowerCase() === 'false') continue;
       
       const isConstant = (en.strategy && en.strategy.type === 'constant') || en.constant === true || en.position === 'before_char';
       const entryName = en.comment || en.name || en.uid || 'Lorebook Entry';
       const formatted = `[${entryName}]\n${content}`;
       
-      if (isConstant) blue += formatted + '\n\n';
-      else green += formatted + '\n\n';
+      if (isConstant) blue = formatted + '\n\n' + blue;
+      else green = formatted + '\n\n' + green;
     }
     
-    let txt = blue + '\n' + green;
+    let txt = blue + green;
     if (chatContext) txt += chatContext;
     const limit = SEC.wbLimit !== undefined ? SEC.wbLimit : 20000;
     return limit > 0 ? txt.slice(0, limit) : txt;
