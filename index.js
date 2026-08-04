@@ -732,16 +732,23 @@ function initFarm() {
         const simpleColors = Object.entries(palette).filter(e => typeof e[1] === 'string');
         const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(', ');
         
-        const sysPrompt = `Bạn là một chuyên gia Pixel Art 16x16.
-Nhiệm vụ: Vẽ một đồ vật dựa trên yêu cầu của người dùng, sử dụng CHỈ CÁC MÃ MÀU TRONG BẢNG MÀU SAU ĐÂY:
+        const sysPrompt = `Bạn là một chuyên gia thiết kế Pixel Art (16x16). Nhiệm vụ của bạn là vẽ một đồ vật dựa trên yêu cầu, và BẮT BUỘC chỉ được dùng các mã ký tự trong Bảng màu sau đây.
+
+BẢNG MÀU CHO PHÉP (Ký tự: Mã màu Hex):
 ${paletteStr}
 
-QUY TẮC BẮT BUỘC:
-1. Bản vẽ là một mảng JSON gồm 16 chuỗi. Mỗi chuỗi DÀI CHÍNH XÁC 16 KÝ TỰ.
-2. Dùng dấu chấm '.' cho vùng trong suốt (không có màu).
-3. Dùng CHỈ CÁC KÝ TỰ trong bảng màu được cung cấp để tô màu.
-4. KHÔNG dùng ký tự nào nằm ngoài bảng màu.
-5. Cấm viết bất kỳ giải thích nào. CHỈ trả về mảng JSON hợp lệ. Bắt đầu bằng [ và kết thúc bằng ].`;
+HƯỚNG DẪN TƯ DUY (Bắt buộc):
+Để tạo ra một sprite đẹp, hãy viết suy nghĩ của bạn vào thẻ <thinking> trước khi xuất kết quả:
+1. Phân tích hình khối: Đặt vật thể ở trung tâm khung 16x16.
+2. Chọn màu (Palette): Từ bảng màu trên, chọn ra ký tự làm màu viền, màu tối (shadow), màu trung gian (mid-tone), và sáng (highlight). TUYỆT ĐỐI KHÔNG chế ra ký tự ngoài bảng màu.
+3. Kỹ thuật Pixel Art: Xác định nguồn sáng (vd: trên-trái). Tạo khối 3D bằng cách xếp màu sáng ở hướng sáng, màu tối ở hướng khuất.
+4. Phác thảo từng dòng: Tưởng tượng sự phân bố pixel từ dòng 0 đến 15.
+
+QUY TẮC ĐẦU RA BẮT BUỘC:
+- Sau phần </thinking>, CHỈ ĐƯỢC XUẤT 1 khối mã \`\`\`json chứa mảng gồm ĐÚNG 16 chuỗi.
+- Mỗi chuỗi đại diện cho 1 hàng và phải chứa ĐÚNG 16 ký tự.
+- Dùng dấu chấm '.' cho pixel trong suốt.
+- TUYỆT ĐỐI không dùng ký tự lạ ngoài dấu '.' và các ký tự trong Bảng màu.`;
 
         const reqBody = {
           model: SEC.model,
@@ -765,9 +772,18 @@ QUY TẮC BẮT BUỘC:
         const data = await res.json();
         const content = data.choices?.[0]?.message?.content || '';
         
-        const match = content.match(/\[[\s\S]*?\]/);
-        if (match) {
-          ta.value = match[0];
+        // Trích xuất JSON mảng chuỗi mạnh mẽ hơn để tránh bắt nhầm ngoặc vuông trong phần thinking
+        let jsonStr = '';
+        const codeMatch = content.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/i);
+        if (codeMatch) {
+          jsonStr = codeMatch[1];
+        } else {
+          const arrMatch = content.match(/\[\s*"(?:[^"\\]|\\.)*"(?:\s*,\s*"(?:[^"\\]|\\.)*")*\s*\]/);
+          jsonStr = arrMatch ? arrMatch[0] : (content.match(/\[[\s\S]*?\]/) || [''])[0];
+        }
+        
+        if (jsonStr) {
+          ta.value = jsonStr.trim();
           render();
           $id('sbStatus').textContent = 'Hoàn tất!';
         } else {
