@@ -40,6 +40,9 @@ export function initFarm() {
 }
 
 export async function init() {
+  // Guard: nếu đã khởi động rồi (ví dụ ST 1.17+ gọi lại qua hooks), bỏ qua
+  if (window[RUNTIME_KEY]) return;
+
   try {
     let context = null;
     try { context = window.SillyTavern?.getContext?.(); } catch (_) {}
@@ -97,12 +100,6 @@ export async function init() {
   }, 10000);
 }
 
-// Self-invoke cho các phiên bản ST cũ (< 1.17) không có hệ thống hooks.
-// ST 1.17+ sẽ gọi init() qua hook "activate", lúc đó window[RUNTIME_KEY] đã được set
-// trước khi timeout này chạy → bỏ qua, không bị double-init.
-setTimeout(() => {
-  if (!window[RUNTIME_KEY]) {
-    console.log('[Farm] Phát hiện ST không có hooks, tự khởi động (chế độ tương thích)...');
-    init();
-  }
-}, 2000);
+// Self-invoke ngay khi module được tải — không cần phụ thuộc vào hệ thống hooks.
+// ST 1.17+ sẽ gọi lại init() qua hooks, nhưng guard RUNTIME_KEY trong init() sẽ chặn double-init.
+init();

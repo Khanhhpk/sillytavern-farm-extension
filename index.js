@@ -4325,6 +4325,7 @@ function initFarm() {
   console.log("Farm initialized");
 }
 async function init() {
+  if (window[RUNTIME_KEY]) return;
   try {
     let context = null;
     try {
@@ -4383,12 +4384,7 @@ async function init() {
     }
   }, 1e4);
 }
-setTimeout(() => {
-  if (!window[RUNTIME_KEY]) {
-    console.log("[Farm] Ph\xE1t hi\u1EC7n ST kh\xF4ng c\xF3 hooks, t\u1EF1 kh\u1EDFi \u0111\u1ED9ng (ch\u1EBF \u0111\u1ED9 t\u01B0\u01A1ng th\xEDch)...");
-    init();
-  }
-}, 2e3);
+init();
 export {
   init,
   initFarm
