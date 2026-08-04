@@ -748,18 +748,23 @@ function initFarm() {
 BẢNG MÀU CHO PHÉP (Ký tự: Mã màu Hex):
 ${paletteStr}
 
-HƯỚNG DẪN TƯ DUY (Bắt buộc):
-Để tạo ra một sprite đẹp, hãy viết suy nghĩ của bạn vào thẻ <thinking> trước khi xuất kết quả:
-1. Phân tích hình khối: Đặt vật thể ở trung tâm khung ${size}x${size}.
-2. Chọn màu (Palette): Từ bảng màu trên, chọn ra ký tự làm màu viền, màu tối (shadow), màu trung gian (mid-tone), và sáng (highlight). TUYỆT ĐỐI KHÔNG chế ra ký tự ngoài bảng màu.
-3. Kỹ thuật Pixel Art: Xác định nguồn sáng (vd: trên-trái). Tạo khối 3D bằng cách xếp màu sáng ở hướng sáng, màu tối ở hướng khuất.
-4. Phác thảo từng dòng: Tưởng tượng sự phân bố pixel từ dòng 0 đến ${size - 1}.
+HƯỚNG DẪN TƯ DUY (Bắt buộc phải có thẻ <thinking> trước khi xuất mã):
+Để vẽ pixel art sắc nét và có chiều sâu, hãy phân tích kỹ càng qua các bước sau:
+1. Phân tích Bố cục (Layout): Nếu vẽ vũ khí/công cụ (như kiếm, gậy), hãy vẽ chéo từ góc dưới-trái lên góc trên-phải để tận dụng tối đa không gian. Nếu vẽ đồ vật tròn/ngắn (bình thuốc, khiên), hãy căn giữa khung ${size}x${size}. Phác họa tỉ lệ các phần (chuôi, lưỡi, nắp, thân).
+2. Quy hoạch Màu sắc (Palette Selection): Liệt kê rõ ràng các ký tự sẽ dùng:
+   - Viền (Outline): Bao quanh vật thể bằng màu tối nhất (hoặc đen) để tạo độ nổi bật.
+   - Sáng tối (Shading): Xác định nguồn sáng chiếu từ góc trên-trái. Chọn màu Sáng (Highlight) cho phần đón sáng, màu Tối (Shadow) cho phần khuất sáng.
+   - Thân (Base/Mid-tone): Màu chủ đạo.
+   - Chi tiết: Ngọc đính, vân gỗ, hiệu ứng phát sáng...
+   TUYỆT ĐỐI KHÔNG chế ra ký tự ngoài Bảng màu.
+3. Hình dáng (Shape & Texture): Tránh làm các khối màu bị vuông vức, thẳng đuột. Sử dụng các nét lượn, zig-zag để tạo hình dáng tự nhiên. Chú ý tính đối xứng (nếu có).
+4. Ánh xạ Từng dòng (Row-by-Row Mapping): Lập kế hoạch phân bố pixel cụ thể từ dòng 0 đến ${size - 1}.
 
 QUY TẮC ĐẦU RA BẮT BUỘC:
-- Sau phần </thinking>, CHỈ ĐƯỢC XUẤT 1 khối mã \`\`\`json chứa mảng gồm ĐÚNG ${size} chuỗi.
+- Sau khi đóng thẻ </thinking>, CHỈ ĐƯỢC XUẤT 1 khối mã \`\`\`json chứa mảng gồm ĐÚNG ${size} chuỗi.
 - Mỗi chuỗi đại diện cho 1 hàng và phải chứa ĐÚNG ${size} ký tự.
 - Dùng dấu chấm '.' cho pixel trong suốt.
-- TUYỆT ĐỐI không dùng ký tự lạ ngoài dấu '.' và các ký tự trong Bảng màu.`;
+- TUYỆT ĐỐI không dùng ký tự lạ ngoài dấu '.' và các ký tự Bảng màu.`;
 
         const reqBody = {
           model: SEC.model,
