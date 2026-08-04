@@ -3138,7 +3138,7 @@ function initRender() {
       if (c) return toast("\xD4 n\xE0y tr\u1ED3ng r\u1ED3i");
       plant(pi, mode.id);
       if ((ctx.S.seeds[mode.id] || 0) <= 0) {
-        mode = null;
+        setMode(null);
         renderToolbar();
       }
       return;
@@ -3147,7 +3147,7 @@ function initRender() {
     if (mode.t === "fert") {
       fertilize(pi, mode.id);
       if ((ctx.S.ferts[mode.id] || 0) <= 0) {
-        mode = null;
+        setMode(null);
         renderToolbar();
       }
       return;
@@ -4336,7 +4336,11 @@ async function init() {
       event_types: ev_types,
       generateRaw: gen_raw
     });
-    console.log("[Farm] ST Context k\u1EBFt n\u1ED1i th\xE0nh c\xF4ng");
+    const diag = [];
+    if (ctx.S) diag.push("S");
+    if (ctx.CS) diag.push("CS");
+    if (ctx.ui) diag.push("ui");
+    console.log("[Farm] ST Context k\u1EBFt n\u1ED1i th\xE0nh c\xF4ng \u2014 " + diag.join(", "));
   } catch (e) {
     console.error("[Farm] L\u1ED7i khi k\u1EBFt n\u1ED1i ST Context:", e);
     let ext_set = window.extension_settings || {};

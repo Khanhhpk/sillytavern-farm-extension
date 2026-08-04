@@ -55,7 +55,11 @@ export async function init() {
         generateRaw: gen_raw
     });
 
-    console.log('[Farm] ST Context kết nối thành công');
+    const diag = [];
+    if (ctx.S) diag.push('S');
+    if (ctx.CS) diag.push('CS');
+    if (ctx.ui) diag.push('ui');
+    console.log('[Farm] ST Context kết nối thành công — ' + diag.join(', '));
   } catch (e) {
     console.error('[Farm] Lỗi khi kết nối ST Context:', e);
     let ext_set = window.extension_settings || {};

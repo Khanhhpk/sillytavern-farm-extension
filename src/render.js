@@ -362,9 +362,9 @@ All.$id('blocks').addEventListener('click', e => {
   const c = curPlots()[pi].crop;
   if (c && now() >= c.matureAt && (!mode || mode.t !== 'shovel')) { harvest(pi); return; }   // Sửa #6: rau chín bấm thẳng là thu ngay
   if (!mode) { if (c) toast(CROPS[c.id].name + ' · còn ' + fmtLeft(c.matureAt - now())); return; }
-  if (mode.t === 'seed') { if (c) return toast('Ô này trồng rồi'); plant(pi, mode.id); if ((ctx.S.seeds[mode.id] || 0) <= 0) { mode = null; renderToolbar(); } return; }
+  if (mode.t === 'seed') { if (c) return toast('Ô này trồng rồi'); plant(pi, mode.id); if ((ctx.S.seeds[mode.id] || 0) <= 0) { setMode(null); renderToolbar(); } return; }
   if (mode.t === 'water') return water(pi);
-  if (mode.t === 'fert') { fertilize(pi, mode.id); if ((ctx.S.ferts[mode.id] || 0) <= 0) { mode = null; renderToolbar(); } return; }
+  if (mode.t === 'fert') { fertilize(pi, mode.id); if ((ctx.S.ferts[mode.id] || 0) <= 0) { setMode(null); renderToolbar(); } return; }
   if (mode.t === 'harvest') return harvest(pi);
   if (mode.t === 'shovel') {
     if (!c) return;
