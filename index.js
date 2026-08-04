@@ -2367,31 +2367,7 @@ function initPets() {
     activeDrag.dy = rawDy;
   });
   mascots.addEventListener("pointerup", (e) => {
-    if (!ctx.S.dragPet) {
-      const el2 = e.target.closest(".pet");
-      if (!el2) return;
-      const petId2 = el2.dataset.pet;
-      const def = PETS[petId2];
-      if (!def) return;
-      petTouch[petId2] = now();
-      if (el2.classList.contains("sleep")) return wakePet(el2, true);
-      const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
-      if (def.job === "plant") return petPlant(el2, cry);
-      if (def.job === "fert") return petFert(el2, cry);
-      if (def.job === "harvest") return petHarvest(el2, cry);
-      if (def.job) return petBubble(el2, cry);
-      let txt = cry;
-      if (now() - (ctx.S.petPoke[petId2] || 0) >= POKE_CD) {
-        ctx.S.petPoke[petId2] = now();
-        const gain = 1 + Math.floor(Math.random() * 5);
-        ctx.S.coins += gain;
-        txt += petId2 === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : petId2 === "starBlob" ? " r\u01A1i ra " + gain + " G \xE1nh sao!" : " r\u01A1i ra " + gain + " G!";
-        save();
-        renderStatus();
-      }
-      petBubble(el2, txt);
-      return;
-    }
+    if (!ctx.S.dragPet) return;
     if (!activeDrag || activeDrag.id !== e.pointerId) return;
     const { el, petId, moved, dx, dy, ox, oy } = activeDrag;
     try {
@@ -2431,6 +2407,31 @@ function initPets() {
       }
       petBubble(el, txt);
     }
+  });
+  mascots.addEventListener("click", (e) => {
+    if (ctx.S.dragPet) return;
+    const el = e.target.closest(".pet");
+    if (!el) return;
+    const petId = el.dataset.pet;
+    const def = PETS[petId];
+    if (!def) return;
+    petTouch[petId] = now();
+    if (el.classList.contains("sleep")) return wakePet(el, true);
+    const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
+    if (def.job === "plant") return petPlant(el, cry);
+    if (def.job === "fert") return petFert(el, cry);
+    if (def.job === "harvest") return petHarvest(el, cry);
+    if (def.job) return petBubble(el, cry);
+    let txt = cry;
+    if (now() - (ctx.S.petPoke[petId] || 0) >= POKE_CD) {
+      ctx.S.petPoke[petId] = now();
+      const gain = 1 + Math.floor(Math.random() * 5);
+      ctx.S.coins += gain;
+      txt += petId === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : petId === "starBlob" ? " r\u01A1i ra " + gain + " G \xE1nh sao!" : " r\u01A1i ra " + gain + " G!";
+      save();
+      renderStatus();
+    }
+    petBubble(el, txt);
   });
 }
 
