@@ -2322,6 +2322,10 @@ function initPets() {
     const updateDrag = () => {
       if (!activeDrag) return;
       const { el: el2, dropped, dx, dy, petId } = activeDrag;
+      if (!el2.isConnected) {
+        activeDrag = null;
+        return;
+      }
       activeDrag.targetVx *= 0.85;
       activeDrag.targetVy *= 0.85;
       activeDrag.vx = activeDrag.vx * 0.7 + activeDrag.targetVx * 0.3;

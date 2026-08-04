@@ -332,6 +332,7 @@ export function initPets() {
     const updateDrag = () => {
       if (!activeDrag) return;
       const { el, dropped, dx, dy, petId } = activeDrag;
+      if (!el.isConnected) { activeDrag = null; return; }
 
       // Lực cản (ma sát) làm giảm dần tốc độ khi dừng chuột
       activeDrag.targetVx *= 0.85;
