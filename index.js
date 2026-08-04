@@ -2838,8 +2838,8 @@ function layout() {
   DECO_PX = plot >= 70 ? 56 : 40;
 }
 function initOrb() {
-  ctx.orb = $id("ctx.orb");
-  ctx.win = $id("ctx.win");
+  ctx.orb = $id("orb");
+  ctx.win = $id("win");
   ctx.orb.addEventListener("pointerdown", onOrbDown);
   ctx.orb.addEventListener("pointermove", onOrbMove);
   ctx.orb.addEventListener("pointerup", (e) => onOrbUp(e, false));

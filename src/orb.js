@@ -78,8 +78,8 @@ export function layout() {
 
 
 export function initOrb() {
-  ctx.orb = All.$id('ctx.orb');
-  ctx.win = All.$id('ctx.win');
+  ctx.orb = All.$id('orb');
+  ctx.win = All.$id('win');
   ctx.orb.addEventListener('pointerdown', onOrbDown);
   ctx.orb.addEventListener('pointermove', onOrbMove);
   ctx.orb.addEventListener('pointerup', e => onOrbUp(e, false));
