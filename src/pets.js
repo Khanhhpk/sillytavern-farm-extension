@@ -275,28 +275,89 @@ export function initPets() {
       if (Math.random() < 0.35) moveTo(el, petSpot(id));
     });
   }, 7000);
-  All.$id('mascots').addEventListener('click', e => {
-    // @ts-ignore
+  let activeDrag = null;
+  const mascots = All.$id('mascots');
+
+  mascots.addEventListener('pointerdown', e => {
     const el = e.target.closest('.pet'); if (!el) return;
-    const id = el.dataset.pet, def = PETS[id];
-    if (!def) return;
-    petTouch[id] = now();                                  // Ghi lại một lần "được để ý" (dùng để xét ngủ gật của bé làm việc)
-    if (el.classList.contains('sleep')) return wakePet(el, true);   // Bé đang ngủ: chọc = giật mình tỉnh, cú này không tính là chọc chọc
-    const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
-    if (def.job === 'plant') return petPlant(el, cry);    // Nghề tốn tiền: chọc để kích hoạt làm hàng loạt
-    if (def.job === 'fert') return petFert(el, cry);
-    if (def.job === 'harvest') return petHarvest(el, cry);// #27: thu hoạch cũng đổi sang chọc mới chạy, khỏi quay lại mà ngơ ngác
-    if (def.job) return petBubble(el, cry);               // Loại tưới nước: bị động trong ca, chọc = chào hỏi
-    let txt = cry;                                        // Loại tìm kho báu: chọc chọc là rơi tiền
-    if (now() - (ctx.S.petPoke[id] || 0) >= POKE_CD) {
-      ctx.S.petPoke[id] = now();
-      const gain = 1 + Math.floor(Math.random() * 5);
-      ctx.S.coins += gain;
-      txt += id === 'prismBlob' ? ' rũ ra ' + gain + ' G ánh vụn!'
-        : id === 'starBlob' ? ' rơi ra ' + gain + ' G ánh sao!'
-        : ' rơi ra ' + gain + ' G!';
-      save(); All.renderStatus();
+    if (e.button !== 0) return; // Chỉ chuột trái
+    e.preventDefault();
+    try { el.setPointerCapture(e.pointerId); } catch(err){}
+    const id = el.dataset.pet;
+    if (petHopT[id]) { clearTimeout(petHopT[id]); petHopT[id] = null; }
+    el.style.transitionProperty = 'none'; // Tắt transition để kéo theo chuột cho mượt
+    el.classList.remove('walk');
+
+    activeDrag = {
+      id: e.pointerId, el, petId: id,
+      sx: e.clientX, sy: e.clientY,
+      ox: parseFloat(el.style.left) || 0,
+      oy: parseFloat(el.style.bottom) || 0,
+      moved: false, lastX: e.clientX, lastY: e.clientY
+    };
+  });
+
+  mascots.addEventListener('pointermove', e => {
+    if (!activeDrag || activeDrag.id !== e.pointerId) return;
+    const { el, sx, sy, ox, oy } = activeDrag;
+    const dx = e.clientX - sx;
+    const dy = e.clientY - sy; // Kéo xuống thì dy > 0, bottom giảm
+    
+    if (!activeDrag.moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) activeDrag.moved = true;
+    if (!activeDrag.moved) return;
+
+    // Tính tốc độ để kéo dãn (nhéo má)
+    const vx = e.clientX - activeDrag.lastX;
+    const vy = e.clientY - activeDrag.lastY;
+    activeDrag.lastX = e.clientX; activeDrag.lastY = e.clientY;
+
+    const speed = Math.sqrt(vx * vx + vy * vy);
+    const stretch = 1 + Math.min(speed * 0.05, 0.4);
+    const squish = 1 / stretch;
+    const angle = Math.atan2(vy, vx);
+
+    // Xoay quanh tâm dưới để cảm giác "nhấc bổng"
+    el.style.transformOrigin = 'center bottom';
+    el.style.transform = `rotate(${angle + Math.PI/2}rad) scale(${squish}, ${stretch})`;
+    
+    el.style.left = (ox + dx) + 'px';
+    el.style.bottom = (oy - dy) + 'px';
+  });
+
+  mascots.addEventListener('pointerup', e => {
+    if (!activeDrag || activeDrag.id !== e.pointerId) return;
+    const { el, petId, moved } = activeDrag;
+    try { el.releasePointerCapture(e.pointerId); } catch(err){}
+    activeDrag = null;
+
+    el.style.transform = '';
+    el.style.transformOrigin = '';
+    el.style.transitionProperty = 'transform, left, bottom';
+
+    if (!moved) {
+      const def = PETS[petId];
+      if (!def) return;
+      petTouch[petId] = now();
+      if (el.classList.contains('sleep')) return wakePet(el, true);
+      const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
+      if (def.job === 'plant') return petPlant(el, cry);
+      if (def.job === 'fert') return petFert(el, cry);
+      if (def.job === 'harvest') return petHarvest(el, cry);
+      if (def.job) return petBubble(el, cry);
+      let txt = cry;
+      if (now() - (ctx.S.petPoke[petId] || 0) >= POKE_CD) {
+        ctx.S.petPoke[petId] = now();
+        const gain = 1 + Math.floor(Math.random() * 5);
+        ctx.S.coins += gain;
+        txt += petId === 'prismBlob' ? ' rũ ra ' + gain + ' G ánh vụn!'
+          : petId === 'starBlob' ? ' rơi ra ' + gain + ' G ánh sao!'
+          : ' rơi ra ' + gain + ' G!';
+        save(); All.renderStatus();
+      }
+      petBubble(el, txt);
+    } else {
+      petPos[petId] = { x: parseFloat(el.style.left), y: parseFloat(el.style.bottom) };
+      moveTo(el, petPos[petId]); // Đứng yên tại chỗ mới
     }
-    petBubble(el, txt);
   });
 }

@@ -2262,28 +2262,92 @@ function initPets() {
       if (Math.random() < 0.35) moveTo(el, petSpot(id));
     });
   }, 7e3);
-  $id("mascots").addEventListener("click", (e) => {
+  let activeDrag = null;
+  const mascots = $id("mascots");
+  mascots.addEventListener("pointerdown", (e) => {
     const el = e.target.closest(".pet");
     if (!el) return;
-    const id = el.dataset.pet, def = PETS[id];
-    if (!def) return;
-    petTouch[id] = now();
-    if (el.classList.contains("sleep")) return wakePet(el, true);
-    const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
-    if (def.job === "plant") return petPlant(el, cry);
-    if (def.job === "fert") return petFert(el, cry);
-    if (def.job === "harvest") return petHarvest(el, cry);
-    if (def.job) return petBubble(el, cry);
-    let txt = cry;
-    if (now() - (ctx.S.petPoke[id] || 0) >= POKE_CD) {
-      ctx.S.petPoke[id] = now();
-      const gain = 1 + Math.floor(Math.random() * 5);
-      ctx.S.coins += gain;
-      txt += id === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : id === "starBlob" ? " r\u01A1i ra " + gain + " G \xE1nh sao!" : " r\u01A1i ra " + gain + " G!";
-      save();
-      renderStatus();
+    if (e.button !== 0) return;
+    e.preventDefault();
+    try {
+      el.setPointerCapture(e.pointerId);
+    } catch (err) {
     }
-    petBubble(el, txt);
+    const id = el.dataset.pet;
+    if (petHopT[id]) {
+      clearTimeout(petHopT[id]);
+      petHopT[id] = null;
+    }
+    el.style.transitionProperty = "none";
+    el.classList.remove("walk");
+    activeDrag = {
+      id: e.pointerId,
+      el,
+      petId: id,
+      sx: e.clientX,
+      sy: e.clientY,
+      ox: parseFloat(el.style.left) || 0,
+      oy: parseFloat(el.style.bottom) || 0,
+      moved: false,
+      lastX: e.clientX,
+      lastY: e.clientY
+    };
+  });
+  mascots.addEventListener("pointermove", (e) => {
+    if (!activeDrag || activeDrag.id !== e.pointerId) return;
+    const { el, sx, sy, ox, oy } = activeDrag;
+    const dx = e.clientX - sx;
+    const dy = e.clientY - sy;
+    if (!activeDrag.moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) activeDrag.moved = true;
+    if (!activeDrag.moved) return;
+    const vx = e.clientX - activeDrag.lastX;
+    const vy = e.clientY - activeDrag.lastY;
+    activeDrag.lastX = e.clientX;
+    activeDrag.lastY = e.clientY;
+    const speed = Math.sqrt(vx * vx + vy * vy);
+    const stretch = 1 + Math.min(speed * 0.05, 0.4);
+    const squish = 1 / stretch;
+    const angle = Math.atan2(vy, vx);
+    el.style.transformOrigin = "center bottom";
+    el.style.transform = `rotate(${angle + Math.PI / 2}rad) scale(${squish}, ${stretch})`;
+    el.style.left = ox + dx + "px";
+    el.style.bottom = oy - dy + "px";
+  });
+  mascots.addEventListener("pointerup", (e) => {
+    if (!activeDrag || activeDrag.id !== e.pointerId) return;
+    const { el, petId, moved } = activeDrag;
+    try {
+      el.releasePointerCapture(e.pointerId);
+    } catch (err) {
+    }
+    activeDrag = null;
+    el.style.transform = "";
+    el.style.transformOrigin = "";
+    el.style.transitionProperty = "transform, left, bottom";
+    if (!moved) {
+      const def = PETS[petId];
+      if (!def) return;
+      petTouch[petId] = now();
+      if (el.classList.contains("sleep")) return wakePet(el, true);
+      const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
+      if (def.job === "plant") return petPlant(el, cry);
+      if (def.job === "fert") return petFert(el, cry);
+      if (def.job === "harvest") return petHarvest(el, cry);
+      if (def.job) return petBubble(el, cry);
+      let txt = cry;
+      if (now() - (ctx.S.petPoke[petId] || 0) >= POKE_CD) {
+        ctx.S.petPoke[petId] = now();
+        const gain = 1 + Math.floor(Math.random() * 5);
+        ctx.S.coins += gain;
+        txt += petId === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : petId === "starBlob" ? " r\u01A1i ra " + gain + " G \xE1nh sao!" : " r\u01A1i ra " + gain + " G!";
+        save();
+        renderStatus();
+      }
+      petBubble(el, txt);
+    } else {
+      petPos[petId] = { x: parseFloat(el.style.left), y: parseFloat(el.style.bottom) };
+      moveTo(el, petPos[petId]);
+    }
   });
 }
 
