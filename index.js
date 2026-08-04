@@ -3814,7 +3814,7 @@ async function collectWorldbook() {
     }
     const seen = /* @__PURE__ */ new Set();
     for (const en of entries) {
-      if (en.enabled === false) continue;
+      if (en.enabled === false || en.disabled === true) continue;
       const content = (en.content || en.text || "").trim();
       if (!content || seen.has(content)) continue;
       seen.add(content);
