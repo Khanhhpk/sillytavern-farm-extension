@@ -296,14 +296,24 @@ export function initPets() {
       sx: e.clientX, sy: e.clientY,
       ox: parseFloat(el.style.left) || 0,
       oy: parseFloat(el.style.bottom) || 0,
-      dx: 0, dy: 0, vx: 0, vy: 0,
-      moved: false, lastX: e.clientX, lastY: e.clientY,
-      stopT: null
+      dx: 0, dy: 0, vx: 0, vy: 0, targetVx: 0, targetVy: 0,
+      moved: false, lastX: e.clientX, lastY: e.clientY, dropped: false
     };
 
     const updateDrag = () => {
       if (!activeDrag) return;
-      const { el, dx, dy, vx, vy } = activeDrag;
+      const { el, dropped, dx, dy } = activeDrag;
+
+      // Lực cản (ma sát) làm giảm dần tốc độ khi dừng chuột
+      activeDrag.targetVx *= 0.85;
+      activeDrag.targetVy *= 0.85;
+
+      // Làm mượt vận tốc thực tế đuổi theo vận tốc mục tiêu (tạo độ trễ núng nính)
+      activeDrag.vx = activeDrag.vx * 0.7 + activeDrag.targetVx * 0.3;
+      activeDrag.vy = activeDrag.vy * 0.7 + activeDrag.targetVy * 0.3;
+
+      const vx = activeDrag.vx;
+      const vy = activeDrag.vy;
 
       // Tính lực kéo dãn X và Y độc lập (giữ cho hình luôn đứng thẳng)
       const stretchX = 1 + Math.min(Math.abs(vx) * 0.04, 0.4);
@@ -312,10 +322,23 @@ export function initPets() {
       const scaleY = stretchY / stretchX;
       const skewX = Math.max(-30, Math.min(vx * -1.5, 30));
       
-      // Dùng translate3d để tăng tốc phần cứng (GPU), cực kỳ mượt mà, không gây giật (reflow)
+      // Khi thả ra, toạ độ thật đã được chốt, nên translate = 0, chỉ giữ lại transform núng nính đàn hồi
+      const rDx = dropped ? 0 : dx;
+      const rDy = dropped ? 0 : dy; // Sửa lỗi ngược trục Y: translate3d dùng rDy dương = đi xuống
+
       el.style.transformOrigin = 'center';
-      el.style.transform = `translate3d(${dx}px, ${-dy}px, 0) scale(${scaleX}, ${scaleY}) skewX(${skewX}deg)`;
+      el.style.transform = `translate3d(${rDx}px, ${rDy}px, 0) scale(${scaleX}, ${scaleY}) skewX(${skewX}deg)`;
       
+      // Hoàn tất hiệu ứng nảy khi đã thả và vận tốc bị triệt tiêu hết
+      if (dropped && Math.abs(vx) < 0.1 && Math.abs(vy) < 0.1) {
+        el.style.transform = '';
+        el.style.transition = '';
+        petPos[activeDrag.petId] = { x: parseFloat(el.style.left), y: parseFloat(el.style.bottom) };
+        moveTo(el, petPos[activeDrag.petId]); 
+        activeDrag = null;
+        return;
+      }
+
       dragAnimFrame = requestAnimationFrame(updateDrag);
     };
     dragAnimFrame = requestAnimationFrame(updateDrag);
@@ -330,53 +353,35 @@ export function initPets() {
     if (!activeDrag.moved && (Math.abs(rawDx) > 4 || Math.abs(rawDy) > 4)) activeDrag.moved = true;
     if (!activeDrag.moved) return;
 
-    // Tính tốc độ tức thời và cộng dồn nhẹ để tạo đà
     const rawVx = e.clientX - activeDrag.lastX;
     const rawVy = e.clientY - activeDrag.lastY;
     activeDrag.lastX = e.clientX; activeDrag.lastY = e.clientY;
     
-    // Thuật toán làm mượt vận tốc (momentum smoothing)
-    activeDrag.vx = activeDrag.vx * 0.6 + rawVx * 0.4;
-    activeDrag.vy = activeDrag.vy * 0.6 + rawVy * 0.4;
+    // Bơm động lượng vào target velocity
+    activeDrag.targetVx = rawVx;
+    activeDrag.targetVy = rawVy;
     activeDrag.dx = rawDx;
     activeDrag.dy = rawDy;
-
-    // Giảm tốc tự nhiên nếu chuột dừng lại
-    clearTimeout(activeDrag.stopT);
-    activeDrag.stopT = setTimeout(() => {
-      const slowDown = () => {
-        if (!activeDrag) return;
-        activeDrag.vx *= 0.5;
-        activeDrag.vy *= 0.5;
-        if (Math.abs(activeDrag.vx) > 0.1 || Math.abs(activeDrag.vy) > 0.1) {
-          activeDrag.stopT = setTimeout(slowDown, 16);
-        } else {
-          activeDrag.vx = 0; activeDrag.vy = 0;
-        }
-      };
-      slowDown();
-    }, 50);
   });
 
   mascots.addEventListener('pointerup', e => {
     if (!activeDrag || activeDrag.id !== e.pointerId) return;
-    const { el, petId, moved, dx, dy, ox, oy, stopT } = activeDrag;
-    clearTimeout(stopT);
-    if (dragAnimFrame) cancelAnimationFrame(dragAnimFrame);
+    const { el, petId, moved, dx, dy, ox, oy } = activeDrag;
     try { el.releasePointerCapture(e.pointerId); } catch(err){}
-    activeDrag = null;
 
-    // Trả lại hình dáng, chốt toạ độ cuối cùng vào left/bottom
-    el.style.transform = '';
-    el.style.transformOrigin = '';
-    el.style.transition = ''; // Trả lại CSS transition mặc định
-    
     if (moved) {
+      // Chốt toạ độ thật ngay lập tức (bottom = oy - dy: dy > 0 thì bottom giảm = đi xuống)
       el.style.left = (ox + dx) + 'px';
       el.style.bottom = (oy - dy) + 'px';
-    }
+      // Đánh dấu đã thả để frame tiếp theo huỷ translate và bắt đầu giảm chấn
+      activeDrag.dropped = true;
+    } else {
+      // Không kéo, chỉ là click
+      cancelAnimationFrame(dragAnimFrame);
+      el.style.transform = '';
+      el.style.transition = '';
+      activeDrag = null;
 
-    if (!moved) {
       const def = PETS[petId];
       if (!def) return;
       petTouch[petId] = now();
@@ -397,9 +402,6 @@ export function initPets() {
         save(); All.renderStatus();
       }
       petBubble(el, txt);
-    } else {
-      petPos[petId] = { x: parseFloat(el.style.left), y: parseFloat(el.style.bottom) };
-      moveTo(el, petPos[petId]); // Đứng yên tại chỗ mới
     }
   });
 }

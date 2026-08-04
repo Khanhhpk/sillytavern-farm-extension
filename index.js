@@ -2293,21 +2293,39 @@ function initPets() {
       dy: 0,
       vx: 0,
       vy: 0,
+      targetVx: 0,
+      targetVy: 0,
       moved: false,
       lastX: e.clientX,
       lastY: e.clientY,
-      stopT: null
+      dropped: false
     };
     const updateDrag = () => {
       if (!activeDrag) return;
-      const { el: el2, dx, dy, vx, vy } = activeDrag;
+      const { el: el2, dropped, dx, dy } = activeDrag;
+      activeDrag.targetVx *= 0.85;
+      activeDrag.targetVy *= 0.85;
+      activeDrag.vx = activeDrag.vx * 0.7 + activeDrag.targetVx * 0.3;
+      activeDrag.vy = activeDrag.vy * 0.7 + activeDrag.targetVy * 0.3;
+      const vx = activeDrag.vx;
+      const vy = activeDrag.vy;
       const stretchX = 1 + Math.min(Math.abs(vx) * 0.04, 0.4);
       const stretchY = 1 + Math.min(Math.abs(vy) * 0.04, 0.4);
       const scaleX = stretchX / stretchY;
       const scaleY = stretchY / stretchX;
       const skewX = Math.max(-30, Math.min(vx * -1.5, 30));
+      const rDx = dropped ? 0 : dx;
+      const rDy = dropped ? 0 : dy;
       el2.style.transformOrigin = "center";
-      el2.style.transform = `translate3d(${dx}px, ${-dy}px, 0) scale(${scaleX}, ${scaleY}) skewX(${skewX}deg)`;
+      el2.style.transform = `translate3d(${rDx}px, ${rDy}px, 0) scale(${scaleX}, ${scaleY}) skewX(${skewX}deg)`;
+      if (dropped && Math.abs(vx) < 0.1 && Math.abs(vy) < 0.1) {
+        el2.style.transform = "";
+        el2.style.transition = "";
+        petPos[activeDrag.petId] = { x: parseFloat(el2.style.left), y: parseFloat(el2.style.bottom) };
+        moveTo(el2, petPos[activeDrag.petId]);
+        activeDrag = null;
+        return;
+      }
       dragAnimFrame = requestAnimationFrame(updateDrag);
     };
     dragAnimFrame = requestAnimationFrame(updateDrag);
@@ -2323,44 +2341,27 @@ function initPets() {
     const rawVy = e.clientY - activeDrag.lastY;
     activeDrag.lastX = e.clientX;
     activeDrag.lastY = e.clientY;
-    activeDrag.vx = activeDrag.vx * 0.6 + rawVx * 0.4;
-    activeDrag.vy = activeDrag.vy * 0.6 + rawVy * 0.4;
+    activeDrag.targetVx = rawVx;
+    activeDrag.targetVy = rawVy;
     activeDrag.dx = rawDx;
     activeDrag.dy = rawDy;
-    clearTimeout(activeDrag.stopT);
-    activeDrag.stopT = setTimeout(() => {
-      const slowDown = () => {
-        if (!activeDrag) return;
-        activeDrag.vx *= 0.5;
-        activeDrag.vy *= 0.5;
-        if (Math.abs(activeDrag.vx) > 0.1 || Math.abs(activeDrag.vy) > 0.1) {
-          activeDrag.stopT = setTimeout(slowDown, 16);
-        } else {
-          activeDrag.vx = 0;
-          activeDrag.vy = 0;
-        }
-      };
-      slowDown();
-    }, 50);
   });
   mascots.addEventListener("pointerup", (e) => {
     if (!activeDrag || activeDrag.id !== e.pointerId) return;
-    const { el, petId, moved, dx, dy, ox, oy, stopT } = activeDrag;
-    clearTimeout(stopT);
-    if (dragAnimFrame) cancelAnimationFrame(dragAnimFrame);
+    const { el, petId, moved, dx, dy, ox, oy } = activeDrag;
     try {
       el.releasePointerCapture(e.pointerId);
     } catch (err) {
     }
-    activeDrag = null;
-    el.style.transform = "";
-    el.style.transformOrigin = "";
-    el.style.transition = "";
     if (moved) {
       el.style.left = ox + dx + "px";
       el.style.bottom = oy - dy + "px";
-    }
-    if (!moved) {
+      activeDrag.dropped = true;
+    } else {
+      cancelAnimationFrame(dragAnimFrame);
+      el.style.transform = "";
+      el.style.transition = "";
+      activeDrag = null;
       const def = PETS[petId];
       if (!def) return;
       petTouch[petId] = now();
@@ -2380,9 +2381,6 @@ function initPets() {
         renderStatus();
       }
       petBubble(el, txt);
-    } else {
-      petPos[petId] = { x: parseFloat(el.style.left), y: parseFloat(el.style.bottom) };
-      moveTo(el, petPos[petId]);
     }
   });
 }
