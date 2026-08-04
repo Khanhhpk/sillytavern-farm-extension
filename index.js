@@ -2667,10 +2667,10 @@ function openPanel(kind) {
         <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:2px">
           Gi\u1EDBi h\u1EA1n ch\u1EEF Lorebook g\u1EEDi cho AI:
           <input class="inp" id="secWbLimit" type="number" min="0" max="1000000" value="${SEC.wbLimit !== void 0 ? SEC.wbLimit : 2e4}" style="width:80px;padding:3px 6px"> (0 = Kh\xF4ng c\u1EAFt, g\u1EEDi to\xE0n b\u1ED9)
-        </div>
-        <div style="margin-top:10px;">
-          Gi\u1EDBi h\u1EA1n \u0111\u1ECDc tin nh\u1EAFn Chat (s\u1ED1 tin nh\u1EAFn g\u1EA7n nh\u1EA5t \u0111\u01B0\u1EE3c g\u1EEDi l\xEAn l\xE0m Context):<br>
-          <input class="inp" id="secChatDepth" type="number" min="0" max="200" value="${SEC.chatDepth !== void 0 ? SEC.chatDepth : 15}" style="width:80px;padding:3px 6px"> (0 = Kh\xF4ng g\u1EEDi \u0111o\u1EA1n Chat)
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:10px">
+          Gi\u1EDBi h\u1EA1n tin nh\u1EAFn Chat g\u1EEDi l\xEAn Context:
+          <input class="inp" id="secChatDepth" type="number" min="0" max="200" value="${SEC.chatDepth !== void 0 ? SEC.chatDepth : 15}" style="width:80px;padding:3px 6px"> (0 = T\u1EAFt)
         </label>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
           <span class="buy" id="secSave">L\u01B0u c\u1EA5u h\xECnh</span>
