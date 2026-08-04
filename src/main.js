@@ -79,7 +79,7 @@ export async function init() {
   initFarm();
   warmUpCache(CROPS);
 
-  // Failsafe watchdog
+  // Failsafe watchdog: sau 10s, kiểm tra DOM root có tồn tại không
   setTimeout(() => {
     if (!document.getElementById('star-tavern-farm-root')) {
       console.warn('[Farm] Failsafe: Giao diện chưa được nạp. Thử khởi động lại extension...');
@@ -96,3 +96,13 @@ export async function init() {
     }
   }, 10000);
 }
+
+// Self-invoke cho các phiên bản ST cũ (< 1.17) không có hệ thống hooks.
+// ST 1.17+ sẽ gọi init() qua hook "activate", lúc đó window[RUNTIME_KEY] đã được set
+// trước khi timeout này chạy → bỏ qua, không bị double-init.
+setTimeout(() => {
+  if (!window[RUNTIME_KEY]) {
+    console.log('[Farm] Phát hiện ST không có hooks, tự khởi động (chế độ tương thích)...');
+    init();
+  }
+}, 2000);
