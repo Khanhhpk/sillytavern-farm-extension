@@ -2339,10 +2339,18 @@ ${ev && ev.flavor ? `- Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}` : '
 
   // Thêm nút mở nông trại vào menu công cụ (magic wand) của SillyTavern
   let extMenuBtn = null;
+  let extRetry = 0;
   function setupExtButton() {
     if (extMenuBtn) { try { extMenuBtn.remove(); } catch(e){} }
-    const extMenu = pdoc.querySelector('#extensionsMenu');
-    if (!extMenu) { pwin.setTimeout(setupExtButton, 500); return; }
+    let extMenu = pdoc.querySelector('#extensionsMenu');
+    if (!extMenu) { 
+      extRetry++;
+      if (extRetry < 20) {
+        pwin.setTimeout(setupExtButton, 500); 
+        return; 
+      }
+      extMenu = pdoc.body; // Fallback sau 10s cho các UI mod như Kaiz Collection
+    }
     
     extMenuBtn = pdoc.createElement('div');
     extMenuBtn.id = 'farm-wand-btn';
@@ -2350,10 +2358,37 @@ ${ev && ev.flavor ? `- Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}` : '
     extMenuBtn.tabIndex = 0;
     extMenuBtn.innerHTML = '<div class="fa-fw fa-solid fa-leaf extensionsMenuExtensionButton"></div> Nông Trại';
     extMenuBtn.style.cursor = 'pointer';
+    
+    if (extMenu === pdoc.body) { // Style nổi bật nếu dùng fallback
+      extMenuBtn.style.position = 'fixed';
+      extMenuBtn.style.bottom = '20px';
+      extMenuBtn.style.left = '20px';
+      extMenuBtn.style.zIndex = '99999';
+      extMenuBtn.style.backgroundColor = 'var(--black50, rgba(0,0,0,0.5))';
+      extMenuBtn.style.padding = '10px 15px';
+      extMenuBtn.style.borderRadius = '10px';
+      extMenuBtn.style.backdropFilter = 'blur(4px)';
+    }
+
     extMenuBtn.addEventListener('click', toggleWin);
     extMenu.appendChild(extMenuBtn);
   }
   setupExtButton();
+
+  // Đăng ký lệnh chat /farm
+  try {
+    const scp = pwin.SlashCommandParser || globalThis.SlashCommandParser;
+    if (scp && scp.addCommandObject) {
+      scp.addCommandObject(
+        scp.getCommandObject('farm')
+          .help('Mở/Đóng giao diện Nông trại (SillyTavern Farm)')
+          .closure(async () => {
+            toggleWin();
+            return '';
+          })
+      );
+    }
+  } catch(e) {}
 
   const api = { destroy };
   pwin[RUNTIME_KEY] = api;
