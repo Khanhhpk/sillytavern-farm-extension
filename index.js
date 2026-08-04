@@ -2357,19 +2357,27 @@ ${ev && ev.flavor ? `- Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}` : '
   setupExtButton();
 
   // Đăng ký lệnh chat /farm
-  try {
-    const scp = pwin.SlashCommandParser || globalThis.SlashCommandParser;
-    if (scp && scp.addCommandObject) {
-      scp.addCommandObject(
-        scp.getCommandObject('farm')
-          .help('Mở/Đóng giao diện Nông trại (SillyTavern Farm)')
-          .closure(async () => {
-            toggleWin();
-            return '';
-          })
-      );
+  (async function() {
+    try {
+      let scp, SlashCommand;
+      try {
+        scp = (await import('../../../slash-commands/SlashCommandParser.js')).SlashCommandParser;
+        SlashCommand = (await import('../../../slash-commands/SlashCommand.js')).SlashCommand;
+      } catch (err) {}
+      
+      scp = scp || pwin.SlashCommandParser || globalThis.SlashCommandParser;
+      SlashCommand = SlashCommand || pwin.SlashCommand || globalThis.SlashCommand;
+
+      if (scp && SlashCommand) {
+        scp.addCommandObject(
+          new SlashCommand('farm', async () => { toggleWin(); return ''; })
+            .help('Mở/Đóng giao diện Nông trại (SillyTavern Farm)')
+        );
+      }
+    } catch(e) {
+      console.error('[Farm] Lỗi đăng ký lệnh /farm:', e);
     }
-  } catch(e) {}
+  })();
 
   const api = { destroy };
   pwin[RUNTIME_KEY] = api;
