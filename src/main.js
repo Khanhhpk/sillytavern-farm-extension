@@ -2,15 +2,10 @@ import { ctx, RUNTIME_KEY, setExtensionContext } from './store.js';
 import * as All from './all.js';
 import { warmUpCache } from './graphics.js';
 import { CROPS } from './data.js';
-import { styleCSS } from './style.js';
 
 export function initFarm() {
   try { window[RUNTIME_KEY]?.destroy?.(); } catch(e) {}
   document.getElementById('star-tavern-farm-root')?.remove();
-
-  const style = document.createElement('style');
-  style.textContent = styleCSS;
-  document.head.appendChild(style);
 
   All.loadState();
   All.placeOrb();
