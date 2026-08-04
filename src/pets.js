@@ -276,6 +276,7 @@ export function initPets() {
     });
   }, 7000);
   let activeDrag = null;
+  let dragAnimFrame = null;
   const mascots = All.$id('mascots');
 
   mascots.addEventListener('pointerdown', e => {
@@ -286,10 +287,8 @@ export function initPets() {
     const id = el.dataset.pet;
     if (petHopT[id]) { clearTimeout(petHopT[id]); petHopT[id] = null; }
     
-    // Giữ transition cho transform để kéo dãn mềm dẻo, tắt left/bottom
-    el.style.transitionProperty = 'transform';
-    el.style.transitionDuration = '0.15s';
-    el.style.transitionTimingFunction = 'ease-out';
+    // Tắt toàn bộ transition để thao tác phần cứng (GPU) ngay lập tức
+    el.style.transition = 'none';
     el.classList.remove('walk');
 
     activeDrag = {
@@ -297,18 +296,38 @@ export function initPets() {
       sx: e.clientX, sy: e.clientY,
       ox: parseFloat(el.style.left) || 0,
       oy: parseFloat(el.style.bottom) || 0,
+      dx: 0, dy: 0, vx: 0, vy: 0,
       moved: false, lastX: e.clientX, lastY: e.clientY,
-      vx: 0, vy: 0, stopT: null
+      stopT: null
     };
+
+    const updateDrag = () => {
+      if (!activeDrag) return;
+      const { el, dx, dy, vx, vy } = activeDrag;
+
+      // Tính lực kéo dãn X và Y độc lập (giữ cho hình luôn đứng thẳng)
+      const stretchX = 1 + Math.min(Math.abs(vx) * 0.04, 0.4);
+      const stretchY = 1 + Math.min(Math.abs(vy) * 0.04, 0.4);
+      const scaleX = stretchX / stretchY;
+      const scaleY = stretchY / stretchX;
+      const skewX = Math.max(-30, Math.min(vx * -1.5, 30));
+      
+      // Dùng translate3d để tăng tốc phần cứng (GPU), cực kỳ mượt mà, không gây giật (reflow)
+      el.style.transformOrigin = 'center';
+      el.style.transform = `translate3d(${dx}px, ${-dy}px, 0) scale(${scaleX}, ${scaleY}) skewX(${skewX}deg)`;
+      
+      dragAnimFrame = requestAnimationFrame(updateDrag);
+    };
+    dragAnimFrame = requestAnimationFrame(updateDrag);
   });
 
   mascots.addEventListener('pointermove', e => {
     if (!activeDrag || activeDrag.id !== e.pointerId) return;
-    const { el, sx, sy, ox, oy } = activeDrag;
-    const dx = e.clientX - sx;
-    const dy = e.clientY - sy; 
+    const { sx, sy } = activeDrag;
+    const rawDx = e.clientX - sx;
+    const rawDy = e.clientY - sy; 
     
-    if (!activeDrag.moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) activeDrag.moved = true;
+    if (!activeDrag.moved && (Math.abs(rawDx) > 4 || Math.abs(rawDy) > 4)) activeDrag.moved = true;
     if (!activeDrag.moved) return;
 
     // Tính tốc độ tức thời và cộng dồn nhẹ để tạo đà
@@ -316,45 +335,46 @@ export function initPets() {
     const rawVy = e.clientY - activeDrag.lastY;
     activeDrag.lastX = e.clientX; activeDrag.lastY = e.clientY;
     
-    activeDrag.vx = activeDrag.vx * 0.4 + rawVx;
-    activeDrag.vy = activeDrag.vy * 0.4 + rawVy;
+    // Thuật toán làm mượt vận tốc (momentum smoothing)
+    activeDrag.vx = activeDrag.vx * 0.6 + rawVx * 0.4;
+    activeDrag.vy = activeDrag.vy * 0.6 + rawVy * 0.4;
+    activeDrag.dx = rawDx;
+    activeDrag.dy = rawDy;
 
-    const vx = activeDrag.vx;
-    const vy = activeDrag.vy;
-
-    // Phóng đại hệ số kéo dãn để dễ thấy hơn
-    const stretchX = 1 + Math.min(Math.abs(vx) * 0.04, 0.5);
-    const stretchY = 1 + Math.min(Math.abs(vy) * 0.04, 0.5);
-    const scaleX = stretchX / stretchY;
-    const scaleY = stretchY / stretchX;
-
-    const skewX = Math.max(-35, Math.min(vx * -1.5, 35));
-    
-    el.style.transformOrigin = 'center';
-    el.style.transform = `scale(${scaleX}, ${scaleY}) skewX(${skewX}deg)`;
-    
-    el.style.left = (ox + dx) + 'px';
-    el.style.bottom = (oy - dy) + 'px';
-
-    // Nếu chuột dừng lại, hồi phục hình dáng sau 150ms
+    // Giảm tốc tự nhiên nếu chuột dừng lại
     clearTimeout(activeDrag.stopT);
     activeDrag.stopT = setTimeout(() => {
-      if (!activeDrag) return;
-      activeDrag.vx = 0; activeDrag.vy = 0;
-      el.style.transform = 'scale(1, 1) skewX(0deg)';
-    }, 150);
+      const slowDown = () => {
+        if (!activeDrag) return;
+        activeDrag.vx *= 0.5;
+        activeDrag.vy *= 0.5;
+        if (Math.abs(activeDrag.vx) > 0.1 || Math.abs(activeDrag.vy) > 0.1) {
+          activeDrag.stopT = setTimeout(slowDown, 16);
+        } else {
+          activeDrag.vx = 0; activeDrag.vy = 0;
+        }
+      };
+      slowDown();
+    }, 50);
   });
 
   mascots.addEventListener('pointerup', e => {
     if (!activeDrag || activeDrag.id !== e.pointerId) return;
-    const { el, petId, moved, stopT } = activeDrag;
+    const { el, petId, moved, dx, dy, ox, oy, stopT } = activeDrag;
     clearTimeout(stopT);
+    if (dragAnimFrame) cancelAnimationFrame(dragAnimFrame);
     try { el.releasePointerCapture(e.pointerId); } catch(err){}
     activeDrag = null;
 
+    // Trả lại hình dáng, chốt toạ độ cuối cùng vào left/bottom
     el.style.transform = '';
     el.style.transformOrigin = '';
-    el.style.transitionProperty = 'transform, left, bottom';
+    el.style.transition = ''; // Trả lại CSS transition mặc định
+    
+    if (moved) {
+      el.style.left = (ox + dx) + 'px';
+      el.style.bottom = (oy - dy) + 'px';
+    }
 
     if (!moved) {
       const def = PETS[petId];
