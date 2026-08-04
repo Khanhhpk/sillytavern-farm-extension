@@ -219,7 +219,7 @@ function initFarm() {
         <span class="chip" id="chipLink">Liên kết thẻ nhân vật: Tắt</span>
         <span class="chip" id="chipStory" style="display:none">Ảnh hưởng cốt truyện: Tắt</span>
       </div>
-      <div class="banner" id="banner"><span class="btag" id="btag"></span><span id="btxt"></span></div>
+      <div class="banner" id="banner"><span class="btag" id="btag"></span><span id="btxt"></span><span class="bmut" id="bmut" title="Xem khả năng đột biến">✦</span><div class="mut-popup" id="mutPopup"></div></div>
       <div id="scroll">
         <div class="field">
           <div class="pager" id="pager"></div>
@@ -1370,15 +1370,18 @@ QUY TẮC BẮT BUỘC:
   }
   function renderBanner() {
     const b = $id('banner');
-    if (!CS.link) { b.classList.remove('show'); return; }
+    const bmut = $id('bmut');
+    const mutPopup = $id('mutPopup');
+    if (!CS.link) { b.classList.remove('show'); bmut.style.display = 'none'; mutPopup.classList.remove('open'); return; }
     if (eventPending) {
       b.classList.add('show');
       $id('btag').textContent = 'Sự kiện hôm nay';
       $id('btxt').textContent = 'Phù thuỷ tròn đang ngắm sao bói toán…';
+      bmut.style.display = 'none'; mutPopup.classList.remove('open');
       return;
     }
     const ev = todayEvent();
-    if (!ev) { b.classList.remove('show'); return; }
+    if (!ev) { b.classList.remove('show'); bmut.style.display = 'none'; mutPopup.classList.remove('open'); return; }
     b.classList.add('show');
     $id('btag').textContent = 'Sự kiện hôm nay · ' + ev.name;
     const fx = [];
@@ -1389,6 +1392,29 @@ QUY TẮC BẮT BUỘC:
     const fb = S.dayEvent && S.dayEvent.source === 'fallback';
     $id('btxt').textContent = (ev.flavor || '') + (fx.length ? '(' + fx.join(' · ') + ')' : '') +
       (fb ? '〔Sự kiện ngoại tuyến' + (S.dayEvent.reason ? ': ' + S.dayEvent.reason : '') + '〕' : '');
+    /* Nút xem đột biến: chỉ hiện khi sự kiện có mutate_on_fert > 0 và có mutate_desc */
+    const hasMut = ev.mutate_on_fert > 0 && ev.mutate_desc && Object.keys(ev.mutate_desc).length > 0;
+    bmut.style.display = hasMut ? 'flex' : 'none';
+    if (hasMut) {
+      const prefix = ev.mutate_prefix || 'đột biến';
+      const chance = Math.round(ev.mutate_on_fert * 100);
+      let html = '<div class="mut-header">✦ ' + esc(prefix) + ' <span class="mut-chance">(cơ bản ' + chance + '%, bón phân tăng)</span></div>';
+      const desc = ev.mutate_desc;
+      const entries = Object.entries(desc).filter(([k]) => k !== '*');
+      const wildcard = desc['*'] || '';
+      if (entries.length > 0) {
+        html += '<div class="mut-list">';
+        entries.forEach(([crop, effect]) => {
+          html += '<div class="mut-row"><span class="mut-crop">' + esc(crop) + '</span><span class="mut-effect">' + esc(effect) + '</span></div>';
+        });
+        html += '</div>';
+      } else if (wildcard) {
+        html += '<div class="mut-list"><div class="mut-row"><span class="mut-crop">Tất cả</span><span class="mut-effect">' + esc(wildcard) + '</span></div></div>';
+      }
+      mutPopup.innerHTML = html;
+    } else {
+      mutPopup.classList.remove('open');
+    }
   }
   function renderDynamic() { 
     settle(); 
@@ -1405,7 +1431,22 @@ QUY TẮC BẮT BUỘC:
     if (CS.link) { requestDayEvent(); toast('Đã bật liên kết, đang gieo quẻ sự kiện hôm nay theo thế giới quan'); }
     else toast('Đã về lại vườn rau chơi một mình');
   });
-  $id('banner').addEventListener('click', () => $id('banner').classList.toggle('expand'));   // Banner: bấm một cái để mở / thu toàn văn
+  $id('banner').addEventListener('click', (e) => {
+    if (e.target.closest('.bmut') || e.target.closest('.mut-popup')) return;   // Không toggle expand khi bấm nút đột biến hoặc popup
+    $id('banner').classList.toggle('expand');
+    $id('mutPopup').classList.remove('open');   // Thu banner thì đóng popup
+  });
+  $id('bmut').addEventListener('click', (e) => {
+    e.stopPropagation();
+    $id('mutPopup').classList.toggle('open');
+  });
+  /* Bấm ngoài popup thì đóng */
+  pdoc.addEventListener('click', (e) => {
+    const popup = $id('mutPopup');
+    if (popup.classList.contains('open') && !e.target.closest('.mut-popup') && !e.target.closest('.bmut')) {
+      popup.classList.remove('open');
+    }
+  });
   $id('chipRegen').addEventListener('click', () => {      // Nút gieo lại dọn nhà: từ trang cài đặt chuyển ra hàng điều khiển (wen chốt, tiện tay với tới)
     S.dayEvent = null; save();
     requestDayEvent(true); toast('Đang gieo quẻ lại…');
