@@ -104,6 +104,17 @@ async function collectWorldbook() {
                             ? data.entries 
                             : Object.values(data.entries);
                         console.log('[FARM DEBUG] Fetched API data entries length:', vals.length);
+                        if (vals.length > 0) {
+                            const sample = vals[0];
+                            console.log('[FARM DEBUG] Sample entry keys:', Object.keys(sample));
+                            console.log('[FARM DEBUG] Sample entry disable-related:', {
+                                disable: sample.disable,
+                                disabled: sample.disabled,
+                                enabled: sample.enabled,
+                                useProbability: sample.useProbability,
+                                comment: sample.comment,
+                            });
+                        }
                         entries = entries.concat(vals);
                     }
                 } else {
