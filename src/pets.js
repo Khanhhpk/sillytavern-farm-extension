@@ -406,6 +406,29 @@ export function initPets() {
     activeDrag.dy = rawDy;
   });
 
+  const handlePetClick = (el, petId) => {
+    const def = PETS[petId];
+    if (!def) return;
+    petTouch[petId] = now();
+    if (el.classList.contains('sleep')) return wakePet(el, true);
+    const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
+    if (def.job === 'plant') return petPlant(el, cry);
+    if (def.job === 'fert') return petFert(el, cry);
+    if (def.job === 'harvest') return petHarvest(el, cry);
+    if (def.job) return petBubble(el, cry);
+    let txt = cry;
+    if (now() - (ctx.S.petPoke[petId] || 0) >= POKE_CD) {
+      ctx.S.petPoke[petId] = now();
+      const gain = 1 + Math.floor(Math.random() * 5);
+      ctx.S.coins += gain;
+      txt += petId === 'prismBlob' ? ' rũ ra ' + gain + ' G ánh vụn!'
+        : petId === 'starBlob' ? ' rơi ra ' + gain + ' G ánh sao!'
+        : ' rơi ra ' + gain + ' G!';
+      save(); All.renderStatus();
+    }
+    petBubble(el, txt);
+  };
+
   const endDrag = e => {
     if (!ctx.S.dragPet) return;
 
@@ -431,26 +454,7 @@ export function initPets() {
       activeDrag = null;
       delete el.dataset.dragging;
 
-      const def = PETS[petId];
-      if (!def) return;
-      petTouch[petId] = now();
-      if (el.classList.contains('sleep')) return wakePet(el, true);
-      const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
-      if (def.job === 'plant') return petPlant(el, cry);
-      if (def.job === 'fert') return petFert(el, cry);
-      if (def.job === 'harvest') return petHarvest(el, cry);
-      if (def.job) return petBubble(el, cry);
-      let txt = cry;
-      if (now() - (ctx.S.petPoke[petId] || 0) >= POKE_CD) {
-        ctx.S.petPoke[petId] = now();
-        const gain = 1 + Math.floor(Math.random() * 5);
-        ctx.S.coins += gain;
-        txt += petId === 'prismBlob' ? ' rũ ra ' + gain + ' G ánh vụn!'
-          : petId === 'starBlob' ? ' rơi ra ' + gain + ' G ánh sao!'
-          : ' rơi ra ' + gain + ' G!';
-        save(); All.renderStatus();
-      }
-      petBubble(el, txt);
+      handlePetClick(el, petId);
     }
   };
 
@@ -461,26 +465,6 @@ export function initPets() {
   mascots.addEventListener('click', e => {
     if (ctx.S.dragPet) return; // Nếu bật tính năng kéo thả thì dùng logic pointerup ở trên, bỏ qua native click
     const el = e.target.closest('.pet'); if (!el) return;
-    const petId = el.dataset.pet;
-    const def = PETS[petId];
-    if (!def) return;
-    petTouch[petId] = now();
-    if (el.classList.contains('sleep')) return wakePet(el, true);
-    const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
-    if (def.job === 'plant') return petPlant(el, cry);
-    if (def.job === 'fert') return petFert(el, cry);
-    if (def.job === 'harvest') return petHarvest(el, cry);
-    if (def.job) return petBubble(el, cry);
-    let txt = cry;
-    if (now() - (ctx.S.petPoke[petId] || 0) >= POKE_CD) {
-      ctx.S.petPoke[petId] = now();
-      const gain = 1 + Math.floor(Math.random() * 5);
-      ctx.S.coins += gain;
-      txt += petId === 'prismBlob' ? ' rũ ra ' + gain + ' G ánh vụn!'
-        : petId === 'starBlob' ? ' rơi ra ' + gain + ' G ánh sao!'
-        : ' rơi ra ' + gain + ' G!';
-      save(); All.renderStatus();
-    }
-    petBubble(el, txt);
+    handlePetClick(el, el.dataset.pet);
   });
 }
