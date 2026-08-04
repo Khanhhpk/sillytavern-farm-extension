@@ -1770,21 +1770,6 @@ function initUI() {
     renderToolbar();
     toast(pg === 1 ? "V\u1EC1 \u0111\u1ED3ng c\u1ECF~" : pg === 2 ? "T\u1EDBi v\xF9ng n\u01B0\u1EDBc~" : "T\u1EDBi khu m\u1ECF~");
   }, { passive: true });
-  (function() {
-    const drnd = mulberry32(20260717);
-    function addDeco(o, cls, pos) {
-      const el = document.createElement("span");
-      el.className = cls;
-      el.style.cssText = "position:absolute;" + pos;
-      el.innerHTML = spriteSVG(o.n, o.s | 0);
-      decoLayer.appendChild(el);
-    }
-    const side = [];
-    for (let i = 0; i < 3; i++) side.push({ n: "pinkgrass", s: 28 + drnd() * 8, x: 0.4 + drnd() * 1.5, y: 8 + i * 17 + drnd() * 6 });
-    for (let i = 0; i < 2; i++) side.push({ n: "pinkgrass", s: 28 + drnd() * 8, x: 90 + drnd() * 3, y: 24 + i * 17 + drnd() * 6 });
-    side.forEach((o) => addDeco(o, "dside", `left:${o.x}%;top:${o.y}%;`));
-    for (let i = 0; i < 3; i++) addDeco({ n: "pinkgrass", s: 28 + drnd() * 6 }, "dbot", `left:${9 + i * 16 + drnd() * 5}%;bottom:4px;`);
-  })();
 }
 
 // src/logic.js
