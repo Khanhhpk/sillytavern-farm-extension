@@ -8,7 +8,9 @@ export function initFarm() {
   document.getElementById('star-tavern-farm-root')?.remove();
 
   All.loadState();
+  All.applyTheme();
   All.placeOrb();
+  All.initEvents();
   console.log('Farm initialized');
 }
 

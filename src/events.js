@@ -1,4 +1,4 @@
-import { ctx } from './store.js';
+import { ctx, extensionName } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
@@ -32,7 +32,7 @@ export function loadCharState() {
   try {
     const cn = charName();
     const key = 'cs_' + cn;
-    const o = (extension_settings[extensionName] || {})[key] || {};
+    const o = (ctx.extension_settings[extensionName] || {})[key] || {};
     CS = { link: !!o.link, story: !!o.story, userPrompt: o.userPrompt || '' };
   } catch (e) { CS = { link: false, story: false, userPrompt: '' }; }
 }
@@ -40,9 +40,9 @@ export function saveCharState() {
   try {
     const cn = charName();
     const key = 'cs_' + cn;
-    if (!extension_settings[extensionName]) extension_settings[extensionName] = {};
-    extension_settings[extensionName][key] = { link: CS.link, story: CS.story, userPrompt: CS.userPrompt };
-    if (saveSettingsDebounced) saveSettingsDebounced();
+    if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};
+    ctx.extension_settings[extensionName][key] = { link: CS.link, story: CS.story, userPrompt: CS.userPrompt };
+    if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
   } catch (e) {}
 }
 loadCharState();
@@ -603,17 +603,18 @@ export const heartbeat = window.setInterval(() => {
   try { settle(); } catch (e) {}
 }, 60 * 1000);
 
-/* Đổi thẻ: nạp lại trạng thái phía nhân vật, sự kiện lấy lại theo thẻ */
-try {
-  const chatChangedEvent = event_types?.CHAT_CHANGED;
-  if (eventSource?.on && chatChangedEvent) {
-    eventSource.on(chatChangedEvent, () => {
-      loadCharState();
-      renderChips(); renderBanner(); updateInjection();
-      if (CS.link) requestDayEvent();
-    });
-  } else {
-    console.warn('[Farm] eventSource hoặc event_types.CHAT_CHANGED không khả dụng, bỏ qua đăng ký sự kiện đổi thẻ.');
-  }
-} catch (e) { console.warn('[Farm] Lỗi khi đăng ký sự kiện CHAT_CHANGED:', e); }
-
+export function initEvents() {
+  loadCharState();
+  try {
+    const chatChangedEvent = ctx.event_types?.CHAT_CHANGED;
+    if (ctx.eventSource?.on && chatChangedEvent) {
+      ctx.eventSource.on(chatChangedEvent, () => {
+        loadCharState();
+        All.renderChips(); All.renderBanner(); updateInjection();
+        if (CS.link) requestDayEvent();
+      });
+    } else {
+      console.warn('[Farm] ctx.eventSource hoặc ctx.event_types.CHAT_CHANGED không khả dụng, bỏ qua đăng ký sự kiện đổi thẻ.');
+    }
+  } catch (e) { console.warn('[Farm] Lỗi khi đăng ký sự kiện CHAT_CHANGED:', e); }
+}

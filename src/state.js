@@ -1,4 +1,4 @@
-import { ctx } from './store.js';
+import { ctx, extensionName } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
@@ -18,10 +18,10 @@ export function freshState() {
 ctx.S = null;
 export const blockPrice = bi => BLOCK_PRICE_PG[ctx.S.page][bi];
 export function loadState() {
-  if (!extension_settings[extensionName]) {
-    extension_settings[extensionName] = {};
+  if (!ctx.extension_settings[extensionName]) {
+    ctx.extension_settings[extensionName] = {};
   }
-  const g = extension_settings[extensionName] || {};
+  const g = ctx.extension_settings[extensionName] || {};
   ctx.S = g[NS] && g[NS].version === 1 ? g[NS] : freshState();
   if (!ctx.S.petPoke) ctx.S.petPoke = {};
   if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
@@ -68,9 +68,9 @@ ctx.saveTimer = null;
 export function save(immediate) {
   if (ctx.saveTimer) { clearTimeout(ctx.saveTimer); ctx.saveTimer = null; }
   const doSave = () => {
-    if (!extension_settings[extensionName]) extension_settings[extensionName] = {};
-    extension_settings[extensionName][NS] = ctx.S;
-    if (saveSettingsDebounced) saveSettingsDebounced();
+    if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};
+    ctx.extension_settings[extensionName][NS] = ctx.S;
+    if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
   };
   if (immediate) doSave(); else ctx.saveTimer = setTimeout(doSave, 500);
   try { updateInjection(); } catch (e) {}

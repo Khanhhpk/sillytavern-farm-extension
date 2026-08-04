@@ -1,4 +1,5 @@
 // src/store.js
+var extensionName = "sillytavern-farm-extension";
 var RUNTIME_KEY2 = "__STAR_TAVERN_FARM__";
 var ctx = {
   extension_settings: {},
@@ -1284,10 +1285,10 @@ function freshState2() {
 }
 ctx.S = null;
 function loadState2() {
-  if (!extension_settings[extensionName]) {
-    extension_settings[extensionName] = {};
+  if (!ctx.extension_settings[extensionName]) {
+    ctx.extension_settings[extensionName] = {};
   }
-  const g = extension_settings[extensionName] || {};
+  const g = ctx.extension_settings[extensionName] || {};
   ctx.S = g[NS] && g[NS].version === 1 ? g[NS] : freshState2();
   if (!ctx.S.petPoke) ctx.S.petPoke = {};
   if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
@@ -1720,6 +1721,10 @@ ctx.ui.innerHTML = `
   </div>`;
 sh2.appendChild(ctx.ui);
 var $id2 = (x) => sh2.getElementById(x);
+function applyTheme2() {
+  ctx.ui.classList.remove("theme-sakura", "theme-sky");
+  ctx.ui.classList.add("theme-" + (ctx.S && ctx.S.theme === "sky" ? "sky" : "sakura"));
+}
 var fieldEl = sh2.querySelector(".field");
 fieldEl.style.backgroundImage = tileURI("grass", 4242);
 function applyPageSkin2() {
@@ -1841,7 +1846,7 @@ function loadCharState() {
   try {
     const cn = charName();
     const key = "cs_" + cn;
-    const o = (extension_settings[extensionName] || {})[key] || {};
+    const o = (ctx.extension_settings[extensionName] || {})[key] || {};
     CS2 = { link: !!o.link, story: !!o.story, userPrompt: o.userPrompt || "" };
   } catch (e) {
     CS2 = { link: false, story: false, userPrompt: "" };
@@ -2131,21 +2136,24 @@ var heartbeat2 = window.setInterval(() => {
   } catch (e) {
   }
 }, 60 * 1e3);
-try {
-  const chatChangedEvent = event_types?.CHAT_CHANGED;
-  if (eventSource?.on && chatChangedEvent) {
-    eventSource.on(chatChangedEvent, () => {
-      loadCharState();
-      renderChips();
-      renderBanner();
-      updateInjection2();
-      if (CS2.link) requestDayEvent2();
-    });
-  } else {
-    console.warn("[Farm] eventSource ho\u1EB7c event_types.CHAT_CHANGED kh\xF4ng kh\u1EA3 d\u1EE5ng, b\u1ECF qua \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n \u0111\u1ED5i th\u1EBB.");
+function initEvents() {
+  loadCharState();
+  try {
+    const chatChangedEvent = ctx.event_types?.CHAT_CHANGED;
+    if (ctx.eventSource?.on && chatChangedEvent) {
+      ctx.eventSource.on(chatChangedEvent, () => {
+        loadCharState();
+        renderChips();
+        renderBanner2();
+        updateInjection2();
+        if (CS2.link) requestDayEvent2();
+      });
+    } else {
+      console.warn("[Farm] ctx.eventSource ho\u1EB7c ctx.event_types.CHAT_CHANGED kh\xF4ng kh\u1EA3 d\u1EE5ng, b\u1ECF qua \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n \u0111\u1ED5i th\u1EBB.");
+    }
+  } catch (e) {
+    console.warn("[Farm] L\u1ED7i khi \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n CHAT_CHANGED:", e);
   }
-} catch (e) {
-  console.warn("[Farm] L\u1ED7i khi \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n CHAT_CHANGED:", e);
 }
 
 // src/orb.js
@@ -2448,7 +2456,7 @@ function renderPlots2() {
     }
   }
 }
-function renderChips2() {
+function renderChips() {
   const cl = $id("chipLink"), cs2 = $id("chipStory");
   cl.classList.toggle("on", CS.link);
   cl.textContent = "Li\xEAn k\u1EBFt th\u1EBB nh\xE2n v\u1EADt: " + (CS.link ? "B\u1EADt" : "T\u1EAFt");
@@ -2521,7 +2529,7 @@ $id("chipLink").addEventListener("click", () => {
     setInjection("");
   }
   saveCharState();
-  renderChips2();
+  renderChips();
   renderBanner2();
   updateInjection();
   if (CS.link) {
@@ -2553,7 +2561,7 @@ $id("chipRegen").addEventListener("click", () => {
 $id("chipStory").addEventListener("click", () => {
   CS.story = !CS.story;
   saveCharState();
-  renderChips2();
+  renderChips();
   updateInjection();
   toast(CS.story ? "T\xECnh h\xECnh v\u01B0\u1EDDn rau s\u1EBD \u0111\u01B0\u1EE3c th\xEC th\u1EA7m cho nh\u1EEFng ng\u01B0\u1EDDi trong c\u1ED1t truy\u1EC7n" : "V\u01B0\u1EDDn rau l\u1EA1i gi\u1EEF b\xED m\u1EADt");
 });
@@ -3351,7 +3359,9 @@ function initFarm() {
   }
   document.getElementById("star-tavern-farm-root")?.remove();
   loadState2();
+  applyTheme2();
   placeOrb();
+  initEvents();
   console.log("Farm initialized");
 }
 async function init() {
