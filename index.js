@@ -3424,7 +3424,7 @@ function settle() {
     }
     const open = (() => {
       try {
-        return sh.getElementById("ctx.win").classList.contains("open");
+        return sh.getElementById("win").classList.contains("open");
       } catch (e) {
         return false;
       }

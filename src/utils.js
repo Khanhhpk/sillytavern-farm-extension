@@ -26,7 +26,7 @@ export function settle() {
       wz.nextAt = now() + witchGap();
       save(); try { renderWitch(); } catch (e) {}
     }
-    const open = (() => { try { return sh.getElementById('ctx.win').classList.contains('open'); } catch (e) { return false; } })();
+    const open = (() => { try { return sh.getElementById('win').classList.contains('open'); } catch (e) { return false; } })();
     if (!wz.leaveAt && open && (now() >= wz.nextAt || wz.missed >= 2)) witchArrive();   // Chỉ ghé khi bảng đang mở (đã ghé thì phải được nhìn thấy)
   }
   /* Xét đột biến: công bố ngay lúc chín, mỗi vụ một lần; bón phân là bộ khuếch đại (0/1/2 loại phân → xác suất ×0.3/0.65/1.0); v0.8 tính cho cả ba trang */
