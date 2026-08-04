@@ -15,14 +15,6 @@ export function closeModal() {
   pendingPick = null; 
   bagSellMode = false; 
 }   // Tự kiểm: đóng cửa sổ thì thoát chế độ tick chọn
-All.$id('mclose').addEventListener('click', closeModal);
-All.$id('mbody').addEventListener('click', e => {
-  const el = e.target.closest('[data-pick]');
-  if (!el || !pendingPick) return;
-  const cb = pendingPick; pendingPick = null;
-  closeModal(); cb(el.dataset.pick);
-});
-All.$id('modal').addEventListener('click', e => { if (e.target === All.$id('modal')) closeModal(); });
 
 export let shopTab = 'seed';
 export let bagTab = 'crop';

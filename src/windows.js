@@ -28,23 +28,7 @@ export function closeWin() {
 export let wg = null;
 export let dragBar = null;
 
-dragBar.addEventListener('pointerdown', e => {
-  if (e.target.id === 'close') return;
-  dragBar.setPointerCapture(e.pointerId);
-  wg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: ctx.win.offsetLeft, oy: ctx.win.offsetTop };
-});
-dragBar.addEventListener('pointermove', e => {
-  if (!wg || e.pointerId !== wg.id) return;
-  ctx.win.style.left = wg.ox + e.clientX - wg.sx + 'px';
-  ctx.win.style.top = wg.oy + e.clientY - wg.sy + 'px';
-});
-dragBar.addEventListener('pointerup', e => {
-  if (!wg || e.pointerId !== wg.id) return;
-  try { dragBar.releasePointerCapture(e.pointerId); } catch (er) {}
-  wg = null;
-  ctx.S.win = { fx: ctx.win.offsetLeft / window.innerWidth, fy: ctx.win.offsetTop / window.innerHeight };
-  save();
-});
+
 
 
 export function initWindows() {

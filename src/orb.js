@@ -51,10 +51,7 @@ export function onOrbUp(e, cancelled) {
     save();
   } else toggleWin();
 }
-ctx.orb.addEventListener('pointerdown', onOrbDown);
-ctx.orb.addEventListener('pointermove', onOrbMove);
-ctx.orb.addEventListener('pointerup', e => onOrbUp(e, false));
-ctx.orb.addEventListener('pointercancel', e => onOrbUp(e, true));
+
 export let resizeTimer = null;
 export const onResize = () => {
   if (resizeTimer) window.clearTimeout(resizeTimer);
@@ -63,9 +60,7 @@ export const onResize = () => {
     if (ctx.win.classList.contains('open')) { layout(); placeWin(); renderPlots(); }
   }, 150);
 };
-window.addEventListener('resize', onResize);
-disposers.push(() => window.removeEventListener('resize', onResize));
-placeOrb();
+
 
 /* ---------- ctx.Sửa #11: bố cục dọc thu nhỏ đồng loạt (ô tính theo chiều rộng màn hình, sprite lấy bội số của 16) ---------- */
 export let SPRITE_PX = 64, DECO_PX = 56;

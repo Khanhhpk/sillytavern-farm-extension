@@ -2302,10 +2302,6 @@ function onOrbUp(e, cancelled) {
     save();
   } else toggleWin();
 }
-ctx.orb.addEventListener("pointerdown", onOrbDown);
-ctx.orb.addEventListener("pointermove", onOrbMove);
-ctx.orb.addEventListener("pointerup", (e) => onOrbUp(e, false));
-ctx.orb.addEventListener("pointercancel", (e) => onOrbUp(e, true));
 var resizeTimer = null;
 var onResize = () => {
   if (resizeTimer) window.clearTimeout(resizeTimer);
@@ -2318,9 +2314,6 @@ var onResize = () => {
     }
   }, 150);
 };
-window.addEventListener("resize", onResize);
-disposers2.push(() => window.removeEventListener("resize", onResize));
-placeOrb();
 var SPRITE_PX2 = 64;
 var DECO_PX = 56;
 function layout2() {
@@ -2355,26 +2348,6 @@ function closeWin() {
 }
 var wg = null;
 var dragBar = null;
-dragBar.addEventListener("pointerdown", (e) => {
-  if (e.target.id === "close") return;
-  dragBar.setPointerCapture(e.pointerId);
-  wg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: ctx.win.offsetLeft, oy: ctx.win.offsetTop };
-});
-dragBar.addEventListener("pointermove", (e) => {
-  if (!wg || e.pointerId !== wg.id) return;
-  ctx.win.style.left = wg.ox + e.clientX - wg.sx + "px";
-  ctx.win.style.top = wg.oy + e.clientY - wg.sy + "px";
-});
-dragBar.addEventListener("pointerup", (e) => {
-  if (!wg || e.pointerId !== wg.id) return;
-  try {
-    dragBar.releasePointerCapture(e.pointerId);
-  } catch (er) {
-  }
-  wg = null;
-  ctx.S.win = { fx: ctx.win.offsetLeft / window.innerWidth, fy: ctx.win.offsetTop / window.innerHeight };
-  save();
-});
 function initWindows() {
   $id("close").addEventListener("click", closeWin);
   dragBar = $id("drag");
@@ -2788,18 +2761,6 @@ function closeModal2() {
   pendingPick = null;
   bagSellMode = false;
 }
-$id("mclose").addEventListener("click", closeModal2);
-$id("mbody").addEventListener("click", (e) => {
-  const el = e.target.closest("[data-pick]");
-  if (!el || !pendingPick) return;
-  const cb = pendingPick;
-  pendingPick = null;
-  closeModal2();
-  cb(el.dataset.pick);
-});
-$id("modal").addEventListener("click", (e) => {
-  if (e.target === $id("modal")) closeModal2();
-});
 var shopTab = "seed";
 var bagTab = "crop";
 var bagSellMode = false;
