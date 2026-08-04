@@ -698,10 +698,15 @@ function initFarm() {
       const isPet = sel.value === 'PETS';
       const palette = isPet ? PET_P : P;
       const size = parseInt(sizeSel.value) || 16;
-      ctx.clearRect(0, 0, 256, 256);
+      
+      const canvasEl = $id('sbCanvas');
+      if (canvasEl.width !== size) {
+        canvasEl.width = size;
+        canvasEl.height = size;
+      }
+      ctx.clearRect(0, 0, size, size);
       
       const lines = ta.value.split('\n').map(l => l.trim().replace(/['",\[\]]/g, '')).filter(l => l.length > 0);
-      const pxSize = 256 / size;
       for (let y = 0; y < Math.min(size, lines.length); y++) {
         const row = lines[y];
         for (let x = 0; x < Math.min(size, row.length); x++) {
@@ -710,7 +715,7 @@ function initFarm() {
             const color = palette[char];
             if (color && typeof color === 'string') { // exclude gradients for now
               ctx.fillStyle = color;
-              ctx.fillRect(x * pxSize, y * pxSize, pxSize, pxSize);
+              ctx.fillRect(x, y, 1, 1);
             }
           }
         }
