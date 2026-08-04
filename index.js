@@ -855,8 +855,8 @@ QUY TẮC BẮT BUỘC:
   const INJECT_ID = 'star_tavern_farm_summary';
   function setInjection(text) {
     try {
-      const ctx = (SillyTavern.getContext && SillyTavern.getContext()) || SillyTavern;
-      ctx.setExtensionPrompt(INJECT_ID, text || '', 1, 4);
+      const ctx = (window.SillyTavern?.getContext?.()) || {};
+      if (ctx.setExtensionPrompt) ctx.setExtensionPrompt(INJECT_ID, text || '', 1, 4);
     } catch (e) {}
   }
   function updateInjection() {
@@ -892,12 +892,17 @@ QUY TẮC BẮT BUỘC:
 
   /* Đổi thẻ: nạp lại trạng thái phía nhân vật, sự kiện lấy lại theo thẻ */
   try {
-    eventSource.on(event_types.CHAT_CHANGED, () => {
-      loadCharState();
-      renderChips(); renderBanner(); updateInjection();
-      if (CS.link) requestDayEvent();
-    });
-  } catch (e) {}
+    const chatChangedEvent = event_types?.CHAT_CHANGED;
+    if (eventSource?.on && chatChangedEvent) {
+      eventSource.on(chatChangedEvent, () => {
+        loadCharState();
+        renderChips(); renderBanner(); updateInjection();
+        if (CS.link) requestDayEvent();
+      });
+    } else {
+      console.warn('[Farm] eventSource hoặc event_types.CHAT_CHANGED không khả dụng, bỏ qua đăng ký sự kiện đổi thẻ.');
+    }
+  } catch (e) { console.warn('[Farm] Lỗi khi đăng ký sự kiện CHAT_CHANGED:', e); }
 
   /* ---------- Bóng nổi: kéo / hít mép / phân xử cú bấm (C11 §4) ---------- */
   const orb = $id('orb'), win = $id('win');
@@ -2251,21 +2256,39 @@ QUY TẮC BẮT BUỘC:
 
 // ST Extension Hook
 export async function init() {
-  // Thay vì import phức tạp dễ gây lỗi 404, chúng ta dùng chuẩn SillyTavern.getContext()
-  // Đây là cách chính thống và an toàn nhất để lấy các biến toàn cục của ST.
+  // Kết nối ST Context — hỗ trợ nhiều đường fallback để tương thích diện rộng
+  // (kể cả khi bị cocktail-plus module-proxy wrap scope hoặc ST phiên bản cũ/mới).
   try {
-    const ctx = window.SillyTavern && window.SillyTavern.getContext ? window.SillyTavern.getContext() : {};
-    
-    // Gán các hàm/biến từ context
-    extension_settings    = ctx.extensionSettings || window.extension_settings || {};
+    // Bước 1: Lấy context object qua API chính thống
+    let ctx = null;
+    try { ctx = window.SillyTavern?.getContext?.(); } catch (_) {}
+    if (!ctx) try { ctx = globalThis.SillyTavern?.getContext?.(); } catch (_) {}
+    if (!ctx) ctx = {};
+
+    // Bước 2: Gán các hàm/biến — ưu tiên context, fallback window globals
+    extension_settings    = ctx.extensionSettings  || ctx.extension_settings  || window.extension_settings  || {};
     saveSettingsDebounced = ctx.saveSettingsDebounced || window.saveSettingsDebounced || (() => {});
-    eventSource           = ctx.eventSource || window.eventSource;
-    event_types           = ctx.eventTypes || window.event_types;
-    generateRaw           = ctx.generateRaw || window.generateRaw;
-    
-    console.log('[Farm] Đã kết nối ST Context thành công!');
+    eventSource           = ctx.eventSource  || window.eventSource;
+    event_types           = ctx.event_types  || ctx.eventTypes  || window.event_types;
+    generateRaw           = ctx.generateRaw  || window.generateRaw;
+
+    // Bước 3: Log chẩn đoán để dễ debug khi có vấn đề
+    const diag = [
+      'ext_settings=' + (extension_settings ? 'OK' : 'MISS'),
+      'eventSource=' + (eventSource ? 'OK' : 'MISS'),
+      'event_types=' + (event_types ? 'OK' : 'MISS'),
+      'CHAT_CHANGED=' + (event_types?.CHAT_CHANGED ?? 'UNDEF'),
+      'generateRaw=' + (typeof generateRaw),
+    ];
+    console.log('[Farm] ST Context kết nối thành công — ' + diag.join(', '));
   } catch (e) {
     console.error('[Farm] Lỗi khi kết nối ST Context:', e);
+    // Fallback cứng: đảm bảo extension không crash hoàn toàn
+    if (!extension_settings) extension_settings = window.extension_settings || {};
+    if (!saveSettingsDebounced) saveSettingsDebounced = window.saveSettingsDebounced || (() => {});
+    if (!eventSource) eventSource = window.eventSource;
+    if (!event_types) event_types = window.event_types;
+    if (!generateRaw) generateRaw = window.generateRaw;
   }
 
   // Khởi tạo game
