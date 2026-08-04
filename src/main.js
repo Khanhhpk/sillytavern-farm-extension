@@ -100,6 +100,17 @@ export async function init() {
   }, 10000);
 }
 
-// Self-invoke ngay khi module được tải — không cần phụ thuộc vào hệ thống hooks.
-// ST 1.17+ sẽ gọi lại init() qua hooks, nhưng guard RUNTIME_KEY trong init() sẽ chặn double-init.
-init();
+// Dùng jQuery document.ready — chuẩn của ST, đảm bảo settings + globals sẵn sàng.
+// Guard RUNTIME_KEY trong init() chặn double-init nếu ST 1.17+ cũng gọi qua hooks.
+/** @type {any} */
+const jQuery = /** @type {any} */ (window).jQuery;
+if (typeof jQuery === 'function') {
+  jQuery(async () => { if (!window[RUNTIME_KEY]) await init(); });
+} else {
+  // Fallback nếu jQuery chưa load (rất hiếm): chờ DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { if (!window[RUNTIME_KEY]) init(); });
+  } else {
+    if (!window[RUNTIME_KEY]) init();
+  }
+}

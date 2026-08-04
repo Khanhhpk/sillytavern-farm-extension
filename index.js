@@ -4384,7 +4384,23 @@ async function init() {
     }
   }, 1e4);
 }
-init();
+var jQuery = (
+  /** @type {any} */
+  window.jQuery
+);
+if (typeof jQuery === "function") {
+  jQuery(async () => {
+    if (!window[RUNTIME_KEY]) await init();
+  });
+} else {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!window[RUNTIME_KEY]) init();
+    });
+  } else {
+    if (!window[RUNTIME_KEY]) init();
+  }
+}
 export {
   init,
   initFarm
