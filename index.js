@@ -1544,7 +1544,12 @@ QUY TẮC ĐẦU RA BẮT BUỘC:
     $id('mbody').innerHTML = bodyHTML;
     $id('modal').classList.add('open');
   }
-  function closeModal() { $id('modal').classList.remove('open'); pendingPick = null; bagSellMode = false; }   // Tự kiểm: đóng cửa sổ thì thoát chế độ tick chọn
+  function closeModal() { 
+    $id('modal').classList.remove('open'); 
+    $id('mbody').innerHTML = ''; // Dọn dẹp rác DOM và event listeners bên trong
+    pendingPick = null; 
+    bagSellMode = false; 
+  }   // Tự kiểm: đóng cửa sổ thì thoát chế độ tick chọn
   $id('mclose').addEventListener('click', closeModal);
   $id('mbody').addEventListener('click', e => {
     const el = e.target.closest('[data-pick]');
