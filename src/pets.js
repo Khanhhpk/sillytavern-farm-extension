@@ -299,12 +299,16 @@ export function initPets() {
     const exactLeft = parseFloat(comp.left) || 0;
     const exactBottom = parseFloat(comp.bottom) || 0;
     
-    // Ghi đè toạ độ thực trước khi tắt transition để tránh giật hình
-    el.style.left = exactLeft + 'px';
-    el.style.bottom = exactBottom + 'px';
-
     // Tắt toàn bộ transition để thao tác phần cứng (GPU) ngay lập tức
     el.style.transition = 'none';
+
+    // Ghi đè toạ độ thực
+    el.style.left = exactLeft + 'px';
+    el.style.bottom = exactBottom + 'px';
+    
+    // Cập nhật petPos luôn để đồng bộ dữ liệu, tránh việc toạ độ bị cũ
+    petPos[id] = { x: exactLeft, y: exactBottom };
+    
     el.classList.remove('walk');
 
     activeDrag = {
@@ -318,7 +322,7 @@ export function initPets() {
 
     const updateDrag = () => {
       if (!activeDrag) return;
-      const { el, dropped, dx, dy } = activeDrag;
+      const { el, dropped, dx, dy, petId } = activeDrag;
 
       // Lực cản (ma sát) làm giảm dần tốc độ khi dừng chuột
       activeDrag.targetVx *= 0.85;
@@ -349,8 +353,8 @@ export function initPets() {
       if (dropped && Math.abs(vx) < 0.1 && Math.abs(vy) < 0.1) {
         el.style.transform = '';
         el.style.transition = '';
-        petPos[activeDrag.petId] = { x: parseFloat(el.style.left), y: parseFloat(el.style.bottom) };
-        moveTo(el, petPos[activeDrag.petId]); 
+        delete el.dataset.dragging; // Xoá cờ an toàn khi đã hết núng nính
+        moveTo(el, petPos[petId]); 
         activeDrag = null;
         return;
       }
@@ -386,12 +390,16 @@ export function initPets() {
     try { el.releasePointerCapture(e.pointerId); } catch(err){}
 
     if (moved) {
+      const finalX = ox + dx;
+      const finalY = oy - dy;
       // Chốt toạ độ thật ngay lập tức (bottom = oy - dy: dy > 0 thì bottom giảm = đi xuống)
-      el.style.left = (ox + dx) + 'px';
-      el.style.bottom = (oy - dy) + 'px';
+      el.style.left = finalX + 'px';
+      el.style.bottom = finalY + 'px';
+      // Cập nhật petPos ngay để AI không bị nhầm nếu có xen ngang
+      petPos[petId] = { x: finalX, y: finalY };
       // Đánh dấu đã thả để frame tiếp theo huỷ translate và bắt đầu giảm chấn
       activeDrag.dropped = true;
-      delete el.dataset.dragging;
+      // KHÔNG delete el.dataset.dragging ở đây, chờ jiggle xong mới xoá!
     } else {
       // Không kéo, chỉ là click
       cancelAnimationFrame(dragAnimFrame);

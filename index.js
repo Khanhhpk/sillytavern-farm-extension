@@ -2287,9 +2287,10 @@ function initPets() {
     const comp = window.getComputedStyle(el);
     const exactLeft = parseFloat(comp.left) || 0;
     const exactBottom = parseFloat(comp.bottom) || 0;
+    el.style.transition = "none";
     el.style.left = exactLeft + "px";
     el.style.bottom = exactBottom + "px";
-    el.style.transition = "none";
+    petPos[id] = { x: exactLeft, y: exactBottom };
     el.classList.remove("walk");
     activeDrag = {
       id: e.pointerId,
@@ -2312,7 +2313,7 @@ function initPets() {
     };
     const updateDrag = () => {
       if (!activeDrag) return;
-      const { el: el2, dropped, dx, dy } = activeDrag;
+      const { el: el2, dropped, dx, dy, petId } = activeDrag;
       activeDrag.targetVx *= 0.85;
       activeDrag.targetVy *= 0.85;
       activeDrag.vx = activeDrag.vx * 0.7 + activeDrag.targetVx * 0.3;
@@ -2331,8 +2332,8 @@ function initPets() {
       if (dropped && Math.abs(vx) < 0.1 && Math.abs(vy) < 0.1) {
         el2.style.transform = "";
         el2.style.transition = "";
-        petPos[activeDrag.petId] = { x: parseFloat(el2.style.left), y: parseFloat(el2.style.bottom) };
-        moveTo(el2, petPos[activeDrag.petId]);
+        delete el2.dataset.dragging;
+        moveTo(el2, petPos[petId]);
         activeDrag = null;
         return;
       }
@@ -2364,10 +2365,12 @@ function initPets() {
     } catch (err) {
     }
     if (moved) {
-      el.style.left = ox + dx + "px";
-      el.style.bottom = oy - dy + "px";
+      const finalX = ox + dx;
+      const finalY = oy - dy;
+      el.style.left = finalX + "px";
+      el.style.bottom = finalY + "px";
+      petPos[petId] = { x: finalX, y: finalY };
       activeDrag.dropped = true;
-      delete el.dataset.dragging;
     } else {
       cancelAnimationFrame(dragAnimFrame);
       el.style.transform = "";
