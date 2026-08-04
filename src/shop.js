@@ -268,5 +268,17 @@ export function openPanel(kind) {
     });
   }
 }
+
+
+
+export function initShop() {
+All.$id('mclose').addEventListener('click', closeModal);
+All.$id('mbody').addEventListener('click', e => {
+  const el = e.target.closest('[data-pick]');
+  if (!el || !pendingPick) return;
+  const cb = pendingPick; pendingPick = null;
+  closeModal(); cb(el.dataset.pick);
+});
+All.$id('modal').addEventListener('click', e => { if (e.target === All.$id('modal')) closeModal(); });
 sh.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openPanel(b.dataset.open)));
-
+}

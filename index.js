@@ -1324,6 +1324,23 @@ function loadState() {
   }));
 }
 ctx.saveTimer = null;
+function save2(immediate) {
+  if (ctx.saveTimer) {
+    clearTimeout(ctx.saveTimer);
+    ctx.saveTimer = null;
+  }
+  const doSave = () => {
+    if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};
+    ctx.extension_settings[extensionName][NS] = ctx.S;
+    if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+  };
+  if (immediate) doSave();
+  else ctx.saveTimer = setTimeout(doSave, 500);
+  try {
+    updateInjection();
+  } catch (e) {
+  }
+}
 
 // src/style.js
 var styleCSS = `
@@ -1816,6 +1833,77 @@ fieldEl.insertBefore(decoLayer, fieldEl.firstChild);
 var fxLayer = document.createElement("div");
 fxLayer.style.cssText = "position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:8;";
 fieldEl.appendChild(fxLayer);
+function initUI() {
+  ctx.ui.addEventListener("click", (e) => {
+    const pager = $id("pager");
+    if (pager && pager.classList.contains("open") && !e.target.closest("#pager")) pager.classList.remove("open");
+  }, true);
+  $id("pager") && $id("pager").addEventListener("click", (e) => {
+    const pager = $id("pager");
+    const t = e.target.closest("[data-pg]");
+    if (!t) {
+      pager.classList.toggle("open");
+      return;
+    }
+    const pg = +t.dataset.pg;
+    if (!pageUnlocked(pg)) return toast("C\u1EA7n mua v\xE9 " + (pg === 2 ? "v\xF9ng n\u01B0\u1EDBc" : "khu m\u1ECF") + " \u1EDF c\u1EEDa h\xE0ng tr\u01B0\u1EDBc \u0111\xE3");
+    if (pg === ctx.S.page) {
+      pager.classList.remove("open");
+      return;
+    }
+    ctx.S.page = pg;
+    save();
+    mode = null;
+    pager.classList.remove("open");
+    applyPageSkin2();
+    renderPager2();
+    renderPlots();
+    renderStatus();
+    renderToolbar();
+  });
+  swX = null;
+  swY = null;
+  fieldEl.addEventListener("touchstart", (e) => {
+    if (e.touches.length === 1) {
+      swX = e.touches[0].clientX;
+      swY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+  fieldEl.addEventListener("touchend", (e) => {
+    if (swX == null) return;
+    const dx = e.changedTouches[0].clientX - swX, dy = e.changedTouches[0].clientY - swY;
+    swX = swY = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const dir = dx < 0 ? 1 : -1;
+    let pg = ctx.S.page + dir;
+    while (pg >= 1 && pg <= 3 && !pageUnlocked(pg)) pg += dir;
+    if (pg < 1 || pg > 3 || pg === ctx.S.page) return;
+    ctx.S.page = pg;
+    save();
+    mode = null;
+    applyPageSkin2();
+    renderPager2();
+    renderPlots();
+    renderStatus();
+    renderToolbar();
+    toast(pg === 1 ? "V\u1EC1 \u0111\u1ED3ng c\u1ECF~" : pg === 2 ? "T\u1EDBi v\xF9ng n\u01B0\u1EDBc~" : "T\u1EDBi khu m\u1ECF~");
+  }, { passive: true });
+  (function() {
+    const drnd = mulberry32(20260717);
+    function addDeco(o, cls, pos) {
+      const el = document.createElement("span");
+      el.className = cls;
+      el.style.cssText = "position:absolute;" + pos;
+      el.innerHTML = spriteSVG(o.n, o.s | 0);
+      decoLayer.appendChild(el);
+    }
+    const side = [];
+    for (let i = 0; i < 3; i++) side.push({ n: "pinkgrass", s: 28 + drnd() * 8, x: 0.4 + drnd() * 1.5, y: 8 + i * 17 + drnd() * 6 });
+    for (let i = 0; i < 2; i++) side.push({ n: "pinkgrass", s: 28 + drnd() * 8, x: 90 + drnd() * 3, y: 24 + i * 17 + drnd() * 6 });
+    side.forEach((o) => addDeco(o, "dside", `left:${o.x}%;top:${o.y}%;`));
+    for (let i = 0; i < 3; i++) addDeco({ n: "pinkgrass", s: 28 + drnd() * 6 }, "dbot", `left:${9 + i * 16 + drnd() * 5}%;bottom:4px;`);
+  })();
+}
 
 // src/events.js
 var clampN2 = (x, lo, hi, dflt) => {
@@ -2144,7 +2232,11 @@ function initEvents() {
         renderChips();
         renderBanner2();
         updateInjection2();
-        if (CS2.link) requestDayEvent2();
+        try {
+          if (ctx.S && CS2.link) requestDayEvent2();
+        } catch (e) {
+          console.warn("[Farm] L\u1ED7i khi \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n CHAT_CHANGED:", e);
+        }
       });
     } else {
       console.warn("[Farm] ctx.eventSource ho\u1EB7c ctx.event_types.CHAT_CHANGED kh\xF4ng kh\u1EA3 d\u1EE5ng, b\u1ECF qua \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n \u0111\u1ED5i th\u1EBB.");
@@ -2155,7 +2247,6 @@ function initEvents() {
 }
 
 // src/orb.js
-ctx.orb = $id("ctx.orb"), ctx.win = $id("ctx.win");
 var disposers2 = [];
 var gesture = null;
 function placeOrb() {
@@ -2240,6 +2331,17 @@ function layout2() {
   SPRITE_PX2 = 48;
   DECO_PX = plot >= 70 ? 56 : 40;
 }
+function initOrb() {
+  ctx.orb = $id("ctx.orb");
+  ctx.win = $id("ctx.win");
+  ctx.orb.addEventListener("pointerdown", onOrbDown);
+  ctx.orb.addEventListener("pointermove", onOrbMove);
+  ctx.orb.addEventListener("pointerup", (e) => onOrbUp(e, false));
+  ctx.orb.addEventListener("pointercancel", (e) => onOrbUp(e, true));
+  window.addEventListener("resize", onResize);
+  disposers2.push(() => window.removeEventListener("resize", onResize));
+  placeOrb();
+}
 
 // src/windows.js
 var tick2 = null;
@@ -2251,9 +2353,8 @@ function closeWin() {
   }
   save(true);
 }
-$id("close").addEventListener("click", closeWin);
 var wg = null;
-var dragBar = $id("drag");
+var dragBar = null;
 dragBar.addEventListener("pointerdown", (e) => {
   if (e.target.id === "close") return;
   dragBar.setPointerCapture(e.pointerId);
@@ -2274,6 +2375,30 @@ dragBar.addEventListener("pointerup", (e) => {
   ctx.S.win = { fx: ctx.win.offsetLeft / window.innerWidth, fy: ctx.win.offsetTop / window.innerHeight };
   save();
 });
+function initWindows() {
+  $id("close").addEventListener("click", closeWin);
+  dragBar = $id("drag");
+  dragBar.addEventListener("pointerdown", (e) => {
+    if (e.target.id === "close") return;
+    dragBar.setPointerCapture(e.pointerId);
+    wg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: ctx.win.offsetLeft, oy: ctx.win.offsetTop };
+  });
+  dragBar.addEventListener("pointermove", (e) => {
+    if (!wg || e.pointerId !== wg.id) return;
+    ctx.win.style.left = wg.ox + e.clientX - wg.sx + "px";
+    ctx.win.style.top = wg.oy + e.clientY - wg.sy + "px";
+  });
+  dragBar.addEventListener("pointerup", (e) => {
+    if (!wg || e.pointerId !== wg.id) return;
+    try {
+      dragBar.releasePointerCapture(e.pointerId);
+    } catch (er) {
+    }
+    wg = null;
+    ctx.S.win = { fx: ctx.win.offsetLeft / window.innerWidth, fy: ctx.win.offsetTop / window.innerHeight };
+    save2();
+  });
+}
 
 // src/render.js
 var mode2 = null;
@@ -2307,43 +2432,38 @@ function renderToolbar2() {
     tip.style.display = "block";
   } else tip.style.display = "none";
 }
-$id("toolbar").addEventListener("click", (e) => {
-  const el = e.target.closest("[data-tool]");
-  if (!el) return;
-  const k = el.dataset.tool;
-  if (k === "expand") {
-    toolbarOpen = true;
-    renderToolbar2();
-    return;
-  }
-  if (k === "collapse") {
-    toolbarOpen = false;
-    mode2 = null;
-    renderToolbar2();
-    return;
-  }
-  if (mode2 && mode2.t === k) {
-    mode2 = null;
-    renderToolbar2();
-    return;
-  }
-  if (k === "seed") return pickFrom2("Ch\u1ECDn h\u1EA1t gi\u1ED1ng \u0111\u1EC3 gieo", ctx.S.seeds, (id) => CROPS[id].name, (id) => {
-    mode2 = { t: "seed", id };
-    renderToolbar2();
-  });
-  if (k === "fert") return pickFrom2("Ch\u1ECDn ph\xE2n b\xF3n", ctx.S.ferts, (id) => FERTS[id].name, (id) => {
-    mode2 = { t: "fert", id };
-    renderToolbar2();
-  });
-  mode2 = { t: k };
-  renderToolbar2();
-});
 var pendingPick2 = null;
 function pickFrom2(title, obj, nameFn, cb) {
   const ids = Object.keys(obj).filter((k) => obj[k] > 0);
   if (!ids.length) return toast("Trong balo kh\xF4ng c\xF3, ra c\u1EEDa h\xE0ng mua \u0111\xE3");
   openModal(title, `<div class="picker">${ids.map((id) => `<span class="pick" data-pick="${id}">${nameFn(id)} \xD7${obj[id]}</span>`).join("")}</div>`);
   pendingPick2 = cb;
+}
+var cacheWicon = "";
+var cacheCoins = -1;
+var cacheDayTxt = "";
+var cacheBlockTxt = "";
+function renderStatus2() {
+  if (ctx.S.coins !== cacheCoins) {
+    $id("coins").textContent = ctx.S.coins.toLocaleString();
+    cacheCoins = ctx.S.coins;
+  }
+  const w = weatherOf(gameDay());
+  const wiconHtml = spriteSVG(w === "N\u1EAFng" ? "sun" : w === "M\u01B0a nh\u1ECF" ? "raincloud" : "cloud", 22);
+  if (cacheWicon !== wiconHtml) {
+    $id("wicon").innerHTML = wiconHtml;
+    cacheWicon = wiconHtml;
+  }
+  const dayStr = "Ng\xE0y " + gameDay() + " \xB7 " + w + (w === "M\u01B0a nh\u1ECF" ? " (sinh tr\u01B0\u1EDFng +10%)" : "");
+  if (cacheDayTxt !== dayStr) {
+    $id("daytxt").textContent = dayStr;
+    cacheDayTxt = dayStr;
+  }
+  const blockStr = ZONE_NAME[ctx.S.page] + " " + curBlocks() + "/6";
+  if (cacheBlockTxt !== blockStr) {
+    $id("blocktxt").textContent = blockStr;
+    cacheBlockTxt = blockStr;
+  }
 }
 function plotHTML(pi) {
   const c = curPlots()[pi].crop;
@@ -2520,108 +2640,141 @@ function renderBanner2() {
     mutPopup.classList.remove("open");
   }
 }
-$id("chipLink").addEventListener("click", () => {
-  CS.link = !CS.link;
-  if (!CS.link) {
-    CS.story = false;
-    setInjection("");
-  }
-  saveCharState();
-  renderChips();
-  renderBanner2();
-  updateInjection();
-  if (CS.link) {
-    requestDayEvent();
-    toast("\u0110\xE3 b\u1EADt li\xEAn k\u1EBFt, \u0111ang gieo qu\u1EBB s\u1EF1 ki\u1EC7n h\xF4m nay theo th\u1EBF gi\u1EDBi quan");
-  } else toast("\u0110\xE3 v\u1EC1 l\u1EA1i v\u01B0\u1EDDn rau ch\u01A1i m\u1ED9t m\xECnh");
-});
-$id("banner").addEventListener("click", (e) => {
-  if (e.target.closest(".bmut") || e.target.closest(".mut-popup")) return;
-  $id("banner").classList.toggle("expand");
-  $id("mutPopup").classList.remove("open");
-});
-$id("bmut").addEventListener("click", (e) => {
-  e.stopPropagation();
-  $id("mutPopup").classList.toggle("open");
-});
-document.addEventListener("click", (e) => {
-  const popup = $id("mutPopup");
-  if (popup.classList.contains("open") && !e.target.closest(".mut-popup") && !e.target.closest(".bmut")) {
-    popup.classList.remove("open");
-  }
-});
-$id("chipRegen").addEventListener("click", () => {
-  ctx.S.dayEvent = null;
-  save();
-  requestDayEvent(true);
-  toast("\u0110ang gieo qu\u1EBB l\u1EA1i\u2026");
-});
-$id("chipStory").addEventListener("click", () => {
-  CS.story = !CS.story;
-  saveCharState();
-  renderChips();
-  updateInjection();
-  toast(CS.story ? "T\xECnh h\xECnh v\u01B0\u1EDDn rau s\u1EBD \u0111\u01B0\u1EE3c th\xEC th\u1EA7m cho nh\u1EEFng ng\u01B0\u1EDDi trong c\u1ED1t truy\u1EC7n" : "V\u01B0\u1EDDn rau l\u1EA1i gi\u1EEF b\xED m\u1EADt");
-});
-$id("blocks").addEventListener("click", (e) => {
-  const sign = e.target.closest("[data-buy]");
-  if (sign) {
-    const b = +sign.dataset.buy;
-    if (ctx.S.coins < blockPrice(b)) {
-      toast("C\xF2n thi\u1EBFu " + (blockPrice(b) - ctx.S.coins).toLocaleString() + " G");
+function initRender() {
+  $id("toolbar").addEventListener("click", (e) => {
+    const el = e.target.closest("[data-tool]");
+    if (!el) return;
+    const k = el.dataset.tool;
+    if (k === "expand") {
+      toolbarOpen = true;
+      renderToolbar2();
       return;
     }
-    if (buyConfirm.b === b && now() < buyConfirm.until) {
-      buyConfirm = { b: -1, until: 0 };
-      buyBlock(b);
-    } else {
-      buyConfirm = { b, until: now() + 4e3 };
-      renderPlots2();
-    }
-    return;
-  }
-  const p = e.target.closest(".plot");
-  if (!p || p.dataset.deco) return;
-  const pi = +p.dataset.pi;
-  const c = curPlots()[pi].crop;
-  if (c && now() >= c.matureAt && (!mode2 || mode2.t !== "shovel")) {
-    harvest(pi);
-    return;
-  }
-  if (!mode2) {
-    if (c) toast(CROPS[c.id].name + " \xB7 c\xF2n " + fmtLeft(c.matureAt - now()));
-    return;
-  }
-  if (mode2.t === "seed") {
-    if (c) return toast("\xD4 n\xE0y tr\u1ED3ng r\u1ED3i");
-    plant(pi, mode2.id);
-    if ((ctx.S.seeds[mode2.id] || 0) <= 0) {
+    if (k === "collapse") {
+      toolbarOpen = false;
       mode2 = null;
       renderToolbar2();
+      return;
     }
-    return;
-  }
-  if (mode2.t === "water") return water(pi);
-  if (mode2.t === "fert") {
-    fertilize(pi, mode2.id);
-    if ((ctx.S.ferts[mode2.id] || 0) <= 0) {
+    if (mode2 && mode2.t === k) {
       mode2 = null;
       renderToolbar2();
+      return;
     }
-    return;
-  }
-  if (mode2.t === "harvest") return harvest(pi);
-  if (mode2.t === "shovel") {
-    if (!c) return;
-    if (mode2.confirmPi === pi) {
-      shovel(pi);
-      mode2.confirmPi = null;
-    } else {
-      mode2.confirmPi = pi;
-      toast("B\u1EA5m l\u1EA7n n\u1EEFa \u0111\u1EC3 x\xE1c nh\u1EADn x\u1EDBi b\u1ECF " + CROPS[c.id].name);
+    if (k === "seed") return pickFrom2("Ch\u1ECDn h\u1EA1t gi\u1ED1ng \u0111\u1EC3 gieo", ctx.S.seeds, (id) => CROPS[id].name, (id) => {
+      mode2 = { t: "seed", id };
+      renderToolbar2();
+    });
+    if (k === "fert") return pickFrom2("Ch\u1ECDn ph\xE2n b\xF3n", ctx.S.ferts, (id) => FERTS[id].name, (id) => {
+      mode2 = { t: "fert", id };
+      renderToolbar2();
+    });
+    mode2 = { t: k };
+    renderToolbar2();
+  });
+  $id("chipLink").addEventListener("click", () => {
+    CS.link = !CS.link;
+    if (!CS.link) {
+      CS.story = false;
+      setInjection("");
     }
-  }
-});
+    saveCharState();
+    renderChips();
+    renderBanner2();
+    updateInjection();
+    if (CS.link) {
+      requestDayEvent();
+      toast("\u0110\xE3 b\u1EADt li\xEAn k\u1EBFt, \u0111ang gieo qu\u1EBB s\u1EF1 ki\u1EC7n h\xF4m nay theo th\u1EBF gi\u1EDBi quan");
+    } else toast("\u0110\xE3 v\u1EC1 l\u1EA1i v\u01B0\u1EDDn rau ch\u01A1i m\u1ED9t m\xECnh");
+  });
+  $id("banner").addEventListener("click", (e) => {
+    if (e.target.closest(".bmut") || e.target.closest(".mut-popup")) return;
+    $id("banner").classList.toggle("expand");
+    $id("mutPopup").classList.remove("open");
+  });
+  $id("bmut").addEventListener("click", (e) => {
+    e.stopPropagation();
+    $id("mutPopup").classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    const popup = $id("mutPopup");
+    if (popup.classList.contains("open") && !e.target.closest(".mut-popup") && !e.target.closest(".bmut")) {
+      popup.classList.remove("open");
+    }
+  });
+  $id("chipRegen").addEventListener("click", () => {
+    ctx.S.dayEvent = null;
+    save();
+    requestDayEvent(true);
+    toast("\u0110ang gieo qu\u1EBB l\u1EA1i\u2026");
+  });
+  $id("chipStory").addEventListener("click", () => {
+    CS.story = !CS.story;
+    saveCharState();
+    renderChips();
+    updateInjection();
+    toast(CS.story ? "T\xECnh h\xECnh v\u01B0\u1EDDn rau s\u1EBD \u0111\u01B0\u1EE3c th\xEC th\u1EA7m cho nh\u1EEFng ng\u01B0\u1EDDi trong c\u1ED1t truy\u1EC7n" : "V\u01B0\u1EDDn rau l\u1EA1i gi\u1EEF b\xED m\u1EADt");
+  });
+  $id("blocks").addEventListener("click", (e) => {
+    const sign = e.target.closest("[data-buy]");
+    if (sign) {
+      const b = +sign.dataset.buy;
+      if (ctx.S.coins < blockPrice(b)) {
+        toast("C\xF2n thi\u1EBFu " + (blockPrice(b) - ctx.S.coins).toLocaleString() + " G");
+        return;
+      }
+      if (buyConfirm.b === b && now() < buyConfirm.until) {
+        buyConfirm = { b: -1, until: 0 };
+        buyBlock(b);
+      } else {
+        buyConfirm = { b, until: now() + 4e3 };
+        renderPlots2();
+      }
+      return;
+    }
+    const p = e.target.closest(".plot");
+    if (!p || p.dataset.deco) return;
+    const pi = +p.dataset.pi;
+    const c = curPlots()[pi].crop;
+    if (c && now() >= c.matureAt && (!mode2 || mode2.t !== "shovel")) {
+      harvest(pi);
+      return;
+    }
+    if (!mode2) {
+      if (c) toast(CROPS[c.id].name + " \xB7 c\xF2n " + fmtLeft(c.matureAt - now()));
+      return;
+    }
+    if (mode2.t === "seed") {
+      if (c) return toast("\xD4 n\xE0y tr\u1ED3ng r\u1ED3i");
+      plant(pi, mode2.id);
+      if ((ctx.S.seeds[mode2.id] || 0) <= 0) {
+        mode2 = null;
+        renderToolbar2();
+      }
+      return;
+    }
+    if (mode2.t === "water") return water(pi);
+    if (mode2.t === "fert") {
+      fertilize(pi, mode2.id);
+      if ((ctx.S.ferts[mode2.id] || 0) <= 0) {
+        mode2 = null;
+        renderToolbar2();
+      }
+      return;
+    }
+    if (mode2.t === "harvest") return harvest(pi);
+    if (mode2.t === "shovel") {
+      if (!c) return;
+      if (mode2.confirmPi === pi) {
+        shovel(pi);
+        mode2.confirmPi = null;
+      } else {
+        mode2.confirmPi = pi;
+        toast("B\u1EA5m l\u1EA7n n\u1EEFa \u0111\u1EC3 x\xE1c nh\u1EADn x\u1EDBi b\u1ECF " + CROPS[c.id].name);
+      }
+    }
+  });
+}
 
 // src/shop.js
 function openModal2(title, bodyHTML) {
@@ -2934,7 +3087,21 @@ function openPanel2(kind) {
     });
   }
 }
-sh.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => openPanel2(b.dataset.open)));
+function initShop() {
+  $id("mclose").addEventListener("click", closeModal2);
+  $id("mbody").addEventListener("click", (e) => {
+    const el = e.target.closest("[data-pick]");
+    if (!el || !pendingPick) return;
+    const cb = pendingPick;
+    pendingPick = null;
+    closeModal2();
+    cb(el.dataset.pick);
+  });
+  $id("modal").addEventListener("click", (e) => {
+    if (e.target === $id("modal")) closeModal2();
+  });
+  sh.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => openPanel2(b.dataset.open)));
+}
 
 // src/pets.js
 function petBubble(el, txt) {
@@ -3252,6 +3419,43 @@ function petFert(el, cry) {
     petBubble(pe, cry + (k ? " \u0111\xE3 b\xF3n " + k + " \xF4 " + FERTS[fid].name + "!" : " kh\xF4ng c\xF3 \xF4 n\xE0o c\u1EA7n b\xF3n ph\xE2n"));
   });
 }
+function initPets() {
+  wander2 = window.setInterval(() => {
+    if (!ctx.win.classList.contains("open")) return;
+    if (!scene && now() >= nextSceneAt) tryScene();
+    sh.querySelectorAll("#mascots .pet").forEach((el) => {
+      const id = el.dataset.pet;
+      if (sceneBusy(id) || petTgt[id] || el.classList.contains("sleep")) return;
+      if (!PETS[id].job && Math.random() < 0.08) return sleepPet(el);
+      if (PETS[id].job && now() - (petTouch[id] || touchBase) > 5 * MIN && Math.random() < 0.08) return sleepPet(el);
+      if (Math.random() < 0.35) moveTo(el, petSpot(id));
+    });
+  }, 7e3);
+  $id("mascots").addEventListener("click", (e) => {
+    const el = e.target.closest(".pet");
+    if (!el) return;
+    const id = el.dataset.pet, def = PETS[id];
+    if (!def) return;
+    petTouch[id] = now();
+    if (el.classList.contains("sleep")) return wakePet(el, true);
+    const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
+    if (def.job === "plant") return petPlant(el, cry);
+    if (def.job === "fert") return petFert(el, cry);
+    if (def.job === "harvest") return petHarvest(el, cry);
+    if (def.job) return petBubble(el, cry);
+    let txt = cry;
+    if (now() - (ctx.S.petPoke[id] || 0) >= POKE_CD) {
+      ctx.S.petPoke[id] = now();
+      const gain = 1 + Math.floor(Math.random() * 5);
+      ctx.S.coins += gain;
+      txt += id === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : id === "starBlob" ? " r\u01A1i ra " + gain + " G \xE1nh sao!" : " r\u01A1i ra " + gain + " G";
+      save();
+      renderStatus2();
+    }
+    petBubble(el, txt);
+    wakePet(el, true);
+  });
+}
 
 // src/witch.js
 var WITCH_CRY = ["C\xFAc cu, c\xF3 ai kh\xF4ng?", "\u25C6\u2726\u2234\u2026?", "(d\u01B0\u1EDBi v\xE0nh m\u0169 v\u1ECDng ra ti\u1EBFng l\u1EADt s\xE1ch)", "\u263D\u2042\u25C7!", "\u2736\u25C7\u2234\u2726\u2026", "Tinh t\u01B0\u1EE3ng h\xF4m nay \u0111\u1EB9p \u0111\u1EA5y."];
@@ -3328,16 +3532,6 @@ function openWitchDlg() {
     openWitchDlg();
   }));
 }
-$id("witch").addEventListener("click", (e) => {
-  if (e.target.closest(".wtag")) return openWitchDlg();
-  const el = $id("witch");
-  el.querySelector(".pbubble")?.remove();
-  const b = document.createElement("span");
-  b.className = "pbubble wb";
-  b.textContent = WITCH_CRY[Math.floor(Math.random() * WITCH_CRY.length)];
-  el.appendChild(b);
-  window.setTimeout(() => b.remove(), 1900);
-});
 var toastTimer2 = null;
 function toast2(msg) {
   const t = $id("toast");
@@ -3348,6 +3542,18 @@ function toast2(msg) {
     t.style.display = "none";
   }, 1800);
 }
+function initWitch() {
+  $id("witch").addEventListener("click", (e) => {
+    if (e.target.closest(".wtag")) return openWitchDlg();
+    const el = $id("witch");
+    el.querySelector(".pbubble")?.remove();
+    const b = document.createElement("span");
+    b.className = "pbubble wb";
+    b.textContent = WITCH_CRY[Math.floor(Math.random() * WITCH_CRY.length)];
+    el.appendChild(b);
+    window.setTimeout(() => b.remove(), 1900);
+  });
+}
 
 // src/main.js
 function initFarm() {
@@ -3356,8 +3562,14 @@ function initFarm() {
   } catch (e) {
   }
   loadState();
+  initUI();
   applyTheme2();
-  placeOrb();
+  initOrb();
+  initWindows();
+  initShop();
+  initRender();
+  initPets();
+  initWitch();
   initEvents();
   console.log("Farm initialized");
 }

@@ -35,17 +35,7 @@ export function renderToolbar() {
     tip.style.display = 'block';
   } else tip.style.display = 'none';
 }
-All.$id('toolbar').addEventListener('click', e => {
-  const el = e.target.closest('[data-tool]'); if (!el) return;
-  const k = el.dataset.tool;
-  if (k === 'expand') { toolbarOpen = true; renderToolbar(); return; }
-  if (k === 'collapse') { toolbarOpen = false; mode = null; renderToolbar(); return; }
-  if (mode && mode.t === k) { mode = null; renderToolbar(); return; }
-  if (k === 'seed') return pickFrom('Chọn hạt giống để gieo', ctx.S.seeds, id => CROPS[id].name, id => { mode = { t: 'seed', id }; renderToolbar(); });
-  if (k === 'fert') return pickFrom('Chọn phân bón', ctx.S.ferts, id => FERTS[id].name, id => { mode = { t: 'fert', id }; renderToolbar(); });
-  mode = { t: k };
-  renderToolbar();
-});
+
 export let pendingPick = null;   // Chỉ uỷ quyền một listener, tránh chồng chất trùng lặp
 export function pickFrom(title, obj, nameFn, cb) {
   const ids = Object.keys(obj).filter(k => obj[k] > 0);
@@ -275,7 +265,21 @@ export function renderDynamic() {
   }
 }
 export function renderAll() { applyPageSkin(); renderPager(); renderStatus(); renderPlots(); renderToolbar(); renderChips(); renderBanner(); renderPets(); try { renderWitch(); } catch (e) {} }
-All.$id('chipLink').addEventListener('click', () => {
+
+
+export function initRender() {
+  All.$id('toolbar').addEventListener('click', e => {
+  const el = e.target.closest('[data-tool]'); if (!el) return;
+  const k = el.dataset.tool;
+  if (k === 'expand') { toolbarOpen = true; renderToolbar(); return; }
+  if (k === 'collapse') { toolbarOpen = false; mode = null; renderToolbar(); return; }
+  if (mode && mode.t === k) { mode = null; renderToolbar(); return; }
+  if (k === 'seed') return pickFrom('Chọn hạt giống để gieo', ctx.S.seeds, id => CROPS[id].name, id => { mode = { t: 'seed', id }; renderToolbar(); });
+  if (k === 'fert') return pickFrom('Chọn phân bón', ctx.S.ferts, id => FERTS[id].name, id => { mode = { t: 'fert', id }; renderToolbar(); });
+  mode = { t: k };
+  renderToolbar();
+});
+  All.$id('chipLink').addEventListener('click', () => {
   CS.link = !CS.link;
   if (!CS.link) { CS.story = false; setInjection(''); }
   saveCharState(); renderChips(); renderBanner(); updateInjection();
@@ -332,4 +336,4 @@ All.$id('blocks').addEventListener('click', e => {
     else { mode.confirmPi = pi; toast('Bấm lần nữa để xác nhận xới bỏ ' + CROPS[c.id].name); }
   }
 });
-
+}

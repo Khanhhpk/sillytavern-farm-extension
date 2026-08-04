@@ -92,19 +92,7 @@ export function renderWitch() {
   if (active && !el.innerHTML) el.innerHTML = `<span class="wtag">✦ Đơn hàng</span><span class="wbody">${petSVG('witchBlob', 48)}</span>`;
   if (!active) el.innerHTML = '';
 }
-All.$id('witch').addEventListener('click', e => {
-  if (e.target.closest('.wtag')) return openWitchDlg();
-  const el = All.$id('witch');                              // Chọc vào chính cô ấy = chào hỏi (tiếng phù thuỷ, người nghe không hiểu là bình thường nhé)
-  el.querySelector('.pbubble')?.remove();
-  const b = document.createElement('span');
-  b.className = 'pbubble wb';
-  b.textContent = WITCH_CRY[Math.floor(Math.random() * WITCH_CRY.length)];
-  el.appendChild(b);
-  window.setTimeout(() => b.remove(), 1900);
-});
 
-/* ---------- Mẹo nhỏ ---------- */
-/* #18: lấy ra —— bỏ khỏi balo để mang vào cốt truyện, không quy ra tiền, không thể hoàn tác; trong 10 phút sau khi lấy ra, phần tiêm sẽ kèm một câu nhắc */
 export let takeoutNote = null;
 export function openTakeout(key) {
   const have = ctx.S.bag[key] || 0;
@@ -226,4 +214,20 @@ export function toast(msg) {
   if (toastTimer) window.clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => { t.style.display = 'none'; }, 1800);
 }
-
+
+
+export function initWitch() {
+  All.$id('witch').addEventListener('click', e => {
+  if (e.target.closest('.wtag')) return openWitchDlg();
+  const el = All.$id('witch');                              // Chọc vào chính cô ấy = chào hỏi (tiếng phù thuỷ, người nghe không hiểu là bình thường nhé)
+  el.querySelector('.pbubble')?.remove();
+  const b = document.createElement('span');
+  b.className = 'pbubble wb';
+  b.textContent = WITCH_CRY[Math.floor(Math.random() * WITCH_CRY.length)];
+  el.appendChild(b);
+  window.setTimeout(() => b.remove(), 1900);
+});
+
+/* ---------- Mẹo nhỏ ---------- */
+/* #18: lấy ra —— bỏ khỏi balo để mang vào cốt truyện, không quy ra tiền, không thể hoàn tác; trong 10 phút sau khi lấy ra, phần tiêm sẽ kèm một câu nhắc */
+}

@@ -8,8 +8,14 @@ export function initFarm() {
   // Removed document.getElementById('star-tavern-farm-root')?.remove(); because it removes the DOM created on module load.
 
   All.loadState();
+  All.initUI();
   All.applyTheme();
-  All.placeOrb();
+  All.initOrb();
+  All.initWindows();
+  All.initShop();
+  All.initRender();
+  All.initPets();
+  All.initWitch();
   All.initEvents();
   console.log('Farm initialized');
 }

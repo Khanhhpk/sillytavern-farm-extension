@@ -4,7 +4,7 @@ import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, 
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
 
 /* ---------- Bóng nổi: kéo / hít mép / phân xử cú bấm (C11 §4) ---------- */
-ctx.orb = All.$id('ctx.orb'), ctx.win = All.$id('ctx.win');
+
 export const disposers = [];
 export let gesture = null, destroyed = false;
 export function placeOrb() {
@@ -77,4 +77,16 @@ export function layout() {
   SPRITE_PX = 48;                                       // v0.9: 64→48 (thu 3 lần), hình chi tiết không bị thô (vẫn giữ luật sắt bội số nguyên của 16)
   DECO_PX = plot >= 70 ? 56 : 40;
 }
-
+
+
+export function initOrb() {
+  ctx.orb = All.$id('ctx.orb');
+  ctx.win = All.$id('ctx.win');
+  ctx.orb.addEventListener('pointerdown', onOrbDown);
+  ctx.orb.addEventListener('pointermove', onOrbMove);
+  ctx.orb.addEventListener('pointerup', e => onOrbUp(e, false));
+  ctx.orb.addEventListener('pointercancel', e => onOrbUp(e, true));
+  window.addEventListener('resize', onResize);
+  disposers.push(() => window.removeEventListener('resize', onResize));
+  placeOrb();
+}

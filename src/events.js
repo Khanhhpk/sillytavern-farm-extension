@@ -604,7 +604,8 @@ export function initEvents() {
       ctx.eventSource.on(chatChangedEvent, () => {
         loadCharState();
         All.renderChips(); All.renderBanner(); updateInjection();
-        if (CS.link) requestDayEvent();
+        try { if (ctx.S && CS.link) requestDayEvent(); }
+        catch (e) { console.warn('[Farm] Lỗi khi đăng ký sự kiện CHAT_CHANGED:', e); }
       });
     } else {
       console.warn('[Farm] ctx.eventSource hoặc ctx.event_types.CHAT_CHANGED không khả dụng, bỏ qua đăng ký sự kiện đổi thẻ.');
