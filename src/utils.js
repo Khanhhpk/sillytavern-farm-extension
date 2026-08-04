@@ -3,6 +3,12 @@ import { ctx } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
+import { CS, eventFresh, eventPending, requestDayEvent } from './events.js';
+import { save, eachPage } from './state.js';
+import { renderWitch, witchArrive, toast } from './witch.js';
+import { sh } from './ui.js';
+import { rollMutation } from './logic.js';
+import { renderStatus } from './render.js';
 
 /* ---------- Tiện ích ---------- */
 export const gameDay = () => Math.floor((now() - ctx.S.day0) / DAY_MS) + 1;
@@ -84,7 +90,7 @@ export function settle() {
     c.rainDay = d;
   }));
 }
-  const pageUnlocked = p => p === 1 || (p === 2 && ctx.S.passes.water) || (p === 3 && ctx.S.passes.mine);
+  export const pageUnlocked = p => p === 1 || (p === 2 && ctx.S.passes.water) || (p === 3 && ctx.S.passes.mine);
 
 export const fmtLeft = ms => {
   if (ms <= 0) return 'Thu hoạch được';

@@ -3,6 +3,10 @@ import { ctx } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
+import { sh } from './ui.js';
+import { save, curBlocks, curPlots } from './state.js';
+import { renderStatus, pickFrom } from './render.js';
+import { plant, harvest, fertilize } from './logic.js';
 
 /* ---------- Thú cưng: render động + chọc chọc (uỷ quyền listener, bong bóng trên đầu, đủ 10 phút mới thật sự rơi tiền) ---------- */
 export function petBubble(el, txt) {
@@ -126,6 +130,7 @@ export function walkTo(el, p, cb) {                             // Dàn vị tr�
 export function tryScene() {
   const idle = [], asleep = [], workIdle = [];
   sh.querySelectorAll('#mascots .pet').forEach(el => {
+    // @ts-ignore
     const id = el.dataset.pet;
     if (petTgt[id]) return;                              // Bé đang trên đường thì không kéo vào đoàn kịch
     if (PETS[id].job) { if (!el.classList.contains('sleep')) workIdle.push(id); return; }   // Bé làm việc chỉ vào kho ngáp (đang trong ca thì ngáp tại chỗ chứ không đi)
@@ -207,6 +212,7 @@ export function renderPets() {
   All.$id('mascots').innerHTML = ctx.S.petsOut.map(id => PETS[id]
     ? `<span class="pet" data-pet="${id}" title="Chọc chọc ${PETS[id].name}"><span class="pbody" style="animation-delay:-${(Math.random() * 1.8).toFixed(2)}s">${petSVG(id, 48)}</span></span>` : '').join('');
   sh.querySelectorAll('#mascots .pet').forEach(el => {
+    // @ts-ignore
     const id = el.dataset.pet;
     placePet(el, petPos[id] || petSpot(id), true);
   });
@@ -215,6 +221,7 @@ export let wander = window.setInterval(() => {                  // Nhịp tuần
   if (!ctx.win || !ctx.win.classList.contains('open')) return;           // Tối ưu: Dừng tuần tra và tính toán vị trí khi bảng bị ẩn
   if (!scene && now() >= nextSceneAt) tryScene();
   sh.querySelectorAll('#mascots .pet').forEach(el => {
+    // @ts-ignore
     const id = el.dataset.pet;
     if (sceneBusy(id) || petTgt[id] || el.classList.contains('sleep')) return;   // Đang diễn / đang đi / đang ngủ thì đừng làm phiền
     if (!PETS[id].job && Math.random() < 0.08) return sleepPet(el);   // Rảnh lâu quá thì chợp mắt một giấc
@@ -223,6 +230,7 @@ export let wander = window.setInterval(() => {                  // Nhịp tuần
   });
 }, 7000);
 All.$id('mascots').addEventListener('click', e => {
+  // @ts-ignore
   const el = e.target.closest('.pet'); if (!el) return;
   const id = el.dataset.pet, def = PETS[id];
   if (!def) return;
@@ -294,6 +302,7 @@ export function initPets() {
   if (!ctx.win || !ctx.win.classList.contains('open')) return;           // Tối ưu: Dừng tuần tra và tính toán vị trí khi bảng bị ẩn
   if (!scene && now() >= nextSceneAt) tryScene();
   sh.querySelectorAll('#mascots .pet').forEach(el => {
+    // @ts-ignore
     const id = el.dataset.pet;
     if (sceneBusy(id) || petTgt[id] || el.classList.contains('sleep')) return;   // Đang diễn / đang đi / đang ngủ thì đừng làm phiền
     if (!PETS[id].job && Math.random() < 0.08) return sleepPet(el);   // Rảnh lâu quá thì chợp mắt một giấc
@@ -302,6 +311,7 @@ export function initPets() {
   });
 }, 7000);
 All.$id('mascots').addEventListener('click', e => {
+  // @ts-ignore
   const el = e.target.closest('.pet'); if (!el) return;
   const id = el.dataset.pet, def = PETS[id];
   if (!def) return;

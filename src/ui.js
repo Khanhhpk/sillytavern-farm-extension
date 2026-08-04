@@ -1,8 +1,13 @@
+
 import { ctx } from './store.js';
 import { styleCSS } from './style.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
+import { toast } from './witch.js';
+import { save } from './state.js';
+import { mode, renderPlots, renderStatus, renderToolbar, setMode } from './render.js';
+import { pageUnlocked } from './utils.js';
 
 /* ---------- DOM:Shadow root ---------- */
 export const root = document.createElement('div');
@@ -65,12 +70,15 @@ export function applyTheme() { ctx.ui.classList.remove('theme-sakura', 'theme-sk
 
 /* ---------- ctx.Sửa #5: thảm cỏ mặt ruộng + trang trí hoá hạt giống (vị trí cố định, không rung) ---------- */
 export const fieldEl = sh.querySelector('.field');
+// @ts-ignore
 fieldEl.style.backgroundImage = tileURI('grass', 4242);
 /* ---------- v0.8: lật ba trang (mở khoá bằng vé; da = W1 ruộng nổi đầm sen / M1 mạch quặng kim cương) ---------- */
 export function applyPageSkin() {
   fieldEl.classList.toggle('pg2', ctx.S.page === 2);
   fieldEl.classList.toggle('pg3', ctx.S.page === 3);
+  // @ts-ignore
   fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? 'water' : ctx.S.page === 3 ? 'mine' : 'grass', 4242);
+  // @ts-ignore
   fieldEl.style.backgroundSize = '192px 192px';        // v1.0: cả ba trang dùng chung khung vẽ 96 lát ×2
 }
 export function renderPager() {
@@ -86,21 +94,24 @@ ctx.ui.addEventListener('click', e => {                     // Bấm bất cứ 
 }, true);
 $id('pager') && $id('pager').addEventListener('click', e => {
   const pager = $id('pager');
+  // @ts-ignore
   const t = e.target.closest('[data-pg]');
   if (!t) { pager.classList.toggle('open'); return; }    // Bấm quả cầu = bung ra, bấm chỗ trống trên thanh = thu lại
   const pg = +t.dataset.pg;
   if (!pageUnlocked(pg)) return toast('Cần mua vé ' + (pg === 2 ? 'vùng nước' : 'khu mỏ') + ' ở cửa hàng trước đã');
   if (pg === ctx.S.page) { pager.classList.remove('open'); return; }   // Bấm đúng trang hiện tại = tiện tay thu lại
   ctx.S.page = pg; save();
-  mode = null;                                          // Đổi trang thì thoát chế độ công cụ, tránh thao tác nhầm sang trang khác
+  setMode(null);                                          // Đổi trang thì thoát chế độ công cụ, tránh thao tác nhầm sang trang khác
   pager.classList.remove('open');                        // Chọn xong thì tự co về quả cầu
   applyPageSkin(); renderPager(); renderPlots(); renderStatus(); renderToolbar();
 });
 /* Phương án 3: vuốt trái phải ở khu ruộng để đổi trang (dùng thử song song với thanh viên nang của phương án 2; nếu bỏ thì xoá cả khối này) */
 export let swX = null, swY = null;
+// @ts-ignore
 fieldEl.addEventListener('touchstart', e => { if (e.touches.length === 1) { swX = e.touches[0].clientX; swY = e.touches[0].clientY; } }, { passive: true });
 fieldEl.addEventListener('touchend', e => {
   if (swX == null) return;
+  // @ts-ignore
   const dx = e.changedTouches[0].clientX - swX, dy = e.changedTouches[0].clientY - swY;
   swX = swY = null;
   if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;   // Phải là vuốt ngang chiếm ưu thế mới tính là lật trang
@@ -109,10 +120,11 @@ fieldEl.addEventListener('touchend', e => {
   while (pg >= 1 && pg <= 3 && !pageUnlocked(pg)) pg += dir;   // Bỏ qua các trang chưa mở khoá
   if (pg < 1 || pg > 3 || pg === ctx.S.page) return;
   ctx.S.page = pg; save();
-  mode = null;                                          // Đổi trang thì thoát chế độ công cụ (giống như bấm tab đổi trang)
+  setMode(null);                                          // Đổi trang thì thoát chế độ công cụ (giống như bấm tab đổi trang)
   applyPageSkin(); renderPager(); renderPlots(); renderStatus(); renderToolbar();
   toast(pg === 1 ? 'Về đồng cỏ~' : pg === 2 ? 'Tới vùng nước~' : 'Tới khu mỏ~');
 }, { passive: true });
+// @ts-ignore
 fieldEl.style.backgroundSize = '192px 192px';
 export const decoLayer = document.createElement('div');
 decoLayer.style.cssText = 'position:absolute;inset:0;overflow:hidden;pointer-events:none;';
@@ -161,21 +173,24 @@ ctx.ui.addEventListener('click', e => {                     // Bấm bất cứ 
 }, true);
 $id('pager') && $id('pager').addEventListener('click', e => {
   const pager = $id('pager');
+  // @ts-ignore
   const t = e.target.closest('[data-pg]');
   if (!t) { pager.classList.toggle('open'); return; }    // Bấm quả cầu = bung ra, bấm chỗ trống trên thanh = thu lại
   const pg = +t.dataset.pg;
   if (!pageUnlocked(pg)) return toast('Cần mua vé ' + (pg === 2 ? 'vùng nước' : 'khu mỏ') + ' ở cửa hàng trước đã');
   if (pg === ctx.S.page) { pager.classList.remove('open'); return; }   // Bấm đúng trang hiện tại = tiện tay thu lại
   ctx.S.page = pg; save();
-  mode = null;                                          // Đổi trang thì thoát chế độ công cụ, tránh thao tác nhầm sang trang khác
+  setMode(null);                                          // Đổi trang thì thoát chế độ công cụ, tránh thao tác nhầm sang trang khác
   pager.classList.remove('open');                        // Chọn xong thì tự co về quả cầu
   applyPageSkin(); renderPager(); renderPlots(); renderStatus(); renderToolbar();
 });
 /* Phương án 3: vuốt trái phải ở khu ruộng để đổi trang (dùng thử song song với thanh viên nang của phương án 2; nếu bỏ thì xoá cả khối này) */
   swX = null; swY = null;
+// @ts-ignore
 fieldEl.addEventListener('touchstart', e => { if (e.touches.length === 1) { swX = e.touches[0].clientX; swY = e.touches[0].clientY; } }, { passive: true });
 fieldEl.addEventListener('touchend', e => {
   if (swX == null) return;
+  // @ts-ignore
   const dx = e.changedTouches[0].clientX - swX, dy = e.changedTouches[0].clientY - swY;
   swX = swY = null;
   if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;   // Phải là vuốt ngang chiếm ưu thế mới tính là lật trang
@@ -184,7 +199,7 @@ fieldEl.addEventListener('touchend', e => {
   while (pg >= 1 && pg <= 3 && !pageUnlocked(pg)) pg += dir;   // Bỏ qua các trang chưa mở khoá
   if (pg < 1 || pg > 3 || pg === ctx.S.page) return;
   ctx.S.page = pg; save();
-  mode = null;                                          // Đổi trang thì thoát chế độ công cụ (giống như bấm tab đổi trang)
+  setMode(null);                                          // Đổi trang thì thoát chế độ công cụ (giống như bấm tab đổi trang)
   applyPageSkin(); renderPager(); renderPlots(); renderStatus(); renderToolbar();
   toast(pg === 1 ? 'Về đồng cỏ~' : pg === 2 ? 'Tới vùng nước~' : 'Tới khu mỏ~');
 }, { passive: true });

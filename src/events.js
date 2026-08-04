@@ -3,6 +3,12 @@ import { ctx, extensionName } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
+import { weatherOf, gameDay, settle } from './utils.js';
+import { renderBanner, renderStatus, renderPlots } from './render.js';
+import { toast, setTakeoutNote, takeoutNote } from './witch.js';
+import { openModal } from './shop.js';
+import { eachPage, save } from './state.js';
+import { mutDescOf, bagName } from './logic.js';
 
 export const esc = s => String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 export const clampN = (x, lo, hi, dflt) => { x = Number(x); return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt; };
@@ -245,7 +251,7 @@ export function fallbackEvent() {
 }
 
 export let eventPending = false;
-async function requestDayEvent(force) {
+export async function requestDayEvent(force) {
   if (eventPending || !CS.link) return;
   if (!force && todayEvent()) return;                        // Mỗi ngày trong game tối đa một lần
   if (!SEC.url || !SEC.model) { applyDayEvent(fallbackEvent(), 'fallback', 'Chưa cấu hình API phụ (điền xong trong cài đặt thì nhớ bấm "Lưu cấu hình")'); return; }
@@ -352,20 +358,27 @@ export function openSandbox() {
   const ta = All.$id('sbCode');
   const sel = All.$id('sbPalette');
   const sizeSel = All.$id('sbSize');
+  // @ts-ignore
   const ctx = All.$id('sbCanvas').getContext('2d');
   
   function render() {
+    // @ts-ignore
     const isPet = sel.value === 'PETS';
     const palette = isPet ? PET_P : P;
+    // @ts-ignore
     const size = parseInt(sizeSel.value) || 16;
     
     const canvasEl = All.$id('sbCanvas');
+    // @ts-ignore
     if (canvasEl.width !== size) {
+      // @ts-ignore
       canvasEl.width = size;
+      // @ts-ignore
       canvasEl.height = size;
     }
     ctx.clearRect(0, 0, size, size);
     
+    // @ts-ignore
     const lines = ta.value.split('\n').map(l => l.trim().replace(/['",\[\]]/g, '')).filter(l => l.length > 0);
     for (let y = 0; y < Math.min(size, lines.length); y++) {
       const row = lines[y];
@@ -398,6 +411,7 @@ export function openSandbox() {
   });
 
   All.$id('sbGenerate').addEventListener('click', async () => {
+    // @ts-ignore
     const p = All.$id('sbPrompt').value.trim();
     if (!p) return toast('Vui lòng nhập ý tưởng!');
     if (!SEC.url) return toast('Vui lòng cấu hình API trong Cài đặt trước!');
@@ -407,12 +421,14 @@ export function openSandbox() {
     All.$id('sbStatus').textContent = 'Đang gọi AI...';
     
     try {
+      // @ts-ignore
       const isPet = sel.value === 'PETS';
       const palette = isPet ? PET_P : P;
       // Filter out gradient objects, only send simple colors
       const simpleColors = Object.entries(palette).filter(e => typeof e[1] === 'string');
       const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(', ');
       
+      // @ts-ignore
       const size = parseInt(sizeSel.value) || 16;
       const sysPrompt = `Bạn là một chuyên gia thiết kế Pixel Art (${size}x${size}). Nhiệm vụ của bạn là vẽ một đồ vật dựa trên yêu cầu, và BẮT BUỘC chỉ được dùng các mã ký tự trong Bảng màu sau đây.
 
@@ -443,6 +459,7 @@ QUY TẮC ĐẦU RA BẮT BUỘC:
         ]
       };
 
+      // @ts-ignore
       All.$id('sbPayloadOut').value = JSON.stringify(reqBody, null, 2);
       All.$id('sbPayloadBtn').style.display = 'inline-block';
 
@@ -467,6 +484,7 @@ QUY TẮC ĐẦU RA BẮT BUỘC:
       }
       
       if (jsonStr) {
+        // @ts-ignore
         ta.value = jsonStr.trim();
         render();
         All.$id('sbStatus').textContent = 'Hoàn tất!';
@@ -499,7 +517,7 @@ export function applyDayEvent(ev, source, reason) {
   save(); renderStatus(); renderPlots();
 }
 
-async function testSecApi() {
+export async function testSecApi() {
   if (!SEC.url || !SEC.model) return toast('Hãy điền địa chỉ API và tên model trước');
   toast('Đang kiểm tra kết nối…');
   try {
@@ -526,7 +544,8 @@ async function testSecApi() {
 }
 
 /* #53: lấy danh sách model (API /models) —— dropdown nội tuyến, chọn xong điền thẳng vào ô model */
-async function fetchModelList() {
+export async function fetchModelList() {
+  // @ts-ignore
   const url = All.$id('secUrl').value.trim(), key = All.$id('secKey').value.trim();
   const drop = All.$id('modelDrop');
   if (!url) return toast('Hãy điền địa chỉ API trước');
@@ -544,8 +563,10 @@ async function fetchModelList() {
     drop.innerHTML = ids.map(id => `<span data-mpick="${esc(id)}">${esc(id)}</span>`).join('');
     drop.style.display = 'flex';
     drop.querySelectorAll('[data-mpick]').forEach(el => el.addEventListener('click', () => {
+      // @ts-ignore
       All.$id('secModel').value = el.dataset.mpick;
       drop.style.display = 'none';
+      // @ts-ignore
       toast('Đã chọn: ' + el.dataset.mpick + ', nhớ bấm lưu cấu hình');
     }));
   } catch (e) { toast('Lấy danh sách thất bại: ' + ((e && e.message) || e)); }
@@ -575,7 +596,7 @@ export function updateInjection() {
   const ev = todayEvent();
   
   const takeoutNoteStr = (function () {
-    takeoutNote = (takeoutNote || []).filter(t => now() < t.until);
+    setTakeoutNote((takeoutNote || []).filter(t => now() < t.until));
     if (!takeoutNote.length) return '';
     return `\n\n【QUAN TRỌNG: HÀNH ĐỘNG VỪA XẢY RA】\nNgười chơi vừa lấy ${takeoutNote.map(t => t.txt).join(', ')} ra khỏi balo vườn rau, hẳn là định dùng/tặng trong cốt truyện. Hãy tiếp nhận một cách tự nhiên; phần trong ngoặc là hiệu ứng của vật phẩm đó, hãy lấy đó làm chuẩn và có thể sáng tạo thêm trong chừng mực.`;
   })();

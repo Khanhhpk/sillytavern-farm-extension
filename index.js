@@ -1,7 +1,7 @@
 // src/store.js
 var NS = "star_tavern_farm";
 var extensionName = "sillytavern-farm-extension";
-var RUNTIME_KEY2 = "__STAR_TAVERN_FARM__";
+var RUNTIME_KEY = "__STAR_TAVERN_FARM__";
 var ctx = {
   extension_settings: {},
   eventSource: null,
@@ -35,6 +35,7 @@ var POKE_CD = 10 * MIN;
 var TREASURE_CD = TEST_MODE ? 10 * MIN : 2 * 60 * 60 * 1e3;
 var PETS_OUT_MAX = 8;
 var WITCH_STAY = TEST_MODE ? 10 * MIN : 20 * MIN;
+var witchGap = () => TEST_MODE ? 15 * MIN + Math.random() * 20 * MIN : 100 * MIN + Math.random() * 80 * MIN;
 var SNAP_EDGE = 48;
 var CROPS = {
   /* Số liệu chính thức v1.0 (chốt theo "Bảng số liệu chính thức - chờ duyệt.md"): grow/regrowM tính bằng phút thực */
@@ -72,6 +73,13 @@ var FERTS = {
   compost: { name: "Ph\xE2n \u1EE7", price: 50, desc: "Th\u1EDDi gian c\xF2n l\u1EA1i c\u1EE7a v\u1EE5 n\xE0y \xD70.75" },
   shiny: { name: "Ph\xE2n l\u1EA5p l\xE1nh", price: 100, desc: "Khi thu ho\u1EA1ch v\u1EE5 n\xE0y r\u01A1i th\xEAm s\u1ED1 v\xE0ng b\u1EB1ng 25% gi\xE1 b\xE1n" }
 };
+var BLOCK_PRICE_PG = {
+  // v1.0: giá khai hoang riêng cho từng trang (chốt theo bảng B)
+  1: [0, 0, 800, 3e3, 12e3, 3e4],
+  2: [0, 2e3, 6e3, 18e3, 45e3, 9e4],
+  3: [0, 5e3, 15e3, 4e4, 9e4, 18e4]
+};
+var WEATHERS = ["N\u1EAFng", "N\u1EAFng", "N\u1EAFng", "Nhi\u1EC1u m\xE2y", "M\u01B0a nh\u1ECF"];
 
 // src/graphics.js
 var P = {
@@ -1248,101 +1256,6 @@ function warmUpCache(CROPS2) {
   setTimeout(next, 1e3);
 }
 
-// src/state.js
-var now = () => Date.now();
-var emptyPlots = () => {
-  const a = [];
-  for (let i = 0; i < 24; i++) a.push({ crop: null });
-  return a;
-};
-function freshState2() {
-  return {
-    version: 1,
-    coins: TEST_MODE ? 9999 : 999,
-    totalSales: 0,
-    unlockedBlocks: 2,
-    plots: emptyPlots(),
-    seeds: { douya: 4, mystery: 1 },
-    ferts: {},
-    bag: {},
-    petPoke: {},
-    // Quà khởi đầu: 4 giá đỗ + 1 hạt giống bí ẩn (popup dạy chơi hộp mù)
-    pets: ["slime"],
-    passes: {},
-    petsOut: ["slime"],
-    jobCfg: {},
-    petFind: {},
-    // Tặng slime xanh lúc mở đầu (thực hiện phương án #9)
-    page: 1,
-    plots2: emptyPlots(),
-    plots3: emptyPlots(),
-    unlockedBlocks2: 1,
-    unlockedBlocks3: 1,
-    // v0.8: ba trang (vé vào trang 2/3 tặng kèm ô đất đầu tiên)
-    day0: now(),
-    orb: { fx: 0.94, fy: 0.6 },
-    win: null
-  };
-}
-ctx.S = null;
-function loadState() {
-  if (!ctx.extension_settings[extensionName]) {
-    ctx.extension_settings[extensionName] = {};
-  }
-  const g = ctx.extension_settings[extensionName] || {};
-  ctx.S = g[NS] && g[NS].version === 1 ? g[NS] : freshState2();
-  if (!ctx.S.petPoke) ctx.S.petPoke = {};
-  if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
-  if (!ctx.S.passes) ctx.S.passes = {};
-  if (!ctx.S.pets) ctx.S.pets = ["slime", "octo"];
-  if (!ctx.S.petsOut) ctx.S.petsOut = ctx.S.pets.slice(0, 6);
-  if (!ctx.S.jobCfg) ctx.S.jobCfg = {};
-  if (!ctx.S.petFind) ctx.S.petFind = {};
-  if (!ctx.S.theme) ctx.S.theme = "sakura";
-  if (!ctx.S.page) ctx.S.page = 1;
-  Object.keys(ctx.S.bag || {}).forEach((k) => {
-    const base = k.split("@")[0];
-    if (base === "mysbG" || base === "mysbW" || base === "mysbM") {
-      const nk = k.replace(base, "moonberry");
-      ctx.S.bag[nk] = (ctx.S.bag[nk] || 0) + ctx.S.bag[k];
-      delete ctx.S.bag[k];
-    }
-  });
-  [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach((arr) => (arr || []).forEach((p) => {
-    if (p.crop && (p.crop.id === "mysbG" || p.crop.id === "mysbW" || p.crop.id === "mysbM")) p.crop.id = "moonberry";
-  }));
-  if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
-  if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
-  if (!ctx.S.plots2) ctx.S.plots2 = emptyPlots();
-  if (!ctx.S.plots3) ctx.S.plots3 = emptyPlots();
-  if (ctx.S.unlockedBlocks2 == null) ctx.S.unlockedBlocks2 = 1;
-  if (ctx.S.unlockedBlocks3 == null) ctx.S.unlockedBlocks3 = 1;
-  [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach((arr) => arr.forEach((p) => {
-    const c = p.crop;
-    if (!c) return;
-    if (!c.fertUsed) c.fertUsed = {};
-    if (CROPS[c.id].regrow && c.left == null) c.left = REGROW_MAX;
-  }));
-}
-ctx.saveTimer = null;
-function save2(immediate) {
-  if (ctx.saveTimer) {
-    clearTimeout(ctx.saveTimer);
-    ctx.saveTimer = null;
-  }
-  const doSave = () => {
-    if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};
-    ctx.extension_settings[extensionName][NS] = ctx.S;
-    if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
-  };
-  if (immediate) doSave();
-  else ctx.saveTimer = setTimeout(doSave, 500);
-  try {
-    updateInjection();
-  } catch (e) {
-  }
-}
-
 // src/style.js
 var styleCSS = `
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
@@ -1687,14 +1600,14 @@ var styleCSS = `
 `;
 
 // src/ui.js
-var root2 = document.createElement("div");
-root2.id = "star-tavern-farm-root";
-document.body.appendChild(root2);
-var sh2 = root2.attachShadow({ mode: "open" });
-var $id = (id) => sh2.getElementById(id);
+var root = document.createElement("div");
+root.id = "star-tavern-farm-root";
+document.body.appendChild(root);
+var sh = root.attachShadow({ mode: "open" });
+var $id = (id) => sh.getElementById(id);
 var style = document.createElement("style");
 style.textContent = styleCSS;
-sh2.appendChild(style);
+sh.appendChild(style);
 ctx.ui = document.createElement("div");
 ctx.ui.innerHTML = `
   <div id="ctx.orb" title="Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n trong SillyTavern ch\u1EE9!">${spriteSVG("sprout", 34)}</div>
@@ -1738,20 +1651,20 @@ ctx.ui.innerHTML = `
     </div>
     <div class="toast" id="toast"></div>
   </div>`;
-sh2.appendChild(ctx.ui);
-function applyTheme2() {
+sh.appendChild(ctx.ui);
+function applyTheme() {
   ctx.ui.classList.remove("theme-sakura", "theme-sky");
   ctx.ui.classList.add("theme-" + (ctx.S && ctx.S.theme === "sky" ? "sky" : "sakura"));
 }
-var fieldEl = sh2.querySelector(".field");
+var fieldEl = sh.querySelector(".field");
 fieldEl.style.backgroundImage = tileURI("grass", 4242);
-function applyPageSkin2() {
+function applyPageSkin() {
   fieldEl.classList.toggle("pg2", ctx.S.page === 2);
   fieldEl.classList.toggle("pg3", ctx.S.page === 3);
   fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? "water" : ctx.S.page === 3 ? "mine" : "grass", 4242);
   fieldEl.style.backgroundSize = "192px 192px";
 }
-function renderPager2() {
+function renderPager() {
   const names = { 1: "\u0110\u1ED3ng c\u1ECF", 2: "V\xF9ng n\u01B0\u1EDBc", 3: "Khu m\u1ECF" };
   $id("pager").innerHTML = [1, 2, 3].map((pg) => {
     const un = pageUnlocked(pg);
@@ -1777,10 +1690,10 @@ $id("pager") && $id("pager").addEventListener("click", (e) => {
   }
   ctx.S.page = pg;
   save();
-  mode = null;
+  setMode(null);
   pager.classList.remove("open");
-  applyPageSkin2();
-  renderPager2();
+  applyPageSkin();
+  renderPager();
   renderPlots();
   renderStatus();
   renderToolbar();
@@ -1804,9 +1717,9 @@ fieldEl.addEventListener("touchend", (e) => {
   if (pg < 1 || pg > 3 || pg === ctx.S.page) return;
   ctx.S.page = pg;
   save();
-  mode = null;
-  applyPageSkin2();
-  renderPager2();
+  setMode(null);
+  applyPageSkin();
+  renderPager();
   renderPlots();
   renderStatus();
   renderToolbar();
@@ -1834,6 +1747,18 @@ fieldEl.insertBefore(decoLayer, fieldEl.firstChild);
 var fxLayer = document.createElement("div");
 fxLayer.style.cssText = "position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:8;";
 fieldEl.appendChild(fxLayer);
+function plotEmote(pi, name) {
+  const p = sh.querySelector('.plot[data-pi="' + pi + '"]');
+  if (!p) return;
+  const pr = p.getBoundingClientRect(), fr = fieldEl.getBoundingClientRect();
+  const el = document.createElement("span");
+  el.className = "emote";
+  el.style.left = pr.left - fr.left + pr.width / 2 - 12 + "px";
+  el.style.top = pr.top - fr.top - 14 + "px";
+  el.innerHTML = spriteSVG(name, 24);
+  fxLayer.appendChild(el);
+  window.setTimeout(() => el.remove(), 1300);
+}
 function initUI() {
   ctx.ui.addEventListener("click", (e) => {
     const pager = $id("pager");
@@ -1854,10 +1779,10 @@ function initUI() {
     }
     ctx.S.page = pg;
     save();
-    mode = null;
+    setMode(null);
     pager.classList.remove("open");
-    applyPageSkin2();
-    renderPager2();
+    applyPageSkin();
+    renderPager();
     renderPlots();
     renderStatus();
     renderToolbar();
@@ -1881,9 +1806,9 @@ function initUI() {
     if (pg < 1 || pg > 3 || pg === ctx.S.page) return;
     ctx.S.page = pg;
     save();
-    mode = null;
-    applyPageSkin2();
-    renderPager2();
+    setMode(null);
+    applyPageSkin();
+    renderPager();
     renderPlots();
     renderStatus();
     renderToolbar();
@@ -1906,349 +1831,934 @@ function initUI() {
   })();
 }
 
-// src/events.js
-var clampN2 = (x, lo, hi, dflt) => {
-  x = Number(x);
-  return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt;
-};
-var SEC_LS_KEY = "star_tavern_farm_sec";
-var SEC2 = { url: "", key: "", model: "", autoReset: true, resetHours: 4, wbLimit: 2e4 };
-try {
-  const raw = window.localStorage.getItem(SEC_LS_KEY);
-  if (raw) {
-    const o = JSON.parse(raw);
-    SEC2 = {
-      url: o.url || "",
-      key: o.key ? atob(o.key) : "",
-      model: o.model || "",
-      autoReset: o.autoReset !== false,
-      resetHours: clampN2(o.resetHours, 1, 24, 4),
-      wbLimit: typeof o.wbLimit === "number" ? o.wbLimit : 2e4
-    };
-  }
-} catch (e) {
+// src/logic.js
+var fmtDur = (m) => m < 60 ? m + " ph\xFAt" : m % 60 === 0 ? m / 60 + " gi\u1EDD" : (m / 60).toFixed(1) + " gi\u1EDD";
+function growMs(cropId) {
+  return TEST_MODE ? GROW : CROPS[cropId].grow * MIN;
 }
-var CS2 = { link: false, story: false, userPrompt: "" };
-function loadCharState() {
-  try {
-    const cn = charName();
-    const key = "cs_" + cn;
-    const o = (ctx.extension_settings[extensionName] || {})[key] || {};
-    CS2 = { link: !!o.link, story: !!o.story, userPrompt: o.userPrompt || "" };
-  } catch (e) {
-    CS2 = { link: false, story: false, userPrompt: "" };
-  }
+function regrowMs(cropId) {
+  const c = CROPS[cropId];
+  return TEST_MODE ? REGROW : (c.regrowM || Math.round(c.grow * 0.6)) * MIN;
 }
-loadCharState();
-function charName() {
-  try {
-    const ctx2 = window.SillyTavern && window.SillyTavern.getContext ? window.SillyTavern.getContext() : {};
-    return ctx2.name2 || String(ctx2.characterId || "");
-  } catch (e) {
-    return "";
+function plant(pi, cropId) {
+  if ((ctx.S.seeds[cropId] || 0) <= 0) return toast("H\u1EBFt h\u1EA1t gi\u1ED1ng n\xE0y r\u1ED3i");
+  let realId = cropId;
+  if (cropId === "mystery") {
+    const fam = ["dream", "key", "fang"][Math.floor(Math.random() * 3)];
+    realId = fam + (ctx.S.page === 2 ? "W" : ctx.S.page === 3 ? "M" : "G");
+  } else {
+    const z = CROPS[cropId].zone || 1;
+    if (z !== ctx.S.page) return toast(CROPS[cropId].name + " ph\u1EA3i tr\u1ED3ng \u1EDF " + ZONE_NAME[z] + " (trang " + z + ")");
   }
+  ctx.S.seeds[cropId]--;
+  const g = growMs(realId);
+  const c = { id: realId, matureAt: now() + g, yieldBonus: 0, wateredUntil: 0, fertUsed: {} };
+  if (CROPS[realId].regrow) c.left = REGROW_MAX;
+  if (isRain()) {
+    c.matureAt = now() + g * 0.9;
+    c.rainDay = gameDay();
+  }
+  const ev = todayEvent();
+  if (ev && ev.time_mult !== 1 && (!ev.favored_crop || CROPS[realId].name === ev.favored_crop)) {
+    c.matureAt = now() + Math.round((c.matureAt - now()) * ev.time_mult);
+    c.evDay = gameDay();
+  }
+  curPlots()[pi].crop = c;
+  save();
+  renderPlots();
+  return true;
 }
-var eventFresh2 = () => ctx.S.dayEvent && ctx.S.dayEvent.who === charName() && (!SEC2.autoReset || now() - (ctx.S.dayEvent.at || 0) < SEC2.resetHours * 60 * 60 * 1e3);
-var todayEvent2 = () => CS2.link && eventFresh2() ? ctx.S.dayEvent.ev : null;
-async function collectWorldbook() {
-  try {
-    let blue = "", green = "";
-    let entries = [];
-    const ctx2 = window.SillyTavern && window.SillyTavern.getContext ? window.SillyTavern.getContext() : {};
-    try {
-      const ST_WorldInfo = await new Function("return import('/scripts/world-info.js')")().catch(() => null);
-      const activeNames = /* @__PURE__ */ new Set();
+function water(pi) {
+  const c = curPlots()[pi].crop;
+  if (!c) return toast("\xD4 n\xE0y ch\u01B0a tr\u1ED3ng g\xEC");
+  if (now() >= c.matureAt) return toast("Ch\xEDn r\u1ED3i, thu nhanh \u0111i!");
+  if (now() < c.wateredUntil) return toast("V\u1EEBa t\u01B0\u1EDBi xong m\xE0");
+  c.matureAt = now() + (c.matureAt - now()) * 0.75;
+  c.wateredUntil = now() + WATER_CD;
+  save();
+  renderPlots();
+  toast("T\u01B0\u1EDBi n\u01B0\u1EDBc xong, c\xE2y m\u1ECDc nhanh h\u01A1n!");
+}
+function fertilize(pi, fid, quiet) {
+  const c = curPlots()[pi].crop;
+  if (!c) return toast("\xD4 n\xE0y ch\u01B0a tr\u1ED3ng g\xEC");
+  if ((ctx.S.ferts[fid] || 0) <= 0) return toast("H\u1EBFt lo\u1EA1i ph\xE2n n\xE0y r\u1ED3i");
+  if (!c.fertUsed) c.fertUsed = {};
+  if (c.fertUsed[fid]) return toast("V\u1EE5 n\xE0y \u0111\xE3 b\xF3n " + FERTS[fid].name + " r\u1ED3i");
+  if (fid === "compost") {
+    if (now() >= c.matureAt) return toast("Ch\xEDn r\u1ED3i, kh\u1ECFi b\xF3n ph\xE2n");
+    c.matureAt = now() + (c.matureAt - now()) * 0.75;
+  } else c.shiny = true;
+  c.fertUsed[fid] = true;
+  ctx.S.ferts[fid]--;
+  save();
+  renderPlots();
+  if (!quiet) plotEmote(pi, fid === "compost" ? Math.random() < 0.5 ? "emLeaf" : "emNote" : Math.random() < 0.5 ? "emHeart" : "emStar");
+  return true;
+}
+function rollMutation(c, pi) {
+  if (c.mutRolled) return;
+  c.mutRolled = true;
+  const ev = todayEvent();
+  if (!ev || !(ev.mutate_on_fert > 0)) return;
+  const fertN = (c.fertUsed && c.fertUsed.compost ? 1 : 0) + (c.fertUsed && c.fertUsed.shiny ? 1 : 0);
+  if (Math.random() < ev.mutate_on_fert * (0.3 + 0.35 * fertN)) {
+    const prefix = (ev.mutate_prefix || "\u0111\u1ED9t bi\u1EBFn").slice(0, 20);
+    let mutCode = prefix;
+    if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
+    const cname = CROPS[c.id].name;
+    const dsc = ev.mutate_desc && (ev.mutate_desc[cname] || ev.mutate_desc["*"]);
+    if (dsc) {
+      let attempt = 1;
+      let descKey = mutCode + "@" + cname;
+      while (ctx.S.mutDesc[descKey] && ctx.S.mutDesc[descKey] !== dsc) {
+        attempt++;
+        mutCode = prefix + "@" + attempt;
+        descKey = mutCode + "@" + cname;
+      }
+      ctx.S.mutDesc[descKey] = dsc;
+    }
+    c.mut = mutCode;
+    if (pi != null) {
       try {
-        const charId = ctx2.characterId !== void 0 ? ctx2.characterId : window.this_character;
-        const charData = ctx2.characters?.[charId]?.data || window.characters?.[charId]?.data;
-        console.log("[FARM DEBUG] Character Data:", charData ? "Found" : "Null", "charId:", charId);
-        if (charData) {
-          if (charData.extensions?.world) activeNames.add(charData.extensions.world);
-          if (charData.world) activeNames.add(charData.world);
-        }
-        const wiKey = ST_WorldInfo?.METADATA_KEY || window.WI_METADATA_KEY || "world_info";
-        const chatWorldName = ctx2.chatMetadata?.[wiKey];
-        console.log("[FARM DEBUG] Chat World Name:", chatWorldName);
-        if (chatWorldName && typeof chatWorldName === "string") activeNames.add(chatWorldName);
+        plotEmote(pi, "emStar");
       } catch (e) {
-        console.log("[FARM DEBUG] Error getting active names:", e);
-      }
-      console.log("[FARM DEBUG] Active Worldbook Names to Fetch:", Array.from(activeNames));
-      for (const name of activeNames) {
-        try {
-          console.log("[FARM DEBUG] Fetching API for:", name);
-          const res = await fetch("/api/worldinfo/get", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...typeof ctx2.getRequestHeaders === "function" ? ctx2.getRequestHeaders() : {}
-            },
-            body: JSON.stringify({ name })
-          });
-          if (res.ok) {
-            const data = await res.json();
-            console.log("[FARM DEBUG] Fetched API data entries length:", Array.isArray(data.entries) ? data.entries.length : "Not Array");
-            if (data && Array.isArray(data.entries)) entries = entries.concat(data.entries);
-          } else {
-            console.log("[FARM DEBUG] API Failed, status:", res.status);
-            const book = ST_WorldInfo?.world_info?.[name];
-            if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-          }
-        } catch (e) {
-          console.log("[FARM DEBUG] Fetch Exception:", e);
-          const book = ST_WorldInfo?.world_info?.[name];
-          if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-        }
-      }
-    } catch (e) {
-      console.log("[FARM DEBUG] Outer Exception:", e);
-    }
-    if (ctx2.worldInfo && Array.isArray(ctx2.worldInfo.entries)) {
-      entries = entries.concat(ctx2.worldInfo.entries);
-    } else if (ctx2.worldInfo && typeof ctx2.worldInfo === "object") {
-      Object.values(ctx2.worldInfo).forEach((book) => {
-        if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-      });
-    }
-    if (window.world_info && typeof window.world_info === "object" && !(window.world_info instanceof HTMLElement)) {
-      Object.values(window.world_info).forEach((book) => {
-        if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-        else if (book && typeof book === "object" && !Array.isArray(book) && !(book instanceof HTMLElement)) {
-          if (book.content || book.text) entries.push(book);
-        }
-      });
-    }
-    if (window.world_info_data && typeof window.world_info_data === "object") {
-      Object.values(window.world_info_data).forEach((book) => {
-        if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-      });
-    }
-    try {
-      const charId = ctx2.characterId !== void 0 ? ctx2.characterId : window.this_character;
-      if (typeof charId !== "undefined") {
-        const charData = ctx2.characters?.[charId]?.data || window.characters?.[charId]?.data;
-        if (charData && charData.character_book && Array.isArray(charData.character_book.entries)) {
-          entries = entries.concat(charData.character_book.entries);
-        }
-      }
-    } catch (e) {
-      console.log("[FARM DEBUG] Embedded Book Exception:", e);
-    }
-    if (!entries || entries.length === 0) return "";
-    const seen = /* @__PURE__ */ new Set();
-    for (const en of entries) {
-      if (en.enabled === false) continue;
-      const content = (en.content || en.text || "").trim();
-      if (!content || seen.has(content)) continue;
-      seen.add(content);
-      const isConstant = en.strategy && en.strategy.type === "constant" || en.constant === true || en.position === "before_char";
-      if (isConstant) blue += content + "\n";
-      else green += content + "\n";
-    }
-    const txt = blue.length >= 400 ? blue : blue + "\n" + green;
-    const limit = SEC2.wbLimit !== void 0 ? SEC2.wbLimit : 2e4;
-    return limit > 0 ? txt.slice(0, limit) : txt;
-  } catch (e) {
-    return "";
-  }
-}
-function buildEventPrompt(worldbook) {
-  let roll = Math.random() * 100;
-  const tendency = roll < 60 ? "t\xEDch c\u1EF1c (h\u01B0\u1EDBng b\u1ED9i thu / t\u0103ng t\u1ED1c / th\u1EDDi ti\u1EBFt \u0111\u1EB9p)" : roll < 90 ? "trung t\xEDnh (k\u1EF3 quan / chuy\u1EC7n l\u1EA1 / chuy\u1EC7n v\u1EB7t kh\xF4ng quan tr\u1ECDng)" : "h\u01A1i ti\xEAu c\u1EF1c (gi\u1EA3m s\u1EA3n l\u01B0\u1EE3ng / ch\u1EADm l\u1EA1i, m\u1EE9c \u0111\u1ED9 ph\u1EA3i nh\u1EB9)";
-  const themes = ["c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi th\u1EDDi ti\u1EBFt", "c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi \u0111\u1EA5t \u0111ai ho\u1EB7c ngu\u1ED3n n\u01B0\u1EDBc", "c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi \u0111\u1ED9ng v\u1EADt nh\u1ECF ho\u1EB7c c\xF4n tr\xF9ng", "c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi y\u1EBFu t\u1ED1 si\xEAu nhi\xEAn c\u1EE7a th\u1EBF gi\u1EDBi n\xE0y", "c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi phong t\u1EE5c \u0111\u1ECBa ph\u01B0\u01A1ng ho\u1EB7c ch\u1EE3 phi\xEAn"];
-  const theme = themes[Math.floor(Math.random() * themes.length)];
-  const cropList = Object.entries(CROPS).filter(([id, c]) => !c.seedOnly).map(([id, c]) => c.name).join(", ");
-  return ('B\u1EA1n l\xE0 "tr\xECnh t\u1EA1o s\u1EF1 ki\u1EC7n th\u1EBF gi\u1EDBi quan" cho m\u1ED9t game n\xF4ng tr\u1EA1i nh\u1ECF. Ng\u01B0\u1EDDi ch\u01A1i \u0111ang tr\u1ED3ng m\u1ED9t m\u1EA3nh v\u01B0\u1EDDn rau nh\u1ECF trong m\u1ED9t th\u1EBF gi\u1EDBi nh\u1EADp vai n\xE0o \u0111\xF3, v\xE0 b\u1EA1n s\u1EBD nh\u1EADn \u0111\u01B0\u1EE3c ph\u1EA7n tr\xEDch world book c\u1EE7a th\u1EBF gi\u1EDBi \u0111\xF3. H\xE3y t\u1EA1o 1 s\u1EF1 ki\u1EC7n nh\u1ECF ng\u1EABu nhi\xEAn x\u1EA3y ra \u1EDF v\u01B0\u1EDDn rau h\xF4m nay.\n\nQuy t\u1EAFc:\n1. ctx.S\u1EF1 ki\u1EC7n b\u1EAFt bu\u1ED9c mang h\u01B0\u01A1ng v\u1ECB c\u1EE7a th\u1EBF gi\u1EDBi n\xE0y \u2014\u2014 c\xE1c danh t\u1EEB v\u1EC1 th\u1EDDi ti\u1EBFt, s\u1EA3n v\u1EADt, y\u1EBFu t\u1ED1 si\xEAu nhi\xEAn\u2026 h\xE3y c\u1ED1 l\u1EA5y ch\u1EA5t li\u1EC7u t\u1EEB world book; nh\u01B0ng s\u1EF1 ki\u1EC7n ch\u1EC9 \u1EA3nh h\u01B0\u1EDFng vi\u1EC7c tr\u1ED3ng tr\u1ECDt, kh\xF4ng \u0111\u1EA9y c\u1ED1t truy\u1EC7n. C\xF3 th\u1EC3 nh\u1EAFc t\xEAn nh\xE2n v\u1EADt trong th\u1EBF gi\u1EDBi \u1EDF ph\u1EA7n flavor cho sinh \u0111\u1ED9ng, nh\u01B0ng tuy\u1EC7t \u0111\u1ED1i kh\xF4ng \u0111\u01B0\u1EE3c \u0111\u1EC3 nh\xE2n v\u1EADt n\xF3i chuy\u1EC7n, h\xE0nh \u0111\u1ED9ng hay x\u1EA3y ra t\xECnh ti\u1EBFt n\xE0o.\n2. Xu h\u01B0\u1EDBng s\u1EF1 ki\u1EC7n h\xF4m nay: ' + tendency + "; ch\u1EE7 \u0111\u1EC1 tham kh\u1EA3o: " + theme + '.\n3. Tr\u01B0\u1EDDng hi\u1EC7u \u1EE9ng ch\u1EC9 \u0111\u01B0\u1EE3c d\xF9ng time_mult (0.7~1.1, h\u1EC7 s\u1ED1 nh\xE2n th\u1EDDi gian sinh tr\u01B0\u1EDFng) / mutate_on_fert (0~0.5), c\xF3 th\u1EC3 ch\u1EC9 d\xF9ng m\u1ED9t ho\u1EB7c b\u1ECF c\u1EA3 hai. **Tuy\u1EC7t \u0111\u1ED1i \u0111\u1EEBng vi\u1EBFt ng\u01B0\u1EE3c ng\u1EEF ngh\u0129a c\u1EE7a time_mult: <1 = m\u1ECDc nhanh h\u01A1n = s\u1EF1 ki\u1EC7n t\xEDch c\u1EF1c; >1 = m\u1ECDc ch\u1EADm h\u01A1n = s\u1EF1 ki\u1EC7n ti\xEAu c\u1EF1c**. Ngo\xE0i ra c\xF3 tr\u01B0\u1EDDng hi\u1EBFm double_yield:true (s\u1ED1 qu\u1EA3 thu ho\u1EA1ch h\xF4m nay \xD72, ph\xFAc l\u1EE3i cho d\xE2n may m\u1EAFn) \u2014\u2014 ch\u1EC9 n\xEAn xu\u1EA5t hi\u1EC7n kho\u1EA3ng 8% s\u1ED1 ng\xE0y, khi xu\u1EA5t hi\u1EC7n th\xEC s\u1EF1 ki\u1EC7n ph\u1EA3i vi\u1EBFt theo ch\u1EE7 \u0111\u1EC1 b\u1ED9i thu l\u1EDBn / k\u1EF3 t\xEDch, type b\u1EAFt bu\u1ED9c l\xE0 buff. C\xF3 th\u1EC3 th\xEAm favored_crop: \u0111i\u1EC1n m\u1ED9t t\xEAn c\xE2y tr\u1ED3ng (b\u1EAFt bu\u1ED9c l\u1EA5y t\u1EEB danh s\xE1ch c\xE2y tr\u1ED3ng), khi \u0111\xF3 hi\u1EC7u \u1EE9ng ch\u1EC9 t\xE1c d\u1EE5ng l\xEAn c\xE2y \u0111\xF3; kh\xF4ng \u0111i\u1EC1n th\xEC c\u1EA3 ru\u1ED9ng \u0111\u1EC1u ch\u1ECBu t\xE1c d\u1EE5ng.\n4. N\u1EBFu s\u1EF1 ki\u1EC7n l\xE0m c\xE2y b\u1ECB \u0111\u1ED9t bi\u1EBFn (mutate_on_fert>0, l\xE0 x\xE1c su\u1EA5t \u0111\u1ED9t bi\u1EBFn c\u01A1 b\u1EA3n c\u1EE7a c\xE2y ch\xEDn h\xF4m nay, b\xF3n ph\xE2n s\u1EBD khu\u1EBFch \u0111\u1EA1i), th\xEC cho th\xEAm: mutate_prefix (ti\u1EC1n t\u1ED1 \u0111\u1ED9t bi\u1EBFn mang h\u01B0\u01A1ng v\u1ECB c\u1EE7a th\u1EBF gi\u1EDBi n\xE0y, trong 5 ch\u1EEF, v\xED d\u1EE5 "linh ho\xE1", "si\xEAu to", "\u0103n th\u1ECBt", "c\u1EE9ng ng\u1EAFc", "ph\xE1t s\xE1ng") v\xE0 mutate_desc (m\u1ED9t \u0111\u1ED1i t\u01B0\u1EE3ng, **vi\u1EBFt ri\xEAng cho t\u1EEBng lo\u1EA1i c\xE2y \u0111\u01B0\u1EE3c li\u1EC7t k\xEA b\xEAn d\u01B0\u1EDBi** v\u1EC1 **hi\u1EC7u \u1EE9ng ho\u1EB7c c\xF4ng d\u1EE5ng** c\u1EE7a th\u1EC3 \u0111\u1ED9t bi\u1EBFn \u0111\xF3 trong th\u1EBF gi\u1EDBi n\xE0y, m\u1ED7i m\u1EE5c trong 20 ch\u1EEF \u2014\u2014 h\xE3y vi\u1EBFt "n\xF3 l\xE0m \u0111\u01B0\u1EE3c g\xEC / s\u1EBD g\xE2y ra chuy\u1EC7n g\xEC", b\u1EAFt bu\u1ED9c l\xE0 hi\u1EC7u \u1EE9ng **khi c\u1EA7m gi\u1EEF, \u0103n ho\u1EB7c s\u1EED d\u1EE5ng** (n\xF3 s\u1EBD \u0111\u01B0\u1EE3c mang kh\u1ECFi v\u01B0\u1EDDn rau \u0111\u1EC3 d\xF9ng trong c\xE2u chuy\u1EC7n, nghi\xEAm c\u1EA5m vi\u1EBFt ki\u1EC3u "khi thu ho\u1EA1ch / khi nh\u1ED5 l\xEAn" v\xEC r\u1EDDi v\u01B0\u1EDDn l\xE0 m\u1EA5t hi\u1EC7u l\u1EF1c), ph\u1EA3i m\u01A1 h\u1ED3 \u0111\u1EC3 ch\u1EEBa ch\u1ED7 t\u01B0\u1EDFng t\u01B0\u1EE3ng, nghi\xEAm c\u1EA5m m\xF4 t\u1EA3 ki\u1EC3u ngo\u1EA1i h\xECnh l\u1EA5p l\xE1nh; hi\u1EC7u \u1EE9ng c\u1EE7a c\xE1c c\xE2y kh\xE1c nhau ph\u1EA3i kh\xE1c nhau). Khi kh\xF4ng \u0111\u1ED9t bi\u1EBFn th\xEC b\u1ECF c\u1EA3 hai tr\u01B0\u1EDDng.\n   C\xE1c lo\u1EA1i c\xE2y hi\u1EC7n c\xF3 trong v\u01B0\u1EDDn n\xE0y (t\u1ED5ng c\u1ED9ng {{CROPCOUNT}} lo\u1EA1i, mutate_desc b\u1EAFt bu\u1ED9c ph\u1EE7 h\u1EBFt t\u1EEBng lo\u1EA1i m\u1ED9t, nghi\xEAm c\u1EA5m b\u1ECF s\xF3t hay ch\u1EC9 vi\u1EBFt v\xE0i lo\u1EA1i): {{CROPLIST}}\n5. flavor l\xE0 m\u1ED9t c\xE2u cho ng\u01B0\u1EDDi ch\u01A1i \u0111\u1ECDc, trong 30 ch\u1EEF, \u01B0u ti\xEAn h\u01B0\u01A1ng v\u1ECB, c\xF3 th\u1EC3 h\xF3m h\u1EC9nh.\n6. Ch\u1EC9 \u0111\u01B0\u1EE3c xu\u1EA5t \u0111\xFAng m\u1ED9t d\xF2ng JSON, c\u1EA5m xu\u1EA5t gi\u1EA3i th\xEDch, ti\u1EC1n t\u1ED1 h\u1EADu t\u1ED1 hay d\u1EA5u kh\u1ED1i code:\n{"name":"t\xEAn s\u1EF1 ki\u1EC7n 2~6 ch\u1EEF","type":"buff|debuff|neutral","time_mult":1,"double_yield":false,"mutate_on_fert":0,"mutate_prefix":"","mutate_desc":{"t\xEAn c\xE2y tr\u1ED3ng":"m\xF4 t\u1EA3 hi\u1EC7u \u1EE9ng"},"favored_crop":"","flavor":"m\u1ED9t c\xE2u"}\n\nV\xED d\u1EE5 \u0111\u1ECBnh d\u1EA1ng (l\u1EA5y t\u1EEB th\u1EBF gi\u1EDBi kh\xE1c, ch\u1EC9 \u0111\u1EC3 tham kh\u1EA3o \u0111\u1ECBnh d\u1EA1ng v\xE0 h\u01B0\u1EDBng h\u01B0\u01A1ng v\u1ECB, c\u1EA5m ch\xE9p nguy\xEAn):\n- {"name":"M\u01B0a linh","type":"buff","time_mult":0.8,"flavor":"Linh kh\xED \u0111\u1ECDng th\xE0nh m\u01B0a, m\u1EA7m rau l\xE9n v\u01B0\u01A1n \u0111\u1ED1t nghe r\xF5 ti\u1EBFng."}\n- {"name":"M\u01B0a axit","type":"debuff","time_mult":1.1,"mutate_on_fert":0.3,"mutate_prefix":"bi\u1EBFn ch\u1EE7ng","flavor":"M\u01B0a axit g\xF5 m\xE1i, rau \u1EC9u x\xECu m\u1ECDc ch\u1EADm, c\xE2y \u0111\xE3 b\xF3n ph\xE2n e l\xE0 m\u1ECDc m\xE9o m\u1EA5t."}\n- {"name":"R\xF2 r\u1EC9 ph\xE2n nano","type":"neutral","mutate_on_fert":0.4,"mutate_prefix":"si\xEAu to","mutate_desc":{"B\xED ng\xF4":"B\u1ED5 ra th\xEC kh\xF4ng gian b\xEAn trong r\u1ED9ng h\u01A1n b\xEAn ngo\xE0i","C\xE0 chua":"Ng\u01B0\u1EDDi \u0103n nh\u1EDB m\u1ECDi th\u1EE9 trong ch\u1ED1c l\xE1t"},"flavor":"C\xE2y b\xF3n ph\xE2n h\xF4m nay c\xF3 th\u1EC3 m\u1ECDc ra h\xECnh th\xF9 kh\xF3 tin."}\n' + (CS2.userPrompt ? "\n[ctx.S\u1EDF th\xEDch tu\u1EF3 ch\u1EC9nh c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i, \u01B0u ti\xEAn \u0111\xE1p \u1EE9ng, nh\u01B0ng kh\xF4ng \u0111\u01B0\u1EE3c v\u01B0\u1EE3t ra ngo\xE0i ph\u1EA1m vi c\xE1c tr\u01B0\u1EDDng]:\n" + CS2.userPrompt + "\n" : "") + "\nTr\xEDch world book:\n" + (worldbook || "(Th\u1EBF gi\u1EDBi n\xE0y t\u1EA1m ch\u01B0a c\xF3 world book, h\xE3y t\u1EA1o m\u1ED9t s\u1EF1 ki\u1EC7n \u0111\u1ED3ng qu\xEA chung chung)")).replace("{{CROPLIST}}", cropList).replace("{{CROPCOUNT}}", String(cropList.split(", ").length));
-}
-function sanitizeEvent(o) {
-  if (!o || typeof o !== "object") return null;
-  const ev = {
-    name: String(o.name || "Chuy\u1EC7n l\u1EA1").slice(0, 40),
-    type: ["buff", "debuff", "neutral"].indexOf(o.type) >= 0 ? o.type : "neutral",
-    time_mult: clampN2(o.time_mult != null ? o.time_mult : o.growth_mult && o.growth_mult !== 1 ? 1 / o.growth_mult : 1, 0.7, 1.1, 1),
-    // growth_mult cũ (tốc độ) tự động quy đổi (yield_mult đã nghỉ hưu, bỏ qua thẳng)
-    double_yield: o.double_yield === true,
-    // v1.1: phúc lợi dân may, số quả ×2 (kiểu boolean, nghiêm cấm số thập phân)
-    mutate_on_fert: clampN2(o.mutate_on_fert, 0, 0.5, 0),
-    mutate_prefix: String(o.mutate_prefix || "\u0111\u1ED9t bi\u1EBFn").slice(0, 20),
-    mutate_desc: o.mutate_desc && typeof o.mutate_desc === "object" ? Object.keys(o.mutate_desc).slice(0, 30).reduce((a, k) => {
-      a[String(k).slice(0, 30)] = String(o.mutate_desc[k]).slice(0, 100);
-      return a;
-    }, {}) : typeof o.mutate_desc === "string" && o.mutate_desc ? { "*": String(o.mutate_desc).slice(0, 100) } : {},
-    favored_crop: (() => {
-      const f = String(o.favored_crop || "");
-      return Object.values(CROPS).some((c) => c.name === f) ? f : "";
-    })(),
-    flavor: String(o.flavor || "")
-  };
-  return ev;
-}
-function extractJson(raw) {
-  const s = raw.indexOf("{");
-  if (s < 0) return null;
-  let depth = 0, inStr = false, escd = false;
-  for (let i = s; i < raw.length; i++) {
-    const ch = raw[i];
-    if (inStr) {
-      if (escd) escd = false;
-      else if (ch === "\\") escd = true;
-      else if (ch === '"') inStr = false;
-    } else {
-      if (ch === '"') inStr = true;
-      else if (ch === "{") depth++;
-      else if (ch === "}") {
-        depth--;
-        if (depth === 0) return raw.slice(s, i + 1);
       }
     }
   }
-  return null;
 }
-function fallbackEvent() {
-  const w = weatherOf(gameDay());
-  return sanitizeEvent(w === "M\u01B0a nh\u1ECF" ? { name: "M\u01B0a nh\u1ECF", type: "buff", time_mult: 0.9, flavor: "M\u01B0a nh\u1ECF r\u1ED3i, m\u1EA5y c\xE2y rau u\u1ED1ng n\u01B0\u1EDBc vui l\u1EAFm." } : w === "Nhi\u1EC1u m\xE2y" ? { name: "Nhi\u1EC1u m\xE2y", type: "neutral", flavor: "M\xE2y che b\u1EDBt n\u1EAFng, rau v\xE0 b\u1EA1n \u0111\u1EC1u thong th\u1EA3." } : { name: "N\u1EAFng", type: "neutral", flavor: "N\u1EAFng \u0111\u1EB9p l\u1EAFm, h\u1EE3p \u0111\u1EC3 tr\u1ED3ng g\xEC \u0111\xF3." });
+function bagName(key) {
+  const parts = key.split("@");
+  return (parts[1] ? parts[1] + "\xB7" : "") + (CROPS[parts[0]] || { name: "?" }).name;
 }
-var eventPending2 = false;
-async function requestDayEvent2(force) {
-  if (eventPending2 || !CS2.link) return;
-  if (!force && todayEvent2()) return;
-  if (!SEC2.url || !SEC2.model) {
-    applyDayEvent(fallbackEvent(), "fallback", 'Ch\u01B0a c\u1EA5u h\xECnh API ph\u1EE5 (\u0111i\u1EC1n xong trong c\xE0i \u0111\u1EB7t th\xEC nh\u1EDB b\u1EA5m "L\u01B0u c\u1EA5u h\xECnh")');
-    return;
-  }
-  eventPending2 = true;
-  renderBanner();
-  try {
-    const wb = await collectWorldbook();
-    console.log("====== [FARM DEBUG] WORLDBOOK EXTRACTED ======");
-    console.log(wb);
-    console.log("================================================");
-    const prompt = buildEventPrompt(wb);
-    const reqBody = {
-      model: SEC2.model,
-      messages: [
-        { role: "system", content: prompt },
-        { role: "user", content: "H\xE3y t\u1EA1o s\u1EF1 ki\u1EC7n v\u01B0\u1EDDn rau cho h\xF4m nay." }
-      ],
-      max_tokens: 2e3 + Object.keys(CROPS).length * 100
-    };
-    const resPromise = fetch(SEC2.url.replace(/\/+$/, "") + "/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...SEC2.key ? { Authorization: "Bearer " + SEC2.key } : {} },
-      body: JSON.stringify(reqBody)
-    }).then((r) => r.json());
-    const data = await Promise.race([
-      resPromise,
-      new Promise((_, rej) => window.setTimeout(() => rej(new Error("timeout")), 9e4))
-      // v0.8: 15 mô tả nên lượng sinh ra lớn, 30s→90s
-    ]);
-    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-    const raw = data.choices && data.choices[0] && data.choices[0].message ? String(data.choices[0].message.content) : "";
-    const jtxt = extractJson(raw);
-    if (!jtxt) throw new Error(raw.trim() ? "Kh\xF4ng c\xF3 JSON, model tr\u1EA3 v\u1EC1: " + raw.trim().slice(0, 40) : "Model tr\u1EA3 v\u1EC1 r\u1ED7ng (c\xF3 th\u1EC3 max_tokens b\u1ECB ph\u1EA7n suy ngh\u0129 \u0103n h\u1EBFt / API kh\xF4ng xu\u1EA5t g\xEC)");
-    const ev = sanitizeEvent(JSON.parse(jtxt));
-    if (!ev) throw new Error("Tr\u01B0\u1EDDng JSON b\u1EA5t th\u01B0\u1EDDng");
-    applyDayEvent(ev, "ai");
-  } catch (e) {
-    applyDayEvent(fallbackEvent(), "fallback", (e && e.message || String(e)).slice(0, 60));
-  } finally {
-    eventPending2 = false;
-    renderBanner();
-  }
+function bagPrice(key) {
+  const parts = key.split("@");
+  return Math.round((CROPS[parts[0]] || { sell: 0 }).sell * (parts[1] ? 1.25 : 1));
 }
-function applyDayEvent(ev, source, reason) {
-  const d = gameDay();
-  ctx.S.dayEvent = { day: d, at: now(), who: charName(), ev, source, reason: reason || "" };
-  if (ev.time_mult !== 1) {
-    eachPage((plots) => plots.forEach((p) => {
-      const c = p.crop;
-      if (!c || now() >= c.matureAt || c.evDay === d) return;
-      if (ev.favored_crop && CROPS[c.id].name !== ev.favored_crop) return;
-      c.matureAt = now() + Math.round((c.matureAt - now()) * ev.time_mult);
-      c.evDay = d;
-    }));
+function mutDescOf(bagKey) {
+  const parts = bagKey.split("@");
+  if (!parts[1] || !ctx.S.mutDesc) return "";
+  const mutCode = parts.slice(1).join("@");
+  return ctx.S.mutDesc[mutCode + "@" + (CROPS[parts[0]] || { name: "" }).name] || ctx.S.mutDesc[parts[1]] || "";
+}
+function harvest(pi, quiet) {
+  const c = curPlots()[pi].crop;
+  if (!c || now() < c.matureAt) return null;
+  rollMutation(c, pi);
+  const def = CROPS[c.id];
+  let n = 1 + (c.yieldBonus || 0);
+  const dev = todayEvent();
+  if (dev && dev.double_yield && (!dev.favored_crop || def.name === dev.favored_crop)) n *= 2;
+  const key = c.mut ? c.id + "@" + c.mut : c.id;
+  const shownName = (c.mut ? c.mut + "\xB7" : "") + def.name;
+  ctx.S.bag[key] = (ctx.S.bag[key] || 0) + n;
+  let shinyGain = 0;
+  if (c.shiny) {
+    shinyGain = Math.ceil(def.sell * 0.25) * n;
+    ctx.S.coins += shinyGain;
+    delete c.shiny;
   }
+  c.yieldBonus = 0;
+  if (c.left == null && def.regrow) c.left = REGROW_MAX;
+  if (def.regrow && c.left - 1 > 0) {
+    c.left--;
+    c.matureAt = now() + regrowMs(c.id);
+    c.fertUsed = {};
+    delete c.rainDay;
+    delete c.mut;
+    delete c.mutRolled;
+    save();
+    renderPlots();
+    if (!quiet) toast("Thu ho\u1EA1ch " + shownName + " \xD7" + n + " (c\xF2n thu \u0111\u01B0\u1EE3c " + c.left + " v\u1EE5 n\u1EEFa)" + (shinyGain ? " \u2728+" + shinyGain + "G" : ""));
+  } else {
+    curPlots()[pi].crop = null;
+    save();
+    renderPlots();
+    if (!quiet) toast("Thu ho\u1EA1ch " + shownName + " \xD7" + n + (def.regrow ? " (c\xE2y n\xE0y c\xF4ng th\xE0nh th\xE2n tho\xE1i r\u1ED3i)" : "") + (shinyGain ? " \u2728+" + shinyGain + "G" : ""));
+  }
+  return { name: shownName, n };
+}
+function shovel(pi) {
+  if (!curPlots()[pi].crop) return;
+  curPlots()[pi].crop = null;
+  save();
+  renderPlots();
+  toast("\u0110\xE3 x\u1EDBi b\u1ECF");
+}
+function buyBlock(bi) {
+  const price = blockPrice(bi);
+  if (ctx.S.coins < price) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng");
+  if (bi !== curBlocks()) return;
+  ctx.S.coins -= price;
+  addBlock();
+  save();
+  renderAll();
+  toast("Khai hoang th\xE0nh c\xF4ng! C\xF3 ru\u1ED9ng m\u1EDBi r\u1ED3i");
+}
+function sell(key, n) {
+  const have = ctx.S.bag[key] || 0;
+  n = Math.min(n, have);
+  if (n <= 0) return;
+  const gain = bagPrice(key) * n;
+  ctx.S.bag[key] = have - n;
+  if (ctx.S.bag[key] === 0) delete ctx.S.bag[key];
+  ctx.S.coins += gain;
+  ctx.S.totalSales += gain;
   save();
   renderStatus();
-  renderPlots();
+  openPanel("bag");
+  toast("B\xE1n \u0111\u01B0\u1EE3c " + gain + " G");
 }
-var INJECT_ID = "star_tavern_farm_summary";
-function setInjection2(text) {
-  try {
-    const ctx2 = window.SillyTavern?.getContext?.() || {};
-    if (ctx2.setExtensionPrompt) ctx2.setExtensionPrompt(INJECT_ID, text || "", 1, 4);
-  } catch (e) {
+
+// src/pets.js
+function petBubble(el, txt) {
+  el.querySelector(".pbubble")?.remove();
+  const b = document.createElement("span");
+  b.className = "pbubble";
+  b.textContent = txt;
+  el.appendChild(b);
+  window.setTimeout(() => b.remove(), 1700);
+}
+var petPos = {};
+var petTgt = {};
+var petHopT = {};
+var WORK_BAND = 74;
+var FLOATY = { cloudMallow: 1, ghostBlob: 1, bunny: 1 };
+var GAITS = {
+  // Dáng đi: len = độ dài một bước nhảy, dur = chu kỳ một cú nhảy (ms), hy = độ cao nhảy
+  octo: { len: 8, dur: 260, hy: -4 },
+  // Bạch tuộc: bước lắt nhắt bò sát đất
+  octoCream: { len: 8, dur: 290, hy: -4 },
+  // Bạch tuộc kem: bò còn chậm rì hơn nữa
+  _: { len: 14, dur: 330, hy: -9 }
+  // Mặc định: kiểu nảy chuẩn của dòng slime
+};
+var gaitOf = (id) => GAITS[id] || GAITS._;
+var stopHop = (id) => {
+  if (petHopT[id]) {
+    window.clearTimeout(petHopT[id]);
+    delete petHopT[id];
   }
+};
+function petSpot(id) {
+  const ov = $id("mascots"), W = ov.clientWidth, H = ov.clientHeight;
+  if (PETS[id] && PETS[id].job) {
+    const workers = ctx.S.petsOut.filter((p) => PETS[p] && PETS[p].job);
+    const anchor = W - 64 - Math.max(0, workers.indexOf(id)) * 62;
+    return { x: Math.max(4, anchor - 10 + Math.random() * 20), y: Math.random() * 4 };
+  }
+  const x = 4 + Math.random() * Math.max(20, W - 64);
+  return { x, y: WORK_BAND + 6 + Math.random() * Math.max(20, H - WORK_BAND - 70) };
 }
-function updateInjection2() {
-  if (!CS2.link || !CS2.story) {
-    setInjection2("");
+function placePet(el, p, instant) {
+  if (instant) el.style.transitionProperty = "transform";
+  else {
+    const old = petPos[el.dataset.pet] || p;
+    const dist = Math.hypot(p.x - old.x, p.y - old.y);
+    const dur = dist < 40 ? 0.5 : Math.min(11, Math.max(3, dist / 18));
+    el.style.transitionProperty = "transform, left, bottom";
+    el.style.transitionDuration = ".12s, " + dur + "s, " + dur + "s";
+    el.style.transitionTimingFunction = "ease, linear, ease";
+    el.classList.toggle("flip", p.x < old.x);
+  }
+  el.style.left = p.x + "px";
+  el.style.bottom = p.y + "px";
+  petPos[el.dataset.pet] = p;
+}
+function hopStep(el) {
+  const id = el.dataset.pet;
+  if (!el.isConnected) {
+    stopHop(id);
     return;
   }
-  const counts = {};
-  let ripe = 0;
-  eachPage((plots) => plots.forEach((p) => {
-    const c = p.crop;
-    if (!c) return;
-    counts[c.id] = (counts[c.id] || 0) + 1;
-    if (now() >= c.matureAt) ripe++;
-  }));
-  const field = Object.keys(counts).map((id) => CROPS[id].name + "\xD7" + counts[id]).join(", ") || "\u0111ang \u0111\u1EC3 tr\u1ED1ng";
-  const bagTxt = Object.keys(ctx.S.bag).map((k) => {
-    const d = mutDescOf(k);
-    return "  + " + bagName(k) + " \xD7" + ctx.S.bag[k] + (d ? " (" + d + ")" : "");
-  }).join("\n");
-  const ev = todayEvent2();
-  const takeoutNoteStr = function() {
-    takeoutNote = (takeoutNote || []).filter((t) => now() < t.until);
-    if (!takeoutNote.length) return "";
-    return `
-
-\u3010QUAN TR\u1ECCNG: H\xC0NH \u0110\u1ED8NG V\u1EEAA X\u1EA2Y RA\u3011
-Ng\u01B0\u1EDDi ch\u01A1i v\u1EEBa l\u1EA5y ${takeoutNote.map((t) => t.txt).join(", ")} ra kh\u1ECFi balo v\u01B0\u1EDDn rau, h\u1EB3n l\xE0 \u0111\u1ECBnh d\xF9ng/t\u1EB7ng trong c\u1ED1t truy\u1EC7n. H\xE3y ti\u1EBFp nh\u1EADn m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn; ph\u1EA7n trong ngo\u1EB7c l\xE0 hi\u1EC7u \u1EE9ng c\u1EE7a v\u1EADt ph\u1EA9m \u0111\xF3, h\xE3y l\u1EA5y \u0111\xF3 l\xE0m chu\u1EA9n v\xE0 c\xF3 th\u1EC3 s\xE1ng t\u1EA1o th\xEAm trong ch\u1EEBng m\u1EF1c.`;
-  }();
-  const promptText = `\u3010V\u01B0\u1EDDn rau nh\u1ECF c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i\u3011
-Ng\u01B0\u1EDDi ch\u01A1i \u0111ang tr\u1ED3ng m\u1ED9t m\u1EA3nh v\u01B0\u1EDDn rau th\u01B0 gi\xE3n tr\xEAn giao di\u1EC7n SillyTavern (l\u1ED1i ch\u01A1i ti\u1EC7n \xEDch, t\u1ED3n t\u1EA1i song song v\u1EDBi c\u1ED1t truy\u1EC7n).
-T\xECnh tr\u1EA1ng hi\u1EC7n t\u1EA1i:
-- \u0110ang tr\u1ED3ng: ${field || "\u0110\u1EA5t tr\u1ED1ng"}${ripe ? ` (c\xF3 ${ripe} c\xE2y \u0111\xE3 ch\xEDn ch\u1EDD thu)` : ""}
-${bagTxt ? "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF:\n" + bagTxt : "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF: Tr\u1ED1ng"}
-${ev && ev.flavor ? `- ctx.S\u1EF1 ki\u1EC7n h\xF4m nay: ${ev.name} \u2014\u2014 ${ev.flavor}` : ""}${takeoutNoteStr}
-
-* H\u01B0\u1EDBng d\u1EABn cho AI: Nh\xE2n v\u1EADt trong c\u1ED1t truy\u1EC7n th\u1EC9nh tho\u1EA3ng c\xF3 th\u1EC3 nh\u1EAFc t\u1EDBi vi\u1EC7c ng\u01B0\u1EDDi ch\u01A1i ch\u0103m v\u01B0\u1EDDn hay thu ho\u1EA1ch th\u1EBF n\xE0o m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn, nh\u01B0ng \u0110\u1EEANG thao t\xE1c v\u01B0\u1EDDn rau thay ng\u01B0\u1EDDi ch\u01A1i, c\u0169ng \u0110\u1EEANG bi\u1EBFn v\u01B0\u1EDDn rau th\xE0nh m\u1EA1ch ch\xEDnh c\u1EE7a c\u1ED1t truy\u1EC7n.`;
-  setInjection2(promptText);
+  const cur = petPos[id], tgt = petTgt[id], g = gaitOf(id);
+  if (!cur || !tgt || Math.hypot(tgt.x - cur.x, tgt.y - cur.y) < 3) {
+    delete petTgt[id];
+    el.classList.remove("walk");
+    stopHop(id);
+    const cb = petArrive[id];
+    delete petArrive[id];
+    if (cb) cb();
+    return;
+  }
+  const dx = tgt.x - cur.x, dy = tgt.y - cur.y, dist = Math.hypot(dx, dy);
+  const len = Math.min(g.len, dist);
+  const p = { x: cur.x + dx / dist * len, y: cur.y + dy / dist * len };
+  el.classList.toggle("flip", dx < 0);
+  el.classList.add("walk");
+  el.style.setProperty("--hopd", g.dur + "ms");
+  el.style.setProperty("--hy", g.hy + "px");
+  el.style.transitionProperty = "transform, left, bottom";
+  el.style.transitionDuration = ".12s, " + g.dur + "ms, " + g.dur + "ms";
+  el.style.transitionTimingFunction = "ease, linear, linear";
+  el.style.left = p.x + "px";
+  el.style.bottom = p.y + "px";
+  petPos[id] = p;
+  petHopT[id] = window.setTimeout(() => hopStep(el), g.dur);
 }
-var heartbeat2 = window.setInterval(() => {
-  try {
-    settle();
-  } catch (e) {
+function moveTo(el, p) {
+  const id = el.dataset.pet;
+  if (FLOATY[id]) return placePet(el, p, false);
+  petTgt[id] = p;
+  if (!petHopT[id]) hopStep(el);
+}
+var petSleepT = {};
+function sleepPet(el) {
+  const id = el.dataset.pet;
+  el.classList.add("sleep");
+  el.insertAdjacentHTML("beforeend", '<span class="zzz">Z</span><span class="zzz z2">z</span>');
+  petSleepT[id] = window.setTimeout(() => wakePet(el, false), 4e4 + Math.random() * 4e4);
+}
+function wakePet(el, startled) {
+  const id = el.dataset.pet;
+  if (petSleepT[id]) {
+    window.clearTimeout(petSleepT[id]);
+    delete petSleepT[id];
   }
-}, 60 * 1e3);
-function initEvents() {
-  loadCharState();
-  try {
-    const chatChangedEvent = ctx.event_types?.CHAT_CHANGED;
-    if (ctx.eventSource?.on && chatChangedEvent) {
-      ctx.eventSource.on(chatChangedEvent, () => {
-        loadCharState();
-        renderChips();
-        renderBanner2();
-        updateInjection2();
-        try {
-          if (ctx.S && CS2.link) requestDayEvent2();
-        } catch (e) {
-          console.warn("[Farm] L\u1ED7i khi \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n CHAT_CHANGED:", e);
-        }
-      });
-    } else {
-      console.warn("[Farm] ctx.eventSource ho\u1EB7c ctx.event_types.CHAT_CHANGED kh\xF4ng kh\u1EA3 d\u1EE5ng, b\u1ECF qua \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n \u0111\u1ED5i th\u1EBB.");
+  el.classList.remove("sleep");
+  el.querySelectorAll(".zzz").forEach((z) => z.remove());
+  const mate = pileWith[id];
+  delete pileWith[id];
+  if (mate) {
+    delete pileWith[mate];
+    const me = petEl(mate);
+    if (startled && me && me.classList.contains("sleep")) window.setTimeout(() => wakePet(me, true), 260);
+  }
+  if (startled) petBubble(el, "?!");
+}
+var petArrive = {};
+var pileWith = {};
+var petTouch = {};
+var touchBase = now();
+var scene = null;
+var lastScene = "";
+var nextSceneAt = now() + (TEST_MODE ? 30 * 1e3 : 45 * MIN);
+var sceneBusy = (id) => !!(scene && scene.ids.indexOf(id) >= 0);
+var sceneTimer = (fn, ms) => {
+  if (scene) scene.timers.push(window.setTimeout(fn, ms));
+};
+function endScene() {
+  if (!scene) return;
+  scene.timers.forEach((t) => window.clearTimeout(t));
+  scene = null;
+}
+function petEl(id) {
+  return sh.querySelector('#mascots .pet[data-pet="' + id + '"]');
+}
+function walkTo(el, p, cb) {
+  const id = el.dataset.pet;
+  if (FLOATY[id]) {
+    const old = petPos[id] || p;
+    const dur = Math.min(11, Math.max(3, Math.hypot(p.x - old.x, p.y - old.y) / 18));
+    placePet(el, p, false);
+    if (cb) sceneTimer(cb, dur * 1e3 + 80);
+    return;
+  }
+  petTgt[id] = p;
+  if (cb) petArrive[id] = cb;
+  if (!petHopT[id]) hopStep(el);
+}
+function tryScene() {
+  const idle = [], asleep = [], workIdle = [];
+  sh.querySelectorAll("#mascots .pet").forEach((el) => {
+    const id = el.dataset.pet;
+    if (petTgt[id]) return;
+    if (PETS[id].job) {
+      if (!el.classList.contains("sleep")) workIdle.push(id);
+      return;
     }
-  } catch (e) {
-    console.warn("[Farm] L\u1ED7i khi \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n CHAT_CHANGED:", e);
+    (el.classList.contains("sleep") ? asleep : idle).push(id);
+  });
+  const pool = [];
+  if (idle.length >= 2) pool.push("bump");
+  if (idle.length + workIdle.length >= 2) pool.push("yawn");
+  if (idle.filter((i) => !FLOATY[i]).length >= 2) pool.push("chase");
+  if (idle.length >= 1 && asleep.length >= 1) pool.push("pile");
+  const picks = pool.filter((a) => a !== lastScene);
+  if (!picks.length) return;
+  const act = picks[Math.floor(Math.random() * picks.length)];
+  lastScene = act;
+  nextSceneAt = now() + (TEST_MODE ? 45 * 1e3 + Math.random() * 90 * 1e3 : 60 * MIN + Math.random() * 120 * MIN);
+  const shuffle = (a) => a.sort(() => Math.random() - 0.5);
+  const ov = $id("mascots"), W = ov.clientWidth, H = ov.clientHeight;
+  const clampX = (x) => Math.max(4, Math.min(W - 60, x));
+  const midY = () => WORK_BAND + 20 + Math.random() * Math.max(20, H - WORK_BAND - 100);
+  if (act === "bump") {
+    const [a, b] = shuffle(idle.slice());
+    const ea = petEl(a), eb = petEl(b);
+    const mx = clampX(60 + Math.random() * Math.max(40, W - 180)), my = midY();
+    scene = { ids: [a, b], timers: [] };
+    let met = 0;
+    const meet = () => {
+      if (++met < 2 || !scene) return;
+      petBubble(ea, PETS[a].cry[0]);
+      petBubble(eb, PETS[b].cry[0]);
+      walkTo(ea, { x: clampX(petPos[a].x - 32), y: petPos[a].y });
+      walkTo(eb, { x: clampX(petPos[b].x + 32), y: petPos[b].y });
+      sceneTimer(endScene, 1600);
+    };
+    walkTo(ea, { x: clampX(mx - 26), y: my }, meet);
+    walkTo(eb, { x: clampX(mx + 26), y: my }, meet);
+    sceneTimer(endScene, 3e4);
+  } else if (act === "yawn") {
+    const [a, b] = shuffle(idle.concat(workIdle));
+    const ea = petEl(a), eb = petEl(b);
+    scene = { ids: [a, b], timers: [] };
+    petBubble(ea, "(ng\xE1p\u2026)");
+    sceneTimer(() => petBubble(eb, "(ng\xE1p theo\u2026)"), 1300);
+    sceneTimer(() => sleepPet(ea), 2500);
+    sceneTimer(() => {
+      sleepPet(eb);
+      pileWith[a] = b;
+      pileWith[b] = a;
+      endScene();
+    }, 3300);
+  } else if (act === "pile") {
+    const b = asleep[Math.floor(Math.random() * asleep.length)];
+    const a = idle[Math.floor(Math.random() * idle.length)];
+    const ea = petEl(a), eb = petEl(b);
+    scene = { ids: [a, b], timers: [] };
+    const side = petPos[b].x > 70 ? -1 : 1;
+    walkTo(ea, { x: clampX(petPos[b].x + side * 34), y: petPos[b].y }, () => {
+      sleepPet(ea);
+      pileWith[a] = b;
+      pileWith[b] = a;
+      endScene();
+    });
+    sceneTimer(endScene, 3e4);
+  } else if (act === "chase") {
+    const hop = shuffle(idle.filter((i) => !FLOATY[i]));
+    const a = hop[0], b = hop[1];
+    const ea = petEl(a), eb = petEl(b);
+    scene = { ids: [a, b], timers: [] };
+    let leg = 0;
+    const run = () => {
+      if (!scene) return;
+      if (++leg > 3) {
+        petBubble(eb, "(ph\xF9\u2026 c\u1EAFt \u0111u\xF4i r\u1ED3i)");
+        return endScene();
+      }
+      const p = { x: clampX(20 + Math.random() * Math.max(40, W - 100)), y: midY() };
+      walkTo(eb, p);
+      sceneTimer(() => walkTo(ea, { x: clampX(p.x - 22), y: p.y }, run), 380);
+    };
+    petBubble(ea, "(th\xECnh th\u1ECBch th\u1ECBch!)");
+    petBubble(eb, "(oaa!)");
+    run();
+    sceneTimer(endScene, 45e3);
   }
+}
+function renderPets() {
+  endScene();
+  Object.keys(petHopT).forEach(stopHop);
+  for (const k in petTgt) delete petTgt[k];
+  for (const k in petArrive) delete petArrive[k];
+  for (const k in pileWith) delete pileWith[k];
+  Object.keys(petSleepT).forEach((k) => {
+    window.clearTimeout(petSleepT[k]);
+    delete petSleepT[k];
+  });
+  $id("mascots").innerHTML = ctx.S.petsOut.map((id) => PETS[id] ? `<span class="pet" data-pet="${id}" title="Ch\u1ECDc ch\u1ECDc ${PETS[id].name}"><span class="pbody" style="animation-delay:-${(Math.random() * 1.8).toFixed(2)}s">${petSVG(id, 48)}</span></span>` : "").join("");
+  sh.querySelectorAll("#mascots .pet").forEach((el) => {
+    const id = el.dataset.pet;
+    placePet(el, petPos[id] || petSpot(id), true);
+  });
+}
+var wander = window.setInterval(() => {
+  if (!ctx.win || !ctx.win.classList.contains("open")) return;
+  if (!scene && now() >= nextSceneAt) tryScene();
+  sh.querySelectorAll("#mascots .pet").forEach((el) => {
+    const id = el.dataset.pet;
+    if (sceneBusy(id) || petTgt[id] || el.classList.contains("sleep")) return;
+    if (!PETS[id].job && Math.random() < 0.08) return sleepPet(el);
+    if (PETS[id].job && now() - (petTouch[id] || touchBase) > 5 * MIN && Math.random() < 0.08) return sleepPet(el);
+    if (Math.random() < 0.35) moveTo(el, petSpot(id));
+  });
+}, 7e3);
+$id("mascots").addEventListener("click", (e) => {
+  const el = e.target.closest(".pet");
+  if (!el) return;
+  const id = el.dataset.pet, def = PETS[id];
+  if (!def) return;
+  petTouch[id] = now();
+  if (el.classList.contains("sleep")) return wakePet(el, true);
+  const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
+  if (def.job === "plant") return petPlant(el, cry);
+  if (def.job === "fert") return petFert(el, cry);
+  if (def.job === "harvest") return petHarvest(el, cry);
+  if (def.job) return petBubble(el, cry);
+  let txt = cry;
+  if (now() - (ctx.S.petPoke[id] || 0) >= POKE_CD) {
+    ctx.S.petPoke[id] = now();
+    const gain = 1 + Math.floor(Math.random() * 5);
+    ctx.S.coins += gain;
+    txt += id === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : id === "starBell" ? " l\u1EAFc ra " + gain + " G b\u1EE5i sao!" : " r\u01A1i ra " + gain + " G!";
+    save();
+    renderStatus();
+  }
+  petBubble(el, txt);
+});
+function petPlant(el, cry) {
+  const empty = [];
+  for (let pi = 0; pi < curBlocks() * 4; pi++) if (!curPlots()[pi].crop) empty.push(pi);
+  if (!empty.length) return petBubble(el, cry + " h\u1EBFt ch\u1ED7 tr\u1ED1ng r\u1ED3i");
+  const usable = {};
+  Object.keys(ctx.S.seeds).forEach((id) => {
+    if (!(ctx.S.seeds[id] > 0) || !CROPS[id]) return;
+    if (id === "mystery" || (CROPS[id].zone || 1) === ctx.S.page) usable[id] = ctx.S.seeds[id];
+  });
+  if (!Object.keys(usable).length) return petBubble(el, cry + " kh\xF4ng c\xF3 h\u1EA1t n\xE0o tr\u1ED3ng \u0111\u01B0\u1EE3c \u1EDF " + ZONE_NAME[ctx.S.page] + "\u2026");
+  pickFrom("B\xE9 m\u1EA7m s\u01B0\u01A1ng: l\u1EA7n n\xE0y tr\u1ED3ng g\xEC \u0111\xE2y?", usable, (x) => CROPS[x].name, (sid) => {
+    let k = 0;
+    for (const pi of empty) {
+      if (!(ctx.S.seeds[sid] > 0)) break;
+      if (plant(pi, sid)) k++;
+    }
+    const pe = sh.querySelector('.pet[data-pet="dewSprout"]') || el;
+    petBubble(pe, cry + " \u0111\xE3 tr\u1ED3ng " + k + " \xF4 " + CROPS[sid].name + (k < empty.length ? " (h\u1EBFt h\u1EA1t gi\u1ED1ng r\u1ED3i)" : "!"));
+  });
+}
+function petHarvest(el, cry) {
+  const got = {};
+  curPlots().forEach((p, pi) => {
+    const c = p.crop;
+    if (!c || now() < c.matureAt) return;
+    const r = harvest(pi, true);
+    if (r) got[r.name] = (got[r.name] || 0) + r.n;
+  });
+  const ks = Object.keys(got);
+  if (!ks.length) return petBubble(el, cry + " ch\u01B0a c\xF3 rau n\xE0o ch\xEDn");
+  petBubble(el, cry + " cu\u1ED9n v\u1EC1 \u0111\u01B0\u1EE3c: " + ks.map((k) => k + "\xD7" + got[k]).join(", "));
+}
+function petFert(el, cry) {
+  pickFrom("B\xE9 b\xED \u1EA9n: d\xF9ng lo\u1EA1i ph\xE2n n\xE0o?", ctx.S.ferts, (x) => FERTS[x].name, (fid) => {
+    let k = 0;
+    for (let pi = 0; pi < curBlocks() * 4 && ctx.S.ferts[fid] > 0; pi++) {
+      const c = curPlots()[pi].crop;
+      if (!c || now() >= c.matureAt || c.fertUsed && c.fertUsed[fid]) continue;
+      if (fertilize(pi, fid, true)) k++;
+    }
+    const pe = sh.querySelector('.pet[data-pet="batBlob"]') || el;
+    petBubble(pe, cry + (k ? " \u0111\xE3 b\xF3n " + k + " \xF4 " + FERTS[fid].name + "!" : " kh\xF4ng c\xF3 \xF4 n\xE0o c\u1EA7n b\xF3n ph\xE2n"));
+  });
+}
+function initPets() {
+  wander = window.setInterval(() => {
+    if (!ctx.win || !ctx.win.classList.contains("open")) return;
+    if (!scene && now() >= nextSceneAt) tryScene();
+    sh.querySelectorAll("#mascots .pet").forEach((el) => {
+      const id = el.dataset.pet;
+      if (sceneBusy(id) || petTgt[id] || el.classList.contains("sleep")) return;
+      if (!PETS[id].job && Math.random() < 0.08) return sleepPet(el);
+      if (PETS[id].job && now() - (petTouch[id] || touchBase) > 5 * MIN && Math.random() < 0.08) return sleepPet(el);
+      if (Math.random() < 0.35) moveTo(el, petSpot(id));
+    });
+  }, 7e3);
+  $id("mascots").addEventListener("click", (e) => {
+    const el = e.target.closest(".pet");
+    if (!el) return;
+    const id = el.dataset.pet, def = PETS[id];
+    if (!def) return;
+    petTouch[id] = now();
+    if (el.classList.contains("sleep")) return wakePet(el, true);
+    const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
+    if (def.job === "plant") return petPlant(el, cry);
+    if (def.job === "fert") return petFert(el, cry);
+    if (def.job === "harvest") return petHarvest(el, cry);
+    if (def.job) return petBubble(el, cry);
+    let txt = cry;
+    if (now() - (ctx.S.petPoke[id] || 0) >= POKE_CD) {
+      ctx.S.petPoke[id] = now();
+      const gain = 1 + Math.floor(Math.random() * 5);
+      ctx.S.coins += gain;
+      txt += id === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : id === "starBlob" ? " r\u01A1i ra " + gain + " G \xE1nh sao!" : " r\u01A1i ra " + gain + " G";
+      save();
+      renderStatus();
+    }
+    petBubble(el, txt);
+    wakePet(el, true);
+  });
+}
+
+// src/shop.js
+function openModal(title, bodyHTML) {
+  $id("mtitle-text").textContent = title;
+  $id("mbody").innerHTML = bodyHTML;
+  $id("modal").classList.add("open");
+}
+function closeModal() {
+  $id("modal").classList.remove("open");
+  $id("mbody").innerHTML = "";
+  setPendingPick(null);
+  bagSellMode = false;
+}
+var shopTab = "seed";
+var bagTab = "crop";
+var bagSellMode = false;
+var bagSel = {};
+function openPanel(kind) {
+  if (kind === "shop") {
+    const tabs = [["seed", "H\u1EA1t gi\u1ED1ng"], ["fert", "Ph\xE2n b\xF3n"], ["pet", "Th\xFA c\u01B0ng"], ["pass", "V\xE9"]];
+    let items = "";
+    if (shopTab === "seed") {
+      items = [1, 2, 3].map((z) => {
+        const list = Object.entries(CROPS).filter(([id, c]) => !c.hidden && (c.zone || 1) === z);
+        if (!list.length) return "";
+        const un = pageUnlocked(z);
+        const head = `<div class="note" style="margin:8px 0 6px">C\xE2y ${ZONE_NAME[z]} (trang ${z})${un ? "" : " \xB7 \u{1F512} c\u1EA7n v\xE9 " + (z === 2 ? "v\xF9ng n\u01B0\u1EDBc" : "khu m\u1ECF")}</div>`;
+        return head + list.map(([id, c]) => `
+        <div class="item${un ? "" : " locked"}"><span class="icon">${spriteSVG(c.sp, 32)}</span>
+          <span class="info"><div class="name">H\u1EA1t ${c.name}${c.regrow ? ' <span style="font-size:10px;color:#6a4a9a">t\xE1i sinh</span>' : ""}</div>
+          <div class="meta">Ch\xEDn sau ${fmtDur(c.grow)}${c.regrow ? " (t\xE1i sinh " + fmtDur(c.regrowM || Math.round(c.grow * 0.6)) + ")" : ""} \xB7 Gi\xE1 b\xE1n ${c.sell} G \xB7 \u0110ang c\xF3 ${ctx.S.seeds[id] || 0}</div></span>
+          ${un ? `<span class="price">${spriteSVG("coin", 16)}${c.seed}</span>
+          <span class="buy${ctx.S.coins < c.seed ? " off" : ""}" data-buyseed="${id}">Mua</span>` : '<span class="buy off">Ch\u01B0a m\u1EDF kho\xE1</span>'}</div>`).join("");
+      }).join("");
+    } else if (shopTab === "fert") {
+      items = Object.entries(FERTS).map(([id, f]) => `
+        <div class="item"><span class="icon">${spriteSVG("toolFert", 32)}</span>
+          <span class="info"><div class="name">${f.name}</div><div class="meta">${f.desc} \xB7 \u0110ang c\xF3 ${ctx.S.ferts[id] || 0}</div></span>
+          <span class="price">${spriteSVG("coin", 16)}${f.price}</span>
+          <span class="buy${ctx.S.coins < f.price ? " off" : ""}" data-buyfert="${id}">Mua</span></div>`).join("");
+    } else if (shopTab === "pet") {
+      items = Object.keys(PETS).map((id) => {
+        const pd = PETS[id];
+        const owned = ctx.S.pets.indexOf(id) >= 0;
+        const unlocked = pageUnlocked(pd.page);
+        const poor = ctx.S.coins < pd.price;
+        const btn = owned ? '<span class="buy off">\u0110\xE3 \u1EDF nh\xE0</span>' : !unlocked ? '<span class="buy off">Ch\u01B0a m\u1EDF kho\xE1</span>' : `<span class="buy${poor ? " off" : ""}" data-buypet="${id}">\u0110\xF3n v\u1EC1 nh\xE0</span>`;
+        const priceHtml = owned || !unlocked ? "" : `<span class="price">${spriteSVG("coin", 16)}${pd.price.toLocaleString()}</span>`;
+        const lockNote = !unlocked ? " \xB7 c\u1EA7n v\xE9 " + (pd.page === 2 ? "v\xF9ng n\u01B0\u1EDBc" : "khu m\u1ECF") : "";
+        return `
+        <div class="item${!unlocked && !owned ? " locked" : ""}"><span class="icon">${petSVG(id, 34)}</span>
+          <span class="info"><div class="name">${pd.name}</div>
+          <div class="meta">${pd.desc}${lockNote}</div></span>
+          ${priceHtml}${btn}</div>`;
+      }).join("");
+    } else {
+      items = Object.keys(PASSES).map((k) => {
+        const ps = PASSES[k];
+        const owned = !!ctx.S.passes[k];
+        return `
+        <div class="item"><span class="icon">${spriteSVG(k === "water" ? "lotus" : "gem", 32)}</span>
+          <span class="info"><div class="name">${ps.name}</div><div class="meta">${ps.desc}</div></span>
+          ${owned ? "" : `<span class="price">${spriteSVG("coin", 16)}${ps.price.toLocaleString()}</span>`}
+          <span class="buy${owned ? " plain" : ""}" data-passdlg="${k}">${owned ? "Xem v\xE9" : "Mua"}</span></div>`;
+      }).join("");
+    }
+    openModal("C\u1EEDa h\xE0ng", `
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:4px;font-size:12px;font-weight:bold;color:#7a5c38;margin-bottom:6px">${spriteSVG("coin", 16)}${ctx.S.coins.toLocaleString()}</div>
+      <div class="tabs">${tabs.map(([k, n]) => `<span class="tab${shopTab === k ? " active" : ""}" data-tab="${k}">${n}</span>`).join("")}</div>
+      <div class="items">${items}</div>`);
+    $id("mbody").querySelectorAll("[data-tab]").forEach((t) => t.addEventListener("click", () => {
+      shopTab = t.dataset.tab;
+      openPanel("shop");
+    }));
+    $id("mbody").querySelectorAll("[data-buyseed]").forEach((b) => b.addEventListener("click", () => openBuyDlg("seed", b.dataset.buyseed)));
+    $id("mbody").querySelectorAll("[data-buyfert]").forEach((b) => b.addEventListener("click", () => openBuyDlg("fert", b.dataset.buyfert)));
+    $id("mbody").querySelectorAll("[data-buypet]").forEach((b) => b.addEventListener("click", () => {
+      const id = b.dataset.buypet, pd = PETS[id];
+      if (ctx.S.pets.indexOf(id) >= 0) return;
+      if (ctx.S.coins < pd.price) return toast("C\xF2n thi\u1EBFu " + (pd.price - ctx.S.coins).toLocaleString() + " G");
+      ctx.S.coins -= pd.price;
+      ctx.S.pets.push(id);
+      if (ctx.S.petsOut.length < PETS_OUT_MAX) {
+        ctx.S.petsOut.push(id);
+        toast(pd.name + " \u0111\xE3 d\u1ECDn ra b\u1EDD ru\u1ED9ng nh\xE0 b\u1EA1n!");
+      } else toast(pd.name + " \u0111\xE3 v\u1EC1 nh\xE0! B\u1EDD ru\u1ED9ng ch\u1EADt r\u1ED3i, b\xE9 \u0111ang ngh\u1EC9 \u1EDF trang Balo \xB7 B\xE9 tr\xF2n");
+      save();
+      renderStatus();
+      renderPets();
+      openPanel("shop");
+    }));
+    $id("mbody").querySelectorAll("[data-passdlg]").forEach((b) => b.addEventListener("click", () => openPassDlg(b.dataset.passdlg)));
+  } else if (kind === "bag") {
+    const btabs = `<div class="tabs"><span class="tab${bagTab === "crop" ? " active" : ""}" data-btab="crop">N\xF4ng s\u1EA3n</span><span class="tab${bagTab === "pet" ? " active" : ""}" data-btab="pet">B\xE9 tr\xF2n</span><span class="tab${bagTab === "relic" ? " active" : ""}" data-btab="relic">Qu\xE0 c\u1EE7a b\xE9 tr\xF2n</span></div>`;
+    if (bagTab === "relic") {
+      const sh2 = ctx.S.shards || { prism: 0, star: 0 };
+      const relicRows = (ctx.S.seeds.mystery > 0 ? `
+      <div class="item"><span class="icon">${spriteSVG("seedLight", 30)}</span>
+        <span class="info"><div class="name">H\u1EA1t gi\u1ED1ng b\xED \u1EA9n \xD7${ctx.S.seeds.mystery}</div><div class="meta">Tr\u1ED3ng xu\u1ED1ng s\u1EBD ra ng\u1EABu nhi\xEAn m\u1ED9t h\u1ECD (ch\u1ECDn khi gieo h\u1EA1t / khi ch\u1ECDc b\xE9 m\u1EA7m s\u01B0\u01A1ng)</div></span></div>` : "") + (sh2.prism > 0 ? `
+      <div class="item"><span class="icon">${spriteSVG("shardPrism", 30)}</span>
+        <span class="info"><div class="name">M\u1EA3nh l\u0103ng quang \xD7${sh2.prism}</div><div class="meta">D\xF9ng \u0111\u1EC3 "\u0111\u1ED5i \u0111\u01A1n kh\xE1c" \u1EDF trang \u0111\u01A1n h\xE0ng c\u1EE7a ph\xF9 thu\u1EF7</div></span></div>` : "") + (sh2.star > 0 ? `
+      <div class="item"><span class="icon">${spriteSVG("shardStar", 30)}</span>
+        <span class="info"><div class="name">M\u1EA3nh ng\xF4i sao \xD7${sh2.star}</div><div class="meta">\u0110\u1EADp v\u1EE1 s\u1EBD tri\u1EC7u h\u1ED3i ph\xF9 thu\u1EF7 tr\xF2n gh\xE9 th\u0103m</div></span>
+        <span class="buy" data-useshard="star">Tri\u1EC7u h\u1ED3i</span></div>` : "");
+      openModal("Balo", btabs + (relicRows || '<div class="note">Ng\u0103n qu\xE0 c\xF2n tr\u1ED1ng~ H\u1EA1t gi\u1ED1ng b\xED \u1EA9n \u0111\u1EBFn t\u1EEB chuy\u1EBFn t\xECm kho b\xE1u c\u1EE7a b\xE9 qu\u1EF7/b\xE9 thi\xEAn th\u1EA7n v\xE0 t\u1EEB \u0111\u01A1n h\xE0ng c\u1EE7a ph\xF9 thu\u1EF7; b\xE9 l\u0103ng quang / b\xE9 chu\xF4ng sao \u0111i t\xECm kho b\xE1u s\u1EBD mang m\u1EA3nh v\u1EE1 v\u1EC1</div>'));
+      $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
+        bagTab = t.dataset.btab;
+        openPanel("bag");
+      }));
+      $id("mbody").querySelectorAll("[data-useshard]").forEach((b) => b.addEventListener("click", useStarShard));
+      return;
+    }
+    if (bagTab === "pet") {
+      const prow = ctx.S.pets.map((id) => {
+        const pd = PETS[id];
+        if (!pd) return "";
+        const out = ctx.S.petsOut.indexOf(id) >= 0;
+        const cfg = "", cfgBtn = "";
+        return `
+        <div class="item"><span class="icon">${petSVG(id, 34)}</span>
+          <span class="info"><div class="name">${pd.name}${out ? ' <span style="font-size:10px;color:#4d7a26">\u0111ang ra s\xE2n</span>' : ""}</div>
+          <div class="meta">${pd.desc}${cfg}</div></span>
+          ${cfgBtn}
+          <span class="buy${out ? " plain" : ""}" data-petout="${id}">${out ? "Thu v\u1EC1" : "Ra s\xE2n"}</span></div>`;
+      }).join("") || '<div class="note">Ch\u01B0a c\xF3 b\xE9 tr\xF2n n\xE0o, ra c\u1EEDa h\xE0ng ng\u1EAFm th\u1EED \u0111i</div>';
+      openModal("Balo", btabs + `<div class="note" style="margin-bottom:8px">B\u1EDD ru\u1ED9ng c\xF9ng l\xFAc \u0111\u1EE9ng \u0111\u01B0\u1EE3c t\u1ED1i \u0111a ${PETS_OUT_MAX} b\xE9; b\xE9 \u0111\u01B0\u1EE3c thu v\u1EC1 s\u1EBD ngh\u1EC9 \u1EDF \u0111\xE2y, kh\xF4ng l\xE0m vi\u1EC7c c\u0169ng kh\xF4ng t\xECm kho b\xE1u</div>` + prow);
+      $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
+        bagTab = t.dataset.btab;
+        openPanel("bag");
+      }));
+      $id("mbody").querySelectorAll("[data-petout]").forEach((b) => b.addEventListener("click", () => {
+        const id = b.dataset.petout;
+        const i = ctx.S.petsOut.indexOf(id);
+        if (i >= 0) ctx.S.petsOut.splice(i, 1);
+        else {
+          if (ctx.S.petsOut.length >= PETS_OUT_MAX) return toast("B\u1EDD ru\u1ED9ng ch\u1EC9 \u0111\u1EE9ng \u0111\u01B0\u1EE3c " + PETS_OUT_MAX + " b\xE9, thu m\u1ED9t b\xE9 v\u1EC1 \u0111\xE3");
+          ctx.S.petsOut.push(id);
+        }
+        save();
+        renderPets();
+        openPanel("bag");
+      }));
+      return;
+    }
+    const rows = Object.entries(ctx.S.bag).map(([key, n]) => {
+      const id = key.split("@")[0], mut = key.indexOf("@") > 0;
+      const d0 = mutDescOf(key);
+      const mdesc = d0 ? " \xB7 " + d0 : "";
+      if (bagSellMode) {
+        const on = !!bagSel[key];
+        return `
+      <div class="item selrow${on ? " selon" : ""}" data-selkey="${key}"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
+        <span class="info"><div class="name">${bagName(key)} \xD7${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">\u2726</span>' : ""}</div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
+        <span class="selmark">${on ? "\u2713" : ""}</span></div>`;
+      }
+      return `
+      <div class="item"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
+        <span class="info"><div class="name">${bagName(key)} \xD7${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">\u2726</span>' : ""}</div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
+        <span class="acts">
+          <span class="ibtn" data-takeout="${key}" title="L\u1EA5y ra (mang v\xE0o c\u1ED1t truy\u1EC7n, kh\xF4ng quy ra ti\u1EC1n)">${spriteSVG("emBang", 16)}</span>
+          <span class="ibtn" data-selldlg="${key}" title="B\xE1n (t\u1EF1 ch\u1ECDn s\u1ED1 l\u01B0\u1EE3ng)">${spriteSVG("coin", 16)}</span>
+        </span></div>`;
+    }).join("");
+    let sellBar = "";
+    if (Object.keys(ctx.S.bag).length) {
+      if (bagSellMode) {
+        const total = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.bag[k]).reduce((s, k) => s + bagPrice(k) * ctx.S.bag[k], 0);
+        sellBar = `<div class="note" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:8px;white-space:nowrap;overflow:hidden">
+          <b style="overflow:hidden;text-overflow:ellipsis">${total > 0 ? "T\u1ED5ng " + total.toLocaleString() + " G" : "B\u1EA5m v\xE0o t\u1EEBng m\u1EE5c \u0111\u1EC3 tick ch\u1ECDn th\u1EE9 mu\u1ED1n b\xE1n"}</b><span style="flex:1"></span>
+          <span class="buy" id="sellSelGo" style="padding:4px 10px;font-size:11px;flex:none">B\xE1n</span>
+          <span class="buy plain" id="sellSelNo" style="padding:4px 10px;font-size:11px;flex:none">Hu\u1EF7</span></div>`;
+      } else {
+        sellBar = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div class="note" style="flex:1">B\u1EA5m \xAB!\xBB \u0111\u1EC3 l\u1EA5y n\xF4ng s\u1EA3n ra mang v\xE0o c\u1ED1t truy\u1EC7n</div>
+          <span class="buy" id="sellModeGo" style="flex:none">B\xE1n m\u1ED9t ch\u1EA1m</span></div>`;
+      }
+    }
+    openModal("Balo", btabs + sellBar + (rows || '<div class="note">Balo tr\u1ED1ng tr\u01A1n, \u0111i thu \xEDt rau \u0111i n\xE0o</div>'));
+    $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
+      bagTab = t.dataset.btab;
+      openPanel("bag");
+    }));
+    $id("mbody").querySelectorAll("[data-selldlg]").forEach((b) => b.addEventListener("click", () => openSellDlg(b.dataset.selldlg)));
+    $id("mbody").querySelectorAll("[data-takeout]").forEach((b) => b.addEventListener("click", () => openTakeout(b.dataset.takeout)));
+    const smGo = $id("sellModeGo");
+    if (smGo) smGo.addEventListener("click", () => {
+      bagSellMode = true;
+      bagSel = {};
+      openPanel("bag");
+    });
+    $id("mbody").querySelectorAll("[data-selkey]").forEach((el) => el.addEventListener("click", () => {
+      bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
+      openPanel("bag");
+    }));
+    const ssNo = $id("sellSelNo");
+    if (ssNo) ssNo.addEventListener("click", () => {
+      bagSellMode = false;
+      openPanel("bag");
+    });
+    const ssGo = $id("sellSelGo");
+    if (ssGo) ssGo.addEventListener("click", () => {
+      const keys = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.bag[k]);
+      if (!keys.length) return toast("Ch\u01B0a tick c\xE1i n\xE0o c\u1EA3");
+      let gain = 0;
+      keys.forEach((k) => {
+        gain += bagPrice(k) * ctx.S.bag[k];
+        delete ctx.S.bag[k];
+      });
+      ctx.S.coins += gain;
+      ctx.S.totalSales += gain;
+      bagSellMode = false;
+      save();
+      renderStatus();
+      toast("B\xE1n m\u1ED9t m\u1EBB n\xF4ng s\u1EA3n: +" + gain.toLocaleString() + " G");
+      openPanel("bag");
+    });
+  } else {
+    openModal("C\xE0i \u0111\u1EB7t", `
+      <div class="shead" style="margin-top:0">Ch\u1EE7 \u0111\u1EC1 giao di\u1EC7n</div>
+      <div class="picker" style="margin-bottom:4px">
+        <span class="pick${ctx.S.theme !== "sky" ? " active" : ""}" data-settheme="sakura">\u{1F338} H\u1ED3ng anh \u0111\xE0o</span>
+        <span class="pick${ctx.S.theme === "sky" ? " active" : ""}" data-settheme="sky">\u2601\uFE0F Tr\u1EDDi quang</span>
+      </div>
+      <div class="shead">API ph\u1EE5 (d\xF9ng cho s\u1EF1 ki\u1EC7n th\u1EBF gi\u1EDBi quan)</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <input class="inp" id="secUrl" placeholder="\u0110\u1ECBa ch\u1EC9 API, v\xED d\u1EE5 https://xx.com/v1" value="${esc(SEC.url)}">
+        <input class="inp" id="secKey" type="password" placeholder="API Key (ch\u1EC9 l\u01B0u trong tr\xECnh duy\u1EC7t m\xE1y n\xE0y, kh\xF4ng v\xE0o save)" value="${esc(SEC.key)}">
+        <input class="inp" id="secModel" placeholder="T\xEAn model, v\xED d\u1EE5 gemini-2.5-flash" value="${esc(SEC.model)}">
+        <div class="mdrop" id="modelDrop" style="display:none"></div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer">
+          <input type="checkbox" id="secAuto" ${SEC.autoReset ? "checked" : ""}> T\u1EF1 \u0111\u1ED9ng \u0111\u1EB7t l\u1EA1i s\u1EF1 ki\u1EC7n, m\u1ED7i
+          <input class="inp" id="secHours" type="number" min="1" max="24" value="${SEC.resetHours}" style="width:60px;padding:3px 6px"> gi\u1EDD m\u1ED9t l\u1EA7n (1~24; t\u1EAFt th\xEC s\u1EF1 ki\u1EC7n gi\u1EEF nguy\xEAn, ch\u1EC9 gieo l\u1EA1i th\u1EE7 c\xF4ng)
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:2px">
+          Gi\u1EDBi h\u1EA1n ch\u1EEF Lorebook g\u1EEDi cho AI:
+          <input class="inp" id="secWbLimit" type="number" min="0" max="1000000" value="${SEC.wbLimit !== void 0 ? SEC.wbLimit : 2e4}" style="width:80px;padding:3px 6px"> (0 = Kh\xF4ng c\u1EAFt, g\u1EEDi to\xE0n b\u1ED9)
+        </label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+          <span class="buy" id="secSave">L\u01B0u c\u1EA5u h\xECnh</span>
+          <span class="buy plain" id="secModels">L\u1EA5y model</span>
+          <span class="buy plain" id="secTest">Ki\u1EC3m tra k\u1EBFt n\u1ED1i</span>
+        </div>
+      </div>
+      <div class="shead">ctx.S\u1EF1 ki\u1EC7n th\u1EBF gi\u1EDBi quan \xB7 prompt tu\u1EF3 ch\u1EC9nh (ch\u1EC9 l\u01B0u \u1EDF th\u1EBB nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i)</div>
+      <textarea class="inp" id="csPrompt" placeholder="V\xED d\u1EE5: th\u1EBF gi\u1EDBi n\xE0y linh kh\xED m\u1ECFng, b\u1EDBt s\u1EF1 ki\u1EC7n t\xEDch c\u1EF1c \u0111i; l\u1EDDi v\u0103n s\u1EF1 ki\u1EC7n vi\u1EBFt theo l\u1ED1i c\u1ED5.">${esc(CS.userPrompt)}</textarea>
+      <div style="display:flex;gap:8px;margin-top:6px"><span class="buy" id="csPromptSave">L\u01B0u (ch\u1EC9 th\u1EBB n\xE0y)</span></div>
+      <div class="shead">C\xF4ng c\u1EE5 d\xE0nh cho Gi\xE1m \u0111\u1ED1c \u0110\u1ED3 ho\u1EA1</div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <span class="buy plain" id="openSandboxBtn">\u{1F3A8} M\u1EDF X\u01B0\u1EDFng Ch\u1EBF T\xE1c AI</span>
+      </div>
+      <div class="note" style="margin:12px 0 8px">
+        <b>H\u01B0\u1EDBng d\u1EABn ch\u01A1i</b><br>\xB7 Li\xEAn k\u1EBFt th\u1EBB nh\xE2n v\u1EADt: b\u1EADt l\xEAn s\u1EBD t\u1EA1o s\u1EF1 ki\u1EC7n d\u1EF1a theo th\u1EBB nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i<br>
+        \xB7 \u1EA2nh h\u01B0\u1EDFng c\u1ED1t truy\u1EC7n: b\u1EADt l\xEAn c\xF3 th\u1EC3 t\xE1c \u0111\u1ED9ng ng\u01B0\u1EE3c v\xE0o c\u1ED1t truy\u1EC7n hi\u1EC7n t\u1EA1i<br>
+        \xB7 Sau khi b\u1EADt li\xEAn k\u1EBFt, c\xE2y tr\u1ED3ng c\xF3 t\u1EC9 l\u1EC7 <b>\u0111\u1ED9t bi\u1EBFn</b> theo th\u1EBF gi\u1EDBi quan (ch\u1EC9 s\u1EF1 ki\u1EC7n c\xF3 n\u1ED9i dung "\u0111\u1ED9t bi\u1EBFn" m\u1EDBi sinh ra c\xE2y \u0111\u1ED9t bi\u1EBFn); c\xE2y \u0111\u1ED9t bi\u1EBFn c\xF3 th\u1EC3 "L\u1EA5y ra" trong balo \u0111\u1EC3 mang v\xE0o c\u1ED1t truy\u1EC7n l\xE0m \u0111\u1EA1o c\u1EE5<br>
+        \xB7 H\u1EA1t gi\u1ED1ng b\xED \u1EA9n: tr\u1ED3ng ra c\xE2y ng\u1EABu nhi\xEAn. Ngu\u1ED3n: \u0111\u01A1n h\xE0ng c\u1EE7a ph\xF9 thu\u1EF7 tr\xF2n (c\u1EA7n v\xE9 v\xF9ng n\u01B0\u1EDBc m\u1EDBi m\u1EDF); b\xE9 qu\u1EF7 nh\u1ECF / b\xE9 thi\xEAn th\u1EA7n \u0111i t\xECm kho b\xE1u<br>
+        \xB7 Save n\u1EB1m trong ch\xEDnh SillyTavern, c\u1EADp nh\u1EADt phi\xEAn b\u1EA3n c\u1EE9 nh\u1EADp script m\u1EDBi, save kh\xF4ng m\u1EA5t; API Key ph\u1EE5 ch\u1EC9 n\u1EB1m trong tr\xECnh duy\u1EC7t m\xE1y n\xE0y<br>
+        \xB7 C\xE1c b\u1EA3n SillyTavern kh\xE1c nhau <b>kh\xF4ng d\xF9ng chung</b> (c\xE0i th\xEAm m\u1ED9t b\u1EA3n tr\xEAn \u0111i\u1EC7n tho\u1EA1i = m\u1ED9t v\u01B0\u1EDDn rau kh\xE1c); tr\u01B0\u1EDBc khi c\xE0i l\u1EA1i SillyTavern nh\u1EDB sao l\u01B0u th\u01B0 m\u1EE5c data</div>
+      <span class="buy" id="resetSave">\u0110\u1EB7t l\u1EA1i save (c\u1EA9n th\u1EADn, b\u1EA5m hai l\u1EA7n)</span>`);
+    $id("secSave").addEventListener("click", () => {
+      Object.assign(SEC, {
+        // @ts-ignore
+        url: $id("secUrl").value.trim(),
+        key: $id("secKey").value.trim(),
+        model: $id("secModel").value.trim(),
+        // @ts-ignore
+        autoReset: $id("secAuto").checked,
+        resetHours: clampN($id("secHours").value, 1, 24, 4),
+        // @ts-ignore
+        wbLimit: parseInt($id("secWbLimit").value, 10) || 0
+      });
+      saveSec();
+      toast("\u0110\xE3 l\u01B0u c\u1EA5u h\xECnh API ph\u1EE5");
+    });
+    $id("secTest").addEventListener("click", () => testSecApi());
+    $id("secModels").addEventListener("click", () => fetchModelList());
+    if ($id("openSandboxBtn")) $id("openSandboxBtn").addEventListener("click", openSandbox);
+    $id("mbody").querySelectorAll("[data-settheme]").forEach((b) => b.addEventListener("click", () => {
+      ctx.S.theme = b.dataset.settheme;
+      save();
+      applyTheme();
+      openPanel("cfg");
+      toast(ctx.S.theme === "sky" ? "\u0110\u1ED5i sang giao di\u1EC7n tr\u1EDDi quang~" : "V\u1EC1 l\u1EA1i giao di\u1EC7n h\u1ED3ng anh \u0111\xE0o~");
+    }));
+    $id("csPromptSave").addEventListener("click", () => {
+      CS.userPrompt = $id("csPrompt").value.slice(0, 3e3);
+      saveCharState();
+      toast("\u0110\xE3 l\u01B0u v\xE0o th\u1EBB nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i");
+    });
+    let armed = false;
+    $id("resetSave").addEventListener("click", () => {
+      if (!armed) {
+        armed = true;
+        $id("resetSave").textContent = "B\u1EA5m l\u1EA7n n\u1EEFa \u0111\u1EC3 x\xE1c nh\u1EADn \u0111\u1EB7t l\u1EA1i!";
+        return;
+      }
+      ctx.S = freshState();
+      save(true);
+      closeModal();
+      renderAll();
+      toast("\u0110\xE3 \u0111\u1EB7t l\u1EA1i");
+    });
+  }
+}
+function initShop() {
+  $id("mclose").addEventListener("click", closeModal);
+  $id("mbody").addEventListener("click", (e) => {
+    const el = e.target.closest("[data-pick]");
+    if (!el || !pendingPick) return;
+    const cb = pendingPick;
+    setPendingPick(null);
+    closeModal();
+    cb(el.dataset.pick);
+  });
+  $id("modal").addEventListener("click", (e) => {
+    if (e.target === $id("modal")) closeModal();
+  });
+  sh.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => openPanel(b.dataset.open)));
+}
+
+// src/windows.js
+var tick = null;
+function placeWin() {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const w = Math.min(760, vw * 0.96);
+  let x = ctx.S.win ? ctx.S.win.fx * vw : (vw - w) / 2;
+  let y = ctx.S.win ? ctx.S.win.fy * vh : vh * 0.04;
+  ctx.win.style.left = Math.min(Math.max(x, 0), Math.max(vw - w, 0)) + "px";
+  ctx.win.style.top = Math.min(Math.max(y, 0), vh - 60) + "px";
+}
+function toggleWin() {
+  if (ctx.win.classList.contains("open")) {
+    closeWin();
+    return;
+  }
+  ctx.win.classList.add("open");
+  layout();
+  placeWin();
+  settle();
+  renderAll();
+  tick = window.setInterval(() => {
+    renderDynamic();
+  }, 1e3);
+}
+function closeWin() {
+  ctx.win.classList.remove("open");
+  if (tick) {
+    window.clearInterval(tick);
+    tick = null;
+  }
+  save(true);
+}
+var wg = null;
+var dragBar = null;
+function initWindows() {
+  $id("close").addEventListener("click", closeWin);
+  dragBar = $id("drag");
+  dragBar.addEventListener("pointerdown", (e) => {
+    if (e.target.id === "close") return;
+    dragBar.setPointerCapture(e.pointerId);
+    wg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: ctx.win.offsetLeft, oy: ctx.win.offsetTop };
+  });
+  dragBar.addEventListener("pointermove", (e) => {
+    if (!wg || e.pointerId !== wg.id) return;
+    ctx.win.style.left = wg.ox + e.clientX - wg.sx + "px";
+    ctx.win.style.top = wg.oy + e.clientY - wg.sy + "px";
+  });
+  dragBar.addEventListener("pointerup", (e) => {
+    if (!wg || e.pointerId !== wg.id) return;
+    try {
+      dragBar.releasePointerCapture(e.pointerId);
+    } catch (er) {
+    }
+    wg = null;
+    ctx.S.win = { fx: ctx.win.offsetLeft / window.innerWidth, fy: ctx.win.offsetTop / window.innerHeight };
+    save();
+  });
 }
 
 // src/orb.js
-var disposers2 = [];
+var disposers = [];
 var gesture = null;
 function placeOrb() {
   const vw = window.innerWidth, vh = window.innerHeight;
@@ -2309,20 +2819,20 @@ var onResize = () => {
   resizeTimer = window.setTimeout(() => {
     placeOrb();
     if (ctx.win.classList.contains("open")) {
-      layout2();
+      layout();
       placeWin();
       renderPlots();
     }
   }, 150);
 };
-var SPRITE_PX2 = 64;
+var SPRITE_PX = 64;
 var DECO_PX = 56;
-function layout2() {
+function layout() {
   const vw = window.innerWidth;
   let plot = 74;
   if (vw <= 640) plot = Math.max(52, Math.min(74, Math.floor((Math.min(vw * 0.96, 760) - 92) / 4)));
   ctx.win.style.setProperty("--plot", plot + "px");
-  SPRITE_PX2 = 48;
+  SPRITE_PX = 48;
   DECO_PX = plot >= 70 ? 56 : 40;
 }
 function initOrb() {
@@ -2333,49 +2843,15 @@ function initOrb() {
   ctx.orb.addEventListener("pointerup", (e) => onOrbUp(e, false));
   ctx.orb.addEventListener("pointercancel", (e) => onOrbUp(e, true));
   window.addEventListener("resize", onResize);
-  disposers2.push(() => window.removeEventListener("resize", onResize));
+  disposers.push(() => window.removeEventListener("resize", onResize));
   placeOrb();
 }
 
-// src/windows.js
-var tick2 = null;
-function closeWin() {
-  ctx.win.classList.remove("open");
-  if (tick2) {
-    window.clearInterval(tick2);
-    tick2 = null;
-  }
-  save(true);
-}
-var wg = null;
-var dragBar = null;
-function initWindows() {
-  $id("close").addEventListener("click", closeWin);
-  dragBar = $id("drag");
-  dragBar.addEventListener("pointerdown", (e) => {
-    if (e.target.id === "close") return;
-    dragBar.setPointerCapture(e.pointerId);
-    wg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: ctx.win.offsetLeft, oy: ctx.win.offsetTop };
-  });
-  dragBar.addEventListener("pointermove", (e) => {
-    if (!wg || e.pointerId !== wg.id) return;
-    ctx.win.style.left = wg.ox + e.clientX - wg.sx + "px";
-    ctx.win.style.top = wg.oy + e.clientY - wg.sy + "px";
-  });
-  dragBar.addEventListener("pointerup", (e) => {
-    if (!wg || e.pointerId !== wg.id) return;
-    try {
-      dragBar.releasePointerCapture(e.pointerId);
-    } catch (er) {
-    }
-    wg = null;
-    ctx.S.win = { fx: ctx.win.offsetLeft / window.innerWidth, fy: ctx.win.offsetTop / window.innerHeight };
-    save2();
-  });
-}
-
 // src/render.js
-var mode2 = null;
+var mode = null;
+function setMode(val) {
+  mode = val;
+}
 var buyConfirm = { b: -1, until: 0 };
 var TOOLS = [
   { key: "seed", sp: "toolSeed", tip: "Gieo h\u1EA1t" },
@@ -2385,39 +2861,42 @@ var TOOLS = [
   { key: "shovel", sp: "toolShovel", tip: "X\u1EDBi b\u1ECF" }
 ];
 var toolbarOpen = false;
-function renderToolbar2() {
+function renderToolbar() {
   const tb = $id("toolbar");
   tb.classList.toggle("open", toolbarOpen);
   if (!toolbarOpen) {
     tb.innerHTML = `<div class="tool" data-tool="expand" title="C\xF4ng c\u1EE5" style="width:34px;height:34px">${spriteSVG("toolSeed", 22)}</div>`;
   } else {
     tb.innerHTML = TOOLS.map(
-      (t) => `<div class="tool${mode2 && mode2.t === t.key ? " selected" : ""}" data-tool="${t.key}" title="${t.tip}">${spriteSVG(t.sp, 30)}</div>`
+      (t) => `<div class="tool${mode && mode.t === t.key ? " selected" : ""}" data-tool="${t.key}" title="${t.tip}">${spriteSVG(t.sp, 30)}</div>`
     ).join("") + `<div class="tool mini" data-tool="collapse">\u2715</div>`;
   }
   const tip = $id("modetip");
-  if (mode2) {
+  if (mode) {
     const names = { seed: "Gieo h\u1EA1t", water: "T\u01B0\u1EDBi n\u01B0\u1EDBc", fert: "B\xF3n ph\xE2n", harvest: "Thu ho\u1EA1ch", shovel: "X\u1EDBi b\u1ECF" };
-    let txt = "Ch\u1EBF \u0111\u1ED9 " + names[mode2.t];
-    if (mode2.t === "seed") txt += " \xB7 " + CROPS[mode2.id].name;
-    if (mode2.t === "fert") txt += " \xB7 " + FERTS[mode2.id].name;
-    if (mode2.t === "shovel") txt += " \xB7 b\u1EA5m hai l\u1EA7n \u0111\u1EC3 x\xE1c nh\u1EADn";
+    let txt = "Ch\u1EBF \u0111\u1ED9 " + names[mode.t];
+    if (mode.t === "seed") txt += " \xB7 " + CROPS[mode.id].name;
+    if (mode.t === "fert") txt += " \xB7 " + FERTS[mode.id].name;
+    if (mode.t === "shovel") txt += " \xB7 b\u1EA5m hai l\u1EA7n \u0111\u1EC3 x\xE1c nh\u1EADn";
     tip.textContent = txt + " \xB7 b\u1EA5m v\xE0o \xF4 ru\u1ED9ng \u0111\u1EC3 th\u1EF1c hi\u1EC7n";
     tip.style.display = "block";
   } else tip.style.display = "none";
 }
-var pendingPick2 = null;
-function pickFrom2(title, obj, nameFn, cb) {
+var pendingPick = null;
+function setPendingPick(val) {
+  pendingPick = val;
+}
+function pickFrom(title, obj, nameFn, cb) {
   const ids = Object.keys(obj).filter((k) => obj[k] > 0);
   if (!ids.length) return toast("Trong balo kh\xF4ng c\xF3, ra c\u1EEDa h\xE0ng mua \u0111\xE3");
   openModal(title, `<div class="picker">${ids.map((id) => `<span class="pick" data-pick="${id}">${nameFn(id)} \xD7${obj[id]}</span>`).join("")}</div>`);
-  pendingPick2 = cb;
+  pendingPick = cb;
 }
 var cacheWicon = "";
 var cacheCoins = -1;
 var cacheDayTxt = "";
 var cacheBlockTxt = "";
-function renderStatus2() {
+function renderStatus() {
   if (ctx.S.coins !== cacheCoins) {
     $id("coins").textContent = ctx.S.coins.toLocaleString();
     cacheCoins = ctx.S.coins;
@@ -2452,7 +2931,7 @@ function plotHTML(pi) {
   const prog = Math.min(0.99, 1 - left / total);
   return spriteSVG("seedling", SPRITE_PX) + `<div class="bar"><i style="width:${prog * 100 | 0}%"></i></div>` + chip + fdot + mut;
 }
-function renderPlots2() {
+function renderPlots() {
   const wrap = $id("blocks");
   const pg = ctx.S.page, plots = curPlots(), nb = curBlocks();
   if (wrap.children.length !== 6 || wrap.dataset.pg !== String(pg)) {
@@ -2557,7 +3036,7 @@ function renderChips() {
   cs2.textContent = "\u1EA2nh h\u01B0\u1EDFng c\u1ED1t truy\u1EC7n: " + (CS.story ? "B\u1EADt" : "T\u1EAFt");
   $id("chipRegen").style.display = CS.link ? "" : "none";
 }
-function renderBanner2() {
+function renderBanner() {
   const b = $id("banner");
   const bmut = $id("bmut");
   const mutPopup = $id("mutPopup");
@@ -2614,6 +3093,27 @@ function renderBanner2() {
     mutPopup.classList.remove("open");
   }
 }
+function renderDynamic() {
+  settle();
+  if (ctx.win.classList.contains("open")) {
+    renderStatus();
+    renderPlots();
+  }
+}
+function renderAll() {
+  applyPageSkin();
+  renderPager();
+  renderStatus();
+  renderPlots();
+  renderToolbar();
+  renderChips();
+  renderBanner();
+  renderPets();
+  try {
+    renderWitch();
+  } catch (e) {
+  }
+}
 function initRender() {
   $id("toolbar").addEventListener("click", (e) => {
     const el = e.target.closest("[data-tool]");
@@ -2621,30 +3121,30 @@ function initRender() {
     const k = el.dataset.tool;
     if (k === "expand") {
       toolbarOpen = true;
-      renderToolbar2();
+      renderToolbar();
       return;
     }
     if (k === "collapse") {
       toolbarOpen = false;
-      mode2 = null;
-      renderToolbar2();
+      mode = null;
+      renderToolbar();
       return;
     }
-    if (mode2 && mode2.t === k) {
-      mode2 = null;
-      renderToolbar2();
+    if (mode && mode.t === k) {
+      mode = null;
+      renderToolbar();
       return;
     }
-    if (k === "seed") return pickFrom2("Ch\u1ECDn h\u1EA1t gi\u1ED1ng \u0111\u1EC3 gieo", ctx.S.seeds, (id) => CROPS[id].name, (id) => {
-      mode2 = { t: "seed", id };
-      renderToolbar2();
+    if (k === "seed") return pickFrom("Ch\u1ECDn h\u1EA1t gi\u1ED1ng \u0111\u1EC3 gieo", ctx.S.seeds, (id) => CROPS[id].name, (id) => {
+      mode = { t: "seed", id };
+      renderToolbar();
     });
-    if (k === "fert") return pickFrom2("Ch\u1ECDn ph\xE2n b\xF3n", ctx.S.ferts, (id) => FERTS[id].name, (id) => {
-      mode2 = { t: "fert", id };
-      renderToolbar2();
+    if (k === "fert") return pickFrom("Ch\u1ECDn ph\xE2n b\xF3n", ctx.S.ferts, (id) => FERTS[id].name, (id) => {
+      mode = { t: "fert", id };
+      renderToolbar();
     });
-    mode2 = { t: k };
-    renderToolbar2();
+    mode = { t: k };
+    renderToolbar();
   });
   $id("chipLink").addEventListener("click", () => {
     CS.link = !CS.link;
@@ -2654,7 +3154,7 @@ function initRender() {
     }
     saveCharState();
     renderChips();
-    renderBanner2();
+    renderBanner();
     updateInjection();
     if (CS.link) {
       requestDayEvent();
@@ -2702,7 +3202,7 @@ function initRender() {
         buyBlock(b);
       } else {
         buyConfirm = { b, until: now() + 4e3 };
-        renderPlots2();
+        renderPlots();
       }
       return;
     }
@@ -2710,717 +3210,57 @@ function initRender() {
     if (!p || p.dataset.deco) return;
     const pi = +p.dataset.pi;
     const c = curPlots()[pi].crop;
-    if (c && now() >= c.matureAt && (!mode2 || mode2.t !== "shovel")) {
+    if (c && now() >= c.matureAt && (!mode || mode.t !== "shovel")) {
       harvest(pi);
       return;
     }
-    if (!mode2) {
+    if (!mode) {
       if (c) toast(CROPS[c.id].name + " \xB7 c\xF2n " + fmtLeft(c.matureAt - now()));
       return;
     }
-    if (mode2.t === "seed") {
+    if (mode.t === "seed") {
       if (c) return toast("\xD4 n\xE0y tr\u1ED3ng r\u1ED3i");
-      plant(pi, mode2.id);
-      if ((ctx.S.seeds[mode2.id] || 0) <= 0) {
-        mode2 = null;
-        renderToolbar2();
+      plant(pi, mode.id);
+      if ((ctx.S.seeds[mode.id] || 0) <= 0) {
+        mode = null;
+        renderToolbar();
       }
       return;
     }
-    if (mode2.t === "water") return water(pi);
-    if (mode2.t === "fert") {
-      fertilize(pi, mode2.id);
-      if ((ctx.S.ferts[mode2.id] || 0) <= 0) {
-        mode2 = null;
-        renderToolbar2();
+    if (mode.t === "water") return water(pi);
+    if (mode.t === "fert") {
+      fertilize(pi, mode.id);
+      if ((ctx.S.ferts[mode.id] || 0) <= 0) {
+        mode = null;
+        renderToolbar();
       }
       return;
     }
-    if (mode2.t === "harvest") return harvest(pi);
-    if (mode2.t === "shovel") {
+    if (mode.t === "harvest") return harvest(pi);
+    if (mode.t === "shovel") {
       if (!c) return;
-      if (mode2.confirmPi === pi) {
+      if (mode.confirmPi === pi) {
         shovel(pi);
-        mode2.confirmPi = null;
+        mode.confirmPi = null;
       } else {
-        mode2.confirmPi = pi;
+        mode.confirmPi = pi;
         toast("B\u1EA5m l\u1EA7n n\u1EEFa \u0111\u1EC3 x\xE1c nh\u1EADn x\u1EDBi b\u1ECF " + CROPS[c.id].name);
       }
     }
   });
 }
 
-// src/shop.js
-function openModal2(title, bodyHTML) {
-  $id("mtitle-text").textContent = title;
-  $id("mbody").innerHTML = bodyHTML;
-  $id("modal").classList.add("open");
-}
-function closeModal2() {
-  $id("modal").classList.remove("open");
-  $id("mbody").innerHTML = "";
-  pendingPick = null;
-  bagSellMode = false;
-}
-var shopTab = "seed";
-var bagTab = "crop";
-var bagSellMode = false;
-var bagSel = {};
-function openPanel2(kind) {
-  if (kind === "shop") {
-    const tabs = [["seed", "H\u1EA1t gi\u1ED1ng"], ["fert", "Ph\xE2n b\xF3n"], ["pet", "Th\xFA c\u01B0ng"], ["pass", "V\xE9"]];
-    let items = "";
-    if (shopTab === "seed") {
-      items = [1, 2, 3].map((z) => {
-        const list = Object.entries(CROPS).filter(([id, c]) => !c.hidden && (c.zone || 1) === z);
-        if (!list.length) return "";
-        const un = pageUnlocked(z);
-        const head = `<div class="note" style="margin:8px 0 6px">C\xE2y ${ZONE_NAME[z]} (trang ${z})${un ? "" : " \xB7 \u{1F512} c\u1EA7n v\xE9 " + (z === 2 ? "v\xF9ng n\u01B0\u1EDBc" : "khu m\u1ECF")}</div>`;
-        return head + list.map(([id, c]) => `
-        <div class="item${un ? "" : " locked"}"><span class="icon">${spriteSVG(c.sp, 32)}</span>
-          <span class="info"><div class="name">H\u1EA1t ${c.name}${c.regrow ? ' <span style="font-size:10px;color:#6a4a9a">t\xE1i sinh</span>' : ""}</div>
-          <div class="meta">Ch\xEDn sau ${fmtDur(c.grow)}${c.regrow ? " (t\xE1i sinh " + fmtDur(c.regrowM || Math.round(c.grow * 0.6)) + ")" : ""} \xB7 Gi\xE1 b\xE1n ${c.sell} G \xB7 \u0110ang c\xF3 ${ctx.S.seeds[id] || 0}</div></span>
-          ${un ? `<span class="price">${spriteSVG("coin", 16)}${c.seed}</span>
-          <span class="buy${ctx.S.coins < c.seed ? " off" : ""}" data-buyseed="${id}">Mua</span>` : '<span class="buy off">Ch\u01B0a m\u1EDF kho\xE1</span>'}</div>`).join("");
-      }).join("");
-    } else if (shopTab === "fert") {
-      items = Object.entries(FERTS).map(([id, f]) => `
-        <div class="item"><span class="icon">${spriteSVG("toolFert", 32)}</span>
-          <span class="info"><div class="name">${f.name}</div><div class="meta">${f.desc} \xB7 \u0110ang c\xF3 ${ctx.S.ferts[id] || 0}</div></span>
-          <span class="price">${spriteSVG("coin", 16)}${f.price}</span>
-          <span class="buy${ctx.S.coins < f.price ? " off" : ""}" data-buyfert="${id}">Mua</span></div>`).join("");
-    } else if (shopTab === "pet") {
-      items = Object.keys(PETS).map((id) => {
-        const pd = PETS[id];
-        const owned = ctx.S.pets.indexOf(id) >= 0;
-        const unlocked = pageUnlocked(pd.page);
-        const poor = ctx.S.coins < pd.price;
-        const btn = owned ? '<span class="buy off">\u0110\xE3 \u1EDF nh\xE0</span>' : !unlocked ? '<span class="buy off">Ch\u01B0a m\u1EDF kho\xE1</span>' : `<span class="buy${poor ? " off" : ""}" data-buypet="${id}">\u0110\xF3n v\u1EC1 nh\xE0</span>`;
-        const priceHtml = owned || !unlocked ? "" : `<span class="price">${spriteSVG("coin", 16)}${pd.price.toLocaleString()}</span>`;
-        const lockNote = !unlocked ? " \xB7 c\u1EA7n v\xE9 " + (pd.page === 2 ? "v\xF9ng n\u01B0\u1EDBc" : "khu m\u1ECF") : "";
-        return `
-        <div class="item${!unlocked && !owned ? " locked" : ""}"><span class="icon">${petSVG(id, 34)}</span>
-          <span class="info"><div class="name">${pd.name}</div>
-          <div class="meta">${pd.desc}${lockNote}</div></span>
-          ${priceHtml}${btn}</div>`;
-      }).join("");
-    } else {
-      items = Object.keys(PASSES).map((k) => {
-        const ps = PASSES[k];
-        const owned = !!ctx.S.passes[k];
-        return `
-        <div class="item"><span class="icon">${spriteSVG(k === "water" ? "lotus" : "gem", 32)}</span>
-          <span class="info"><div class="name">${ps.name}</div><div class="meta">${ps.desc}</div></span>
-          ${owned ? "" : `<span class="price">${spriteSVG("coin", 16)}${ps.price.toLocaleString()}</span>`}
-          <span class="buy${owned ? " plain" : ""}" data-passdlg="${k}">${owned ? "Xem v\xE9" : "Mua"}</span></div>`;
-      }).join("");
-    }
-    openModal2("C\u1EEDa h\xE0ng", `
-      <div style="display:flex;justify-content:flex-end;align-items:center;gap:4px;font-size:12px;font-weight:bold;color:#7a5c38;margin-bottom:6px">${spriteSVG("coin", 16)}${ctx.S.coins.toLocaleString()}</div>
-      <div class="tabs">${tabs.map(([k, n]) => `<span class="tab${shopTab === k ? " active" : ""}" data-tab="${k}">${n}</span>`).join("")}</div>
-      <div class="items">${items}</div>`);
-    $id("mbody").querySelectorAll("[data-tab]").forEach((t) => t.addEventListener("click", () => {
-      shopTab = t.dataset.tab;
-      openPanel2("shop");
-    }));
-    $id("mbody").querySelectorAll("[data-buyseed]").forEach((b) => b.addEventListener("click", () => openBuyDlg("seed", b.dataset.buyseed)));
-    $id("mbody").querySelectorAll("[data-buyfert]").forEach((b) => b.addEventListener("click", () => openBuyDlg("fert", b.dataset.buyfert)));
-    $id("mbody").querySelectorAll("[data-buypet]").forEach((b) => b.addEventListener("click", () => {
-      const id = b.dataset.buypet, pd = PETS[id];
-      if (ctx.S.pets.indexOf(id) >= 0) return;
-      if (ctx.S.coins < pd.price) return toast("C\xF2n thi\u1EBFu " + (pd.price - ctx.S.coins).toLocaleString() + " G");
-      ctx.S.coins -= pd.price;
-      ctx.S.pets.push(id);
-      if (ctx.S.petsOut.length < PETS_OUT_MAX) {
-        ctx.S.petsOut.push(id);
-        toast(pd.name + " \u0111\xE3 d\u1ECDn ra b\u1EDD ru\u1ED9ng nh\xE0 b\u1EA1n!");
-      } else toast(pd.name + " \u0111\xE3 v\u1EC1 nh\xE0! B\u1EDD ru\u1ED9ng ch\u1EADt r\u1ED3i, b\xE9 \u0111ang ngh\u1EC9 \u1EDF trang Balo \xB7 B\xE9 tr\xF2n");
-      save();
-      renderStatus();
-      renderPets();
-      openPanel2("shop");
-    }));
-    $id("mbody").querySelectorAll("[data-passdlg]").forEach((b) => b.addEventListener("click", () => openPassDlg(b.dataset.passdlg)));
-  } else if (kind === "bag") {
-    const btabs = `<div class="tabs"><span class="tab${bagTab === "crop" ? " active" : ""}" data-btab="crop">N\xF4ng s\u1EA3n</span><span class="tab${bagTab === "pet" ? " active" : ""}" data-btab="pet">B\xE9 tr\xF2n</span><span class="tab${bagTab === "relic" ? " active" : ""}" data-btab="relic">Qu\xE0 c\u1EE7a b\xE9 tr\xF2n</span></div>`;
-    if (bagTab === "relic") {
-      const sh22 = ctx.S.shards || { prism: 0, star: 0 };
-      const relicRows = (ctx.S.seeds.mystery > 0 ? `
-      <div class="item"><span class="icon">${spriteSVG("seedLight", 30)}</span>
-        <span class="info"><div class="name">H\u1EA1t gi\u1ED1ng b\xED \u1EA9n \xD7${ctx.S.seeds.mystery}</div><div class="meta">Tr\u1ED3ng xu\u1ED1ng s\u1EBD ra ng\u1EABu nhi\xEAn m\u1ED9t h\u1ECD (ch\u1ECDn khi gieo h\u1EA1t / khi ch\u1ECDc b\xE9 m\u1EA7m s\u01B0\u01A1ng)</div></span></div>` : "") + (sh22.prism > 0 ? `
-      <div class="item"><span class="icon">${spriteSVG("shardPrism", 30)}</span>
-        <span class="info"><div class="name">M\u1EA3nh l\u0103ng quang \xD7${sh22.prism}</div><div class="meta">D\xF9ng \u0111\u1EC3 "\u0111\u1ED5i \u0111\u01A1n kh\xE1c" \u1EDF trang \u0111\u01A1n h\xE0ng c\u1EE7a ph\xF9 thu\u1EF7</div></span></div>` : "") + (sh22.star > 0 ? `
-      <div class="item"><span class="icon">${spriteSVG("shardStar", 30)}</span>
-        <span class="info"><div class="name">M\u1EA3nh ng\xF4i sao \xD7${sh22.star}</div><div class="meta">\u0110\u1EADp v\u1EE1 s\u1EBD tri\u1EC7u h\u1ED3i ph\xF9 thu\u1EF7 tr\xF2n gh\xE9 th\u0103m</div></span>
-        <span class="buy" data-useshard="star">Tri\u1EC7u h\u1ED3i</span></div>` : "");
-      openModal2("Balo", btabs + (relicRows || '<div class="note">Ng\u0103n qu\xE0 c\xF2n tr\u1ED1ng~ H\u1EA1t gi\u1ED1ng b\xED \u1EA9n \u0111\u1EBFn t\u1EEB chuy\u1EBFn t\xECm kho b\xE1u c\u1EE7a b\xE9 qu\u1EF7/b\xE9 thi\xEAn th\u1EA7n v\xE0 t\u1EEB \u0111\u01A1n h\xE0ng c\u1EE7a ph\xF9 thu\u1EF7; b\xE9 l\u0103ng quang / b\xE9 chu\xF4ng sao \u0111i t\xECm kho b\xE1u s\u1EBD mang m\u1EA3nh v\u1EE1 v\u1EC1</div>'));
-      $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
-        bagTab = t.dataset.btab;
-        openPanel2("bag");
-      }));
-      $id("mbody").querySelectorAll("[data-useshard]").forEach((b) => b.addEventListener("click", useStarShard));
-      return;
-    }
-    if (bagTab === "pet") {
-      const prow = ctx.S.pets.map((id) => {
-        const pd = PETS[id];
-        if (!pd) return "";
-        const out = ctx.S.petsOut.indexOf(id) >= 0;
-        const cfg = "", cfgBtn = "";
-        return `
-        <div class="item"><span class="icon">${petSVG(id, 34)}</span>
-          <span class="info"><div class="name">${pd.name}${out ? ' <span style="font-size:10px;color:#4d7a26">\u0111ang ra s\xE2n</span>' : ""}</div>
-          <div class="meta">${pd.desc}${cfg}</div></span>
-          ${cfgBtn}
-          <span class="buy${out ? " plain" : ""}" data-petout="${id}">${out ? "Thu v\u1EC1" : "Ra s\xE2n"}</span></div>`;
-      }).join("") || '<div class="note">Ch\u01B0a c\xF3 b\xE9 tr\xF2n n\xE0o, ra c\u1EEDa h\xE0ng ng\u1EAFm th\u1EED \u0111i</div>';
-      openModal2("Balo", btabs + `<div class="note" style="margin-bottom:8px">B\u1EDD ru\u1ED9ng c\xF9ng l\xFAc \u0111\u1EE9ng \u0111\u01B0\u1EE3c t\u1ED1i \u0111a ${PETS_OUT_MAX} b\xE9; b\xE9 \u0111\u01B0\u1EE3c thu v\u1EC1 s\u1EBD ngh\u1EC9 \u1EDF \u0111\xE2y, kh\xF4ng l\xE0m vi\u1EC7c c\u0169ng kh\xF4ng t\xECm kho b\xE1u</div>` + prow);
-      $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
-        bagTab = t.dataset.btab;
-        openPanel2("bag");
-      }));
-      $id("mbody").querySelectorAll("[data-petout]").forEach((b) => b.addEventListener("click", () => {
-        const id = b.dataset.petout;
-        const i = ctx.S.petsOut.indexOf(id);
-        if (i >= 0) ctx.S.petsOut.splice(i, 1);
-        else {
-          if (ctx.S.petsOut.length >= PETS_OUT_MAX) return toast("B\u1EDD ru\u1ED9ng ch\u1EC9 \u0111\u1EE9ng \u0111\u01B0\u1EE3c " + PETS_OUT_MAX + " b\xE9, thu m\u1ED9t b\xE9 v\u1EC1 \u0111\xE3");
-          ctx.S.petsOut.push(id);
-        }
-        save();
-        renderPets();
-        openPanel2("bag");
-      }));
-      return;
-    }
-    const rows = Object.entries(ctx.S.bag).map(([key, n]) => {
-      const id = key.split("@")[0], mut = key.indexOf("@") > 0;
-      const d0 = mutDescOf(key);
-      const mdesc = d0 ? " \xB7 " + d0 : "";
-      if (bagSellMode) {
-        const on = !!bagSel[key];
-        return `
-      <div class="item selrow${on ? " selon" : ""}" data-selkey="${key}"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
-        <span class="info"><div class="name">${bagName(key)} \xD7${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">\u2726</span>' : ""}</div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
-        <span class="selmark">${on ? "\u2713" : ""}</span></div>`;
-      }
-      return `
-      <div class="item"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
-        <span class="info"><div class="name">${bagName(key)} \xD7${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">\u2726</span>' : ""}</div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
-        <span class="acts">
-          <span class="ibtn" data-takeout="${key}" title="L\u1EA5y ra (mang v\xE0o c\u1ED1t truy\u1EC7n, kh\xF4ng quy ra ti\u1EC1n)">${spriteSVG("emBang", 16)}</span>
-          <span class="ibtn" data-selldlg="${key}" title="B\xE1n (t\u1EF1 ch\u1ECDn s\u1ED1 l\u01B0\u1EE3ng)">${spriteSVG("coin", 16)}</span>
-        </span></div>`;
-    }).join("");
-    let sellBar = "";
-    if (Object.keys(ctx.S.bag).length) {
-      if (bagSellMode) {
-        const total = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.bag[k]).reduce((s, k) => s + bagPrice(k) * ctx.S.bag[k], 0);
-        sellBar = `<div class="note" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:8px;white-space:nowrap;overflow:hidden">
-          <b style="overflow:hidden;text-overflow:ellipsis">${total > 0 ? "T\u1ED5ng " + total.toLocaleString() + " G" : "B\u1EA5m v\xE0o t\u1EEBng m\u1EE5c \u0111\u1EC3 tick ch\u1ECDn th\u1EE9 mu\u1ED1n b\xE1n"}</b><span style="flex:1"></span>
-          <span class="buy" id="sellSelGo" style="padding:4px 10px;font-size:11px;flex:none">B\xE1n</span>
-          <span class="buy plain" id="sellSelNo" style="padding:4px 10px;font-size:11px;flex:none">Hu\u1EF7</span></div>`;
-      } else {
-        sellBar = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <div class="note" style="flex:1">B\u1EA5m \xAB!\xBB \u0111\u1EC3 l\u1EA5y n\xF4ng s\u1EA3n ra mang v\xE0o c\u1ED1t truy\u1EC7n</div>
-          <span class="buy" id="sellModeGo" style="flex:none">B\xE1n m\u1ED9t ch\u1EA1m</span></div>`;
-      }
-    }
-    openModal2("Balo", btabs + sellBar + (rows || '<div class="note">Balo tr\u1ED1ng tr\u01A1n, \u0111i thu \xEDt rau \u0111i n\xE0o</div>'));
-    $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
-      bagTab = t.dataset.btab;
-      openPanel2("bag");
-    }));
-    $id("mbody").querySelectorAll("[data-selldlg]").forEach((b) => b.addEventListener("click", () => openSellDlg(b.dataset.selldlg)));
-    $id("mbody").querySelectorAll("[data-takeout]").forEach((b) => b.addEventListener("click", () => openTakeout(b.dataset.takeout)));
-    const smGo = $id("sellModeGo");
-    if (smGo) smGo.addEventListener("click", () => {
-      bagSellMode = true;
-      bagSel = {};
-      openPanel2("bag");
-    });
-    $id("mbody").querySelectorAll("[data-selkey]").forEach((el) => el.addEventListener("click", () => {
-      bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
-      openPanel2("bag");
-    }));
-    const ssNo = $id("sellSelNo");
-    if (ssNo) ssNo.addEventListener("click", () => {
-      bagSellMode = false;
-      openPanel2("bag");
-    });
-    const ssGo = $id("sellSelGo");
-    if (ssGo) ssGo.addEventListener("click", () => {
-      const keys = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.bag[k]);
-      if (!keys.length) return toast("Ch\u01B0a tick c\xE1i n\xE0o c\u1EA3");
-      let gain = 0;
-      keys.forEach((k) => {
-        gain += bagPrice(k) * ctx.S.bag[k];
-        delete ctx.S.bag[k];
-      });
-      ctx.S.coins += gain;
-      ctx.S.totalSales += gain;
-      bagSellMode = false;
-      save();
-      renderStatus();
-      toast("B\xE1n m\u1ED9t m\u1EBB n\xF4ng s\u1EA3n: +" + gain.toLocaleString() + " G");
-      openPanel2("bag");
-    });
-  } else {
-    openModal2("C\xE0i \u0111\u1EB7t", `
-      <div class="shead" style="margin-top:0">Ch\u1EE7 \u0111\u1EC1 giao di\u1EC7n</div>
-      <div class="picker" style="margin-bottom:4px">
-        <span class="pick${ctx.S.theme !== "sky" ? " active" : ""}" data-settheme="sakura">\u{1F338} H\u1ED3ng anh \u0111\xE0o</span>
-        <span class="pick${ctx.S.theme === "sky" ? " active" : ""}" data-settheme="sky">\u2601\uFE0F Tr\u1EDDi quang</span>
-      </div>
-      <div class="shead">API ph\u1EE5 (d\xF9ng cho s\u1EF1 ki\u1EC7n th\u1EBF gi\u1EDBi quan)</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <input class="inp" id="secUrl" placeholder="\u0110\u1ECBa ch\u1EC9 API, v\xED d\u1EE5 https://xx.com/v1" value="${esc(SEC.url)}">
-        <input class="inp" id="secKey" type="password" placeholder="API Key (ch\u1EC9 l\u01B0u trong tr\xECnh duy\u1EC7t m\xE1y n\xE0y, kh\xF4ng v\xE0o save)" value="${esc(SEC.key)}">
-        <input class="inp" id="secModel" placeholder="T\xEAn model, v\xED d\u1EE5 gemini-2.5-flash" value="${esc(SEC.model)}">
-        <div class="mdrop" id="modelDrop" style="display:none"></div>
-        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer">
-          <input type="checkbox" id="secAuto" ${SEC.autoReset ? "checked" : ""}> T\u1EF1 \u0111\u1ED9ng \u0111\u1EB7t l\u1EA1i s\u1EF1 ki\u1EC7n, m\u1ED7i
-          <input class="inp" id="secHours" type="number" min="1" max="24" value="${SEC.resetHours}" style="width:60px;padding:3px 6px"> gi\u1EDD m\u1ED9t l\u1EA7n (1~24; t\u1EAFt th\xEC s\u1EF1 ki\u1EC7n gi\u1EEF nguy\xEAn, ch\u1EC9 gieo l\u1EA1i th\u1EE7 c\xF4ng)
-        </label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:2px">
-          Gi\u1EDBi h\u1EA1n ch\u1EEF Lorebook g\u1EEDi cho AI:
-          <input class="inp" id="secWbLimit" type="number" min="0" max="1000000" value="${SEC.wbLimit !== void 0 ? SEC.wbLimit : 2e4}" style="width:80px;padding:3px 6px"> (0 = Kh\xF4ng c\u1EAFt, g\u1EEDi to\xE0n b\u1ED9)
-        </label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-          <span class="buy" id="secSave">L\u01B0u c\u1EA5u h\xECnh</span>
-          <span class="buy plain" id="secModels">L\u1EA5y model</span>
-          <span class="buy plain" id="secTest">Ki\u1EC3m tra k\u1EBFt n\u1ED1i</span>
-        </div>
-      </div>
-      <div class="shead">ctx.S\u1EF1 ki\u1EC7n th\u1EBF gi\u1EDBi quan \xB7 prompt tu\u1EF3 ch\u1EC9nh (ch\u1EC9 l\u01B0u \u1EDF th\u1EBB nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i)</div>
-      <textarea class="inp" id="csPrompt" placeholder="V\xED d\u1EE5: th\u1EBF gi\u1EDBi n\xE0y linh kh\xED m\u1ECFng, b\u1EDBt s\u1EF1 ki\u1EC7n t\xEDch c\u1EF1c \u0111i; l\u1EDDi v\u0103n s\u1EF1 ki\u1EC7n vi\u1EBFt theo l\u1ED1i c\u1ED5.">${esc(CS.userPrompt)}</textarea>
-      <div style="display:flex;gap:8px;margin-top:6px"><span class="buy" id="csPromptSave">L\u01B0u (ch\u1EC9 th\u1EBB n\xE0y)</span></div>
-      <div class="shead">C\xF4ng c\u1EE5 d\xE0nh cho Gi\xE1m \u0111\u1ED1c \u0110\u1ED3 ho\u1EA1</div>
-      <div style="display:flex;gap:8px;margin-top:6px">
-        <span class="buy plain" id="openSandboxBtn">\u{1F3A8} M\u1EDF X\u01B0\u1EDFng Ch\u1EBF T\xE1c AI</span>
-      </div>
-      <div class="note" style="margin:12px 0 8px">
-        <b>H\u01B0\u1EDBng d\u1EABn ch\u01A1i</b><br>\xB7 Li\xEAn k\u1EBFt th\u1EBB nh\xE2n v\u1EADt: b\u1EADt l\xEAn s\u1EBD t\u1EA1o s\u1EF1 ki\u1EC7n d\u1EF1a theo th\u1EBB nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i<br>
-        \xB7 \u1EA2nh h\u01B0\u1EDFng c\u1ED1t truy\u1EC7n: b\u1EADt l\xEAn c\xF3 th\u1EC3 t\xE1c \u0111\u1ED9ng ng\u01B0\u1EE3c v\xE0o c\u1ED1t truy\u1EC7n hi\u1EC7n t\u1EA1i<br>
-        \xB7 Sau khi b\u1EADt li\xEAn k\u1EBFt, c\xE2y tr\u1ED3ng c\xF3 t\u1EC9 l\u1EC7 <b>\u0111\u1ED9t bi\u1EBFn</b> theo th\u1EBF gi\u1EDBi quan (ch\u1EC9 s\u1EF1 ki\u1EC7n c\xF3 n\u1ED9i dung "\u0111\u1ED9t bi\u1EBFn" m\u1EDBi sinh ra c\xE2y \u0111\u1ED9t bi\u1EBFn); c\xE2y \u0111\u1ED9t bi\u1EBFn c\xF3 th\u1EC3 "L\u1EA5y ra" trong balo \u0111\u1EC3 mang v\xE0o c\u1ED1t truy\u1EC7n l\xE0m \u0111\u1EA1o c\u1EE5<br>
-        \xB7 H\u1EA1t gi\u1ED1ng b\xED \u1EA9n: tr\u1ED3ng ra c\xE2y ng\u1EABu nhi\xEAn. Ngu\u1ED3n: \u0111\u01A1n h\xE0ng c\u1EE7a ph\xF9 thu\u1EF7 tr\xF2n (c\u1EA7n v\xE9 v\xF9ng n\u01B0\u1EDBc m\u1EDBi m\u1EDF); b\xE9 qu\u1EF7 nh\u1ECF / b\xE9 thi\xEAn th\u1EA7n \u0111i t\xECm kho b\xE1u<br>
-        \xB7 Save n\u1EB1m trong ch\xEDnh SillyTavern, c\u1EADp nh\u1EADt phi\xEAn b\u1EA3n c\u1EE9 nh\u1EADp script m\u1EDBi, save kh\xF4ng m\u1EA5t; API Key ph\u1EE5 ch\u1EC9 n\u1EB1m trong tr\xECnh duy\u1EC7t m\xE1y n\xE0y<br>
-        \xB7 C\xE1c b\u1EA3n SillyTavern kh\xE1c nhau <b>kh\xF4ng d\xF9ng chung</b> (c\xE0i th\xEAm m\u1ED9t b\u1EA3n tr\xEAn \u0111i\u1EC7n tho\u1EA1i = m\u1ED9t v\u01B0\u1EDDn rau kh\xE1c); tr\u01B0\u1EDBc khi c\xE0i l\u1EA1i SillyTavern nh\u1EDB sao l\u01B0u th\u01B0 m\u1EE5c data</div>
-      <span class="buy" id="resetSave">\u0110\u1EB7t l\u1EA1i save (c\u1EA9n th\u1EADn, b\u1EA5m hai l\u1EA7n)</span>`);
-    $id("secSave").addEventListener("click", () => {
-      SEC = {
-        url: $id("secUrl").value.trim(),
-        key: $id("secKey").value.trim(),
-        model: $id("secModel").value.trim(),
-        autoReset: $id("secAuto").checked,
-        resetHours: clampN($id("secHours").value, 1, 24, 4),
-        wbLimit: parseInt($id("secWbLimit").value, 10) || 0
-      };
-      saveSec();
-      toast("\u0110\xE3 l\u01B0u c\u1EA5u h\xECnh API ph\u1EE5");
-    });
-    $id("secTest").addEventListener("click", () => testSecApi());
-    $id("secModels").addEventListener("click", () => fetchModelList());
-    if ($id("openSandboxBtn")) $id("openSandboxBtn").addEventListener("click", openSandbox);
-    $id("mbody").querySelectorAll("[data-settheme]").forEach((b) => b.addEventListener("click", () => {
-      ctx.S.theme = b.dataset.settheme;
-      save();
-      applyTheme();
-      openPanel2("cfg");
-      toast(ctx.S.theme === "sky" ? "\u0110\u1ED5i sang giao di\u1EC7n tr\u1EDDi quang~" : "V\u1EC1 l\u1EA1i giao di\u1EC7n h\u1ED3ng anh \u0111\xE0o~");
-    }));
-    $id("csPromptSave").addEventListener("click", () => {
-      CS.userPrompt = $id("csPrompt").value.slice(0, 3e3);
-      saveCharState();
-      toast("\u0110\xE3 l\u01B0u v\xE0o th\u1EBB nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i");
-    });
-    let armed = false;
-    $id("resetSave").addEventListener("click", () => {
-      if (!armed) {
-        armed = true;
-        $id("resetSave").textContent = "B\u1EA5m l\u1EA7n n\u1EEFa \u0111\u1EC3 x\xE1c nh\u1EADn \u0111\u1EB7t l\u1EA1i!";
-        return;
-      }
-      ctx.S = freshState();
-      save(true);
-      closeModal2();
-      renderAll();
-      toast("\u0110\xE3 \u0111\u1EB7t l\u1EA1i");
-    });
-  }
-}
-function initShop() {
-  $id("mclose").addEventListener("click", closeModal2);
-  $id("mbody").addEventListener("click", (e) => {
-    const el = e.target.closest("[data-pick]");
-    if (!el || !pendingPick) return;
-    const cb = pendingPick;
-    pendingPick = null;
-    closeModal2();
-    cb(el.dataset.pick);
-  });
-  $id("modal").addEventListener("click", (e) => {
-    if (e.target === $id("modal")) closeModal2();
-  });
-  sh.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => openPanel2(b.dataset.open)));
-}
-
-// src/pets.js
-function petBubble(el, txt) {
-  el.querySelector(".pbubble")?.remove();
-  const b = document.createElement("span");
-  b.className = "pbubble";
-  b.textContent = txt;
-  el.appendChild(b);
-  window.setTimeout(() => b.remove(), 1700);
-}
-var petPos = {};
-var petTgt = {};
-var petHopT2 = {};
-var WORK_BAND = 74;
-var FLOATY = { cloudMallow: 1, ghostBlob: 1, bunny: 1 };
-var GAITS = {
-  // Dáng đi: len = độ dài một bước nhảy, dur = chu kỳ một cú nhảy (ms), hy = độ cao nhảy
-  octo: { len: 8, dur: 260, hy: -4 },
-  // Bạch tuộc: bước lắt nhắt bò sát đất
-  octoCream: { len: 8, dur: 290, hy: -4 },
-  // Bạch tuộc kem: bò còn chậm rì hơn nữa
-  _: { len: 14, dur: 330, hy: -9 }
-  // Mặc định: kiểu nảy chuẩn của dòng slime
-};
-var gaitOf = (id) => GAITS[id] || GAITS._;
-var stopHop = (id) => {
-  if (petHopT2[id]) {
-    window.clearTimeout(petHopT2[id]);
-    delete petHopT2[id];
-  }
-};
-function petSpot(id) {
-  const ov = $id("mascots"), W = ov.clientWidth, H = ov.clientHeight;
-  if (PETS[id] && PETS[id].job) {
-    const workers = ctx.S.petsOut.filter((p) => PETS[p] && PETS[p].job);
-    const anchor = W - 64 - Math.max(0, workers.indexOf(id)) * 62;
-    return { x: Math.max(4, anchor - 10 + Math.random() * 20), y: Math.random() * 4 };
-  }
-  const x = 4 + Math.random() * Math.max(20, W - 64);
-  return { x, y: WORK_BAND + 6 + Math.random() * Math.max(20, H - WORK_BAND - 70) };
-}
-function placePet(el, p, instant) {
-  if (instant) el.style.transitionProperty = "transform";
-  else {
-    const old = petPos[el.dataset.pet] || p;
-    const dist = Math.hypot(p.x - old.x, p.y - old.y);
-    const dur = dist < 40 ? 0.5 : Math.min(11, Math.max(3, dist / 18));
-    el.style.transitionProperty = "transform, left, bottom";
-    el.style.transitionDuration = ".12s, " + dur + "s, " + dur + "s";
-    el.style.transitionTimingFunction = "ease, linear, ease";
-    el.classList.toggle("flip", p.x < old.x);
-  }
-  el.style.left = p.x + "px";
-  el.style.bottom = p.y + "px";
-  petPos[el.dataset.pet] = p;
-}
-function hopStep(el) {
-  const id = el.dataset.pet;
-  if (!el.isConnected) {
-    stopHop(id);
-    return;
-  }
-  const cur = petPos[id], tgt = petTgt[id], g = gaitOf(id);
-  if (!cur || !tgt || Math.hypot(tgt.x - cur.x, tgt.y - cur.y) < 3) {
-    delete petTgt[id];
-    el.classList.remove("walk");
-    stopHop(id);
-    const cb = petArrive[id];
-    delete petArrive[id];
-    if (cb) cb();
-    return;
-  }
-  const dx = tgt.x - cur.x, dy = tgt.y - cur.y, dist = Math.hypot(dx, dy);
-  const len = Math.min(g.len, dist);
-  const p = { x: cur.x + dx / dist * len, y: cur.y + dy / dist * len };
-  el.classList.toggle("flip", dx < 0);
-  el.classList.add("walk");
-  el.style.setProperty("--hopd", g.dur + "ms");
-  el.style.setProperty("--hy", g.hy + "px");
-  el.style.transitionProperty = "transform, left, bottom";
-  el.style.transitionDuration = ".12s, " + g.dur + "ms, " + g.dur + "ms";
-  el.style.transitionTimingFunction = "ease, linear, linear";
-  el.style.left = p.x + "px";
-  el.style.bottom = p.y + "px";
-  petPos[id] = p;
-  petHopT2[id] = window.setTimeout(() => hopStep(el), g.dur);
-}
-function moveTo(el, p) {
-  const id = el.dataset.pet;
-  if (FLOATY[id]) return placePet(el, p, false);
-  petTgt[id] = p;
-  if (!petHopT2[id]) hopStep(el);
-}
-var petSleepT2 = {};
-function sleepPet(el) {
-  const id = el.dataset.pet;
-  el.classList.add("sleep");
-  el.insertAdjacentHTML("beforeend", '<span class="zzz">Z</span><span class="zzz z2">z</span>');
-  petSleepT2[id] = window.setTimeout(() => wakePet(el, false), 4e4 + Math.random() * 4e4);
-}
-function wakePet(el, startled) {
-  const id = el.dataset.pet;
-  if (petSleepT2[id]) {
-    window.clearTimeout(petSleepT2[id]);
-    delete petSleepT2[id];
-  }
-  el.classList.remove("sleep");
-  el.querySelectorAll(".zzz").forEach((z) => z.remove());
-  const mate = pileWith[id];
-  delete pileWith[id];
-  if (mate) {
-    delete pileWith[mate];
-    const me = petEl(mate);
-    if (startled && me && me.classList.contains("sleep")) window.setTimeout(() => wakePet(me, true), 260);
-  }
-  if (startled) petBubble(el, "?!");
-}
-var petArrive = {};
-var pileWith = {};
-var petTouch = {};
-var touchBase = now();
-var scene = null;
-var lastScene = "";
-var nextSceneAt = now() + (TEST_MODE ? 30 * 1e3 : 45 * MIN);
-var sceneBusy = (id) => !!(scene && scene.ids.indexOf(id) >= 0);
-var sceneTimer = (fn, ms) => {
-  if (scene) scene.timers.push(window.setTimeout(fn, ms));
-};
-function endScene2() {
-  if (!scene) return;
-  scene.timers.forEach((t) => window.clearTimeout(t));
-  scene = null;
-}
-function petEl(id) {
-  return sh.querySelector('#mascots .pet[data-pet="' + id + '"]');
-}
-function walkTo(el, p, cb) {
-  const id = el.dataset.pet;
-  if (FLOATY[id]) {
-    const old = petPos[id] || p;
-    const dur = Math.min(11, Math.max(3, Math.hypot(p.x - old.x, p.y - old.y) / 18));
-    placePet(el, p, false);
-    if (cb) sceneTimer(cb, dur * 1e3 + 80);
-    return;
-  }
-  petTgt[id] = p;
-  if (cb) petArrive[id] = cb;
-  if (!petHopT2[id]) hopStep(el);
-}
-function tryScene() {
-  const idle = [], asleep = [], workIdle = [];
-  sh.querySelectorAll("#mascots .pet").forEach((el) => {
-    const id = el.dataset.pet;
-    if (petTgt[id]) return;
-    if (PETS[id].job) {
-      if (!el.classList.contains("sleep")) workIdle.push(id);
-      return;
-    }
-    (el.classList.contains("sleep") ? asleep : idle).push(id);
-  });
-  const pool = [];
-  if (idle.length >= 2) pool.push("bump");
-  if (idle.length + workIdle.length >= 2) pool.push("yawn");
-  if (idle.filter((i) => !FLOATY[i]).length >= 2) pool.push("chase");
-  if (idle.length >= 1 && asleep.length >= 1) pool.push("pile");
-  const picks = pool.filter((a) => a !== lastScene);
-  if (!picks.length) return;
-  const act = picks[Math.floor(Math.random() * picks.length)];
-  lastScene = act;
-  nextSceneAt = now() + (TEST_MODE ? 45 * 1e3 + Math.random() * 90 * 1e3 : 60 * MIN + Math.random() * 120 * MIN);
-  const shuffle = (a) => a.sort(() => Math.random() - 0.5);
-  const ov = $id("mascots"), W = ov.clientWidth, H = ov.clientHeight;
-  const clampX = (x) => Math.max(4, Math.min(W - 60, x));
-  const midY = () => WORK_BAND + 20 + Math.random() * Math.max(20, H - WORK_BAND - 100);
-  if (act === "bump") {
-    const [a, b] = shuffle(idle.slice());
-    const ea = petEl(a), eb = petEl(b);
-    const mx = clampX(60 + Math.random() * Math.max(40, W - 180)), my = midY();
-    scene = { ids: [a, b], timers: [] };
-    let met = 0;
-    const meet = () => {
-      if (++met < 2 || !scene) return;
-      petBubble(ea, PETS[a].cry[0]);
-      petBubble(eb, PETS[b].cry[0]);
-      walkTo(ea, { x: clampX(petPos[a].x - 32), y: petPos[a].y });
-      walkTo(eb, { x: clampX(petPos[b].x + 32), y: petPos[b].y });
-      sceneTimer(endScene2, 1600);
-    };
-    walkTo(ea, { x: clampX(mx - 26), y: my }, meet);
-    walkTo(eb, { x: clampX(mx + 26), y: my }, meet);
-    sceneTimer(endScene2, 3e4);
-  } else if (act === "yawn") {
-    const [a, b] = shuffle(idle.concat(workIdle));
-    const ea = petEl(a), eb = petEl(b);
-    scene = { ids: [a, b], timers: [] };
-    petBubble(ea, "(ng\xE1p\u2026)");
-    sceneTimer(() => petBubble(eb, "(ng\xE1p theo\u2026)"), 1300);
-    sceneTimer(() => sleepPet(ea), 2500);
-    sceneTimer(() => {
-      sleepPet(eb);
-      pileWith[a] = b;
-      pileWith[b] = a;
-      endScene2();
-    }, 3300);
-  } else if (act === "pile") {
-    const b = asleep[Math.floor(Math.random() * asleep.length)];
-    const a = idle[Math.floor(Math.random() * idle.length)];
-    const ea = petEl(a), eb = petEl(b);
-    scene = { ids: [a, b], timers: [] };
-    const side = petPos[b].x > 70 ? -1 : 1;
-    walkTo(ea, { x: clampX(petPos[b].x + side * 34), y: petPos[b].y }, () => {
-      sleepPet(ea);
-      pileWith[a] = b;
-      pileWith[b] = a;
-      endScene2();
-    });
-    sceneTimer(endScene2, 3e4);
-  } else if (act === "chase") {
-    const hop = shuffle(idle.filter((i) => !FLOATY[i]));
-    const a = hop[0], b = hop[1];
-    const ea = petEl(a), eb = petEl(b);
-    scene = { ids: [a, b], timers: [] };
-    let leg = 0;
-    const run = () => {
-      if (!scene) return;
-      if (++leg > 3) {
-        petBubble(eb, "(ph\xF9\u2026 c\u1EAFt \u0111u\xF4i r\u1ED3i)");
-        return endScene2();
-      }
-      const p = { x: clampX(20 + Math.random() * Math.max(40, W - 100)), y: midY() };
-      walkTo(eb, p);
-      sceneTimer(() => walkTo(ea, { x: clampX(p.x - 22), y: p.y }, run), 380);
-    };
-    petBubble(ea, "(th\xECnh th\u1ECBch th\u1ECBch!)");
-    petBubble(eb, "(oaa!)");
-    run();
-    sceneTimer(endScene2, 45e3);
-  }
-}
-var wander2 = window.setInterval(() => {
-  if (!ctx.win || !ctx.win.classList.contains("open")) return;
-  if (!scene && now() >= nextSceneAt) tryScene();
-  sh.querySelectorAll("#mascots .pet").forEach((el) => {
-    const id = el.dataset.pet;
-    if (sceneBusy(id) || petTgt[id] || el.classList.contains("sleep")) return;
-    if (!PETS[id].job && Math.random() < 0.08) return sleepPet(el);
-    if (PETS[id].job && now() - (petTouch[id] || touchBase) > 5 * MIN && Math.random() < 0.08) return sleepPet(el);
-    if (Math.random() < 0.35) moveTo(el, petSpot(id));
-  });
-}, 7e3);
-$id("mascots").addEventListener("click", (e) => {
-  const el = e.target.closest(".pet");
-  if (!el) return;
-  const id = el.dataset.pet, def = PETS[id];
-  if (!def) return;
-  petTouch[id] = now();
-  if (el.classList.contains("sleep")) return wakePet(el, true);
-  const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
-  if (def.job === "plant") return petPlant(el, cry);
-  if (def.job === "fert") return petFert(el, cry);
-  if (def.job === "harvest") return petHarvest(el, cry);
-  if (def.job) return petBubble(el, cry);
-  let txt = cry;
-  if (now() - (ctx.S.petPoke[id] || 0) >= POKE_CD) {
-    ctx.S.petPoke[id] = now();
-    const gain = 1 + Math.floor(Math.random() * 5);
-    ctx.S.coins += gain;
-    txt += id === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : id === "starBell" ? " l\u1EAFc ra " + gain + " G b\u1EE5i sao!" : " r\u01A1i ra " + gain + " G!";
-    save();
-    renderStatus();
-  }
-  petBubble(el, txt);
-});
-function petPlant(el, cry) {
-  const empty = [];
-  for (let pi = 0; pi < curBlocks() * 4; pi++) if (!curPlots()[pi].crop) empty.push(pi);
-  if (!empty.length) return petBubble(el, cry + " h\u1EBFt ch\u1ED7 tr\u1ED1ng r\u1ED3i");
-  const usable = {};
-  Object.keys(ctx.S.seeds).forEach((id) => {
-    if (!(ctx.S.seeds[id] > 0) || !CROPS[id]) return;
-    if (id === "mystery" || (CROPS[id].zone || 1) === ctx.S.page) usable[id] = ctx.S.seeds[id];
-  });
-  if (!Object.keys(usable).length) return petBubble(el, cry + " kh\xF4ng c\xF3 h\u1EA1t n\xE0o tr\u1ED3ng \u0111\u01B0\u1EE3c \u1EDF " + ZONE_NAME[ctx.S.page] + "\u2026");
-  pickFrom("B\xE9 m\u1EA7m s\u01B0\u01A1ng: l\u1EA7n n\xE0y tr\u1ED3ng g\xEC \u0111\xE2y?", usable, (x) => CROPS[x].name, (sid) => {
-    let k = 0;
-    for (const pi of empty) {
-      if (!(ctx.S.seeds[sid] > 0)) break;
-      if (plant(pi, sid)) k++;
-    }
-    const pe = sh.querySelector('.pet[data-pet="dewSprout"]') || el;
-    petBubble(pe, cry + " \u0111\xE3 tr\u1ED3ng " + k + " \xF4 " + CROPS[sid].name + (k < empty.length ? " (h\u1EBFt h\u1EA1t gi\u1ED1ng r\u1ED3i)" : "!"));
-  });
-}
-function petHarvest(el, cry) {
-  const got = {};
-  curPlots().forEach((p, pi) => {
-    const c = p.crop;
-    if (!c || now() < c.matureAt) return;
-    const r = harvest(pi, true);
-    if (r) got[r.name] = (got[r.name] || 0) + r.n;
-  });
-  const ks = Object.keys(got);
-  if (!ks.length) return petBubble(el, cry + " ch\u01B0a c\xF3 rau n\xE0o ch\xEDn");
-  petBubble(el, cry + " cu\u1ED9n v\u1EC1 \u0111\u01B0\u1EE3c: " + ks.map((k) => k + "\xD7" + got[k]).join(", "));
-}
-function petFert(el, cry) {
-  pickFrom("B\xE9 b\xED \u1EA9n: d\xF9ng lo\u1EA1i ph\xE2n n\xE0o?", ctx.S.ferts, (x) => FERTS[x].name, (fid) => {
-    let k = 0;
-    for (let pi = 0; pi < curBlocks() * 4 && ctx.S.ferts[fid] > 0; pi++) {
-      const c = curPlots()[pi].crop;
-      if (!c || now() >= c.matureAt || c.fertUsed && c.fertUsed[fid]) continue;
-      if (fertilize(pi, fid, true)) k++;
-    }
-    const pe = sh.querySelector('.pet[data-pet="batBlob"]') || el;
-    petBubble(pe, cry + (k ? " \u0111\xE3 b\xF3n " + k + " \xF4 " + FERTS[fid].name + "!" : " kh\xF4ng c\xF3 \xF4 n\xE0o c\u1EA7n b\xF3n ph\xE2n"));
-  });
-}
-function initPets() {
-  wander2 = window.setInterval(() => {
-    if (!ctx.win || !ctx.win.classList.contains("open")) return;
-    if (!scene && now() >= nextSceneAt) tryScene();
-    sh.querySelectorAll("#mascots .pet").forEach((el) => {
-      const id = el.dataset.pet;
-      if (sceneBusy(id) || petTgt[id] || el.classList.contains("sleep")) return;
-      if (!PETS[id].job && Math.random() < 0.08) return sleepPet(el);
-      if (PETS[id].job && now() - (petTouch[id] || touchBase) > 5 * MIN && Math.random() < 0.08) return sleepPet(el);
-      if (Math.random() < 0.35) moveTo(el, petSpot(id));
-    });
-  }, 7e3);
-  $id("mascots").addEventListener("click", (e) => {
-    const el = e.target.closest(".pet");
-    if (!el) return;
-    const id = el.dataset.pet, def = PETS[id];
-    if (!def) return;
-    petTouch[id] = now();
-    if (el.classList.contains("sleep")) return wakePet(el, true);
-    const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
-    if (def.job === "plant") return petPlant(el, cry);
-    if (def.job === "fert") return petFert(el, cry);
-    if (def.job === "harvest") return petHarvest(el, cry);
-    if (def.job) return petBubble(el, cry);
-    let txt = cry;
-    if (now() - (ctx.S.petPoke[id] || 0) >= POKE_CD) {
-      ctx.S.petPoke[id] = now();
-      const gain = 1 + Math.floor(Math.random() * 5);
-      ctx.S.coins += gain;
-      txt += id === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : id === "starBlob" ? " r\u01A1i ra " + gain + " G \xE1nh sao!" : " r\u01A1i ra " + gain + " G";
-      save();
-      renderStatus2();
-    }
-    petBubble(el, txt);
-    wakePet(el, true);
-  });
-}
-
 // src/witch.js
 var WITCH_CRY = ["C\xFAc cu, c\xF3 ai kh\xF4ng?", "\u25C6\u2726\u2234\u2026?", "(d\u01B0\u1EDBi v\xE0nh m\u0169 v\u1ECDng ra ti\u1EBFng l\u1EADt s\xE1ch)", "\u263D\u2042\u25C7!", "\u2736\u25C7\u2234\u2726\u2026", "Tinh t\u01B0\u1EE3ng h\xF4m nay \u0111\u1EB9p \u0111\u1EA5y."];
+function witchArrive() {
+  const wz = ctx.S.witch;
+  wz.leaveAt = now() + WITCH_STAY;
+  wz.missed = 0;
+  wz.order = makeWitchOrder();
+  save();
+  renderWitch();
+  toast("Ph\xF9 thu\u1EF7 tr\xF2n t\u1EDBi r\u1ED3i! Qu\u1EA7y h\xE0ng ng\xF4i sao \u1EDF g\xF3c d\u01B0\u1EDBi tr\xE1i b\u1EDD ru\u1ED9ng \u0111\xE3 s\xE1ng \u0111\xE8n");
+}
 function makeWitchOrder() {
   const pool = Object.entries(CROPS).filter(([id, c]) => !c.hidden && pageUnlocked(c.zone || 1));
   const pick = () => pool[Math.floor(Math.random() * pool.length)][0];
@@ -3442,11 +3282,11 @@ function witchDeliver(li) {
   const line = wz.order.lines[li];
   if (!line || line.done) return;
   if (!line.mut) {
-    if ((ctx.S.bag[line.id] || 0) < line.n) return toast2("C\xF2n thi\u1EBFu " + (line.n - (ctx.S.bag[line.id] || 0)) + " qu\u1EA3 " + CROPS[line.id].name);
+    if ((ctx.S.bag[line.id] || 0) < line.n) return toast("C\xF2n thi\u1EBFu " + (line.n - (ctx.S.bag[line.id] || 0)) + " qu\u1EA3 " + CROPS[line.id].name);
     ctx.S.bag[line.id] -= line.n;
     if (!ctx.S.bag[line.id]) delete ctx.S.bag[line.id];
   } else {
-    if (mutCountOf(line.id) < line.n) return toast2("Lo\u1EA1i " + CROPS[line.id].name + " c\xF3 ti\u1EC1n t\u1ED1 c\xF2n thi\u1EBFu " + (line.n - mutCountOf(line.id)) + " qu\u1EA3");
+    if (mutCountOf(line.id) < line.n) return toast("Lo\u1EA1i " + CROPS[line.id].name + " c\xF3 ti\u1EC1n t\u1ED1 c\xF2n thi\u1EBFu " + (line.n - mutCountOf(line.id)) + " qu\u1EA3");
     let need = line.n;
     for (const k of mutKeysOf(line.id)) {
       const take = Math.min(need, ctx.S.bag[k]);
@@ -3464,7 +3304,7 @@ function witchDeliver(li) {
   }
   save();
   renderStatus();
-  toast2("Giao h\xE0ng xong! Nh\u1EADn \u0111\u01B0\u1EE3c h\u1EA1t gi\u1ED1ng b\xED \u1EA9n \xD7" + line.reward);
+  toast("Giao h\xE0ng xong! Nh\u1EADn \u0111\u01B0\u1EE3c h\u1EA1t gi\u1ED1ng b\xED \u1EA9n \xD7" + line.reward);
   openWitchDlg();
 }
 function openWitchDlg() {
@@ -3490,17 +3330,147 @@ function openWitchDlg() {
     ctx.S.shards.prism--;
     ctx.S.witch.order = makeWitchOrder();
     save();
-    toast2("L\u0103ng quang lo\xE9 l\xEAn, \u0111\u01A1n h\xE0ng \u0111\xE3 \u0111\u1ED5i m\u1ED9t lo\u1EA1t");
+    toast("L\u0103ng quang lo\xE9 l\xEAn, \u0111\u01A1n h\xE0ng \u0111\xE3 \u0111\u1ED5i m\u1ED9t lo\u1EA1t");
     openWitchDlg();
   }));
 }
-var toastTimer2 = null;
-function toast2(msg) {
+function useStarShard() {
+  if (!(ctx.S.shards && ctx.S.shards.star > 0)) return;
+  if (!ctx.S.passes.water) return toast("Ph\xF9 thu\u1EF7 ch\u1EC9 ch\u1ECBu gh\xE9 nh\u1EEFng n\xF4ng tr\u1EA1i c\xF3 v\xE9 v\xF9ng n\u01B0\u1EDBc");
+  if (ctx.S.witch.leaveAt > now()) return toast("Ph\xF9 thu\u1EF7 tr\xF2n \u0111ang \u1EDF qu\u1EA7y r\u1ED3i m\xE0");
+  ctx.S.shards.star--;
+  closeModal();
+  witchArrive();
+}
+function renderWitch() {
+  const el = $id("witch");
+  const active = ctx.S.witch && ctx.S.witch.leaveAt > now() && ctx.S.passes.water;
+  el.classList.toggle("show", !!active);
+  if (active && !el.innerHTML) el.innerHTML = `<span class="wtag">\u2726 \u0110\u01A1n h\xE0ng</span><span class="wbody">${petSVG("witchBlob", 48)}</span>`;
+  if (!active) el.innerHTML = "";
+}
+var takeoutNote = null;
+function setTakeoutNote(val) {
+  takeoutNote = val;
+}
+function openTakeout(key) {
+  const have = ctx.S.bag[key] || 0;
+  if (have <= 0) return;
+  openModal("L\u1EA5y ra \xB7 " + bagName(key), `
+    <div class="note" style="margin-bottom:8px">L\u1EA5y ra = mang kh\u1ECFi balo \u0111\u1EC3 d\xF9ng trong c\u1ED1t truy\u1EC7n. <b style="color:var(--accFg)">Kh\xF4ng quy ra ti\u1EC1n, l\u1EA5y ra r\u1ED3i kh\xF4ng b\u1ECF l\u1EA1i balo \u0111\u01B0\u1EE3c!</b></div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <input class="inp" id="takeN" type="number" min="1" max="${have}" value="1" style="width:90px">
+      <span style="font-size:12px;color:#7a5c38">/ \u0111ang c\xF3 ${have}</span>
+      <span class="buy" id="takeGo">X\xE1c nh\u1EADn l\u1EA5y ra</span>
+    </div>`);
+  $id("takeGo").addEventListener("click", () => {
+    const n = clampN($id("takeN").value, 1, have, 1) | 0;
+    ctx.S.bag[key] = have - n;
+    if (ctx.S.bag[key] <= 0) delete ctx.S.bag[key];
+    const d = mutDescOf(key);
+    takeoutNote = (takeoutNote || []).filter((t) => now() < t.until).concat({ txt: n + " " + bagName(key) + (d ? " (hi\u1EC7u \u1EE9ng \u0111\xE3 \u0111\u1ECBnh: " + d + ")" : ""), until: now() + 10 * MIN }).slice(-3);
+    save();
+    renderStatus();
+    toast("\u0110\xE3 l\u1EA5y ra " + n + " " + bagName(key));
+    openPanel("bag");
+  });
+}
+function openSellDlg(key) {
+  const have = ctx.S.bag[key] || 0;
+  if (have <= 0) return;
+  const price = bagPrice(key);
+  openModal("B\xE1n \xB7 " + bagName(key), `
+    <div class="note" style="margin-bottom:8px">\u0110\u01A1n gi\xE1 ${price} G \xB7 \u0111ang c\xF3 ${have} c\xE1i</div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <input class="inp" id="sellN" type="number" min="1" max="${have}" value="1" style="width:90px">
+      <span style="font-size:12px;color:#7a5c38">/ ${have}</span>
+      <span class="buy" id="sellGo">X\xE1c nh\u1EADn b\xE1n</span>
+    </div>`);
+  $id("sellGo").addEventListener("click", () => {
+    sell(key, clampN($id("sellN").value, 1, have, 1) | 0);
+  });
+}
+function buildTicket(k) {
+  const water2 = k === "water";
+  return `
+  <div class="tk ${water2 ? "water" : "mine"}">
+    <div class="stub">${spriteSVG(water2 ? "lotus" : "gem", 52)}<span class="no">${water2 ? "V\xF9ng n\u01B0\u1EDBc \xB7 Trang II" : "Khu m\u1ECF \xB7 Trang III"}</span></div>
+    <div class="perf"></div>
+    <div class="tmain">
+      <div class="inner">
+        <div class="eyebrow">Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9! \xB7 Gi\u1EA5y ph\xE9p th\xF4ng h\xE0nh</div>
+        <div class="tname">${water2 ? "V \xC9   V \xD9 N G   N \u01AF \u1EDA C" : "V \xC9   K H U   M \u1ECE"}</div>
+        <div class="tsub">${water2 ? "C\u1EA7m v\xE9 n\xE0y \u0111\u1EC3 m\u1EDF ru\u1ED9ng v\xF9ng n\u01B0\u1EDBc \u1EDF trang hai \xB7 tr\u1ED3ng \u0111\u01B0\u1EE3c c\xE2y thu\u1EF7 sinh<br>C\u1EE7 sen \u0111ang \u0111\u1EE3i b\u1EA1n, rong bi\u1EC3n c\u0169ng v\u1EADy." : "C\u1EA7m v\xE9 n\xE0y \u0111\u1EC3 v\xE0o ru\u1ED9ng b\u1EA3o th\u1EA1ch \u1EDF trang ba \xB7 \u01B0\u01A1m \u0111\u01B0\u1EE3c c\xE2y tinh th\u1EA1ch<br>Coi ch\u1EEBng d\u01B0\u1EDBi ch\xE2n, th\u1EE9 g\xEC ph\xE1t s\xE1ng th\xEC \u0111\u1EEBng gi\u1EABm."}</div>
+        <div class="trow">
+          <span class="serial">${water2 ? "N\u2070 000002" : "N\u2070 000003"}</span>
+          <span class="valid">${water2 ? "C\xF3 gi\xE1 tr\u1ECB v\u0129nh vi\u1EC5n \xB7 kh\xF4ng chuy\u1EC3n nh\u01B0\u1EE3ng (rau th\xEC \u0111\u01B0\u1EE3c)" : "C\xF3 gi\xE1 tr\u1ECB v\u0129nh vi\u1EC5n \xB7 ch\u1EE9a m\u1ED9t l\u01B0\u1EE3ng nh\u1ECF ma l\u1EF1c"}</span>
+        </div>
+      </div>
+      <div class="stamp">${water2 ? "B\xE9 tr\xF2n<br>\u0111\xE3 duy\u1EC7t" : "Ph\xF9 thu\u1EF7<br>\u0111\u1EB7c duy\u1EC7t"}</div>
+      <div class="curl"></div>
+    </div>
+  </div>`;
+}
+function openPassDlg(k) {
+  const ps = PASSES[k];
+  const owned = !!ctx.S.passes[k];
+  const poor = ctx.S.coins < ps.price;
+  openModal(ps.name, buildTicket(k) + (owned ? '<div class="note">\u0110\xE3 s\u1EDF h\u1EEFu \xB7 c\u1EA5t trong k\u1EB9p gi\u1EA5y t\u1EDD c\u1EE7a b\u1EA1n. C\xE1c b\xE9 tr\xF2n \u1EDF trang t\u01B0\u01A1ng \u1EE9ng lu\xF4n hoan ngh\xEAnh b\u1EA1n gh\xE9 mua.</div>' : `<div style="display:flex;gap:8px;align-items:center">
+        <span class="buy${poor ? " off" : ""}" id="passGo">Mua ${ps.price.toLocaleString()} G</span>
+        <span class="buy plain" id="passNo">\u0110\u1EC3 ngh\u0129 th\xEAm</span>
+      </div>`));
+  if (!owned) {
+    $id("passGo").addEventListener("click", () => {
+      if (ctx.S.coins < ps.price) return toast("C\xF2n thi\u1EBFu " + (ps.price - ctx.S.coins).toLocaleString() + " G");
+      ctx.S.coins -= ps.price;
+      ctx.S.passes[k] = true;
+      save();
+      renderStatus();
+      renderPager();
+      openPanel("shop");
+      toast(ps.name + " \u0111\xE3 v\xE0o tay! " + (k === "water" ? "Ru\u1ED9ng v\xF9ng n\u01B0\u1EDBc \u0111\xE3 m\u1EDF, l\u1EADt trang qua xem th\u1EED \u0111i" : "Ru\u1ED9ng khu m\u1ECF \u0111\xE3 m\u1EDF, l\u1EADt trang qua xem th\u1EED \u0111i"));
+    });
+    $id("passNo").addEventListener("click", () => openPanel("shop"));
+  }
+}
+function openBuyDlg(kind, id) {
+  const def = kind === "seed" ? CROPS[id] : FERTS[id];
+  const price = kind === "seed" ? def.seed : def.price;
+  const name = kind === "seed" ? "H\u1EA1t " + def.name : def.name;
+  if (ctx.S.coins < price) return toast("C\xF2n thi\u1EBFu " + (price - ctx.S.coins).toLocaleString() + " G");
+  const maxN = Math.max(1, Math.floor(ctx.S.coins / Math.max(1, price)));
+  openModal("Mua \xB7 " + name, `
+    <div class="note" style="margin-bottom:8px">\u0110\u01A1n gi\xE1 ${price} G \xB7 v\xE0ng hi\u1EC7n c\xF3 ${ctx.S.coins.toLocaleString()} \xB7 mua \u0111\u01B0\u1EE3c t\u1ED1i \u0111a ${maxN}</div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <input class="inp" id="buyN" type="number" min="1" max="${maxN}" value="1" style="width:90px">
+      <span id="buyTotal" style="font-size:12px;color:#7a5c38;font-weight:bold">T\u1ED5ng ${price} G</span>
+      <span class="buy" id="buyGo">X\xE1c nh\u1EADn mua</span>
+    </div>`);
+  const upd = () => {
+    const n = clampN($id("buyN").value, 1, maxN, 1) | 0;
+    $id("buyTotal").textContent = "T\u1ED5ng " + (n * price).toLocaleString() + " G";
+    return n;
+  };
+  $id("buyN").addEventListener("input", upd);
+  $id("buyGo").addEventListener("click", () => {
+    const n = upd(), cost = n * price;
+    if (ctx.S.coins < cost) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng r\u1ED3i");
+    ctx.S.coins -= cost;
+    if (kind === "seed") ctx.S.seeds[id] = (ctx.S.seeds[id] || 0) + n;
+    else ctx.S.ferts[id] = (ctx.S.ferts[id] || 0) + n;
+    save();
+    renderStatus();
+    toast("\u0110\xE3 mua " + name + " \xD7" + n);
+    openPanel("shop");
+  });
+}
+var toastTimer = null;
+function toast(msg) {
   const t = $id("toast");
   t.textContent = ctx.msg;
   t.style.display = "block";
-  if (toastTimer2) window.clearTimeout(toastTimer2);
-  toastTimer2 = window.setTimeout(() => {
+  if (toastTimer) window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => {
     t.style.display = "none";
   }, 1800);
 }
@@ -3517,15 +3487,783 @@ function initWitch() {
   });
 }
 
+// src/utils.js
+var gameDay = () => Math.floor((now() - ctx.S.day0) / DAY_MS) + 1;
+var weatherOf = (d) => WEATHERS[Math.floor(mulberry32(d * 7919)() * WEATHERS.length)];
+var isRain = () => weatherOf(gameDay()) === "M\u01B0a nh\u1ECF";
+function settle() {
+  if (CS.link && !eventFresh() && !eventPending) requestDayEvent();
+  if (ctx.S.passes.water && ctx.S.witch) {
+    const wz = ctx.S.witch;
+    if (wz.leaveAt && now() >= wz.leaveAt) {
+      wz.leaveAt = 0;
+      if (wz.order && !wz.order.done) wz.missed++;
+      wz.order = null;
+      wz.nextAt = now() + witchGap();
+      save();
+      try {
+        renderWitch();
+      } catch (e) {
+      }
+    }
+    const open = (() => {
+      try {
+        return sh.getElementById("ctx.win").classList.contains("open");
+      } catch (e) {
+        return false;
+      }
+    })();
+    if (!wz.leaveAt && open && (now() >= wz.nextAt || wz.missed >= 2)) witchArrive();
+  }
+  let mutChanged = false;
+  eachPage((plots, pg) => plots.forEach((p, pi) => {
+    const c = p.crop;
+    if (!c || now() < c.matureAt || c.mutRolled) return;
+    mutChanged = true;
+    rollMutation(c, pg === ctx.S.page ? pi : null);
+  }));
+  if (mutChanged) save();
+  let wChanged = false;
+  const outed = (id) => ctx.S.petsOut.indexOf(id) >= 0;
+  if (outed("cloudMallow")) {
+    eachPage((plots) => plots.forEach((p) => {
+      const c = p.crop;
+      if (!c || now() >= c.matureAt || now() < c.wateredUntil) return;
+      c.matureAt = now() + (c.matureAt - now()) * 0.75;
+      c.wateredUntil = now() + WATER_CD;
+      wChanged = true;
+    }));
+  }
+  let tGain = 0, tSeed = null, tMyst = null, tPrism = 0, tStar = 0;
+  ctx.S.petsOut.forEach((id) => {
+    const pd = PETS[id];
+    if (!pd || pd.job) return;
+    if (ctx.S.petFind[id] == null) {
+      ctx.S.petFind[id] = now();
+      wChanged = true;
+      return;
+    }
+    if (now() - ctx.S.petFind[id] < TREASURE_CD) return;
+    ctx.S.petFind[id] = now();
+    tGain += 10 + Math.floor(Math.random() * 41);
+    if ((id === "impBlob" || id === "angelBlob") && Math.random() < 0.2) {
+      ctx.S.seeds.mystery = (ctx.S.seeds.mystery || 0) + 1;
+      tMyst = id;
+    }
+    if (id === "prismBlob" && Math.random() < 0.2) {
+      ctx.S.shards.prism++;
+      tPrism++;
+    }
+    if (id === "starBell" && Math.random() < 0.15) {
+      ctx.S.shards.star++;
+      tStar++;
+    }
+    if (!tSeed && !tMyst && Math.random() < 0.1) {
+      const ids = Object.keys(CROPS).filter((k) => !CROPS[k].hidden);
+      tSeed = ids[Math.floor(Math.random() * ids.length)];
+      ctx.S.seeds[tSeed] = (ctx.S.seeds[tSeed] || 0) + 1;
+    }
+    wChanged = true;
+  });
+  if (tGain) {
+    ctx.S.coins += tGain;
+    toast("C\xE1c b\xE9 tr\xF2n \u0111i t\xECm kho b\xE1u v\u1EC1: +" + tGain + " G" + (tSeed ? ", c\xF2n tha v\u1EC1 c\u1EA3 h\u1EA1t gi\u1ED1ng " + CROPS[tSeed].name + "!" : "") + (tMyst ? tMyst === "impBlob" ? ", b\xE9 qu\u1EF7 nh\u1ECF tha v\u1EC1 m\u1ED9t h\u1EA1t gi\u1ED1ng b\xED \u1EA9n \u0111en s\xEC\u2026" : ", b\xE9 thi\xEAn th\u1EA7n ng\u1EADm v\u1EC1 m\u1ED9t h\u1EA1t gi\u1ED1ng b\xED \u1EA9n \xE1nh l\xEAn l\u1EA5p l\xE1nh\u2026" : "") + (tPrism ? ", b\xE9 l\u0103ng quang nh\u1EA3 ra " + tPrism + " m\u1EA3nh l\u0103ng quang" : "") + (tStar ? ", b\xE9 chu\xF4ng sao rung r\u01A1i " + tStar + " m\u1EA3nh ng\xF4i sao\u2726" : ""));
+    renderStatus();
+  }
+  if (wChanged) save();
+  if (!isRain()) return;
+  const d = gameDay();
+  eachPage((plots) => plots.forEach((p) => {
+    const c = p.crop;
+    if (!c || now() >= c.matureAt || c.rainDay === d) return;
+    c.matureAt = now() + (c.matureAt - now()) * 0.9;
+    c.rainDay = d;
+  }));
+}
+var pageUnlocked = (p) => p === 1 || p === 2 && ctx.S.passes.water || p === 3 && ctx.S.passes.mine;
+var fmtLeft = (ms) => {
+  if (ms <= 0) return "Thu ho\u1EA1ch \u0111\u01B0\u1EE3c";
+  const m = Math.ceil(ms / MIN);
+  return m >= 60 ? Math.floor(m / 60) + "g" + m % 60 + "p" : m + "p";
+};
+
+// src/events.js
+var esc = (s) => String(s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[m]);
+var clampN = (x, lo, hi, dflt) => {
+  x = Number(x);
+  return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt;
+};
+var SEC_LS_KEY = "star_tavern_farm_sec";
+var SEC = { url: "", key: "", model: "", autoReset: true, resetHours: 4, wbLimit: 2e4 };
+try {
+  const raw = window.localStorage.getItem(SEC_LS_KEY);
+  if (raw) {
+    const o = JSON.parse(raw);
+    SEC = {
+      url: o.url || "",
+      key: o.key ? atob(o.key) : "",
+      model: o.model || "",
+      autoReset: o.autoReset !== false,
+      resetHours: clampN(o.resetHours, 1, 24, 4),
+      wbLimit: typeof o.wbLimit === "number" ? o.wbLimit : 2e4
+    };
+  }
+} catch (e) {
+}
+function saveSec() {
+  try {
+    window.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit }));
+  } catch (e) {
+  }
+}
+var CS = { link: false, story: false, userPrompt: "" };
+function loadCharState() {
+  try {
+    const cn = charName();
+    const key = "cs_" + cn;
+    const o = (ctx.extension_settings[extensionName] || {})[key] || {};
+    CS = { link: !!o.link, story: !!o.story, userPrompt: o.userPrompt || "" };
+  } catch (e) {
+    CS = { link: false, story: false, userPrompt: "" };
+  }
+}
+function saveCharState() {
+  try {
+    const cn = charName();
+    const key = "cs_" + cn;
+    if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};
+    ctx.extension_settings[extensionName][key] = { link: CS.link, story: CS.story, userPrompt: CS.userPrompt };
+    if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+  } catch (e) {
+  }
+}
+loadCharState();
+function charName() {
+  try {
+    const ctx2 = window.SillyTavern && window.SillyTavern.getContext ? window.SillyTavern.getContext() : {};
+    return ctx2.name2 || String(ctx2.characterId || "");
+  } catch (e) {
+    return "";
+  }
+}
+var eventFresh = () => ctx.S.dayEvent && ctx.S.dayEvent.who === charName() && (!SEC.autoReset || now() - (ctx.S.dayEvent.at || 0) < SEC.resetHours * 60 * 60 * 1e3);
+var todayEvent = () => CS.link && eventFresh() ? ctx.S.dayEvent.ev : null;
+async function collectWorldbook() {
+  try {
+    let blue = "", green = "";
+    let entries = [];
+    const ctx2 = window.SillyTavern && window.SillyTavern.getContext ? window.SillyTavern.getContext() : {};
+    try {
+      const ST_WorldInfo = await new Function("return import('/scripts/world-info.js')")().catch(() => null);
+      const activeNames = /* @__PURE__ */ new Set();
+      try {
+        const charId = ctx2.characterId !== void 0 ? ctx2.characterId : window.this_character;
+        const charData = ctx2.characters?.[charId]?.data || window.characters?.[charId]?.data;
+        console.log("[FARM DEBUG] Character Data:", charData ? "Found" : "Null", "charId:", charId);
+        if (charData) {
+          if (charData.extensions?.world) activeNames.add(charData.extensions.world);
+          if (charData.world) activeNames.add(charData.world);
+        }
+        const wiKey = ST_WorldInfo?.METADATA_KEY || window.WI_METADATA_KEY || "world_info";
+        const chatWorldName = ctx2.chatMetadata?.[wiKey];
+        console.log("[FARM DEBUG] Chat World Name:", chatWorldName);
+        if (chatWorldName && typeof chatWorldName === "string") activeNames.add(chatWorldName);
+      } catch (e) {
+        console.log("[FARM DEBUG] Error getting active names:", e);
+      }
+      console.log("[FARM DEBUG] Active Worldbook Names to Fetch:", Array.from(activeNames));
+      for (const name of activeNames) {
+        try {
+          console.log("[FARM DEBUG] Fetching API for:", name);
+          const res = await fetch("/api/worldinfo/get", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...typeof ctx2.getRequestHeaders === "function" ? ctx2.getRequestHeaders() : {}
+            },
+            body: JSON.stringify({ name })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            console.log("[FARM DEBUG] Fetched API data entries length:", Array.isArray(data.entries) ? data.entries.length : "Not Array");
+            if (data && Array.isArray(data.entries)) entries = entries.concat(data.entries);
+          } else {
+            console.log("[FARM DEBUG] API Failed, status:", res.status);
+            const book = ST_WorldInfo?.world_info?.[name];
+            if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+          }
+        } catch (e) {
+          console.log("[FARM DEBUG] Fetch Exception:", e);
+          const book = ST_WorldInfo?.world_info?.[name];
+          if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+        }
+      }
+    } catch (e) {
+      console.log("[FARM DEBUG] Outer Exception:", e);
+    }
+    if (ctx2.worldInfo && Array.isArray(ctx2.worldInfo.entries)) {
+      entries = entries.concat(ctx2.worldInfo.entries);
+    } else if (ctx2.worldInfo && typeof ctx2.worldInfo === "object") {
+      Object.values(ctx2.worldInfo).forEach((book) => {
+        if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+      });
+    }
+    if (window.world_info && typeof window.world_info === "object" && !(window.world_info instanceof HTMLElement)) {
+      Object.values(window.world_info).forEach((book) => {
+        if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+        else if (book && typeof book === "object" && !Array.isArray(book) && !(book instanceof HTMLElement)) {
+          if (book.content || book.text) entries.push(book);
+        }
+      });
+    }
+    if (window.world_info_data && typeof window.world_info_data === "object") {
+      Object.values(window.world_info_data).forEach((book) => {
+        if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+      });
+    }
+    try {
+      const charId = ctx2.characterId !== void 0 ? ctx2.characterId : window.this_character;
+      if (typeof charId !== "undefined") {
+        const charData = ctx2.characters?.[charId]?.data || window.characters?.[charId]?.data;
+        if (charData && charData.character_book && Array.isArray(charData.character_book.entries)) {
+          entries = entries.concat(charData.character_book.entries);
+        }
+      }
+    } catch (e) {
+      console.log("[FARM DEBUG] Embedded Book Exception:", e);
+    }
+    if (!entries || entries.length === 0) return "";
+    const seen = /* @__PURE__ */ new Set();
+    for (const en of entries) {
+      if (en.enabled === false) continue;
+      const content = (en.content || en.text || "").trim();
+      if (!content || seen.has(content)) continue;
+      seen.add(content);
+      const isConstant = en.strategy && en.strategy.type === "constant" || en.constant === true || en.position === "before_char";
+      if (isConstant) blue += content + "\n";
+      else green += content + "\n";
+    }
+    const txt = blue.length >= 400 ? blue : blue + "\n" + green;
+    const limit = SEC.wbLimit !== void 0 ? SEC.wbLimit : 2e4;
+    return limit > 0 ? txt.slice(0, limit) : txt;
+  } catch (e) {
+    return "";
+  }
+}
+function buildEventPrompt(worldbook) {
+  let roll = Math.random() * 100;
+  const tendency = roll < 60 ? "t\xEDch c\u1EF1c (h\u01B0\u1EDBng b\u1ED9i thu / t\u0103ng t\u1ED1c / th\u1EDDi ti\u1EBFt \u0111\u1EB9p)" : roll < 90 ? "trung t\xEDnh (k\u1EF3 quan / chuy\u1EC7n l\u1EA1 / chuy\u1EC7n v\u1EB7t kh\xF4ng quan tr\u1ECDng)" : "h\u01A1i ti\xEAu c\u1EF1c (gi\u1EA3m s\u1EA3n l\u01B0\u1EE3ng / ch\u1EADm l\u1EA1i, m\u1EE9c \u0111\u1ED9 ph\u1EA3i nh\u1EB9)";
+  const themes = ["c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi th\u1EDDi ti\u1EBFt", "c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi \u0111\u1EA5t \u0111ai ho\u1EB7c ngu\u1ED3n n\u01B0\u1EDBc", "c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi \u0111\u1ED9ng v\u1EADt nh\u1ECF ho\u1EB7c c\xF4n tr\xF9ng", "c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi y\u1EBFu t\u1ED1 si\xEAu nhi\xEAn c\u1EE7a th\u1EBF gi\u1EDBi n\xE0y", "c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi phong t\u1EE5c \u0111\u1ECBa ph\u01B0\u01A1ng ho\u1EB7c ch\u1EE3 phi\xEAn"];
+  const theme = themes[Math.floor(Math.random() * themes.length)];
+  const cropList = Object.entries(CROPS).filter(([id, c]) => !c.seedOnly).map(([id, c]) => c.name).join(", ");
+  return ('B\u1EA1n l\xE0 "tr\xECnh t\u1EA1o s\u1EF1 ki\u1EC7n th\u1EBF gi\u1EDBi quan" cho m\u1ED9t game n\xF4ng tr\u1EA1i nh\u1ECF. Ng\u01B0\u1EDDi ch\u01A1i \u0111ang tr\u1ED3ng m\u1ED9t m\u1EA3nh v\u01B0\u1EDDn rau nh\u1ECF trong m\u1ED9t th\u1EBF gi\u1EDBi nh\u1EADp vai n\xE0o \u0111\xF3, v\xE0 b\u1EA1n s\u1EBD nh\u1EADn \u0111\u01B0\u1EE3c ph\u1EA7n tr\xEDch world book c\u1EE7a th\u1EBF gi\u1EDBi \u0111\xF3. H\xE3y t\u1EA1o 1 s\u1EF1 ki\u1EC7n nh\u1ECF ng\u1EABu nhi\xEAn x\u1EA3y ra \u1EDF v\u01B0\u1EDDn rau h\xF4m nay.\n\nQuy t\u1EAFc:\n1. ctx.S\u1EF1 ki\u1EC7n b\u1EAFt bu\u1ED9c mang h\u01B0\u01A1ng v\u1ECB c\u1EE7a th\u1EBF gi\u1EDBi n\xE0y \u2014\u2014 c\xE1c danh t\u1EEB v\u1EC1 th\u1EDDi ti\u1EBFt, s\u1EA3n v\u1EADt, y\u1EBFu t\u1ED1 si\xEAu nhi\xEAn\u2026 h\xE3y c\u1ED1 l\u1EA5y ch\u1EA5t li\u1EC7u t\u1EEB world book; nh\u01B0ng s\u1EF1 ki\u1EC7n ch\u1EC9 \u1EA3nh h\u01B0\u1EDFng vi\u1EC7c tr\u1ED3ng tr\u1ECDt, kh\xF4ng \u0111\u1EA9y c\u1ED1t truy\u1EC7n. C\xF3 th\u1EC3 nh\u1EAFc t\xEAn nh\xE2n v\u1EADt trong th\u1EBF gi\u1EDBi \u1EDF ph\u1EA7n flavor cho sinh \u0111\u1ED9ng, nh\u01B0ng tuy\u1EC7t \u0111\u1ED1i kh\xF4ng \u0111\u01B0\u1EE3c \u0111\u1EC3 nh\xE2n v\u1EADt n\xF3i chuy\u1EC7n, h\xE0nh \u0111\u1ED9ng hay x\u1EA3y ra t\xECnh ti\u1EBFt n\xE0o.\n2. Xu h\u01B0\u1EDBng s\u1EF1 ki\u1EC7n h\xF4m nay: ' + tendency + "; ch\u1EE7 \u0111\u1EC1 tham kh\u1EA3o: " + theme + '.\n3. Tr\u01B0\u1EDDng hi\u1EC7u \u1EE9ng ch\u1EC9 \u0111\u01B0\u1EE3c d\xF9ng time_mult (0.7~1.1, h\u1EC7 s\u1ED1 nh\xE2n th\u1EDDi gian sinh tr\u01B0\u1EDFng) / mutate_on_fert (0~0.5), c\xF3 th\u1EC3 ch\u1EC9 d\xF9ng m\u1ED9t ho\u1EB7c b\u1ECF c\u1EA3 hai. **Tuy\u1EC7t \u0111\u1ED1i \u0111\u1EEBng vi\u1EBFt ng\u01B0\u1EE3c ng\u1EEF ngh\u0129a c\u1EE7a time_mult: <1 = m\u1ECDc nhanh h\u01A1n = s\u1EF1 ki\u1EC7n t\xEDch c\u1EF1c; >1 = m\u1ECDc ch\u1EADm h\u01A1n = s\u1EF1 ki\u1EC7n ti\xEAu c\u1EF1c**. Ngo\xE0i ra c\xF3 tr\u01B0\u1EDDng hi\u1EBFm double_yield:true (s\u1ED1 qu\u1EA3 thu ho\u1EA1ch h\xF4m nay \xD72, ph\xFAc l\u1EE3i cho d\xE2n may m\u1EAFn) \u2014\u2014 ch\u1EC9 n\xEAn xu\u1EA5t hi\u1EC7n kho\u1EA3ng 8% s\u1ED1 ng\xE0y, khi xu\u1EA5t hi\u1EC7n th\xEC s\u1EF1 ki\u1EC7n ph\u1EA3i vi\u1EBFt theo ch\u1EE7 \u0111\u1EC1 b\u1ED9i thu l\u1EDBn / k\u1EF3 t\xEDch, type b\u1EAFt bu\u1ED9c l\xE0 buff. C\xF3 th\u1EC3 th\xEAm favored_crop: \u0111i\u1EC1n m\u1ED9t t\xEAn c\xE2y tr\u1ED3ng (b\u1EAFt bu\u1ED9c l\u1EA5y t\u1EEB danh s\xE1ch c\xE2y tr\u1ED3ng), khi \u0111\xF3 hi\u1EC7u \u1EE9ng ch\u1EC9 t\xE1c d\u1EE5ng l\xEAn c\xE2y \u0111\xF3; kh\xF4ng \u0111i\u1EC1n th\xEC c\u1EA3 ru\u1ED9ng \u0111\u1EC1u ch\u1ECBu t\xE1c d\u1EE5ng.\n4. N\u1EBFu s\u1EF1 ki\u1EC7n l\xE0m c\xE2y b\u1ECB \u0111\u1ED9t bi\u1EBFn (mutate_on_fert>0, l\xE0 x\xE1c su\u1EA5t \u0111\u1ED9t bi\u1EBFn c\u01A1 b\u1EA3n c\u1EE7a c\xE2y ch\xEDn h\xF4m nay, b\xF3n ph\xE2n s\u1EBD khu\u1EBFch \u0111\u1EA1i), th\xEC cho th\xEAm: mutate_prefix (ti\u1EC1n t\u1ED1 \u0111\u1ED9t bi\u1EBFn mang h\u01B0\u01A1ng v\u1ECB c\u1EE7a th\u1EBF gi\u1EDBi n\xE0y, trong 5 ch\u1EEF, v\xED d\u1EE5 "linh ho\xE1", "si\xEAu to", "\u0103n th\u1ECBt", "c\u1EE9ng ng\u1EAFc", "ph\xE1t s\xE1ng") v\xE0 mutate_desc (m\u1ED9t \u0111\u1ED1i t\u01B0\u1EE3ng, **vi\u1EBFt ri\xEAng cho t\u1EEBng lo\u1EA1i c\xE2y \u0111\u01B0\u1EE3c li\u1EC7t k\xEA b\xEAn d\u01B0\u1EDBi** v\u1EC1 **hi\u1EC7u \u1EE9ng ho\u1EB7c c\xF4ng d\u1EE5ng** c\u1EE7a th\u1EC3 \u0111\u1ED9t bi\u1EBFn \u0111\xF3 trong th\u1EBF gi\u1EDBi n\xE0y, m\u1ED7i m\u1EE5c trong 20 ch\u1EEF \u2014\u2014 h\xE3y vi\u1EBFt "n\xF3 l\xE0m \u0111\u01B0\u1EE3c g\xEC / s\u1EBD g\xE2y ra chuy\u1EC7n g\xEC", b\u1EAFt bu\u1ED9c l\xE0 hi\u1EC7u \u1EE9ng **khi c\u1EA7m gi\u1EEF, \u0103n ho\u1EB7c s\u1EED d\u1EE5ng** (n\xF3 s\u1EBD \u0111\u01B0\u1EE3c mang kh\u1ECFi v\u01B0\u1EDDn rau \u0111\u1EC3 d\xF9ng trong c\xE2u chuy\u1EC7n, nghi\xEAm c\u1EA5m vi\u1EBFt ki\u1EC3u "khi thu ho\u1EA1ch / khi nh\u1ED5 l\xEAn" v\xEC r\u1EDDi v\u01B0\u1EDDn l\xE0 m\u1EA5t hi\u1EC7u l\u1EF1c), ph\u1EA3i m\u01A1 h\u1ED3 \u0111\u1EC3 ch\u1EEBa ch\u1ED7 t\u01B0\u1EDFng t\u01B0\u1EE3ng, nghi\xEAm c\u1EA5m m\xF4 t\u1EA3 ki\u1EC3u ngo\u1EA1i h\xECnh l\u1EA5p l\xE1nh; hi\u1EC7u \u1EE9ng c\u1EE7a c\xE1c c\xE2y kh\xE1c nhau ph\u1EA3i kh\xE1c nhau). Khi kh\xF4ng \u0111\u1ED9t bi\u1EBFn th\xEC b\u1ECF c\u1EA3 hai tr\u01B0\u1EDDng.\n   C\xE1c lo\u1EA1i c\xE2y hi\u1EC7n c\xF3 trong v\u01B0\u1EDDn n\xE0y (t\u1ED5ng c\u1ED9ng {{CROPCOUNT}} lo\u1EA1i, mutate_desc b\u1EAFt bu\u1ED9c ph\u1EE7 h\u1EBFt t\u1EEBng lo\u1EA1i m\u1ED9t, nghi\xEAm c\u1EA5m b\u1ECF s\xF3t hay ch\u1EC9 vi\u1EBFt v\xE0i lo\u1EA1i): {{CROPLIST}}\n5. flavor l\xE0 m\u1ED9t c\xE2u cho ng\u01B0\u1EDDi ch\u01A1i \u0111\u1ECDc, trong 30 ch\u1EEF, \u01B0u ti\xEAn h\u01B0\u01A1ng v\u1ECB, c\xF3 th\u1EC3 h\xF3m h\u1EC9nh.\n6. Ch\u1EC9 \u0111\u01B0\u1EE3c xu\u1EA5t \u0111\xFAng m\u1ED9t d\xF2ng JSON, c\u1EA5m xu\u1EA5t gi\u1EA3i th\xEDch, ti\u1EC1n t\u1ED1 h\u1EADu t\u1ED1 hay d\u1EA5u kh\u1ED1i code:\n{"name":"t\xEAn s\u1EF1 ki\u1EC7n 2~6 ch\u1EEF","type":"buff|debuff|neutral","time_mult":1,"double_yield":false,"mutate_on_fert":0,"mutate_prefix":"","mutate_desc":{"t\xEAn c\xE2y tr\u1ED3ng":"m\xF4 t\u1EA3 hi\u1EC7u \u1EE9ng"},"favored_crop":"","flavor":"m\u1ED9t c\xE2u"}\n\nV\xED d\u1EE5 \u0111\u1ECBnh d\u1EA1ng (l\u1EA5y t\u1EEB th\u1EBF gi\u1EDBi kh\xE1c, ch\u1EC9 \u0111\u1EC3 tham kh\u1EA3o \u0111\u1ECBnh d\u1EA1ng v\xE0 h\u01B0\u1EDBng h\u01B0\u01A1ng v\u1ECB, c\u1EA5m ch\xE9p nguy\xEAn):\n- {"name":"M\u01B0a linh","type":"buff","time_mult":0.8,"flavor":"Linh kh\xED \u0111\u1ECDng th\xE0nh m\u01B0a, m\u1EA7m rau l\xE9n v\u01B0\u01A1n \u0111\u1ED1t nghe r\xF5 ti\u1EBFng."}\n- {"name":"M\u01B0a axit","type":"debuff","time_mult":1.1,"mutate_on_fert":0.3,"mutate_prefix":"bi\u1EBFn ch\u1EE7ng","flavor":"M\u01B0a axit g\xF5 m\xE1i, rau \u1EC9u x\xECu m\u1ECDc ch\u1EADm, c\xE2y \u0111\xE3 b\xF3n ph\xE2n e l\xE0 m\u1ECDc m\xE9o m\u1EA5t."}\n- {"name":"R\xF2 r\u1EC9 ph\xE2n nano","type":"neutral","mutate_on_fert":0.4,"mutate_prefix":"si\xEAu to","mutate_desc":{"B\xED ng\xF4":"B\u1ED5 ra th\xEC kh\xF4ng gian b\xEAn trong r\u1ED9ng h\u01A1n b\xEAn ngo\xE0i","C\xE0 chua":"Ng\u01B0\u1EDDi \u0103n nh\u1EDB m\u1ECDi th\u1EE9 trong ch\u1ED1c l\xE1t"},"flavor":"C\xE2y b\xF3n ph\xE2n h\xF4m nay c\xF3 th\u1EC3 m\u1ECDc ra h\xECnh th\xF9 kh\xF3 tin."}\n' + (CS.userPrompt ? "\n[ctx.S\u1EDF th\xEDch tu\u1EF3 ch\u1EC9nh c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i, \u01B0u ti\xEAn \u0111\xE1p \u1EE9ng, nh\u01B0ng kh\xF4ng \u0111\u01B0\u1EE3c v\u01B0\u1EE3t ra ngo\xE0i ph\u1EA1m vi c\xE1c tr\u01B0\u1EDDng]:\n" + CS.userPrompt + "\n" : "") + "\nTr\xEDch world book:\n" + (worldbook || "(Th\u1EBF gi\u1EDBi n\xE0y t\u1EA1m ch\u01B0a c\xF3 world book, h\xE3y t\u1EA1o m\u1ED9t s\u1EF1 ki\u1EC7n \u0111\u1ED3ng qu\xEA chung chung)")).replace("{{CROPLIST}}", cropList).replace("{{CROPCOUNT}}", String(cropList.split(", ").length));
+}
+function sanitizeEvent(o) {
+  if (!o || typeof o !== "object") return null;
+  const ev = {
+    name: String(o.name || "Chuy\u1EC7n l\u1EA1").slice(0, 40),
+    type: ["buff", "debuff", "neutral"].indexOf(o.type) >= 0 ? o.type : "neutral",
+    time_mult: clampN(o.time_mult != null ? o.time_mult : o.growth_mult && o.growth_mult !== 1 ? 1 / o.growth_mult : 1, 0.7, 1.1, 1),
+    // growth_mult cũ (tốc độ) tự động quy đổi (yield_mult đã nghỉ hưu, bỏ qua thẳng)
+    double_yield: o.double_yield === true,
+    // v1.1: phúc lợi dân may, số quả ×2 (kiểu boolean, nghiêm cấm số thập phân)
+    mutate_on_fert: clampN(o.mutate_on_fert, 0, 0.5, 0),
+    mutate_prefix: String(o.mutate_prefix || "\u0111\u1ED9t bi\u1EBFn").slice(0, 20),
+    mutate_desc: o.mutate_desc && typeof o.mutate_desc === "object" ? Object.keys(o.mutate_desc).slice(0, 30).reduce((a, k) => {
+      a[String(k).slice(0, 30)] = String(o.mutate_desc[k]).slice(0, 100);
+      return a;
+    }, {}) : typeof o.mutate_desc === "string" && o.mutate_desc ? { "*": String(o.mutate_desc).slice(0, 100) } : {},
+    favored_crop: (() => {
+      const f = String(o.favored_crop || "");
+      return Object.values(CROPS).some((c) => c.name === f) ? f : "";
+    })(),
+    flavor: String(o.flavor || "")
+  };
+  return ev;
+}
+function extractJson(raw) {
+  const s = raw.indexOf("{");
+  if (s < 0) return null;
+  let depth = 0, inStr = false, escd = false;
+  for (let i = s; i < raw.length; i++) {
+    const ch = raw[i];
+    if (inStr) {
+      if (escd) escd = false;
+      else if (ch === "\\") escd = true;
+      else if (ch === '"') inStr = false;
+    } else {
+      if (ch === '"') inStr = true;
+      else if (ch === "{") depth++;
+      else if (ch === "}") {
+        depth--;
+        if (depth === 0) return raw.slice(s, i + 1);
+      }
+    }
+  }
+  return null;
+}
+function fallbackEvent() {
+  const w = weatherOf(gameDay());
+  return sanitizeEvent(w === "M\u01B0a nh\u1ECF" ? { name: "M\u01B0a nh\u1ECF", type: "buff", time_mult: 0.9, flavor: "M\u01B0a nh\u1ECF r\u1ED3i, m\u1EA5y c\xE2y rau u\u1ED1ng n\u01B0\u1EDBc vui l\u1EAFm." } : w === "Nhi\u1EC1u m\xE2y" ? { name: "Nhi\u1EC1u m\xE2y", type: "neutral", flavor: "M\xE2y che b\u1EDBt n\u1EAFng, rau v\xE0 b\u1EA1n \u0111\u1EC1u thong th\u1EA3." } : { name: "N\u1EAFng", type: "neutral", flavor: "N\u1EAFng \u0111\u1EB9p l\u1EAFm, h\u1EE3p \u0111\u1EC3 tr\u1ED3ng g\xEC \u0111\xF3." });
+}
+var eventPending = false;
+async function requestDayEvent(force) {
+  if (eventPending || !CS.link) return;
+  if (!force && todayEvent()) return;
+  if (!SEC.url || !SEC.model) {
+    applyDayEvent(fallbackEvent(), "fallback", 'Ch\u01B0a c\u1EA5u h\xECnh API ph\u1EE5 (\u0111i\u1EC1n xong trong c\xE0i \u0111\u1EB7t th\xEC nh\u1EDB b\u1EA5m "L\u01B0u c\u1EA5u h\xECnh")');
+    return;
+  }
+  eventPending = true;
+  renderBanner();
+  try {
+    const wb = await collectWorldbook();
+    console.log("====== [FARM DEBUG] WORLDBOOK EXTRACTED ======");
+    console.log(wb);
+    console.log("================================================");
+    const prompt = buildEventPrompt(wb);
+    const reqBody = {
+      model: SEC.model,
+      messages: [
+        { role: "system", content: prompt },
+        { role: "user", content: "H\xE3y t\u1EA1o s\u1EF1 ki\u1EC7n v\u01B0\u1EDDn rau cho h\xF4m nay." }
+      ],
+      max_tokens: 2e3 + Object.keys(CROPS).length * 100
+    };
+    const resPromise = fetch(SEC.url.replace(/\/+$/, "") + "/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...SEC.key ? { Authorization: "Bearer " + SEC.key } : {} },
+      body: JSON.stringify(reqBody)
+    }).then((r) => r.json());
+    const data = await Promise.race([
+      resPromise,
+      new Promise((_, rej) => window.setTimeout(() => rej(new Error("timeout")), 9e4))
+      // v0.8: 15 mô tả nên lượng sinh ra lớn, 30s→90s
+    ]);
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+    const raw = data.choices && data.choices[0] && data.choices[0].message ? String(data.choices[0].message.content) : "";
+    const jtxt = extractJson(raw);
+    if (!jtxt) throw new Error(raw.trim() ? "Kh\xF4ng c\xF3 JSON, model tr\u1EA3 v\u1EC1: " + raw.trim().slice(0, 40) : "Model tr\u1EA3 v\u1EC1 r\u1ED7ng (c\xF3 th\u1EC3 max_tokens b\u1ECB ph\u1EA7n suy ngh\u0129 \u0103n h\u1EBFt / API kh\xF4ng xu\u1EA5t g\xEC)");
+    const ev = sanitizeEvent(JSON.parse(jtxt));
+    if (!ev) throw new Error("Tr\u01B0\u1EDDng JSON b\u1EA5t th\u01B0\u1EDDng");
+    applyDayEvent(ev, "ai");
+  } catch (e) {
+    applyDayEvent(fallbackEvent(), "fallback", (e && e.message || String(e)).slice(0, 60));
+  } finally {
+    eventPending = false;
+    renderBanner();
+  }
+}
+function openSandbox() {
+  const html = `
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:260px;display:flex;flex-direction:column;gap:8px">
+        <div class="shead" style="margin-top:0">T\u1EA1o Sprite b\u1EB1ng AI</div>
+        <div class="note">Nh\u1EADp \xFD t\u01B0\u1EDFng \u0111\u1EC3 AI x\u1EBFp m\xE3 t\u1EF1 \u0111\u1ED9ng. D\xF9ng chung API \u1EDF ph\u1EA7n c\xE0i \u0111\u1EB7t.</div>
+        <div style="display:flex;gap:8px">
+          <select class="inp" id="sbPalette" style="padding:6px;flex:1">
+            <option value="SPRITES">B\u1EA3ng m\xE0u N\xF4ng s\u1EA3n/V\u1EADt ph\u1EA9m (P)</option>
+            <option value="PETS">B\u1EA3ng m\xE0u Th\xFA c\u01B0ng (PET_P)</option>
+          </select>
+          <select class="inp" id="sbSize" style="padding:6px;width:90px">
+            <option value="16">16 x 16</option>
+            <option value="24">24 x 24</option>
+            <option value="32">32 x 32</option>
+          </select>
+        </div>
+        <textarea class="inp" id="sbPrompt" placeholder="Nh\u1EADp \xFD t\u01B0\u1EDFng pixel art (g\xF5 ti\u1EBFng Vi\u1EC7t c\u0169ng \u0111\u01B0\u1EE3c)..." style="height:60px"></textarea>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="buy" id="sbGenerate">\u2728 T\u1EA1o b\u1EB1ng AI</span>
+          <span class="buy plain" id="sbPayloadBtn" style="display:none;padding:4px 8px;font-size:12px">\u{1F50D} Payload</span>
+          <span id="sbStatus" style="font-size:12px;color:var(--accFg)"></span>
+        </div>
+        <textarea class="inp" id="sbPayloadOut" style="display:none;height:120px;font-size:11px;font-family:monospace;margin-top:4px" readonly></textarea>
+        <div class="shead">M\xE3 Pixel</div>
+        <div class="note">D\u1EA5u . l\xE0 trong su\u1ED1t. D\xE1n ho\u1EB7c s\u1EEDa m\u1EA3ng JSON v\xE0o \u0111\xE2y \u0111\u1EC3 xem th\u1EED tr\xEAn b\u1EA3ng v\u1EBD.</div>
+        <textarea class="inp" id="sbCode" style="height:200px;font-family:monospace;white-space:pre"></textarea>
+      </div>
+      <div style="width:256px;display:flex;flex-direction:column;gap:8px">
+        <div class="shead" style="margin-top:0">B\u1EA3n xem tr\u01B0\u1EDBc</div>
+        <canvas id="sbCanvas" width="256" height="256" style="background: repeating-conic-gradient(#dfdfdf 0% 25%, #ffffff 0% 50%) 0 0 / 16px 16px; image-rendering:pixelated; border:2px solid var(--st-border-color); border-radius:4px; width:100%"></canvas>
+      </div>
+    </div>
+  `;
+  openModal("X\u01B0\u1EDFng Ch\u1EBF T\xE1c", html);
+  const ta = $id("sbCode");
+  const sel = $id("sbPalette");
+  const sizeSel = $id("sbSize");
+  const ctx2 = $id("sbCanvas").getContext("2d");
+  function render() {
+    const isPet = sel.value === "PETS";
+    const palette = isPet ? PET_P : P;
+    const size = parseInt(sizeSel.value) || 16;
+    const canvasEl = $id("sbCanvas");
+    if (canvasEl.width !== size) {
+      canvasEl.width = size;
+      canvasEl.height = size;
+    }
+    ctx2.clearRect(0, 0, size, size);
+    const lines = ta.value.split("\n").map((l) => l.trim().replace(/['",\[\]]/g, "")).filter((l) => l.length > 0);
+    for (let y = 0; y < Math.min(size, lines.length); y++) {
+      const row = lines[y];
+      for (let x = 0; x < Math.min(size, row.length); x++) {
+        const char = row[x];
+        if (char !== ".") {
+          const color = palette[char];
+          if (color && typeof color === "string") {
+            ctx2.fillStyle = color;
+            ctx2.fillRect(x, y, 1, 1);
+          }
+        }
+      }
+    }
+  }
+  let renderTimeout;
+  function debouncedRender() {
+    clearTimeout(renderTimeout);
+    renderTimeout = setTimeout(render, 150);
+  }
+  ta.addEventListener("input", debouncedRender);
+  sel.addEventListener("change", render);
+  sizeSel.addEventListener("change", render);
+  $id("sbPayloadBtn").addEventListener("click", () => {
+    const out = $id("sbPayloadOut");
+    out.style.display = out.style.display === "none" ? "block" : "none";
+  });
+  $id("sbGenerate").addEventListener("click", async () => {
+    const p = $id("sbPrompt").value.trim();
+    if (!p) return toast("Vui l\xF2ng nh\u1EADp \xFD t\u01B0\u1EDFng!");
+    if (!SEC.url) return toast("Vui l\xF2ng c\u1EA5u h\xECnh API trong C\xE0i \u0111\u1EB7t tr\u01B0\u1EDBc!");
+    $id("sbGenerate").style.pointerEvents = "none";
+    $id("sbGenerate").style.opacity = "0.5";
+    $id("sbStatus").textContent = "\u0110ang g\u1ECDi AI...";
+    try {
+      const isPet = sel.value === "PETS";
+      const palette = isPet ? PET_P : P;
+      const simpleColors = Object.entries(palette).filter((e) => typeof e[1] === "string");
+      const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(", ");
+      const size = parseInt(sizeSel.value) || 16;
+      const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t chuy\xEAn gia thi\u1EBFt k\u1EBF Pixel Art (${size}x${size}). Nhi\u1EC7m v\u1EE5 c\u1EE7a b\u1EA1n l\xE0 v\u1EBD m\u1ED9t \u0111\u1ED3 v\u1EADt d\u1EF1a tr\xEAn y\xEAu c\u1EA7u, v\xE0 B\u1EAET BU\u1ED8C ch\u1EC9 \u0111\u01B0\u1EE3c d\xF9ng c\xE1c m\xE3 k\xFD t\u1EF1 trong B\u1EA3ng m\xE0u sau \u0111\xE2y.
+
+B\u1EA2NG M\xC0U CHO PH\xC9P (K\xFD t\u1EF1: M\xE3 m\xE0u Hex):
+${paletteStr}
+
+H\u01AF\u1EDANG D\u1EAAN T\u01AF DUY (B\u1EAFt bu\u1ED9c ph\u1EA3i c\xF3 th\u1EBB <thinking> tr\u01B0\u1EDBc khi xu\u1EA5t m\xE3):
+\u0110\u1EC3 v\u1EBD pixel art ho\xE0n h\u1EA3o, s\u1EAFc n\xE9t v\xE0 kh\xF4ng b\u1ECB m\xE9o l\u1EC7ch, h\xE3y tu\xE2n th\u1EE7 nghi\xEAm ng\u1EB7t c\xE1c b\u01B0\u1EDBc sau:
+1. Ph\xE2n t\xEDch B\u1ED1 c\u1EE5c & H\xECnh kh\u1ED1i: L\u1EF1a ch\u1ECDn g\xF3c \u0111\u1ED9 \u0111\u1EB7t v\u1EADt th\u1EC3 (vd: v\u0169 kh\xED n\xEAn \u0111\u1EB7t ch\xE9o). N\u1EBFu v\u1EBD v\u1EADt th\u1EC3 tr\xF2n/c\xE2n x\u1EE9ng, h\xE3y t\xEDnh to\xE1n sao cho n\u1EEDa tr\xE1i v\xE0 n\u1EEDa ph\u1EA3i kh\u1EDBp nhau. Nh\u1EDB r\u1EB1ng khung ${size}x${size} kh\xF4ng c\xF3 t\xE2m 1 pixel (t\xE2m n\u1EB1m gi\u1EEFa c\u1ED9t ${size / 2 - 1} v\xE0 ${size / 2}).
+2. Quy ho\u1EA1ch M\xE0u s\u1EAFc (Palette): Ch\u1ECDn k\xFD t\u1EF1 l\xE0m m\xE0u Vi\u1EC1n (b\u1EAFt bu\u1ED9c bao quanh v\u1EADt th\u1EC3), m\xE0u T\u1ED1i (Shadow) cho h\u01B0\u1EDBng khu\u1EA5t s\xE1ng, m\xE0u ctx.S\xE1ng (Highlight) cho h\u01B0\u1EDBng \u0111\xF3n s\xE1ng, v\xE0 m\xE0u N\u1EC1n (Base). TUY\u1EC6T \u0110\u1ED0I KH\xD4NG ch\u1EBF ra k\xFD t\u1EF1 ngo\xE0i B\u1EA3ng m\xE0u.
+3. H\xECnh d\xE1ng (Shape & Texture): Tr\xE1nh l\xE0m c\xE1c kh\u1ED1i m\xE0u b\u1ECB vu\xF4ng v\u1EE9c, th\u1EB3ng \u0111u\u1ED9t. ctx.S\u1EED d\u1EE5ng c\xE1c n\xE9t l\u01B0\u1EE3n \u0111\u1EC3 t\u1EA1o h\xECnh d\xE1ng t\u1EF1 nhi\xEAn.
+4. \xC1nh x\u1EA1 & \u0110\u1EBEM K\xDD T\u1EF0 (R\u1EA5t quan tr\u1ECDng): Khi ph\xE1c th\u1EA3o t\u1EEBng d\xF2ng (t\u1EEB d\xF2ng 0 \u0111\u1EBFn ${size - 1}), B\u1EA0N PH\u1EA2I \u0110\u1EBEM CH\xCDNH X\xC1C s\u1ED1 l\u01B0\u1EE3ng k\xFD t\u1EF1. 
+ - Khung canvas l\xE0 ${size}x${size}. Do \u0111\xF3, m\u1ED9t d\xF2ng CH\u1EC8 \u0110\u01AF\u1EE2C PH\xC9P d\xE0i \u0111\xFAng ${size} k\xFD t\u1EF1.
+ - V\xED d\u1EE5 m\u1ED9t d\xF2ng tr\u1ED1ng h\u1EE3p l\u1EC7: "${".".repeat(size)}"
+ - N\u1EBFu b\u1EA1n t\u1EA1o ra d\xF2ng c\xF3 ${size + 1} ho\u1EB7c ${size - 1} k\xFD t\u1EF1, h\xECnh s\u1EBD b\u1ECB c\u1EAFt x\xE9n v\xE0 m\xE9o m\xF3.
+
+QUY T\u1EAEC \u0110\u1EA6U RA B\u1EAET BU\u1ED8C:
+- Sau khi \u0111\xF3ng th\u1EBB </thinking>, CH\u1EC8 \u0110\u01AF\u1EE2C XU\u1EA4T 1 kh\u1ED1i m\xE3 \`\`\`json ch\u1EE9a m\u1EA3ng g\u1ED3m \u0110\xDANG ${size} chu\u1ED7i.
+- KI\u1EC2M TRA L\u1EA0I: M\u1ED7i chu\u1ED7i \u0111\u1EA1i di\u1EC7n cho 1 h\xE0ng v\xE0 PH\u1EA2I D\xC0I CH\xCDNH X\xC1C ${size} K\xDD T\u1EF0. Kh\xF4ng h\u01A1n kh\xF4ng k\xE9m!
+- D\xF9ng d\u1EA5u ch\u1EA5m '.' cho pixel trong su\u1ED1t.
+- TUY\u1EC6T \u0110\u1ED0I kh\xF4ng d\xF9ng k\xFD t\u1EF1 l\u1EA1 ngo\xE0i d\u1EA5u '.' v\xE0 c\xE1c k\xFD t\u1EF1 B\u1EA3ng m\xE0u.`;
+      const reqBody = {
+        model: SEC.model,
+        messages: [
+          { role: "system", content: sysPrompt },
+          { role: "user", content: "V\u1EBD: " + p }
+        ]
+      };
+      $id("sbPayloadOut").value = JSON.stringify(reqBody, null, 2);
+      $id("sbPayloadBtn").style.display = "inline-block";
+      const res = await fetch(SEC.url.replace(/\/+$/, "") + "/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...SEC.key ? { Authorization: "Bearer " + SEC.key } : {} },
+        body: JSON.stringify(reqBody)
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      const content = data.choices?.[0]?.message?.content || "";
+      let jsonStr = "";
+      const codeMatch = content.match(/```(?:json)?\s*(\[[\s\ctx.S]*?\])\s*```/i);
+      if (codeMatch) {
+        jsonStr = codeMatch[1];
+      } else {
+        const arrMatch = content.match(/\[\s*"(?:[^"\\]|\\.)*"(?:\s*,\s*"(?:[^"\\]|\\.)*")*\s*\]/);
+        jsonStr = arrMatch ? arrMatch[0] : (content.match(/\[[\s\ctx.S]*?\]/) || [""])[0];
+      }
+      if (jsonStr) {
+        ta.value = jsonStr.trim();
+        render();
+        $id("sbStatus").textContent = "Ho\xE0n t\u1EA5t!";
+      } else {
+        throw new Error("AI kh\xF4ng tr\u1EA3 v\u1EC1 m\u1EA3ng JSON");
+      }
+    } catch (e) {
+      console.error(e);
+      $id("sbStatus").textContent = "L\u1ED7i!";
+      toast("L\u1ED7i AI: " + e.message);
+    } finally {
+      $id("sbGenerate").style.pointerEvents = "";
+      $id("sbGenerate").style.opacity = "1";
+    }
+  });
+}
+function applyDayEvent(ev, source, reason) {
+  const d = gameDay();
+  ctx.S.dayEvent = { day: d, at: now(), who: charName(), ev, source, reason: reason || "" };
+  if (ev.time_mult !== 1) {
+    eachPage((plots) => plots.forEach((p) => {
+      const c = p.crop;
+      if (!c || now() >= c.matureAt || c.evDay === d) return;
+      if (ev.favored_crop && CROPS[c.id].name !== ev.favored_crop) return;
+      c.matureAt = now() + Math.round((c.matureAt - now()) * ev.time_mult);
+      c.evDay = d;
+    }));
+  }
+  save();
+  renderStatus();
+  renderPlots();
+}
+async function testSecApi() {
+  if (!SEC.url || !SEC.model) return toast("H\xE3y \u0111i\u1EC1n \u0111\u1ECBa ch\u1EC9 API v\xE0 t\xEAn model tr\u01B0\u1EDBc");
+  toast("\u0110ang ki\u1EC3m tra k\u1EBFt n\u1ED1i\u2026");
+  try {
+    const reqBody = {
+      model: SEC.model,
+      messages: [{ role: "user", content: "Ch\u1EC9 tr\u1EA3 l\u1EDDi \u0111\xFAng hai ch\u1EEF: C\xF3 m\u1EB7t" }],
+      max_tokens: 16
+    };
+    const resPromise = fetch(SEC.url.replace(/\/+$/, "") + "/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...SEC.key ? { Authorization: "Bearer " + SEC.key } : {} },
+      body: JSON.stringify(reqBody)
+    }).then((r) => r.json());
+    const data = await Promise.race([
+      resPromise,
+      new Promise((_, rej) => window.setTimeout(() => rej(new Error("Qu\xE1 th\u1EDDi gian ch\u1EDD (20s)")), 2e4))
+    ]);
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+    const raw = data.choices && data.choices[0] && data.choices[0].message ? String(data.choices[0].message.content) : "";
+    toast("K\u1EBFt n\u1ED1i th\xE0nh c\xF4ng: " + raw.trim().slice(0, 20));
+  } catch (e) {
+    toast("K\u1EBFt n\u1ED1i th\u1EA5t b\u1EA1i: " + (e && e.message || e));
+  }
+}
+async function fetchModelList() {
+  const url = $id("secUrl").value.trim(), key = $id("secKey").value.trim();
+  const drop = $id("modelDrop");
+  if (!url) return toast("H\xE3y \u0111i\u1EC1n \u0111\u1ECBa ch\u1EC9 API tr\u01B0\u1EDBc");
+  if (drop.style.display !== "none") {
+    drop.style.display = "none";
+    return;
+  }
+  toast("\u0110ang l\u1EA5y danh s\xE1ch model\u2026");
+  try {
+    const ctrl = new AbortController();
+    const to = window.setTimeout(() => ctrl.abort(), 15e3);
+    const r = await fetch(url.replace(/\/+$/, "") + "/models", { headers: key ? { Authorization: "Bearer " + key } : {}, signal: ctrl.signal });
+    window.clearTimeout(to);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const d = await r.json();
+    const ids = (d && (d.data || d.models) || []).map((m) => m && (m.id || m.model || m.name) || "").filter(Boolean);
+    if (!ids.length) throw new Error("API kh\xF4ng tr\u1EA3 v\u1EC1 danh s\xE1ch model");
+    drop.innerHTML = ids.map((id) => `<span data-mpick="${esc(id)}">${esc(id)}</span>`).join("");
+    drop.style.display = "flex";
+    drop.querySelectorAll("[data-mpick]").forEach((el) => el.addEventListener("click", () => {
+      $id("secModel").value = el.dataset.mpick;
+      drop.style.display = "none";
+      toast("\u0110\xE3 ch\u1ECDn: " + el.dataset.mpick + ", nh\u1EDB b\u1EA5m l\u01B0u c\u1EA5u h\xECnh");
+    }));
+  } catch (e) {
+    toast("L\u1EA5y danh s\xE1ch th\u1EA5t b\u1EA1i: " + (e && e.message || e));
+  }
+}
+var INJECT_ID = "star_tavern_farm_summary";
+function setInjection(text) {
+  try {
+    const ctx2 = window.SillyTavern?.getContext?.() || {};
+    if (ctx2.setExtensionPrompt) ctx2.setExtensionPrompt(INJECT_ID, text || "", 1, 4);
+  } catch (e) {
+  }
+}
+function updateInjection() {
+  if (!CS.link || !CS.story) {
+    setInjection("");
+    return;
+  }
+  const counts = {};
+  let ripe = 0;
+  eachPage((plots) => plots.forEach((p) => {
+    const c = p.crop;
+    if (!c) return;
+    counts[c.id] = (counts[c.id] || 0) + 1;
+    if (now() >= c.matureAt) ripe++;
+  }));
+  const field = Object.keys(counts).map((id) => CROPS[id].name + "\xD7" + counts[id]).join(", ") || "\u0111ang \u0111\u1EC3 tr\u1ED1ng";
+  const bagTxt = Object.keys(ctx.S.bag).map((k) => {
+    const d = mutDescOf(k);
+    return "  + " + bagName(k) + " \xD7" + ctx.S.bag[k] + (d ? " (" + d + ")" : "");
+  }).join("\n");
+  const ev = todayEvent();
+  const takeoutNoteStr = function() {
+    setTakeoutNote((takeoutNote || []).filter((t) => now() < t.until));
+    if (!takeoutNote.length) return "";
+    return `
+
+\u3010QUAN TR\u1ECCNG: H\xC0NH \u0110\u1ED8NG V\u1EEAA X\u1EA2Y RA\u3011
+Ng\u01B0\u1EDDi ch\u01A1i v\u1EEBa l\u1EA5y ${takeoutNote.map((t) => t.txt).join(", ")} ra kh\u1ECFi balo v\u01B0\u1EDDn rau, h\u1EB3n l\xE0 \u0111\u1ECBnh d\xF9ng/t\u1EB7ng trong c\u1ED1t truy\u1EC7n. H\xE3y ti\u1EBFp nh\u1EADn m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn; ph\u1EA7n trong ngo\u1EB7c l\xE0 hi\u1EC7u \u1EE9ng c\u1EE7a v\u1EADt ph\u1EA9m \u0111\xF3, h\xE3y l\u1EA5y \u0111\xF3 l\xE0m chu\u1EA9n v\xE0 c\xF3 th\u1EC3 s\xE1ng t\u1EA1o th\xEAm trong ch\u1EEBng m\u1EF1c.`;
+  }();
+  const promptText = `\u3010V\u01B0\u1EDDn rau nh\u1ECF c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i\u3011
+Ng\u01B0\u1EDDi ch\u01A1i \u0111ang tr\u1ED3ng m\u1ED9t m\u1EA3nh v\u01B0\u1EDDn rau th\u01B0 gi\xE3n tr\xEAn giao di\u1EC7n SillyTavern (l\u1ED1i ch\u01A1i ti\u1EC7n \xEDch, t\u1ED3n t\u1EA1i song song v\u1EDBi c\u1ED1t truy\u1EC7n).
+T\xECnh tr\u1EA1ng hi\u1EC7n t\u1EA1i:
+- \u0110ang tr\u1ED3ng: ${field || "\u0110\u1EA5t tr\u1ED1ng"}${ripe ? ` (c\xF3 ${ripe} c\xE2y \u0111\xE3 ch\xEDn ch\u1EDD thu)` : ""}
+${bagTxt ? "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF:\n" + bagTxt : "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF: Tr\u1ED1ng"}
+${ev && ev.flavor ? `- ctx.S\u1EF1 ki\u1EC7n h\xF4m nay: ${ev.name} \u2014\u2014 ${ev.flavor}` : ""}${takeoutNoteStr}
+
+* H\u01B0\u1EDBng d\u1EABn cho AI: Nh\xE2n v\u1EADt trong c\u1ED1t truy\u1EC7n th\u1EC9nh tho\u1EA3ng c\xF3 th\u1EC3 nh\u1EAFc t\u1EDBi vi\u1EC7c ng\u01B0\u1EDDi ch\u01A1i ch\u0103m v\u01B0\u1EDDn hay thu ho\u1EA1ch th\u1EBF n\xE0o m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn, nh\u01B0ng \u0110\u1EEANG thao t\xE1c v\u01B0\u1EDDn rau thay ng\u01B0\u1EDDi ch\u01A1i, c\u0169ng \u0110\u1EEANG bi\u1EBFn v\u01B0\u1EDDn rau th\xE0nh m\u1EA1ch ch\xEDnh c\u1EE7a c\u1ED1t truy\u1EC7n.`;
+  setInjection(promptText);
+}
+var heartbeat = window.setInterval(() => {
+  try {
+    settle();
+  } catch (e) {
+  }
+}, 60 * 1e3);
+function initEvents() {
+  loadCharState();
+  try {
+    const chatChangedEvent = ctx.event_types?.CHAT_CHANGED;
+    if (ctx.eventSource?.on && chatChangedEvent) {
+      ctx.eventSource.on(chatChangedEvent, () => {
+        loadCharState();
+        renderChips();
+        renderBanner();
+        updateInjection();
+        try {
+          if (ctx.S && CS.link) requestDayEvent();
+        } catch (e) {
+          console.warn("[Farm] L\u1ED7i khi \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n CHAT_CHANGED:", e);
+        }
+      });
+    } else {
+      console.warn("[Farm] ctx.eventSource ho\u1EB7c ctx.event_types.CHAT_CHANGED kh\xF4ng kh\u1EA3 d\u1EE5ng, b\u1ECF qua \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n \u0111\u1ED5i th\u1EBB.");
+    }
+  } catch (e) {
+    console.warn("[Farm] L\u1ED7i khi \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n CHAT_CHANGED:", e);
+  }
+}
+
+// src/state.js
+var now = () => Date.now();
+var emptyPlots = () => {
+  const a = [];
+  for (let i = 0; i < 24; i++) a.push({ crop: null });
+  return a;
+};
+function freshState() {
+  return {
+    version: 1,
+    coins: TEST_MODE ? 9999 : 999,
+    totalSales: 0,
+    unlockedBlocks: 2,
+    plots: emptyPlots(),
+    seeds: { douya: 4, mystery: 1 },
+    ferts: {},
+    bag: {},
+    petPoke: {},
+    // Quà khởi đầu: 4 giá đỗ + 1 hạt giống bí ẩn (popup dạy chơi hộp mù)
+    pets: ["slime"],
+    passes: {},
+    petsOut: ["slime"],
+    jobCfg: {},
+    petFind: {},
+    // Tặng slime xanh lúc mở đầu (thực hiện phương án #9)
+    page: 1,
+    plots2: emptyPlots(),
+    plots3: emptyPlots(),
+    unlockedBlocks2: 1,
+    unlockedBlocks3: 1,
+    // v0.8: ba trang (vé vào trang 2/3 tặng kèm ô đất đầu tiên)
+    day0: now(),
+    orb: { fx: 0.94, fy: 0.6 },
+    win: null
+  };
+}
+ctx.S = null;
+var blockPrice = (bi) => BLOCK_PRICE_PG[ctx.S.page][bi];
+function loadState() {
+  if (!ctx.extension_settings[extensionName]) {
+    ctx.extension_settings[extensionName] = {};
+  }
+  const g = ctx.extension_settings[extensionName] || {};
+  ctx.S = g[NS] && g[NS].version === 1 ? g[NS] : freshState();
+  if (!ctx.S.petPoke) ctx.S.petPoke = {};
+  if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
+  if (!ctx.S.passes) ctx.S.passes = {};
+  if (!ctx.S.pets) ctx.S.pets = ["slime", "octo"];
+  if (!ctx.S.petsOut) ctx.S.petsOut = ctx.S.pets.slice(0, 6);
+  if (!ctx.S.jobCfg) ctx.S.jobCfg = {};
+  if (!ctx.S.petFind) ctx.S.petFind = {};
+  if (!ctx.S.theme) ctx.S.theme = "sakura";
+  if (!ctx.S.page) ctx.S.page = 1;
+  Object.keys(ctx.S.bag || {}).forEach((k) => {
+    const base = k.split("@")[0];
+    if (base === "mysbG" || base === "mysbW" || base === "mysbM") {
+      const nk = k.replace(base, "moonberry");
+      ctx.S.bag[nk] = (ctx.S.bag[nk] || 0) + ctx.S.bag[k];
+      delete ctx.S.bag[k];
+    }
+  });
+  [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach((arr) => (arr || []).forEach((p) => {
+    if (p.crop && (p.crop.id === "mysbG" || p.crop.id === "mysbW" || p.crop.id === "mysbM")) p.crop.id = "moonberry";
+  }));
+  if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
+  if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
+  if (!ctx.S.plots2) ctx.S.plots2 = emptyPlots();
+  if (!ctx.S.plots3) ctx.S.plots3 = emptyPlots();
+  if (ctx.S.unlockedBlocks2 == null) ctx.S.unlockedBlocks2 = 1;
+  if (ctx.S.unlockedBlocks3 == null) ctx.S.unlockedBlocks3 = 1;
+  [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach((arr) => arr.forEach((p) => {
+    const c = p.crop;
+    if (!c) return;
+    if (!c.fertUsed) c.fertUsed = {};
+    if (CROPS[c.id].regrow && c.left == null) c.left = REGROW_MAX;
+  }));
+}
+var pagePlots = (pg) => pg === 2 ? ctx.S.plots2 : pg === 3 ? ctx.S.plots3 : ctx.S.plots;
+var curPlots = () => pagePlots(ctx.S.page);
+var curBlocks = () => ctx.S.page === 2 ? ctx.S.unlockedBlocks2 : ctx.S.page === 3 ? ctx.S.unlockedBlocks3 : ctx.S.unlockedBlocks;
+var addBlock = () => {
+  if (ctx.S.page === 2) ctx.S.unlockedBlocks2++;
+  else if (ctx.S.page === 3) ctx.S.unlockedBlocks3++;
+  else ctx.S.unlockedBlocks++;
+};
+var eachPage = (fn) => [1, 2, 3].forEach((pg) => fn(pagePlots(pg), pg));
+ctx.saveTimer = null;
+function save(immediate) {
+  if (ctx.saveTimer) {
+    clearTimeout(ctx.saveTimer);
+    ctx.saveTimer = null;
+  }
+  const doSave = () => {
+    if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};
+    ctx.extension_settings[extensionName][NS] = ctx.S;
+    if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+  };
+  if (immediate) doSave();
+  else ctx.saveTimer = setTimeout(doSave, 500);
+  try {
+    updateInjection();
+  } catch (e) {
+  }
+}
+
 // src/main.js
 function initFarm() {
   try {
-    window[RUNTIME_KEY2]?.destroy?.();
+    window[RUNTIME_KEY]?.destroy?.();
   } catch (e) {
   }
   loadState();
   initUI();
-  applyTheme2();
+  applyTheme();
   initOrb();
   initWindows();
   initShop();

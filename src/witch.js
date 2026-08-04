@@ -3,6 +3,14 @@ import { ctx } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
+import { save } from './state.js';
+import { CS, clampN } from './events.js';
+import { renderStatus } from './render.js';
+import { openModal, closeModal, openPanel } from './shop.js';
+import { fmtLeft } from './utils.js';
+import { bagName, mutDescOf, bagPrice, sell } from './logic.js';
+import { renderPager } from './ui.js';
+import { pageUnlocked } from './utils.js';
 
 /* ---------- v0.8b: phù thuỷ tròn · hệ thống đơn hàng (§2.65 chốt: thù lao = hạt giống bí ẩn, trang đơn hàng quỹ đạo sao A) ---------- */
 export const WITCH_CRY = ['Cúc cu, có ai không?', '◆✦∴…?', '(dưới vành mũ vọng ra tiếng lật sách)', '☽⁂◇!', '✶◇∴✦…', 'Tinh tượng hôm nay đẹp đấy.'];
@@ -69,6 +77,7 @@ export function openWitchDlg() {
     <div class="wzsub">✦ ｡ﾟ☽ ∴ ✧ ∴ ☽ﾟ｡ ✦</div>${rows}${reroll}
     <div class="wzleave">☽ ${wz.order.done ? '"✶◇…!" (trông cô ấy hài lòng lắm)' : 'Cô ấy còn nán lại khoảng ' + fmtLeft(wz.leaveAt - now())}</div>
   </div>`);
+  // @ts-ignore
   All.$id('mbody').querySelectorAll('[data-wdeliver]').forEach(b => b.addEventListener('click', () => witchDeliver(+b.dataset.wdeliver)));
   All.$id('mbody').querySelectorAll('[data-wreroll]').forEach(b => b.addEventListener('click', () => {   // v1.0: dùng mảnh lăng quang đổi đơn
     if (!(ctx.S.shards && ctx.S.shards.prism > 0)) return;
@@ -95,6 +104,7 @@ export function renderWitch() {
 }
 
 export let takeoutNote = null;
+export function setTakeoutNote(val) { takeoutNote = val; }
 export function openTakeout(key) {
   const have = ctx.S.bag[key] || 0;
   if (have <= 0) return;
@@ -106,6 +116,7 @@ export function openTakeout(key) {
       <span class="buy" id="takeGo">Xác nhận lấy ra</span>
     </div>`);
   All.$id('takeGo').addEventListener('click', () => {
+    // @ts-ignore
     const n = clampN(All.$id('takeN').value, 1, have, 1) | 0;
     ctx.S.bag[key] = have - n;
     if (ctx.S.bag[key] <= 0) delete ctx.S.bag[key];
@@ -132,6 +143,7 @@ export function openSellDlg(key) {
       <span class="buy" id="sellGo">Xác nhận bán</span>
     </div>`);
   All.$id('sellGo').addEventListener('click', () => {
+    // @ts-ignore
     sell(key, clampN(All.$id('sellN').value, 1, have, 1) | 0);
   });
 }
@@ -193,6 +205,7 @@ export function openBuyDlg(kind, id) {
       <span id="buyTotal" style="font-size:12px;color:#7a5c38;font-weight:bold">Tổng ${price} G</span>
       <span class="buy" id="buyGo">Xác nhận mua</span>
     </div>`);
+  // @ts-ignore
   const upd = () => { const n = clampN(All.$id('buyN').value, 1, maxN, 1) | 0; All.$id('buyTotal').textContent = 'Tổng ' + (n * price).toLocaleString() + ' G'; return n; };
   All.$id('buyN').addEventListener('input', upd);
   All.$id('buyGo').addEventListener('click', () => {
@@ -219,6 +232,7 @@ export function toast(msg) {
 
 export function initWitch() {
   All.$id('witch').addEventListener('click', e => {
+  // @ts-ignore
   if (e.target.closest('.wtag')) return openWitchDlg();
   const el = All.$id('witch');                              // Chọc vào chính cô ấy = chào hỏi (tiếng phù thuỷ, người nghe không hiểu là bình thường nhé)
   el.querySelector('.pbubble')?.remove();

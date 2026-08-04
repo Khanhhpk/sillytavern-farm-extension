@@ -2,8 +2,17 @@ import { ctx } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
+import { tick } from './windows.js';
+import { heartbeat, setInjection } from './events.js';
+import { wander, petSleepT, endScene, petHopT } from './pets.js';
+import { save } from './state.js';
+import { toastTimer } from './witch.js';
+import { disposers } from './orb.js';
+import { root } from './ui.js';
+import { RUNTIME_KEY } from './store.js';
 
 /* ---------- Huỷ (C11 §8) ---------- */
+let destroyed = false;
 export function destroy() {
   if (destroyed) return; destroyed = true;
   try { if (tick) window.clearInterval(tick); } catch (e) {}
@@ -18,7 +27,7 @@ export function destroy() {
   try { setInjection(''); } catch (e) {}
   try { root.remove(); } catch (e) {}
   try { if (extMenuBtn) extMenuBtn.remove(); } catch (e) {}
-  try { if (window[RUNTIME_KEY] === api) delete window[RUNTIME_KEY]; } catch (e) {}
+  try { delete window[RUNTIME_KEY]; } catch (e) {}
 }
 
 // Thêm nút mở nông trại vào menu công cụ (magic wand) của SillyTavern

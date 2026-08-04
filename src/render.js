@@ -3,9 +3,22 @@ import { ctx } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
+import { toast, renderWitch } from './witch.js';
+import { openModal } from './shop.js';
+import { gameDay, settle, fmtLeft } from './utils.js';
+import { curBlocks, curPlots, blockPrice, save } from './state.js';
+import { SPRITE_PX } from './orb.js';
+import { CS, eventPending, todayEvent, setInjection, saveCharState, updateInjection, requestDayEvent } from './events.js';
+import { applyPageSkin, renderPager } from './ui.js';
+import { buyBlock, harvest, plant, water, fertilize, shovel } from './logic.js';
+import { weatherOf } from './utils.js';
+import { growMs } from './logic.js';
+import { esc } from './events.js';
+import { renderPets } from './pets.js';
 
 /* ---------- Thanh công cụ và các chế độ ---------- */
-export let mode = null;         // null | {t:'seed',id} | {t:'water'} | {t:'fert',id} | {t:'harvest'} | {t:'shovel', confirmPi}
+export let mode = null;
+export function setMode(val) { mode = val; }
 export let buyConfirm = { b: -1, until: 0 };   // Xác nhận lần hai khi khai hoang (trạng thái render, tránh bị vẽ lại mỗi giây xoá mất)
 export const TOOLS = [
   { key: 'seed', sp: 'toolSeed', tip: 'Gieo hạt' },
@@ -37,7 +50,8 @@ export function renderToolbar() {
   } else tip.style.display = 'none';
 }
 
-export let pendingPick = null;   // Chỉ uỷ quyền một listener, tránh chồng chất trùng lặp
+export let pendingPick = null;
+export function setPendingPick(val) { pendingPick = val; }
 export function pickFrom(title, obj, nameFn, cb) {
   const ids = Object.keys(obj).filter(k => obj[k] > 0);
   if (!ids.length) return toast('Trong balo không có, ra cửa hàng mua đã');
@@ -132,16 +146,22 @@ export function renderPlots() {
       if (!hasSign) {
         signEl = document.createElement('div');
         signEl.className = sclassName;
+        // @ts-ignore
         if (!next) signEl.style.opacity = '0.55';
+        // @ts-ignore
         if (next) signEl.dataset.buy = String(b);
         signEl.innerHTML = shtml;
         blockEl.appendChild(signEl); console.log('[Farm] Added sign to block', b);
       } else {
         if (signEl.className !== sclassName) signEl.className = sclassName;
+        // @ts-ignore
         if (!next && signEl.style.opacity !== '0.55') signEl.style.opacity = '0.55';
+        // @ts-ignore
         if (next && signEl.style.opacity === '0.55') signEl.style.opacity = '';
         
+        // @ts-ignore
         if (next && signEl.dataset.buy !== String(b)) signEl.dataset.buy = String(b);
+        // @ts-ignore
         if (!next && signEl.dataset.buy !== undefined) delete signEl.dataset.buy;
         
         if (signEl.innerHTML !== shtml) signEl.innerHTML = shtml;
@@ -155,11 +175,14 @@ export function renderPlots() {
       const pEl = blockEl.children[j];
       
       if (locked) {
+        // @ts-ignore
         if (pEl.dataset.deco !== 'lock') {
+           // @ts-ignore
            pEl.dataset.deco = 'lock';
            if (pEl.innerHTML !== '') pEl.innerHTML = '';
         }
       } else {
+        // @ts-ignore
         if (pEl.dataset.deco === 'lock') delete pEl.dataset.deco;
         
         const c = plots[pi].crop;
@@ -169,16 +192,20 @@ export function renderPlots() {
         }
         
         if (!c) {
+           // @ts-ignore
            if (pEl.dataset.state !== 'empty') {
              if (pEl.innerHTML !== '') pEl.innerHTML = '';
+             // @ts-ignore
              pEl.dataset.state = 'empty';
            }
         } else {
            const left = c.matureAt - now();
            const stateStr = `${c.id}|${c.left}|${c.mut}|${c.fertUsed ? Object.keys(c.fertUsed).join(',') : ''}|${left <= 0 ? 'ripe' : 'grow'}`;
            
+           // @ts-ignore
            if (pEl.dataset.state !== stateStr) {
              const expected = plotHTML(pi); if (pEl.innerHTML !== expected) pEl.innerHTML = expected;
+             // @ts-ignore
              pEl.dataset.state = stateStr;
            } else {
              // Đang lớn và không có thay đổi về phân bón/đột biến -> Chỉ kéo dài thanh progress (O(1) reflow)
@@ -186,6 +213,7 @@ export function renderPlots() {
                const prog = Math.min(0.99, 1 - left / growMs(c.id));
                const w = ((prog * 100) | 0) + '%';
                const barI = pEl.querySelector('.bar i');
+               // @ts-ignore
                if (barI && barI.style.width !== w) barI.style.width = w;
              }
            }
@@ -195,8 +223,10 @@ export function renderPlots() {
       const isLocked = pi >= nb * 4;
       const bg = isLocked ? tileURI(groundKind, pi * 31 + 5)
         : pEl.classList.contains('watered') ? tileURI(wetKind, pi * 31 + 5) : tileURI(plotKind, pi * 31 + 5);
+      // @ts-ignore
       if (pEl.style.backgroundImage !== bg) pEl.style.backgroundImage = bg;
       const bgSz = isLocked ? '144px 144px' : '100% 100%';
+      // @ts-ignore
       if (pEl.style.backgroundSize !== bgSz) pEl.style.backgroundSize = bgSz;
     }
   }
@@ -270,6 +300,7 @@ export function renderAll() { applyPageSkin(); renderPager(); renderStatus(); re
 
 export function initRender() {
   All.$id('toolbar').addEventListener('click', e => {
+  // @ts-ignore
   const el = e.target.closest('[data-tool]'); if (!el) return;
   const k = el.dataset.tool;
   if (k === 'expand') { toolbarOpen = true; renderToolbar(); return; }
@@ -288,6 +319,7 @@ export function initRender() {
   else toast('Đã về lại vườn rau chơi một mình');
 });
 All.$id('banner').addEventListener('click', (e) => {
+  // @ts-ignore
   if (e.target.closest('.bmut') || e.target.closest('.mut-popup')) return;   // Không toggle expand khi bấm nút đột biến hoặc popup
   All.$id('banner').classList.toggle('expand');
   All.$id('mutPopup').classList.remove('open');   // Thu banner thì đóng popup
@@ -299,6 +331,7 @@ All.$id('bmut').addEventListener('click', (e) => {
 /* Bấm ngoài popup thì đóng */
 document.addEventListener('click', (e) => {
   const popup = All.$id('mutPopup');
+  // @ts-ignore
   if (popup.classList.contains('open') && !e.target.closest('.mut-popup') && !e.target.closest('.bmut')) {
     popup.classList.remove('open');
   }
@@ -314,6 +347,7 @@ All.$id('chipStory').addEventListener('click', () => {
 });
 
 All.$id('blocks').addEventListener('click', e => {
+  // @ts-ignore
   const sign = e.target.closest('[data-buy]');
   if (sign) {
     const b = +sign.dataset.buy;
@@ -322,6 +356,7 @@ All.$id('blocks').addEventListener('click', e => {
     else { buyConfirm = { b, until: now() + 4000 }; renderPlots(); }
     return;
   }
+  // @ts-ignore
   const p = e.target.closest('.plot'); if (!p || p.dataset.deco) return;
   const pi = +p.dataset.pi;
   const c = curPlots()[pi].crop;

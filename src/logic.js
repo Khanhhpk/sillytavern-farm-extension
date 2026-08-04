@@ -3,6 +3,13 @@ import { ctx } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
+import { toast } from './witch.js';
+import { isRain, gameDay } from './utils.js';
+import { todayEvent } from './events.js';
+import { curPlots, save, blockPrice, curBlocks, addBlock } from './state.js';
+import { renderPlots, renderAll, renderStatus } from './render.js';
+import { plotEmote } from './ui.js';
+import { openPanel } from './shop.js';
 
 /* ---------- Logic game ---------- */
 export const fmtDur = m => m < 60 ? m + ' phút' : (m % 60 === 0 ? (m / 60) + ' giờ' : (m / 60).toFixed(1) + ' giờ');
