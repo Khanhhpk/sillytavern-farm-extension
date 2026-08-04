@@ -4255,6 +4255,118 @@ function save(immediate) {
   }
 }
 
+// src/destroy.js
+var destroyed = false;
+function destroy() {
+  if (destroyed) return;
+  destroyed = true;
+  try {
+    if (tick) window.clearInterval(tick);
+  } catch (e) {
+  }
+  try {
+    window.clearInterval(heartbeat);
+  } catch (e) {
+  }
+  try {
+    window.clearInterval(wander);
+  } catch (e) {
+  }
+  try {
+    Object.keys(petHopT).forEach((k) => window.clearTimeout(petHopT[k]));
+  } catch (e) {
+  }
+  try {
+    Object.keys(petSleepT).forEach((k) => window.clearTimeout(petSleepT[k]));
+  } catch (e) {
+  }
+  try {
+    endScene();
+  } catch (e) {
+  }
+  try {
+    if (ctx.saveTimer) {
+      clearTimeout(ctx.saveTimer);
+      save(true);
+    }
+  } catch (e) {
+  }
+  try {
+    if (toastTimer) window.clearTimeout(toastTimer);
+  } catch (e) {
+  }
+  while (disposers.length) {
+    try {
+      disposers.pop()();
+    } catch (e) {
+    }
+  }
+  try {
+    setInjection("");
+  } catch (e) {
+  }
+  try {
+    root.remove();
+  } catch (e) {
+  }
+  try {
+    if (extMenuBtn) extMenuBtn.remove();
+  } catch (e) {
+  }
+  try {
+    delete window[RUNTIME_KEY];
+  } catch (e) {
+  }
+}
+var extMenuBtn = null;
+function setupExtButton() {
+  if (extMenuBtn) {
+    try {
+      extMenuBtn.remove();
+    } catch (e) {
+    }
+  }
+  const extMenu = document.querySelector("#extensionsMenu");
+  if (!extMenu) {
+    window.setTimeout(setupExtButton, 500);
+    return;
+  }
+  extMenuBtn = document.createElement("div");
+  extMenuBtn.id = "farm-wand-btn";
+  extMenuBtn.className = "list-group-item flex-container flexGap5 interactable";
+  extMenuBtn.tabIndex = 0;
+  extMenuBtn.innerHTML = '<div class="fa-fw fa-solid fa-leaf extensionsMenuExtensionButton"></div> N\xF4ng Tr\u1EA1i';
+  extMenuBtn.style.cursor = "pointer";
+  extMenuBtn.addEventListener("click", toggleWin);
+  extMenu.appendChild(extMenuBtn);
+}
+function setupSlashCommand() {
+  (async function() {
+    try {
+      let scp, SlashCommand;
+      try {
+        scp = (await import("../../../slash-commands/SlashCommandParser.js")).SlashCommandParser;
+        SlashCommand = (await import("../../../slash-commands/SlashCommand.js")).SlashCommand;
+      } catch (err) {
+      }
+      scp = scp || window.SlashCommandParser || globalThis.SlashCommandParser;
+      SlashCommand = SlashCommand || window.SlashCommand || globalThis.SlashCommand;
+      if (scp && SlashCommand && SlashCommand.fromProps) {
+        scp.addCommandObject(SlashCommand.fromProps({
+          name: "farm",
+          callback: async () => {
+            toggleWin();
+            return "";
+          },
+          helpString: "M\u1EDF/\u0110\xF3ng giao di\u1EC7n N\xF4ng tr\u1EA1i (SillyTavern Farm)"
+        }));
+      }
+    } catch (e) {
+      console.error("[Farm] L\u1ED7i \u0111\u0103ng k\xFD l\u1EC7nh /farm:", e);
+    }
+  })();
+}
+
 // src/main.js
 function initFarm() {
   try {
@@ -4271,6 +4383,16 @@ function initFarm() {
   initPets();
   initWitch();
   initEvents();
+  setupExtButton();
+  setupSlashCommand();
+  const api = { destroy };
+  window[RUNTIME_KEY] = api;
+  renderToolbar();
+  renderChips();
+  renderBanner();
+  renderPets();
+  updateInjection();
+  if (CS.link) requestDayEvent();
   console.log("Farm initialized");
 }
 async function init() {

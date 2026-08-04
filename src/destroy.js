@@ -5,6 +5,7 @@ import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, L
 import { tick } from './windows.js';
 import { heartbeat, setInjection } from './events.js';
 import { wander, petSleepT, endScene, petHopT } from './pets.js';
+import { toggleWin } from './windows.js';
 import { save } from './state.js';
 import { toastTimer } from './witch.js';
 import { disposers } from './orb.js';
@@ -41,4 +42,35 @@ export function setupExtButton() {
   extMenuBtn.id = 'farm-wand-btn';
   extMenuBtn.className = 'list-group-item flex-container flexGap5 interactable';
   extMenuBtn.tabIndex = 0;
-  extMenuBtn.innerHTML = '<div class="fa-fw fa-solid fa-leaf extensionsMenuExtensionButton"></div> Nông Trại';}
+  extMenuBtn.innerHTML = '<div class="fa-fw fa-solid fa-leaf extensionsMenuExtensionButton"></div> Nông Trại';
+  extMenuBtn.style.cursor = 'pointer';
+
+  extMenuBtn.addEventListener('click', toggleWin);
+  extMenu.appendChild(extMenuBtn);
+}
+
+export function setupSlashCommand() {
+  // Đăng ký lệnh chat /farm
+  (async function() {
+    try {
+      let scp, SlashCommand;
+      try {
+        scp = (await import('../../../slash-commands/SlashCommandParser.js')).SlashCommandParser;
+        SlashCommand = (await import('../../../slash-commands/SlashCommand.js')).SlashCommand;
+      } catch (err) {}
+      
+      scp = scp || window.SlashCommandParser || globalThis.SlashCommandParser;
+      SlashCommand = SlashCommand || window.SlashCommand || globalThis.SlashCommand;
+
+      if (scp && SlashCommand && SlashCommand.fromProps) {
+        scp.addCommandObject(SlashCommand.fromProps({
+            name: 'farm',
+            callback: async () => { toggleWin(); return ''; },
+            helpString: 'Mở/Đóng giao diện Nông trại (SillyTavern Farm)'
+        }));
+      }
+    } catch(e) {
+      console.error('[Farm] Lỗi đăng ký lệnh /farm:', e);
+    }
+  })();
+}

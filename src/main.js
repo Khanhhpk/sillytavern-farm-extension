@@ -17,6 +17,20 @@ export function initFarm() {
   All.initPets();
   All.initWitch();
   All.initEvents();
+
+  All.setupExtButton();
+  All.setupSlashCommand();
+
+  const api = { destroy: All.destroy };
+  window[RUNTIME_KEY] = api;
+
+  All.renderToolbar();
+  All.renderChips();
+  All.renderBanner();
+  All.renderPets();
+  All.updateInjection();
+  if (All.CS.link) All.requestDayEvent();
+
   console.log('Farm initialized');
 }
 
