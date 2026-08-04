@@ -1122,11 +1122,25 @@ QUY TẮC ĐẦU RA BẮT BUỘC:
     if (!ev || !(ev.mutate_on_fert > 0)) return;
     const fertN = (c.fertUsed && c.fertUsed.compost ? 1 : 0) + (c.fertUsed && c.fertUsed.shiny ? 1 : 0);
     if (Math.random() < ev.mutate_on_fert * (0.3 + 0.35 * fertN)) {
-      c.mut = (ev.mutate_prefix || 'đột biến').slice(0, 20);
+      let prefix = (ev.mutate_prefix || 'đột biến').slice(0, 20);
       if (!S.mutDesc) S.mutDesc = {};
       const cname = CROPS[c.id].name;                     // #19: mô tả chức năng lưu theo cây (tiền tố@cây)
       const dsc = ev.mutate_desc && (ev.mutate_desc[cname] || ev.mutate_desc['*']);
-      if (dsc) S.mutDesc[c.mut + '@' + cname] = dsc;
+      
+      if (dsc) {
+        let key = prefix + '@' + cname;
+        let attempt = 1;
+        // Tránh đè description: nếu tiền tố đã được dùng cho mô tả khác, thêm " II", " III"...
+        while (S.mutDesc[key] && S.mutDesc[key] !== dsc) {
+          attempt++;
+          const suffix = attempt === 2 ? ' II' : attempt === 3 ? ' III' : attempt === 4 ? ' IV' : ' ' + attempt;
+          prefix = (ev.mutate_prefix || 'đột biến').slice(0, 20) + suffix;
+          key = prefix + '@' + cname;
+        }
+        S.mutDesc[key] = dsc;
+      }
+      
+      c.mut = prefix;
       if (pi != null) { try { plotEmote(pi, 'emStar'); } catch (e) {} }
     }
   }
