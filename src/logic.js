@@ -30,10 +30,10 @@ export function plant(pi, cropId) {
   const g = growMs(realId);
   const c = { id: realId, matureAt: now() + g, yieldBonus: 0, wateredUntil: 0, fertUsed: {} };
   if (CROPS[realId].regrow) c.left = REGROW_MAX;
-  if (isRain()) { c.matureAt = now() + g * 0.9; c.rainDay = gameDay(); }   // ctx.Sửa #10: trồng vào ngày mưa được giảm thẳng 10%
-  const ev = todayEvent();                                                  // ctx.Sự kiện thế giới quan: trồng trong ngày cũng được hưởng
+  if (isRain()) { c.matureAt = now() + g * 0.9; c.rainDay = gameDay(); }   // Sửa #10: trồng vào ngày mưa được giảm thẳng 10%
+  const ev = todayEvent();                                                  // Sự kiện thế giới quan: trồng trong ngày cũng được hưởng
   if (ev && ev.time_mult !== 1 && (!ev.favored_crop || CROPS[realId].name === ev.favored_crop)) {
-    c.matureAt = now() + Math.round((c.matureAt - now()) * ev.time_mult);   // ctx.Sự kiện thế giới quan: hệ số thời gian sinh trưởng (<1 = nhanh hơn = tích cực)
+    c.matureAt = now() + Math.round((c.matureAt - now()) * ev.time_mult);   // Sự kiện thế giới quan: hệ số thời gian sinh trưởng (<1 = nhanh hơn = tích cực)
     c.evDay = gameDay();
   }
   curPlots()[pi].crop = c;
@@ -54,7 +54,7 @@ export function fertilize(pi, fid, quiet) {
   if (!c) return toast('Ô này chưa trồng gì');
   if ((ctx.S.ferts[fid] || 0) <= 0) return toast('Hết loại phân này rồi');
   if (!c.fertUsed) c.fertUsed = {};
-  if (c.fertUsed[fid]) return toast('Vụ này đã bón ' + FERTS[fid].name + ' rồi');   // ctx.Sửa #3
+  if (c.fertUsed[fid]) return toast('Vụ này đã bón ' + FERTS[fid].name + ' rồi');   // Sửa #3
   if (fid === 'compost') {
     if (now() >= c.matureAt) return toast('Chín rồi, khỏi bón phân');
     c.matureAt = now() + (c.matureAt - now()) * 0.75;
@@ -62,7 +62,7 @@ export function fertilize(pi, fid, quiet) {
   c.fertUsed[fid] = true;
   ctx.S.ferts[fid]--;
   save(); renderPlots();
-  if (!quiet) plotEmote(pi, fid === 'compost' ? (Math.random() < 0.5 ? 'emLeaf' : 'emNote') : (Math.random() < 0.5 ? 'emHeart' : 'emStar'));   // ctx.Sửa #15
+  if (!quiet) plotEmote(pi, fid === 'compost' ? (Math.random() < 0.5 ? 'emLeaf' : 'emNote') : (Math.random() < 0.5 ? 'emHeart' : 'emStar'));   // Sửa #15
   return true;
 }
 export function rollMutation(c, pi) {                          // Mỗi vụ gieo một lần; nhịp tim settle và cửa thu hoạch dùng chung (chặn tranh chấp tốc độ tay giữa lúc chín và lúc tung xúc xắc)
@@ -123,7 +123,7 @@ export function harvest(pi, quiet) {
   if (c.shiny) { shinyGain = Math.ceil(def.sell * 0.25) * n; ctx.S.coins += shinyGain; delete c.shiny; }
   c.yieldBonus = 0;
   if (c.left == null && def.regrow) c.left = REGROW_MAX;
-  if (def.regrow && c.left - 1 > 0) {                 // ctx.Sửa #4: tối đa 3 vụ
+  if (def.regrow && c.left - 1 > 0) {                 // Sửa #4: tối đa 3 vụ
     c.left--;
     c.matureAt = now() + regrowMs(c.id);
     c.fertUsed = {};                                   // Vụ mới: phân bón và đột biến đều đặt lại
@@ -157,4 +157,4 @@ export function sell(key, n) {
   ctx.S.coins += gain; ctx.S.totalSales += gain;
   save(); renderStatus(); openPanel('bag'); toast('Bán được ' + gain + ' G');
 }
-
+

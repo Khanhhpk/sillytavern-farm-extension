@@ -70,7 +70,7 @@ ctx.win = $id('win');
 
 export function applyTheme() { ctx.ui.classList.remove('theme-sakura', 'theme-sky'); ctx.ui.classList.add('theme-' + (ctx.S && ctx.S.theme === 'sky' ? 'sky' : 'sakura')); }
 
-/* ---------- ctx.Sửa #5: thảm cỏ mặt ruộng + trang trí hoá hạt giống (vị trí cố định, không rung) ---------- */
+/* ---------- Sửa #5: thảm cỏ mặt ruộng + trang trí hoá hạt giống (vị trí cố định, không rung) ---------- */
 export const fieldEl = sh.querySelector('.field');
 // @ts-ignore
 fieldEl.style.backgroundImage = tileURI('grass', 4242);
@@ -90,48 +90,15 @@ export function renderPager() {
     return `<span class="ptab p${pg}${ctx.S.page === pg ? ' active' : ''}${un ? '' : ' lock'}" data-pg="${pg}">${names[pg]}${un ? '' : ' 🔒'}</span>`;
   }).join('');
 }
-ctx.ui.addEventListener('click', e => {                     // Bấm bất cứ đâu ngoài pager = thu quả cầu lại (giai đoạn capture, chạy trước các xử lý click khác)
-  const pager = $id('pager');
-  if (pager && pager.classList.contains('open') && !e.target.closest('#pager')) pager.classList.remove('open');
-}, true);
-$id('pager') && $id('pager').addEventListener('click', e => {
-  const pager = $id('pager');
-  // @ts-ignore
-  const t = e.target.closest('[data-pg]');
-  if (!t) { pager.classList.toggle('open'); return; }    // Bấm quả cầu = bung ra, bấm chỗ trống trên thanh = thu lại
-  const pg = +t.dataset.pg;
-  if (!pageUnlocked(pg)) return toast('Cần mua vé ' + (pg === 2 ? 'vùng nước' : 'khu mỏ') + ' ở cửa hàng trước đã');
-  if (pg === ctx.S.page) { pager.classList.remove('open'); return; }   // Bấm đúng trang hiện tại = tiện tay thu lại
-  ctx.S.page = pg; save();
-  setMode(null);                                          // Đổi trang thì thoát chế độ công cụ, tránh thao tác nhầm sang trang khác
-  pager.classList.remove('open');                        // Chọn xong thì tự co về quả cầu
-  applyPageSkin(); renderPager(); renderPlots(); renderStatus(); renderToolbar();
-});
+
 /* Phương án 3: vuốt trái phải ở khu ruộng để đổi trang (dùng thử song song với thanh viên nang của phương án 2; nếu bỏ thì xoá cả khối này) */
 export let swX = null, swY = null;
-// @ts-ignore
-fieldEl.addEventListener('touchstart', e => { if (e.touches.length === 1) { swX = e.touches[0].clientX; swY = e.touches[0].clientY; } }, { passive: true });
-fieldEl.addEventListener('touchend', e => {
-  if (swX == null) return;
-  // @ts-ignore
-  const dx = e.changedTouches[0].clientX - swX, dy = e.changedTouches[0].clientY - swY;
-  swX = swY = null;
-  if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;   // Phải là vuốt ngang chiếm ưu thế mới tính là lật trang
-  const dir = dx < 0 ? 1 : -1;                          // Vuốt sang trái = trang sau
-  let pg = ctx.S.page + dir;
-  while (pg >= 1 && pg <= 3 && !pageUnlocked(pg)) pg += dir;   // Bỏ qua các trang chưa mở khoá
-  if (pg < 1 || pg > 3 || pg === ctx.S.page) return;
-  ctx.S.page = pg; save();
-  setMode(null);                                          // Đổi trang thì thoát chế độ công cụ (giống như bấm tab đổi trang)
-  applyPageSkin(); renderPager(); renderPlots(); renderStatus(); renderToolbar();
-  toast(pg === 1 ? 'Về đồng cỏ~' : pg === 2 ? 'Tới vùng nước~' : 'Tới khu mỏ~');
-}, { passive: true });
-// @ts-ignore
+
 fieldEl.style.backgroundSize = '192px 192px';
 export const decoLayer = document.createElement('div');
 decoLayer.style.cssText = 'position:absolute;inset:0;overflow:hidden;pointer-events:none;';
 fieldEl.insertBefore(decoLayer, fieldEl.firstChild);
-(function () {                                        // ctx.Sửa #13: trang trí chỉ ở phần đất trống hai bên (màn hẹp thì dời xuống dải xanh dưới đáy)
+(function () {                                        // Sửa #13: trang trí chỉ ở phần đất trống hai bên (màn hẹp thì dời xuống dải xanh dưới đáy)
   const drnd = mulberry32(20260717);
   function addDeco(o, cls, pos) {
     const el = document.createElement('span');
@@ -150,7 +117,7 @@ fieldEl.insertBefore(decoLayer, fieldEl.firstChild);
   for (let i = 0; i < 3; i++) addDeco({ n: 'pinkgrass', s: 28 + drnd() * 6 }, 'dbot', `left:${9 + i * 16 + drnd() * 5}%;bottom:4px;`);
 })();
 
-/* ---------- ctx.Sửa #15: lớp bong bóng cảm xúc dùng chung ---------- */
+/* ---------- Sửa #15: lớp bong bóng cảm xúc dùng chung ---------- */
 export const fxLayer = document.createElement('div');
 fxLayer.style.cssText = 'position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:8;';
 fieldEl.appendChild(fxLayer);
@@ -205,7 +172,7 @@ fieldEl.addEventListener('touchend', e => {
   applyPageSkin(); renderPager(); renderPlots(); renderStatus(); renderToolbar();
   toast(pg === 1 ? 'Về đồng cỏ~' : pg === 2 ? 'Tới vùng nước~' : 'Tới khu mỏ~');
 }, { passive: true });
-(function () {                                        // ctx.Sửa #13: trang trí chỉ ở phần đất trống hai bên (màn hẹp thì dời xuống dải xanh dưới đáy)
+(function () {                                        // Sửa #13: trang trí chỉ ở phần đất trống hai bên (màn hẹp thì dời xuống dải xanh dưới đáy)
   const drnd = mulberry32(20260717);
   function addDeco(o, cls, pos) {
     const el = document.createElement('span');

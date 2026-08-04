@@ -240,7 +240,7 @@ export function openPanel(kind) {
           <span class="buy plain" id="secTest">Kiểm tra kết nối</span>
         </div>
       </div>
-      <div class="shead">ctx.Sự kiện thế giới quan · prompt tuỳ chỉnh (chỉ lưu ở thẻ nhân vật hiện tại)</div>
+      <div class="shead">Sự kiện thế giới quan · prompt tuỳ chỉnh (chỉ lưu ở thẻ nhân vật hiện tại)</div>
       <textarea class="inp" id="csPrompt" placeholder="Ví dụ: thế giới này linh khí mỏng, bớt sự kiện tích cực đi; lời văn sự kiện viết theo lối cổ.">${esc(CS.userPrompt)}</textarea>
       <div style="display:flex;gap:8px;margin-top:6px"><span class="buy" id="csPromptSave">Lưu (chỉ thẻ này)</span></div>
       <div class="shead">Công cụ dành cho Giám đốc Đồ hoạ</div>

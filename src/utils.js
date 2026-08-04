@@ -80,7 +80,7 @@ export function settle() {
     renderStatus();
   }
   if (wChanged) save();
-  /* ctx.Sửa #10: ngày mưa giảm một lần 10% thời gian còn lại của cây chưa chín (#27 sửa kèm: bù lại const d bị mất); v0.8 ba trang cùng mưa */
+  /* Sửa #10: ngày mưa giảm một lần 10% thời gian còn lại của cây chưa chín (#27 sửa kèm: bù lại const d bị mất); v0.8 ba trang cùng mưa */
   if (!isRain()) return;
   const d = gameDay();
   eachPage(plots => plots.forEach(p => {
@@ -97,4 +97,4 @@ export const fmtLeft = ms => {
   const m = Math.ceil(ms / MIN);
   return m >= 60 ? Math.floor(m / 60) + 'g' + (m % 60) + 'p' : m + 'p';
 };
-
+

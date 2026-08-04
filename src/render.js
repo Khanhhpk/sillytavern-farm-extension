@@ -88,8 +88,8 @@ export function plotHTML(pi) {
   const c = curPlots()[pi].crop;
   if (!c) return '';
   const left = c.matureAt - now();
-  const chip = CROPS[c.id].regrow && c.left != null ? `<span class="cnt2">${c.left}/${REGROW_MAX}</span>` : '';   // ctx.Sửa #4: số góc hiển thị số vụ
-  const fdot = c.fertUsed && (c.fertUsed.compost || c.fertUsed.shiny) ? '<span class="fdot" title="Đã bón phân"></span>' : '';   // Dấu shiny ghi theo fertUsed, logic số góc không đổi   // ctx.Sửa #15: số góc bón phân hiển thị thường trực
+  const chip = CROPS[c.id].regrow && c.left != null ? `<span class="cnt2">${c.left}/${REGROW_MAX}</span>` : '';   // Sửa #4: số góc hiển thị số vụ
+  const fdot = c.fertUsed && (c.fertUsed.compost || c.fertUsed.shiny) ? '<span class="fdot" title="Đã bón phân"></span>' : '';   // Dấu shiny ghi theo fertUsed, logic số góc không đổi   // Sửa #15: số góc bón phân hiển thị thường trực
   const mutPrefix = c.mut ? c.mut.split('@')[0] : '';
   const mut = c.mut ? `<span class="cnt2" style="left:3px;right:auto;background:#ead9f7;border-color:#9a6ad8;color:#6a4a9a" title="${mutPrefix}·đột biến">✦</span>` : '';
   if (left <= 0) return spriteSVG(CROPS[c.id].sp, SPRITE_PX) + `<span class="ripe">!</span>` + chip + fdot + mut;
@@ -247,7 +247,7 @@ export function renderBanner() {
   if (!CS.link) { b.classList.remove('show'); bmut.style.display = 'none'; mutPopup.classList.remove('open'); return; }
   if (eventPending) {
     b.classList.add('show');
-    All.$id('btag').textContent = 'ctx.Sự kiện hôm nay';
+    All.$id('btag').textContent = 'Sự kiện hôm nay';
     All.$id('btxt').textContent = 'Phù thuỷ tròn đang ngắm sao bói toán…';
     bmut.style.display = 'none'; mutPopup.classList.remove('open');
     return;
@@ -255,7 +255,7 @@ export function renderBanner() {
   const ev = todayEvent();
   if (!ev) { b.classList.remove('show'); bmut.style.display = 'none'; mutPopup.classList.remove('open'); return; }
   b.classList.add('show');
-  All.$id('btag').textContent = 'ctx.Sự kiện hôm nay · ' + ev.name;
+  All.$id('btag').textContent = 'Sự kiện hôm nay · ' + ev.name;
   const fx = [];
   if (ev.double_yield) fx.push('✨Thu hoạch hôm nay ×2!');
   if (ev.time_mult !== 1) fx.push(ev.time_mult < 1 ? 'Sinh trưởng nhanh hơn (thời lượng ×' + ev.time_mult + ')' : 'Sinh trưởng chậm lại (thời lượng ×' + ev.time_mult + ')');
@@ -263,7 +263,7 @@ export function renderBanner() {
   if (ev.favored_crop) fx.unshift('Chỉ ' + ev.favored_crop + ' chịu ảnh hưởng');
   const fb = ctx.S.dayEvent && ctx.S.dayEvent.source === 'fallback';
   All.$id('btxt').textContent = (ev.flavor || '') + (fx.length ? '(' + fx.join(' · ') + ')' : '') +
-    (fb ? '〔ctx.Sự kiện ngoại tuyến' + (ctx.S.dayEvent.reason ? ': ' + ctx.S.dayEvent.reason : '') + '〕' : '');
+    (fb ? '〔Sự kiện ngoại tuyến' + (ctx.S.dayEvent.reason ? ': ' + ctx.S.dayEvent.reason : '') + '〕' : '');
   /* Nút xem đột biến: chỉ hiện khi sự kiện có mutate_on_fert > 0 và có mutate_desc */
   const hasMut = ev.mutate_on_fert > 0 && ev.mutate_desc && Object.keys(ev.mutate_desc).length > 0;
   bmut.style.display = hasMut ? 'flex' : 'none';
@@ -351,7 +351,7 @@ All.$id('blocks').addEventListener('click', e => {
   const sign = e.target.closest('[data-buy]');
   if (sign) {
     const b = +sign.dataset.buy;
-    if (ctx.S.coins < blockPrice(b)) { toast('Còn thiếu ' + (blockPrice(b) - ctx.S.coins).toLocaleString() + ' G'); return; }   // ctx.Sửa #8
+    if (ctx.S.coins < blockPrice(b)) { toast('Còn thiếu ' + (blockPrice(b) - ctx.S.coins).toLocaleString() + ' G'); return; }   // Sửa #8
     if (buyConfirm.b === b && now() < buyConfirm.until) { buyConfirm = { b: -1, until: 0 }; buyBlock(b); }
     else { buyConfirm = { b, until: now() + 4000 }; renderPlots(); }
     return;
@@ -360,7 +360,7 @@ All.$id('blocks').addEventListener('click', e => {
   const p = e.target.closest('.plot'); if (!p || p.dataset.deco) return;
   const pi = +p.dataset.pi;
   const c = curPlots()[pi].crop;
-  if (c && now() >= c.matureAt && (!mode || mode.t !== 'shovel')) { harvest(pi); return; }   // ctx.Sửa #6: rau chín bấm thẳng là thu ngay
+  if (c && now() >= c.matureAt && (!mode || mode.t !== 'shovel')) { harvest(pi); return; }   // Sửa #6: rau chín bấm thẳng là thu ngay
   if (!mode) { if (c) toast(CROPS[c.id].name + ' · còn ' + fmtLeft(c.matureAt - now())); return; }
   if (mode.t === 'seed') { if (c) return toast('Ô này trồng rồi'); plant(pi, mode.id); if ((ctx.S.seeds[mode.id] || 0) <= 0) { mode = null; renderToolbar(); } return; }
   if (mode.t === 'water') return water(pi);

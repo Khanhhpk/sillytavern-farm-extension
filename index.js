@@ -1673,60 +1673,8 @@ function renderPager() {
     return `<span class="ptab p${pg}${ctx.S.page === pg ? " active" : ""}${un ? "" : " lock"}" data-pg="${pg}">${names[pg]}${un ? "" : " \u{1F512}"}</span>`;
   }).join("");
 }
-ctx.ui.addEventListener("click", (e) => {
-  const pager = $id("pager");
-  if (pager && pager.classList.contains("open") && !e.target.closest("#pager")) pager.classList.remove("open");
-}, true);
-$id("pager") && $id("pager").addEventListener("click", (e) => {
-  const pager = $id("pager");
-  const t = e.target.closest("[data-pg]");
-  if (!t) {
-    pager.classList.toggle("open");
-    return;
-  }
-  const pg = +t.dataset.pg;
-  if (!pageUnlocked(pg)) return toast("C\u1EA7n mua v\xE9 " + (pg === 2 ? "v\xF9ng n\u01B0\u1EDBc" : "khu m\u1ECF") + " \u1EDF c\u1EEDa h\xE0ng tr\u01B0\u1EDBc \u0111\xE3");
-  if (pg === ctx.S.page) {
-    pager.classList.remove("open");
-    return;
-  }
-  ctx.S.page = pg;
-  save();
-  setMode(null);
-  pager.classList.remove("open");
-  applyPageSkin();
-  renderPager();
-  renderPlots();
-  renderStatus();
-  renderToolbar();
-});
 var swX = null;
 var swY = null;
-fieldEl.addEventListener("touchstart", (e) => {
-  if (e.touches.length === 1) {
-    swX = e.touches[0].clientX;
-    swY = e.touches[0].clientY;
-  }
-}, { passive: true });
-fieldEl.addEventListener("touchend", (e) => {
-  if (swX == null) return;
-  const dx = e.changedTouches[0].clientX - swX, dy = e.changedTouches[0].clientY - swY;
-  swX = swY = null;
-  if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-  const dir = dx < 0 ? 1 : -1;
-  let pg = ctx.S.page + dir;
-  while (pg >= 1 && pg <= 3 && !pageUnlocked(pg)) pg += dir;
-  if (pg < 1 || pg > 3 || pg === ctx.S.page) return;
-  ctx.S.page = pg;
-  save();
-  setMode(null);
-  applyPageSkin();
-  renderPager();
-  renderPlots();
-  renderStatus();
-  renderToolbar();
-  toast(pg === 1 ? "V\u1EC1 \u0111\u1ED3ng c\u1ECF~" : pg === 2 ? "T\u1EDBi v\xF9ng n\u01B0\u1EDBc~" : "T\u1EDBi khu m\u1ECF~");
-}, { passive: true });
 fieldEl.style.backgroundSize = "192px 192px";
 var decoLayer = document.createElement("div");
 decoLayer.style.cssText = "position:absolute;inset:0;overflow:hidden;pointer-events:none;";
@@ -2266,40 +2214,7 @@ function renderPets() {
     placePet(el, petPos[id] || petSpot(id), true);
   });
 }
-var wander = window.setInterval(() => {
-  if (!ctx.win || !ctx.win.classList.contains("open")) return;
-  if (!scene && now() >= nextSceneAt) tryScene();
-  sh.querySelectorAll("#mascots .pet").forEach((el) => {
-    const id = el.dataset.pet;
-    if (sceneBusy(id) || petTgt[id] || el.classList.contains("sleep")) return;
-    if (!PETS[id].job && Math.random() < 0.08) return sleepPet(el);
-    if (PETS[id].job && now() - (petTouch[id] || touchBase) > 5 * MIN && Math.random() < 0.08) return sleepPet(el);
-    if (Math.random() < 0.35) moveTo(el, petSpot(id));
-  });
-}, 7e3);
-$id("mascots").addEventListener("click", (e) => {
-  const el = e.target.closest(".pet");
-  if (!el) return;
-  const id = el.dataset.pet, def = PETS[id];
-  if (!def) return;
-  petTouch[id] = now();
-  if (el.classList.contains("sleep")) return wakePet(el, true);
-  const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
-  if (def.job === "plant") return petPlant(el, cry);
-  if (def.job === "fert") return petFert(el, cry);
-  if (def.job === "harvest") return petHarvest(el, cry);
-  if (def.job) return petBubble(el, cry);
-  let txt = cry;
-  if (now() - (ctx.S.petPoke[id] || 0) >= POKE_CD) {
-    ctx.S.petPoke[id] = now();
-    const gain = 1 + Math.floor(Math.random() * 5);
-    ctx.S.coins += gain;
-    txt += id === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : id === "starBell" ? " l\u1EAFc ra " + gain + " G b\u1EE5i sao!" : " r\u01A1i ra " + gain + " G!";
-    save();
-    renderStatus();
-  }
-  petBubble(el, txt);
-});
+var wander;
 function petPlant(el, cry) {
   const empty = [];
   for (let pi = 0; pi < curBlocks() * 4; pi++) if (!curPlots()[pi].crop) empty.push(pi);
@@ -2373,12 +2288,11 @@ function initPets() {
       ctx.S.petPoke[id] = now();
       const gain = 1 + Math.floor(Math.random() * 5);
       ctx.S.coins += gain;
-      txt += id === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : id === "starBlob" ? " r\u01A1i ra " + gain + " G \xE1nh sao!" : " r\u01A1i ra " + gain + " G";
+      txt += id === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : id === "starBlob" ? " r\u01A1i ra " + gain + " G \xE1nh sao!" : " r\u01A1i ra " + gain + " G!";
       save();
       renderStatus();
     }
     petBubble(el, txt);
-    wakePet(el, true);
   });
 }
 
@@ -2624,7 +2538,7 @@ function openPanel(kind) {
           <span class="buy plain" id="secTest">Ki\u1EC3m tra k\u1EBFt n\u1ED1i</span>
         </div>
       </div>
-      <div class="shead">ctx.S\u1EF1 ki\u1EC7n th\u1EBF gi\u1EDBi quan \xB7 prompt tu\u1EF3 ch\u1EC9nh (ch\u1EC9 l\u01B0u \u1EDF th\u1EBB nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i)</div>
+      <div class="shead">S\u1EF1 ki\u1EC7n th\u1EBF gi\u1EDBi quan \xB7 prompt tu\u1EF3 ch\u1EC9nh (ch\u1EC9 l\u01B0u \u1EDF th\u1EBB nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i)</div>
       <textarea class="inp" id="csPrompt" placeholder="V\xED d\u1EE5: th\u1EBF gi\u1EDBi n\xE0y linh kh\xED m\u1ECFng, b\u1EDBt s\u1EF1 ki\u1EC7n t\xEDch c\u1EF1c \u0111i; l\u1EDDi v\u0103n s\u1EF1 ki\u1EC7n vi\u1EBFt theo l\u1ED1i c\u1ED5.">${esc(CS.userPrompt)}</textarea>
       <div style="display:flex;gap:8px;margin-top:6px"><span class="buy" id="csPromptSave">L\u01B0u (ch\u1EC9 th\u1EBB n\xE0y)</span></div>
       <div class="shead">C\xF4ng c\u1EE5 d\xE0nh cho Gi\xE1m \u0111\u1ED1c \u0110\u1ED3 ho\u1EA1</div>
@@ -3050,7 +2964,7 @@ function renderBanner() {
   }
   if (eventPending) {
     b.classList.add("show");
-    $id("btag").textContent = "ctx.S\u1EF1 ki\u1EC7n h\xF4m nay";
+    $id("btag").textContent = "S\u1EF1 ki\u1EC7n h\xF4m nay";
     $id("btxt").textContent = "Ph\xF9 thu\u1EF7 tr\xF2n \u0111ang ng\u1EAFm sao b\xF3i to\xE1n\u2026";
     bmut.style.display = "none";
     mutPopup.classList.remove("open");
@@ -3064,14 +2978,14 @@ function renderBanner() {
     return;
   }
   b.classList.add("show");
-  $id("btag").textContent = "ctx.S\u1EF1 ki\u1EC7n h\xF4m nay \xB7 " + ev.name;
+  $id("btag").textContent = "S\u1EF1 ki\u1EC7n h\xF4m nay \xB7 " + ev.name;
   const fx = [];
   if (ev.double_yield) fx.push("\u2728Thu ho\u1EA1ch h\xF4m nay \xD72!");
   if (ev.time_mult !== 1) fx.push(ev.time_mult < 1 ? "Sinh tr\u01B0\u1EDFng nhanh h\u01A1n (th\u1EDDi l\u01B0\u1EE3ng \xD7" + ev.time_mult + ")" : "Sinh tr\u01B0\u1EDFng ch\u1EADm l\u1EA1i (th\u1EDDi l\u01B0\u1EE3ng \xD7" + ev.time_mult + ")");
   if (ev.mutate_on_fert > 0) fx.push("C\xE2y h\xF4m nay c\xF3 th\u1EC3 \u0111\u1ED9t bi\u1EBFn");
   if (ev.favored_crop) fx.unshift("Ch\u1EC9 " + ev.favored_crop + " ch\u1ECBu \u1EA3nh h\u01B0\u1EDFng");
   const fb = ctx.S.dayEvent && ctx.S.dayEvent.source === "fallback";
-  $id("btxt").textContent = (ev.flavor || "") + (fx.length ? "(" + fx.join(" \xB7 ") + ")" : "") + (fb ? "\u3014ctx.S\u1EF1 ki\u1EC7n ngo\u1EA1i tuy\u1EBFn" + (ctx.S.dayEvent.reason ? ": " + ctx.S.dayEvent.reason : "") + "\u3015" : "");
+  $id("btxt").textContent = (ev.flavor || "") + (fx.length ? "(" + fx.join(" \xB7 ") + ")" : "") + (fb ? "\u3014S\u1EF1 ki\u1EC7n ngo\u1EA1i tuy\u1EBFn" + (ctx.S.dayEvent.reason ? ": " + ctx.S.dayEvent.reason : "") + "\u3015" : "");
   const hasMut = ev.mutate_on_fert > 0 && ev.mutate_desc && Object.keys(ev.mutate_desc).length > 0;
   bmut.style.display = hasMut ? "flex" : "none";
   if (hasMut) {
@@ -3758,7 +3672,7 @@ function buildEventPrompt(worldbook) {
   const themes = ["c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi th\u1EDDi ti\u1EBFt", "c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi \u0111\u1EA5t \u0111ai ho\u1EB7c ngu\u1ED3n n\u01B0\u1EDBc", "c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi \u0111\u1ED9ng v\u1EADt nh\u1ECF ho\u1EB7c c\xF4n tr\xF9ng", "c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi y\u1EBFu t\u1ED1 si\xEAu nhi\xEAn c\u1EE7a th\u1EBF gi\u1EDBi n\xE0y", "c\xF3 th\u1EC3 li\xEAn quan t\u1EDBi phong t\u1EE5c \u0111\u1ECBa ph\u01B0\u01A1ng ho\u1EB7c ch\u1EE3 phi\xEAn"];
   const theme = themes[Math.floor(Math.random() * themes.length)];
   const cropList = Object.entries(CROPS).filter(([id, c]) => !c.seedOnly).map(([id, c]) => c.name).join(", ");
-  return ('B\u1EA1n l\xE0 "tr\xECnh t\u1EA1o s\u1EF1 ki\u1EC7n th\u1EBF gi\u1EDBi quan" cho m\u1ED9t game n\xF4ng tr\u1EA1i nh\u1ECF. Ng\u01B0\u1EDDi ch\u01A1i \u0111ang tr\u1ED3ng m\u1ED9t m\u1EA3nh v\u01B0\u1EDDn rau nh\u1ECF trong m\u1ED9t th\u1EBF gi\u1EDBi nh\u1EADp vai n\xE0o \u0111\xF3, v\xE0 b\u1EA1n s\u1EBD nh\u1EADn \u0111\u01B0\u1EE3c ph\u1EA7n tr\xEDch world book c\u1EE7a th\u1EBF gi\u1EDBi \u0111\xF3. H\xE3y t\u1EA1o 1 s\u1EF1 ki\u1EC7n nh\u1ECF ng\u1EABu nhi\xEAn x\u1EA3y ra \u1EDF v\u01B0\u1EDDn rau h\xF4m nay.\n\nQuy t\u1EAFc:\n1. ctx.S\u1EF1 ki\u1EC7n b\u1EAFt bu\u1ED9c mang h\u01B0\u01A1ng v\u1ECB c\u1EE7a th\u1EBF gi\u1EDBi n\xE0y \u2014\u2014 c\xE1c danh t\u1EEB v\u1EC1 th\u1EDDi ti\u1EBFt, s\u1EA3n v\u1EADt, y\u1EBFu t\u1ED1 si\xEAu nhi\xEAn\u2026 h\xE3y c\u1ED1 l\u1EA5y ch\u1EA5t li\u1EC7u t\u1EEB world book; nh\u01B0ng s\u1EF1 ki\u1EC7n ch\u1EC9 \u1EA3nh h\u01B0\u1EDFng vi\u1EC7c tr\u1ED3ng tr\u1ECDt, kh\xF4ng \u0111\u1EA9y c\u1ED1t truy\u1EC7n. C\xF3 th\u1EC3 nh\u1EAFc t\xEAn nh\xE2n v\u1EADt trong th\u1EBF gi\u1EDBi \u1EDF ph\u1EA7n flavor cho sinh \u0111\u1ED9ng, nh\u01B0ng tuy\u1EC7t \u0111\u1ED1i kh\xF4ng \u0111\u01B0\u1EE3c \u0111\u1EC3 nh\xE2n v\u1EADt n\xF3i chuy\u1EC7n, h\xE0nh \u0111\u1ED9ng hay x\u1EA3y ra t\xECnh ti\u1EBFt n\xE0o.\n2. Xu h\u01B0\u1EDBng s\u1EF1 ki\u1EC7n h\xF4m nay: ' + tendency + "; ch\u1EE7 \u0111\u1EC1 tham kh\u1EA3o: " + theme + '.\n3. Tr\u01B0\u1EDDng hi\u1EC7u \u1EE9ng ch\u1EC9 \u0111\u01B0\u1EE3c d\xF9ng time_mult (0.7~1.1, h\u1EC7 s\u1ED1 nh\xE2n th\u1EDDi gian sinh tr\u01B0\u1EDFng) / mutate_on_fert (0~0.5), c\xF3 th\u1EC3 ch\u1EC9 d\xF9ng m\u1ED9t ho\u1EB7c b\u1ECF c\u1EA3 hai. **Tuy\u1EC7t \u0111\u1ED1i \u0111\u1EEBng vi\u1EBFt ng\u01B0\u1EE3c ng\u1EEF ngh\u0129a c\u1EE7a time_mult: <1 = m\u1ECDc nhanh h\u01A1n = s\u1EF1 ki\u1EC7n t\xEDch c\u1EF1c; >1 = m\u1ECDc ch\u1EADm h\u01A1n = s\u1EF1 ki\u1EC7n ti\xEAu c\u1EF1c**. Ngo\xE0i ra c\xF3 tr\u01B0\u1EDDng hi\u1EBFm double_yield:true (s\u1ED1 qu\u1EA3 thu ho\u1EA1ch h\xF4m nay \xD72, ph\xFAc l\u1EE3i cho d\xE2n may m\u1EAFn) \u2014\u2014 ch\u1EC9 n\xEAn xu\u1EA5t hi\u1EC7n kho\u1EA3ng 8% s\u1ED1 ng\xE0y, khi xu\u1EA5t hi\u1EC7n th\xEC s\u1EF1 ki\u1EC7n ph\u1EA3i vi\u1EBFt theo ch\u1EE7 \u0111\u1EC1 b\u1ED9i thu l\u1EDBn / k\u1EF3 t\xEDch, type b\u1EAFt bu\u1ED9c l\xE0 buff. C\xF3 th\u1EC3 th\xEAm favored_crop: \u0111i\u1EC1n m\u1ED9t t\xEAn c\xE2y tr\u1ED3ng (b\u1EAFt bu\u1ED9c l\u1EA5y t\u1EEB danh s\xE1ch c\xE2y tr\u1ED3ng), khi \u0111\xF3 hi\u1EC7u \u1EE9ng ch\u1EC9 t\xE1c d\u1EE5ng l\xEAn c\xE2y \u0111\xF3; kh\xF4ng \u0111i\u1EC1n th\xEC c\u1EA3 ru\u1ED9ng \u0111\u1EC1u ch\u1ECBu t\xE1c d\u1EE5ng.\n4. N\u1EBFu s\u1EF1 ki\u1EC7n l\xE0m c\xE2y b\u1ECB \u0111\u1ED9t bi\u1EBFn (mutate_on_fert>0, l\xE0 x\xE1c su\u1EA5t \u0111\u1ED9t bi\u1EBFn c\u01A1 b\u1EA3n c\u1EE7a c\xE2y ch\xEDn h\xF4m nay, b\xF3n ph\xE2n s\u1EBD khu\u1EBFch \u0111\u1EA1i), th\xEC cho th\xEAm: mutate_prefix (ti\u1EC1n t\u1ED1 \u0111\u1ED9t bi\u1EBFn mang h\u01B0\u01A1ng v\u1ECB c\u1EE7a th\u1EBF gi\u1EDBi n\xE0y, trong 5 ch\u1EEF, v\xED d\u1EE5 "linh ho\xE1", "si\xEAu to", "\u0103n th\u1ECBt", "c\u1EE9ng ng\u1EAFc", "ph\xE1t s\xE1ng") v\xE0 mutate_desc (m\u1ED9t \u0111\u1ED1i t\u01B0\u1EE3ng, **vi\u1EBFt ri\xEAng cho t\u1EEBng lo\u1EA1i c\xE2y \u0111\u01B0\u1EE3c li\u1EC7t k\xEA b\xEAn d\u01B0\u1EDBi** v\u1EC1 **hi\u1EC7u \u1EE9ng ho\u1EB7c c\xF4ng d\u1EE5ng** c\u1EE7a th\u1EC3 \u0111\u1ED9t bi\u1EBFn \u0111\xF3 trong th\u1EBF gi\u1EDBi n\xE0y, m\u1ED7i m\u1EE5c trong 20 ch\u1EEF \u2014\u2014 h\xE3y vi\u1EBFt "n\xF3 l\xE0m \u0111\u01B0\u1EE3c g\xEC / s\u1EBD g\xE2y ra chuy\u1EC7n g\xEC", b\u1EAFt bu\u1ED9c l\xE0 hi\u1EC7u \u1EE9ng **khi c\u1EA7m gi\u1EEF, \u0103n ho\u1EB7c s\u1EED d\u1EE5ng** (n\xF3 s\u1EBD \u0111\u01B0\u1EE3c mang kh\u1ECFi v\u01B0\u1EDDn rau \u0111\u1EC3 d\xF9ng trong c\xE2u chuy\u1EC7n, nghi\xEAm c\u1EA5m vi\u1EBFt ki\u1EC3u "khi thu ho\u1EA1ch / khi nh\u1ED5 l\xEAn" v\xEC r\u1EDDi v\u01B0\u1EDDn l\xE0 m\u1EA5t hi\u1EC7u l\u1EF1c), ph\u1EA3i m\u01A1 h\u1ED3 \u0111\u1EC3 ch\u1EEBa ch\u1ED7 t\u01B0\u1EDFng t\u01B0\u1EE3ng, nghi\xEAm c\u1EA5m m\xF4 t\u1EA3 ki\u1EC3u ngo\u1EA1i h\xECnh l\u1EA5p l\xE1nh; hi\u1EC7u \u1EE9ng c\u1EE7a c\xE1c c\xE2y kh\xE1c nhau ph\u1EA3i kh\xE1c nhau). Khi kh\xF4ng \u0111\u1ED9t bi\u1EBFn th\xEC b\u1ECF c\u1EA3 hai tr\u01B0\u1EDDng.\n   C\xE1c lo\u1EA1i c\xE2y hi\u1EC7n c\xF3 trong v\u01B0\u1EDDn n\xE0y (t\u1ED5ng c\u1ED9ng {{CROPCOUNT}} lo\u1EA1i, mutate_desc b\u1EAFt bu\u1ED9c ph\u1EE7 h\u1EBFt t\u1EEBng lo\u1EA1i m\u1ED9t, nghi\xEAm c\u1EA5m b\u1ECF s\xF3t hay ch\u1EC9 vi\u1EBFt v\xE0i lo\u1EA1i): {{CROPLIST}}\n5. flavor l\xE0 m\u1ED9t c\xE2u cho ng\u01B0\u1EDDi ch\u01A1i \u0111\u1ECDc, trong 30 ch\u1EEF, \u01B0u ti\xEAn h\u01B0\u01A1ng v\u1ECB, c\xF3 th\u1EC3 h\xF3m h\u1EC9nh.\n6. Ch\u1EC9 \u0111\u01B0\u1EE3c xu\u1EA5t \u0111\xFAng m\u1ED9t d\xF2ng JSON, c\u1EA5m xu\u1EA5t gi\u1EA3i th\xEDch, ti\u1EC1n t\u1ED1 h\u1EADu t\u1ED1 hay d\u1EA5u kh\u1ED1i code:\n{"name":"t\xEAn s\u1EF1 ki\u1EC7n 2~6 ch\u1EEF","type":"buff|debuff|neutral","time_mult":1,"double_yield":false,"mutate_on_fert":0,"mutate_prefix":"","mutate_desc":{"t\xEAn c\xE2y tr\u1ED3ng":"m\xF4 t\u1EA3 hi\u1EC7u \u1EE9ng"},"favored_crop":"","flavor":"m\u1ED9t c\xE2u"}\n\nV\xED d\u1EE5 \u0111\u1ECBnh d\u1EA1ng (l\u1EA5y t\u1EEB th\u1EBF gi\u1EDBi kh\xE1c, ch\u1EC9 \u0111\u1EC3 tham kh\u1EA3o \u0111\u1ECBnh d\u1EA1ng v\xE0 h\u01B0\u1EDBng h\u01B0\u01A1ng v\u1ECB, c\u1EA5m ch\xE9p nguy\xEAn):\n- {"name":"M\u01B0a linh","type":"buff","time_mult":0.8,"flavor":"Linh kh\xED \u0111\u1ECDng th\xE0nh m\u01B0a, m\u1EA7m rau l\xE9n v\u01B0\u01A1n \u0111\u1ED1t nghe r\xF5 ti\u1EBFng."}\n- {"name":"M\u01B0a axit","type":"debuff","time_mult":1.1,"mutate_on_fert":0.3,"mutate_prefix":"bi\u1EBFn ch\u1EE7ng","flavor":"M\u01B0a axit g\xF5 m\xE1i, rau \u1EC9u x\xECu m\u1ECDc ch\u1EADm, c\xE2y \u0111\xE3 b\xF3n ph\xE2n e l\xE0 m\u1ECDc m\xE9o m\u1EA5t."}\n- {"name":"R\xF2 r\u1EC9 ph\xE2n nano","type":"neutral","mutate_on_fert":0.4,"mutate_prefix":"si\xEAu to","mutate_desc":{"B\xED ng\xF4":"B\u1ED5 ra th\xEC kh\xF4ng gian b\xEAn trong r\u1ED9ng h\u01A1n b\xEAn ngo\xE0i","C\xE0 chua":"Ng\u01B0\u1EDDi \u0103n nh\u1EDB m\u1ECDi th\u1EE9 trong ch\u1ED1c l\xE1t"},"flavor":"C\xE2y b\xF3n ph\xE2n h\xF4m nay c\xF3 th\u1EC3 m\u1ECDc ra h\xECnh th\xF9 kh\xF3 tin."}\n' + (CS.userPrompt ? "\n[ctx.S\u1EDF th\xEDch tu\u1EF3 ch\u1EC9nh c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i, \u01B0u ti\xEAn \u0111\xE1p \u1EE9ng, nh\u01B0ng kh\xF4ng \u0111\u01B0\u1EE3c v\u01B0\u1EE3t ra ngo\xE0i ph\u1EA1m vi c\xE1c tr\u01B0\u1EDDng]:\n" + CS.userPrompt + "\n" : "") + "\nTr\xEDch world book:\n" + (worldbook || "(Th\u1EBF gi\u1EDBi n\xE0y t\u1EA1m ch\u01B0a c\xF3 world book, h\xE3y t\u1EA1o m\u1ED9t s\u1EF1 ki\u1EC7n \u0111\u1ED3ng qu\xEA chung chung)")).replace("{{CROPLIST}}", cropList).replace("{{CROPCOUNT}}", String(cropList.split(", ").length));
+  return ('B\u1EA1n l\xE0 "tr\xECnh t\u1EA1o s\u1EF1 ki\u1EC7n th\u1EBF gi\u1EDBi quan" cho m\u1ED9t game n\xF4ng tr\u1EA1i nh\u1ECF. Ng\u01B0\u1EDDi ch\u01A1i \u0111ang tr\u1ED3ng m\u1ED9t m\u1EA3nh v\u01B0\u1EDDn rau nh\u1ECF trong m\u1ED9t th\u1EBF gi\u1EDBi nh\u1EADp vai n\xE0o \u0111\xF3, v\xE0 b\u1EA1n s\u1EBD nh\u1EADn \u0111\u01B0\u1EE3c ph\u1EA7n tr\xEDch world book c\u1EE7a th\u1EBF gi\u1EDBi \u0111\xF3. H\xE3y t\u1EA1o 1 s\u1EF1 ki\u1EC7n nh\u1ECF ng\u1EABu nhi\xEAn x\u1EA3y ra \u1EDF v\u01B0\u1EDDn rau h\xF4m nay.\n\nQuy t\u1EAFc:\n1. S\u1EF1 ki\u1EC7n b\u1EAFt bu\u1ED9c mang h\u01B0\u01A1ng v\u1ECB c\u1EE7a th\u1EBF gi\u1EDBi n\xE0y \u2014\u2014 c\xE1c danh t\u1EEB v\u1EC1 th\u1EDDi ti\u1EBFt, s\u1EA3n v\u1EADt, y\u1EBFu t\u1ED1 si\xEAu nhi\xEAn\u2026 h\xE3y c\u1ED1 l\u1EA5y ch\u1EA5t li\u1EC7u t\u1EEB world book; nh\u01B0ng s\u1EF1 ki\u1EC7n ch\u1EC9 \u1EA3nh h\u01B0\u1EDFng vi\u1EC7c tr\u1ED3ng tr\u1ECDt, kh\xF4ng \u0111\u1EA9y c\u1ED1t truy\u1EC7n. C\xF3 th\u1EC3 nh\u1EAFc t\xEAn nh\xE2n v\u1EADt trong th\u1EBF gi\u1EDBi \u1EDF ph\u1EA7n flavor cho sinh \u0111\u1ED9ng, nh\u01B0ng tuy\u1EC7t \u0111\u1ED1i kh\xF4ng \u0111\u01B0\u1EE3c \u0111\u1EC3 nh\xE2n v\u1EADt n\xF3i chuy\u1EC7n, h\xE0nh \u0111\u1ED9ng hay x\u1EA3y ra t\xECnh ti\u1EBFt n\xE0o.\n2. Xu h\u01B0\u1EDBng s\u1EF1 ki\u1EC7n h\xF4m nay: ' + tendency + "; ch\u1EE7 \u0111\u1EC1 tham kh\u1EA3o: " + theme + '.\n3. Tr\u01B0\u1EDDng hi\u1EC7u \u1EE9ng ch\u1EC9 \u0111\u01B0\u1EE3c d\xF9ng time_mult (0.7~1.1, h\u1EC7 s\u1ED1 nh\xE2n th\u1EDDi gian sinh tr\u01B0\u1EDFng) / mutate_on_fert (0~0.5), c\xF3 th\u1EC3 ch\u1EC9 d\xF9ng m\u1ED9t ho\u1EB7c b\u1ECF c\u1EA3 hai. **Tuy\u1EC7t \u0111\u1ED1i \u0111\u1EEBng vi\u1EBFt ng\u01B0\u1EE3c ng\u1EEF ngh\u0129a c\u1EE7a time_mult: <1 = m\u1ECDc nhanh h\u01A1n = s\u1EF1 ki\u1EC7n t\xEDch c\u1EF1c; >1 = m\u1ECDc ch\u1EADm h\u01A1n = s\u1EF1 ki\u1EC7n ti\xEAu c\u1EF1c**. Ngo\xE0i ra c\xF3 tr\u01B0\u1EDDng hi\u1EBFm double_yield:true (s\u1ED1 qu\u1EA3 thu ho\u1EA1ch h\xF4m nay \xD72, ph\xFAc l\u1EE3i cho d\xE2n may m\u1EAFn) \u2014\u2014 ch\u1EC9 n\xEAn xu\u1EA5t hi\u1EC7n kho\u1EA3ng 8% s\u1ED1 ng\xE0y, khi xu\u1EA5t hi\u1EC7n th\xEC s\u1EF1 ki\u1EC7n ph\u1EA3i vi\u1EBFt theo ch\u1EE7 \u0111\u1EC1 b\u1ED9i thu l\u1EDBn / k\u1EF3 t\xEDch, type b\u1EAFt bu\u1ED9c l\xE0 buff. C\xF3 th\u1EC3 th\xEAm favored_crop: \u0111i\u1EC1n m\u1ED9t t\xEAn c\xE2y tr\u1ED3ng (b\u1EAFt bu\u1ED9c l\u1EA5y t\u1EEB danh s\xE1ch c\xE2y tr\u1ED3ng), khi \u0111\xF3 hi\u1EC7u \u1EE9ng ch\u1EC9 t\xE1c d\u1EE5ng l\xEAn c\xE2y \u0111\xF3; kh\xF4ng \u0111i\u1EC1n th\xEC c\u1EA3 ru\u1ED9ng \u0111\u1EC1u ch\u1ECBu t\xE1c d\u1EE5ng.\n4. N\u1EBFu s\u1EF1 ki\u1EC7n l\xE0m c\xE2y b\u1ECB \u0111\u1ED9t bi\u1EBFn (mutate_on_fert>0, l\xE0 x\xE1c su\u1EA5t \u0111\u1ED9t bi\u1EBFn c\u01A1 b\u1EA3n c\u1EE7a c\xE2y ch\xEDn h\xF4m nay, b\xF3n ph\xE2n s\u1EBD khu\u1EBFch \u0111\u1EA1i), th\xEC cho th\xEAm: mutate_prefix (ti\u1EC1n t\u1ED1 \u0111\u1ED9t bi\u1EBFn mang h\u01B0\u01A1ng v\u1ECB c\u1EE7a th\u1EBF gi\u1EDBi n\xE0y, trong 5 ch\u1EEF, v\xED d\u1EE5 "linh ho\xE1", "si\xEAu to", "\u0103n th\u1ECBt", "c\u1EE9ng ng\u1EAFc", "ph\xE1t s\xE1ng") v\xE0 mutate_desc (m\u1ED9t \u0111\u1ED1i t\u01B0\u1EE3ng, **vi\u1EBFt ri\xEAng cho t\u1EEBng lo\u1EA1i c\xE2y \u0111\u01B0\u1EE3c li\u1EC7t k\xEA b\xEAn d\u01B0\u1EDBi** v\u1EC1 **hi\u1EC7u \u1EE9ng ho\u1EB7c c\xF4ng d\u1EE5ng** c\u1EE7a th\u1EC3 \u0111\u1ED9t bi\u1EBFn \u0111\xF3 trong th\u1EBF gi\u1EDBi n\xE0y, m\u1ED7i m\u1EE5c trong 20 ch\u1EEF \u2014\u2014 h\xE3y vi\u1EBFt "n\xF3 l\xE0m \u0111\u01B0\u1EE3c g\xEC / s\u1EBD g\xE2y ra chuy\u1EC7n g\xEC", b\u1EAFt bu\u1ED9c l\xE0 hi\u1EC7u \u1EE9ng **khi c\u1EA7m gi\u1EEF, \u0103n ho\u1EB7c s\u1EED d\u1EE5ng** (n\xF3 s\u1EBD \u0111\u01B0\u1EE3c mang kh\u1ECFi v\u01B0\u1EDDn rau \u0111\u1EC3 d\xF9ng trong c\xE2u chuy\u1EC7n, nghi\xEAm c\u1EA5m vi\u1EBFt ki\u1EC3u "khi thu ho\u1EA1ch / khi nh\u1ED5 l\xEAn" v\xEC r\u1EDDi v\u01B0\u1EDDn l\xE0 m\u1EA5t hi\u1EC7u l\u1EF1c), ph\u1EA3i m\u01A1 h\u1ED3 \u0111\u1EC3 ch\u1EEBa ch\u1ED7 t\u01B0\u1EDFng t\u01B0\u1EE3ng, nghi\xEAm c\u1EA5m m\xF4 t\u1EA3 ki\u1EC3u ngo\u1EA1i h\xECnh l\u1EA5p l\xE1nh; hi\u1EC7u \u1EE9ng c\u1EE7a c\xE1c c\xE2y kh\xE1c nhau ph\u1EA3i kh\xE1c nhau). Khi kh\xF4ng \u0111\u1ED9t bi\u1EBFn th\xEC b\u1ECF c\u1EA3 hai tr\u01B0\u1EDDng.\n   C\xE1c lo\u1EA1i c\xE2y hi\u1EC7n c\xF3 trong v\u01B0\u1EDDn n\xE0y (t\u1ED5ng c\u1ED9ng {{CROPCOUNT}} lo\u1EA1i, mutate_desc b\u1EAFt bu\u1ED9c ph\u1EE7 h\u1EBFt t\u1EEBng lo\u1EA1i m\u1ED9t, nghi\xEAm c\u1EA5m b\u1ECF s\xF3t hay ch\u1EC9 vi\u1EBFt v\xE0i lo\u1EA1i): {{CROPLIST}}\n5. flavor l\xE0 m\u1ED9t c\xE2u cho ng\u01B0\u1EDDi ch\u01A1i \u0111\u1ECDc, trong 30 ch\u1EEF, \u01B0u ti\xEAn h\u01B0\u01A1ng v\u1ECB, c\xF3 th\u1EC3 h\xF3m h\u1EC9nh.\n6. Ch\u1EC9 \u0111\u01B0\u1EE3c xu\u1EA5t \u0111\xFAng m\u1ED9t d\xF2ng JSON, c\u1EA5m xu\u1EA5t gi\u1EA3i th\xEDch, ti\u1EC1n t\u1ED1 h\u1EADu t\u1ED1 hay d\u1EA5u kh\u1ED1i code:\n{"name":"t\xEAn s\u1EF1 ki\u1EC7n 2~6 ch\u1EEF","type":"buff|debuff|neutral","time_mult":1,"double_yield":false,"mutate_on_fert":0,"mutate_prefix":"","mutate_desc":{"t\xEAn c\xE2y tr\u1ED3ng":"m\xF4 t\u1EA3 hi\u1EC7u \u1EE9ng"},"favored_crop":"","flavor":"m\u1ED9t c\xE2u"}\n\nV\xED d\u1EE5 \u0111\u1ECBnh d\u1EA1ng (l\u1EA5y t\u1EEB th\u1EBF gi\u1EDBi kh\xE1c, ch\u1EC9 \u0111\u1EC3 tham kh\u1EA3o \u0111\u1ECBnh d\u1EA1ng v\xE0 h\u01B0\u1EDBng h\u01B0\u01A1ng v\u1ECB, c\u1EA5m ch\xE9p nguy\xEAn):\n- {"name":"M\u01B0a linh","type":"buff","time_mult":0.8,"flavor":"Linh kh\xED \u0111\u1ECDng th\xE0nh m\u01B0a, m\u1EA7m rau l\xE9n v\u01B0\u01A1n \u0111\u1ED1t nghe r\xF5 ti\u1EBFng."}\n- {"name":"M\u01B0a axit","type":"debuff","time_mult":1.1,"mutate_on_fert":0.3,"mutate_prefix":"bi\u1EBFn ch\u1EE7ng","flavor":"M\u01B0a axit g\xF5 m\xE1i, rau \u1EC9u x\xECu m\u1ECDc ch\u1EADm, c\xE2y \u0111\xE3 b\xF3n ph\xE2n e l\xE0 m\u1ECDc m\xE9o m\u1EA5t."}\n- {"name":"R\xF2 r\u1EC9 ph\xE2n nano","type":"neutral","mutate_on_fert":0.4,"mutate_prefix":"si\xEAu to","mutate_desc":{"B\xED ng\xF4":"B\u1ED5 ra th\xEC kh\xF4ng gian b\xEAn trong r\u1ED9ng h\u01A1n b\xEAn ngo\xE0i","C\xE0 chua":"Ng\u01B0\u1EDDi \u0103n nh\u1EDB m\u1ECDi th\u1EE9 trong ch\u1ED1c l\xE1t"},"flavor":"C\xE2y b\xF3n ph\xE2n h\xF4m nay c\xF3 th\u1EC3 m\u1ECDc ra h\xECnh th\xF9 kh\xF3 tin."}\n' + (CS.userPrompt ? "\n[ctx.S\u1EDF th\xEDch tu\u1EF3 ch\u1EC9nh c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i, \u01B0u ti\xEAn \u0111\xE1p \u1EE9ng, nh\u01B0ng kh\xF4ng \u0111\u01B0\u1EE3c v\u01B0\u1EE3t ra ngo\xE0i ph\u1EA1m vi c\xE1c tr\u01B0\u1EDDng]:\n" + CS.userPrompt + "\n" : "") + "\nTr\xEDch world book:\n" + (worldbook || "(Th\u1EBF gi\u1EDBi n\xE0y t\u1EA1m ch\u01B0a c\xF3 world book, h\xE3y t\u1EA1o m\u1ED9t s\u1EF1 ki\u1EC7n \u0111\u1ED3ng qu\xEA chung chung)")).replace("{{CROPLIST}}", cropList).replace("{{CROPCOUNT}}", String(cropList.split(", ").length));
 }
 function sanitizeEvent(o) {
   if (!o || typeof o !== "object") return null;
@@ -4117,7 +4031,7 @@ Ng\u01B0\u1EDDi ch\u01A1i \u0111ang tr\u1ED3ng m\u1ED9t m\u1EA3nh v\u01B0\u1EDDn
 T\xECnh tr\u1EA1ng hi\u1EC7n t\u1EA1i:
 - \u0110ang tr\u1ED3ng: ${field || "\u0110\u1EA5t tr\u1ED1ng"}${ripe ? ` (c\xF3 ${ripe} c\xE2y \u0111\xE3 ch\xEDn ch\u1EDD thu)` : ""}
 ${bagTxt ? "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF:\n" + bagTxt : "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF: Tr\u1ED1ng"}
-${ev && ev.flavor ? `- ctx.S\u1EF1 ki\u1EC7n h\xF4m nay: ${ev.name} \u2014\u2014 ${ev.flavor}` : ""}${takeoutNoteStr}
+${ev && ev.flavor ? `- S\u1EF1 ki\u1EC7n h\xF4m nay: ${ev.name} \u2014\u2014 ${ev.flavor}` : ""}${takeoutNoteStr}
 
 * H\u01B0\u1EDBng d\u1EABn cho AI: Nh\xE2n v\u1EADt trong c\u1ED1t truy\u1EC7n th\u1EC9nh tho\u1EA3ng c\xF3 th\u1EC3 nh\u1EAFc t\u1EDBi vi\u1EC7c ng\u01B0\u1EDDi ch\u01A1i ch\u0103m v\u01B0\u1EDDn hay thu ho\u1EA1ch th\u1EBF n\xE0o m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn, nh\u01B0ng \u0110\u1EEANG thao t\xE1c v\u01B0\u1EDDn rau thay ng\u01B0\u1EDDi ch\u01A1i, c\u0169ng \u0110\u1EEANG bi\u1EBFn v\u01B0\u1EDDn rau th\xE0nh m\u1EA1ch ch\xEDnh c\u1EE7a c\u1ED1t truy\u1EC7n.`;
   setInjection(promptText);

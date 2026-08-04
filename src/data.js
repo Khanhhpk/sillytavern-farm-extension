@@ -1,6 +1,18 @@
 export const TEST_MODE = false;
-export const MIN = 60 * 1000;export const GROW = TEST_MODE ? 5 * MIN : null;export const REGROW = TEST_MODE ? 2 * MIN : null;export const DAY_MS = 4 * 60 * 60 * 1000;                 // Một ngày trong game = 4 giờ thực (hằng số nội bộ)export const WATER_CD = TEST_MODE ? 10 * MIN : 2 * 60 * 60 * 1000;   // Sửa #3: hồi chiêu tưới nước 10 phútexport const REGROW_MAX = 3;                                          // Sửa #4: tái sinh tối đa 3 vụexport const POKE_CD = 10 * MIN;                                      // Sửa #9: hồi chiêu chọc thú cưng rơi tiềnexport const TREASURE_CD = TEST_MODE ? 10 * MIN : 2 * 60 * 60 * 1000; // v0.6b: chu kỳ tìm kho báuexport const PETS_OUT_MAX = 8;                                        // Giới hạn số thú ra sân (#25: bỏ điều phái, ra sân = có hiệu lực trên mọi trang)export const WITCH_STAY = TEST_MODE ? 10 * MIN : 20 * MIN;            // Phù thuỷ ở lại 20 phút (do wen chốt, định vị trứng phục sinh)export const witchGap = () => TEST_MODE ? 15 * MIN + Math.random() * 20 * MIN : 100 * MIN + Math.random() * 80 * MIN;   // Bản chính thức ≈ mỗi chu kỳ 4h có 1~2 lầnexport const SNAP_EDGE = 48;                                          // Sửa #1: lại gần mép mới hít vào
-  /* zone: 1 đồng cỏ, 2 vùng nước, 3 khu mỏ (mặc định = 1); hidden: cửa hàng không bán / tìm kho báu không rơi (#34); họ mystery xem plant() */export const CROPS = {
+export const MIN = 60 * 1000;
+export const GROW = TEST_MODE ? 5 * MIN : null;
+export const REGROW = TEST_MODE ? 2 * MIN : null;
+export const DAY_MS = 4 * 60 * 60 * 1000;                 // Một ngày trong game = 4 giờ thực (hằng số nội bộ)
+export const WATER_CD = TEST_MODE ? 10 * MIN : 2 * 60 * 60 * 1000;   // Sửa #3: hồi chiêu tưới nước 10 phút
+export const REGROW_MAX = 3;                                          // Sửa #4: tái sinh tối đa 3 vụ
+export const POKE_CD = 10 * MIN;                                      // Sửa #9: hồi chiêu chọc thú cưng rơi tiền
+export const TREASURE_CD = TEST_MODE ? 10 * MIN : 2 * 60 * 60 * 1000; // v0.6b: chu kỳ tìm kho báu
+export const PETS_OUT_MAX = 8;                                        // Giới hạn số thú ra sân (#25: bỏ điều phái, ra sân = có hiệu lực trên mọi trang)
+export const WITCH_STAY = TEST_MODE ? 10 * MIN : 20 * MIN;            // Phù thuỷ ở lại 20 phút (do wen chốt, định vị trứng phục sinh)
+export const witchGap = () => TEST_MODE ? 15 * MIN + Math.random() * 20 * MIN : 100 * MIN + Math.random() * 80 * MIN;   // Bản chính thức ≈ mỗi chu kỳ 4h có 1~2 lần
+export const SNAP_EDGE = 48;                                          // Sửa #1: lại gần mép mới hít vào
+  /* zone: 1 đồng cỏ, 2 vùng nước, 3 khu mỏ (mặc định = 1); hidden: cửa hàng không bán / tìm kho báu không rơi (#34); họ mystery xem plant() */
+export const CROPS = {
     /* Số liệu chính thức v1.0 (chốt theo "Bảng số liệu chính thức - chờ duyệt.md"): grow/regrowM tính bằng phút thực */
     douya:     { name: 'Giá đỗ',        grow: 5,   seed: 5,    sell: 12,   sp: 'sprout' },
     radish:    { name: 'Củ cải cherry', grow: 10,  seed: 25,   sell: 45,   sp: 'radish' },
@@ -30,11 +42,17 @@ export const MIN = 60 * 1000;export const GROW = TEST_MODE ? 5 * MIN : null;ex
     fangG:     { name: 'Cây bắt ruồi',  grow: 30, seed: 0, sell: 400,  sp: 'fangG', hidden: true, zone: 1 },
     fangW:     { name: 'Hoa bá vương',  grow: 30, seed: 0, sell: 800,  sp: 'fangW', hidden: true, zone: 2 },
     fangM:     { name: 'Hoa nanh rồng', grow: 30, seed: 0, sell: 1200, sp: 'fangM', hidden: true, zone: 3 },
-  };export const ZONE_NAME = { 1: 'Đồng cỏ', 2: 'Vùng nước', 3: 'Khu mỏ' };export const FERTS = {
+  };
+export const ZONE_NAME = { 1: 'Đồng cỏ', 2: 'Vùng nước', 3: 'Khu mỏ' };
+export const FERTS = {
     compost: { name: 'Phân ủ',       price: 50,  desc: 'Thời gian còn lại của vụ này ×0.75' },
     shiny:   { name: 'Phân lấp lánh', price: 100, desc: 'Khi thu hoạch vụ này rơi thêm số vàng bằng 25% giá bán' },
-  };export const BLOCK_PRICE_PG = {   // v1.0: giá khai hoang riêng cho từng trang (chốt theo bảng B)
+  };
+export const BLOCK_PRICE_PG = {   // v1.0: giá khai hoang riêng cho từng trang (chốt theo bảng B)
     1: [0, 0, 800, 3000, 12000, 30000],
     2: [0, 2000, 6000, 18000, 45000, 90000],
     3: [0, 5000, 15000, 40000, 90000, 180000],
-  };export const WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ'];
+  };
+
+export const WEATHERS = ['Nắng', 'Nắng', 'Nắng', 'Nhiều mây', 'Mưa nhỏ'];
+

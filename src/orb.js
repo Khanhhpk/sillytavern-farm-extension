@@ -15,7 +15,7 @@ export function placeOrb() {
   const x = Math.min(Math.max(ctx.S.orb.fx * vw, 4), vw - 56);
   const y = Math.min(Math.max(ctx.S.orb.fy * vh, 4), vh - 56);
   ctx.orb.style.left = x + 'px'; ctx.orb.style.top = y + 'px';
-  ctx.orb.classList.toggle('dockL', ctx.S.orb.dock === 'L');   // ctx.Sửa #12: khôi phục trạng thái thu nửa
+  ctx.orb.classList.toggle('dockL', ctx.S.orb.dock === 'L');   // Sửa #12: khôi phục trạng thái thu nửa
   ctx.orb.classList.toggle('dockR', ctx.S.orb.dock === 'R');
 }
 export function onOrbDown(e) {
@@ -28,7 +28,7 @@ export function onOrbMove(e) {
   if (!gesture || e.pointerId !== gesture.id) return;
   if (Math.hypot(e.clientX - gesture.sx, e.clientY - gesture.sy) > 5) {
     gesture.drag = true;
-    ctx.orb.classList.remove('dockL', 'dockR');   // ctx.Sửa #12: khi kéo thì hiện đầy đủ
+    ctx.orb.classList.remove('dockL', 'dockR');   // Sửa #12: khi kéo thì hiện đầy đủ
   }
   if (gesture.drag) {
     ctx.orb.style.left = gesture.ox + e.clientX - gesture.sx + 'px';
@@ -43,12 +43,12 @@ export function onOrbUp(e, cancelled) {
   if (cancelled) return;
   const vw = window.innerWidth, vh = window.innerHeight;
   if (wasDrag) {
-    let nx = Math.min(Math.max(ctx.orb.offsetLeft, 4), vw - 56);    // ctx.Sửa #1: lại gần mép mới hít, còn lại đứng nguyên chỗ
+    let nx = Math.min(Math.max(ctx.orb.offsetLeft, 4), vw - 56);    // Sửa #1: lại gần mép mới hít, còn lại đứng nguyên chỗ
     let dock = null;
     if (nx < SNAP_EDGE) { nx = 4; dock = 'L'; }
     else if (nx > vw - 56 - SNAP_EDGE) { nx = vw - 56; dock = 'R'; }
     ctx.orb.style.left = nx + 'px';
-    ctx.S.orb = { fx: nx / vw, fy: Math.min(Math.max(ctx.orb.offsetTop, 4), vh - 56) / vh, dock };   // ctx.Sửa #12
+    ctx.S.orb = { fx: nx / vw, fy: Math.min(Math.max(ctx.orb.offsetTop, 4), vh - 56) / vh, dock };   // Sửa #12
     ctx.orb.classList.toggle('dockL', dock === 'L');
     ctx.orb.classList.toggle('dockR', dock === 'R');
     save();
@@ -65,7 +65,7 @@ export const onResize = () => {
 };
 
 
-/* ---------- ctx.Sửa #11: bố cục dọc thu nhỏ đồng loạt (ô tính theo chiều rộng màn hình, sprite lấy bội số của 16) ---------- */
+/* ---------- Sửa #11: bố cục dọc thu nhỏ đồng loạt (ô tính theo chiều rộng màn hình, sprite lấy bội số của 16) ---------- */
 export let SPRITE_PX = 64, DECO_PX = 56;
 export function layout() {
   const vw = window.innerWidth;

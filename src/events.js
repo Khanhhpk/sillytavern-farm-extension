@@ -186,7 +186,7 @@ export function buildEventPrompt(worldbook) {
     .filter(([id, c]) => !c.seedOnly)
     .map(([id, c]) => c.name).join(', ');
   return ('Bạn là "trình tạo sự kiện thế giới quan" cho một game nông trại nhỏ. Người chơi đang trồng một mảnh vườn rau nhỏ trong một thế giới nhập vai nào đó, và bạn sẽ nhận được phần trích world book của thế giới đó. Hãy tạo 1 sự kiện nhỏ ngẫu nhiên xảy ra ở vườn rau hôm nay.\n\nQuy tắc:\n' +
-    '1. ctx.Sự kiện bắt buộc mang hương vị của thế giới này —— các danh từ về thời tiết, sản vật, yếu tố siêu nhiên… hãy cố lấy chất liệu từ world book; nhưng sự kiện chỉ ảnh hưởng việc trồng trọt, không đẩy cốt truyện. Có thể nhắc tên nhân vật trong thế giới ở phần flavor cho sinh động, nhưng tuyệt đối không được để nhân vật nói chuyện, hành động hay xảy ra tình tiết nào.\n' +
+    '1. Sự kiện bắt buộc mang hương vị của thế giới này —— các danh từ về thời tiết, sản vật, yếu tố siêu nhiên… hãy cố lấy chất liệu từ world book; nhưng sự kiện chỉ ảnh hưởng việc trồng trọt, không đẩy cốt truyện. Có thể nhắc tên nhân vật trong thế giới ở phần flavor cho sinh động, nhưng tuyệt đối không được để nhân vật nói chuyện, hành động hay xảy ra tình tiết nào.\n' +
     '2. Xu hướng sự kiện hôm nay: ' + tendency + '; chủ đề tham khảo: ' + theme + '.\n' +
     '3. Trường hiệu ứng chỉ được dùng time_mult (0.7~1.1, hệ số nhân thời gian sinh trưởng) / mutate_on_fert (0~0.5), có thể chỉ dùng một hoặc bỏ cả hai. **Tuyệt đối đừng viết ngược ngữ nghĩa của time_mult: <1 = mọc nhanh hơn = sự kiện tích cực; >1 = mọc chậm hơn = sự kiện tiêu cực**. Ngoài ra có trường hiếm double_yield:true (số quả thu hoạch hôm nay ×2, phúc lợi cho dân may mắn) —— chỉ nên xuất hiện khoảng 8% số ngày, khi xuất hiện thì sự kiện phải viết theo chủ đề bội thu lớn / kỳ tích, type bắt buộc là buff. Có thể thêm favored_crop: điền một tên cây trồng (bắt buộc lấy từ danh sách cây trồng), khi đó hiệu ứng chỉ tác dụng lên cây đó; không điền thì cả ruộng đều chịu tác dụng.\n' +
     '4. Nếu sự kiện làm cây bị đột biến (mutate_on_fert>0, là xác suất đột biến cơ bản của cây chín hôm nay, bón phân sẽ khuếch đại), thì cho thêm: mutate_prefix (tiền tố đột biến mang hương vị của thế giới này, trong 5 chữ, ví dụ "linh hoá", "siêu to", "ăn thịt", "cứng ngắc", "phát sáng") và mutate_desc (một đối tượng, **viết riêng cho từng loại cây được liệt kê bên dưới** về **hiệu ứng hoặc công dụng** của thể đột biến đó trong thế giới này, mỗi mục trong 20 chữ —— hãy viết "nó làm được gì / sẽ gây ra chuyện gì", bắt buộc là hiệu ứng **khi cầm giữ, ăn hoặc sử dụng** (nó sẽ được mang khỏi vườn rau để dùng trong câu chuyện, nghiêm cấm viết kiểu "khi thu hoạch / khi nhổ lên" vì rời vườn là mất hiệu lực), phải mơ hồ để chừa chỗ tưởng tượng, nghiêm cấm mô tả kiểu ngoại hình lấp lánh; hiệu ứng của các cây khác nhau phải khác nhau). Khi không đột biến thì bỏ cả hai trường.\n' +
@@ -606,7 +606,7 @@ Người chơi đang trồng một mảnh vườn rau thư giãn trên giao di�
 Tình trạng hiện tại:
 - Đang trồng: ${field || 'Đất trống'}${ripe ? ` (có ${ripe} cây đã chín chờ thu)` : ''}
 ${bagTxt ? '- Nông sản tích trữ:\n' + bagTxt : '- Nông sản tích trữ: Trống'}
-${ev && ev.flavor ? `- ctx.Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}` : ''}${takeoutNoteStr}
+${ev && ev.flavor ? `- Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}` : ''}${takeoutNoteStr}
 
 * Hướng dẫn cho AI: Nhân vật trong cốt truyện thỉnh thoảng có thể nhắc tới việc người chơi chăm vườn hay thu hoạch thế nào một cách tự nhiên, nhưng ĐỪNG thao tác vườn rau thay người chơi, cũng ĐỪNG biến vườn rau thành mạch chính của cốt truyện.`;
 
