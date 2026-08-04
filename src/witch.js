@@ -224,7 +224,7 @@ export function openBuyDlg(kind, id) {
 export let toastTimer = null;
 export function toast(msg) {
   const t = All.$id('toast');
-  t.textContent = ctx.msg; t.style.display = 'block';
+  t.textContent = msg; t.style.display = 'block';
   if (toastTimer) window.clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => { t.style.display = 'none'; }, 1800);
 }

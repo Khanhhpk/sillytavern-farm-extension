@@ -3383,7 +3383,7 @@ function openBuyDlg(kind, id) {
 var toastTimer = null;
 function toast(msg) {
   const t = $id("toast");
-  t.textContent = ctx.msg;
+  t.textContent = msg;
   t.style.display = "block";
   if (toastTimer) window.clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => {
