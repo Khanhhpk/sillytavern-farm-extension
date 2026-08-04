@@ -3813,8 +3813,8 @@ async function collectWorldbook() {
       const entryName = en.comment || en.name || String(en.uid ?? en.id ?? "") || "Lorebook Entry";
       const formatted = `[${entryName}]
 ${content}`;
-      if (isConstant) blue = formatted + "\n\n" + blue;
-      else green = formatted + "\n\n" + green;
+      if (isConstant) blue += formatted + "\n\n";
+      else green += formatted + "\n\n";
     }
     let txt = blue + green;
     if (chatContext) txt += chatContext;

@@ -162,8 +162,8 @@ async function collectWorldbook() {
       const entryName = en.comment || en.name || String(en.uid ?? en.id ?? '') || 'Lorebook Entry';
       const formatted = `[${entryName}]\n${content}`;
 
-      if (isConstant) blue = formatted + '\n\n' + blue;
-      else green = formatted + '\n\n' + green;
+      if (isConstant) blue += formatted + '\n\n';
+      else green += formatted + '\n\n';
     }
     
     let txt = blue + green;
