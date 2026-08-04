@@ -3742,8 +3742,6 @@ async function collectWorldbook() {
         const wiKey = ST_WorldInfo?.METADATA_KEY || window.WI_METADATA_KEY || "world_info";
         const chatWorldName = ctx2.chatMetadata?.[wiKey];
         if (chatWorldName && typeof chatWorldName === "string") activeNames.add(chatWorldName);
-        const globalBooks = ST_WorldInfo?.selected_world_info || window.selected_world_info || [];
-        if (Array.isArray(globalBooks)) globalBooks.forEach((n) => n && activeNames.add(n));
       } catch (e) {
         console.log("[FARM DEBUG] Error getting active names:", e);
       }
