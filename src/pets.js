@@ -24,7 +24,7 @@ export const GAITS = {                                          // Dáng đi: le
 export const gaitOf = id => GAITS[id] || GAITS._;
 export const stopHop = id => { if (petHopT[id]) { window.clearTimeout(petHopT[id]); delete petHopT[id]; } };
 export function petSpot(id) {
-  const ov = $id('mascots'), W = ov.clientWidth, H = ov.clientHeight;
+  const ov = All.$id('mascots'), W = ov.clientWidth, H = ov.clientHeight;
   if (PETS[id] && PETS[id].job) {                        // Loại làm việc (sửa lần 3): đứng cố định thành hàng ở góc dưới phải, nhún nhảy tại chỗ chứ không đi
     const workers = ctx.S.petsOut.filter(p => PETS[p] && PETS[p].job);
     const anchor = W - 64 - Math.max(0, workers.indexOf(id)) * 62;
@@ -141,7 +141,7 @@ export function tryScene() {
   lastScene = act;
   nextSceneAt = now() + (TEST_MODE ? 45 * 1000 + Math.random() * 90 * 1000 : 60 * MIN + Math.random() * 120 * MIN);
   const shuffle = a => a.sort(() => Math.random() - .5);
-  const ov = $id('mascots'), W = ov.clientWidth, H = ov.clientHeight;
+  const ov = All.$id('mascots'), W = ov.clientWidth, H = ov.clientHeight;
   const clampX = x => Math.max(4, Math.min(W - 60, x));
   const midY = () => WORK_BAND + 20 + Math.random() * Math.max(20, H - WORK_BAND - 100);
   if (act === 'bump') {                                  // Đụng đầu nảy ra: đâm sầm vào nhau, cả hai bật ra, mỗi bé kêu một tiếng
@@ -203,7 +203,7 @@ export function renderPets() {
   for (const k in petArrive) delete petArrive[k];
   for (const k in pileWith) delete pileWith[k];
   Object.keys(petSleepT).forEach(k => { window.clearTimeout(petSleepT[k]); delete petSleepT[k]; });
-  $id('mascots').innerHTML = ctx.S.petsOut.map(id => PETS[id]
+  All.$id('mascots').innerHTML = ctx.S.petsOut.map(id => PETS[id]
     ? `<span class="pet" data-pet="${id}" title="Chọc chọc ${PETS[id].name}"><span class="pbody" style="animation-delay:-${(Math.random() * 1.8).toFixed(2)}s">${petSVG(id, 48)}</span></span>` : '').join('');
   sh.querySelectorAll('#mascots .pet').forEach(el => {
     const id = el.dataset.pet;
@@ -221,7 +221,7 @@ export const wander = window.setInterval(() => {                  // Nhịp tu�
     if (Math.random() < 0.35) moveTo(el, petSpot(id));
   });
 }, 7000);
-$id('mascots').addEventListener('click', e => {
+All.$id('mascots').addEventListener('click', e => {
   const el = e.target.closest('.pet'); if (!el) return;
   const id = el.dataset.pet, def = PETS[id];
   if (!def) return;

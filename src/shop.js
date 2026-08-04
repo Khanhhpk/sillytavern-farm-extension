@@ -5,24 +5,24 @@ import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, L
 
 /* ---------- Bảng ---------- */
 export function openModal(title, bodyHTML) {
-  $id('mtitle-text').textContent = title;
-  $id('mbody').innerHTML = bodyHTML;
-  $id('modal').classList.add('open');
+  All.$id('mtitle-text').textContent = title;
+  All.$id('mbody').innerHTML = bodyHTML;
+  All.$id('modal').classList.add('open');
 }
 export function closeModal() { 
-  $id('modal').classList.remove('open'); 
-  $id('mbody').innerHTML = ''; // Dọn dẹp rác DOM và event listeners bên trong
+  All.$id('modal').classList.remove('open'); 
+  All.$id('mbody').innerHTML = ''; // Dọn dẹp rác DOM và event listeners bên trong
   pendingPick = null; 
   bagSellMode = false; 
 }   // Tự kiểm: đóng cửa sổ thì thoát chế độ tick chọn
-$id('mclose').addEventListener('click', closeModal);
-$id('mbody').addEventListener('click', e => {
+All.$id('mclose').addEventListener('click', closeModal);
+All.$id('mbody').addEventListener('click', e => {
   const el = e.target.closest('[data-pick]');
   if (!el || !pendingPick) return;
   const cb = pendingPick; pendingPick = null;
   closeModal(); cb(el.dataset.pick);
 });
-$id('modal').addEventListener('click', e => { if (e.target === $id('modal')) closeModal(); });
+All.$id('modal').addEventListener('click', e => { if (e.target === All.$id('modal')) closeModal(); });
 
 export let shopTab = 'seed';
 export let bagTab = 'crop';
@@ -82,10 +82,10 @@ export function openPanel(kind) {
       <div style="display:flex;justify-content:flex-end;align-items:center;gap:4px;font-size:12px;font-weight:bold;color:#7a5c38;margin-bottom:6px">${spriteSVG('coin', 16)}${ctx.S.coins.toLocaleString()}</div>
       <div class="tabs">${tabs.map(([k, n]) => `<span class="tab${shopTab === k ? ' active' : ''}" data-tab="${k}">${n}</span>`).join('')}</div>
       <div class="items">${items}</div>`);
-    $id('mbody').querySelectorAll('[data-tab]').forEach(t => t.addEventListener('click', () => { shopTab = t.dataset.tab; openPanel('shop'); }));
-    $id('mbody').querySelectorAll('[data-buyseed]').forEach(b => b.addEventListener('click', () => openBuyDlg('seed', b.dataset.buyseed)));
-    $id('mbody').querySelectorAll('[data-buyfert]').forEach(b => b.addEventListener('click', () => openBuyDlg('fert', b.dataset.buyfert)));
-    $id('mbody').querySelectorAll('[data-buypet]').forEach(b => b.addEventListener('click', () => {
+    All.$id('mbody').querySelectorAll('[data-tab]').forEach(t => t.addEventListener('click', () => { shopTab = t.dataset.tab; openPanel('shop'); }));
+    All.$id('mbody').querySelectorAll('[data-buyseed]').forEach(b => b.addEventListener('click', () => openBuyDlg('seed', b.dataset.buyseed)));
+    All.$id('mbody').querySelectorAll('[data-buyfert]').forEach(b => b.addEventListener('click', () => openBuyDlg('fert', b.dataset.buyfert)));
+    All.$id('mbody').querySelectorAll('[data-buypet]').forEach(b => b.addEventListener('click', () => {
       const id = b.dataset.buypet, pd = PETS[id];
       if (ctx.S.pets.indexOf(id) >= 0) return;
       if (ctx.S.coins < pd.price) return toast('Còn thiếu ' + (pd.price - ctx.S.coins).toLocaleString() + ' G');
@@ -94,7 +94,7 @@ export function openPanel(kind) {
       else toast(pd.name + ' đã về nhà! Bờ ruộng chật rồi, bé đang nghỉ ở trang Balo · Bé tròn');
       save(); renderStatus(); renderPets(); openPanel('shop');
     }));
-    $id('mbody').querySelectorAll('[data-passdlg]').forEach(b => b.addEventListener('click', () => openPassDlg(b.dataset.passdlg)));
+    All.$id('mbody').querySelectorAll('[data-passdlg]').forEach(b => b.addEventListener('click', () => openPassDlg(b.dataset.passdlg)));
   } else if (kind === 'bag') {
     const btabs = `<div class="tabs"><span class="tab${bagTab === 'crop' ? ' active' : ''}" data-btab="crop">Nông sản</span><span class="tab${bagTab === 'pet' ? ' active' : ''}" data-btab="pet">Bé tròn</span><span class="tab${bagTab === 'relic' ? ' active' : ''}" data-btab="relic">Quà của bé tròn</span></div>`;
     if (bagTab === 'relic') {                            // v1.0: quà của bé tròn —— quầy riêng cho mảnh vỡ và hạt giống bí ẩn
@@ -110,8 +110,8 @@ export function openPanel(kind) {
         <span class="info"><div class="name">Mảnh ngôi sao ×${sh2.star}</div><div class="meta">Đập vỡ sẽ triệu hồi phù thuỷ tròn ghé thăm</div></span>
         <span class="buy" data-useshard="star">Triệu hồi</span></div>` : '');
       openModal('Balo', btabs + (relicRows || '<div class="note">Ngăn quà còn trống~ Hạt giống bí ẩn đến từ chuyến tìm kho báu của bé quỷ/bé thiên thần và từ đơn hàng của phù thuỷ; bé lăng quang / bé chuông sao đi tìm kho báu sẽ mang mảnh vỡ về</div>'));
-      $id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
-      $id('mbody').querySelectorAll('[data-useshard]').forEach(b => b.addEventListener('click', useStarShard));
+      All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
+      All.$id('mbody').querySelectorAll('[data-useshard]').forEach(b => b.addEventListener('click', useStarShard));
       return;
     }
     if (bagTab === 'pet') {
@@ -127,8 +127,8 @@ export function openPanel(kind) {
           <span class="buy${out ? ' plain' : ''}" data-petout="${id}">${out ? 'Thu về' : 'Ra sân'}</span></div>`;
       }).join('') || '<div class="note">Chưa có bé tròn nào, ra cửa hàng ngắm thử đi</div>';
       openModal('Balo', btabs + `<div class="note" style="margin-bottom:8px">Bờ ruộng cùng lúc đứng được tối đa ${PETS_OUT_MAX} bé; bé được thu về sẽ nghỉ ở đây, không làm việc cũng không tìm kho báu</div>` + prow);
-      $id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
-      $id('mbody').querySelectorAll('[data-petout]').forEach(b => b.addEventListener('click', () => {
+      All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
+      All.$id('mbody').querySelectorAll('[data-petout]').forEach(b => b.addEventListener('click', () => {
         const id = b.dataset.petout;
         const i = ctx.S.petsOut.indexOf(id);
         if (i >= 0) ctx.S.petsOut.splice(i, 1);
@@ -174,21 +174,21 @@ export function openPanel(kind) {
       }
     }
     openModal('Balo', btabs + sellBar + (rows || '<div class="note">Balo trống trơn, đi thu ít rau đi nào</div>'));
-    $id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
-    $id('mbody').querySelectorAll('[data-selldlg]').forEach(b => b.addEventListener('click', () => openSellDlg(b.dataset.selldlg)));
-    $id('mbody').querySelectorAll('[data-takeout]').forEach(b => b.addEventListener('click', () => openTakeout(b.dataset.takeout)));
-    const smGo = $id('sellModeGo');
+    All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
+    All.$id('mbody').querySelectorAll('[data-selldlg]').forEach(b => b.addEventListener('click', () => openSellDlg(b.dataset.selldlg)));
+    All.$id('mbody').querySelectorAll('[data-takeout]').forEach(b => b.addEventListener('click', () => openTakeout(b.dataset.takeout)));
+    const smGo = All.$id('sellModeGo');
     if (smGo) smGo.addEventListener('click', () => {
       bagSellMode = true; bagSel = {};                   // Mặc định không chọn gì (wen chốt: tránh lỡ tay bán mất hàng đột biến sưu tầm)
       openPanel('bag');
     });
-    $id('mbody').querySelectorAll('[data-selkey]').forEach(el => el.addEventListener('click', () => {
+    All.$id('mbody').querySelectorAll('[data-selkey]').forEach(el => el.addEventListener('click', () => {
       bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
       openPanel('bag');
     }));
-    const ssNo = $id('sellSelNo');
+    const ssNo = All.$id('sellSelNo');
     if (ssNo) ssNo.addEventListener('click', () => { bagSellMode = false; openPanel('bag'); });
-    const ssGo = $id('sellSelGo');
+    const ssGo = All.$id('sellSelGo');
     if (ssGo) ssGo.addEventListener('click', () => {
       const keys = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.bag[k]);
       if (!keys.length) return toast('Chưa tick cái nào cả');
@@ -242,28 +242,28 @@ export function openPanel(kind) {
         · Save nằm trong chính SillyTavern, cập nhật phiên bản cứ nhập script mới, save không mất; API Key phụ chỉ nằm trong trình duyệt máy này<br>
         · Các bản SillyTavern khác nhau <b>không dùng chung</b> (cài thêm một bản trên điện thoại = một vườn rau khác); trước khi cài lại SillyTavern nhớ sao lưu thư mục data</div>
       <span class="buy" id="resetSave">Đặt lại save (cẩn thận, bấm hai lần)</span>`);
-    $id('secSave').addEventListener('click', () => {
+    All.$id('secSave').addEventListener('click', () => {
       SEC = {
-        url: $id('secUrl').value.trim(), key: $id('secKey').value.trim(), model: $id('secModel').value.trim(),
-        autoReset: $id('secAuto').checked, resetHours: clampN($id('secHours').value, 1, 24, 4),
-        wbLimit: parseInt($id('secWbLimit').value, 10) || 0,
+        url: All.$id('secUrl').value.trim(), key: All.$id('secKey').value.trim(), model: All.$id('secModel').value.trim(),
+        autoReset: All.$id('secAuto').checked, resetHours: clampN(All.$id('secHours').value, 1, 24, 4),
+        wbLimit: parseInt(All.$id('secWbLimit').value, 10) || 0,
       };
       saveSec(); toast('Đã lưu cấu hình API phụ');
     });
-    $id('secTest').addEventListener('click', () => testSecApi());
-    $id('secModels').addEventListener('click', () => fetchModelList());
-    if ($id('openSandboxBtn')) $id('openSandboxBtn').addEventListener('click', openSandbox);
-    $id('mbody').querySelectorAll('[data-settheme]').forEach(b => b.addEventListener('click', () => {
+    All.$id('secTest').addEventListener('click', () => testSecApi());
+    All.$id('secModels').addEventListener('click', () => fetchModelList());
+    if (All.$id('openSandboxBtn')) All.$id('openSandboxBtn').addEventListener('click', openSandbox);
+    All.$id('mbody').querySelectorAll('[data-settheme]').forEach(b => b.addEventListener('click', () => {
       ctx.S.theme = b.dataset.settheme; save(); applyTheme(); openPanel('cfg');
       toast(ctx.S.theme === 'sky' ? 'Đổi sang giao diện trời quang~' : 'Về lại giao diện hồng anh đào~');
     }));
-    $id('csPromptSave').addEventListener('click', () => {
-      CS.userPrompt = $id('csPrompt').value.slice(0, 3000);
+    All.$id('csPromptSave').addEventListener('click', () => {
+      CS.userPrompt = All.$id('csPrompt').value.slice(0, 3000);
       saveCharState(); toast('Đã lưu vào thẻ nhân vật hiện tại');
     });
     let armed = false;
-    $id('resetSave').addEventListener('click', () => {
-      if (!armed) { armed = true; $id('resetSave').textContent = 'Bấm lần nữa để xác nhận đặt lại!'; return; }
+    All.$id('resetSave').addEventListener('click', () => {
+      if (!armed) { armed = true; All.$id('resetSave').textContent = 'Bấm lần nữa để xác nhận đặt lại!'; return; }
       ctx.S = freshState(); save(true); closeModal(); renderAll(); toast('Đã đặt lại');
     });
   }

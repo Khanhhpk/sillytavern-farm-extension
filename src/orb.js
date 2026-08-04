@@ -4,7 +4,7 @@ import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, 
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
 
 /* ---------- Bóng nổi: kéo / hít mép / phân xử cú bấm (C11 §4) ---------- */
-ctx.orb = $id('ctx.orb'), ctx.win = $id('ctx.win');
+ctx.orb = All.$id('ctx.orb'), ctx.win = All.$id('ctx.win');
 export const disposers = [];
 export let gesture = null, destroyed = false;
 export function placeOrb() {

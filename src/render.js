@@ -15,7 +15,7 @@ export const TOOLS = [
 ];
 export let toolbarOpen = false;
 export function renderToolbar() {
-  const tb = $id('toolbar');
+  const tb = All.$id('toolbar');
   tb.classList.toggle('open', toolbarOpen);
   if (!toolbarOpen) {
     tb.innerHTML = `<div class="tool" data-tool="expand" title="Công cụ" style="width:34px;height:34px">${spriteSVG('toolSeed', 22)}</div>`;
@@ -24,7 +24,7 @@ export function renderToolbar() {
       `<div class="tool${mode && mode.t === t.key ? ' selected' : ''}" data-tool="${t.key}" title="${t.tip}">${spriteSVG(t.sp, 30)}</div>`
     ).join('') + `<div class="tool mini" data-tool="collapse">✕</div>`;
   }
-  const tip = $id('modetip');
+  const tip = All.$id('modetip');
   if (mode) {
     const names = { seed: 'Gieo hạt', water: 'Tưới nước', fert: 'Bón phân', harvest: 'Thu hoạch', shovel: 'Xới bỏ' };
     let txt = 'Chế độ ' + names[mode.t];
@@ -35,7 +35,7 @@ export function renderToolbar() {
     tip.style.display = 'block';
   } else tip.style.display = 'none';
 }
-$id('toolbar').addEventListener('click', e => {
+All.$id('toolbar').addEventListener('click', e => {
   const el = e.target.closest('[data-tool]'); if (!el) return;
   const k = el.dataset.tool;
   if (k === 'expand') { toolbarOpen = true; renderToolbar(); return; }
@@ -59,23 +59,23 @@ export function pickFrom(title, obj, nameFn, cb) {
 export let cacheWicon = '', cacheCoins = -1, cacheDayTxt = '', cacheBlockTxt = '';
 export function renderStatus() {
   if (ctx.S.coins !== cacheCoins) {
-    $id('coins').textContent = ctx.S.coins.toLocaleString();
+    All.$id('coins').textContent = ctx.S.coins.toLocaleString();
     cacheCoins = ctx.S.coins;
   }
   const w = weatherOf(gameDay());
   const wiconHtml = spriteSVG(w === 'Nắng' ? 'sun' : w === 'Mưa nhỏ' ? 'raincloud' : 'cloud', 22);
   if (cacheWicon !== wiconHtml) {
-    $id('wicon').innerHTML = wiconHtml;
+    All.$id('wicon').innerHTML = wiconHtml;
     cacheWicon = wiconHtml;
   }
   const dayStr = 'Ngày ' + gameDay() + ' · ' + w + (w === 'Mưa nhỏ' ? ' (sinh trưởng +10%)' : '');
   if (cacheDayTxt !== dayStr) {
-    $id('daytxt').textContent = dayStr;
+    All.$id('daytxt').textContent = dayStr;
     cacheDayTxt = dayStr;
   }
   const blockStr = ZONE_NAME[ctx.S.page] + ' ' + curBlocks() + '/6';
   if (cacheBlockTxt !== blockStr) {
-    $id('blocktxt').textContent = blockStr;
+    All.$id('blocktxt').textContent = blockStr;
     cacheBlockTxt = blockStr;
   }
 }
@@ -94,7 +94,7 @@ export function plotHTML(pi) {
 }
 /* v1.1 (wen chốt): bỏ hết trang trí ở ô khoá —— 24 ô đầy cỏ dại / hoa sen / pha lê thì rối mắt quá, để hoạ tiết nền đất tự tạo không khí */
 export function renderPlots() {
-  const wrap = $id('blocks');
+  const wrap = All.$id('blocks');
   const pg = ctx.S.page, plots = curPlots(), nb = curBlocks();
   
   // 1. Dựng khung tĩnh (Skeleton) nếu chưa có hoặc chuyển trang
@@ -211,37 +211,37 @@ export function renderPlots() {
   }
 }
 export function renderChips() {
-  const cl = $id('chipLink'), cs2 = $id('chipStory');
+  const cl = All.$id('chipLink'), cs2 = All.$id('chipStory');
   cl.classList.toggle('on', CS.link);
   cl.textContent = 'Liên kết thẻ nhân vật: ' + (CS.link ? 'Bật' : 'Tắt');
   cs2.style.display = CS.link ? '' : 'none';
   cs2.classList.toggle('on', CS.story);
   cs2.textContent = 'Ảnh hưởng cốt truyện: ' + (CS.story ? 'Bật' : 'Tắt');
-  $id('chipRegen').style.display = CS.link ? '' : 'none';   // Nút gieo lại chỉ hiện khi đã bật liên kết
+  All.$id('chipRegen').style.display = CS.link ? '' : 'none';   // Nút gieo lại chỉ hiện khi đã bật liên kết
 }
 export function renderBanner() {
-  const b = $id('banner');
-  const bmut = $id('bmut');
-  const mutPopup = $id('mutPopup');
+  const b = All.$id('banner');
+  const bmut = All.$id('bmut');
+  const mutPopup = All.$id('mutPopup');
   if (!CS.link) { b.classList.remove('show'); bmut.style.display = 'none'; mutPopup.classList.remove('open'); return; }
   if (eventPending) {
     b.classList.add('show');
-    $id('btag').textContent = 'ctx.Sự kiện hôm nay';
-    $id('btxt').textContent = 'Phù thuỷ tròn đang ngắm sao bói toán…';
+    All.$id('btag').textContent = 'ctx.Sự kiện hôm nay';
+    All.$id('btxt').textContent = 'Phù thuỷ tròn đang ngắm sao bói toán…';
     bmut.style.display = 'none'; mutPopup.classList.remove('open');
     return;
   }
   const ev = todayEvent();
   if (!ev) { b.classList.remove('show'); bmut.style.display = 'none'; mutPopup.classList.remove('open'); return; }
   b.classList.add('show');
-  $id('btag').textContent = 'ctx.Sự kiện hôm nay · ' + ev.name;
+  All.$id('btag').textContent = 'ctx.Sự kiện hôm nay · ' + ev.name;
   const fx = [];
   if (ev.double_yield) fx.push('✨Thu hoạch hôm nay ×2!');
   if (ev.time_mult !== 1) fx.push(ev.time_mult < 1 ? 'Sinh trưởng nhanh hơn (thời lượng ×' + ev.time_mult + ')' : 'Sinh trưởng chậm lại (thời lượng ×' + ev.time_mult + ')');
   if (ev.mutate_on_fert > 0) fx.push('Cây hôm nay có thể đột biến');
   if (ev.favored_crop) fx.unshift('Chỉ ' + ev.favored_crop + ' chịu ảnh hưởng');
   const fb = ctx.S.dayEvent && ctx.S.dayEvent.source === 'fallback';
-  $id('btxt').textContent = (ev.flavor || '') + (fx.length ? '(' + fx.join(' · ') + ')' : '') +
+  All.$id('btxt').textContent = (ev.flavor || '') + (fx.length ? '(' + fx.join(' · ') + ')' : '') +
     (fb ? '〔ctx.Sự kiện ngoại tuyến' + (ctx.S.dayEvent.reason ? ': ' + ctx.S.dayEvent.reason : '') + '〕' : '');
   /* Nút xem đột biến: chỉ hiện khi sự kiện có mutate_on_fert > 0 và có mutate_desc */
   const hasMut = ev.mutate_on_fert > 0 && ev.mutate_desc && Object.keys(ev.mutate_desc).length > 0;
@@ -275,40 +275,40 @@ export function renderDynamic() {
   }
 }
 export function renderAll() { applyPageSkin(); renderPager(); renderStatus(); renderPlots(); renderToolbar(); renderChips(); renderBanner(); renderPets(); try { renderWitch(); } catch (e) {} }
-$id('chipLink').addEventListener('click', () => {
+All.$id('chipLink').addEventListener('click', () => {
   CS.link = !CS.link;
   if (!CS.link) { CS.story = false; setInjection(''); }
   saveCharState(); renderChips(); renderBanner(); updateInjection();
   if (CS.link) { requestDayEvent(); toast('Đã bật liên kết, đang gieo quẻ sự kiện hôm nay theo thế giới quan'); }
   else toast('Đã về lại vườn rau chơi một mình');
 });
-$id('banner').addEventListener('click', (e) => {
+All.$id('banner').addEventListener('click', (e) => {
   if (e.target.closest('.bmut') || e.target.closest('.mut-popup')) return;   // Không toggle expand khi bấm nút đột biến hoặc popup
-  $id('banner').classList.toggle('expand');
-  $id('mutPopup').classList.remove('open');   // Thu banner thì đóng popup
+  All.$id('banner').classList.toggle('expand');
+  All.$id('mutPopup').classList.remove('open');   // Thu banner thì đóng popup
 });
-$id('bmut').addEventListener('click', (e) => {
+All.$id('bmut').addEventListener('click', (e) => {
   e.stopPropagation();
-  $id('mutPopup').classList.toggle('open');
+  All.$id('mutPopup').classList.toggle('open');
 });
 /* Bấm ngoài popup thì đóng */
 document.addEventListener('click', (e) => {
-  const popup = $id('mutPopup');
+  const popup = All.$id('mutPopup');
   if (popup.classList.contains('open') && !e.target.closest('.mut-popup') && !e.target.closest('.bmut')) {
     popup.classList.remove('open');
   }
 });
-$id('chipRegen').addEventListener('click', () => {      // Nút gieo lại dọn nhà: từ trang cài đặt chuyển ra hàng điều khiển (wen chốt, tiện tay với tới)
+All.$id('chipRegen').addEventListener('click', () => {      // Nút gieo lại dọn nhà: từ trang cài đặt chuyển ra hàng điều khiển (wen chốt, tiện tay với tới)
   ctx.S.dayEvent = null; save();
   requestDayEvent(true); toast('Đang gieo quẻ lại…');
 });
-$id('chipStory').addEventListener('click', () => {
+All.$id('chipStory').addEventListener('click', () => {
   CS.story = !CS.story;
   saveCharState(); renderChips(); updateInjection();
   toast(CS.story ? 'Tình hình vườn rau sẽ được thì thầm cho những người trong cốt truyện' : 'Vườn rau lại giữ bí mật');
 });
 
-$id('blocks').addEventListener('click', e => {
+All.$id('blocks').addEventListener('click', e => {
   const sign = e.target.closest('[data-buy]');
   if (sign) {
     const b = +sign.dataset.buy;

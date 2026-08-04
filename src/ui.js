@@ -9,6 +9,7 @@ export const root = document.createElement('div');
 root.id = 'star-tavern-farm-root';
 document.body.appendChild(root);
 export const sh = root.attachShadow({ mode: 'open' });
+export const $id = id => sh.getElementById(id);
 // CSS moved to style.css
 
 const style = document.createElement('style');
@@ -59,7 +60,7 @@ ctx.ui.innerHTML = `
     <div class="toast" id="toast"></div>
   </div>`;
 sh.appendChild(ctx.ui);
-const $id = x => sh.getElementById(x);
+
 export function applyTheme() { ctx.ui.classList.remove('theme-sakura', 'theme-sky'); ctx.ui.classList.add('theme-' + (ctx.S && ctx.S.theme === 'sky' ? 'sky' : 'sakura')); }
 
 /* ---------- ctx.Sửa #5: thảm cỏ mặt ruộng + trang trí hoá hạt giống (vị trí cố định, không rung) ---------- */

@@ -68,8 +68,8 @@ export function openWitchDlg() {
     <div class="wzsub">✦ ｡ﾟ☽ ∴ ✧ ∴ ☽ﾟ｡ ✦</div>${rows}${reroll}
     <div class="wzleave">☽ ${wz.order.done ? '"✶◇…!" (trông cô ấy hài lòng lắm)' : 'Cô ấy còn nán lại khoảng ' + fmtLeft(wz.leaveAt - now())}</div>
   </div>`);
-  $id('mbody').querySelectorAll('[data-wdeliver]').forEach(b => b.addEventListener('click', () => witchDeliver(+b.dataset.wdeliver)));
-  $id('mbody').querySelectorAll('[data-wreroll]').forEach(b => b.addEventListener('click', () => {   // v1.0: dùng mảnh lăng quang đổi đơn
+  All.$id('mbody').querySelectorAll('[data-wdeliver]').forEach(b => b.addEventListener('click', () => witchDeliver(+b.dataset.wdeliver)));
+  All.$id('mbody').querySelectorAll('[data-wreroll]').forEach(b => b.addEventListener('click', () => {   // v1.0: dùng mảnh lăng quang đổi đơn
     if (!(ctx.S.shards && ctx.S.shards.prism > 0)) return;
     ctx.S.shards.prism--;
     ctx.S.witch.order = makeWitchOrder();
@@ -86,15 +86,15 @@ export function useStarShard() {                               // v1.0: mảnh n
   witchArrive();                                        // Bên trong đã có save + toast
 }
 export function renderWitch() {
-  const el = $id('witch');
+  const el = All.$id('witch');
   const active = ctx.S.witch && ctx.S.witch.leaveAt > now() && ctx.S.passes.water;
   el.classList.toggle('show', !!active);
   if (active && !el.innerHTML) el.innerHTML = `<span class="wtag">✦ Đơn hàng</span><span class="wbody">${petSVG('witchBlob', 48)}</span>`;
   if (!active) el.innerHTML = '';
 }
-$id('witch').addEventListener('click', e => {
+All.$id('witch').addEventListener('click', e => {
   if (e.target.closest('.wtag')) return openWitchDlg();
-  const el = $id('witch');                              // Chọc vào chính cô ấy = chào hỏi (tiếng phù thuỷ, người nghe không hiểu là bình thường nhé)
+  const el = All.$id('witch');                              // Chọc vào chính cô ấy = chào hỏi (tiếng phù thuỷ, người nghe không hiểu là bình thường nhé)
   el.querySelector('.pbubble')?.remove();
   const b = document.createElement('span');
   b.className = 'pbubble wb';
@@ -116,8 +116,8 @@ export function openTakeout(key) {
       <span style="font-size:12px;color:#7a5c38">/ đang có ${have}</span>
       <span class="buy" id="takeGo">Xác nhận lấy ra</span>
     </div>`);
-  $id('takeGo').addEventListener('click', () => {
-    const n = clampN($id('takeN').value, 1, have, 1) | 0;
+  All.$id('takeGo').addEventListener('click', () => {
+    const n = clampN(All.$id('takeN').value, 1, have, 1) | 0;
     ctx.S.bag[key] = have - n;
     if (ctx.S.bag[key] <= 0) delete ctx.S.bag[key];
     const d = mutDescOf(key);
@@ -142,8 +142,8 @@ export function openSellDlg(key) {
       <span style="font-size:12px;color:#7a5c38">/ ${have}</span>
       <span class="buy" id="sellGo">Xác nhận bán</span>
     </div>`);
-  $id('sellGo').addEventListener('click', () => {
-    sell(key, clampN($id('sellN').value, 1, have, 1) | 0);
+  All.$id('sellGo').addEventListener('click', () => {
+    sell(key, clampN(All.$id('sellN').value, 1, have, 1) | 0);
   });
 }
 
@@ -180,13 +180,13 @@ export function openPassDlg(k) {
         <span class="buy plain" id="passNo">Để nghĩ thêm</span>
       </div>`));
   if (!owned) {
-    $id('passGo').addEventListener('click', () => {
+    All.$id('passGo').addEventListener('click', () => {
       if (ctx.S.coins < ps.price) return toast('Còn thiếu ' + (ps.price - ctx.S.coins).toLocaleString() + ' G');
       ctx.S.coins -= ps.price; ctx.S.passes[k] = true;
       save(); renderStatus(); renderPager(); openPanel('shop');
       toast(ps.name + ' đã vào tay! ' + (k === 'water' ? 'Ruộng vùng nước đã mở, lật trang qua xem thử đi' : 'Ruộng khu mỏ đã mở, lật trang qua xem thử đi'));
     });
-    $id('passNo').addEventListener('click', () => openPanel('shop'));
+    All.$id('passNo').addEventListener('click', () => openPanel('shop'));
   }
 }
 
@@ -204,9 +204,9 @@ export function openBuyDlg(kind, id) {
       <span id="buyTotal" style="font-size:12px;color:#7a5c38;font-weight:bold">Tổng ${price} G</span>
       <span class="buy" id="buyGo">Xác nhận mua</span>
     </div>`);
-  const upd = () => { const n = clampN($id('buyN').value, 1, maxN, 1) | 0; $id('buyTotal').textContent = 'Tổng ' + (n * price).toLocaleString() + ' G'; return n; };
-  $id('buyN').addEventListener('input', upd);
-  $id('buyGo').addEventListener('click', () => {
+  const upd = () => { const n = clampN(All.$id('buyN').value, 1, maxN, 1) | 0; All.$id('buyTotal').textContent = 'Tổng ' + (n * price).toLocaleString() + ' G'; return n; };
+  All.$id('buyN').addEventListener('input', upd);
+  All.$id('buyGo').addEventListener('click', () => {
     const n = upd(), cost = n * price;
     if (ctx.S.coins < cost) return toast('Không đủ vàng rồi');
     ctx.S.coins -= cost;
@@ -221,7 +221,7 @@ export function openBuyDlg(kind, id) {
 
 export let toastTimer = null;
 export function toast(msg) {
-  const t = $id('toast');
+  const t = All.$id('toast');
   t.textContent = ctx.msg; t.style.display = 'block';
   if (toastTimer) window.clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => { t.style.display = 'none'; }, 1800);

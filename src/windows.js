@@ -24,9 +24,9 @@ export function closeWin() {
   if (tick) { window.clearInterval(tick); tick = null; }
   save(true);
 }
-$id('close').addEventListener('click', closeWin);
+All.$id('close').addEventListener('click', closeWin);
 export let wg = null;
-export const dragBar = $id('drag');
+export const dragBar = All.$id('drag');
 dragBar.addEventListener('pointerdown', e => {
   if (e.target.id === 'close') return;
   dragBar.setPointerCapture(e.pointerId);

@@ -287,7 +287,7 @@ async function requestDayEvent(force) {
 }
 
 async function secTest() {
-  const p = $id('secTest');
+  const p = All.$id('secTest');
   const ori = p.textContent;
   p.textContent = 'Đang gọi…'; p.style.pointerEvents = 'none';
   try {
@@ -348,17 +348,17 @@ export function openSandbox() {
   `;
   openModal('Xưởng Chế Tác', html);
 
-  const ta = $id('sbCode');
-  const sel = $id('sbPalette');
-  const sizeSel = $id('sbSize');
-  const ctx = $id('sbCanvas').getContext('2d');
+  const ta = All.$id('sbCode');
+  const sel = All.$id('sbPalette');
+  const sizeSel = All.$id('sbSize');
+  const ctx = All.$id('sbCanvas').getContext('2d');
   
   function render() {
     const isPet = sel.value === 'PETS';
     const palette = isPet ? PET_P : P;
     const size = parseInt(sizeSel.value) || 16;
     
-    const canvasEl = $id('sbCanvas');
+    const canvasEl = All.$id('sbCanvas');
     if (canvasEl.width !== size) {
       canvasEl.width = size;
       canvasEl.height = size;
@@ -391,19 +391,19 @@ export function openSandbox() {
   sel.addEventListener('change', render);
   sizeSel.addEventListener('change', render);
 
-  $id('sbPayloadBtn').addEventListener('click', () => {
-    const out = $id('sbPayloadOut');
+  All.$id('sbPayloadBtn').addEventListener('click', () => {
+    const out = All.$id('sbPayloadOut');
     out.style.display = out.style.display === 'none' ? 'block' : 'none';
   });
 
-  $id('sbGenerate').addEventListener('click', async () => {
-    const p = $id('sbPrompt').value.trim();
+  All.$id('sbGenerate').addEventListener('click', async () => {
+    const p = All.$id('sbPrompt').value.trim();
     if (!p) return toast('Vui lòng nhập ý tưởng!');
     if (!SEC.url) return toast('Vui lòng cấu hình API trong Cài đặt trước!');
     
-    $id('sbGenerate').style.pointerEvents = 'none';
-    $id('sbGenerate').style.opacity = '0.5';
-    $id('sbStatus').textContent = 'Đang gọi AI...';
+    All.$id('sbGenerate').style.pointerEvents = 'none';
+    All.$id('sbGenerate').style.opacity = '0.5';
+    All.$id('sbStatus').textContent = 'Đang gọi AI...';
     
     try {
       const isPet = sel.value === 'PETS';
@@ -442,8 +442,8 @@ QUY TẮC ĐẦU RA BẮT BUỘC:
         ]
       };
 
-      $id('sbPayloadOut').value = JSON.stringify(reqBody, null, 2);
-      $id('sbPayloadBtn').style.display = 'inline-block';
+      All.$id('sbPayloadOut').value = JSON.stringify(reqBody, null, 2);
+      All.$id('sbPayloadBtn').style.display = 'inline-block';
 
       const res = await fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
         method: 'POST',
@@ -468,17 +468,17 @@ QUY TẮC ĐẦU RA BẮT BUỘC:
       if (jsonStr) {
         ta.value = jsonStr.trim();
         render();
-        $id('sbStatus').textContent = 'Hoàn tất!';
+        All.$id('sbStatus').textContent = 'Hoàn tất!';
       } else {
         throw new Error('AI không trả về mảng JSON');
       }
     } catch (e) {
       console.error(e);
-      $id('sbStatus').textContent = 'Lỗi!';
+      All.$id('sbStatus').textContent = 'Lỗi!';
       toast('Lỗi AI: ' + e.message);
     } finally {
-      $id('sbGenerate').style.pointerEvents = '';
-      $id('sbGenerate').style.opacity = '1';
+      All.$id('sbGenerate').style.pointerEvents = '';
+      All.$id('sbGenerate').style.opacity = '1';
     }
   });
 }
@@ -526,8 +526,8 @@ async function testSecApi() {
 
 /* #53: lấy danh sách model (API /models) —— dropdown nội tuyến, chọn xong điền thẳng vào ô model */
 async function fetchModelList() {
-  const url = $id('secUrl').value.trim(), key = $id('secKey').value.trim();
-  const drop = $id('modelDrop');
+  const url = All.$id('secUrl').value.trim(), key = All.$id('secKey').value.trim();
+  const drop = All.$id('modelDrop');
   if (!url) return toast('Hãy điền địa chỉ API trước');
   if (drop.style.display !== 'none') { drop.style.display = 'none'; return; }   // Bấm lần nữa = thu lại
   toast('Đang lấy danh sách model…');
@@ -543,7 +543,7 @@ async function fetchModelList() {
     drop.innerHTML = ids.map(id => `<span data-mpick="${esc(id)}">${esc(id)}</span>`).join('');
     drop.style.display = 'flex';
     drop.querySelectorAll('[data-mpick]').forEach(el => el.addEventListener('click', () => {
-      $id('secModel').value = el.dataset.mpick;
+      All.$id('secModel').value = el.dataset.mpick;
       drop.style.display = 'none';
       toast('Đã chọn: ' + el.dataset.mpick + ', nhớ bấm lưu cấu hình');
     }));

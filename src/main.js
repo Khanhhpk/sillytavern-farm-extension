@@ -5,7 +5,7 @@ import { CROPS } from './data.js';
 
 export function initFarm() {
   try { window[RUNTIME_KEY]?.destroy?.(); } catch(e) {}
-  document.getElementById('star-tavern-farm-root')?.remove();
+  // Removed document.getElementById('star-tavern-farm-root')?.remove(); because it removes the DOM created on module load.
 
   All.loadState();
   All.applyTheme();
