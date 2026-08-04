@@ -176,7 +176,7 @@ async function collectWorldbook() {
       else green += content + '\n';
     }
     
-    let txt = blue.length >= 400 ? blue : blue + '\n' + green;
+    let txt = blue + '\n' + green;
     if (chatContext) txt += chatContext;
     const limit = SEC.wbLimit !== undefined ? SEC.wbLimit : 20000;
     return limit > 0 ? txt.slice(0, limit) : txt;

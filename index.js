@@ -3829,7 +3829,7 @@ async function collectWorldbook() {
       if (isConstant) blue += content + "\n";
       else green += content + "\n";
     }
-    let txt = blue.length >= 400 ? blue : blue + "\n" + green;
+    let txt = blue + "\n" + green;
     if (chatContext) txt += chatContext;
     const limit = SEC.wbLimit !== void 0 ? SEC.wbLimit : 2e4;
     return limit > 0 ? txt.slice(0, limit) : txt;
