@@ -1604,7 +1604,7 @@ var root = document.createElement("div");
 root.id = "star-tavern-farm-root";
 document.body.appendChild(root);
 var sh = root.attachShadow({ mode: "open" });
-var $id = (id) => sh.getElementById(id);
+var $id = (id) => sh.querySelector("#" + id);
 var style = document.createElement("style");
 style.textContent = styleCSS;
 sh.appendChild(style);

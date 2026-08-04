@@ -14,7 +14,7 @@ export const root = document.createElement('div');
 root.id = 'star-tavern-farm-root';
 document.body.appendChild(root);
 export const sh = root.attachShadow({ mode: 'open' });
-export const $id = id => sh.getElementById(id);
+export const $id = id => sh.querySelector('#' + id);
 // CSS moved to style.css
 
 const style = document.createElement('style');
