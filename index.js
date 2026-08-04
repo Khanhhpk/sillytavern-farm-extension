@@ -3826,8 +3826,11 @@ async function collectWorldbook() {
       if (!content || seen.has(content)) continue;
       seen.add(content);
       const isConstant = en.strategy && en.strategy.type === "constant" || en.constant === true || en.position === "before_char";
-      if (isConstant) blue += content + "\n";
-      else green += content + "\n";
+      const entryName = en.comment || en.name || en.uid || "Lorebook Entry";
+      const formatted = `[${entryName}]
+${content}`;
+      if (isConstant) blue += formatted + "\n\n";
+      else green += formatted + "\n\n";
     }
     let txt = blue + "\n" + green;
     if (chatContext) txt += chatContext;

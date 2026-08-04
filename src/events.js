@@ -172,8 +172,11 @@ async function collectWorldbook() {
       seen.add(content);
       
       const isConstant = (en.strategy && en.strategy.type === 'constant') || en.constant === true || en.position === 'before_char';
-      if (isConstant) blue += content + '\n';
-      else green += content + '\n';
+      const entryName = en.comment || en.name || en.uid || 'Lorebook Entry';
+      const formatted = `[${entryName}]\n${content}`;
+      
+      if (isConstant) blue += formatted + '\n\n';
+      else green += formatted + '\n\n';
     }
     
     let txt = blue + '\n' + green;
