@@ -55,11 +55,15 @@ export function setupSlashCommand() {
     try {
       let scp, SlashCommand;
       try {
+        // @ts-ignore
         scp = (await import('../../../slash-commands/SlashCommandParser.js')).SlashCommandParser;
+        // @ts-ignore
         SlashCommand = (await import('../../../slash-commands/SlashCommand.js')).SlashCommand;
       } catch (err) {}
       
+      // @ts-ignore
       scp = scp || window.SlashCommandParser || globalThis.SlashCommandParser;
+      // @ts-ignore
       SlashCommand = SlashCommand || window.SlashCommand || globalThis.SlashCommand;
 
       if (scp && SlashCommand && SlashCommand.fromProps) {
