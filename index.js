@@ -3835,13 +3835,19 @@ async function collectWorldbook() {
     } catch (e) {
       console.log("[FARM DEBUG] Chat History Exception:", e);
     }
+    const disabledContent = /* @__PURE__ */ new Set();
+    for (const en of entries) {
+      if (en.disable === true) {
+        const c = (en.content || en.text || "").trim();
+        if (c) disabledContent.add(c);
+      }
+    }
     const seen = /* @__PURE__ */ new Set();
-    for (let i = entries.length - 1; i >= 0; i--) {
-      const en = entries[i];
+    for (const en of entries) {
       const content = (en.content || en.text || "").trim();
       if (!content || seen.has(content)) continue;
       seen.add(content);
-      if (en.disable === true) continue;
+      if (disabledContent.has(content)) continue;
       const isConstant = en.constant === true || en.strategy && en.strategy.type === "constant" || en.position === "before_char";
       const entryName = en.comment || en.name || String(en.uid ?? en.id ?? "") || "Lorebook Entry";
       const formatted = `[${entryName}]
