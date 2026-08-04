@@ -319,6 +319,7 @@ async function secTest() {
   p.textContent = ori; p.style.pointerEvents = '';
 }
 
+let renderTimeout;
 export function openSandbox() {
   const html = `
     <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -395,7 +396,6 @@ export function openSandbox() {
     }
   }
 
-  let renderTimeout;
   function debouncedRender() {
     clearTimeout(renderTimeout);
     renderTimeout = setTimeout(render, 150);

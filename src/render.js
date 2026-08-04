@@ -224,7 +224,7 @@ export function renderPlots() {
       const bg = isLocked ? tileURI(groundKind, pi * 31 + 5)
         : pEl.classList.contains('watered') ? tileURI(wetKind, pi * 31 + 5) : tileURI(plotKind, pi * 31 + 5);
       // @ts-ignore
-      if (pEl.style.backgroundImage !== bg) pEl.style.backgroundImage = bg;
+      if (pEl.dataset.bg !== bg) { pEl.style.backgroundImage = bg; pEl.dataset.bg = bg; }
       const bgSz = isLocked ? '144px 144px' : '100% 100%';
       // @ts-ignore
       if (pEl.style.backgroundSize !== bgSz) pEl.style.backgroundSize = bgSz;

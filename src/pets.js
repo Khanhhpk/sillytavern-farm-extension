@@ -39,17 +39,17 @@ export function petSpot(id) {
   return { x, y: WORK_BAND + 6 + Math.random() * Math.max(20, H - WORK_BAND - 70) };
 }
 export function placePet(el, p, instant) {                      // Đặt vị trí: instant = dịch chuyển tức thì; nếu không thì trượt đều (dành riêng cho bé bay)
-  if (instant) el.style.transitionProperty = 'transform';
+  if (instant) el.style.transitionProperty = 'transform, translate';
   else {
     const old = petPos[el.dataset.pet] || p;
     const dist = Math.hypot(p.x - old.x, p.y - old.y);
     const dur = dist < 40 ? .5 : Math.min(11, Math.max(3, dist / 18));
-    el.style.transitionProperty = 'transform, left, bottom';
-    el.style.transitionDuration = '.12s, ' + dur + 's, ' + dur + 's';
-    el.style.transitionTimingFunction = 'ease, linear, ease';
+    el.style.transitionProperty = 'transform, translate';
+    el.style.transitionDuration = '.12s, ' + dur + 's';
+    el.style.transitionTimingFunction = 'ease, linear';
     el.classList.toggle('flip', p.x < old.x);
   }
-  el.style.left = p.x + 'px'; el.style.bottom = p.y + 'px';
+  el.style.translate = p.x + 'px ' + (-p.y) + 'px';
   petPos[el.dataset.pet] = p;
 }
 export function hopStep(el) {                                   // Một cú nhảy: nhích một bước về phía đích, tới nơi thì nghỉ
@@ -69,10 +69,10 @@ export function hopStep(el) {                                   // Một cú nh�
   el.classList.add('walk');
   el.style.setProperty('--hopd', g.dur + 'ms');
   el.style.setProperty('--hy', g.hy + 'px');
-  el.style.transitionProperty = 'transform, left, bottom';
-  el.style.transitionDuration = '.12s, ' + g.dur + 'ms, ' + g.dur + 'ms';
-  el.style.transitionTimingFunction = 'ease, linear, linear';
-  el.style.left = p.x + 'px'; el.style.bottom = p.y + 'px';
+  el.style.transitionProperty = 'transform, translate';
+  el.style.transitionDuration = '.12s, ' + g.dur + 'ms';
+  el.style.transitionTimingFunction = 'ease, linear';
+  el.style.translate = p.x + 'px ' + (-p.y) + 'px';
   petPos[id] = p;
   petHopT[id] = window.setTimeout(() => hopStep(el), g.dur);
 }
@@ -297,12 +297,16 @@ export function initPets() {
 
     // Lấy toạ độ thực tế (mid-air) nếu bé đang nhảy dở
     const comp = window.getComputedStyle(el);
-    const exactLeft = parseFloat(comp.left) || 0;
-    const exactBottom = parseFloat(comp.bottom) || 0;
+    let exactLeft = 0, exactBottom = 0;
+    if (comp.translate && comp.translate !== 'none') {
+      const parts = comp.translate.split(' ').map(parseFloat);
+      exactLeft = parts[0] || 0; exactBottom = -(parts[1] || 0);
+    } else if (petPos[id]) {
+      exactLeft = petPos[id].x; exactBottom = petPos[id].y;
+    }
     
     // Ghi đè toạ độ thực
-    el.style.left = exactLeft + 'px';
-    el.style.bottom = exactBottom + 'px';
+    el.style.translate = exactLeft + 'px ' + (-exactBottom) + 'px';
     
     // Giữ lại transition cho transform để click vẫn có hiệu ứng nhún (.pet:active)
     // left và bottom mặc định không có transition nên sẽ nhảy tức thời (đóng băng hop)
@@ -397,7 +401,7 @@ export function initPets() {
     activeDrag.dy = rawDy;
   });
 
-  mascots.addEventListener('pointerup', e => {
+  const endDrag = e => {
     if (!ctx.S.dragPet) return;
 
     if (!activeDrag || activeDrag.id !== e.pointerId) return;
@@ -408,8 +412,7 @@ export function initPets() {
       const finalX = ox + dx;
       const finalY = oy - dy;
       // Chốt toạ độ thật ngay lập tức (bottom = oy - dy: dy > 0 thì bottom giảm = đi xuống)
-      el.style.left = finalX + 'px';
-      el.style.bottom = finalY + 'px';
+      el.style.translate = finalX + 'px ' + (-finalY) + 'px';
       // Cập nhật petPos ngay để AI không bị nhầm nếu có xen ngang
       petPos[petId] = { x: finalX, y: finalY };
       // Đánh dấu đã thả để frame tiếp theo huỷ translate và bắt đầu giảm chấn
@@ -444,7 +447,10 @@ export function initPets() {
       }
       petBubble(el, txt);
     }
-  });
+  };
+
+  mascots.addEventListener('pointerup', endDrag);
+  mascots.addEventListener('pointercancel', endDrag);
 
   // Bản lưu trữ gốc: chạy bằng native 'click', y hệt bản cũ không lệch một byte
   mascots.addEventListener('click', e => {

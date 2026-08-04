@@ -109,7 +109,7 @@ export const styleCSS = `
     /* #26: lớp cho bé tròn tự do đi lại —— phủ toàn bộ khu ruộng, đi theo khu vực (loại làm việc = hàng dưới, loại đi dạo = bờ ruộng) */
     .mascots { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
     .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute;
-      left: 0; bottom: 0; will-change: left, bottom; }
+      left: 0; bottom: 0; will-change: transform, translate; }
     .pet:active { transform: scale(1.15, .85); }
     .pbody { display: block; animation: petbob 1.8s ease-in-out infinite; }
     .pet.walk .pbody { animation: pethop var(--hopd, .33s) linear infinite; }   /* v0.7①: đi bộ = nhảy liên tiếp theo đường parabol */
