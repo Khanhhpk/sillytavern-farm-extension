@@ -910,19 +910,26 @@ QUY TẮC ĐẦU RA BẮT BUỘC:
     const field = Object.keys(counts).map(id => CROPS[id].name + '×' + counts[id]).join(', ') || 'đang để trống';
     const bagTxt = Object.keys(S.bag).map(k => {
       const d = mutDescOf(k);
-      return bagName(k) + '×' + S.bag[k] + (d ? '(' + d + ')' : '');
-    }).join('、');
+      return '  + ' + bagName(k) + ' ×' + S.bag[k] + (d ? ' (' + d + ')' : '');
+    }).join('\n');
     const ev = todayEvent();
-    setInjection('【Vườn rau nhỏ của người chơi】Người chơi đang trồng một mảnh vườn rau thư giãn ngay trên giao diện SillyTavern (lối chơi tiện ích, tồn tại song song với cốt truyện). Hiện tại: trong ruộng đang trồng ' + field +
-      (ripe ? ' (có ' + ripe + ' cây đã chín chờ thu)' : '') +
-      (bagTxt ? '; nông sản đang tích trữ chờ bán: ' + bagTxt : '') +
-      (ev && ev.flavor ? '; sự kiện vườn rau hôm nay: ' + ev.name + ' —— ' + ev.flavor : '') +
-      (function () {
-        takeoutNote = (takeoutNote || []).filter(t => now() < t.until);
-        if (!takeoutNote.length) return '';
-        return '; 【Quan trọng】Người chơi vừa lấy ' + takeoutNote.map(t => t.txt).join(', ') + ' ra khỏi balo vườn rau, hẳn là định dùng/tặng trong cốt truyện, hãy tiếp nhận một cách tự nhiên; phần trong ngoặc là hiệu ứng đã định của vật phẩm đó, hãy lấy đó làm chuẩn và có thể sáng tạo thêm trong chừng mực';
-      })() +
-      '. Nhân vật trong cốt truyện thỉnh thoảng có thể nhắc tới việc người chơi chăm vườn hay thu hoạch thế nào một cách tự nhiên, nhưng đừng thao tác vườn rau thay người chơi, cũng đừng biến vườn rau thành mạch chính của cốt truyện.');
+    
+    const takeoutNoteStr = (function () {
+      takeoutNote = (takeoutNote || []).filter(t => now() < t.until);
+      if (!takeoutNote.length) return '';
+      return `\n\n【QUAN TRỌNG: HÀNH ĐỘNG VỪA XẢY RA】\nNgười chơi vừa lấy ${takeoutNote.map(t => t.txt).join(', ')} ra khỏi balo vườn rau, hẳn là định dùng/tặng trong cốt truyện. Hãy tiếp nhận một cách tự nhiên; phần trong ngoặc là hiệu ứng của vật phẩm đó, hãy lấy đó làm chuẩn và có thể sáng tạo thêm trong chừng mực.`;
+    })();
+
+    const promptText = `【Vườn rau nhỏ của người chơi】
+Người chơi đang trồng một mảnh vườn rau thư giãn trên giao diện SillyTavern (lối chơi tiện ích, tồn tại song song với cốt truyện).
+Tình trạng hiện tại:
+- Đang trồng: ${field || 'Đất trống'}${ripe ? ` (có ${ripe} cây đã chín chờ thu)` : ''}
+${bagTxt ? '- Nông sản tích trữ:\n' + bagTxt : '- Nông sản tích trữ: Trống'}
+${ev && ev.flavor ? `- Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}` : ''}${takeoutNoteStr}
+
+* Hướng dẫn cho AI: Nhân vật trong cốt truyện thỉnh thoảng có thể nhắc tới việc người chơi chăm vườn hay thu hoạch thế nào một cách tự nhiên, nhưng ĐỪNG thao tác vườn rau thay người chơi, cũng ĐỪNG biến vườn rau thành mạch chính của cốt truyện.`;
+
+    setInjection(promptText);
   }
 
   /* #17+v0.6b: nhịp tim chạy nền —— cứ 60s chạy settle một lần (tính toán cục bộ, cỡ micro~mili giây): sự kiện tới hạn thì gieo lại, bé làm việc làm việc, kết toán tìm kho báu; mở hay không mở bảng đều có hiệu lực */
