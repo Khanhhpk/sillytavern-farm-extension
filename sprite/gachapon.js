@@ -1,5 +1,5 @@
-// Máy gắp gấu Among Us
-export const susClawMachine = [
+// Máy quay Gachapon
+export const gachapon = [
   ".............ffffff.............",
   "...........ffFFFFFFff...........",
   "..........fFFFFFFFFFFf..........",
