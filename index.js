@@ -4336,13 +4336,13 @@ function save(immediate) {
     if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};
     ctx.extension_settings[extensionName][NS] = ctx.S;
     if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+    try {
+      updateInjection();
+    } catch (e) {
+    }
   };
   if (immediate) doSave();
   else ctx.saveTimer = setTimeout(doSave, 500);
-  try {
-    updateInjection();
-  } catch (e) {
-  }
 }
 
 // src/destroy.js
