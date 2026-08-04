@@ -299,12 +299,14 @@ export function initPets() {
     const exactLeft = parseFloat(comp.left) || 0;
     const exactBottom = parseFloat(comp.bottom) || 0;
     
-    // Tắt toàn bộ transition để thao tác phần cứng (GPU) ngay lập tức
-    el.style.transition = 'none';
-
     // Ghi đè toạ độ thực
     el.style.left = exactLeft + 'px';
     el.style.bottom = exactBottom + 'px';
+    
+    // Giữ lại transition cho transform để click vẫn có hiệu ứng nhún (.pet:active)
+    // left và bottom mặc định không có transition nên sẽ nhảy tức thời (đóng băng hop)
+    el.style.transitionProperty = 'transform';
+    el.style.transitionDuration = '0.12s';
     
     // Cập nhật petPos luôn để đồng bộ dữ liệu, tránh việc toạ độ bị cũ
     petPos[id] = { x: exactLeft, y: exactBottom };
@@ -370,7 +372,11 @@ export function initPets() {
     const rawDx = e.clientX - sx;
     const rawDy = e.clientY - sy; 
     
-    if (!activeDrag.moved && (Math.abs(rawDx) > 4 || Math.abs(rawDy) > 4)) activeDrag.moved = true;
+    if (!activeDrag.moved && (Math.abs(rawDx) > 4 || Math.abs(rawDy) > 4)) {
+      activeDrag.moved = true;
+      // Vượt ngưỡng click, bắt đầu kéo lê -> tắt transition để GPU translate3d mượt
+      activeDrag.el.style.transition = 'none';
+    }
     if (!activeDrag.moved) return;
 
     const rawVx = e.clientX - activeDrag.lastX;

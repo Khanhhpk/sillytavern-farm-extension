@@ -2287,9 +2287,10 @@ function initPets() {
     const comp = window.getComputedStyle(el);
     const exactLeft = parseFloat(comp.left) || 0;
     const exactBottom = parseFloat(comp.bottom) || 0;
-    el.style.transition = "none";
     el.style.left = exactLeft + "px";
     el.style.bottom = exactBottom + "px";
+    el.style.transitionProperty = "transform";
+    el.style.transitionDuration = "0.12s";
     petPos[id] = { x: exactLeft, y: exactBottom };
     el.classList.remove("walk");
     activeDrag = {
@@ -2346,7 +2347,10 @@ function initPets() {
     const { sx, sy } = activeDrag;
     const rawDx = e.clientX - sx;
     const rawDy = e.clientY - sy;
-    if (!activeDrag.moved && (Math.abs(rawDx) > 4 || Math.abs(rawDy) > 4)) activeDrag.moved = true;
+    if (!activeDrag.moved && (Math.abs(rawDx) > 4 || Math.abs(rawDy) > 4)) {
+      activeDrag.moved = true;
+      activeDrag.el.style.transition = "none";
+    }
     if (!activeDrag.moved) return;
     const rawVx = e.clientX - activeDrag.lastX;
     const rawVy = e.clientY - activeDrag.lastY;
