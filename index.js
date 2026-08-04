@@ -2368,10 +2368,12 @@ ${ev && ev.flavor ? `- Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}` : '
       scp = scp || pwin.SlashCommandParser || globalThis.SlashCommandParser;
       SlashCommand = SlashCommand || pwin.SlashCommand || globalThis.SlashCommand;
 
-      if (scp && SlashCommand) {
-        const cmd = new SlashCommand('farm', async () => { toggleWin(); return ''; });
-        cmd.helpString = 'Mở/Đóng giao diện Nông trại (SillyTavern Farm)';
-        scp.addCommandObject(cmd);
+      if (scp && SlashCommand && SlashCommand.fromProps) {
+        scp.addCommandObject(SlashCommand.fromProps({
+            name: 'farm',
+            callback: async () => { toggleWin(); return ''; },
+            helpString: 'Mở/Đóng giao diện Nông trại (SillyTavern Farm)'
+        }));
       }
     } catch(e) {
       console.error('[Farm] Lỗi đăng ký lệnh /farm:', e);
