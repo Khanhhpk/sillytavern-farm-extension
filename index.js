@@ -4165,6 +4165,9 @@ function save(immediate) {
 
 // src/destroy.js
 var destroyed = false;
+function resetDestroyed() {
+  destroyed = false;
+}
 function destroy() {
   if (destroyed) return;
   destroyed = true;
@@ -4281,6 +4284,7 @@ function initFarm() {
     window[RUNTIME_KEY]?.destroy?.();
   } catch (e) {
   }
+  resetDestroyed();
   document.getElementById("star-tavern-farm-root")?.remove();
   loadState();
   initUI();

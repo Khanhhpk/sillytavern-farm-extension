@@ -5,6 +5,7 @@ import { CROPS } from './data.js';
 
 function initFarm() {
   try { window[RUNTIME_KEY]?.destroy?.(); } catch(e) {}
+  All.resetDestroyed(); // Reset destroyed flag sau khi destroy() cũ chạy xong
   document.getElementById('star-tavern-farm-root')?.remove();
 
   All.loadState();
