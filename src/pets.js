@@ -363,7 +363,11 @@ export function initPets() {
 
       dragAnimFrame = requestAnimationFrame(updateDrag);
     };
-    dragAnimFrame = requestAnimationFrame(updateDrag);
+    
+    // Không chạy vòng lặp vật lý ngay lúc bấm để tránh ghi đè CSS transform của pseudo-class :active
+    activeDrag.startPhysics = () => {
+      dragAnimFrame = requestAnimationFrame(updateDrag);
+    };
   });
 
   mascots.addEventListener('pointermove', e => {
@@ -376,6 +380,7 @@ export function initPets() {
       activeDrag.moved = true;
       // Vượt ngưỡng click, bắt đầu kéo lê -> tắt transition để GPU translate3d mượt
       activeDrag.el.style.transition = 'none';
+      if (activeDrag.startPhysics) activeDrag.startPhysics();
     }
     if (!activeDrag.moved) return;
 

@@ -2340,7 +2340,9 @@ function initPets() {
       }
       dragAnimFrame = requestAnimationFrame(updateDrag);
     };
-    dragAnimFrame = requestAnimationFrame(updateDrag);
+    activeDrag.startPhysics = () => {
+      dragAnimFrame = requestAnimationFrame(updateDrag);
+    };
   });
   mascots.addEventListener("pointermove", (e) => {
     if (!activeDrag || activeDrag.id !== e.pointerId) return;
@@ -2350,6 +2352,7 @@ function initPets() {
     if (!activeDrag.moved && (Math.abs(rawDx) > 4 || Math.abs(rawDy) > 4)) {
       activeDrag.moved = true;
       activeDrag.el.style.transition = "none";
+      if (activeDrag.startPhysics) activeDrag.startPhysics();
     }
     if (!activeDrag.moved) return;
     const rawVx = e.clientX - activeDrag.lastX;
