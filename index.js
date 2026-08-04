@@ -3450,7 +3450,7 @@ function settle() {
       wChanged = true;
     }));
   }
-  let tGain = 0, tSeed = null, tMyst = null, tPrism = 0, tStar = 0;
+  let tGain = 0, tSeed = "", tMyst = "", tPrism = 0, tStar = 0;
   ctx.S.petsOut.forEach((id) => {
     const pd = PETS[id];
     if (!pd || pd.job) return;

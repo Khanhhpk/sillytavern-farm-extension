@@ -51,7 +51,7 @@ export function settle() {
     }));
   }
   /* #27: thu hoạch đổi sang kích hoạt bằng cách chọc (xem petHarvest) — rau chín nằm lại ruộng chờ user quay lại xem, không bị tim đập lén cuốn đi nữa */
-  let tGain = 0, tSeed = null, tMyst = null, tPrism = 0, tStar = 0;            // Loại tìm kho báu (thú ra sân không có job): định kỳ nhặt tiền, thỉnh thoảng tha hạt giống về
+  let tGain = 0, tSeed = '', tMyst = '', tPrism = 0, tStar = 0;            // Loại tìm kho báu (thú ra sân không có job): định kỳ nhặt tiền, thỉnh thoảng tha hạt giống về
   ctx.S.petsOut.forEach(id => {
     const pd = PETS[id];
     if (!pd || pd.job) return;
