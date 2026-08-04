@@ -152,56 +152,31 @@ async function collectWorldbook() {
     } catch(e) { console.log('[FARM DEBUG] Embedded Book Exception:', e); }
     
     if (!entries || entries.length === 0) return '';
-    // Build recent chat history for Lorebook activation check
-    const chatHistory = ctx.chat || window.chat || [];
-    const recentMsgs = chatHistory.slice(-15).map(m => m.mes || '').join('\n').toLowerCase();
-
-    // 4. Extract Character Main Text
+    // Build recent chat history to include in the context
+    let chatContext = '';
     try {
-      const charId = ctx.characterId !== undefined ? ctx.characterId : window.this_character;
-      const charData = ctx.characters?.[charId]?.data || window.characters?.[charId]?.data || window.characters?.[charId];
-      if (charData) {
-        const desc = charData.description || '';
-        const pers = charData.personality || '';
-        const scen = charData.scenario || '';
-        const mainText = [desc, pers, scen].filter(Boolean).join('\n\n').trim();
-        if (mainText) {
-          blue += "==== CHARACTER INFO ====\n" + mainText + "\n========================\n\n";
-        }
+      const chatHistory = ctx.chat || window.chat || [];
+      // Lấy 5 tin nhắn gần nhất để làm ngữ cảnh chat
+      const recentMsgs = chatHistory.slice(-5).map(m => (m.name ? m.name + ': ' : '') + (m.mes || '')).join('\n').trim();
+      if (recentMsgs) {
+        chatContext = "\n==== RECENT CHAT HISTORY ====\n" + recentMsgs + "\n=============================\n";
       }
-    } catch(e) { console.log('[FARM DEBUG] Character Info Exception:', e); }
+    } catch(e) { console.log('[FARM DEBUG] Chat History Exception:', e); }
 
     const seen = new Set();
     for (const en of entries) {
       if (en.enabled === false) continue;
       const content = (en.content || en.text || '').trim();
       if (!content || seen.has(content)) continue;
+      seen.add(content);
       
       const isConstant = (en.strategy && en.strategy.type === 'constant') || en.constant === true || en.position === 'before_char';
-      let isActive = isConstant;
-
-      // Check keywords if not constant
-      if (!isActive) {
-        let keys = en.keys || en.key || [];
-        if (typeof keys === 'string') keys = keys.split(',').map(k => k.trim());
-        if (Array.isArray(keys)) {
-          for (let k of keys) {
-            if (typeof k === 'string' && k.length > 0 && recentMsgs.includes(k.toLowerCase())) {
-              isActive = true;
-              break;
-            }
-          }
-        }
-      }
-
-      if (!isActive) continue;
-
-      seen.add(content);
       if (isConstant) blue += content + '\n';
       else green += content + '\n';
     }
     
-    const txt = blue.length >= 400 ? blue : blue + '\n' + green;
+    let txt = blue.length >= 400 ? blue : blue + '\n' + green;
+    if (chatContext) txt += chatContext;
     const limit = SEC.wbLimit !== undefined ? SEC.wbLimit : 20000;
     return limit > 0 ? txt.slice(0, limit) : txt;
   } catch (e) { 
