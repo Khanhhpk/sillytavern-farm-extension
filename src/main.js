@@ -3,7 +3,7 @@ import * as All from './all.js';
 import { warmUpCache } from './graphics.js';
 import { CROPS } from './data.js';
 
-export function initFarm() {
+function initFarm() {
   try { window[RUNTIME_KEY]?.destroy?.(); } catch(e) {}
   document.getElementById('star-tavern-farm-root')?.remove();
 
@@ -39,7 +39,7 @@ export function initFarm() {
   console.log('Farm initialized');
 }
 
-export async function init() {
+async function init() {
   // Guard: nếu đã khởi động rồi (ví dụ ST 1.17+ gọi lại qua hooks), bỏ qua
   if (window[RUNTIME_KEY]) return;
 

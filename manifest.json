@@ -5,8 +5,5 @@
   "author": "N/A",
   "description": "Vườn rau nhỏ ngay trên giao diện SillyTavern, tồn tại song song với cốt truyện.",
   "js": "index.js",
-  "requires": [],
-  "hooks": {
-    "activate": "init"
-  }
+  "requires": []
 }

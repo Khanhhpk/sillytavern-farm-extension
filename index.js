@@ -4401,7 +4401,3 @@ if (typeof jQuery === "function") {
     if (!window[RUNTIME_KEY]) init();
   }
 }
-export {
-  init,
-  initFarm
-};
