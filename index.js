@@ -2278,7 +2278,9 @@ function initPets() {
       clearTimeout(petHopT[id]);
       petHopT[id] = null;
     }
-    el.style.transitionProperty = "none";
+    el.style.transitionProperty = "transform";
+    el.style.transitionDuration = "0.15s";
+    el.style.transitionTimingFunction = "ease-out";
     el.classList.remove("walk");
     activeDrag = {
       id: e.pointerId,
@@ -2290,7 +2292,10 @@ function initPets() {
       oy: parseFloat(el.style.bottom) || 0,
       moved: false,
       lastX: e.clientX,
-      lastY: e.clientY
+      lastY: e.clientY,
+      vx: 0,
+      vy: 0,
+      stopT: null
     };
   });
   mascots.addEventListener("pointermove", (e) => {
@@ -2300,23 +2305,35 @@ function initPets() {
     const dy = e.clientY - sy;
     if (!activeDrag.moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) activeDrag.moved = true;
     if (!activeDrag.moved) return;
-    const vx = e.clientX - activeDrag.lastX;
-    const vy = e.clientY - activeDrag.lastY;
+    const rawVx = e.clientX - activeDrag.lastX;
+    const rawVy = e.clientY - activeDrag.lastY;
     activeDrag.lastX = e.clientX;
     activeDrag.lastY = e.clientY;
-    const stretchX = 1 + Math.min(Math.abs(vx) * 0.02, 0.3);
-    const stretchY = 1 + Math.min(Math.abs(vy) * 0.02, 0.3);
+    activeDrag.vx = activeDrag.vx * 0.4 + rawVx;
+    activeDrag.vy = activeDrag.vy * 0.4 + rawVy;
+    const vx = activeDrag.vx;
+    const vy = activeDrag.vy;
+    const stretchX = 1 + Math.min(Math.abs(vx) * 0.04, 0.5);
+    const stretchY = 1 + Math.min(Math.abs(vy) * 0.04, 0.5);
     const scaleX = stretchX / stretchY;
     const scaleY = stretchY / stretchX;
-    const skewX = Math.max(-25, Math.min(vx * -0.8, 25));
+    const skewX = Math.max(-35, Math.min(vx * -1.5, 35));
     el.style.transformOrigin = "center";
     el.style.transform = `scale(${scaleX}, ${scaleY}) skewX(${skewX}deg)`;
     el.style.left = ox + dx + "px";
     el.style.bottom = oy - dy + "px";
+    clearTimeout(activeDrag.stopT);
+    activeDrag.stopT = setTimeout(() => {
+      if (!activeDrag) return;
+      activeDrag.vx = 0;
+      activeDrag.vy = 0;
+      el.style.transform = "scale(1, 1) skewX(0deg)";
+    }, 150);
   });
   mascots.addEventListener("pointerup", (e) => {
     if (!activeDrag || activeDrag.id !== e.pointerId) return;
-    const { el, petId, moved } = activeDrag;
+    const { el, petId, moved, stopT } = activeDrag;
+    clearTimeout(stopT);
     try {
       el.releasePointerCapture(e.pointerId);
     } catch (err) {

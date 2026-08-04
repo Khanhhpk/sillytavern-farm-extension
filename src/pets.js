@@ -285,7 +285,11 @@ export function initPets() {
     try { el.setPointerCapture(e.pointerId); } catch(err){}
     const id = el.dataset.pet;
     if (petHopT[id]) { clearTimeout(petHopT[id]); petHopT[id] = null; }
-    el.style.transitionProperty = 'none'; // Tắt transition để kéo theo chuột cho mượt
+    
+    // Giữ transition cho transform để kéo dãn mềm dẻo, tắt left/bottom
+    el.style.transitionProperty = 'transform';
+    el.style.transitionDuration = '0.15s';
+    el.style.transitionTimingFunction = 'ease-out';
     el.classList.remove('walk');
 
     activeDrag = {
@@ -293,7 +297,8 @@ export function initPets() {
       sx: e.clientX, sy: e.clientY,
       ox: parseFloat(el.style.left) || 0,
       oy: parseFloat(el.style.bottom) || 0,
-      moved: false, lastX: e.clientX, lastY: e.clientY
+      moved: false, lastX: e.clientX, lastY: e.clientY,
+      vx: 0, vy: 0, stopT: null
     };
   });
 
@@ -301,35 +306,49 @@ export function initPets() {
     if (!activeDrag || activeDrag.id !== e.pointerId) return;
     const { el, sx, sy, ox, oy } = activeDrag;
     const dx = e.clientX - sx;
-    const dy = e.clientY - sy; // Kéo xuống thì dy > 0, bottom giảm
+    const dy = e.clientY - sy; 
     
     if (!activeDrag.moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) activeDrag.moved = true;
     if (!activeDrag.moved) return;
 
-    // Tính tốc độ để kéo dãn (nhéo má)
-    const vx = e.clientX - activeDrag.lastX;
-    const vy = e.clientY - activeDrag.lastY;
+    // Tính tốc độ tức thời và cộng dồn nhẹ để tạo đà
+    const rawVx = e.clientX - activeDrag.lastX;
+    const rawVy = e.clientY - activeDrag.lastY;
     activeDrag.lastX = e.clientX; activeDrag.lastY = e.clientY;
+    
+    activeDrag.vx = activeDrag.vx * 0.4 + rawVx;
+    activeDrag.vy = activeDrag.vy * 0.4 + rawVy;
 
-    // Tính lực kéo dãn X và Y độc lập (giữ cho hình luôn đứng thẳng)
-    const stretchX = 1 + Math.min(Math.abs(vx) * 0.02, 0.3);
-    const stretchY = 1 + Math.min(Math.abs(vy) * 0.02, 0.3);
+    const vx = activeDrag.vx;
+    const vy = activeDrag.vy;
+
+    // Phóng đại hệ số kéo dãn để dễ thấy hơn
+    const stretchX = 1 + Math.min(Math.abs(vx) * 0.04, 0.5);
+    const stretchY = 1 + Math.min(Math.abs(vy) * 0.04, 0.5);
     const scaleX = stretchX / stretchY;
     const scaleY = stretchY / stretchX;
 
-    // Nghiêng má theo chiều ngang (skewX) để tạo cảm giác núng nính khi kéo đi
-    const skewX = Math.max(-25, Math.min(vx * -0.8, 25));
+    const skewX = Math.max(-35, Math.min(vx * -1.5, 35));
     
     el.style.transformOrigin = 'center';
     el.style.transform = `scale(${scaleX}, ${scaleY}) skewX(${skewX}deg)`;
     
     el.style.left = (ox + dx) + 'px';
     el.style.bottom = (oy - dy) + 'px';
+
+    // Nếu chuột dừng lại, hồi phục hình dáng sau 150ms
+    clearTimeout(activeDrag.stopT);
+    activeDrag.stopT = setTimeout(() => {
+      if (!activeDrag) return;
+      activeDrag.vx = 0; activeDrag.vy = 0;
+      el.style.transform = 'scale(1, 1) skewX(0deg)';
+    }, 150);
   });
 
   mascots.addEventListener('pointerup', e => {
     if (!activeDrag || activeDrag.id !== e.pointerId) return;
-    const { el, petId, moved } = activeDrag;
+    const { el, petId, moved, stopT } = activeDrag;
+    clearTimeout(stopT);
     try { el.releasePointerCapture(e.pointerId); } catch(err){}
     activeDrag = null;
 
