@@ -292,7 +292,7 @@ $id('bmut').addEventListener('click', (e) => {
   $id('mutPopup').classList.toggle('open');
 });
 /* Bấm ngoài popup thì đóng */
-pdoc.addEventListener('click', (e) => {
+document.addEventListener('click', (e) => {
   const popup = $id('mutPopup');
   if (popup.classList.contains('open') && !e.target.closest('.mut-popup') && !e.target.closest('.bmut')) {
     popup.classList.remove('open');

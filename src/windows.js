@@ -6,7 +6,7 @@ import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, L
 /* ---------- Bật tắt / kéo cửa sổ nổi ---------- */
 export let tick = null;
 export function placeWin() {
-  const vw = pwin.innerWidth, vh = pwin.innerHeight;
+  const vw = window.innerWidth, vh = window.innerHeight;
   const w = Math.min(760, vw * 0.96);
   let x = ctx.S.win ? ctx.S.win.fx * vw : (vw - w) / 2;
   let y = ctx.S.win ? ctx.S.win.fy * vh : vh * 0.04;
@@ -17,11 +17,11 @@ export function toggleWin() {
   if (ctx.win.classList.contains('open')) { closeWin(); return; }
   ctx.win.classList.add('open');
   layout(); placeWin(); settle(); renderAll();
-  tick = pwin.setInterval(() => { renderDynamic(); }, 1000);
+  tick = window.setInterval(() => { renderDynamic(); }, 1000);
 }
 export function closeWin() {
   ctx.win.classList.remove('open');
-  if (tick) { pwin.clearInterval(tick); tick = null; }
+  if (tick) { window.clearInterval(tick); tick = null; }
   save(true);
 }
 $id('close').addEventListener('click', closeWin);
@@ -41,7 +41,7 @@ dragBar.addEventListener('pointerup', e => {
   if (!wg || e.pointerId !== wg.id) return;
   try { dragBar.releasePointerCapture(e.pointerId); } catch (er) {}
   wg = null;
-  ctx.S.win = { fx: ctx.win.offsetLeft / pwin.innerWidth, fy: ctx.win.offsetTop / pwin.innerHeight };
+  ctx.S.win = { fx: ctx.win.offsetLeft / window.innerWidth, fy: ctx.win.offsetTop / window.innerHeight };
   save();
 });
 

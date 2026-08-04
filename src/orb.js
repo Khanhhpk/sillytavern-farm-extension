@@ -8,7 +8,7 @@ ctx.orb = $id('ctx.orb'), ctx.win = $id('ctx.win');
 export const disposers = [];
 export let gesture = null, destroyed = false;
 export function placeOrb() {
-  const vw = pwin.innerWidth, vh = pwin.innerHeight;
+  const vw = window.innerWidth, vh = window.innerHeight;
   const x = Math.min(Math.max(ctx.S.orb.fx * vw, 4), vw - 56);
   const y = Math.min(Math.max(ctx.S.orb.fy * vh, 4), vh - 56);
   ctx.orb.style.left = x + 'px'; ctx.orb.style.top = y + 'px';
@@ -38,7 +38,7 @@ export function onOrbUp(e, cancelled) {
   try { ctx.orb.releasePointerCapture(e.pointerId); } catch (er) {}
   gesture = null;
   if (cancelled) return;
-  const vw = pwin.innerWidth, vh = pwin.innerHeight;
+  const vw = window.innerWidth, vh = window.innerHeight;
   if (wasDrag) {
     let nx = Math.min(Math.max(ctx.orb.offsetLeft, 4), vw - 56);    // ctx.Sửa #1: lại gần mép mới hít, còn lại đứng nguyên chỗ
     let dock = null;
@@ -57,20 +57,20 @@ ctx.orb.addEventListener('pointerup', e => onOrbUp(e, false));
 ctx.orb.addEventListener('pointercancel', e => onOrbUp(e, true));
 export let resizeTimer = null;
 export const onResize = () => {
-  if (resizeTimer) pwin.clearTimeout(resizeTimer);
-  resizeTimer = pwin.setTimeout(() => {
+  if (resizeTimer) window.clearTimeout(resizeTimer);
+  resizeTimer = window.setTimeout(() => {
     placeOrb();
     if (ctx.win.classList.contains('open')) { layout(); placeWin(); renderPlots(); }
   }, 150);
 };
-pwin.addEventListener('resize', onResize);
-disposers.push(() => pwin.removeEventListener('resize', onResize));
+window.addEventListener('resize', onResize);
+disposers.push(() => window.removeEventListener('resize', onResize));
 placeOrb();
 
 /* ---------- ctx.Sửa #11: bố cục dọc thu nhỏ đồng loạt (ô tính theo chiều rộng màn hình, sprite lấy bội số của 16) ---------- */
 export let SPRITE_PX = 64, DECO_PX = 56;
 export function layout() {
-  const vw = pwin.innerWidth;
+  const vw = window.innerWidth;
   let plot = 74;
   if (vw <= 640) plot = Math.max(52, Math.min(74, Math.floor((Math.min(vw * 0.96, 760) - 92) / 4)));
   ctx.win.style.setProperty('--plot', plot + 'px');

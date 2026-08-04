@@ -96,11 +96,11 @@ $id('witch').addEventListener('click', e => {
   if (e.target.closest('.wtag')) return openWitchDlg();
   const el = $id('witch');                              // Chọc vào chính cô ấy = chào hỏi (tiếng phù thuỷ, người nghe không hiểu là bình thường nhé)
   el.querySelector('.pbubble')?.remove();
-  const b = pdoc.createElement('span');
+  const b = document.createElement('span');
   b.className = 'pbubble wb';
   b.textContent = WITCH_CRY[Math.floor(Math.random() * WITCH_CRY.length)];
   el.appendChild(b);
-  pwin.setTimeout(() => b.remove(), 1900);
+  window.setTimeout(() => b.remove(), 1900);
 });
 
 /* ---------- Mẹo nhỏ ---------- */
@@ -223,7 +223,7 @@ export let toastTimer = null;
 export function toast(msg) {
   const t = $id('toast');
   t.textContent = ctx.msg; t.style.display = 'block';
-  if (toastTimer) pwin.clearTimeout(toastTimer);
-  toastTimer = pwin.setTimeout(() => { t.style.display = 'none'; }, 1800);
+  if (toastTimer) window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => { t.style.display = 'none'; }, 1800);
 }
 

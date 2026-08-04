@@ -1325,12 +1325,12 @@ function loadState2() {
 ctx.saveTimer = null;
 
 // src/ui.js
-var root2 = pdoc.createElement("div");
+var root2 = document.createElement("div");
 root2.id = "star-tavern-farm-root";
-pdoc.body.appendChild(root2);
+document.body.appendChild(root2);
 var sh2 = root2.attachShadow({ mode: "open" });
 sh2.appendChild(style);
-ctx.ui = pdoc.createElement("div");
+ctx.ui = document.createElement("div");
 ctx.ui.innerHTML = `
   <div id="ctx.orb" title="Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n trong SillyTavern ch\u1EE9!">${spriteSVG("sprout", 34)}</div>
   <div id="ctx.win">
@@ -1445,13 +1445,13 @@ fieldEl.addEventListener("touchend", (e) => {
   toast(pg === 1 ? "V\u1EC1 \u0111\u1ED3ng c\u1ECF~" : pg === 2 ? "T\u1EDBi v\xF9ng n\u01B0\u1EDBc~" : "T\u1EDBi khu m\u1ECF~");
 }, { passive: true });
 fieldEl.style.backgroundSize = "192px 192px";
-var decoLayer = pdoc.createElement("div");
+var decoLayer = document.createElement("div");
 decoLayer.style.cssText = "position:absolute;inset:0;overflow:hidden;pointer-events:none;";
 fieldEl.insertBefore(decoLayer, fieldEl.firstChild);
 (function() {
   const drnd = mulberry32(20260717);
   function addDeco(o, cls, pos) {
-    const el = pdoc.createElement("span");
+    const el = document.createElement("span");
     el.className = cls;
     el.style.cssText = "position:absolute;" + pos;
     el.innerHTML = spriteSVG(o.n, o.s | 0);
@@ -1463,7 +1463,7 @@ fieldEl.insertBefore(decoLayer, fieldEl.firstChild);
   side.forEach((o) => addDeco(o, "dside", `left:${o.x}%;top:${o.y}%;`));
   for (let i = 0; i < 3; i++) addDeco({ n: "pinkgrass", s: 28 + drnd() * 6 }, "dbot", `left:${9 + i * 16 + drnd() * 5}%;bottom:4px;`);
 })();
-var fxLayer = pdoc.createElement("div");
+var fxLayer = document.createElement("div");
 fxLayer.style.cssText = "position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:8;";
 fieldEl.appendChild(fxLayer);
 
@@ -1477,7 +1477,7 @@ var clampN2 = (x, lo, hi, dflt) => {
 var SEC_LS_KEY = "star_tavern_farm_sec";
 var SEC2 = { url: "", key: "", model: "", autoReset: true, resetHours: 4, wbLimit: 2e4 };
 try {
-  const raw = pwin.localStorage.getItem(SEC_LS_KEY);
+  const raw = window.localStorage.getItem(SEC_LS_KEY);
   if (raw) {
     const o = JSON.parse(raw);
     SEC2 = {
@@ -1702,7 +1702,7 @@ async function requestDayEvent2(force) {
     }).then((r) => r.json());
     const data = await Promise.race([
       resPromise,
-      new Promise((_, rej) => pwin.setTimeout(() => rej(new Error("timeout")), 9e4))
+      new Promise((_, rej) => window.setTimeout(() => rej(new Error("timeout")), 9e4))
       // v0.8: 15 mô tả nên lượng sinh ra lớn, 30s→90s
     ]);
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
@@ -1780,7 +1780,7 @@ ${ev && ev.flavor ? `- ctx.S\u1EF1 ki\u1EC7n h\xF4m nay: ${ev.name} \u2014\u2014
 * H\u01B0\u1EDBng d\u1EABn cho AI: Nh\xE2n v\u1EADt trong c\u1ED1t truy\u1EC7n th\u1EC9nh tho\u1EA3ng c\xF3 th\u1EC3 nh\u1EAFc t\u1EDBi vi\u1EC7c ng\u01B0\u1EDDi ch\u01A1i ch\u0103m v\u01B0\u1EDDn hay thu ho\u1EA1ch th\u1EBF n\xE0o m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn, nh\u01B0ng \u0110\u1EEANG thao t\xE1c v\u01B0\u1EDDn rau thay ng\u01B0\u1EDDi ch\u01A1i, c\u0169ng \u0110\u1EEANG bi\u1EBFn v\u01B0\u1EDDn rau th\xE0nh m\u1EA1ch ch\xEDnh c\u1EE7a c\u1ED1t truy\u1EC7n.`;
   setInjection2(promptText);
 }
-var heartbeat2 = pwin.setInterval(() => {
+var heartbeat2 = window.setInterval(() => {
   try {
     settle();
   } catch (e) {
@@ -1808,7 +1808,7 @@ ctx.orb = $id("ctx.orb"), ctx.win = $id("ctx.win");
 var disposers2 = [];
 var gesture = null;
 function placeOrb() {
-  const vw = pwin.innerWidth, vh = pwin.innerHeight;
+  const vw = window.innerWidth, vh = window.innerHeight;
   const x = Math.min(Math.max(ctx.S.orb.fx * vw, 4), vw - 56);
   const y = Math.min(Math.max(ctx.S.orb.fy * vh, 4), vh - 56);
   ctx.orb.style.left = x + "px";
@@ -1842,7 +1842,7 @@ function onOrbUp(e, cancelled) {
   }
   gesture = null;
   if (cancelled) return;
-  const vw = pwin.innerWidth, vh = pwin.innerHeight;
+  const vw = window.innerWidth, vh = window.innerHeight;
   if (wasDrag) {
     let nx = Math.min(Math.max(ctx.orb.offsetLeft, 4), vw - 56);
     let dock = null;
@@ -1866,8 +1866,8 @@ ctx.orb.addEventListener("pointerup", (e) => onOrbUp(e, false));
 ctx.orb.addEventListener("pointercancel", (e) => onOrbUp(e, true));
 var resizeTimer = null;
 var onResize = () => {
-  if (resizeTimer) pwin.clearTimeout(resizeTimer);
-  resizeTimer = pwin.setTimeout(() => {
+  if (resizeTimer) window.clearTimeout(resizeTimer);
+  resizeTimer = window.setTimeout(() => {
     placeOrb();
     if (ctx.win.classList.contains("open")) {
       layout2();
@@ -1876,13 +1876,13 @@ var onResize = () => {
     }
   }, 150);
 };
-pwin.addEventListener("resize", onResize);
-disposers2.push(() => pwin.removeEventListener("resize", onResize));
+window.addEventListener("resize", onResize);
+disposers2.push(() => window.removeEventListener("resize", onResize));
 placeOrb();
 var SPRITE_PX2 = 64;
 var DECO_PX = 56;
 function layout2() {
-  const vw = pwin.innerWidth;
+  const vw = window.innerWidth;
   let plot = 74;
   if (vw <= 640) plot = Math.max(52, Math.min(74, Math.floor((Math.min(vw * 0.96, 760) - 92) / 4)));
   ctx.win.style.setProperty("--plot", plot + "px");
@@ -1895,7 +1895,7 @@ var tick2 = null;
 function closeWin() {
   ctx.win.classList.remove("open");
   if (tick2) {
-    pwin.clearInterval(tick2);
+    window.clearInterval(tick2);
     tick2 = null;
   }
   save(true);
@@ -1920,7 +1920,7 @@ dragBar.addEventListener("pointerup", (e) => {
   } catch (er) {
   }
   wg = null;
-  ctx.S.win = { fx: ctx.win.offsetLeft / pwin.innerWidth, fy: ctx.win.offsetTop / pwin.innerHeight };
+  ctx.S.win = { fx: ctx.win.offsetLeft / window.innerWidth, fy: ctx.win.offsetTop / window.innerHeight };
   save();
 });
 
@@ -2193,7 +2193,7 @@ $id("bmut").addEventListener("click", (e) => {
   e.stopPropagation();
   $id("mutPopup").classList.toggle("open");
 });
-pdoc.addEventListener("click", (e) => {
+document.addEventListener("click", (e) => {
   const popup = $id("mutPopup");
   if (popup.classList.contains("open") && !e.target.closest(".mut-popup") && !e.target.closest(".bmut")) {
     popup.classList.remove("open");
@@ -2588,11 +2588,11 @@ sh.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", ()
 // src/pets.js
 function petBubble(el, txt) {
   el.querySelector(".pbubble")?.remove();
-  const b = pdoc.createElement("span");
+  const b = document.createElement("span");
   b.className = "pbubble";
   b.textContent = txt;
   el.appendChild(b);
-  pwin.setTimeout(() => b.remove(), 1700);
+  window.setTimeout(() => b.remove(), 1700);
 }
 var petPos = {};
 var petTgt = {};
@@ -2611,7 +2611,7 @@ var GAITS = {
 var gaitOf = (id) => GAITS[id] || GAITS._;
 var stopHop = (id) => {
   if (petHopT2[id]) {
-    pwin.clearTimeout(petHopT2[id]);
+    window.clearTimeout(petHopT2[id]);
     delete petHopT2[id];
   }
 };
@@ -2669,7 +2669,7 @@ function hopStep(el) {
   el.style.left = p.x + "px";
   el.style.bottom = p.y + "px";
   petPos[id] = p;
-  petHopT2[id] = pwin.setTimeout(() => hopStep(el), g.dur);
+  petHopT2[id] = window.setTimeout(() => hopStep(el), g.dur);
 }
 function moveTo(el, p) {
   const id = el.dataset.pet;
@@ -2682,12 +2682,12 @@ function sleepPet(el) {
   const id = el.dataset.pet;
   el.classList.add("sleep");
   el.insertAdjacentHTML("beforeend", '<span class="zzz">Z</span><span class="zzz z2">z</span>');
-  petSleepT2[id] = pwin.setTimeout(() => wakePet(el, false), 4e4 + Math.random() * 4e4);
+  petSleepT2[id] = window.setTimeout(() => wakePet(el, false), 4e4 + Math.random() * 4e4);
 }
 function wakePet(el, startled) {
   const id = el.dataset.pet;
   if (petSleepT2[id]) {
-    pwin.clearTimeout(petSleepT2[id]);
+    window.clearTimeout(petSleepT2[id]);
     delete petSleepT2[id];
   }
   el.classList.remove("sleep");
@@ -2697,7 +2697,7 @@ function wakePet(el, startled) {
   if (mate) {
     delete pileWith[mate];
     const me = petEl(mate);
-    if (startled && me && me.classList.contains("sleep")) pwin.setTimeout(() => wakePet(me, true), 260);
+    if (startled && me && me.classList.contains("sleep")) window.setTimeout(() => wakePet(me, true), 260);
   }
   if (startled) petBubble(el, "?!");
 }
@@ -2710,11 +2710,11 @@ var lastScene = "";
 var nextSceneAt = now() + (TEST_MODE ? 30 * 1e3 : 45 * MIN);
 var sceneBusy = (id) => !!(scene && scene.ids.indexOf(id) >= 0);
 var sceneTimer = (fn, ms) => {
-  if (scene) scene.timers.push(pwin.setTimeout(fn, ms));
+  if (scene) scene.timers.push(window.setTimeout(fn, ms));
 };
 function endScene2() {
   if (!scene) return;
-  scene.timers.forEach((t) => pwin.clearTimeout(t));
+  scene.timers.forEach((t) => window.clearTimeout(t));
   scene = null;
 }
 function petEl(id) {
@@ -2823,7 +2823,7 @@ function tryScene() {
     sceneTimer(endScene2, 45e3);
   }
 }
-var wander2 = pwin.setInterval(() => {
+var wander2 = window.setInterval(() => {
   if (!ctx.win.classList.contains("open")) return;
   if (!scene && now() >= nextSceneAt) tryScene();
   sh.querySelectorAll("#mascots .pet").forEach((el) => {
@@ -2981,19 +2981,19 @@ $id("witch").addEventListener("click", (e) => {
   if (e.target.closest(".wtag")) return openWitchDlg();
   const el = $id("witch");
   el.querySelector(".pbubble")?.remove();
-  const b = pdoc.createElement("span");
+  const b = document.createElement("span");
   b.className = "pbubble wb";
   b.textContent = WITCH_CRY[Math.floor(Math.random() * WITCH_CRY.length)];
   el.appendChild(b);
-  pwin.setTimeout(() => b.remove(), 1900);
+  window.setTimeout(() => b.remove(), 1900);
 });
 var toastTimer2 = null;
 function toast2(msg) {
   const t = $id("toast");
   t.textContent = ctx.msg;
   t.style.display = "block";
-  if (toastTimer2) pwin.clearTimeout(toastTimer2);
-  toastTimer2 = pwin.setTimeout(() => {
+  if (toastTimer2) window.clearTimeout(toastTimer2);
+  toastTimer2 = window.setTimeout(() => {
     t.style.display = "none";
   }, 1800);
 }

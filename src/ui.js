@@ -4,15 +4,15 @@ import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, 
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
 
 /* ---------- DOM:Shadow root ---------- */
-export const root = pdoc.createElement('div');
+export const root = document.createElement('div');
 root.id = 'star-tavern-farm-root';
-pdoc.body.appendChild(root);
+document.body.appendChild(root);
 export const sh = root.attachShadow({ mode: 'open' });
 // CSS moved to style.css
 
 sh.appendChild(style);
 
-ctx.ui = pdoc.createElement('div');
+ctx.ui = document.createElement('div');
 ctx.ui.innerHTML = `
   <div id="ctx.orb" title="Ai mà thèm làm nông dân trong SillyTavern chứ!">${spriteSVG('sprout', 34)}</div>
   <div id="ctx.win">
@@ -110,13 +110,13 @@ fieldEl.addEventListener('touchend', e => {
   toast(pg === 1 ? 'Về đồng cỏ~' : pg === 2 ? 'Tới vùng nước~' : 'Tới khu mỏ~');
 }, { passive: true });
 fieldEl.style.backgroundSize = '192px 192px';
-export const decoLayer = pdoc.createElement('div');
+export const decoLayer = document.createElement('div');
 decoLayer.style.cssText = 'position:absolute;inset:0;overflow:hidden;pointer-events:none;';
 fieldEl.insertBefore(decoLayer, fieldEl.firstChild);
 (function () {                                        // ctx.Sửa #13: trang trí chỉ ở phần đất trống hai bên (màn hẹp thì dời xuống dải xanh dưới đáy)
   const drnd = mulberry32(20260717);
   function addDeco(o, cls, pos) {
-    const el = pdoc.createElement('span');
+    const el = document.createElement('span');
     el.className = cls;
     el.style.cssText = 'position:absolute;' + pos;
     el.innerHTML = spriteSVG(o.n, o.s | 0);
@@ -133,19 +133,19 @@ fieldEl.insertBefore(decoLayer, fieldEl.firstChild);
 })();
 
 /* ---------- ctx.Sửa #15: lớp bong bóng cảm xúc dùng chung ---------- */
-export const fxLayer = pdoc.createElement('div');
+export const fxLayer = document.createElement('div');
 fxLayer.style.cssText = 'position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:8;';
 fieldEl.appendChild(fxLayer);
 export function plotEmote(pi, name) {
   const p = sh.querySelector('.plot[data-pi="' + pi + '"]');
   if (!p) return;
   const pr = p.getBoundingClientRect(), fr = fieldEl.getBoundingClientRect();
-  const el = pdoc.createElement('span');
+  const el = document.createElement('span');
   el.className = 'emote';
   el.style.left = (pr.left - fr.left + pr.width / 2 - 12) + 'px';
   el.style.top = (pr.top - fr.top - 14) + 'px';
   el.innerHTML = spriteSVG(name, 24);
   fxLayer.appendChild(el);
-  pwin.setTimeout(() => el.remove(), 1300);
+  window.setTimeout(() => el.remove(), 1300);
 }
 

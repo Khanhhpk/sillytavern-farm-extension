@@ -6,29 +6,29 @@ import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, L
 /* ---------- Huỷ (C11 §8) ---------- */
 export function destroy() {
   if (destroyed) return; destroyed = true;
-  try { if (tick) pwin.clearInterval(tick); } catch (e) {}
-  try { pwin.clearInterval(heartbeat); } catch (e) {}
-  try { pwin.clearInterval(wander); } catch (e) {}
-  try { Object.keys(petHopT).forEach(k => pwin.clearTimeout(petHopT[k])); } catch (e) {}
-  try { Object.keys(petSleepT).forEach(k => pwin.clearTimeout(petSleepT[k])); } catch (e) {}
+  try { if (tick) window.clearInterval(tick); } catch (e) {}
+  try { window.clearInterval(heartbeat); } catch (e) {}
+  try { window.clearInterval(wander); } catch (e) {}
+  try { Object.keys(petHopT).forEach(k => window.clearTimeout(petHopT[k])); } catch (e) {}
+  try { Object.keys(petSleepT).forEach(k => window.clearTimeout(petSleepT[k])); } catch (e) {}
   try { endScene(); } catch (e) {}
   try { if (ctx.saveTimer) { clearTimeout(ctx.saveTimer); save(true); } } catch (e) {}
-  try { if (toastTimer) pwin.clearTimeout(toastTimer); } catch (e) {}
+  try { if (toastTimer) window.clearTimeout(toastTimer); } catch (e) {}
   while (disposers.length) { try { disposers.pop()(); } catch (e) {} }
   try { setInjection(''); } catch (e) {}
   try { root.remove(); } catch (e) {}
   try { if (extMenuBtn) extMenuBtn.remove(); } catch (e) {}
-  try { if (pwin[RUNTIME_KEY] === api) delete pwin[RUNTIME_KEY]; } catch (e) {}
+  try { if (window[RUNTIME_KEY] === api) delete window[RUNTIME_KEY]; } catch (e) {}
 }
 
 // Thêm nút mở nông trại vào menu công cụ (magic wand) của SillyTavern
 export let extMenuBtn = null;
 export function setupExtButton() {
   if (extMenuBtn) { try { extMenuBtn.remove(); } catch(e){} }
-  const extMenu = pdoc.querySelector('#extensionsMenu');
-  if (!extMenu) { pwin.setTimeout(setupExtButton, 500); return; }
+  const extMenu = document.querySelector('#extensionsMenu');
+  if (!extMenu) { window.setTimeout(setupExtButton, 500); return; }
   
-  extMenuBtn = pdoc.createElement('div');
+  extMenuBtn = document.createElement('div');
   extMenuBtn.id = 'farm-wand-btn';
   extMenuBtn.className = 'list-group-item flex-container flexGap5 interactable';
   extMenuBtn.tabIndex = 0;

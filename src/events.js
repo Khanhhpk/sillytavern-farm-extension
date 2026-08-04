@@ -16,7 +16,7 @@ export const clampN = (x, lo, hi, dflt) => { x = Number(x); return isFinite(x) ?
 export const SEC_LS_KEY = 'star_tavern_farm_sec';
 export let SEC = { url: '', key: '', model: '', autoReset: true, resetHours: 4, wbLimit: 20000 };
 try {
-  const raw = pwin.localStorage.getItem(SEC_LS_KEY);
+  const raw = window.localStorage.getItem(SEC_LS_KEY);
   if (raw) {
     const o = JSON.parse(raw);
     SEC = { url: o.url || '', key: o.key ? atob(o.key) : '', model: o.model || '',
@@ -24,7 +24,7 @@ try {
   }
 } catch (e) {}
 export function saveSec() {
-  try { pwin.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit })); } catch (e) {}
+  try { window.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit })); } catch (e) {}
 }
 /* Công tắc và prompt tự điền: lưu theo từng thẻ nhân vật */
 export let CS = { link: false, story: false, userPrompt: '' };
@@ -278,7 +278,7 @@ async function requestDayEvent(force) {
 
     const data = await Promise.race([
       resPromise,
-      new Promise((_, rej) => pwin.setTimeout(() => rej(new Error('timeout')), 90000)),   // v0.8: 15 mô tả nên lượng sinh ra lớn, 30s→90s
+      new Promise((_, rej) => window.setTimeout(() => rej(new Error('timeout')), 90000)),   // v0.8: 15 mô tả nên lượng sinh ra lớn, 30s→90s
     ]);
     
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
@@ -309,7 +309,7 @@ async function secTest() {
       body: JSON.stringify(reqBody)
     }).then(r => r.json());
 
-    const res = await Promise.race([ resPromise, new Promise((_, rj) => pwin.setTimeout(() => rj(new Error('Timeout 10s')), 10000)) ]);
+    const res = await Promise.race([ resPromise, new Promise((_, rj) => window.setTimeout(() => rj(new Error('Timeout 10s')), 10000)) ]);
     if (res.error) throw new Error(res.error.message || JSON.stringify(res.error));
     const text = (res.choices?.[0]?.message?.content || '').trim();
     toast('Kết nối OK! AI đáp: ' + text);
@@ -522,7 +522,7 @@ async function testSecApi() {
 
     const data = await Promise.race([
       resPromise,
-      new Promise((_, rej) => pwin.setTimeout(() => rej(new Error('Quá thời gian chờ (20s)')), 20000)),
+      new Promise((_, rej) => window.setTimeout(() => rej(new Error('Quá thời gian chờ (20s)')), 20000)),
     ]);
     
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
@@ -540,9 +540,9 @@ async function fetchModelList() {
   toast('Đang lấy danh sách model…');
   try {
     const ctrl = new AbortController();
-    const to = pwin.setTimeout(() => ctrl.abort(), 15000);
+    const to = window.setTimeout(() => ctrl.abort(), 15000);
     const r = await fetch(url.replace(/\/+$/, '') + '/models', { headers: key ? { Authorization: 'Bearer ' + key } : {}, signal: ctrl.signal });
-    pwin.clearTimeout(to);
+    window.clearTimeout(to);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
     const ids = ((d && (d.data || d.models)) || []).map(m => (m && (m.id || m.model || m.name)) || '').filter(Boolean);
@@ -599,7 +599,7 @@ ${ev && ev.flavor ? `- ctx.Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}`
 }
 
 /* #17+v0.6b: nhịp tim chạy nền —— cứ 60s chạy settle một lần (tính toán cục bộ, cỡ micro~mili giây): sự kiện tới hạn thì gieo lại, bé làm việc làm việc, kết toán tìm kho báu; mở hay không mở bảng đều có hiệu lực */
-export const heartbeat = pwin.setInterval(() => {
+export const heartbeat = window.setInterval(() => {
   try { settle(); } catch (e) {}
 }, 60 * 1000);
 

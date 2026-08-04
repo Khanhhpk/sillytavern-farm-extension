@@ -6,10 +6,10 @@ import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, L
 /* ---------- Thú cưng: render động + chọc chọc (uỷ quyền listener, bong bóng trên đầu, đủ 10 phút mới thật sự rơi tiền) ---------- */
 export function petBubble(el, txt) {
   el.querySelector('.pbubble')?.remove();
-  const b = pdoc.createElement('span');
+  const b = document.createElement('span');
   b.className = 'pbubble'; b.textContent = txt;
   el.appendChild(b);
-  pwin.setTimeout(() => b.remove(), 1700);
+  window.setTimeout(() => b.remove(), 1700);
 }
 /* #26 (sửa lần 2): hàng dưới cùng (cao bằng một ô ruộng) = tầng đi lại riêng cho loại làm việc, không chạy lên trên; các bé khác đi lang thang tự do trong toàn khu ruộng phía trên hàng dưới, có thể băng ngang qua ruộng
    v0.7①: di chuyển kiểu nhảy —— bé không thuộc nhóm bay sẽ nhích tới điểm đích bằng từng cú nhảy nhỏ (mỗi cú = xê dịch ngang tuyến tính một bước + thân bay lên hạ xuống theo parabol), mây/ma thì trượt */
@@ -22,7 +22,7 @@ export const GAITS = {                                          // Dáng đi: le
   _:         { len: 14, dur: 330, hy: -9 },              // Mặc định: kiểu nảy chuẩn của dòng slime
 };
 export const gaitOf = id => GAITS[id] || GAITS._;
-export const stopHop = id => { if (petHopT[id]) { pwin.clearTimeout(petHopT[id]); delete petHopT[id]; } };
+export const stopHop = id => { if (petHopT[id]) { window.clearTimeout(petHopT[id]); delete petHopT[id]; } };
 export function petSpot(id) {
   const ov = $id('mascots'), W = ov.clientWidth, H = ov.clientHeight;
   if (PETS[id] && PETS[id].job) {                        // Loại làm việc (sửa lần 3): đứng cố định thành hàng ở góc dưới phải, nhún nhảy tại chỗ chứ không đi
@@ -68,7 +68,7 @@ export function hopStep(el) {                                   // Một cú nh�
   el.style.transitionTimingFunction = 'ease, linear, linear';
   el.style.left = p.x + 'px'; el.style.bottom = p.y + 'px';
   petPos[id] = p;
-  petHopT[id] = pwin.setTimeout(() => hopStep(el), g.dur);
+  petHopT[id] = window.setTimeout(() => hopStep(el), g.dur);
 }
 export function moveTo(el, p) {                                 // Lên đường tới p: bé bay thì trượt, còn lại thì nhảy liên tiếp
   const id = el.dataset.pet;
@@ -82,11 +82,11 @@ export function sleepPet(el) {
   const id = el.dataset.pet;
   el.classList.add('sleep');
   el.insertAdjacentHTML('beforeend', '<span class="zzz">Z</span><span class="zzz z2">z</span>');
-  petSleepT[id] = pwin.setTimeout(() => wakePet(el, false), 40000 + Math.random() * 40000);
+  petSleepT[id] = window.setTimeout(() => wakePet(el, false), 40000 + Math.random() * 40000);
 }
 export function wakePet(el, startled) {
   const id = el.dataset.pet;
-  if (petSleepT[id]) { pwin.clearTimeout(petSleepT[id]); delete petSleepT[id]; }
+  if (petSleepT[id]) { window.clearTimeout(petSleepT[id]); delete petSleepT[id]; }
   el.classList.remove('sleep');
   el.querySelectorAll('.zzz').forEach(z => z.remove());
   const mate = pileWith[id];                             // Bạn ngủ chung: một bé bị đánh thức thì bé kia cũng bật dậy theo
@@ -94,7 +94,7 @@ export function wakePet(el, startled) {
   if (mate) {
     delete pileWith[mate];
     const me = petEl(mate);
-    if (startled && me && me.classList.contains('sleep')) pwin.setTimeout(() => wakePet(me, true), 260);
+    if (startled && me && me.classList.contains('sleep')) window.setTimeout(() => wakePet(me, true), 260);
   }
   if (startled) petBubble(el, '?!');
 }
@@ -106,8 +106,8 @@ export const petTouch = {}, touchBase = now();                  // Thời điể
 export let scene = null, lastScene = '';
 export let nextSceneAt = now() + (TEST_MODE ? 30 * 1000 : 45 * MIN);
 export const sceneBusy = id => !!(scene && scene.ids.indexOf(id) >= 0);
-export const sceneTimer = (fn, ms) => { if (scene) scene.timers.push(pwin.setTimeout(fn, ms)); };
-export function endScene() { if (!scene) return; scene.timers.forEach(t => pwin.clearTimeout(t)); scene = null; }
+export const sceneTimer = (fn, ms) => { if (scene) scene.timers.push(window.setTimeout(fn, ms)); };
+export function endScene() { if (!scene) return; scene.timers.forEach(t => window.clearTimeout(t)); scene = null; }
 export function petEl(id) { return sh.querySelector('#mascots .pet[data-pet="' + id + '"]'); }
 export function walkTo(el, p, cb) {                             // Dàn vị trí: tới nơi thì gọi cb (bé bay thì ước lượng theo thời gian trượt)
   const id = el.dataset.pet;
@@ -202,7 +202,7 @@ export function renderPets() {
   for (const k in petTgt) delete petTgt[k];
   for (const k in petArrive) delete petArrive[k];
   for (const k in pileWith) delete pileWith[k];
-  Object.keys(petSleepT).forEach(k => { pwin.clearTimeout(petSleepT[k]); delete petSleepT[k]; });
+  Object.keys(petSleepT).forEach(k => { window.clearTimeout(petSleepT[k]); delete petSleepT[k]; });
   $id('mascots').innerHTML = ctx.S.petsOut.map(id => PETS[id]
     ? `<span class="pet" data-pet="${id}" title="Chọc chọc ${PETS[id].name}"><span class="pbody" style="animation-delay:-${(Math.random() * 1.8).toFixed(2)}s">${petSVG(id, 48)}</span></span>` : '').join('');
   sh.querySelectorAll('#mascots .pet').forEach(el => {
@@ -210,7 +210,7 @@ export function renderPets() {
     placePet(el, petPos[id] || petSpot(id), true);
   });
 }
-export const wander = pwin.setInterval(() => {                  // Nhịp tuần tra: cứ 7s lại giao điểm đến / ru ngủ / mở tiểu phẩm cho các bé đang rảnh
+export const wander = window.setInterval(() => {                  // Nhịp tuần tra: cứ 7s lại giao điểm đến / ru ngủ / mở tiểu phẩm cho các bé đang rảnh
   if (!ctx.win.classList.contains('open')) return;           // Tối ưu: Dừng tuần tra và tính toán vị trí khi bảng bị ẩn
   if (!scene && now() >= nextSceneAt) tryScene();
   sh.querySelectorAll('#mascots .pet').forEach(el => {
