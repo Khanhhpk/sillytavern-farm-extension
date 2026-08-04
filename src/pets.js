@@ -282,6 +282,7 @@ export function initPets() {
   const mascots = All.$id('mascots');
 
   mascots.addEventListener('pointerdown', e => {
+    if (!ctx.S.dragPet) return; // Nếu tính năng kéo thả tắt, không làm gì ở đây cả
     const el = e.target.closest('.pet'); if (!el) return;
     if (e.button !== 0) return; // Chỉ chuột trái
     e.preventDefault();
@@ -319,7 +320,8 @@ export function initPets() {
       ox: exactLeft,
       oy: exactBottom,
       dx: 0, dy: 0, vx: 0, vy: 0, targetVx: 0, targetVy: 0,
-      moved: false, lastX: e.clientX, lastY: e.clientY, dropped: false
+      moved: false, lastX: e.clientX, lastY: e.clientY, dropped: false,
+      startPhysics: null
     };
 
     const updateDrag = () => {
@@ -396,6 +398,25 @@ export function initPets() {
   });
 
   mascots.addEventListener('pointerup', e => {
+    if (!ctx.S.dragPet) {
+      // Giữ nguyên logic click cũ khi tắt tính năng kéo thả
+      const el = e.target.closest('.pet'); if (!el) return;
+      const id = el.dataset.pet;
+      const def = PETS[id];
+      if (!def) return;
+      petTouch[id] = now();
+      if (el.classList.contains('sleep')) return wakePet(el, true);
+      const isJob = el.dataset.job === '1';
+      const msg = isJob ? (def.touchW || def.touch || 'Đang bận...') : (def.touch || '...');
+      if (!isJob) { wakePet(el); playSound(def.snd); }
+      if (!All.$id('pb' + id)) {
+        const pb = document.createElement('div'); pb.id = 'pb' + id; pb.className = 'pbubble';
+        pb.textContent = typeof msg === 'function' ? msg() : msg;
+        el.appendChild(pb); setTimeout(() => pb.remove(), 1500);
+      }
+      return;
+    }
+
     if (!activeDrag || activeDrag.id !== e.pointerId) return;
     const { el, petId, moved, dx, dy, ox, oy } = activeDrag;
     try { el.releasePointerCapture(e.pointerId); } catch(err){}

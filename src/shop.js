@@ -243,6 +243,10 @@ export function openPanel(kind) {
       <div class="shead">Sự kiện thế giới quan · prompt tuỳ chỉnh (chỉ lưu ở thẻ nhân vật hiện tại)</div>
       <textarea class="inp" id="csPrompt" placeholder="Ví dụ: thế giới này linh khí mỏng, bớt sự kiện tích cực đi; lời văn sự kiện viết theo lối cổ.">${esc(CS.userPrompt)}</textarea>
       <div style="display:flex;gap:8px;margin-top:6px"><span class="buy" id="csPromptSave">Lưu (chỉ thẻ này)</span></div>
+      <div class="shead">Tương tác thú cưng</div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:6px">
+        <input type="checkbox" id="cfgDragPet" ${ctx.S.dragPet ? 'checked' : ''}> Bật tính năng nhéo và kéo thú cưng
+      </label>
       <div class="shead">Công cụ dành cho Giám đốc Đồ hoạ</div>
       <div style="display:flex;gap:8px;margin-top:6px">
         <span class="buy plain" id="openSandboxBtn">🎨 Mở Xưởng Chế Tác AI</span>
@@ -274,6 +278,14 @@ export function openPanel(kind) {
       ctx.S.theme = b.dataset.settheme; save(); applyTheme(); openPanel('cfg');
       toast(ctx.S.theme === 'sky' ? 'Đổi sang giao diện trời quang~' : 'Về lại giao diện hồng anh đào~');
     }));
+    
+    const cfgDragPet = All.$id('cfgDragPet');
+    if (cfgDragPet) cfgDragPet.addEventListener('change', () => {
+      ctx.S.dragPet = cfgDragPet.checked;
+      save();
+      toast(ctx.S.dragPet ? 'Đã bật tính năng kéo thả thú cưng' : 'Đã tắt tính năng kéo thả thú cưng');
+    });
+
     All.$id('csPromptSave').addEventListener('click', () => {
       // @ts-ignore
       CS.userPrompt = All.$id('csPrompt').value.slice(0, 3000);

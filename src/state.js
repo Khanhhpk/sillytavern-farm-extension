@@ -32,6 +32,7 @@ export function loadState() {
   if (!ctx.S.petFind) ctx.S.petFind = {};
   if (!ctx.S.theme) ctx.S.theme = 'sakura';
   if (!ctx.S.page) ctx.S.page = 1;
+  if (ctx.S.dragPet === undefined) ctx.S.dragPet = false;
   
   Object.keys(ctx.S.bag || {}).forEach(k => {
     const base = k.split('@')[0];

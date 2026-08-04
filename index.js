@@ -2268,6 +2268,7 @@ function initPets() {
   let dragAnimFrame = null;
   const mascots = $id("mascots");
   mascots.addEventListener("pointerdown", (e) => {
+    if (!ctx.S.dragPet) return;
     const el = e.target.closest(".pet");
     if (!el) return;
     if (e.button !== 0) return;
@@ -2310,7 +2311,8 @@ function initPets() {
       moved: false,
       lastX: e.clientX,
       lastY: e.clientY,
-      dropped: false
+      dropped: false,
+      startPhysics: null
     };
     const updateDrag = () => {
       if (!activeDrag) return;
@@ -2365,6 +2367,30 @@ function initPets() {
     activeDrag.dy = rawDy;
   });
   mascots.addEventListener("pointerup", (e) => {
+    if (!ctx.S.dragPet) {
+      const el2 = e.target.closest(".pet");
+      if (!el2) return;
+      const id = el2.dataset.pet;
+      const def = PETS[id];
+      if (!def) return;
+      petTouch[id] = now();
+      if (el2.classList.contains("sleep")) return wakePet(el2, true);
+      const isJob = el2.dataset.job === "1";
+      const msg = isJob ? def.touchW || def.touch || "\u0110ang b\u1EADn..." : def.touch || "...";
+      if (!isJob) {
+        wakePet(el2);
+        playSound(def.snd);
+      }
+      if (!$id("pb" + id)) {
+        const pb = document.createElement("div");
+        pb.id = "pb" + id;
+        pb.className = "pbubble";
+        pb.textContent = typeof msg === "function" ? msg() : msg;
+        el2.appendChild(pb);
+        setTimeout(() => pb.remove(), 1500);
+      }
+      return;
+    }
     if (!activeDrag || activeDrag.id !== e.pointerId) return;
     const { el, petId, moved, dx, dy, ox, oy } = activeDrag;
     try {
@@ -2652,6 +2678,10 @@ function openPanel(kind) {
       <div class="shead">S\u1EF1 ki\u1EC7n th\u1EBF gi\u1EDBi quan \xB7 prompt tu\u1EF3 ch\u1EC9nh (ch\u1EC9 l\u01B0u \u1EDF th\u1EBB nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i)</div>
       <textarea class="inp" id="csPrompt" placeholder="V\xED d\u1EE5: th\u1EBF gi\u1EDBi n\xE0y linh kh\xED m\u1ECFng, b\u1EDBt s\u1EF1 ki\u1EC7n t\xEDch c\u1EF1c \u0111i; l\u1EDDi v\u0103n s\u1EF1 ki\u1EC7n vi\u1EBFt theo l\u1ED1i c\u1ED5.">${esc(CS.userPrompt)}</textarea>
       <div style="display:flex;gap:8px;margin-top:6px"><span class="buy" id="csPromptSave">L\u01B0u (ch\u1EC9 th\u1EBB n\xE0y)</span></div>
+      <div class="shead">T\u01B0\u01A1ng t\xE1c th\xFA c\u01B0ng</div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:6px">
+        <input type="checkbox" id="cfgDragPet" ${ctx.S.dragPet ? "checked" : ""}> B\u1EADt t\xEDnh n\u0103ng nh\xE9o v\xE0 k\xE9o th\xFA c\u01B0ng
+      </label>
       <div class="shead">C\xF4ng c\u1EE5 d\xE0nh cho Gi\xE1m \u0111\u1ED1c \u0110\u1ED3 ho\u1EA1</div>
       <div style="display:flex;gap:8px;margin-top:6px">
         <span class="buy plain" id="openSandboxBtn">\u{1F3A8} M\u1EDF X\u01B0\u1EDFng Ch\u1EBF T\xE1c AI</span>
@@ -2689,6 +2719,12 @@ function openPanel(kind) {
       openPanel("cfg");
       toast(ctx.S.theme === "sky" ? "\u0110\u1ED5i sang giao di\u1EC7n tr\u1EDDi quang~" : "V\u1EC1 l\u1EA1i giao di\u1EC7n h\u1ED3ng anh \u0111\xE0o~");
     }));
+    const cfgDragPet = $id("cfgDragPet");
+    if (cfgDragPet) cfgDragPet.addEventListener("change", () => {
+      ctx.S.dragPet = cfgDragPet.checked;
+      save();
+      toast(ctx.S.dragPet ? "\u0110\xE3 b\u1EADt t\xEDnh n\u0103ng k\xE9o th\u1EA3 th\xFA c\u01B0ng" : "\u0110\xE3 t\u1EAFt t\xEDnh n\u0103ng k\xE9o th\u1EA3 th\xFA c\u01B0ng");
+    });
     $id("csPromptSave").addEventListener("click", () => {
       CS.userPrompt = $id("csPrompt").value.slice(0, 3e3);
       saveCharState();
@@ -4231,6 +4267,7 @@ function loadState() {
   if (!ctx.S.petFind) ctx.S.petFind = {};
   if (!ctx.S.theme) ctx.S.theme = "sakura";
   if (!ctx.S.page) ctx.S.page = 1;
+  if (ctx.S.dragPet === void 0) ctx.S.dragPet = false;
   Object.keys(ctx.S.bag || {}).forEach((k) => {
     const base = k.split("@")[0];
     if (base === "mysbG" || base === "mysbW" || base === "mysbM") {
