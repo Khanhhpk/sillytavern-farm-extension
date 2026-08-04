@@ -31,24 +31,14 @@ export function onOrbMove(e) {
     ctx.orb.classList.remove('dockL', 'dockR');   // Sửa #12: khi kéo thì hiện đầy đủ
   }
   if (gesture.drag) {
-    const dx = e.clientX - gesture.sx;
-    const dy = e.clientY - gesture.sy;
-    ctx.orb.style.translate = dx + 'px ' + dy + 'px';
+    ctx.orb.style.left = gesture.ox + e.clientX - gesture.sx + 'px';
+    ctx.orb.style.top = gesture.oy + e.clientY - gesture.sy + 'px';
   }
 }
 export function onOrbUp(e, cancelled) {
   if (!gesture || e.pointerId !== gesture.id) return;
   const wasDrag = gesture.drag;
   try { ctx.orb.releasePointerCapture(e.pointerId); } catch (er) {}
-  
-  if (wasDrag) {
-    const dx = e.clientX - gesture.sx;
-    const dy = e.clientY - gesture.sy;
-    ctx.orb.style.translate = '';
-    ctx.orb.style.left = (gesture.ox + dx) + 'px';
-    ctx.orb.style.top = (gesture.oy + dy) + 'px';
-  }
-  
   gesture = null;
   if (cancelled) return;
   const vw = window.innerWidth, vh = window.innerHeight;
