@@ -683,7 +683,7 @@ function initFarm() {
         </div>
         <div style="width:256px;display:flex;flex-direction:column;gap:8px">
           <div class="shead" style="margin-top:0">Bản xem trước</div>
-          <canvas id="sbCanvas" width="256" height="256" style="background:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAHElEQVQYV2N89erVfwY0wAgSVBVE1ThqOCrcCwCPpBzhjVq6gQAAAABJRU5ErkJggg==');image-rendering:pixelated;border:2px solid var(--st-border-color);border-radius:4px;width:100%"></canvas>
+          <canvas id="sbCanvas" width="256" height="256" style="background: repeating-conic-gradient(#dfdfdf 0% 25%, #ffffff 0% 50%) 0 0 / 16px 16px; image-rendering:pixelated; border:2px solid var(--st-border-color); border-radius:4px; width:100%"></canvas>
         </div>
       </div>
     `;
