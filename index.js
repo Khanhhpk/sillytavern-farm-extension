@@ -219,7 +219,7 @@ function initFarm() {
         <span class="chip" id="chipLink">Liên kết thẻ nhân vật: Tắt</span>
         <span class="chip" id="chipStory" style="display:none">Ảnh hưởng cốt truyện: Tắt</span>
       </div>
-      <div class="banner" id="banner"><span class="btag" id="btag"></span><span id="btxt"></span></div>
+      <div class="banner" id="banner"><span class="btag" id="btag"></span><span id="btxt"></span><span class="bmut" id="bmut" title="Xem khả năng đột biến">✦</span><div class="mut-popup" id="mutPopup"></div></div>
       <div id="scroll">
         <div class="field">
           <div class="pager" id="pager"></div>
@@ -658,11 +658,18 @@ function initFarm() {
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         <div style="flex:1;min-width:260px;display:flex;flex-direction:column;gap:8px">
           <div class="shead" style="margin-top:0">Tạo Sprite bằng AI</div>
-          <div class="note">Nhập ý tưởng (VD: Thanh kiếm lửa, bình mana) để AI tự động xếp mã 16x16. Dùng chung API ở phần cài đặt.</div>
-          <select class="inp" id="sbPalette" style="padding:6px;width:100%">
-            <option value="SPRITES">Bảng màu Nông sản/Vật phẩm (P)</option>
-            <option value="PETS">Bảng màu Thú cưng (PET_P)</option>
-          </select>
+          <div class="note">Nhập ý tưởng để AI xếp mã tự động. Dùng chung API ở phần cài đặt.</div>
+          <div style="display:flex;gap:8px">
+            <select class="inp" id="sbPalette" style="padding:6px;flex:1">
+              <option value="SPRITES">Bảng màu Nông sản/Vật phẩm (P)</option>
+              <option value="PETS">Bảng màu Thú cưng (PET_P)</option>
+            </select>
+            <select class="inp" id="sbSize" style="padding:6px;width:90px">
+              <option value="16">16 x 16</option>
+              <option value="24">24 x 24</option>
+              <option value="32">32 x 32</option>
+            </select>
+          </div>
           <textarea class="inp" id="sbPrompt" placeholder="Nhập ý tưởng pixel art (gõ tiếng Việt cũng được)..." style="height:60px"></textarea>
           <div style="display:flex;gap:8px;align-items:center">
             <span class="buy" id="sbGenerate">✨ Tạo bằng AI</span>
@@ -670,13 +677,13 @@ function initFarm() {
             <span id="sbStatus" style="font-size:12px;color:var(--accFg)"></span>
           </div>
           <textarea class="inp" id="sbPayloadOut" style="display:none;height:120px;font-size:11px;font-family:monospace;margin-top:4px" readonly></textarea>
-          <div class="shead">Mã Pixel (16x16)</div>
+          <div class="shead">Mã Pixel</div>
           <div class="note">Dấu . là trong suốt. Dán hoặc sửa mảng JSON vào đây để xem thử trên bảng vẽ.</div>
           <textarea class="inp" id="sbCode" style="height:200px;font-family:monospace;white-space:pre"></textarea>
         </div>
         <div style="width:256px;display:flex;flex-direction:column;gap:8px">
           <div class="shead" style="margin-top:0">Bản xem trước</div>
-          <canvas id="sbCanvas" width="256" height="256" style="background:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAHElEQVQYV2N89erVfwY0wAgSVBVE1ThqOCrcCwCPpBzhjVq6gQAAAABJRU5ErkJggg==');image-rendering:pixelated;border:2px solid var(--st-border-color);border-radius:4px;width:100%"></canvas>
+          <canvas id="sbCanvas" width="256" height="256" style="background: repeating-conic-gradient(#dfdfdf 0% 25%, #ffffff 0% 50%) 0 0 / 16px 16px; image-rendering:pixelated; border:2px solid var(--st-border-color); border-radius:4px; width:100%"></canvas>
         </div>
       </div>
     `;
@@ -684,32 +691,46 @@ function initFarm() {
 
     const ta = $id('sbCode');
     const sel = $id('sbPalette');
+    const sizeSel = $id('sbSize');
     const ctx = $id('sbCanvas').getContext('2d');
     
     function render() {
       const isPet = sel.value === 'PETS';
       const palette = isPet ? PET_P : P;
-      ctx.clearRect(0, 0, 256, 256);
+      const size = parseInt(sizeSel.value) || 16;
+      
+      const canvasEl = $id('sbCanvas');
+      if (canvasEl.width !== size) {
+        canvasEl.width = size;
+        canvasEl.height = size;
+      }
+      ctx.clearRect(0, 0, size, size);
       
       const lines = ta.value.split('\n').map(l => l.trim().replace(/['",\[\]]/g, '')).filter(l => l.length > 0);
-      const pxSize = 256 / 16;
-      for (let y = 0; y < Math.min(16, lines.length); y++) {
+      for (let y = 0; y < Math.min(size, lines.length); y++) {
         const row = lines[y];
-        for (let x = 0; x < Math.min(16, row.length); x++) {
+        for (let x = 0; x < Math.min(size, row.length); x++) {
           const char = row[x];
           if (char !== '.') {
             const color = palette[char];
             if (color && typeof color === 'string') { // exclude gradients for now
               ctx.fillStyle = color;
-              ctx.fillRect(x * pxSize, y * pxSize, pxSize, pxSize);
+              ctx.fillRect(x, y, 1, 1);
             }
           }
         }
       }
     }
 
-    ta.addEventListener('input', render);
+    let renderTimeout;
+    function debouncedRender() {
+      clearTimeout(renderTimeout);
+      renderTimeout = setTimeout(render, 150);
+    }
+
+    ta.addEventListener('input', debouncedRender);
     sel.addEventListener('change', render);
+    sizeSel.addEventListener('change', render);
 
     $id('sbPayloadBtn').addEventListener('click', () => {
       const out = $id('sbPayloadOut');
@@ -732,24 +753,34 @@ function initFarm() {
         const simpleColors = Object.entries(palette).filter(e => typeof e[1] === 'string');
         const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(', ');
         
-        const sysPrompt = `Bạn là một chuyên gia Pixel Art 16x16.
-Nhiệm vụ: Vẽ một đồ vật dựa trên yêu cầu của người dùng, sử dụng CHỈ CÁC MÃ MÀU TRONG BẢNG MÀU SAU ĐÂY:
+        const size = parseInt(sizeSel.value) || 16;
+        const sysPrompt = `Bạn là một chuyên gia thiết kế Pixel Art (${size}x${size}). Nhiệm vụ của bạn là vẽ một đồ vật dựa trên yêu cầu, và BẮT BUỘC chỉ được dùng các mã ký tự trong Bảng màu sau đây.
+
+BẢNG MÀU CHO PHÉP (Ký tự: Mã màu Hex):
 ${paletteStr}
 
-QUY TẮC BẮT BUỘC:
-1. Bản vẽ là một mảng JSON gồm 16 chuỗi. Mỗi chuỗi DÀI CHÍNH XÁC 16 KÝ TỰ.
-2. Dùng dấu chấm '.' cho vùng trong suốt (không có màu).
-3. Dùng CHỈ CÁC KÝ TỰ trong bảng màu được cung cấp để tô màu.
-4. KHÔNG dùng ký tự nào nằm ngoài bảng màu.
-5. Cấm viết bất kỳ giải thích nào. CHỈ trả về mảng JSON hợp lệ. Bắt đầu bằng [ và kết thúc bằng ].`;
+HƯỚNG DẪN TƯ DUY (Bắt buộc phải có thẻ <thinking> trước khi xuất mã):
+Để vẽ pixel art hoàn hảo, sắc nét và không bị méo lệch, hãy tuân thủ nghiêm ngặt các bước sau:
+1. Phân tích Bố cục & Hình khối: Lựa chọn góc độ đặt vật thể (vd: vũ khí nên đặt chéo). Nếu vẽ vật thể tròn/cân xứng, hãy tính toán sao cho nửa trái và nửa phải khớp nhau. Nhớ rằng khung ${size}x${size} không có tâm 1 pixel (tâm nằm giữa cột ${size/2 - 1} và ${size/2}).
+2. Quy hoạch Màu sắc (Palette): Chọn ký tự làm màu Viền (bắt buộc bao quanh vật thể), màu Tối (Shadow) cho hướng khuất sáng, màu Sáng (Highlight) cho hướng đón sáng, và màu Nền (Base). TUYỆT ĐỐI KHÔNG chế ra ký tự ngoài Bảng màu.
+3. Hình dáng (Shape & Texture): Tránh làm các khối màu bị vuông vức, thẳng đuột. Sử dụng các nét lượn để tạo hình dáng tự nhiên.
+4. Ánh xạ & ĐẾM KÝ TỰ (Rất quan trọng): Khi phác thảo từng dòng (từ dòng 0 đến ${size - 1}), BẠN PHẢI ĐẾM CHÍNH XÁC số lượng ký tự. 
+   - Khung canvas là ${size}x${size}. Do đó, một dòng CHỈ ĐƯỢC PHÉP dài đúng ${size} ký tự.
+   - Ví dụ một dòng trống hợp lệ: "${'.'.repeat(size)}"
+   - Nếu bạn tạo ra dòng có ${size + 1} hoặc ${size - 1} ký tự, hình sẽ bị cắt xén và méo mó.
+
+QUY TẮC ĐẦU RA BẮT BUỘC:
+- Sau khi đóng thẻ </thinking>, CHỈ ĐƯỢC XUẤT 1 khối mã \`\`\`json chứa mảng gồm ĐÚNG ${size} chuỗi.
+- KIỂM TRA LẠI: Mỗi chuỗi đại diện cho 1 hàng và PHẢI DÀI CHÍNH XÁC ${size} KÝ TỰ. Không hơn không kém!
+- Dùng dấu chấm '.' cho pixel trong suốt.
+- TUYỆT ĐỐI không dùng ký tự lạ ngoài dấu '.' và các ký tự Bảng màu.`;
 
         const reqBody = {
           model: SEC.model,
           messages: [
             { role: 'system', content: sysPrompt },
             { role: 'user', content: 'Vẽ: ' + p }
-          ],
-          max_tokens: 1500
+          ]
         };
 
         $id('sbPayloadOut').value = JSON.stringify(reqBody, null, 2);
@@ -765,9 +796,18 @@ QUY TẮC BẮT BUỘC:
         const data = await res.json();
         const content = data.choices?.[0]?.message?.content || '';
         
-        const match = content.match(/\[[\s\S]*?\]/);
-        if (match) {
-          ta.value = match[0];
+        // Trích xuất JSON mảng chuỗi mạnh mẽ hơn để tránh bắt nhầm ngoặc vuông trong phần thinking
+        let jsonStr = '';
+        const codeMatch = content.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/i);
+        if (codeMatch) {
+          jsonStr = codeMatch[1];
+        } else {
+          const arrMatch = content.match(/\[\s*"(?:[^"\\]|\\.)*"(?:\s*,\s*"(?:[^"\\]|\\.)*")*\s*\]/);
+          jsonStr = arrMatch ? arrMatch[0] : (content.match(/\[[\s\S]*?\]/) || [''])[0];
+        }
+        
+        if (jsonStr) {
+          ta.value = jsonStr.trim();
           render();
           $id('sbStatus').textContent = 'Hoàn tất!';
         } else {
@@ -870,19 +910,26 @@ QUY TẮC BẮT BUỘC:
     const field = Object.keys(counts).map(id => CROPS[id].name + '×' + counts[id]).join(', ') || 'đang để trống';
     const bagTxt = Object.keys(S.bag).map(k => {
       const d = mutDescOf(k);
-      return bagName(k) + '×' + S.bag[k] + (d ? '(' + d + ')' : '');
-    }).join('、');
+      return '  + ' + bagName(k) + ' ×' + S.bag[k] + (d ? ' (' + d + ')' : '');
+    }).join('\n');
     const ev = todayEvent();
-    setInjection('【Vườn rau nhỏ của người chơi】Người chơi đang trồng một mảnh vườn rau thư giãn ngay trên giao diện SillyTavern (lối chơi tiện ích, tồn tại song song với cốt truyện). Hiện tại: trong ruộng đang trồng ' + field +
-      (ripe ? ' (có ' + ripe + ' cây đã chín chờ thu)' : '') +
-      (bagTxt ? '; nông sản đang tích trữ chờ bán: ' + bagTxt : '') +
-      (ev && ev.flavor ? '; sự kiện vườn rau hôm nay: ' + ev.name + ' —— ' + ev.flavor : '') +
-      (function () {
-        takeoutNote = (takeoutNote || []).filter(t => now() < t.until);
-        if (!takeoutNote.length) return '';
-        return '; 【Quan trọng】Người chơi vừa lấy ' + takeoutNote.map(t => t.txt).join(', ') + ' ra khỏi balo vườn rau, hẳn là định dùng/tặng trong cốt truyện, hãy tiếp nhận một cách tự nhiên; phần trong ngoặc là hiệu ứng đã định của vật phẩm đó, hãy lấy đó làm chuẩn và có thể sáng tạo thêm trong chừng mực';
-      })() +
-      '. Nhân vật trong cốt truyện thỉnh thoảng có thể nhắc tới việc người chơi chăm vườn hay thu hoạch thế nào một cách tự nhiên, nhưng đừng thao tác vườn rau thay người chơi, cũng đừng biến vườn rau thành mạch chính của cốt truyện.');
+    
+    const takeoutNoteStr = (function () {
+      takeoutNote = (takeoutNote || []).filter(t => now() < t.until);
+      if (!takeoutNote.length) return '';
+      return `\n\n【QUAN TRỌNG: HÀNH ĐỘNG VỪA XẢY RA】\nNgười chơi vừa lấy ${takeoutNote.map(t => t.txt).join(', ')} ra khỏi balo vườn rau, hẳn là định dùng/tặng trong cốt truyện. Hãy tiếp nhận một cách tự nhiên; phần trong ngoặc là hiệu ứng của vật phẩm đó, hãy lấy đó làm chuẩn và có thể sáng tạo thêm trong chừng mực.`;
+    })();
+
+    const promptText = `【Vườn rau nhỏ của người chơi】
+Người chơi đang trồng một mảnh vườn rau thư giãn trên giao diện SillyTavern (lối chơi tiện ích, tồn tại song song với cốt truyện).
+Tình trạng hiện tại:
+- Đang trồng: ${field || 'Đất trống'}${ripe ? ` (có ${ripe} cây đã chín chờ thu)` : ''}
+${bagTxt ? '- Nông sản tích trữ:\n' + bagTxt : '- Nông sản tích trữ: Trống'}
+${ev && ev.flavor ? `- Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}` : ''}${takeoutNoteStr}
+
+* Hướng dẫn cho AI: Nhân vật trong cốt truyện thỉnh thoảng có thể nhắc tới việc người chơi chăm vườn hay thu hoạch thế nào một cách tự nhiên, nhưng ĐỪNG thao tác vườn rau thay người chơi, cũng ĐỪNG biến vườn rau thành mạch chính của cốt truyện.`;
+
+    setInjection(promptText);
   }
 
   /* #17+v0.6b: nhịp tim chạy nền —— cứ 60s chạy settle một lần (tính toán cục bộ, cỡ micro~mili giây): sự kiện tới hạn thì gieo lại, bé làm việc làm việc, kết toán tìm kho báu; mở hay không mở bảng đều có hiệu lực */
@@ -1082,11 +1129,25 @@ QUY TẮC BẮT BUỘC:
     if (!ev || !(ev.mutate_on_fert > 0)) return;
     const fertN = (c.fertUsed && c.fertUsed.compost ? 1 : 0) + (c.fertUsed && c.fertUsed.shiny ? 1 : 0);
     if (Math.random() < ev.mutate_on_fert * (0.3 + 0.35 * fertN)) {
-      c.mut = (ev.mutate_prefix || 'đột biến').slice(0, 20);
+      const prefix = (ev.mutate_prefix || 'đột biến').slice(0, 20);
+      let mutCode = prefix;
       if (!S.mutDesc) S.mutDesc = {};
       const cname = CROPS[c.id].name;                     // #19: mô tả chức năng lưu theo cây (tiền tố@cây)
       const dsc = ev.mutate_desc && (ev.mutate_desc[cname] || ev.mutate_desc['*']);
-      if (dsc) S.mutDesc[c.mut + '@' + cname] = dsc;
+      
+      if (dsc) {
+        let attempt = 1;
+        let descKey = mutCode + '@' + cname;
+        // Tránh đè description: tách ra ngăn riêng biệt ẩn danh, không lộ số đếm ra giao diện
+        while (S.mutDesc[descKey] && S.mutDesc[descKey] !== dsc) {
+          attempt++;
+          mutCode = prefix + '@' + attempt;
+          descKey = mutCode + '@' + cname;
+        }
+        S.mutDesc[descKey] = dsc;
+      }
+      
+      c.mut = mutCode;
       if (pi != null) { try { plotEmote(pi, 'emStar'); } catch (e) {} }
     }
   }
@@ -1101,7 +1162,8 @@ QUY TẮC BẮT BUỘC:
   function mutDescOf(bagKey) {                            // #19: lấy mô tả chức năng (tương thích khoá chỉ có tiền tố của save cũ)
     const parts = bagKey.split('@');
     if (!parts[1] || !S.mutDesc) return '';
-    return S.mutDesc[parts[1] + '@' + (CROPS[parts[0]] || { name: '' }).name] || S.mutDesc[parts[1]] || '';
+    const mutCode = parts.slice(1).join('@');
+    return S.mutDesc[mutCode + '@' + (CROPS[parts[0]] || { name: '' }).name] || S.mutDesc[parts[1]] || '';
   }
   function harvest(pi, quiet) {
     const c = curPlots()[pi].crop;
@@ -1235,7 +1297,8 @@ QUY TẮC BẮT BUỘC:
     const left = c.matureAt - now();
     const chip = CROPS[c.id].regrow && c.left != null ? `<span class="cnt2">${c.left}/${REGROW_MAX}</span>` : '';   // Sửa #4: số góc hiển thị số vụ
     const fdot = c.fertUsed && (c.fertUsed.compost || c.fertUsed.shiny) ? '<span class="fdot" title="Đã bón phân"></span>' : '';   // Dấu shiny ghi theo fertUsed, logic số góc không đổi   // Sửa #15: số góc bón phân hiển thị thường trực
-    const mut = c.mut ? `<span class="cnt2" style="left:3px;right:auto;background:#ead9f7;border-color:#9a6ad8;color:#6a4a9a" title="${c.mut}·đột biến">✦</span>` : '';
+    const mutPrefix = c.mut ? c.mut.split('@')[0] : '';
+    const mut = c.mut ? `<span class="cnt2" style="left:3px;right:auto;background:#ead9f7;border-color:#9a6ad8;color:#6a4a9a" title="${mutPrefix}·đột biến">✦</span>` : '';
     if (left <= 0) return spriteSVG(CROPS[c.id].sp, SPRITE_PX) + `<span class="ripe">!</span>` + chip + fdot + mut;
     const total = growMs(c.id);
     const prog = Math.min(0.99, 1 - left / total);
@@ -1370,15 +1433,18 @@ QUY TẮC BẮT BUỘC:
   }
   function renderBanner() {
     const b = $id('banner');
-    if (!CS.link) { b.classList.remove('show'); return; }
+    const bmut = $id('bmut');
+    const mutPopup = $id('mutPopup');
+    if (!CS.link) { b.classList.remove('show'); bmut.style.display = 'none'; mutPopup.classList.remove('open'); return; }
     if (eventPending) {
       b.classList.add('show');
       $id('btag').textContent = 'Sự kiện hôm nay';
       $id('btxt').textContent = 'Phù thuỷ tròn đang ngắm sao bói toán…';
+      bmut.style.display = 'none'; mutPopup.classList.remove('open');
       return;
     }
     const ev = todayEvent();
-    if (!ev) { b.classList.remove('show'); return; }
+    if (!ev) { b.classList.remove('show'); bmut.style.display = 'none'; mutPopup.classList.remove('open'); return; }
     b.classList.add('show');
     $id('btag').textContent = 'Sự kiện hôm nay · ' + ev.name;
     const fx = [];
@@ -1389,6 +1455,29 @@ QUY TẮC BẮT BUỘC:
     const fb = S.dayEvent && S.dayEvent.source === 'fallback';
     $id('btxt').textContent = (ev.flavor || '') + (fx.length ? '(' + fx.join(' · ') + ')' : '') +
       (fb ? '〔Sự kiện ngoại tuyến' + (S.dayEvent.reason ? ': ' + S.dayEvent.reason : '') + '〕' : '');
+    /* Nút xem đột biến: chỉ hiện khi sự kiện có mutate_on_fert > 0 và có mutate_desc */
+    const hasMut = ev.mutate_on_fert > 0 && ev.mutate_desc && Object.keys(ev.mutate_desc).length > 0;
+    bmut.style.display = hasMut ? 'flex' : 'none';
+    if (hasMut) {
+      const prefix = ev.mutate_prefix || 'đột biến';
+      const chance = Math.round(ev.mutate_on_fert * 100);
+      let html = '<div class="mut-header">✦ ' + esc(prefix) + ' <span class="mut-chance">(cơ bản ' + chance + '%, bón phân tăng)</span></div>';
+      const desc = ev.mutate_desc;
+      const entries = Object.entries(desc).filter(([k]) => k !== '*');
+      const wildcard = desc['*'] || '';
+      if (entries.length > 0) {
+        html += '<div class="mut-list">';
+        entries.forEach(([crop, effect]) => {
+          html += '<div class="mut-row"><span class="mut-crop">' + esc(crop) + '</span><span class="mut-effect">' + esc(effect) + '</span></div>';
+        });
+        html += '</div>';
+      } else if (wildcard) {
+        html += '<div class="mut-list"><div class="mut-row"><span class="mut-crop">Tất cả</span><span class="mut-effect">' + esc(wildcard) + '</span></div></div>';
+      }
+      mutPopup.innerHTML = html;
+    } else {
+      mutPopup.classList.remove('open');
+    }
   }
   function renderDynamic() { 
     settle(); 
@@ -1405,7 +1494,22 @@ QUY TẮC BẮT BUỘC:
     if (CS.link) { requestDayEvent(); toast('Đã bật liên kết, đang gieo quẻ sự kiện hôm nay theo thế giới quan'); }
     else toast('Đã về lại vườn rau chơi một mình');
   });
-  $id('banner').addEventListener('click', () => $id('banner').classList.toggle('expand'));   // Banner: bấm một cái để mở / thu toàn văn
+  $id('banner').addEventListener('click', (e) => {
+    if (e.target.closest('.bmut') || e.target.closest('.mut-popup')) return;   // Không toggle expand khi bấm nút đột biến hoặc popup
+    $id('banner').classList.toggle('expand');
+    $id('mutPopup').classList.remove('open');   // Thu banner thì đóng popup
+  });
+  $id('bmut').addEventListener('click', (e) => {
+    e.stopPropagation();
+    $id('mutPopup').classList.toggle('open');
+  });
+  /* Bấm ngoài popup thì đóng */
+  pdoc.addEventListener('click', (e) => {
+    const popup = $id('mutPopup');
+    if (popup.classList.contains('open') && !e.target.closest('.mut-popup') && !e.target.closest('.bmut')) {
+      popup.classList.remove('open');
+    }
+  });
   $id('chipRegen').addEventListener('click', () => {      // Nút gieo lại dọn nhà: từ trang cài đặt chuyển ra hàng điều khiển (wen chốt, tiện tay với tới)
     S.dayEvent = null; save();
     requestDayEvent(true); toast('Đang gieo quẻ lại…');
@@ -1447,7 +1551,12 @@ QUY TẮC BẮT BUỘC:
     $id('mbody').innerHTML = bodyHTML;
     $id('modal').classList.add('open');
   }
-  function closeModal() { $id('modal').classList.remove('open'); pendingPick = null; bagSellMode = false; }   // Tự kiểm: đóng cửa sổ thì thoát chế độ tick chọn
+  function closeModal() { 
+    $id('modal').classList.remove('open'); 
+    $id('mbody').innerHTML = ''; // Dọn dẹp rác DOM và event listeners bên trong
+    pendingPick = null; 
+    bagSellMode = false; 
+  }   // Tự kiểm: đóng cửa sổ thì thoát chế độ tick chọn
   $id('mclose').addEventListener('click', closeModal);
   $id('mbody').addEventListener('click', e => {
     const el = e.target.closest('[data-pick]');
@@ -2241,10 +2350,35 @@ QUY TẮC BẮT BUỘC:
     extMenuBtn.tabIndex = 0;
     extMenuBtn.innerHTML = '<div class="fa-fw fa-solid fa-leaf extensionsMenuExtensionButton"></div> Nông Trại';
     extMenuBtn.style.cursor = 'pointer';
+
     extMenuBtn.addEventListener('click', toggleWin);
     extMenu.appendChild(extMenuBtn);
   }
   setupExtButton();
+
+  // Đăng ký lệnh chat /farm
+  (async function() {
+    try {
+      let scp, SlashCommand;
+      try {
+        scp = (await import('../../../slash-commands/SlashCommandParser.js')).SlashCommandParser;
+        SlashCommand = (await import('../../../slash-commands/SlashCommand.js')).SlashCommand;
+      } catch (err) {}
+      
+      scp = scp || pwin.SlashCommandParser || globalThis.SlashCommandParser;
+      SlashCommand = SlashCommand || pwin.SlashCommand || globalThis.SlashCommand;
+
+      if (scp && SlashCommand && SlashCommand.fromProps) {
+        scp.addCommandObject(SlashCommand.fromProps({
+            name: 'farm',
+            callback: async () => { toggleWin(); return ''; },
+            helpString: 'Mở/Đóng giao diện Nông trại (SillyTavern Farm)'
+        }));
+      }
+    } catch(e) {
+      console.error('[Farm] Lỗi đăng ký lệnh /farm:', e);
+    }
+  })();
 
   const api = { destroy };
   pwin[RUNTIME_KEY] = api;

@@ -185,12 +185,34 @@ export const styleCSS = `
     .chip.on::before { background: #b48ae0; box-shadow: inset 0 -2px 0 #8a5cc0, 0 0 4px #cdb0ef; }
     .banner { margin: 9px 12px 0; padding: 7px 11px; background: var(--banBg);
       border: 3px solid var(--banLine); border-radius: 8px; font-size: 12px; color: var(--banFg);
-      display: none; align-items: center; gap: 9px; box-shadow: inset 0 2px 0 var(--banIn); cursor: pointer; }
+      display: none; align-items: center; gap: 9px; box-shadow: inset 0 2px 0 var(--banIn); cursor: pointer; position: relative; }
     .banner #btxt { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* Mặc định một dòng, bấm vào banner thì mở rộng */
     .banner.expand #btxt { white-space: normal; }
     .banner.show { display: flex; }
     .banner .btag { background: var(--tagBg); color: var(--tagFg); font-weight: bold; padding: 1px 7px;
       border-radius: 5px; font-size: 11px; white-space: nowrap; }
+    .bmut { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+      background: linear-gradient(135deg, #ead9f7, #d4b8f0); border: 2px solid #9a6ad8;
+      color: #6a4a9a; font-size: 13px; font-weight: bold; cursor: pointer;
+      display: none; align-items: center; justify-content: center;
+      transition: transform .15s, box-shadow .15s; box-shadow: 0 1px 3px rgba(154,106,216,.3); }
+    .bmut:hover { transform: scale(1.15); box-shadow: 0 2px 8px rgba(154,106,216,.5); }
+    .bmut:active { transform: scale(0.95); }
+    .mut-popup { display: none; position: absolute; top: calc(100% + 6px); right: 0;
+      min-width: 260px; max-width: 340px; max-height: 240px; overflow-y: auto;
+      background: #fdfaff; border: 2px solid #c4a0e8; border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(120,60,180,.18); padding: 10px 12px;
+      z-index: 20; cursor: default; font-size: 12px; }
+    .mut-popup.open { display: block; animation: mutFadeIn .18s ease-out; }
+    @keyframes mutFadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+    .mut-header { font-weight: bold; color: #7a4aaa; font-size: 13px; margin-bottom: 8px;
+      padding-bottom: 6px; border-bottom: 1px dashed #d8c0ef; }
+    .mut-chance { font-weight: normal; color: #a080c0; font-size: 11px; }
+    .mut-list { display: flex; flex-direction: column; gap: 4px; }
+    .mut-row { display: flex; gap: 8px; padding: 4px 6px; border-radius: 6px; background: #f4eefa; }
+    .mut-row:nth-child(even) { background: #efe4f8; }
+    .mut-crop { font-weight: bold; color: #6a4a9a; white-space: nowrap; min-width: 70px; flex-shrink: 0; }
+    .mut-effect { color: #5a4070; flex: 1; line-height: 1.35; }\r
     .mdrop { flex-direction: column; gap: 2px; max-height: 150px; overflow: auto; background: #fffdf4;
       border: 2px solid #c2a274; border-radius: 6px; padding: 5px; }
     .mdrop span { padding: 4px 9px; font-size: 12px; font-weight: bold; color: #6b4f2e; border-radius: 5px; cursor: pointer; }
