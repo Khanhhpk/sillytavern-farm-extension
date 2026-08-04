@@ -1,3 +1,4 @@
+import { now } from './state.js';
 import { CROPS } from './data.js';
   /* ---------- Tài nguyên pixel (cùng nguồn với bản xem trước) ---------- */
 export const P = {

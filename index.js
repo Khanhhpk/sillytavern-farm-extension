@@ -1248,7 +1248,7 @@ function warmUpCache(CROPS2) {
 }
 
 // src/state.js
-var now2 = () => Date.now();
+var now = () => Date.now();
 var emptyPlots = () => {
   const a = [];
   for (let i = 0; i < 24; i++) a.push({ crop: null });
@@ -1278,7 +1278,7 @@ function freshState2() {
     unlockedBlocks2: 1,
     unlockedBlocks3: 1,
     // v0.8: ba trang (vé vào trang 2/3 tặng kèm ô đất đầu tiên)
-    day0: now2(),
+    day0: now(),
     orb: { fx: 0.94, fy: 0.6 },
     win: null
   };
@@ -1310,7 +1310,7 @@ function loadState() {
   [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach((arr) => (arr || []).forEach((p) => {
     if (p.crop && (p.crop.id === "mysbG" || p.crop.id === "mysbW" || p.crop.id === "mysbM")) p.crop.id = "moonberry";
   }));
-  if (!ctx.S.witch) ctx.S.witch = { nextAt: now2(), leaveAt: 0, missed: 0, order: null };
+  if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
   if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
   if (!ctx.S.plots2) ctx.S.plots2 = emptyPlots();
   if (!ctx.S.plots3) ctx.S.plots3 = emptyPlots();
