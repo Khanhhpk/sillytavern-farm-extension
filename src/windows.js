@@ -44,12 +44,20 @@ export function initWindows() {
   });
   dragBar.addEventListener('pointermove', e => {
     if (!wg || e.pointerId !== wg.id) return;
-    ctx.win.style.left = wg.ox + e.clientX - wg.sx + 'px';
-    ctx.win.style.top = wg.oy + e.clientY - wg.sy + 'px';
+    const dx = e.clientX - wg.sx;
+    const dy = e.clientY - wg.sy;
+    ctx.win.style.translate = dx + 'px ' + dy + 'px';
   });
   dragBar.addEventListener('pointerup', e => {
     if (!wg || e.pointerId !== wg.id) return;
     try { dragBar.releasePointerCapture(e.pointerId); } catch (er) {}
+    
+    const dx = e.clientX - wg.sx;
+    const dy = e.clientY - wg.sy;
+    ctx.win.style.translate = '';
+    ctx.win.style.left = wg.ox + dx + 'px';
+    ctx.win.style.top = wg.oy + dy + 'px';
+    
     wg = null;
     ctx.S.win = { fx: ctx.win.offsetLeft / window.innerWidth, fy: ctx.win.offsetTop / window.innerHeight };
     All.save();
