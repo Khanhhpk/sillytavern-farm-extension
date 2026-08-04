@@ -54,6 +54,7 @@ export function placePet(el, p, instant) {                      // Đặt vị t
 }
 export function hopStep(el) {                                   // Một cú nhảy: nhích một bước về phía đích, tới nơi thì nghỉ
   const id = el.dataset.pet;
+  if (el.dataset.dragging) return; // Không can thiệp khi người dùng đang kéo
   if (!el.isConnected) { stopHop(id); return; }
   const cur = petPos[id], tgt = petTgt[id], g = gaitOf(id);
   if (!cur || !tgt || Math.hypot(tgt.x - cur.x, tgt.y - cur.y) < 3) {
@@ -77,6 +78,7 @@ export function hopStep(el) {                                   // Một cú nh�
 }
 export function moveTo(el, p) {                                 // Lên đường tới p: bé bay thì trượt, còn lại thì nhảy liên tiếp
   const id = el.dataset.pet;
+  if (el.dataset.dragging) return; // Không giành quyền điều khiển
   if (FLOATY[id]) return placePet(el, p, false);
   petTgt[id] = p;
   if (!petHopT[id]) hopStep(el);
@@ -285,8 +287,22 @@ export function initPets() {
     e.preventDefault();
     try { el.setPointerCapture(e.pointerId); } catch(err){}
     const id = el.dataset.pet;
-    if (petHopT[id]) { clearTimeout(petHopT[id]); petHopT[id] = null; }
     
+    // Ngắt mọi hoạt động AI hiện tại
+    if (petHopT[id]) { clearTimeout(petHopT[id]); petHopT[id] = null; }
+    delete petTgt[id];
+    delete petArrive[id];
+    el.dataset.dragging = 'true'; // Đánh dấu đang bị người dùng điều khiển
+
+    // Lấy toạ độ thực tế (mid-air) nếu bé đang nhảy dở
+    const comp = window.getComputedStyle(el);
+    const exactLeft = parseFloat(comp.left) || 0;
+    const exactBottom = parseFloat(comp.bottom) || 0;
+    
+    // Ghi đè toạ độ thực trước khi tắt transition để tránh giật hình
+    el.style.left = exactLeft + 'px';
+    el.style.bottom = exactBottom + 'px';
+
     // Tắt toàn bộ transition để thao tác phần cứng (GPU) ngay lập tức
     el.style.transition = 'none';
     el.classList.remove('walk');
@@ -294,8 +310,8 @@ export function initPets() {
     activeDrag = {
       id: e.pointerId, el, petId: id,
       sx: e.clientX, sy: e.clientY,
-      ox: parseFloat(el.style.left) || 0,
-      oy: parseFloat(el.style.bottom) || 0,
+      ox: exactLeft,
+      oy: exactBottom,
       dx: 0, dy: 0, vx: 0, vy: 0, targetVx: 0, targetVy: 0,
       moved: false, lastX: e.clientX, lastY: e.clientY, dropped: false
     };
@@ -375,12 +391,14 @@ export function initPets() {
       el.style.bottom = (oy - dy) + 'px';
       // Đánh dấu đã thả để frame tiếp theo huỷ translate và bắt đầu giảm chấn
       activeDrag.dropped = true;
+      delete el.dataset.dragging;
     } else {
       // Không kéo, chỉ là click
       cancelAnimationFrame(dragAnimFrame);
       el.style.transform = '';
       el.style.transition = '';
       activeDrag = null;
+      delete el.dataset.dragging;
 
       const def = PETS[petId];
       if (!def) return;

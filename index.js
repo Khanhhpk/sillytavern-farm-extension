@@ -2008,6 +2008,7 @@ function placePet(el, p, instant) {
 }
 function hopStep(el) {
   const id = el.dataset.pet;
+  if (el.dataset.dragging) return;
   if (!el.isConnected) {
     stopHop(id);
     return;
@@ -2039,6 +2040,7 @@ function hopStep(el) {
 }
 function moveTo(el, p) {
   const id = el.dataset.pet;
+  if (el.dataset.dragging) return;
   if (FLOATY[id]) return placePet(el, p, false);
   petTgt[id] = p;
   if (!petHopT[id]) hopStep(el);
@@ -2279,6 +2281,14 @@ function initPets() {
       clearTimeout(petHopT[id]);
       petHopT[id] = null;
     }
+    delete petTgt[id];
+    delete petArrive[id];
+    el.dataset.dragging = "true";
+    const comp = window.getComputedStyle(el);
+    const exactLeft = parseFloat(comp.left) || 0;
+    const exactBottom = parseFloat(comp.bottom) || 0;
+    el.style.left = exactLeft + "px";
+    el.style.bottom = exactBottom + "px";
     el.style.transition = "none";
     el.classList.remove("walk");
     activeDrag = {
@@ -2287,8 +2297,8 @@ function initPets() {
       petId: id,
       sx: e.clientX,
       sy: e.clientY,
-      ox: parseFloat(el.style.left) || 0,
-      oy: parseFloat(el.style.bottom) || 0,
+      ox: exactLeft,
+      oy: exactBottom,
       dx: 0,
       dy: 0,
       vx: 0,
@@ -2357,11 +2367,13 @@ function initPets() {
       el.style.left = ox + dx + "px";
       el.style.bottom = oy - dy + "px";
       activeDrag.dropped = true;
+      delete el.dataset.dragging;
     } else {
       cancelAnimationFrame(dragAnimFrame);
       el.style.transform = "";
       el.style.transition = "";
       activeDrag = null;
+      delete el.dataset.dragging;
       const def = PETS[petId];
       if (!def) return;
       petTouch[petId] = now();
