@@ -1122,25 +1122,25 @@ QUY TẮC ĐẦU RA BẮT BUỘC:
     if (!ev || !(ev.mutate_on_fert > 0)) return;
     const fertN = (c.fertUsed && c.fertUsed.compost ? 1 : 0) + (c.fertUsed && c.fertUsed.shiny ? 1 : 0);
     if (Math.random() < ev.mutate_on_fert * (0.3 + 0.35 * fertN)) {
-      let prefix = (ev.mutate_prefix || 'đột biến').slice(0, 20);
+      const prefix = (ev.mutate_prefix || 'đột biến').slice(0, 20);
+      let mutCode = prefix;
       if (!S.mutDesc) S.mutDesc = {};
       const cname = CROPS[c.id].name;                     // #19: mô tả chức năng lưu theo cây (tiền tố@cây)
       const dsc = ev.mutate_desc && (ev.mutate_desc[cname] || ev.mutate_desc['*']);
       
       if (dsc) {
-        let key = prefix + '@' + cname;
         let attempt = 1;
-        // Tránh đè description: nếu tiền tố đã được dùng cho mô tả khác, thêm " II", " III"...
-        while (S.mutDesc[key] && S.mutDesc[key] !== dsc) {
+        let descKey = mutCode + '@' + cname;
+        // Tránh đè description: tách ra ngăn riêng biệt ẩn danh, không lộ số đếm ra giao diện
+        while (S.mutDesc[descKey] && S.mutDesc[descKey] !== dsc) {
           attempt++;
-          const suffix = attempt === 2 ? ' II' : attempt === 3 ? ' III' : attempt === 4 ? ' IV' : ' ' + attempt;
-          prefix = (ev.mutate_prefix || 'đột biến').slice(0, 20) + suffix;
-          key = prefix + '@' + cname;
+          mutCode = prefix + '@' + attempt;
+          descKey = mutCode + '@' + cname;
         }
-        S.mutDesc[key] = dsc;
+        S.mutDesc[descKey] = dsc;
       }
       
-      c.mut = prefix;
+      c.mut = mutCode;
       if (pi != null) { try { plotEmote(pi, 'emStar'); } catch (e) {} }
     }
   }
@@ -1155,7 +1155,8 @@ QUY TẮC ĐẦU RA BẮT BUỘC:
   function mutDescOf(bagKey) {                            // #19: lấy mô tả chức năng (tương thích khoá chỉ có tiền tố của save cũ)
     const parts = bagKey.split('@');
     if (!parts[1] || !S.mutDesc) return '';
-    return S.mutDesc[parts[1] + '@' + (CROPS[parts[0]] || { name: '' }).name] || S.mutDesc[parts[1]] || '';
+    const mutCode = parts.slice(1).join('@');
+    return S.mutDesc[mutCode + '@' + (CROPS[parts[0]] || { name: '' }).name] || S.mutDesc[parts[1]] || '';
   }
   function harvest(pi, quiet) {
     const c = curPlots()[pi].crop;
@@ -1289,7 +1290,8 @@ QUY TẮC ĐẦU RA BẮT BUỘC:
     const left = c.matureAt - now();
     const chip = CROPS[c.id].regrow && c.left != null ? `<span class="cnt2">${c.left}/${REGROW_MAX}</span>` : '';   // Sửa #4: số góc hiển thị số vụ
     const fdot = c.fertUsed && (c.fertUsed.compost || c.fertUsed.shiny) ? '<span class="fdot" title="Đã bón phân"></span>' : '';   // Dấu shiny ghi theo fertUsed, logic số góc không đổi   // Sửa #15: số góc bón phân hiển thị thường trực
-    const mut = c.mut ? `<span class="cnt2" style="left:3px;right:auto;background:#ead9f7;border-color:#9a6ad8;color:#6a4a9a" title="${c.mut}·đột biến">✦</span>` : '';
+    const mutPrefix = c.mut ? c.mut.split('@')[0] : '';
+    const mut = c.mut ? `<span class="cnt2" style="left:3px;right:auto;background:#ead9f7;border-color:#9a6ad8;color:#6a4a9a" title="${mutPrefix}·đột biến">✦</span>` : '';
     if (left <= 0) return spriteSVG(CROPS[c.id].sp, SPRITE_PX) + `<span class="ripe">!</span>` + chip + fdot + mut;
     const total = growMs(c.id);
     const prog = Math.min(0.99, 1 - left / total);
