@@ -717,7 +717,13 @@ function initFarm() {
       }
     }
 
-    ta.addEventListener('input', render);
+    let renderTimeout;
+    function debouncedRender() {
+      clearTimeout(renderTimeout);
+      renderTimeout = setTimeout(render, 150);
+    }
+
+    ta.addEventListener('input', debouncedRender);
     sel.addEventListener('change', render);
     sizeSel.addEventListener('change', render);
 
