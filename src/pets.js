@@ -325,6 +325,7 @@ export function initPets() {
       oy: exactBottom,
       dx: 0, dy: 0, vx: 0, vy: 0, targetVx: 0, targetVy: 0,
       moved: false, lastX: e.clientX, lastY: e.clientY, dropped: false,
+      lastTime: performance.now(),
       startPhysics: null
     };
 
@@ -390,9 +391,12 @@ export function initPets() {
     }
     if (!activeDrag.moved) return;
 
-    const rawVx = e.clientX - activeDrag.lastX;
-    const rawVy = e.clientY - activeDrag.lastY;
+    const nowMs = performance.now();
+    const dt = Math.max(1, nowMs - (activeDrag.lastTime || nowMs));
+    const rawVx = ((e.clientX - activeDrag.lastX) / dt) * 16.66;
+    const rawVy = ((e.clientY - activeDrag.lastY) / dt) * 16.66;
     activeDrag.lastX = e.clientX; activeDrag.lastY = e.clientY;
+    activeDrag.lastTime = nowMs;
     
     // Bơm động lượng vào target velocity
     activeDrag.targetVx = rawVx;

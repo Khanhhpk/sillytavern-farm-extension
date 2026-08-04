@@ -625,11 +625,18 @@ export function initEvents() {
   try {
     const chatChangedEvent = ctx.event_types?.CHAT_CHANGED;
     if (ctx.eventSource?.on && chatChangedEvent) {
-      ctx.eventSource.on(chatChangedEvent, () => {
+      const onChatChanged = () => {
         loadCharState();
         All.renderChips(); All.renderBanner(); updateInjection();
         try { if (ctx.S && CS.link) requestDayEvent(); }
         catch (e) { console.warn('[Farm] Lỗi khi đăng ký sự kiện CHAT_CHANGED:', e); }
+      };
+      ctx.eventSource.on(chatChangedEvent, onChatChanged);
+      All.disposers.push(() => {
+        try {
+          if (ctx.eventSource.removeListener) ctx.eventSource.removeListener(chatChangedEvent, onChatChanged);
+          else if (ctx.eventSource.off) ctx.eventSource.off(chatChangedEvent, onChatChanged);
+        } catch(e) {}
       });
     } else {
       console.warn('[Farm] ctx.eventSource hoặc ctx.event_types.CHAT_CHANGED không khả dụng, bỏ qua đăng ký sự kiện đổi thẻ.');

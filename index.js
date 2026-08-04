@@ -1368,7 +1368,7 @@ var styleCSS = `
     /* #26: l\u1EDBp cho b\xE9 tr\xF2n t\u1EF1 do \u0111i l\u1EA1i \u2014\u2014 ph\u1EE7 to\xE0n b\u1ED9 khu ru\u1ED9ng, \u0111i theo khu v\u1EF1c (lo\u1EA1i l\xE0m vi\u1EC7c = h\xE0ng d\u01B0\u1EDBi, lo\u1EA1i \u0111i d\u1EA1o = b\u1EDD ru\u1ED9ng) */
     .mascots { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
     .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute;
-      left: 0; bottom: 0; will-change: left, bottom; }
+      left: 0; bottom: 0; will-change: transform, translate; }
     .pet:active { transform: scale(1.15, .85); }
     .pbody { display: block; animation: petbob 1.8s ease-in-out infinite; }
     .pet.walk .pbody { animation: pethop var(--hopd, .33s) linear infinite; }   /* v0.7\u2460: \u0111i b\u1ED9 = nh\u1EA3y li\xEAn ti\u1EBFp theo \u0111\u01B0\u1EDDng parabol */
@@ -1992,18 +1992,17 @@ function petSpot(id) {
   return { x, y: WORK_BAND + 6 + Math.random() * Math.max(20, H - WORK_BAND - 70) };
 }
 function placePet(el, p, instant) {
-  if (instant) el.style.transitionProperty = "transform";
+  if (instant) el.style.transitionProperty = "transform, translate";
   else {
     const old = petPos[el.dataset.pet] || p;
     const dist = Math.hypot(p.x - old.x, p.y - old.y);
     const dur = dist < 40 ? 0.5 : Math.min(11, Math.max(3, dist / 18));
-    el.style.transitionProperty = "transform, left, bottom";
-    el.style.transitionDuration = ".12s, " + dur + "s, " + dur + "s";
-    el.style.transitionTimingFunction = "ease, linear, ease";
+    el.style.transitionProperty = "transform, translate";
+    el.style.transitionDuration = ".12s, " + dur + "s";
+    el.style.transitionTimingFunction = "ease, linear";
     el.classList.toggle("flip", p.x < old.x);
   }
-  el.style.left = p.x + "px";
-  el.style.bottom = p.y + "px";
+  el.style.translate = p.x + "px " + -p.y + "px";
   petPos[el.dataset.pet] = p;
 }
 function hopStep(el) {
@@ -2030,11 +2029,10 @@ function hopStep(el) {
   el.classList.add("walk");
   el.style.setProperty("--hopd", g.dur + "ms");
   el.style.setProperty("--hy", g.hy + "px");
-  el.style.transitionProperty = "transform, left, bottom";
-  el.style.transitionDuration = ".12s, " + g.dur + "ms, " + g.dur + "ms";
-  el.style.transitionTimingFunction = "ease, linear, linear";
-  el.style.left = p.x + "px";
-  el.style.bottom = p.y + "px";
+  el.style.transitionProperty = "transform, translate";
+  el.style.transitionDuration = ".12s, " + g.dur + "ms";
+  el.style.transitionTimingFunction = "ease, linear";
+  el.style.translate = p.x + "px " + -p.y + "px";
   petPos[id] = p;
   petHopT[id] = window.setTimeout(() => hopStep(el), g.dur);
 }
@@ -2286,10 +2284,16 @@ function initPets() {
     delete petArrive[id];
     el.dataset.dragging = "true";
     const comp = window.getComputedStyle(el);
-    const exactLeft = parseFloat(comp.left) || 0;
-    const exactBottom = parseFloat(comp.bottom) || 0;
-    el.style.left = exactLeft + "px";
-    el.style.bottom = exactBottom + "px";
+    let exactLeft = 0, exactBottom = 0;
+    if (comp.translate && comp.translate !== "none") {
+      const parts = comp.translate.split(" ").map(parseFloat);
+      exactLeft = parts[0] || 0;
+      exactBottom = -(parts[1] || 0);
+    } else if (petPos[id]) {
+      exactLeft = petPos[id].x;
+      exactBottom = petPos[id].y;
+    }
+    el.style.translate = exactLeft + "px " + -exactBottom + "px";
     el.style.transitionProperty = "transform";
     el.style.transitionDuration = "0.12s";
     petPos[id] = { x: exactLeft, y: exactBottom };
@@ -2312,6 +2316,7 @@ function initPets() {
       lastX: e.clientX,
       lastY: e.clientY,
       dropped: false,
+      lastTime: performance.now(),
       startPhysics: null
     };
     const updateDrag = () => {
@@ -2357,16 +2362,19 @@ function initPets() {
       if (activeDrag.startPhysics) activeDrag.startPhysics();
     }
     if (!activeDrag.moved) return;
-    const rawVx = e.clientX - activeDrag.lastX;
-    const rawVy = e.clientY - activeDrag.lastY;
+    const nowMs = performance.now();
+    const dt = Math.max(1, nowMs - (activeDrag.lastTime || nowMs));
+    const rawVx = (e.clientX - activeDrag.lastX) / dt * 16.66;
+    const rawVy = (e.clientY - activeDrag.lastY) / dt * 16.66;
     activeDrag.lastX = e.clientX;
     activeDrag.lastY = e.clientY;
+    activeDrag.lastTime = nowMs;
     activeDrag.targetVx = rawVx;
     activeDrag.targetVy = rawVy;
     activeDrag.dx = rawDx;
     activeDrag.dy = rawDy;
   });
-  mascots.addEventListener("pointerup", (e) => {
+  const endDrag = (e) => {
     if (!ctx.S.dragPet) return;
     if (!activeDrag || activeDrag.id !== e.pointerId) return;
     const { el, petId, moved, dx, dy, ox, oy } = activeDrag;
@@ -2377,8 +2385,7 @@ function initPets() {
     if (moved) {
       const finalX = ox + dx;
       const finalY = oy - dy;
-      el.style.left = finalX + "px";
-      el.style.bottom = finalY + "px";
+      el.style.translate = finalX + "px " + -finalY + "px";
       petPos[petId] = { x: finalX, y: finalY };
       activeDrag.dropped = true;
     } else {
@@ -2407,7 +2414,9 @@ function initPets() {
       }
       petBubble(el, txt);
     }
-  });
+  };
+  mascots.addEventListener("pointerup", endDrag);
+  mascots.addEventListener("pointercancel", endDrag);
   mascots.addEventListener("click", (e) => {
     if (ctx.S.dragPet) return;
     const el = e.target.closest(".pet");
@@ -3069,6 +3078,10 @@ function renderPlots() {
           }
         } else {
           const left = c.matureAt - now();
+          if (left <= 0 && !c.mutRolled) {
+            rollMutation(c, pi);
+            save();
+          }
           const stateStr = `${c.id}|${c.left}|${c.mut}|${c.fertUsed ? Object.keys(c.fertUsed).join(",") : ""}|${left <= 0 ? "ripe" : "grow"}`;
           if (pEl.dataset.state !== stateStr) {
             const expected = plotHTML(pi);
@@ -3086,7 +3099,10 @@ function renderPlots() {
       }
       const isLocked = pi >= nb * 4;
       const bg = isLocked ? tileURI(groundKind, pi * 31 + 5) : pEl.classList.contains("watered") ? tileURI(wetKind, pi * 31 + 5) : tileURI(plotKind, pi * 31 + 5);
-      if (pEl.style.backgroundImage !== bg) pEl.style.backgroundImage = bg;
+      if (pEl.dataset.bg !== bg) {
+        pEl.style.backgroundImage = bg;
+        pEl.dataset.bg = bg;
+      }
       const bgSz = isLocked ? "144px 144px" : "100% 100%";
       if (pEl.style.backgroundSize !== bgSz) pEl.style.backgroundSize = bgSz;
     }
@@ -3159,7 +3175,6 @@ function renderBanner() {
   }
 }
 function renderDynamic() {
-  settle();
   if (ctx.win.classList.contains("open")) {
     renderStatus();
     renderPlots();
@@ -3919,6 +3934,7 @@ async function requestDayEvent(force) {
     renderBanner();
   }
 }
+var renderTimeout;
 function openSandbox() {
   const html = `
     <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -3983,7 +3999,6 @@ function openSandbox() {
       }
     }
   }
-  let renderTimeout;
   function debouncedRender() {
     clearTimeout(renderTimeout);
     renderTimeout = setTimeout(render, 150);
@@ -4197,7 +4212,7 @@ function initEvents() {
   try {
     const chatChangedEvent = ctx.event_types?.CHAT_CHANGED;
     if (ctx.eventSource?.on && chatChangedEvent) {
-      ctx.eventSource.on(chatChangedEvent, () => {
+      const onChatChanged = () => {
         loadCharState();
         renderChips();
         renderBanner();
@@ -4206,6 +4221,14 @@ function initEvents() {
           if (ctx.S && CS.link) requestDayEvent();
         } catch (e) {
           console.warn("[Farm] L\u1ED7i khi \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n CHAT_CHANGED:", e);
+        }
+      };
+      ctx.eventSource.on(chatChangedEvent, onChatChanged);
+      disposers.push(() => {
+        try {
+          if (ctx.eventSource.removeListener) ctx.eventSource.removeListener(chatChangedEvent, onChatChanged);
+          else if (ctx.eventSource.off) ctx.eventSource.off(chatChangedEvent, onChatChanged);
+        } catch (e) {
         }
       });
     } else {

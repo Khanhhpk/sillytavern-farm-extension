@@ -10,7 +10,7 @@ import { curBlocks, curPlots, blockPrice, save } from './state.js';
 import { SPRITE_PX } from './orb.js';
 import { CS, eventPending, todayEvent, setInjection, saveCharState, updateInjection, requestDayEvent } from './events.js';
 import { applyPageSkin, renderPager } from './ui.js';
-import { buyBlock, harvest, plant, water, fertilize, shovel } from './logic.js';
+import { buyBlock, harvest, plant, water, fertilize, shovel, rollMutation } from './logic.js';
 import { weatherOf } from './utils.js';
 import { growMs } from './logic.js';
 import { esc } from './events.js';
@@ -200,6 +200,10 @@ export function renderPlots() {
            }
         } else {
            const left = c.matureAt - now();
+           if (left <= 0 && !c.mutRolled) {
+             rollMutation(c, pi);
+             save();
+           }
            const stateStr = `${c.id}|${c.left}|${c.mut}|${c.fertUsed ? Object.keys(c.fertUsed).join(',') : ''}|${left <= 0 ? 'ripe' : 'grow'}`;
            
            // @ts-ignore
@@ -289,7 +293,6 @@ export function renderBanner() {
   }
 }
 export function renderDynamic() { 
-  settle(); 
   if (ctx.win.classList.contains('open')) {
     renderStatus(); 
     renderPlots(); 
