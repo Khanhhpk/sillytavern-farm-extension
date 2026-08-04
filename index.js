@@ -750,7 +750,7 @@ ${paletteStr}
 
 HƯỚNG DẪN TƯ DUY (Bắt buộc phải có thẻ <thinking> trước khi xuất mã):
 Để vẽ pixel art sắc nét và có chiều sâu, hãy phân tích kỹ càng qua các bước sau:
-1. Phân tích Bố cục (Layout): Nếu vẽ vũ khí/công cụ (như kiếm, gậy), hãy vẽ chéo từ góc dưới-trái lên góc trên-phải để tận dụng tối đa không gian. Nếu vẽ đồ vật tròn/ngắn (bình thuốc, khiên), hãy căn giữa khung ${size}x${size}. Phác họa tỉ lệ các phần (chuôi, lưỡi, nắp, thân).
+1. Phân tích Bố cục (Layout): Lựa chọn góc độ và hướng đặt vật thể sao cho tận dụng tối đa không gian ${size}x${size} một cách tinh tế nhất. Căn chỉnh tỉ lệ các bộ phận cho hài hòa và phù hợp với đặc trưng của vật thể.
 2. Quy hoạch Màu sắc (Palette Selection): Liệt kê rõ ràng các ký tự sẽ dùng:
    - Viền (Outline): Bao quanh vật thể bằng màu tối nhất (hoặc đen) để tạo độ nổi bật.
    - Sáng tối (Shading): Xác định nguồn sáng chiếu từ góc trên-trái. Chọn màu Sáng (Highlight) cho phần đón sáng, màu Tối (Shadow) cho phần khuất sáng.
@@ -771,8 +771,7 @@ QUY TẮC ĐẦU RA BẮT BUỘC:
           messages: [
             { role: 'system', content: sysPrompt },
             { role: 'user', content: 'Vẽ: ' + p }
-          ],
-          max_tokens: 1500
+          ]
         };
 
         $id('sbPayloadOut').value = JSON.stringify(reqBody, null, 2);
