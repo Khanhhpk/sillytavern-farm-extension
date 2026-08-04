@@ -3734,22 +3734,22 @@ async function collectWorldbook() {
       try {
         const charId = ctx2.characterId !== void 0 ? ctx2.characterId : window.this_character;
         const charData = ctx2.characters?.[charId]?.data || window.characters?.[charId]?.data;
-        console.log("[FARM DEBUG] Character Data:", charData ? "Found" : "Null", "charId:", charId);
+        console.log("[FARM DEBUG] Character Data:", charData ? "Found charId:" + charId : "Null");
         if (charData) {
           if (charData.extensions?.world) activeNames.add(charData.extensions.world);
           if (charData.world) activeNames.add(charData.world);
         }
         const wiKey = ST_WorldInfo?.METADATA_KEY || window.WI_METADATA_KEY || "world_info";
         const chatWorldName = ctx2.chatMetadata?.[wiKey];
-        console.log("[FARM DEBUG] Chat World Name:", chatWorldName);
         if (chatWorldName && typeof chatWorldName === "string") activeNames.add(chatWorldName);
+        const globalBooks = ST_WorldInfo?.selected_world_info || window.selected_world_info || [];
+        if (Array.isArray(globalBooks)) globalBooks.forEach((n) => n && activeNames.add(n));
       } catch (e) {
         console.log("[FARM DEBUG] Error getting active names:", e);
       }
       console.log("[FARM DEBUG] Active Worldbook Names to Fetch:", Array.from(activeNames));
       for (const name of activeNames) {
         try {
-          console.log("[FARM DEBUG] Fetching API for:", name);
           const res = await fetch("/api/worldinfo/get", {
             method: "POST",
             headers: {
@@ -3762,53 +3762,16 @@ async function collectWorldbook() {
             const data = await res.json();
             if (data && data.entries) {
               const vals = Array.isArray(data.entries) ? data.entries : Object.values(data.entries);
-              console.log("[FARM DEBUG] Fetched API data entries length:", vals.length);
-              if (vals.length > 0) {
-                const sample = vals[0];
-                console.log("[FARM DEBUG] Sample entry keys:", Object.keys(sample));
-                console.log("[FARM DEBUG] Sample entry disable-related:", {
-                  disable: sample.disable,
-                  disabled: sample.disabled,
-                  enabled: sample.enabled,
-                  useProbability: sample.useProbability,
-                  comment: sample.comment
-                });
-              }
+              console.log("[FARM DEBUG] Fetched", vals.length, "entries from:", name);
               entries = entries.concat(vals);
             }
-          } else {
-            console.log("[FARM DEBUG] API Failed, status:", res.status);
-            const book = ST_WorldInfo?.world_info?.[name];
-            if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
           }
         } catch (e) {
-          console.log("[FARM DEBUG] Fetch Exception:", e);
-          const book = ST_WorldInfo?.world_info?.[name];
-          if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+          console.log("[FARM DEBUG] Fetch Exception for", name, ":", e);
         }
       }
     } catch (e) {
       console.log("[FARM DEBUG] Outer Exception:", e);
-    }
-    if (ctx2.worldInfo && Array.isArray(ctx2.worldInfo.entries)) {
-      entries = entries.concat(ctx2.worldInfo.entries);
-    } else if (ctx2.worldInfo && typeof ctx2.worldInfo === "object") {
-      Object.values(ctx2.worldInfo).forEach((book) => {
-        if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-      });
-    }
-    if (window.world_info && typeof window.world_info === "object" && !(window.world_info instanceof HTMLElement)) {
-      Object.values(window.world_info).forEach((book) => {
-        if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-        else if (book && typeof book === "object" && !Array.isArray(book) && !(book instanceof HTMLElement)) {
-          if (book.content || book.text) entries.push(book);
-        }
-      });
-    }
-    if (window.world_info_data && typeof window.world_info_data === "object") {
-      Object.values(window.world_info_data).forEach((book) => {
-        if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-      });
     }
     try {
       const charId = ctx2.characterId !== void 0 ? ctx2.characterId : window.this_character;

@@ -65,29 +65,30 @@ async function collectWorldbook() {
     
     const ctx = (window.SillyTavern && window.SillyTavern.getContext) ? window.SillyTavern.getContext() : {};
     
-    // 0. Use native ST ES Module and Backend API (Kaiz-Agent Method)
+    // 0. Nguồn chính: ST API + ES Module — lấy đúng disable state từ file
     try {
         const ST_WorldInfo = await new Function("return import('/scripts/world-info.js')")().catch(()=>null);
         const activeNames = new Set();
         try {
             const charId = ctx.characterId !== undefined ? ctx.characterId : window.this_character;
             const charData = ctx.characters?.[charId]?.data || window.characters?.[charId]?.data;
-            console.log('[FARM DEBUG] Character Data:', charData ? 'Found' : 'Null', 'charId:', charId);
+            console.log('[FARM DEBUG] Character Data:', charData ? 'Found charId:' + charId : 'Null');
             if (charData) {
                 if (charData.extensions?.world) activeNames.add(charData.extensions.world);
                 if (charData.world) activeNames.add(charData.world);
             }
             const wiKey = ST_WorldInfo?.METADATA_KEY || window.WI_METADATA_KEY || 'world_info';
             const chatWorldName = ctx.chatMetadata?.[wiKey];
-            console.log('[FARM DEBUG] Chat World Name:', chatWorldName);
             if (chatWorldName && typeof chatWorldName === 'string') activeNames.add(chatWorldName);
+            // Global selected worldbooks
+            const globalBooks = ST_WorldInfo?.selected_world_info || window.selected_world_info || [];
+            if (Array.isArray(globalBooks)) globalBooks.forEach(n => n && activeNames.add(n));
         } catch(e) { console.log('[FARM DEBUG] Error getting active names:', e); }
         
         console.log('[FARM DEBUG] Active Worldbook Names to Fetch:', Array.from(activeNames));
 
         for (const name of activeNames) {
             try {
-                console.log('[FARM DEBUG] Fetching API for:', name);
                 const res = await fetch('/api/worldinfo/get', {
                     method: 'POST',
                     headers: {
@@ -103,61 +104,17 @@ async function collectWorldbook() {
                         const vals = Array.isArray(data.entries) 
                             ? data.entries 
                             : Object.values(data.entries);
-                        console.log('[FARM DEBUG] Fetched API data entries length:', vals.length);
-                        if (vals.length > 0) {
-                            const sample = vals[0];
-                            console.log('[FARM DEBUG] Sample entry keys:', Object.keys(sample));
-                            console.log('[FARM DEBUG] Sample entry disable-related:', {
-                                disable: sample.disable,
-                                disabled: sample.disabled,
-                                enabled: sample.enabled,
-                                useProbability: sample.useProbability,
-                                comment: sample.comment,
-                            });
-                        }
+                        console.log('[FARM DEBUG] Fetched', vals.length, 'entries from:', name);
                         entries = entries.concat(vals);
                     }
-                } else {
-                    console.log('[FARM DEBUG] API Failed, status:', res.status);
-                    const book = ST_WorldInfo?.world_info?.[name];
-                    if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
                 }
             } catch(e) {
-                console.log('[FARM DEBUG] Fetch Exception:', e);
-                const book = ST_WorldInfo?.world_info?.[name];
-                if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+                console.log('[FARM DEBUG] Fetch Exception for', name, ':', e);
             }
         }
     } catch (e) { console.log('[FARM DEBUG] Outer Exception:', e); }
 
-    // 1. Try ctx.worldInfo
-    if (ctx.worldInfo && Array.isArray(ctx.worldInfo.entries)) {
-      entries = entries.concat(ctx.worldInfo.entries);
-    } 
-    else if (ctx.worldInfo && typeof ctx.worldInfo === 'object') {
-       Object.values(ctx.worldInfo).forEach(book => {
-         if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-       });
-    }
-
-    // 2. Try window.world_info (make sure it's NOT an HTML element)
-    if (window.world_info && typeof window.world_info === 'object' && !(window.world_info instanceof HTMLElement)) {
-       Object.values(window.world_info).forEach(book => {
-         if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-         else if (book && typeof book === 'object' && !Array.isArray(book) && !(book instanceof HTMLElement)) {
-             if (book.content || book.text) entries.push(book);
-         }
-       });
-    }
-
-    // 2b. Try window.world_info_data
-    if (window.world_info_data && typeof window.world_info_data === 'object') {
-       Object.values(window.world_info_data).forEach(book => {
-         if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-       });
-    }
-
-    // 3. Try embedded character_book
+    // 1. Embedded character_book (nhúng trong thẻ nhân vật)
     try {
       const charId = ctx.characterId !== undefined ? ctx.characterId : window.this_character;
       if (typeof charId !== 'undefined') {
