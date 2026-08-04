@@ -14,17 +14,17 @@ export const esc = s => String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<':
 export const clampN = (x, lo, hi, dflt) => { x = Number(x); return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt; };
 /* Cấu hình API phụ: lưu trong localStorage của host, khoá bị làm rối bằng base64, vĩnh viễn không vào cây biến (tránh rò rỉ khi xuất thẻ) */
 export const SEC_LS_KEY = 'star_tavern_farm_sec';
-export let SEC = { url: '', key: '', model: '', autoReset: true, resetHours: 4, wbLimit: 20000 };
+export let SEC = { url: '', key: '', model: '', autoReset: true, resetHours: 4, wbLimit: 20000, chatDepth: 15 };
 try {
   const raw = window.localStorage.getItem(SEC_LS_KEY);
   if (raw) {
     const o = JSON.parse(raw);
     SEC = { url: o.url || '', key: o.key ? atob(o.key) : '', model: o.model || '',
-      autoReset: o.autoReset !== false, resetHours: clampN(o.resetHours, 1, 24, 4), wbLimit: typeof o.wbLimit === 'number' ? o.wbLimit : 20000 };
+      autoReset: o.autoReset !== false, resetHours: clampN(o.resetHours, 1, 24, 4), wbLimit: typeof o.wbLimit === 'number' ? o.wbLimit : 20000, chatDepth: typeof o.chatDepth === 'number' ? o.chatDepth : 15 };
   }
 } catch (e) {}
 export function saveSec() {
-  try { window.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit })); } catch (e) {}
+  try { window.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit, chatDepth: SEC.chatDepth })); } catch (e) {}
 }
 /* Công tắc và prompt tự điền: lưu theo từng thẻ nhân vật */
 export let CS = { link: false, story: false, userPrompt: '' };
@@ -156,8 +156,9 @@ async function collectWorldbook() {
     let chatContext = '';
     try {
       const chatHistory = ctx.chat || window.chat || [];
-      // Lấy 5 tin nhắn gần nhất để làm ngữ cảnh chat
-      const recentMsgs = chatHistory.slice(-5).map(m => (m.name ? m.name + ': ' : '') + (m.mes || '')).join('\n').trim();
+      // Lấy N tin nhắn gần nhất để làm ngữ cảnh chat
+      const depth = SEC.chatDepth !== undefined ? SEC.chatDepth : 15;
+      const recentMsgs = chatHistory.slice(-depth).map(m => (m.name ? m.name + ': ' : '') + (m.mes || '')).join('\n').trim();
       if (recentMsgs) {
         chatContext = "\n==== RECENT CHAT HISTORY ====\n" + recentMsgs + "\n=============================\n";
       }

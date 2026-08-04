@@ -233,6 +233,10 @@ export function openPanel(kind) {
         <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:2px">
           Giới hạn chữ Lorebook gửi cho AI:
           <input class="inp" id="secWbLimit" type="number" min="0" max="1000000" value="${SEC.wbLimit !== undefined ? SEC.wbLimit : 20000}" style="width:80px;padding:3px 6px"> (0 = Không cắt, gửi toàn bộ)
+        </div>
+        <div style="margin-top:10px;">
+          Giới hạn đọc tin nhắn Chat (số tin nhắn gần nhất được gửi lên làm Context):<br>
+          <input class="inp" id="secChatDepth" type="number" min="0" max="200" value="${SEC.chatDepth !== undefined ? SEC.chatDepth : 15}" style="width:80px;padding:3px 6px"> (0 = Không gửi đoạn Chat)
         </label>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
           <span class="buy" id="secSave">Lưu cấu hình</span>
@@ -267,6 +271,7 @@ export function openPanel(kind) {
         autoReset: All.$id('secAuto').checked, resetHours: clampN(All.$id('secHours').value, 1, 24, 4),
         // @ts-ignore
         wbLimit: parseInt(All.$id('secWbLimit').value, 10) || 0,
+        chatDepth: parseInt(All.$id('secChatDepth').value, 10) || 0,
       });
       saveSec(); toast('Đã lưu cấu hình API phụ');
     });

@@ -2667,6 +2667,10 @@ function openPanel(kind) {
         <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:2px">
           Gi\u1EDBi h\u1EA1n ch\u1EEF Lorebook g\u1EEDi cho AI:
           <input class="inp" id="secWbLimit" type="number" min="0" max="1000000" value="${SEC.wbLimit !== void 0 ? SEC.wbLimit : 2e4}" style="width:80px;padding:3px 6px"> (0 = Kh\xF4ng c\u1EAFt, g\u1EEDi to\xE0n b\u1ED9)
+        </div>
+        <div style="margin-top:10px;">
+          Gi\u1EDBi h\u1EA1n \u0111\u1ECDc tin nh\u1EAFn Chat (s\u1ED1 tin nh\u1EAFn g\u1EA7n nh\u1EA5t \u0111\u01B0\u1EE3c g\u1EEDi l\xEAn l\xE0m Context):<br>
+          <input class="inp" id="secChatDepth" type="number" min="0" max="200" value="${SEC.chatDepth !== void 0 ? SEC.chatDepth : 15}" style="width:80px;padding:3px 6px"> (0 = Kh\xF4ng g\u1EEDi \u0111o\u1EA1n Chat)
         </label>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
           <span class="buy" id="secSave">L\u01B0u c\u1EA5u h\xECnh</span>
@@ -2703,7 +2707,8 @@ function openPanel(kind) {
         autoReset: $id("secAuto").checked,
         resetHours: clampN($id("secHours").value, 1, 24, 4),
         // @ts-ignore
-        wbLimit: parseInt($id("secWbLimit").value, 10) || 0
+        wbLimit: parseInt($id("secWbLimit").value, 10) || 0,
+        chatDepth: parseInt($id("secChatDepth").value, 10) || 0
       });
       saveSec();
       toast("\u0110\xE3 l\u01B0u c\u1EA5u h\xECnh API ph\u1EE5");
@@ -3663,7 +3668,7 @@ var clampN = (x, lo, hi, dflt) => {
   return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt;
 };
 var SEC_LS_KEY = "star_tavern_farm_sec";
-var SEC = { url: "", key: "", model: "", autoReset: true, resetHours: 4, wbLimit: 2e4 };
+var SEC = { url: "", key: "", model: "", autoReset: true, resetHours: 4, wbLimit: 2e4, chatDepth: 15 };
 try {
   const raw = window.localStorage.getItem(SEC_LS_KEY);
   if (raw) {
@@ -3674,14 +3679,15 @@ try {
       model: o.model || "",
       autoReset: o.autoReset !== false,
       resetHours: clampN(o.resetHours, 1, 24, 4),
-      wbLimit: typeof o.wbLimit === "number" ? o.wbLimit : 2e4
+      wbLimit: typeof o.wbLimit === "number" ? o.wbLimit : 2e4,
+      chatDepth: typeof o.chatDepth === "number" ? o.chatDepth : 15
     };
   }
 } catch (e) {
 }
 function saveSec() {
   try {
-    window.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit }));
+    window.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit, chatDepth: SEC.chatDepth }));
   } catch (e) {
   }
 }
@@ -3805,7 +3811,8 @@ async function collectWorldbook() {
     let chatContext = "";
     try {
       const chatHistory = ctx2.chat || window.chat || [];
-      const recentMsgs = chatHistory.slice(-5).map((m) => (m.name ? m.name + ": " : "") + (m.mes || "")).join("\n").trim();
+      const depth = SEC.chatDepth !== void 0 ? SEC.chatDepth : 15;
+      const recentMsgs = chatHistory.slice(-depth).map((m) => (m.name ? m.name + ": " : "") + (m.mes || "")).join("\n").trim();
       if (recentMsgs) {
         chatContext = "\n==== RECENT CHAT HISTORY ====\n" + recentMsgs + "\n=============================\n";
       }
