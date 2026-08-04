@@ -3760,8 +3760,11 @@ async function collectWorldbook() {
           });
           if (res.ok) {
             const data = await res.json();
-            console.log("[FARM DEBUG] Fetched API data entries length:", Array.isArray(data.entries) ? data.entries.length : "Not Array");
-            if (data && Array.isArray(data.entries)) entries = entries.concat(data.entries);
+            if (data && data.entries) {
+              const vals = Array.isArray(data.entries) ? data.entries : Object.values(data.entries);
+              console.log("[FARM DEBUG] Fetched API data entries length:", vals.length);
+              entries = entries.concat(vals);
+            }
           } else {
             console.log("[FARM DEBUG] API Failed, status:", res.status);
             const book = ST_WorldInfo?.world_info?.[name];
@@ -3800,8 +3803,10 @@ async function collectWorldbook() {
       const charId = ctx2.characterId !== void 0 ? ctx2.characterId : window.this_character;
       if (typeof charId !== "undefined") {
         const charData = ctx2.characters?.[charId]?.data || window.characters?.[charId]?.data;
-        if (charData && charData.character_book && Array.isArray(charData.character_book.entries)) {
-          entries = entries.concat(charData.character_book.entries);
+        if (charData && charData.character_book && charData.character_book.entries) {
+          const charEntries = charData.character_book.entries;
+          const vals = Array.isArray(charEntries) ? charEntries : Object.values(charEntries);
+          entries = entries.concat(vals);
         }
       }
     } catch (e) {
@@ -3825,9 +3830,9 @@ async function collectWorldbook() {
       const content = (en.content || en.text || "").trim();
       if (!content || seen.has(content)) continue;
       seen.add(content);
-      if (en.enabled === false || en.disabled === true || String(en.enabled).toLowerCase() === "false") continue;
-      const isConstant = en.strategy && en.strategy.type === "constant" || en.constant === true || en.position === "before_char";
-      const entryName = en.comment || en.name || en.uid || "Lorebook Entry";
+      if (en.disable === true) continue;
+      const isConstant = en.constant === true || en.strategy && en.strategy.type === "constant" || en.position === "before_char";
+      const entryName = en.comment || en.name || String(en.uid ?? en.id ?? "") || "Lorebook Entry";
       const formatted = `[${entryName}]
 ${content}`;
       if (isConstant) blue = formatted + "\n\n" + blue;
