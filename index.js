@@ -4367,6 +4367,21 @@ async function init() {
   }
   initFarm();
   warmUpCache(CROPS);
+  setTimeout(() => {
+    if (!document.getElementById("star-tavern-farm-root")) {
+      console.warn("[Farm] Failsafe: Giao di\u1EC7n ch\u01B0a \u0111\u01B0\u1EE3c n\u1EA1p. Th\u1EED kh\u1EDFi \u0111\u1ED9ng l\u1EA1i extension...");
+      try {
+        initFarm();
+        if (!document.getElementById("star-tavern-farm-root")) {
+          console.error("[Farm] Failsafe: Kh\u1EDFi \u0111\u1ED9ng l\u1EA1i th\u1EA5t b\u1EA1i, DOM root v\u1EABn kh\xF4ng t\u1ED3n t\u1EA1i. Vui l\xF2ng ki\u1EC3m tra qu\xE1 tr\xECnh n\u1EA1p extension c\u1EE7a SillyTavern.");
+        } else {
+          console.log("[Farm] Failsafe: Kh\u1EDFi \u0111\u1ED9ng l\u1EA1i th\xE0nh c\xF4ng.");
+        }
+      } catch (err) {
+        console.error("[Farm] Failsafe: Kh\u1EDFi \u0111\u1ED9ng l\u1EA1i g\u1EB7p l\u1ED7i nghi\xEAm tr\u1ECDng! Chi ti\u1EBFt l\u1ED7i:", err);
+      }
+    }
+  }, 1e4);
 }
 export {
   init,

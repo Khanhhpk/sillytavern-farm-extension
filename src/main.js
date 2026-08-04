@@ -78,4 +78,21 @@ export async function init() {
 
   initFarm();
   warmUpCache(CROPS);
+
+  // Failsafe watchdog
+  setTimeout(() => {
+    if (!document.getElementById('star-tavern-farm-root')) {
+      console.warn('[Farm] Failsafe: Giao diện chưa được nạp. Thử khởi động lại extension...');
+      try {
+        initFarm();
+        if (!document.getElementById('star-tavern-farm-root')) {
+          console.error('[Farm] Failsafe: Khởi động lại thất bại, DOM root vẫn không tồn tại. Vui lòng kiểm tra quá trình nạp extension của SillyTavern.');
+        } else {
+          console.log('[Farm] Failsafe: Khởi động lại thành công.');
+        }
+      } catch (err) {
+        console.error('[Farm] Failsafe: Khởi động lại gặp lỗi nghiêm trọng! Chi tiết lỗi:', err);
+      }
+    }
+  }, 10000);
 }
