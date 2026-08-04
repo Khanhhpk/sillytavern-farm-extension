@@ -1610,8 +1610,8 @@ style.textContent = styleCSS;
 sh.appendChild(style);
 ctx.ui = document.createElement("div");
 ctx.ui.innerHTML = `
-  <div id="ctx.orb" title="Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n trong SillyTavern ch\u1EE9!">${spriteSVG("sprout", 34)}</div>
-  <div id="ctx.win">
+  <div id="orb" title="Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n trong SillyTavern ch\u1EE9!">${spriteSVG("sprout", 34)}</div>
+  <div id="win">
     <div class="titlebar" id="drag">
       <h1>${spriteSVG("strawhat", 16)}Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!</h1>
       <div class="close-x" id="close">\xD7</div>
@@ -1652,6 +1652,8 @@ ctx.ui.innerHTML = `
     <div class="toast" id="toast"></div>
   </div>`;
 sh.appendChild(ctx.ui);
+ctx.orb = $id("orb");
+ctx.win = $id("win");
 function applyTheme() {
   ctx.ui.classList.remove("theme-sakura", "theme-sky");
   ctx.ui.classList.add("theme-" + (ctx.S && ctx.S.theme === "sky" ? "sky" : "sakura"));
