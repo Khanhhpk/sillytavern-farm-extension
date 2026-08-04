@@ -749,20 +749,18 @@ BẢNG MÀU CHO PHÉP (Ký tự: Mã màu Hex):
 ${paletteStr}
 
 HƯỚNG DẪN TƯ DUY (Bắt buộc phải có thẻ <thinking> trước khi xuất mã):
-Để vẽ pixel art sắc nét và có chiều sâu, hãy phân tích kỹ càng qua các bước sau:
-1. Phân tích Bố cục (Layout): Lựa chọn góc độ và hướng đặt vật thể sao cho tận dụng tối đa không gian ${size}x${size} một cách tinh tế nhất. Căn chỉnh tỉ lệ các bộ phận cho hài hòa và phù hợp với đặc trưng của vật thể.
-2. Quy hoạch Màu sắc (Palette Selection): Liệt kê rõ ràng các ký tự sẽ dùng:
-   - Viền (Outline): Bao quanh vật thể bằng màu tối nhất (hoặc đen) để tạo độ nổi bật.
-   - Sáng tối (Shading): Xác định nguồn sáng chiếu từ góc trên-trái. Chọn màu Sáng (Highlight) cho phần đón sáng, màu Tối (Shadow) cho phần khuất sáng.
-   - Thân (Base/Mid-tone): Màu chủ đạo.
-   - Chi tiết: Ngọc đính, vân gỗ, hiệu ứng phát sáng...
-   TUYỆT ĐỐI KHÔNG chế ra ký tự ngoài Bảng màu.
-3. Hình dáng (Shape & Texture): Tránh làm các khối màu bị vuông vức, thẳng đuột. Sử dụng các nét lượn, zig-zag để tạo hình dáng tự nhiên. Chú ý tính đối xứng (nếu có).
-4. Ánh xạ Từng dòng (Row-by-Row Mapping): Lập kế hoạch phân bố pixel cụ thể từ dòng 0 đến ${size - 1}.
+Để vẽ pixel art hoàn hảo, sắc nét và không bị méo lệch, hãy tuân thủ nghiêm ngặt các bước sau:
+1. Phân tích Bố cục & Hình khối: Lựa chọn góc độ đặt vật thể (vd: vũ khí nên đặt chéo). Nếu vẽ vật thể tròn/cân xứng, hãy tính toán sao cho nửa trái và nửa phải khớp nhau. Nhớ rằng khung ${size}x${size} không có tâm 1 pixel (tâm nằm giữa cột ${size/2 - 1} và ${size/2}).
+2. Quy hoạch Màu sắc (Palette): Chọn ký tự làm màu Viền (bắt buộc bao quanh vật thể), màu Tối (Shadow) cho hướng khuất sáng, màu Sáng (Highlight) cho hướng đón sáng, và màu Nền (Base). TUYỆT ĐỐI KHÔNG chế ra ký tự ngoài Bảng màu.
+3. Hình dáng (Shape & Texture): Tránh làm các khối màu bị vuông vức, thẳng đuột. Sử dụng các nét lượn để tạo hình dáng tự nhiên.
+4. Ánh xạ & ĐẾM KÝ TỰ (Rất quan trọng): Khi phác thảo từng dòng (từ dòng 0 đến ${size - 1}), BẠN PHẢI ĐẾM CHÍNH XÁC số lượng ký tự. 
+   - Khung canvas là ${size}x${size}. Do đó, một dòng CHỈ ĐƯỢC PHÉP dài đúng ${size} ký tự.
+   - Ví dụ một dòng trống hợp lệ: "${'.'.repeat(size)}"
+   - Nếu bạn tạo ra dòng có ${size + 1} hoặc ${size - 1} ký tự, hình sẽ bị cắt xén và méo mó.
 
 QUY TẮC ĐẦU RA BẮT BUỘC:
 - Sau khi đóng thẻ </thinking>, CHỈ ĐƯỢC XUẤT 1 khối mã \`\`\`json chứa mảng gồm ĐÚNG ${size} chuỗi.
-- Mỗi chuỗi đại diện cho 1 hàng và phải chứa ĐÚNG ${size} ký tự.
+- KIỂM TRA LẠI: Mỗi chuỗi đại diện cho 1 hàng và PHẢI DÀI CHÍNH XÁC ${size} KÝ TỰ. Không hơn không kém!
 - Dùng dấu chấm '.' cho pixel trong suốt.
 - TUYỆT ĐỐI không dùng ký tự lạ ngoài dấu '.' và các ký tự Bảng màu.`;
 
