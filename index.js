@@ -658,11 +658,18 @@ function initFarm() {
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         <div style="flex:1;min-width:260px;display:flex;flex-direction:column;gap:8px">
           <div class="shead" style="margin-top:0">Tạo Sprite bằng AI</div>
-          <div class="note">Nhập ý tưởng (VD: Thanh kiếm lửa, bình mana) để AI tự động xếp mã 16x16. Dùng chung API ở phần cài đặt.</div>
-          <select class="inp" id="sbPalette" style="padding:6px;width:100%">
-            <option value="SPRITES">Bảng màu Nông sản/Vật phẩm (P)</option>
-            <option value="PETS">Bảng màu Thú cưng (PET_P)</option>
-          </select>
+          <div class="note">Nhập ý tưởng để AI xếp mã tự động. Dùng chung API ở phần cài đặt.</div>
+          <div style="display:flex;gap:8px">
+            <select class="inp" id="sbPalette" style="padding:6px;flex:1">
+              <option value="SPRITES">Bảng màu Nông sản/Vật phẩm (P)</option>
+              <option value="PETS">Bảng màu Thú cưng (PET_P)</option>
+            </select>
+            <select class="inp" id="sbSize" style="padding:6px;width:90px">
+              <option value="16">16 x 16</option>
+              <option value="24">24 x 24</option>
+              <option value="32">32 x 32</option>
+            </select>
+          </div>
           <textarea class="inp" id="sbPrompt" placeholder="Nhập ý tưởng pixel art (gõ tiếng Việt cũng được)..." style="height:60px"></textarea>
           <div style="display:flex;gap:8px;align-items:center">
             <span class="buy" id="sbGenerate">✨ Tạo bằng AI</span>
@@ -670,7 +677,7 @@ function initFarm() {
             <span id="sbStatus" style="font-size:12px;color:var(--accFg)"></span>
           </div>
           <textarea class="inp" id="sbPayloadOut" style="display:none;height:120px;font-size:11px;font-family:monospace;margin-top:4px" readonly></textarea>
-          <div class="shead">Mã Pixel (16x16)</div>
+          <div class="shead">Mã Pixel</div>
           <div class="note">Dấu . là trong suốt. Dán hoặc sửa mảng JSON vào đây để xem thử trên bảng vẽ.</div>
           <textarea class="inp" id="sbCode" style="height:200px;font-family:monospace;white-space:pre"></textarea>
         </div>
@@ -684,18 +691,20 @@ function initFarm() {
 
     const ta = $id('sbCode');
     const sel = $id('sbPalette');
+    const sizeSel = $id('sbSize');
     const ctx = $id('sbCanvas').getContext('2d');
     
     function render() {
       const isPet = sel.value === 'PETS';
       const palette = isPet ? PET_P : P;
+      const size = parseInt(sizeSel.value) || 16;
       ctx.clearRect(0, 0, 256, 256);
       
       const lines = ta.value.split('\n').map(l => l.trim().replace(/['",\[\]]/g, '')).filter(l => l.length > 0);
-      const pxSize = 256 / 16;
-      for (let y = 0; y < Math.min(16, lines.length); y++) {
+      const pxSize = 256 / size;
+      for (let y = 0; y < Math.min(size, lines.length); y++) {
         const row = lines[y];
-        for (let x = 0; x < Math.min(16, row.length); x++) {
+        for (let x = 0; x < Math.min(size, row.length); x++) {
           const char = row[x];
           if (char !== '.') {
             const color = palette[char];
@@ -710,6 +719,7 @@ function initFarm() {
 
     ta.addEventListener('input', render);
     sel.addEventListener('change', render);
+    sizeSel.addEventListener('change', render);
 
     $id('sbPayloadBtn').addEventListener('click', () => {
       const out = $id('sbPayloadOut');
@@ -732,21 +742,22 @@ function initFarm() {
         const simpleColors = Object.entries(palette).filter(e => typeof e[1] === 'string');
         const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(', ');
         
-        const sysPrompt = `Bạn là một chuyên gia thiết kế Pixel Art (16x16). Nhiệm vụ của bạn là vẽ một đồ vật dựa trên yêu cầu, và BẮT BUỘC chỉ được dùng các mã ký tự trong Bảng màu sau đây.
+        const size = parseInt(sizeSel.value) || 16;
+        const sysPrompt = `Bạn là một chuyên gia thiết kế Pixel Art (${size}x${size}). Nhiệm vụ của bạn là vẽ một đồ vật dựa trên yêu cầu, và BẮT BUỘC chỉ được dùng các mã ký tự trong Bảng màu sau đây.
 
 BẢNG MÀU CHO PHÉP (Ký tự: Mã màu Hex):
 ${paletteStr}
 
 HƯỚNG DẪN TƯ DUY (Bắt buộc):
 Để tạo ra một sprite đẹp, hãy viết suy nghĩ của bạn vào thẻ <thinking> trước khi xuất kết quả:
-1. Phân tích hình khối: Đặt vật thể ở trung tâm khung 16x16.
+1. Phân tích hình khối: Đặt vật thể ở trung tâm khung ${size}x${size}.
 2. Chọn màu (Palette): Từ bảng màu trên, chọn ra ký tự làm màu viền, màu tối (shadow), màu trung gian (mid-tone), và sáng (highlight). TUYỆT ĐỐI KHÔNG chế ra ký tự ngoài bảng màu.
 3. Kỹ thuật Pixel Art: Xác định nguồn sáng (vd: trên-trái). Tạo khối 3D bằng cách xếp màu sáng ở hướng sáng, màu tối ở hướng khuất.
-4. Phác thảo từng dòng: Tưởng tượng sự phân bố pixel từ dòng 0 đến 15.
+4. Phác thảo từng dòng: Tưởng tượng sự phân bố pixel từ dòng 0 đến ${size - 1}.
 
 QUY TẮC ĐẦU RA BẮT BUỘC:
-- Sau phần </thinking>, CHỈ ĐƯỢC XUẤT 1 khối mã \`\`\`json chứa mảng gồm ĐÚNG 16 chuỗi.
-- Mỗi chuỗi đại diện cho 1 hàng và phải chứa ĐÚNG 16 ký tự.
+- Sau phần </thinking>, CHỈ ĐƯỢC XUẤT 1 khối mã \`\`\`json chứa mảng gồm ĐÚNG ${size} chuỗi.
+- Mỗi chuỗi đại diện cho 1 hàng và phải chứa ĐÚNG ${size} ký tự.
 - Dùng dấu chấm '.' cho pixel trong suốt.
 - TUYỆT ĐỐI không dùng ký tự lạ ngoài dấu '.' và các ký tự trong Bảng màu.`;
 
