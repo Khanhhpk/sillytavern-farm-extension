@@ -1,4 +1,5 @@
 // src/store.js
+var NS = "star_tavern_farm";
 var extensionName = "sillytavern-farm-extension";
 var RUNTIME_KEY2 = "__STAR_TAVERN_FARM__";
 var ctx = {
@@ -3303,7 +3304,7 @@ function tryScene() {
   }
 }
 var wander2 = window.setInterval(() => {
-  if (!ctx.win.classList.contains("open")) return;
+  if (!ctx.win || !ctx.win.classList.contains("open")) return;
   if (!scene && now() >= nextSceneAt) tryScene();
   sh.querySelectorAll("#mascots .pet").forEach((el) => {
     const id = el.dataset.pet;
@@ -3382,7 +3383,7 @@ function petFert(el, cry) {
 }
 function initPets() {
   wander2 = window.setInterval(() => {
-    if (!ctx.win.classList.contains("open")) return;
+    if (!ctx.win || !ctx.win.classList.contains("open")) return;
     if (!scene && now() >= nextSceneAt) tryScene();
     sh.querySelectorAll("#mascots .pet").forEach((el) => {
       const id = el.dataset.pet;
