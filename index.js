@@ -2370,25 +2370,26 @@ function initPets() {
     if (!ctx.S.dragPet) {
       const el2 = e.target.closest(".pet");
       if (!el2) return;
-      const id = el2.dataset.pet;
-      const def = PETS[id];
+      const petId2 = el2.dataset.pet;
+      const def = PETS[petId2];
       if (!def) return;
-      petTouch[id] = now();
+      petTouch[petId2] = now();
       if (el2.classList.contains("sleep")) return wakePet(el2, true);
-      const isJob = el2.dataset.job === "1";
-      const msg = isJob ? def.touchW || def.touch || "\u0110ang b\u1EADn..." : def.touch || "...";
-      if (!isJob) {
-        wakePet(el2);
-        playSound(def.snd);
+      const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
+      if (def.job === "plant") return petPlant(el2, cry);
+      if (def.job === "fert") return petFert(el2, cry);
+      if (def.job === "harvest") return petHarvest(el2, cry);
+      if (def.job) return petBubble(el2, cry);
+      let txt = cry;
+      if (now() - (ctx.S.petPoke[petId2] || 0) >= POKE_CD) {
+        ctx.S.petPoke[petId2] = now();
+        const gain = 1 + Math.floor(Math.random() * 5);
+        ctx.S.coins += gain;
+        txt += petId2 === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : petId2 === "starBlob" ? " r\u01A1i ra " + gain + " G \xE1nh sao!" : " r\u01A1i ra " + gain + " G!";
+        save();
+        renderStatus();
       }
-      if (!$id("pb" + id)) {
-        const pb = document.createElement("div");
-        pb.id = "pb" + id;
-        pb.className = "pbubble";
-        pb.textContent = typeof msg === "function" ? msg() : msg;
-        el2.appendChild(pb);
-        setTimeout(() => pb.remove(), 1500);
-      }
+      petBubble(el2, txt);
       return;
     }
     if (!activeDrag || activeDrag.id !== e.pointerId) return;

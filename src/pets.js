@@ -401,19 +401,27 @@ export function initPets() {
     if (!ctx.S.dragPet) {
       // Giữ nguyên logic click cũ khi tắt tính năng kéo thả
       const el = e.target.closest('.pet'); if (!el) return;
-      const id = el.dataset.pet;
-      const def = PETS[id];
+      const petId = el.dataset.pet;
+      const def = PETS[petId];
       if (!def) return;
-      petTouch[id] = now();
+      petTouch[petId] = now();
       if (el.classList.contains('sleep')) return wakePet(el, true);
-      const isJob = el.dataset.job === '1';
-      const msg = isJob ? (def.touchW || def.touch || 'Đang bận...') : (def.touch || '...');
-      if (!isJob) { wakePet(el); playSound(def.snd); }
-      if (!All.$id('pb' + id)) {
-        const pb = document.createElement('div'); pb.id = 'pb' + id; pb.className = 'pbubble';
-        pb.textContent = typeof msg === 'function' ? msg() : msg;
-        el.appendChild(pb); setTimeout(() => pb.remove(), 1500);
+      const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
+      if (def.job === 'plant') return petPlant(el, cry);
+      if (def.job === 'fert') return petFert(el, cry);
+      if (def.job === 'harvest') return petHarvest(el, cry);
+      if (def.job) return petBubble(el, cry);
+      let txt = cry;
+      if (now() - (ctx.S.petPoke[petId] || 0) >= POKE_CD) {
+        ctx.S.petPoke[petId] = now();
+        const gain = 1 + Math.floor(Math.random() * 5);
+        ctx.S.coins += gain;
+        txt += petId === 'prismBlob' ? ' rũ ra ' + gain + ' G ánh vụn!'
+          : petId === 'starBlob' ? ' rơi ra ' + gain + ' G ánh sao!'
+          : ' rơi ra ' + gain + ' G!';
+        save(); All.renderStatus();
       }
+      petBubble(el, txt);
       return;
     }
 
