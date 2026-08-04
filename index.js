@@ -1600,16 +1600,54 @@ var styleCSS = `
 `;
 
 // src/ui.js
-var root = document.createElement("div");
-root.id = "star-tavern-farm-root";
-document.body.appendChild(root);
-var sh = root.attachShadow({ mode: "open" });
-var $id = (id) => sh.querySelector("#" + id);
-var style = document.createElement("style");
-style.textContent = styleCSS;
-sh.appendChild(style);
-ctx.ui = document.createElement("div");
-ctx.ui.innerHTML = `
+var root;
+var sh;
+var $id;
+var fieldEl;
+var decoLayer;
+var fxLayer;
+var swX = null;
+var swY = null;
+function applyTheme() {
+  ctx.ui.classList.remove("theme-sakura", "theme-sky");
+  ctx.ui.classList.add("theme-" + (ctx.S && ctx.S.theme === "sky" ? "sky" : "sakura"));
+}
+function applyPageSkin() {
+  fieldEl.classList.toggle("pg2", ctx.S.page === 2);
+  fieldEl.classList.toggle("pg3", ctx.S.page === 3);
+  fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? "water" : ctx.S.page === 3 ? "mine" : "grass", 4242);
+  fieldEl.style.backgroundSize = "192px 192px";
+}
+function renderPager() {
+  const names = { 1: "\u0110\u1ED3ng c\u1ECF", 2: "V\xF9ng n\u01B0\u1EDBc", 3: "Khu m\u1ECF" };
+  $id("pager").innerHTML = [1, 2, 3].map((pg) => {
+    const un = pageUnlocked(pg);
+    return `<span class="ptab p${pg}${ctx.S.page === pg ? " active" : ""}${un ? "" : " lock"}" data-pg="${pg}">${names[pg]}${un ? "" : " \u{1F512}"}</span>`;
+  }).join("");
+}
+function plotEmote(pi, name) {
+  const p = sh.querySelector('.plot[data-pi="' + pi + '"]');
+  if (!p) return;
+  const pr = p.getBoundingClientRect(), fr = fieldEl.getBoundingClientRect();
+  const el = document.createElement("span");
+  el.className = "emote";
+  el.style.left = pr.left - fr.left + pr.width / 2 - 12 + "px";
+  el.style.top = pr.top - fr.top - 14 + "px";
+  el.innerHTML = spriteSVG(name, 24);
+  fxLayer.appendChild(el);
+  window.setTimeout(() => el.remove(), 1300);
+}
+function initUI() {
+  root = document.createElement("div");
+  root.id = "star-tavern-farm-root";
+  document.body.appendChild(root);
+  sh = root.attachShadow({ mode: "open" });
+  $id = (id) => sh.querySelector("#" + id);
+  const style = document.createElement("style");
+  style.textContent = styleCSS;
+  sh.appendChild(style);
+  ctx.ui = document.createElement("div");
+  ctx.ui.innerHTML = `
   <div id="orb" title="Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n trong SillyTavern ch\u1EE9!">${spriteSVG("sprout", 34)}</div>
   <div id="win">
     <div class="titlebar" id="drag">
@@ -1651,65 +1689,33 @@ ctx.ui.innerHTML = `
     </div>
     <div class="toast" id="toast"></div>
   </div>`;
-sh.appendChild(ctx.ui);
-ctx.orb = $id("orb");
-ctx.win = $id("win");
-function applyTheme() {
-  ctx.ui.classList.remove("theme-sakura", "theme-sky");
-  ctx.ui.classList.add("theme-" + (ctx.S && ctx.S.theme === "sky" ? "sky" : "sakura"));
-}
-var fieldEl = sh.querySelector(".field");
-fieldEl.style.backgroundImage = tileURI("grass", 4242);
-function applyPageSkin() {
-  fieldEl.classList.toggle("pg2", ctx.S.page === 2);
-  fieldEl.classList.toggle("pg3", ctx.S.page === 3);
-  fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? "water" : ctx.S.page === 3 ? "mine" : "grass", 4242);
+  sh.appendChild(ctx.ui);
+  ctx.orb = $id("orb");
+  ctx.win = $id("win");
+  fieldEl = sh.querySelector(".field");
+  fieldEl.style.backgroundImage = tileURI("grass", 4242);
   fieldEl.style.backgroundSize = "192px 192px";
-}
-function renderPager() {
-  const names = { 1: "\u0110\u1ED3ng c\u1ECF", 2: "V\xF9ng n\u01B0\u1EDBc", 3: "Khu m\u1ECF" };
-  $id("pager").innerHTML = [1, 2, 3].map((pg) => {
-    const un = pageUnlocked(pg);
-    return `<span class="ptab p${pg}${ctx.S.page === pg ? " active" : ""}${un ? "" : " lock"}" data-pg="${pg}">${names[pg]}${un ? "" : " \u{1F512}"}</span>`;
-  }).join("");
-}
-var swX = null;
-var swY = null;
-fieldEl.style.backgroundSize = "192px 192px";
-var decoLayer = document.createElement("div");
-decoLayer.style.cssText = "position:absolute;inset:0;overflow:hidden;pointer-events:none;";
-fieldEl.insertBefore(decoLayer, fieldEl.firstChild);
-(function() {
-  const drnd = mulberry32(20260717);
-  function addDeco(o, cls, pos) {
-    const el = document.createElement("span");
-    el.className = cls;
-    el.style.cssText = "position:absolute;" + pos;
-    el.innerHTML = spriteSVG(o.n, o.s | 0);
-    decoLayer.appendChild(el);
-  }
-  const side = [];
-  for (let i = 0; i < 3; i++) side.push({ n: "pinkgrass", s: 28 + drnd() * 8, x: 0.4 + drnd() * 1.5, y: 8 + i * 17 + drnd() * 6 });
-  for (let i = 0; i < 2; i++) side.push({ n: "pinkgrass", s: 28 + drnd() * 8, x: 90 + drnd() * 3, y: 24 + i * 17 + drnd() * 6 });
-  side.forEach((o) => addDeco(o, "dside", `left:${o.x}%;top:${o.y}%;`));
-  for (let i = 0; i < 3; i++) addDeco({ n: "pinkgrass", s: 28 + drnd() * 6 }, "dbot", `left:${9 + i * 16 + drnd() * 5}%;bottom:4px;`);
-})();
-var fxLayer = document.createElement("div");
-fxLayer.style.cssText = "position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:8;";
-fieldEl.appendChild(fxLayer);
-function plotEmote(pi, name) {
-  const p = sh.querySelector('.plot[data-pi="' + pi + '"]');
-  if (!p) return;
-  const pr = p.getBoundingClientRect(), fr = fieldEl.getBoundingClientRect();
-  const el = document.createElement("span");
-  el.className = "emote";
-  el.style.left = pr.left - fr.left + pr.width / 2 - 12 + "px";
-  el.style.top = pr.top - fr.top - 14 + "px";
-  el.innerHTML = spriteSVG(name, 24);
-  fxLayer.appendChild(el);
-  window.setTimeout(() => el.remove(), 1300);
-}
-function initUI() {
+  decoLayer = document.createElement("div");
+  decoLayer.style.cssText = "position:absolute;inset:0;overflow:hidden;pointer-events:none;";
+  fieldEl.insertBefore(decoLayer, fieldEl.firstChild);
+  (function() {
+    const drnd = mulberry32(20260717);
+    function addDeco(o, cls, pos) {
+      const el = document.createElement("span");
+      el.className = cls;
+      el.style.cssText = "position:absolute;" + pos;
+      el.innerHTML = spriteSVG(o.n, o.s | 0);
+      decoLayer.appendChild(el);
+    }
+    const side = [];
+    for (let i = 0; i < 3; i++) side.push({ n: "pinkgrass", s: 28 + drnd() * 8, x: 0.4 + drnd() * 1.5, y: 8 + i * 17 + drnd() * 6 });
+    for (let i = 0; i < 2; i++) side.push({ n: "pinkgrass", s: 28 + drnd() * 8, x: 90 + drnd() * 3, y: 24 + i * 17 + drnd() * 6 });
+    side.forEach((o) => addDeco(o, "dside", `left:${o.x}%;top:${o.y}%;`));
+    for (let i = 0; i < 3; i++) addDeco({ n: "pinkgrass", s: 28 + drnd() * 6 }, "dbot", `left:${9 + i * 16 + drnd() * 5}%;bottom:4px;`);
+  })();
+  fxLayer = document.createElement("div");
+  fxLayer.style.cssText = "position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:8;";
+  fieldEl.appendChild(fxLayer);
   ctx.ui.addEventListener("click", (e) => {
     const pager = $id("pager");
     if (pager && pager.classList.contains("open") && !e.target.closest("#pager")) pager.classList.remove("open");
@@ -4036,13 +4042,14 @@ ${ev && ev.flavor ? `- S\u1EF1 ki\u1EC7n h\xF4m nay: ${ev.name} \u2014\u2014 ${e
 * H\u01B0\u1EDBng d\u1EABn cho AI: Nh\xE2n v\u1EADt trong c\u1ED1t truy\u1EC7n th\u1EC9nh tho\u1EA3ng c\xF3 th\u1EC3 nh\u1EAFc t\u1EDBi vi\u1EC7c ng\u01B0\u1EDDi ch\u01A1i ch\u0103m v\u01B0\u1EDDn hay thu ho\u1EA1ch th\u1EBF n\xE0o m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn, nh\u01B0ng \u0110\u1EEANG thao t\xE1c v\u01B0\u1EDDn rau thay ng\u01B0\u1EDDi ch\u01A1i, c\u0169ng \u0110\u1EEANG bi\u1EBFn v\u01B0\u1EDDn rau th\xE0nh m\u1EA1ch ch\xEDnh c\u1EE7a c\u1ED1t truy\u1EC7n.`;
   setInjection(promptText);
 }
-var heartbeat = window.setInterval(() => {
-  try {
-    settle();
-  } catch (e) {
-  }
-}, 60 * 1e3);
+var heartbeat;
 function initEvents() {
+  heartbeat = window.setInterval(() => {
+    try {
+      settle();
+    } catch (e) {
+    }
+  }, 60 * 1e3);
   loadCharState();
   try {
     const chatChangedEvent = ctx.event_types?.CHAT_CHANGED;
@@ -4289,6 +4296,7 @@ function initFarm() {
     window[RUNTIME_KEY]?.destroy?.();
   } catch (e) {
   }
+  document.getElementById("star-tavern-farm-root")?.remove();
   loadState();
   initUI();
   applyTheme();
@@ -4309,6 +4317,11 @@ function initFarm() {
   renderPets();
   updateInjection();
   if (CS.link) requestDayEvent();
+  const diag = [];
+  if (ctx.S) diag.push("S");
+  if (ctx.CS) diag.push("CS");
+  if (ctx.ui) diag.push("ui");
+  console.log("[Farm] ST Context k\u1EBFt n\u1ED1i th\xE0nh c\xF4ng \u2014 " + diag.join(", "));
   console.log("Farm initialized");
 }
 async function init() {
@@ -4336,11 +4349,6 @@ async function init() {
       event_types: ev_types,
       generateRaw: gen_raw
     });
-    const diag = [];
-    if (ctx.S) diag.push("S");
-    if (ctx.CS) diag.push("CS");
-    if (ctx.ui) diag.push("ui");
-    console.log("[Farm] ST Context k\u1EBFt n\u1ED1i th\xE0nh c\xF4ng \u2014 " + diag.join(", "));
   } catch (e) {
     console.error("[Farm] L\u1ED7i khi k\u1EBFt n\u1ED1i ST Context:", e);
     let ext_set = window.extension_settings || {};

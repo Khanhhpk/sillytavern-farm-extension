@@ -10,19 +10,59 @@ import { mode, renderPlots, renderStatus, renderToolbar, setMode } from './rende
 import { pageUnlocked } from './utils.js';
 
 /* ---------- DOM:Shadow root ---------- */
-export const root = document.createElement('div');
-root.id = 'star-tavern-farm-root';
-document.body.appendChild(root);
-export const sh = root.attachShadow({ mode: 'open' });
-export const $id = id => sh.querySelector('#' + id);
-// CSS moved to style.css
+export let root;
+export let sh;
+export let $id;
+export let fieldEl;
+export let decoLayer;
+export let fxLayer;
+export let swX = null, swY = null;
 
-const style = document.createElement('style');
-style.textContent = styleCSS;
-sh.appendChild(style);
+export function applyTheme() { ctx.ui.classList.remove('theme-sakura', 'theme-sky'); ctx.ui.classList.add('theme-' + (ctx.S && ctx.S.theme === 'sky' ? 'sky' : 'sakura')); }
 
-ctx.ui = document.createElement('div');
-ctx.ui.innerHTML = `
+export function applyPageSkin() {
+  fieldEl.classList.toggle('pg2', ctx.S.page === 2);
+  fieldEl.classList.toggle('pg3', ctx.S.page === 3);
+  // @ts-ignore
+  fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? 'water' : ctx.S.page === 3 ? 'mine' : 'grass', 4242);
+  // @ts-ignore
+  fieldEl.style.backgroundSize = '192px 192px';
+}
+
+export function renderPager() {
+  const names = { 1: 'Đồng cỏ', 2: 'Vùng nước', 3: 'Khu mỏ' };
+  $id('pager').innerHTML = [1, 2, 3].map(pg => {
+    const un = pageUnlocked(pg);
+    return `<span class="ptab p${pg}${ctx.S.page === pg ? ' active' : ''}${un ? '' : ' lock'}" data-pg="${pg}">${names[pg]}${un ? '' : ' 🔒'}</span>`;
+  }).join('');
+}
+
+export function plotEmote(pi, name) {
+  const p = sh.querySelector('.plot[data-pi="' + pi + '"]');
+  if (!p) return;
+  const pr = p.getBoundingClientRect(), fr = fieldEl.getBoundingClientRect();
+  const el = document.createElement('span');
+  el.className = 'emote';
+  el.style.left = (pr.left - fr.left + pr.width / 2 - 12) + 'px';
+  el.style.top = (pr.top - fr.top - 14) + 'px';
+  el.innerHTML = spriteSVG(name, 24);
+  fxLayer.appendChild(el);
+  window.setTimeout(() => el.remove(), 1300);
+}
+
+export function initUI() {
+  root = document.createElement('div');
+  root.id = 'star-tavern-farm-root';
+  document.body.appendChild(root);
+  sh = root.attachShadow({ mode: 'open' });
+  $id = id => sh.querySelector('#' + id);
+
+  const style = document.createElement('style');
+  style.textContent = styleCSS;
+  sh.appendChild(style);
+
+  ctx.ui = document.createElement('div');
+  ctx.ui.innerHTML = `
   <div id="orb" title="Ai mà thèm làm nông dân trong SillyTavern chứ!">${spriteSVG('sprout', 34)}</div>
   <div id="win">
     <div class="titlebar" id="drag">
@@ -64,78 +104,39 @@ ctx.ui.innerHTML = `
     </div>
     <div class="toast" id="toast"></div>
   </div>`;
-sh.appendChild(ctx.ui);
-ctx.orb = $id('orb');
-ctx.win = $id('win');
+  sh.appendChild(ctx.ui);
+  ctx.orb = $id('orb');
+  ctx.win = $id('win');
 
-export function applyTheme() { ctx.ui.classList.remove('theme-sakura', 'theme-sky'); ctx.ui.classList.add('theme-' + (ctx.S && ctx.S.theme === 'sky' ? 'sky' : 'sakura')); }
-
-/* ---------- Sửa #5: thảm cỏ mặt ruộng + trang trí hoá hạt giống (vị trí cố định, không rung) ---------- */
-export const fieldEl = sh.querySelector('.field');
-// @ts-ignore
-fieldEl.style.backgroundImage = tileURI('grass', 4242);
-/* ---------- v0.8: lật ba trang (mở khoá bằng vé; da = W1 ruộng nổi đầm sen / M1 mạch quặng kim cương) ---------- */
-export function applyPageSkin() {
-  fieldEl.classList.toggle('pg2', ctx.S.page === 2);
-  fieldEl.classList.toggle('pg3', ctx.S.page === 3);
+  fieldEl = sh.querySelector('.field');
   // @ts-ignore
-  fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? 'water' : ctx.S.page === 3 ? 'mine' : 'grass', 4242);
-  // @ts-ignore
-  fieldEl.style.backgroundSize = '192px 192px';        // v1.0: cả ba trang dùng chung khung vẽ 96 lát ×2
-}
-export function renderPager() {
-  const names = { 1: 'Đồng cỏ', 2: 'Vùng nước', 3: 'Khu mỏ' };
-  $id('pager').innerHTML = [1, 2, 3].map(pg => {
-    const un = pageUnlocked(pg);
-    return `<span class="ptab p${pg}${ctx.S.page === pg ? ' active' : ''}${un ? '' : ' lock'}" data-pg="${pg}">${names[pg]}${un ? '' : ' 🔒'}</span>`;
-  }).join('');
-}
+  fieldEl.style.backgroundImage = tileURI('grass', 4242);
+  fieldEl.style.backgroundSize = '192px 192px';
 
-/* Phương án 3: vuốt trái phải ở khu ruộng để đổi trang (dùng thử song song với thanh viên nang của phương án 2; nếu bỏ thì xoá cả khối này) */
-export let swX = null, swY = null;
+  decoLayer = document.createElement('div');
+  decoLayer.style.cssText = 'position:absolute;inset:0;overflow:hidden;pointer-events:none;';
+  fieldEl.insertBefore(decoLayer, fieldEl.firstChild);
+  
+  (function () {
+    const drnd = mulberry32(20260717);
+    function addDeco(o, cls, pos) {
+      const el = document.createElement('span');
+      el.className = cls;
+      el.style.cssText = 'position:absolute;' + pos;
+      el.innerHTML = spriteSVG(o.n, o.s | 0);
+      decoLayer.appendChild(el);
+    }
+    const side = [];
+    for (let i = 0; i < 3; i++) side.push({ n: 'pinkgrass', s: 28 + drnd() * 8, x: 0.4 + drnd() * 1.5, y: 8 + i * 17 + drnd() * 6 });
+    for (let i = 0; i < 2; i++) side.push({ n: 'pinkgrass', s: 28 + drnd() * 8, x: 90 + drnd() * 3, y: 24 + i * 17 + drnd() * 6 });
+    side.forEach(o => addDeco(o, 'dside', `left:${o.x}%;top:${o.y}%;`));
+    for (let i = 0; i < 3; i++) addDeco({ n: 'pinkgrass', s: 28 + drnd() * 6 }, 'dbot', `left:${9 + i * 16 + drnd() * 5}%;bottom:4px;`);
+  })();
 
-fieldEl.style.backgroundSize = '192px 192px';
-export const decoLayer = document.createElement('div');
-decoLayer.style.cssText = 'position:absolute;inset:0;overflow:hidden;pointer-events:none;';
-fieldEl.insertBefore(decoLayer, fieldEl.firstChild);
-(function () {                                        // Sửa #13: trang trí chỉ ở phần đất trống hai bên (màn hẹp thì dời xuống dải xanh dưới đáy)
-  const drnd = mulberry32(20260717);
-  function addDeco(o, cls, pos) {
-    const el = document.createElement('span');
-    el.className = cls;
-    el.style.cssText = 'position:absolute;' + pos;
-    el.innerHTML = spriteSVG(o.n, o.s | 0);
-    decoLayer.appendChild(el);
-  }
-  /* #44: bụi cây nghỉ hưu —— cả ba trang đều không giữ (chen vào trang 2/3 quá lạc quẻ, cỏ hoa trên thảm cỏ trang 1 là đủ) */
-  /* Màn rộng: hoa cỏ hồng ở phần đất trống hai bên */
-  const side = [];
-  for (let i = 0; i < 3; i++) side.push({ n: 'pinkgrass', s: 28 + drnd() * 8, x: 0.4 + drnd() * 1.5, y: 8 + i * 17 + drnd() * 6 });
-  for (let i = 0; i < 2; i++) side.push({ n: 'pinkgrass', s: 28 + drnd() * 8, x: 90 + drnd() * 3, y: 24 + i * 17 + drnd() * 6 });
-  side.forEach(o => addDeco(o, 'dside', `left:${o.x}%;top:${o.y}%;`));
-  /* Màn hẹp: hoa cỏ hồng dời xuống dải xanh dưới đáy */
-  for (let i = 0; i < 3; i++) addDeco({ n: 'pinkgrass', s: 28 + drnd() * 6 }, 'dbot', `left:${9 + i * 16 + drnd() * 5}%;bottom:4px;`);
-})();
+  fxLayer = document.createElement('div');
+  fxLayer.style.cssText = 'position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:8;';
+  fieldEl.appendChild(fxLayer);
 
-/* ---------- Sửa #15: lớp bong bóng cảm xúc dùng chung ---------- */
-export const fxLayer = document.createElement('div');
-fxLayer.style.cssText = 'position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:8;';
-fieldEl.appendChild(fxLayer);
-export function plotEmote(pi, name) {
-  const p = sh.querySelector('.plot[data-pi="' + pi + '"]');
-  if (!p) return;
-  const pr = p.getBoundingClientRect(), fr = fieldEl.getBoundingClientRect();
-  const el = document.createElement('span');
-  el.className = 'emote';
-  el.style.left = (pr.left - fr.left + pr.width / 2 - 12) + 'px';
-  el.style.top = (pr.top - fr.top - 14) + 'px';
-  el.innerHTML = spriteSVG(name, 24);
-  fxLayer.appendChild(el);
-  window.setTimeout(() => el.remove(), 1300);
-}
-
-
-export function initUI() {
 ctx.ui.addEventListener('click', e => {                     // Bấm bất cứ đâu ngoài pager = thu quả cầu lại (giai đoạn capture, chạy trước các xử lý click khác)
   const pager = $id('pager');
   if (pager && pager.classList.contains('open') && !e.target.closest('#pager')) pager.classList.remove('open');

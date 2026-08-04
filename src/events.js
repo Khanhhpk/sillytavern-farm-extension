@@ -614,11 +614,13 @@ ${ev && ev.flavor ? `- Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}` : '
 }
 
 /* #17+v0.6b: nhịp tim chạy nền —— cứ 60s chạy settle một lần (tính toán cục bộ, cỡ micro~mili giây): sự kiện tới hạn thì gieo lại, bé làm việc làm việc, kết toán tìm kho báu; mở hay không mở bảng đều có hiệu lực */
-export const heartbeat = window.setInterval(() => {
-  try { settle(); } catch (e) {}
-}, 60 * 1000);
+export let heartbeat;
 
 export function initEvents() {
+  heartbeat = window.setInterval(() => {
+    try { settle(); } catch (e) {}
+  }, 60 * 1000);
+
   loadCharState();
   try {
     const chatChangedEvent = ctx.event_types?.CHAT_CHANGED;

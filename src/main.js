@@ -5,7 +5,7 @@ import { CROPS } from './data.js';
 
 export function initFarm() {
   try { window[RUNTIME_KEY]?.destroy?.(); } catch(e) {}
-  // Removed document.getElementById('star-tavern-farm-root')?.remove(); because it removes the DOM created on module load.
+  document.getElementById('star-tavern-farm-root')?.remove();
 
   All.loadState();
   All.initUI();
@@ -31,6 +31,11 @@ export function initFarm() {
   All.updateInjection();
   if (All.CS.link) All.requestDayEvent();
 
+  const diag = [];
+  if (ctx.S) diag.push('S');
+  if (ctx.CS) diag.push('CS');
+  if (ctx.ui) diag.push('ui');
+  console.log('[Farm] ST Context kết nối thành công — ' + diag.join(', '));
   console.log('Farm initialized');
 }
 
@@ -54,12 +59,6 @@ export async function init() {
         event_types: ev_types,
         generateRaw: gen_raw
     });
-
-    const diag = [];
-    if (ctx.S) diag.push('S');
-    if (ctx.CS) diag.push('CS');
-    if (ctx.ui) diag.push('ui');
-    console.log('[Farm] ST Context kết nối thành công — ' + diag.join(', '));
   } catch (e) {
     console.error('[Farm] Lỗi khi kết nối ST Context:', e);
     let ext_set = window.extension_settings || {};
