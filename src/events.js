@@ -14,17 +14,17 @@ export const esc = s => String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<':
 export const clampN = (x, lo, hi, dflt) => { x = Number(x); return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt; };
 /* Cấu hình API phụ: lưu trong localStorage của host, khoá bị làm rối bằng base64, vĩnh viễn không vào cây biến (tránh rò rỉ khi xuất thẻ) */
 export const SEC_LS_KEY = 'star_tavern_farm_sec';
-export let SEC = { url: '', key: '', model: '', autoReset: true, resetHours: 4, wbLimit: 20000 };
+export let SEC = { url: '', key: '', model: '', autoReset: true, resetHours: 4, wbLimit: 20000, chatDepth: 15 };
 try {
   const raw = window.localStorage.getItem(SEC_LS_KEY);
   if (raw) {
     const o = JSON.parse(raw);
     SEC = { url: o.url || '', key: o.key ? atob(o.key) : '', model: o.model || '',
-      autoReset: o.autoReset !== false, resetHours: clampN(o.resetHours, 1, 24, 4), wbLimit: typeof o.wbLimit === 'number' ? o.wbLimit : 20000 };
+      autoReset: o.autoReset !== false, resetHours: clampN(o.resetHours, 1, 24, 4), wbLimit: typeof o.wbLimit === 'number' ? o.wbLimit : 20000, chatDepth: typeof o.chatDepth === 'number' ? o.chatDepth : 15 };
   }
 } catch (e) {}
 export function saveSec() {
-  try { window.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit })); } catch (e) {}
+  try { window.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit, chatDepth: SEC.chatDepth })); } catch (e) {}
 }
 /* Công tắc và prompt tự điền: lưu theo từng thẻ nhân vật */
 export let CS = { link: false, story: false, userPrompt: '' };
@@ -65,21 +65,20 @@ async function collectWorldbook() {
     
     const ctx = (window.SillyTavern && window.SillyTavern.getContext) ? window.SillyTavern.getContext() : {};
     
-    // 0. Use native ST ES Module and Backend API (Kaiz-Agent Method)
+    // 0. Nguồn chính: ST API + ES Module — lấy đúng disable state từ file
     try {
         const ST_WorldInfo = await new Function("return import('/scripts/world-info.js')")().catch(()=>null);
         const activeNames = new Set();
         try {
             const charId = ctx.characterId !== undefined ? ctx.characterId : window.this_character;
             const charData = ctx.characters?.[charId]?.data || window.characters?.[charId]?.data;
-            console.log('[FARM DEBUG] Character Data:', charData ? 'Found' : 'Null', 'charId:', charId);
+            console.log('[FARM DEBUG] Character Data:', charData ? 'Found charId:' + charId : 'Null');
             if (charData) {
                 if (charData.extensions?.world) activeNames.add(charData.extensions.world);
                 if (charData.world) activeNames.add(charData.world);
             }
             const wiKey = ST_WorldInfo?.METADATA_KEY || window.WI_METADATA_KEY || 'world_info';
             const chatWorldName = ctx.chatMetadata?.[wiKey];
-            console.log('[FARM DEBUG] Chat World Name:', chatWorldName);
             if (chatWorldName && typeof chatWorldName === 'string') activeNames.add(chatWorldName);
         } catch(e) { console.log('[FARM DEBUG] Error getting active names:', e); }
         
@@ -87,7 +86,6 @@ async function collectWorldbook() {
 
         for (const name of activeNames) {
             try {
-                console.log('[FARM DEBUG] Fetching API for:', name);
                 const res = await fetch('/api/worldinfo/get', {
                     method: 'POST',
                     headers: {
@@ -98,74 +96,78 @@ async function collectWorldbook() {
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    console.log('[FARM DEBUG] Fetched API data entries length:', Array.isArray(data.entries) ? data.entries.length : 'Not Array');
-                    if (data && Array.isArray(data.entries)) entries = entries.concat(data.entries);
-                } else {
-                    console.log('[FARM DEBUG] API Failed, status:', res.status);
-                    const book = ST_WorldInfo?.world_info?.[name];
-                    if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+                    if (data && data.entries) {
+                        // ST trả về entries dạng Object {uid: entry} hoặc Array
+                        const vals = Array.isArray(data.entries) 
+                            ? data.entries 
+                            : Object.values(data.entries);
+                        console.log('[FARM DEBUG] Fetched', vals.length, 'entries from:', name);
+                        entries = entries.concat(vals);
+                    }
                 }
             } catch(e) {
-                console.log('[FARM DEBUG] Fetch Exception:', e);
-                const book = ST_WorldInfo?.world_info?.[name];
-                if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+                console.log('[FARM DEBUG] Fetch Exception for', name, ':', e);
             }
         }
     } catch (e) { console.log('[FARM DEBUG] Outer Exception:', e); }
 
-    // 1. Try ctx.worldInfo
-    if (ctx.worldInfo && Array.isArray(ctx.worldInfo.entries)) {
-      entries = entries.concat(ctx.worldInfo.entries);
-    } 
-    else if (ctx.worldInfo && typeof ctx.worldInfo === 'object') {
-       Object.values(ctx.worldInfo).forEach(book => {
-         if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-       });
-    }
-
-    // 2. Try window.world_info (make sure it's NOT an HTML element)
-    if (window.world_info && typeof window.world_info === 'object' && !(window.world_info instanceof HTMLElement)) {
-       Object.values(window.world_info).forEach(book => {
-         if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-         else if (book && typeof book === 'object' && !Array.isArray(book) && !(book instanceof HTMLElement)) {
-             if (book.content || book.text) entries.push(book);
-         }
-       });
-    }
-
-    // 2b. Try window.world_info_data
-    if (window.world_info_data && typeof window.world_info_data === 'object') {
-       Object.values(window.world_info_data).forEach(book => {
-         if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-       });
-    }
-
-    // 3. Try embedded character_book
+    // 1. Embedded character_book (nhúng trong thẻ nhân vật)
     try {
       const charId = ctx.characterId !== undefined ? ctx.characterId : window.this_character;
       if (typeof charId !== 'undefined') {
         const charData = ctx.characters?.[charId]?.data || window.characters?.[charId]?.data;
-        if (charData && charData.character_book && Array.isArray(charData.character_book.entries)) {
-           entries = entries.concat(charData.character_book.entries);
+        if (charData && charData.character_book && charData.character_book.entries) {
+           const charEntries = charData.character_book.entries;
+           const vals = Array.isArray(charEntries)
+               ? charEntries
+               : Object.values(charEntries);
+           entries = entries.concat(vals);
         }
       }
     } catch(e) { console.log('[FARM DEBUG] Embedded Book Exception:', e); }
     
     if (!entries || entries.length === 0) return '';
-    
+    // Build recent chat history to include in the context
+    let chatContext = '';
+    try {
+      const chatHistory = ctx.chat || window.chat || [];
+      // Lấy N tin nhắn gần nhất để làm ngữ cảnh chat
+      const depth = SEC.chatDepth !== undefined ? SEC.chatDepth : 15;
+      const recentMsgs = chatHistory.slice(-depth).map(m => (m.name ? m.name + ': ' : '') + (m.mes || '')).join('\n').trim();
+      if (recentMsgs) {
+        chatContext = "\n==== RECENT CHAT HISTORY ====\n" + recentMsgs + "\n=============================\n";
+      }
+    } catch(e) { console.log('[FARM DEBUG] Chat History Exception:', e); }
+
+    // Pass 1: thu thập tất cả content đang bị disable từ MỌI nguồn
+    // (tránh trường hợp bản copy từ ctx.worldInfo có disable=false overwrite bản API có disable=true)
+    const disabledContent = new Set();
+    for (const en of entries) {
+      if (en.disable === true) {
+        const c = (en.content || en.text || '').trim();
+        if (c) disabledContent.add(c);
+      }
+    }
+
+    // Pass 2: chỉ include entry không bị disable, bỏ trùng lặp
     const seen = new Set();
     for (const en of entries) {
-      if (en.enabled === false) continue;
       const content = (en.content || en.text || '').trim();
       if (!content || seen.has(content)) continue;
       seen.add(content);
-      
-      const isConstant = (en.strategy && en.strategy.type === 'constant') || en.constant === true || en.position === 'before_char';
-      if (isConstant) blue += content + '\n';
-      else green += content + '\n';
+
+      if (disabledContent.has(content)) continue;
+
+      const isConstant = en.constant === true || (en.strategy && en.strategy.type === 'constant') || en.position === 'before_char';
+      const entryName = en.comment || en.name || String(en.uid ?? en.id ?? '') || 'Lorebook Entry';
+      const formatted = `[${entryName}]\n${content}`;
+
+      if (isConstant) blue += formatted + '\n\n';
+      else green += formatted + '\n\n';
     }
     
-    const txt = blue.length >= 400 ? blue : blue + '\n' + green;
+    let txt = blue + green;
+    if (chatContext) txt += chatContext;
     const limit = SEC.wbLimit !== undefined ? SEC.wbLimit : 20000;
     return limit > 0 ? txt.slice(0, limit) : txt;
   } catch (e) { 
@@ -319,6 +321,7 @@ async function secTest() {
   p.textContent = ori; p.style.pointerEvents = '';
 }
 
+let renderTimeout;
 export function openSandbox() {
   const html = `
     <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -395,7 +398,6 @@ export function openSandbox() {
     }
   }
 
-  let renderTimeout;
   function debouncedRender() {
     clearTimeout(renderTimeout);
     renderTimeout = setTimeout(render, 150);
@@ -625,11 +627,18 @@ export function initEvents() {
   try {
     const chatChangedEvent = ctx.event_types?.CHAT_CHANGED;
     if (ctx.eventSource?.on && chatChangedEvent) {
-      ctx.eventSource.on(chatChangedEvent, () => {
+      const onChatChanged = () => {
         loadCharState();
         All.renderChips(); All.renderBanner(); updateInjection();
         try { if (ctx.S && CS.link) requestDayEvent(); }
         catch (e) { console.warn('[Farm] Lỗi khi đăng ký sự kiện CHAT_CHANGED:', e); }
+      };
+      ctx.eventSource.on(chatChangedEvent, onChatChanged);
+      All.disposers.push(() => {
+        try {
+          if (ctx.eventSource.removeListener) ctx.eventSource.removeListener(chatChangedEvent, onChatChanged);
+          else if (ctx.eventSource.off) ctx.eventSource.off(chatChangedEvent, onChatChanged);
+        } catch(e) {}
       });
     } else {
       console.warn('[Farm] ctx.eventSource hoặc ctx.event_types.CHAT_CHANGED không khả dụng, bỏ qua đăng ký sự kiện đổi thẻ.');

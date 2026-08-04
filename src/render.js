@@ -10,7 +10,7 @@ import { curBlocks, curPlots, blockPrice, save } from './state.js';
 import { SPRITE_PX } from './orb.js';
 import { CS, eventPending, todayEvent, setInjection, saveCharState, updateInjection, requestDayEvent } from './events.js';
 import { applyPageSkin, renderPager } from './ui.js';
-import { buyBlock, harvest, plant, water, fertilize, shovel } from './logic.js';
+import { buyBlock, harvest, plant, water, fertilize, shovel, rollMutation } from './logic.js';
 import { weatherOf } from './utils.js';
 import { growMs } from './logic.js';
 import { esc } from './events.js';
@@ -200,6 +200,10 @@ export function renderPlots() {
            }
         } else {
            const left = c.matureAt - now();
+           if (left <= 0 && !c.mutRolled) {
+             rollMutation(c, pi);
+             save();
+           }
            const stateStr = `${c.id}|${c.left}|${c.mut}|${c.fertUsed ? Object.keys(c.fertUsed).join(',') : ''}|${left <= 0 ? 'ripe' : 'grow'}`;
            
            // @ts-ignore
@@ -224,7 +228,7 @@ export function renderPlots() {
       const bg = isLocked ? tileURI(groundKind, pi * 31 + 5)
         : pEl.classList.contains('watered') ? tileURI(wetKind, pi * 31 + 5) : tileURI(plotKind, pi * 31 + 5);
       // @ts-ignore
-      if (pEl.style.backgroundImage !== bg) pEl.style.backgroundImage = bg;
+      if (pEl.dataset.bg !== bg) { pEl.style.backgroundImage = bg; pEl.dataset.bg = bg; }
       const bgSz = isLocked ? '144px 144px' : '100% 100%';
       // @ts-ignore
       if (pEl.style.backgroundSize !== bgSz) pEl.style.backgroundSize = bgSz;
@@ -289,8 +293,8 @@ export function renderBanner() {
   }
 }
 export function renderDynamic() { 
-  settle(); 
   if (ctx.win.classList.contains('open')) {
+    settle();
     renderStatus(); 
     renderPlots(); 
   }

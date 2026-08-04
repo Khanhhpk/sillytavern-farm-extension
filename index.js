@@ -1368,7 +1368,7 @@ var styleCSS = `
     /* #26: l\u1EDBp cho b\xE9 tr\xF2n t\u1EF1 do \u0111i l\u1EA1i \u2014\u2014 ph\u1EE7 to\xE0n b\u1ED9 khu ru\u1ED9ng, \u0111i theo khu v\u1EF1c (lo\u1EA1i l\xE0m vi\u1EC7c = h\xE0ng d\u01B0\u1EDBi, lo\u1EA1i \u0111i d\u1EA1o = b\u1EDD ru\u1ED9ng) */
     .mascots { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
     .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute;
-      left: 0; bottom: 0; will-change: left, bottom; }
+      left: 0; bottom: 0; will-change: transform, translate; }
     .pet:active { transform: scale(1.15, .85); }
     .pbody { display: block; animation: petbob 1.8s ease-in-out infinite; }
     .pet.walk .pbody { animation: pethop var(--hopd, .33s) linear infinite; }   /* v0.7\u2460: \u0111i b\u1ED9 = nh\u1EA3y li\xEAn ti\u1EBFp theo \u0111\u01B0\u1EDDng parabol */
@@ -1992,22 +1992,22 @@ function petSpot(id) {
   return { x, y: WORK_BAND + 6 + Math.random() * Math.max(20, H - WORK_BAND - 70) };
 }
 function placePet(el, p, instant) {
-  if (instant) el.style.transitionProperty = "transform";
+  if (instant) el.style.transitionProperty = "transform, translate";
   else {
     const old = petPos[el.dataset.pet] || p;
     const dist = Math.hypot(p.x - old.x, p.y - old.y);
     const dur = dist < 40 ? 0.5 : Math.min(11, Math.max(3, dist / 18));
-    el.style.transitionProperty = "transform, left, bottom";
-    el.style.transitionDuration = ".12s, " + dur + "s, " + dur + "s";
-    el.style.transitionTimingFunction = "ease, linear, ease";
+    el.style.transitionProperty = "transform, translate";
+    el.style.transitionDuration = ".12s, " + dur + "s";
+    el.style.transitionTimingFunction = "ease, linear";
     el.classList.toggle("flip", p.x < old.x);
   }
-  el.style.left = p.x + "px";
-  el.style.bottom = p.y + "px";
+  el.style.translate = p.x + "px " + -p.y + "px";
   petPos[el.dataset.pet] = p;
 }
 function hopStep(el) {
   const id = el.dataset.pet;
+  if (el.dataset.dragging) return;
   if (!el.isConnected) {
     stopHop(id);
     return;
@@ -2029,16 +2029,16 @@ function hopStep(el) {
   el.classList.add("walk");
   el.style.setProperty("--hopd", g.dur + "ms");
   el.style.setProperty("--hy", g.hy + "px");
-  el.style.transitionProperty = "transform, left, bottom";
-  el.style.transitionDuration = ".12s, " + g.dur + "ms, " + g.dur + "ms";
-  el.style.transitionTimingFunction = "ease, linear, linear";
-  el.style.left = p.x + "px";
-  el.style.bottom = p.y + "px";
+  el.style.transitionProperty = "transform, translate";
+  el.style.transitionDuration = ".12s, " + g.dur + "ms";
+  el.style.transitionTimingFunction = "ease, linear";
+  el.style.translate = p.x + "px " + -p.y + "px";
   petPos[id] = p;
   petHopT[id] = window.setTimeout(() => hopStep(el), g.dur);
 }
 function moveTo(el, p) {
   const id = el.dataset.pet;
+  if (el.dataset.dragging) return;
   if (FLOATY[id]) return placePet(el, p, false);
   petTgt[id] = p;
   if (!petHopT[id]) hopStep(el);
@@ -2262,12 +2262,126 @@ function initPets() {
       if (Math.random() < 0.35) moveTo(el, petSpot(id));
     });
   }, 7e3);
-  $id("mascots").addEventListener("click", (e) => {
+  let activeDrag = null;
+  let dragAnimFrame = null;
+  const mascots = $id("mascots");
+  mascots.addEventListener("pointerdown", (e) => {
+    if (!ctx.S.dragPet) return;
     const el = e.target.closest(".pet");
     if (!el) return;
-    const id = el.dataset.pet, def = PETS[id];
+    if (e.button !== 0) return;
+    e.preventDefault();
+    try {
+      el.setPointerCapture(e.pointerId);
+    } catch (err) {
+    }
+    const id = el.dataset.pet;
+    if (petHopT[id]) {
+      clearTimeout(petHopT[id]);
+      petHopT[id] = null;
+    }
+    delete petTgt[id];
+    delete petArrive[id];
+    el.dataset.dragging = "true";
+    const comp = window.getComputedStyle(el);
+    let exactLeft = 0, exactBottom = 0;
+    if (comp.translate && comp.translate !== "none") {
+      const parts = comp.translate.split(" ").map(parseFloat);
+      exactLeft = parts[0] || 0;
+      exactBottom = -(parts[1] || 0);
+    } else if (petPos[id]) {
+      exactLeft = petPos[id].x;
+      exactBottom = petPos[id].y;
+    }
+    el.style.translate = exactLeft + "px " + -exactBottom + "px";
+    el.style.transitionProperty = "transform";
+    el.style.transitionDuration = "0.12s";
+    petPos[id] = { x: exactLeft, y: exactBottom };
+    el.classList.remove("walk");
+    activeDrag = {
+      id: e.pointerId,
+      el,
+      petId: id,
+      sx: e.clientX,
+      sy: e.clientY,
+      ox: exactLeft,
+      oy: exactBottom,
+      dx: 0,
+      dy: 0,
+      vx: 0,
+      vy: 0,
+      targetVx: 0,
+      targetVy: 0,
+      moved: false,
+      lastX: e.clientX,
+      lastY: e.clientY,
+      dropped: false,
+      lastTime: performance.now(),
+      startPhysics: null
+    };
+    const updateDrag = () => {
+      if (!activeDrag) return;
+      const { el: el2, dropped, dx, dy, petId } = activeDrag;
+      if (!el2.isConnected) {
+        activeDrag = null;
+        return;
+      }
+      activeDrag.targetVx *= 0.85;
+      activeDrag.targetVy *= 0.85;
+      activeDrag.vx = activeDrag.vx * 0.7 + activeDrag.targetVx * 0.3;
+      activeDrag.vy = activeDrag.vy * 0.7 + activeDrag.targetVy * 0.3;
+      const vx = activeDrag.vx;
+      const vy = activeDrag.vy;
+      const stretchX = 1 + Math.min(Math.abs(vx) * 0.04, 0.4);
+      const stretchY = 1 + Math.min(Math.abs(vy) * 0.04, 0.4);
+      const scaleX = stretchX / stretchY;
+      const scaleY = stretchY / stretchX;
+      const skewX = Math.max(-30, Math.min(vx * -1.5, 30));
+      const rDx = dropped ? 0 : dx;
+      const rDy = dropped ? 0 : dy;
+      el2.style.transformOrigin = "center";
+      el2.style.transform = `translate3d(${rDx}px, ${rDy}px, 0) scale(${scaleX}, ${scaleY}) skewX(${skewX}deg)`;
+      if (dropped && Math.abs(vx) < 0.1 && Math.abs(vy) < 0.1) {
+        el2.style.transform = "";
+        el2.style.transition = "";
+        delete el2.dataset.dragging;
+        moveTo(el2, petPos[petId]);
+        activeDrag = null;
+        return;
+      }
+      dragAnimFrame = requestAnimationFrame(updateDrag);
+    };
+    activeDrag.startPhysics = () => {
+      dragAnimFrame = requestAnimationFrame(updateDrag);
+    };
+  });
+  mascots.addEventListener("pointermove", (e) => {
+    if (!activeDrag || activeDrag.id !== e.pointerId) return;
+    const { sx, sy } = activeDrag;
+    const rawDx = e.clientX - sx;
+    const rawDy = e.clientY - sy;
+    if (!activeDrag.moved && (Math.abs(rawDx) > 4 || Math.abs(rawDy) > 4)) {
+      activeDrag.moved = true;
+      activeDrag.el.style.transition = "none";
+      if (activeDrag.startPhysics) activeDrag.startPhysics();
+    }
+    if (!activeDrag.moved) return;
+    const nowMs = performance.now();
+    const dt = Math.max(1, nowMs - (activeDrag.lastTime || nowMs));
+    const rawVx = (e.clientX - activeDrag.lastX) / dt * 16.66;
+    const rawVy = (e.clientY - activeDrag.lastY) / dt * 16.66;
+    activeDrag.lastX = e.clientX;
+    activeDrag.lastY = e.clientY;
+    activeDrag.lastTime = nowMs;
+    activeDrag.targetVx = rawVx;
+    activeDrag.targetVy = rawVy;
+    activeDrag.dx = rawDx;
+    activeDrag.dy = rawDy;
+  });
+  const handlePetClick = (el, petId) => {
+    const def = PETS[petId];
     if (!def) return;
-    petTouch[id] = now();
+    petTouch[petId] = now();
     if (el.classList.contains("sleep")) return wakePet(el, true);
     const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
     if (def.job === "plant") return petPlant(el, cry);
@@ -2275,15 +2389,46 @@ function initPets() {
     if (def.job === "harvest") return petHarvest(el, cry);
     if (def.job) return petBubble(el, cry);
     let txt = cry;
-    if (now() - (ctx.S.petPoke[id] || 0) >= POKE_CD) {
-      ctx.S.petPoke[id] = now();
+    if (now() - (ctx.S.petPoke[petId] || 0) >= POKE_CD) {
+      ctx.S.petPoke[petId] = now();
       const gain = 1 + Math.floor(Math.random() * 5);
       ctx.S.coins += gain;
-      txt += id === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : id === "starBlob" ? " r\u01A1i ra " + gain + " G \xE1nh sao!" : " r\u01A1i ra " + gain + " G!";
+      txt += petId === "prismBlob" ? " r\u0169 ra " + gain + " G \xE1nh v\u1EE5n!" : petId === "starBlob" ? " r\u01A1i ra " + gain + " G \xE1nh sao!" : " r\u01A1i ra " + gain + " G!";
       save();
       renderStatus();
     }
     petBubble(el, txt);
+  };
+  const endDrag = (e) => {
+    if (!ctx.S.dragPet) return;
+    if (!activeDrag || activeDrag.id !== e.pointerId) return;
+    const { el, petId, moved, dx, dy, ox, oy } = activeDrag;
+    try {
+      el.releasePointerCapture(e.pointerId);
+    } catch (err) {
+    }
+    if (moved) {
+      const finalX = ox + dx;
+      const finalY = oy - dy;
+      el.style.translate = finalX + "px " + -finalY + "px";
+      petPos[petId] = { x: finalX, y: finalY };
+      activeDrag.dropped = true;
+    } else {
+      cancelAnimationFrame(dragAnimFrame);
+      el.style.transform = "";
+      el.style.transition = "";
+      activeDrag = null;
+      delete el.dataset.dragging;
+      handlePetClick(el, petId);
+    }
+  };
+  mascots.addEventListener("pointerup", endDrag);
+  mascots.addEventListener("pointercancel", endDrag);
+  mascots.addEventListener("click", (e) => {
+    if (ctx.S.dragPet) return;
+    const el = e.target.closest(".pet");
+    if (!el) return;
+    handlePetClick(el, el.dataset.pet);
   });
 }
 
@@ -2523,6 +2668,10 @@ function openPanel(kind) {
           Gi\u1EDBi h\u1EA1n ch\u1EEF Lorebook g\u1EEDi cho AI:
           <input class="inp" id="secWbLimit" type="number" min="0" max="1000000" value="${SEC.wbLimit !== void 0 ? SEC.wbLimit : 2e4}" style="width:80px;padding:3px 6px"> (0 = Kh\xF4ng c\u1EAFt, g\u1EEDi to\xE0n b\u1ED9)
         </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:10px">
+          Gi\u1EDBi h\u1EA1n tin nh\u1EAFn Chat g\u1EEDi l\xEAn Context:
+          <input class="inp" id="secChatDepth" type="number" min="0" max="200" value="${SEC.chatDepth !== void 0 ? SEC.chatDepth : 15}" style="width:80px;padding:3px 6px"> (0 = T\u1EAFt)
+        </label>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
           <span class="buy" id="secSave">L\u01B0u c\u1EA5u h\xECnh</span>
           <span class="buy plain" id="secModels">L\u1EA5y model</span>
@@ -2532,6 +2681,10 @@ function openPanel(kind) {
       <div class="shead">S\u1EF1 ki\u1EC7n th\u1EBF gi\u1EDBi quan \xB7 prompt tu\u1EF3 ch\u1EC9nh (ch\u1EC9 l\u01B0u \u1EDF th\u1EBB nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i)</div>
       <textarea class="inp" id="csPrompt" placeholder="V\xED d\u1EE5: th\u1EBF gi\u1EDBi n\xE0y linh kh\xED m\u1ECFng, b\u1EDBt s\u1EF1 ki\u1EC7n t\xEDch c\u1EF1c \u0111i; l\u1EDDi v\u0103n s\u1EF1 ki\u1EC7n vi\u1EBFt theo l\u1ED1i c\u1ED5.">${esc(CS.userPrompt)}</textarea>
       <div style="display:flex;gap:8px;margin-top:6px"><span class="buy" id="csPromptSave">L\u01B0u (ch\u1EC9 th\u1EBB n\xE0y)</span></div>
+      <div class="shead">T\u01B0\u01A1ng t\xE1c th\xFA c\u01B0ng</div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:6px">
+        <input type="checkbox" id="cfgDragPet" ${ctx.S.dragPet ? "checked" : ""}> B\u1EADt t\xEDnh n\u0103ng nh\xE9o v\xE0 k\xE9o th\xFA c\u01B0ng
+      </label>
       <div class="shead">C\xF4ng c\u1EE5 d\xE0nh cho Gi\xE1m \u0111\u1ED1c \u0110\u1ED3 ho\u1EA1</div>
       <div style="display:flex;gap:8px;margin-top:6px">
         <span class="buy plain" id="openSandboxBtn">\u{1F3A8} M\u1EDF X\u01B0\u1EDFng Ch\u1EBF T\xE1c AI</span>
@@ -2554,7 +2707,8 @@ function openPanel(kind) {
         autoReset: $id("secAuto").checked,
         resetHours: clampN($id("secHours").value, 1, 24, 4),
         // @ts-ignore
-        wbLimit: parseInt($id("secWbLimit").value, 10) || 0
+        wbLimit: parseInt($id("secWbLimit").value, 10) || 0,
+        chatDepth: parseInt($id("secChatDepth").value, 10) || 0
       });
       saveSec();
       toast("\u0110\xE3 l\u01B0u c\u1EA5u h\xECnh API ph\u1EE5");
@@ -2569,6 +2723,12 @@ function openPanel(kind) {
       openPanel("cfg");
       toast(ctx.S.theme === "sky" ? "\u0110\u1ED5i sang giao di\u1EC7n tr\u1EDDi quang~" : "V\u1EC1 l\u1EA1i giao di\u1EC7n h\u1ED3ng anh \u0111\xE0o~");
     }));
+    const cfgDragPet = $id("cfgDragPet");
+    if (cfgDragPet) cfgDragPet.addEventListener("change", () => {
+      ctx.S.dragPet = cfgDragPet.checked;
+      save();
+      toast(ctx.S.dragPet ? "\u0110\xE3 b\u1EADt t\xEDnh n\u0103ng k\xE9o th\u1EA3 th\xFA c\u01B0ng" : "\u0110\xE3 t\u1EAFt t\xEDnh n\u0103ng k\xE9o th\u1EA3 th\xFA c\u01B0ng");
+    });
     $id("csPromptSave").addEventListener("click", () => {
       CS.userPrompt = $id("csPrompt").value.slice(0, 3e3);
       saveCharState();
@@ -2911,6 +3071,10 @@ function renderPlots() {
           }
         } else {
           const left = c.matureAt - now();
+          if (left <= 0 && !c.mutRolled) {
+            rollMutation(c, pi);
+            save();
+          }
           const stateStr = `${c.id}|${c.left}|${c.mut}|${c.fertUsed ? Object.keys(c.fertUsed).join(",") : ""}|${left <= 0 ? "ripe" : "grow"}`;
           if (pEl.dataset.state !== stateStr) {
             const expected = plotHTML(pi);
@@ -2928,7 +3092,10 @@ function renderPlots() {
       }
       const isLocked = pi >= nb * 4;
       const bg = isLocked ? tileURI(groundKind, pi * 31 + 5) : pEl.classList.contains("watered") ? tileURI(wetKind, pi * 31 + 5) : tileURI(plotKind, pi * 31 + 5);
-      if (pEl.style.backgroundImage !== bg) pEl.style.backgroundImage = bg;
+      if (pEl.dataset.bg !== bg) {
+        pEl.style.backgroundImage = bg;
+        pEl.dataset.bg = bg;
+      }
       const bgSz = isLocked ? "144px 144px" : "100% 100%";
       if (pEl.style.backgroundSize !== bgSz) pEl.style.backgroundSize = bgSz;
     }
@@ -3001,8 +3168,8 @@ function renderBanner() {
   }
 }
 function renderDynamic() {
-  settle();
   if (ctx.win.classList.contains("open")) {
+    settle();
     renderStatus();
     renderPlots();
   }
@@ -3501,7 +3668,7 @@ var clampN = (x, lo, hi, dflt) => {
   return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt;
 };
 var SEC_LS_KEY = "star_tavern_farm_sec";
-var SEC = { url: "", key: "", model: "", autoReset: true, resetHours: 4, wbLimit: 2e4 };
+var SEC = { url: "", key: "", model: "", autoReset: true, resetHours: 4, wbLimit: 2e4, chatDepth: 15 };
 try {
   const raw = window.localStorage.getItem(SEC_LS_KEY);
   if (raw) {
@@ -3512,14 +3679,15 @@ try {
       model: o.model || "",
       autoReset: o.autoReset !== false,
       resetHours: clampN(o.resetHours, 1, 24, 4),
-      wbLimit: typeof o.wbLimit === "number" ? o.wbLimit : 2e4
+      wbLimit: typeof o.wbLimit === "number" ? o.wbLimit : 2e4,
+      chatDepth: typeof o.chatDepth === "number" ? o.chatDepth : 15
     };
   }
 } catch (e) {
 }
 function saveSec() {
   try {
-    window.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit }));
+    window.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit, chatDepth: SEC.chatDepth }));
   } catch (e) {
   }
 }
@@ -3566,14 +3734,13 @@ async function collectWorldbook() {
       try {
         const charId = ctx2.characterId !== void 0 ? ctx2.characterId : window.this_character;
         const charData = ctx2.characters?.[charId]?.data || window.characters?.[charId]?.data;
-        console.log("[FARM DEBUG] Character Data:", charData ? "Found" : "Null", "charId:", charId);
+        console.log("[FARM DEBUG] Character Data:", charData ? "Found charId:" + charId : "Null");
         if (charData) {
           if (charData.extensions?.world) activeNames.add(charData.extensions.world);
           if (charData.world) activeNames.add(charData.world);
         }
         const wiKey = ST_WorldInfo?.METADATA_KEY || window.WI_METADATA_KEY || "world_info";
         const chatWorldName = ctx2.chatMetadata?.[wiKey];
-        console.log("[FARM DEBUG] Chat World Name:", chatWorldName);
         if (chatWorldName && typeof chatWorldName === "string") activeNames.add(chatWorldName);
       } catch (e) {
         console.log("[FARM DEBUG] Error getting active names:", e);
@@ -3581,7 +3748,6 @@ async function collectWorldbook() {
       console.log("[FARM DEBUG] Active Worldbook Names to Fetch:", Array.from(activeNames));
       for (const name of activeNames) {
         try {
-          console.log("[FARM DEBUG] Fetching API for:", name);
           const res = await fetch("/api/worldinfo/get", {
             method: "POST",
             headers: {
@@ -3592,65 +3758,66 @@ async function collectWorldbook() {
           });
           if (res.ok) {
             const data = await res.json();
-            console.log("[FARM DEBUG] Fetched API data entries length:", Array.isArray(data.entries) ? data.entries.length : "Not Array");
-            if (data && Array.isArray(data.entries)) entries = entries.concat(data.entries);
-          } else {
-            console.log("[FARM DEBUG] API Failed, status:", res.status);
-            const book = ST_WorldInfo?.world_info?.[name];
-            if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+            if (data && data.entries) {
+              const vals = Array.isArray(data.entries) ? data.entries : Object.values(data.entries);
+              console.log("[FARM DEBUG] Fetched", vals.length, "entries from:", name);
+              entries = entries.concat(vals);
+            }
           }
         } catch (e) {
-          console.log("[FARM DEBUG] Fetch Exception:", e);
-          const book = ST_WorldInfo?.world_info?.[name];
-          if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
+          console.log("[FARM DEBUG] Fetch Exception for", name, ":", e);
         }
       }
     } catch (e) {
       console.log("[FARM DEBUG] Outer Exception:", e);
     }
-    if (ctx2.worldInfo && Array.isArray(ctx2.worldInfo.entries)) {
-      entries = entries.concat(ctx2.worldInfo.entries);
-    } else if (ctx2.worldInfo && typeof ctx2.worldInfo === "object") {
-      Object.values(ctx2.worldInfo).forEach((book) => {
-        if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-      });
-    }
-    if (window.world_info && typeof window.world_info === "object" && !(window.world_info instanceof HTMLElement)) {
-      Object.values(window.world_info).forEach((book) => {
-        if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-        else if (book && typeof book === "object" && !Array.isArray(book) && !(book instanceof HTMLElement)) {
-          if (book.content || book.text) entries.push(book);
-        }
-      });
-    }
-    if (window.world_info_data && typeof window.world_info_data === "object") {
-      Object.values(window.world_info_data).forEach((book) => {
-        if (book && Array.isArray(book.entries)) entries = entries.concat(book.entries);
-      });
-    }
     try {
       const charId = ctx2.characterId !== void 0 ? ctx2.characterId : window.this_character;
       if (typeof charId !== "undefined") {
         const charData = ctx2.characters?.[charId]?.data || window.characters?.[charId]?.data;
-        if (charData && charData.character_book && Array.isArray(charData.character_book.entries)) {
-          entries = entries.concat(charData.character_book.entries);
+        if (charData && charData.character_book && charData.character_book.entries) {
+          const charEntries = charData.character_book.entries;
+          const vals = Array.isArray(charEntries) ? charEntries : Object.values(charEntries);
+          entries = entries.concat(vals);
         }
       }
     } catch (e) {
       console.log("[FARM DEBUG] Embedded Book Exception:", e);
     }
     if (!entries || entries.length === 0) return "";
+    let chatContext = "";
+    try {
+      const chatHistory = ctx2.chat || window.chat || [];
+      const depth = SEC.chatDepth !== void 0 ? SEC.chatDepth : 15;
+      const recentMsgs = chatHistory.slice(-depth).map((m) => (m.name ? m.name + ": " : "") + (m.mes || "")).join("\n").trim();
+      if (recentMsgs) {
+        chatContext = "\n==== RECENT CHAT HISTORY ====\n" + recentMsgs + "\n=============================\n";
+      }
+    } catch (e) {
+      console.log("[FARM DEBUG] Chat History Exception:", e);
+    }
+    const disabledContent = /* @__PURE__ */ new Set();
+    for (const en of entries) {
+      if (en.disable === true) {
+        const c = (en.content || en.text || "").trim();
+        if (c) disabledContent.add(c);
+      }
+    }
     const seen = /* @__PURE__ */ new Set();
     for (const en of entries) {
-      if (en.enabled === false) continue;
       const content = (en.content || en.text || "").trim();
       if (!content || seen.has(content)) continue;
       seen.add(content);
-      const isConstant = en.strategy && en.strategy.type === "constant" || en.constant === true || en.position === "before_char";
-      if (isConstant) blue += content + "\n";
-      else green += content + "\n";
+      if (disabledContent.has(content)) continue;
+      const isConstant = en.constant === true || en.strategy && en.strategy.type === "constant" || en.position === "before_char";
+      const entryName = en.comment || en.name || String(en.uid ?? en.id ?? "") || "Lorebook Entry";
+      const formatted = `[${entryName}]
+${content}`;
+      if (isConstant) blue += formatted + "\n\n";
+      else green += formatted + "\n\n";
     }
-    const txt = blue.length >= 400 ? blue : blue + "\n" + green;
+    let txt = blue + green;
+    if (chatContext) txt += chatContext;
     const limit = SEC.wbLimit !== void 0 ? SEC.wbLimit : 2e4;
     return limit > 0 ? txt.slice(0, limit) : txt;
   } catch (e) {
@@ -3761,6 +3928,7 @@ async function requestDayEvent(force) {
     renderBanner();
   }
 }
+var renderTimeout;
 function openSandbox() {
   const html = `
     <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -3825,7 +3993,6 @@ function openSandbox() {
       }
     }
   }
-  let renderTimeout;
   function debouncedRender() {
     clearTimeout(renderTimeout);
     renderTimeout = setTimeout(render, 150);
@@ -4039,7 +4206,7 @@ function initEvents() {
   try {
     const chatChangedEvent = ctx.event_types?.CHAT_CHANGED;
     if (ctx.eventSource?.on && chatChangedEvent) {
-      ctx.eventSource.on(chatChangedEvent, () => {
+      const onChatChanged = () => {
         loadCharState();
         renderChips();
         renderBanner();
@@ -4048,6 +4215,14 @@ function initEvents() {
           if (ctx.S && CS.link) requestDayEvent();
         } catch (e) {
           console.warn("[Farm] L\u1ED7i khi \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n CHAT_CHANGED:", e);
+        }
+      };
+      ctx.eventSource.on(chatChangedEvent, onChatChanged);
+      disposers.push(() => {
+        try {
+          if (ctx.eventSource.removeListener) ctx.eventSource.removeListener(chatChangedEvent, onChatChanged);
+          else if (ctx.eventSource.off) ctx.eventSource.off(chatChangedEvent, onChatChanged);
+        } catch (e) {
         }
       });
     } else {
@@ -4111,6 +4286,7 @@ function loadState() {
   if (!ctx.S.petFind) ctx.S.petFind = {};
   if (!ctx.S.theme) ctx.S.theme = "sakura";
   if (!ctx.S.page) ctx.S.page = 1;
+  if (ctx.S.dragPet === void 0) ctx.S.dragPet = false;
   Object.keys(ctx.S.bag || {}).forEach((k) => {
     const base = k.split("@")[0];
     if (base === "mysbG" || base === "mysbW" || base === "mysbM") {
@@ -4154,13 +4330,13 @@ function save(immediate) {
     if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};
     ctx.extension_settings[extensionName][NS] = ctx.S;
     if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+    try {
+      updateInjection();
+    } catch (e) {
+    }
   };
   if (immediate) doSave();
   else ctx.saveTimer = setTimeout(doSave, 500);
-  try {
-    updateInjection();
-  } catch (e) {
-  }
 }
 
 // src/destroy.js

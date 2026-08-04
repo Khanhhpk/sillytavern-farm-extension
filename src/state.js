@@ -32,6 +32,7 @@ export function loadState() {
   if (!ctx.S.petFind) ctx.S.petFind = {};
   if (!ctx.S.theme) ctx.S.theme = 'sakura';
   if (!ctx.S.page) ctx.S.page = 1;
+  if (ctx.S.dragPet === undefined) ctx.S.dragPet = false;
   
   Object.keys(ctx.S.bag || {}).forEach(k => {
     const base = k.split('@')[0];
@@ -71,7 +72,7 @@ export function save(immediate) {
     if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};
     ctx.extension_settings[extensionName][NS] = ctx.S;
     if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+    try { updateInjection(); } catch (e) {}
   };
   if (immediate) doSave(); else ctx.saveTimer = setTimeout(doSave, 500);
-  try { updateInjection(); } catch (e) {}
 }

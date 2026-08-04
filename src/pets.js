@@ -39,21 +39,22 @@ export function petSpot(id) {
   return { x, y: WORK_BAND + 6 + Math.random() * Math.max(20, H - WORK_BAND - 70) };
 }
 export function placePet(el, p, instant) {                      // Đặt vị trí: instant = dịch chuyển tức thì; nếu không thì trượt đều (dành riêng cho bé bay)
-  if (instant) el.style.transitionProperty = 'transform';
+  if (instant) el.style.transitionProperty = 'transform, translate';
   else {
     const old = petPos[el.dataset.pet] || p;
     const dist = Math.hypot(p.x - old.x, p.y - old.y);
     const dur = dist < 40 ? .5 : Math.min(11, Math.max(3, dist / 18));
-    el.style.transitionProperty = 'transform, left, bottom';
-    el.style.transitionDuration = '.12s, ' + dur + 's, ' + dur + 's';
-    el.style.transitionTimingFunction = 'ease, linear, ease';
+    el.style.transitionProperty = 'transform, translate';
+    el.style.transitionDuration = '.12s, ' + dur + 's';
+    el.style.transitionTimingFunction = 'ease, linear';
     el.classList.toggle('flip', p.x < old.x);
   }
-  el.style.left = p.x + 'px'; el.style.bottom = p.y + 'px';
+  el.style.translate = p.x + 'px ' + (-p.y) + 'px';
   petPos[el.dataset.pet] = p;
 }
 export function hopStep(el) {                                   // Một cú nhảy: nhích một bước về phía đích, tới nơi thì nghỉ
   const id = el.dataset.pet;
+  if (el.dataset.dragging) return; // Không can thiệp khi người dùng đang kéo
   if (!el.isConnected) { stopHop(id); return; }
   const cur = petPos[id], tgt = petTgt[id], g = gaitOf(id);
   if (!cur || !tgt || Math.hypot(tgt.x - cur.x, tgt.y - cur.y) < 3) {
@@ -68,15 +69,16 @@ export function hopStep(el) {                                   // Một cú nh�
   el.classList.add('walk');
   el.style.setProperty('--hopd', g.dur + 'ms');
   el.style.setProperty('--hy', g.hy + 'px');
-  el.style.transitionProperty = 'transform, left, bottom';
-  el.style.transitionDuration = '.12s, ' + g.dur + 'ms, ' + g.dur + 'ms';
-  el.style.transitionTimingFunction = 'ease, linear, linear';
-  el.style.left = p.x + 'px'; el.style.bottom = p.y + 'px';
+  el.style.transitionProperty = 'transform, translate';
+  el.style.transitionDuration = '.12s, ' + g.dur + 'ms';
+  el.style.transitionTimingFunction = 'ease, linear';
+  el.style.translate = p.x + 'px ' + (-p.y) + 'px';
   petPos[id] = p;
   petHopT[id] = window.setTimeout(() => hopStep(el), g.dur);
 }
 export function moveTo(el, p) {                                 // Lên đường tới p: bé bay thì trượt, còn lại thì nhảy liên tiếp
   const id = el.dataset.pet;
+  if (el.dataset.dragging) return; // Không giành quyền điều khiển
   if (FLOATY[id]) return placePet(el, p, false);
   petTgt[id] = p;
   if (!petHopT[id]) hopStep(el);
@@ -275,28 +277,194 @@ export function initPets() {
       if (Math.random() < 0.35) moveTo(el, petSpot(id));
     });
   }, 7000);
-  All.$id('mascots').addEventListener('click', e => {
-    // @ts-ignore
+  let activeDrag = null;
+  let dragAnimFrame = null;
+  const mascots = All.$id('mascots');
+
+  mascots.addEventListener('pointerdown', e => {
+    if (!ctx.S.dragPet) return; // Nếu tính năng kéo thả tắt, không làm gì ở đây cả
     const el = e.target.closest('.pet'); if (!el) return;
-    const id = el.dataset.pet, def = PETS[id];
+    if (e.button !== 0) return; // Chỉ chuột trái
+    e.preventDefault();
+    try { el.setPointerCapture(e.pointerId); } catch(err){}
+    const id = el.dataset.pet;
+    
+    // Ngắt mọi hoạt động AI hiện tại
+    if (petHopT[id]) { clearTimeout(petHopT[id]); petHopT[id] = null; }
+    delete petTgt[id];
+    delete petArrive[id];
+    el.dataset.dragging = 'true'; // Đánh dấu đang bị người dùng điều khiển
+
+    // Lấy toạ độ thực tế (mid-air) nếu bé đang nhảy dở
+    const comp = window.getComputedStyle(el);
+    let exactLeft = 0, exactBottom = 0;
+    if (comp.translate && comp.translate !== 'none') {
+      const parts = comp.translate.split(' ').map(parseFloat);
+      exactLeft = parts[0] || 0; exactBottom = -(parts[1] || 0);
+    } else if (petPos[id]) {
+      exactLeft = petPos[id].x; exactBottom = petPos[id].y;
+    }
+    
+    // Ghi đè toạ độ thực
+    el.style.translate = exactLeft + 'px ' + (-exactBottom) + 'px';
+    
+    // Giữ lại transition cho transform để click vẫn có hiệu ứng nhún (.pet:active)
+    // left và bottom mặc định không có transition nên sẽ nhảy tức thời (đóng băng hop)
+    el.style.transitionProperty = 'transform';
+    el.style.transitionDuration = '0.12s';
+    
+    // Cập nhật petPos luôn để đồng bộ dữ liệu, tránh việc toạ độ bị cũ
+    petPos[id] = { x: exactLeft, y: exactBottom };
+    
+    el.classList.remove('walk');
+
+    activeDrag = {
+      id: e.pointerId, el, petId: id,
+      sx: e.clientX, sy: e.clientY,
+      ox: exactLeft,
+      oy: exactBottom,
+      dx: 0, dy: 0, vx: 0, vy: 0, targetVx: 0, targetVy: 0,
+      moved: false, lastX: e.clientX, lastY: e.clientY, dropped: false,
+      lastTime: performance.now(),
+      startPhysics: null
+    };
+
+    const updateDrag = () => {
+      if (!activeDrag) return;
+      const { el, dropped, dx, dy, petId } = activeDrag;
+      if (!el.isConnected) { activeDrag = null; return; }
+
+      // Lực cản (ma sát) làm giảm dần tốc độ khi dừng chuột
+      activeDrag.targetVx *= 0.85;
+      activeDrag.targetVy *= 0.85;
+
+      // Làm mượt vận tốc thực tế đuổi theo vận tốc mục tiêu (tạo độ trễ núng nính)
+      activeDrag.vx = activeDrag.vx * 0.7 + activeDrag.targetVx * 0.3;
+      activeDrag.vy = activeDrag.vy * 0.7 + activeDrag.targetVy * 0.3;
+
+      const vx = activeDrag.vx;
+      const vy = activeDrag.vy;
+
+      // Tính lực kéo dãn X và Y độc lập (giữ cho hình luôn đứng thẳng)
+      const stretchX = 1 + Math.min(Math.abs(vx) * 0.04, 0.4);
+      const stretchY = 1 + Math.min(Math.abs(vy) * 0.04, 0.4);
+      const scaleX = stretchX / stretchY;
+      const scaleY = stretchY / stretchX;
+      const skewX = Math.max(-30, Math.min(vx * -1.5, 30));
+      
+      // Khi thả ra, toạ độ thật đã được chốt, nên translate = 0, chỉ giữ lại transform núng nính đàn hồi
+      const rDx = dropped ? 0 : dx;
+      const rDy = dropped ? 0 : dy; // Sửa lỗi ngược trục Y: translate3d dùng rDy dương = đi xuống
+
+      el.style.transformOrigin = 'center';
+      el.style.transform = `translate3d(${rDx}px, ${rDy}px, 0) scale(${scaleX}, ${scaleY}) skewX(${skewX}deg)`;
+      
+      // Hoàn tất hiệu ứng nảy khi đã thả và vận tốc bị triệt tiêu hết
+      if (dropped && Math.abs(vx) < 0.1 && Math.abs(vy) < 0.1) {
+        el.style.transform = '';
+        el.style.transition = '';
+        delete el.dataset.dragging; // Xoá cờ an toàn khi đã hết núng nính
+        moveTo(el, petPos[petId]); 
+        activeDrag = null;
+        return;
+      }
+
+      dragAnimFrame = requestAnimationFrame(updateDrag);
+    };
+    
+    // Không chạy vòng lặp vật lý ngay lúc bấm để tránh ghi đè CSS transform của pseudo-class :active
+    activeDrag.startPhysics = () => {
+      dragAnimFrame = requestAnimationFrame(updateDrag);
+    };
+  });
+
+  mascots.addEventListener('pointermove', e => {
+    if (!activeDrag || activeDrag.id !== e.pointerId) return;
+    const { sx, sy } = activeDrag;
+    const rawDx = e.clientX - sx;
+    const rawDy = e.clientY - sy; 
+    
+    if (!activeDrag.moved && (Math.abs(rawDx) > 4 || Math.abs(rawDy) > 4)) {
+      activeDrag.moved = true;
+      // Vượt ngưỡng click, bắt đầu kéo lê -> tắt transition để GPU translate3d mượt
+      activeDrag.el.style.transition = 'none';
+      if (activeDrag.startPhysics) activeDrag.startPhysics();
+    }
+    if (!activeDrag.moved) return;
+
+    const nowMs = performance.now();
+    const dt = Math.max(1, nowMs - (activeDrag.lastTime || nowMs));
+    const rawVx = ((e.clientX - activeDrag.lastX) / dt) * 16.66;
+    const rawVy = ((e.clientY - activeDrag.lastY) / dt) * 16.66;
+    activeDrag.lastX = e.clientX; activeDrag.lastY = e.clientY;
+    activeDrag.lastTime = nowMs;
+    
+    // Bơm động lượng vào target velocity
+    activeDrag.targetVx = rawVx;
+    activeDrag.targetVy = rawVy;
+    activeDrag.dx = rawDx;
+    activeDrag.dy = rawDy;
+  });
+
+  const handlePetClick = (el, petId) => {
+    const def = PETS[petId];
     if (!def) return;
-    petTouch[id] = now();                                  // Ghi lại một lần "được để ý" (dùng để xét ngủ gật của bé làm việc)
-    if (el.classList.contains('sleep')) return wakePet(el, true);   // Bé đang ngủ: chọc = giật mình tỉnh, cú này không tính là chọc chọc
+    petTouch[petId] = now();
+    if (el.classList.contains('sleep')) return wakePet(el, true);
     const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
-    if (def.job === 'plant') return petPlant(el, cry);    // Nghề tốn tiền: chọc để kích hoạt làm hàng loạt
+    if (def.job === 'plant') return petPlant(el, cry);
     if (def.job === 'fert') return petFert(el, cry);
-    if (def.job === 'harvest') return petHarvest(el, cry);// #27: thu hoạch cũng đổi sang chọc mới chạy, khỏi quay lại mà ngơ ngác
-    if (def.job) return petBubble(el, cry);               // Loại tưới nước: bị động trong ca, chọc = chào hỏi
-    let txt = cry;                                        // Loại tìm kho báu: chọc chọc là rơi tiền
-    if (now() - (ctx.S.petPoke[id] || 0) >= POKE_CD) {
-      ctx.S.petPoke[id] = now();
+    if (def.job === 'harvest') return petHarvest(el, cry);
+    if (def.job) return petBubble(el, cry);
+    let txt = cry;
+    if (now() - (ctx.S.petPoke[petId] || 0) >= POKE_CD) {
+      ctx.S.petPoke[petId] = now();
       const gain = 1 + Math.floor(Math.random() * 5);
       ctx.S.coins += gain;
-      txt += id === 'prismBlob' ? ' rũ ra ' + gain + ' G ánh vụn!'
-        : id === 'starBlob' ? ' rơi ra ' + gain + ' G ánh sao!'
+      txt += petId === 'prismBlob' ? ' rũ ra ' + gain + ' G ánh vụn!'
+        : petId === 'starBlob' ? ' rơi ra ' + gain + ' G ánh sao!'
         : ' rơi ra ' + gain + ' G!';
       save(); All.renderStatus();
     }
     petBubble(el, txt);
+  };
+
+  const endDrag = e => {
+    if (!ctx.S.dragPet) return;
+
+    if (!activeDrag || activeDrag.id !== e.pointerId) return;
+    const { el, petId, moved, dx, dy, ox, oy } = activeDrag;
+    try { el.releasePointerCapture(e.pointerId); } catch(err){}
+
+    if (moved) {
+      const finalX = ox + dx;
+      const finalY = oy - dy;
+      // Chốt toạ độ thật ngay lập tức (bottom = oy - dy: dy > 0 thì bottom giảm = đi xuống)
+      el.style.translate = finalX + 'px ' + (-finalY) + 'px';
+      // Cập nhật petPos ngay để AI không bị nhầm nếu có xen ngang
+      petPos[petId] = { x: finalX, y: finalY };
+      // Đánh dấu đã thả để frame tiếp theo huỷ translate và bắt đầu giảm chấn
+      activeDrag.dropped = true;
+      // KHÔNG delete el.dataset.dragging ở đây, chờ jiggle xong mới xoá!
+    } else {
+      // Không kéo, chỉ là click
+      cancelAnimationFrame(dragAnimFrame);
+      el.style.transform = '';
+      el.style.transition = '';
+      activeDrag = null;
+      delete el.dataset.dragging;
+
+      handlePetClick(el, petId);
+    }
+  };
+
+  mascots.addEventListener('pointerup', endDrag);
+  mascots.addEventListener('pointercancel', endDrag);
+
+  // Bản lưu trữ gốc: chạy bằng native 'click', y hệt bản cũ không lệch một byte
+  mascots.addEventListener('click', e => {
+    if (ctx.S.dragPet) return; // Nếu bật tính năng kéo thả thì dùng logic pointerup ở trên, bỏ qua native click
+    const el = e.target.closest('.pet'); if (!el) return;
+    handlePetClick(el, el.dataset.pet);
   });
 }

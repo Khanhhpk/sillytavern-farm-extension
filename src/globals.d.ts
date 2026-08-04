@@ -9,7 +9,9 @@ interface Window {
     characters: any;
     WI_METADATA_KEY: any;
     world_info: any;
-    world_info_data: any;}
+    world_info_data: any;
+    chat: any;
+}
 interface DocumentFragment {
     querySelector<K extends keyof HTMLElementTagNameMap>(selectors: K): HTMLElementTagNameMap[K] | null;
     querySelector<K extends keyof SVGElementTagNameMap>(selectors: K): SVGElementTagNameMap[K] | null;
