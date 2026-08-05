@@ -256,6 +256,9 @@ export async function requestDayEvent(force) {
   try {
     const wb = await collectWorldbook();
     const prompt = buildEventPrompt(wb);
+    console.log('====== [FARM DEBUG] PROMPT SENT TO LLM ======');
+    console.log(prompt);
+    console.log('===============================================');
     const reqBody = {
       model: SEC.model,
       messages: [
