@@ -194,14 +194,16 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
 }
 
 // Hệ thống tạo Vật Phẩm Độc Nhất Async với Retry Logic
-export async function generateUniqueItem(isSpecial) {
+export async function generateUniqueItem(ticketType) {
   initGachaState();
   const roll = Math.random() * 100;
   let rarity = 'Hiếm';
   let color = '#4a90e2';
   let sellPrice = 2500;
 
-  if (isSpecial) {
+  if (ticketType === 'super') {
+    rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000;
+  } else if (ticketType === 'spec') {
     if (roll < 20) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
     else if (roll < 65) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
   } else {
@@ -256,15 +258,16 @@ export async function generateUniqueItem(isSpecial) {
 }
 
 // Thực hiện quay Gacha Bất đồng bộ
-export async function executeGachaRoll(isSpecial, count, updateLoadingText) {
+export async function executeGachaRoll(ticketType, count, updateLoadingText) {
   initGachaState();
-  const ticketKey = isSpecial ? 'spec' : 'norm';
-  const pityKey = isSpecial ? 'spec' : 'norm';
-  const maxPity = isSpecial ? GACHA_SPEC_PITY : GACHA_NORM_PITY;
+  const ticketKey = ticketType;
+  const pityKey = ticketType === 'super' ? 'spec' : ticketType;
+  const maxPity = ticketType === 'spec' ? GACHA_SPEC_PITY : GACHA_NORM_PITY;
 
   const haveTickets = ctx.S.tickets[ticketKey] || 0;
   if (haveTickets < count) {
-    toast(`Bạn cần ${count} Vé quay ${isSpecial ? 'Đặc biệt' : 'Thường'}!`);
+    const tName = ticketType === 'super' ? 'Siêu cường' : (ticketType === 'spec' ? 'Đặc biệt' : 'Thường');
+    toast(`Bạn cần ${count} Vé quay ${tName}!`);
     return null;
   }
 
@@ -279,7 +282,9 @@ export async function executeGachaRoll(isSpecial, count, updateLoadingText) {
     const isPity = ctx.S.gachaPity[pityKey] >= maxPity;
 
     let rewardType = '';
-    if (isPity) {
+    if (ticketType === 'super') {
+      rewardType = 'unique';
+    } else if (isPity) {
       rewardType = 'unique';
     } else {
       const roll = Math.random() * 100;
@@ -304,7 +309,7 @@ export async function executeGachaRoll(isSpecial, count, updateLoadingText) {
     if (updateLoadingText) {
       updateLoadingText(uniquePlans.length > 1 ? `Đang tỉnh thức bảo vật... (${uniqueCount}/${uniquePlans.length})` : 'Đang tỉnh thức bảo vật...');
     }
-    const item = await generateUniqueItem(isSpecial);
+    const item = await generateUniqueItem(ticketType);
     return {
       type: 'unique',
       name: item.name,
@@ -356,6 +361,7 @@ export function openGachaModal() {
   initGachaState();
   const normTicket = ctx.S.tickets?.norm || 0;
   const specTicket = ctx.S.tickets?.spec || 0;
+  const superTicket = ctx.S.tickets?.super || 0;
   const normPity = ctx.S.gachaPity?.norm || 0;
   const specPity = ctx.S.gachaPity?.spec || 0;
 
@@ -363,13 +369,15 @@ export function openGachaModal() {
     <div class="gacha-wrap" style="text-align:center; position:relative; overflow:hidden; padding:4px 0;">
       <!-- Header Thông tin vé & Mua nhanh -->
       <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.04); padding:8px 12px; border-radius:8px; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-        <div style="font-weight:bold; font-size:14px; color:#3a2c22;">
-          Vé Thường: <span id="gachaNormCount" style="color:#4a7a26; font-size:14px; margin-right:8px;">${normTicket}</span> | 
-          Vé Đặc Biệt: <span id="gachaSpecCount" style="color:#8a2acc; font-size:14px;">${specTicket}</span>
+        <div style="font-weight:bold; font-size:14px; color:#3a2c22; text-align:left;">
+          Thường: <span id="gachaNormCount" style="color:#4a7a26; font-size:14px; margin-right:8px;">${normTicket}</span> | 
+          ĐB: <span id="gachaSpecCount" style="color:#8a2acc; font-size:14px; margin-right:8px;">${specTicket}</span> | 
+          SC: <span id="gachaSuperCount" style="color:#ff4500; font-size:14px;">${superTicket}</span>
         </div>
-        <div style="display:flex; gap:6px; flex:none;">
+        <div style="display:flex; gap:6px; flex:none; flex-wrap:wrap; justify-content:flex-end;">
           <span class="buy" id="gachaBuyNormBtn" style="padding:4px 8px; font-size:11px;">+ Vé Thường (1000G)</span>
-          <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé Đặc biệt (5000G)</span>
+          <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé ĐB (5000G)</span>
+          <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé SC (500KG)</span>
         </div>
       </div>
 
@@ -410,6 +418,7 @@ export function openGachaModal() {
         <span class="buy" id="gachaRollNorm10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#4e903a; border:1px solid #3c702c; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Thường ×10</span>
         <span class="buy" id="gachaRollSpec1" style="padding:10px 0; font-size:13px; font-weight:bold; background:#a335ee; border:1px solid #8a2acc; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Đặc Biệt ×1</span>
         <span class="buy" id="gachaRollSpec10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#8a2acc; border:1px solid #6a1aa3; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Đặc Biệt ×10</span>
+        <span class="buy" id="gachaRollSuper1" style="grid-column: 1 / -1; padding:10px 0; font-size:13px; font-weight:bold; background:linear-gradient(90deg, #ff8000, #ff4500); border:1px solid #cc3700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Siêu Cường ×1 (100% Huyền Thoại)</span>
       </div>
 
       <!-- Result Overlay Animation (Lưới kết quả) -->
@@ -460,18 +469,23 @@ export function openGachaModal() {
     openBuyDlg('ticket', 'spec', 'gacha');
   });
 
-  const triggerGridResult = (isSpecial, count, results) => {
+  All.$id('gachaBuySuperBtn')?.addEventListener('click', () => {
+    openBuyDlg('ticket', 'super', 'gacha');
+  });
+
+  const triggerGridResult = (ticketType, count, results) => {
     const overlay = All.$id('gachaResultOverlay');
     const animSlot = All.$id('gachaCapsuleAnim');
     const title = All.$id('gachaResultTitle');
     const grid = All.$id('gachaResultGrid');
 
     if (!overlay || !animSlot || !title || !grid) return;
-    const capsuleIcon = isSpecial ? spriteSVG('gachaCapsuleSpec', 48) : spriteSVG('gachaCapsuleNorm', 48);
+    const capsuleIcon = ticketType === 'super' ? spriteSVG('gachaCapsuleSpec', 48) : (ticketType === 'spec' ? spriteSVG('gachaCapsuleSpec', 48) : spriteSVG('gachaCapsuleNorm', 48));
     animSlot.innerHTML = capsuleIcon;
     animSlot.style.animation = 'gachaDrop 0.5s ease-out';
 
-    title.textContent = `Kết quả Quay ${isSpecial ? 'Đặc biệt' : 'Thường'} ×${count}`;
+    const tName = ticketType === 'super' ? 'Siêu cường' : (ticketType === 'spec' ? 'Đặc biệt' : 'Thường');
+    title.textContent = `Kết quả Quay ${tName} ×${count}`;
 
     grid.innerHTML = results.map(r => `
       <div class="gacha-item-card rarity-${r.rarity.replace(/\s+/g, '-')}" style="border:2px solid ${r.color}; border-radius:8px; padding:6px 8px; background:#fff; display:flex; flex-direction:column; align-items:center; width:100px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
@@ -490,7 +504,7 @@ export function openGachaModal() {
     if (overlay) overlay.style.display = 'none';
   });
 
-  const doRoll = async (isSpecial, count) => {
+  const doRoll = async (ticketType, count) => {
     const machine = All.$id('gachaMachineSprite');
     const loadOverlay = All.$id('gachaLoadingOverlay');
     const loadText = All.$id('gachaLoadingText');
@@ -499,7 +513,7 @@ export function openGachaModal() {
     if (loadOverlay) loadOverlay.style.display = 'flex';
     if (loadText) loadText.textContent = 'Đang quay...';
 
-    const results = await executeGachaRoll(isSpecial, count, (txt) => {
+    const results = await executeGachaRoll(ticketType, count, (txt) => {
       if (loadText) loadText.textContent = txt;
     });
 
@@ -521,7 +535,7 @@ export function openGachaModal() {
         const showNextUnique = () => {
           if (currentShowcase >= uniques.length) {
             showcaseOverlay.style.display = 'none';
-            triggerGridResult(isSpecial, count, results);
+            triggerGridResult(ticketType, count, results);
             return;
           }
           const u = uniques[currentShowcase];
@@ -545,13 +559,14 @@ export function openGachaModal() {
         
         showNextUnique();
       } else {
-        triggerGridResult(isSpecial, count, results);
+        triggerGridResult(ticketType, count, results);
       }
     }
   };
 
-  All.$id('gachaRollNorm1')?.addEventListener('click', () => doRoll(false, 1));
-  All.$id('gachaRollNorm10')?.addEventListener('click', () => doRoll(false, 10));
-  All.$id('gachaRollSpec1')?.addEventListener('click', () => doRoll(true, 1));
-  All.$id('gachaRollSpec10')?.addEventListener('click', () => doRoll(true, 10));
+  All.$id('gachaRollNorm1')?.addEventListener('click', () => doRoll('norm', 1));
+  All.$id('gachaRollNorm10')?.addEventListener('click', () => doRoll('norm', 10));
+  All.$id('gachaRollSpec1')?.addEventListener('click', () => doRoll('spec', 1));
+  All.$id('gachaRollSpec10')?.addEventListener('click', () => doRoll('spec', 10));
+  All.$id('gachaRollSuper1')?.addEventListener('click', () => doRoll('super', 1));
 }

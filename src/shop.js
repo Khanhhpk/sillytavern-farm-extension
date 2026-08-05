@@ -81,7 +81,11 @@ export function openPanel(kind) {
         <div class="item"><span class="icon">${spriteSVG('ticketSpec', 32)}</span>
           <span class="info"><div class="name">Vé Quay Đặc Biệt</div><div class="meta">Dùng quay Gachapon Đặc Biệt tăng tỷ lệ ra đồ độc nhất · Đang có ${ctx.S.tickets?.spec || 0}</div></span>
           <span class="price">${spriteSVG('coin', 16)}5,000</span>
-          <span class="buy${ctx.S.coins < 5000 ? ' off' : ''}" data-buyticket="spec">Mua</span></div>`;
+          <span class="buy${ctx.S.coins < 5000 ? ' off' : ''}" data-buyticket="spec">Mua</span></div>
+        <div class="item"><span class="icon">${spriteSVG('ticketSpec', 32)}</span>
+          <span class="info"><div class="name" style="color:#ff4500;">Vé Quay Siêu Cường</div><div class="meta">Dùng quay 1 phát 100% ra bảo vật AI phẩm chất Huyền Thoại · Đang có ${ctx.S.tickets?.super || 0}</div></span>
+          <span class="price">${spriteSVG('coin', 16)}500,000</span>
+          <span class="buy${ctx.S.coins < 500000 ? ' off' : ''}" data-buyticket="super" style="background:#ff4500; border:1px solid #cc3700; color:#fff;">Mua</span></div>`;
     } else {
       items = Object.keys(PASSES).map(k => {
         const ps = PASSES[k];

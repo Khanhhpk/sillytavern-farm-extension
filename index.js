@@ -2750,13 +2750,17 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
   }
   return null;
 }
-async function generateUniqueItem(isSpecial) {
+async function generateUniqueItem(ticketType) {
   initGachaState();
   const roll = Math.random() * 100;
   let rarity = "Hi\u1EBFm";
   let color = "#4a90e2";
   let sellPrice = 2500;
-  if (isSpecial) {
+  if (ticketType === "super") {
+    rarity = "Huy\u1EC1n tho\u1EA1i";
+    color = "#ff8000";
+    sellPrice = 2e4;
+  } else if (ticketType === "spec") {
     if (roll < 20) {
       rarity = "Huy\u1EC1n tho\u1EA1i";
       color = "#ff8000";
@@ -2814,14 +2818,15 @@ async function generateUniqueItem(isSpecial) {
   save();
   return { key, name: finalName, rarity, color, desc: finalDesc, sell: sellPrice, sp: spKey };
 }
-async function executeGachaRoll(isSpecial, count, updateLoadingText) {
+async function executeGachaRoll(ticketType, count, updateLoadingText) {
   initGachaState();
-  const ticketKey = isSpecial ? "spec" : "norm";
-  const pityKey = isSpecial ? "spec" : "norm";
-  const maxPity = isSpecial ? GACHA_SPEC_PITY : GACHA_NORM_PITY;
+  const ticketKey = ticketType;
+  const pityKey = ticketType === "super" ? "spec" : ticketType;
+  const maxPity = ticketType === "spec" ? GACHA_SPEC_PITY : GACHA_NORM_PITY;
   const haveTickets = ctx.S.tickets[ticketKey] || 0;
   if (haveTickets < count) {
-    toast(`B\u1EA1n c\u1EA7n ${count} V\xE9 quay ${isSpecial ? "\u0110\u1EB7c bi\u1EC7t" : "Th\u01B0\u1EDDng"}!`);
+    const tName = ticketType === "super" ? "Si\xEAu c\u01B0\u1EDDng" : ticketType === "spec" ? "\u0110\u1EB7c bi\u1EC7t" : "Th\u01B0\u1EDDng";
+    toast(`B\u1EA1n c\u1EA7n ${count} V\xE9 quay ${tName}!`);
     return null;
   }
   ctx.S.tickets[ticketKey] -= count;
@@ -2832,7 +2837,9 @@ async function executeGachaRoll(isSpecial, count, updateLoadingText) {
     ctx.S.gachaPity[pityKey]++;
     const isPity = ctx.S.gachaPity[pityKey] >= maxPity;
     let rewardType = "";
-    if (isPity) {
+    if (ticketType === "super") {
+      rewardType = "unique";
+    } else if (isPity) {
       rewardType = "unique";
     } else {
       const roll = Math.random() * 100;
@@ -2853,7 +2860,7 @@ async function executeGachaRoll(isSpecial, count, updateLoadingText) {
     if (updateLoadingText) {
       updateLoadingText(uniquePlans.length > 1 ? `\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt... (${uniqueCount}/${uniquePlans.length})` : "\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt...");
     }
-    const item = await generateUniqueItem(isSpecial);
+    const item = await generateUniqueItem(ticketType);
     return {
       type: "unique",
       name: item.name,
@@ -2900,19 +2907,22 @@ function openGachaModal() {
   initGachaState();
   const normTicket = ctx.S.tickets?.norm || 0;
   const specTicket = ctx.S.tickets?.spec || 0;
+  const superTicket = ctx.S.tickets?.super || 0;
   const normPity = ctx.S.gachaPity?.norm || 0;
   const specPity = ctx.S.gachaPity?.spec || 0;
   const bodyHTML = `
     <div class="gacha-wrap" style="text-align:center; position:relative; overflow:hidden; padding:4px 0;">
       <!-- Header Th\xF4ng tin v\xE9 & Mua nhanh -->
       <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.04); padding:8px 12px; border-radius:8px; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-        <div style="font-weight:bold; font-size:14px; color:#3a2c22;">
-          V\xE9 Th\u01B0\u1EDDng: <span id="gachaNormCount" style="color:#4a7a26; font-size:14px; margin-right:8px;">${normTicket}</span> | 
-          V\xE9 \u0110\u1EB7c Bi\u1EC7t: <span id="gachaSpecCount" style="color:#8a2acc; font-size:14px;">${specTicket}</span>
+        <div style="font-weight:bold; font-size:14px; color:#3a2c22; text-align:left;">
+          Th\u01B0\u1EDDng: <span id="gachaNormCount" style="color:#4a7a26; font-size:14px; margin-right:8px;">${normTicket}</span> | 
+          \u0110B: <span id="gachaSpecCount" style="color:#8a2acc; font-size:14px; margin-right:8px;">${specTicket}</span> | 
+          SC: <span id="gachaSuperCount" style="color:#ff4500; font-size:14px;">${superTicket}</span>
         </div>
-        <div style="display:flex; gap:6px; flex:none;">
+        <div style="display:flex; gap:6px; flex:none; flex-wrap:wrap; justify-content:flex-end;">
           <span class="buy" id="gachaBuyNormBtn" style="padding:4px 8px; font-size:11px;">+ V\xE9 Th\u01B0\u1EDDng (1000G)</span>
-          <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 \u0110\u1EB7c bi\u1EC7t (5000G)</span>
+          <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 \u0110B (5000G)</span>
+          <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 SC (500KG)</span>
         </div>
       </div>
 
@@ -2953,6 +2963,7 @@ function openGachaModal() {
         <span class="buy" id="gachaRollNorm10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#4e903a; border:1px solid #3c702c; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Th\u01B0\u1EDDng \xD710</span>
         <span class="buy" id="gachaRollSpec1" style="padding:10px 0; font-size:13px; font-weight:bold; background:#a335ee; border:1px solid #8a2acc; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay \u0110\u1EB7c Bi\u1EC7t \xD71</span>
         <span class="buy" id="gachaRollSpec10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#8a2acc; border:1px solid #6a1aa3; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay \u0110\u1EB7c Bi\u1EC7t \xD710</span>
+        <span class="buy" id="gachaRollSuper1" style="grid-column: 1 / -1; padding:10px 0; font-size:13px; font-weight:bold; background:linear-gradient(90deg, #ff8000, #ff4500); border:1px solid #cc3700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Si\xEAu C\u01B0\u1EDDng \xD71 (100% Huy\u1EC1n Tho\u1EA1i)</span>
       </div>
 
       <!-- Result Overlay Animation (L\u01B0\u1EDBi k\u1EBFt qu\u1EA3) -->
@@ -3004,16 +3015,20 @@ function openGachaModal() {
   $id("gachaBuySpecBtn")?.addEventListener("click", () => {
     openBuyDlg("ticket", "spec", "gacha");
   });
-  const triggerGridResult = (isSpecial, count, results) => {
+  $id("gachaBuySuperBtn")?.addEventListener("click", () => {
+    openBuyDlg("ticket", "super", "gacha");
+  });
+  const triggerGridResult = (ticketType, count, results) => {
     const overlay = $id("gachaResultOverlay");
     const animSlot = $id("gachaCapsuleAnim");
     const title = $id("gachaResultTitle");
     const grid = $id("gachaResultGrid");
     if (!overlay || !animSlot || !title || !grid) return;
-    const capsuleIcon = isSpecial ? spriteSVG("gachaCapsuleSpec", 48) : spriteSVG("gachaCapsuleNorm", 48);
+    const capsuleIcon = ticketType === "super" ? spriteSVG("gachaCapsuleSpec", 48) : ticketType === "spec" ? spriteSVG("gachaCapsuleSpec", 48) : spriteSVG("gachaCapsuleNorm", 48);
     animSlot.innerHTML = capsuleIcon;
     animSlot.style.animation = "gachaDrop 0.5s ease-out";
-    title.textContent = `K\u1EBFt qu\u1EA3 Quay ${isSpecial ? "\u0110\u1EB7c bi\u1EC7t" : "Th\u01B0\u1EDDng"} \xD7${count}`;
+    const tName = ticketType === "super" ? "Si\xEAu c\u01B0\u1EDDng" : ticketType === "spec" ? "\u0110\u1EB7c bi\u1EC7t" : "Th\u01B0\u1EDDng";
+    title.textContent = `K\u1EBFt qu\u1EA3 Quay ${tName} \xD7${count}`;
     grid.innerHTML = results.map((r) => `
       <div class="gacha-item-card rarity-${r.rarity.replace(/\s+/g, "-")}" style="border:2px solid ${r.color}; border-radius:8px; padding:6px 8px; background:#fff; display:flex; flex-direction:column; align-items:center; width:100px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
         <div style="font-size:10px; font-weight:bold; color:${r.color}; margin-bottom:2px;">${r.rarity}${r.isPity ? " \u2605B\u1EA3o hi\u1EC3m" : ""}</div>
@@ -3028,14 +3043,14 @@ function openGachaModal() {
     const overlay = $id("gachaResultOverlay");
     if (overlay) overlay.style.display = "none";
   });
-  const doRoll = async (isSpecial, count) => {
+  const doRoll = async (ticketType, count) => {
     const machine = $id("gachaMachineSprite");
     const loadOverlay = $id("gachaLoadingOverlay");
     const loadText = $id("gachaLoadingText");
     if (machine) machine.style.animation = "gachaShake 0.2s ease infinite";
     if (loadOverlay) loadOverlay.style.display = "flex";
     if (loadText) loadText.textContent = "\u0110ang quay...";
-    const results = await executeGachaRoll(isSpecial, count, (txt) => {
+    const results = await executeGachaRoll(ticketType, count, (txt) => {
       if (loadText) loadText.textContent = txt;
     });
     if (machine) machine.style.animation = "";
@@ -3053,7 +3068,7 @@ function openGachaModal() {
         const showNextUnique = () => {
           if (currentShowcase >= uniques.length) {
             showcaseOverlay.style.display = "none";
-            triggerGridResult(isSpecial, count, results);
+            triggerGridResult(ticketType, count, results);
             return;
           }
           const u = uniques[currentShowcase];
@@ -3074,14 +3089,15 @@ function openGachaModal() {
         };
         showNextUnique();
       } else {
-        triggerGridResult(isSpecial, count, results);
+        triggerGridResult(ticketType, count, results);
       }
     }
   };
-  $id("gachaRollNorm1")?.addEventListener("click", () => doRoll(false, 1));
-  $id("gachaRollNorm10")?.addEventListener("click", () => doRoll(false, 10));
-  $id("gachaRollSpec1")?.addEventListener("click", () => doRoll(true, 1));
-  $id("gachaRollSpec10")?.addEventListener("click", () => doRoll(true, 10));
+  $id("gachaRollNorm1")?.addEventListener("click", () => doRoll("norm", 1));
+  $id("gachaRollNorm10")?.addEventListener("click", () => doRoll("norm", 10));
+  $id("gachaRollSpec1")?.addEventListener("click", () => doRoll("spec", 1));
+  $id("gachaRollSpec10")?.addEventListener("click", () => doRoll("spec", 10));
+  $id("gachaRollSuper1")?.addEventListener("click", () => doRoll("super", 1));
 }
 
 // src/shop.js
@@ -3150,7 +3166,11 @@ function openPanel(kind) {
         <div class="item"><span class="icon">${spriteSVG("ticketSpec", 32)}</span>
           <span class="info"><div class="name">V\xE9 Quay \u0110\u1EB7c Bi\u1EC7t</div><div class="meta">D\xF9ng quay Gachapon \u0110\u1EB7c Bi\u1EC7t t\u0103ng t\u1EF7 l\u1EC7 ra \u0111\u1ED3 \u0111\u1ED9c nh\u1EA5t \xB7 \u0110ang c\xF3 ${ctx.S.tickets?.spec || 0}</div></span>
           <span class="price">${spriteSVG("coin", 16)}5,000</span>
-          <span class="buy${ctx.S.coins < 5e3 ? " off" : ""}" data-buyticket="spec">Mua</span></div>`;
+          <span class="buy${ctx.S.coins < 5e3 ? " off" : ""}" data-buyticket="spec">Mua</span></div>
+        <div class="item"><span class="icon">${spriteSVG("ticketSpec", 32)}</span>
+          <span class="info"><div class="name" style="color:#ff4500;">V\xE9 Quay Si\xEAu C\u01B0\u1EDDng</div><div class="meta">D\xF9ng quay 1 ph\xE1t 100% ra b\u1EA3o v\u1EADt AI ph\u1EA9m ch\u1EA5t Huy\u1EC1n Tho\u1EA1i \xB7 \u0110ang c\xF3 ${ctx.S.tickets?.super || 0}</div></span>
+          <span class="price">${spriteSVG("coin", 16)}500,000</span>
+          <span class="buy${ctx.S.coins < 5e5 ? " off" : ""}" data-buyticket="super" style="background:#ff4500; border:1px solid #cc3700; color:#fff;">Mua</span></div>`;
     } else {
       items = Object.keys(PASSES).map((k) => {
         const ps = PASSES[k];
@@ -4362,8 +4382,8 @@ function openPassDlg(k) {
 function openBuyDlg(kind, id, returnTo = "shop") {
   let def, price, name;
   if (kind === "ticket") {
-    price = id === "norm" ? 1e3 : 5e3;
-    name = id === "norm" ? "V\xE9 Quay Th\u01B0\u1EDDng" : "V\xE9 Quay \u0110\u1EB7c Bi\u1EC7t";
+    price = id === "super" ? 5e5 : id === "norm" ? 1e3 : 5e3;
+    name = id === "super" ? "V\xE9 Quay Si\xEAu C\u01B0\u1EDDng" : id === "norm" ? "V\xE9 Quay Th\u01B0\u1EDDng" : "V\xE9 Quay \u0110\u1EB7c Bi\u1EC7t";
   } else {
     def = kind === "seed" ? CROPS[id] : FERTS[id];
     price = kind === "seed" ? def.seed : def.price;
