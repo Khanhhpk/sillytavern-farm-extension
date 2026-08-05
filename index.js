@@ -2780,32 +2780,7 @@ async function generateAIUniqueItemData(rarity) {
 ${worldbook ? worldbook : "(Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u th\u1EBF gi\u1EDBi c\u1EE5 th\u1EC3, h\xE3y t\u1EF1 do s\xE1ng t\u1EA1o)"}
 N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m li\xEAn k\u1EBFt v\u1EDBi b\u1ED1i c\u1EA3nh n\xE0y, n\u1EBFu kh\xF4ng th\xEC t\u1EF1 do s\xE1ng t\u1EA1o.`;
     } else {
-      const RANDOM_THEMES = [
-        "\u0111\u1ED3 d\xF9ng h\u1ECDc t\u1EADp (b\xFAt, th\u01B0\u1EDBc, t\u1EA9y...)",
-        "\u1EA9m th\u1EF1c \u0111\u01B0\u1EDDng ph\u1ED1 (b\xE1nh m\xEC, xi\xEAn n\u01B0\u1EDBng...)",
-        "nh\u1EA1c c\u1EE5 c\u1ED5 \u0111i\u1EC3n (piano, violin, s\xE1o...)",
-        "\u0111\u1ED3 ch\u01A1i tr\u1EBB em (l\u1EAFc k\xEAu, g\u1EA5u b\xF4ng, xe phanh...)",
-        "th\u1EF1c v\u1EADt k\u1EF3 l\u1EA1 (n\u1EA5m \u0111\u1ED9c, hoa \u0103n th\u1ECBt...)",
-        "\u0111\u1ED9ng v\u1EADt bi\u1EC3n s\xE2u (s\u1EE9a, b\u1EA1ch tu\u1ED9c, c\xE1 v\xE2y ch\xE2n...)",
-        "c\xF4n tr\xF9ng (b\u1ECD r\xF9a, nh\u1EC7n, chu\u1ED3n chu\u1ED3n...)",
-        "trang ph\u1EE5c/ph\u1EE5 ki\u1EC7n (m\u0169 len, t\u1EA5t r\xE1ch, k\xEDnh r\xE2m...)",
-        "\u0111\u1ED3 gia d\u1EE5ng \u0111i\u1EC7n t\u1EED (qu\u1EA1t tr\u1EA7n, m\xE1y s\u1EA5y, l\xF2 vi s\xF3ng...)",
-        "d\u1EE5ng c\u1EE5 s\u1EEDa ch\u1EEFa (c\u1EDD l\xEA, b\xFAa, \u1ED1c v\xEDt...)",
-        "\u0111\u1ED3 n\u1ED9i th\u1EA5t (gh\u1EBF b\xE0nh, \u0111\xE8n ng\u1EE7, th\u1EA3m ch\xF9i ch\xE2n...)",
-        "ph\u01B0\u01A1ng ti\u1EC7n giao th\xF4ng (xe \u0111\u1EA1p, x\xEDch l\xF4, v\xE1n tr\u01B0\u1EE3t...)",
-        "m\u1EF9 ph\u1EA9m/trang \u0111i\u1EC3m (son m\xF4i, ph\u1EA5n ph\u1EE7, g\u01B0\u01A1ng tay...)",
-        "thi\u1EBFt b\u1ECB th\u1EC3 thao (qu\u1EA3 b\xF3ng, v\u1EE3t, t\u1EA1...)",
-        "m\u1ED9t sinh v\u1EADt th\u1EA7n tho\u1EA1i v\xF4 danh",
-        "m\u1ED9t lo\u1EA1i tr\xE1i c\xE2y lai t\u1EA1o",
-        "m\u1ED9t m\xF3n \u0111\u1ED3 c\u1ED5 t\u1EEB n\u1EC1n v\u0103n minh \u0111\xE3 m\u1EA5t",
-        "m\u1ED9t meme internet ph\u1ED5 bi\u1EBFn h\xF3a th\u1EA1ch",
-        "c\u1EA3m x\xFAc con ng\u01B0\u1EDDi \u0111\u01B0\u1EE3c v\u1EADt ch\u1EA5t h\xF3a",
-        "d\u1EE5ng c\u1EE5 v\u1EC7 sinh (ch\u1ED5i, c\xE2y lau nh\xE0, x\xF4 n\u01B0\u1EDBc...)",
-        "\u0111\u1ED3 d\xF9ng c\u1EAFm tr\u1EA1i (l\u1EC1u, la b\xE0n, \u0111\xE8n pin...)"
-      ];
-      const randomTheme = RANDOM_THEMES[Math.floor(Math.random() * RANDOM_THEMES.length)];
-      contextStr = `CH\u1EE6 \u0110\u1EC0 B\u1EAET BU\u1ED8C CHO L\u1EA6N N\xC0Y: "${randomTheme}".
-H\xE3y l\u1EA5y c\u1EA3m h\u1EE9ng t\u1EEB ch\u1EE7 \u0111\u1EC1 n\xE0y v\xE0 bi\u1EBFn n\xF3 th\xE0nh m\u1ED9t V\u1EACT PH\u1EA8M \u0110\u1ED8C NH\u1EA4T, b\u1EA5t ng\u1EDD v\xE0 s\xE1ng t\u1EA1o nh\u1EA5t c\xF3 th\u1EC3. \u0110\u1EEBng \u0111i l\u1ED1i m\xF2n, h\xE3y \u0111\u1EC3 tr\xED t\u01B0\u1EDFng t\u01B0\u1EE3ng bay xa!`;
+      contextStr = `KH\xD4NG C\xD3 CH\u1EE6 \u0110\u1EC0 C\u1ED0 \u0110\u1ECANH. \u0110\u1EC3 \u0111\u1EA3m b\u1EA3o t\xEDnh ng\u1EABu nhi\xEAn tuy\u1EC7t \u0111\u1ED1i, b\u1EA1n PH\u1EA2I t\u1EF1 b\u1ED1c th\u0103m m\u1ED9t ch\u1EE7 \u0111\u1EC1 b\u1EA5t k\u1EF3 (\u0111\u1ED3 gia d\u1EE5ng, m\xF3n \u0103n, sinh v\u1EADt bi\u1EC3n, nh\u1EA1c c\u1EE5, \u0111\u1ED3 ngh\u1EC1 th\u1EE3 m\u1ED9c, ph\u01B0\u01A1ng ti\u1EC7n giao th\xF4ng, \u0111\u1ED3 d\xF9ng h\u1ECDc t\u1EADp...) tr\u01B0\u1EDBc khi b\u1EAFt \u0111\u1EA7u thi\u1EBFt k\u1EBF. Kh\xF4ng \u0111\u01B0\u1EE3c d\xF9ng l\u1EA1i c\xE1c ch\u1EE7 \u0111\u1EC1 vi\u1EC5n t\u01B0\u1EDFng/ma thu\u1EADt/cyberpunk nh\xE0m ch\xE1n.`;
     }
     const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m game nh\u1EADp vai v\xE0 chuy\xEAn gia Pixel Art (32x32).
 H\xE3y s\xE1ng t\u1EA1o 1 V\u1EACT PH\u1EA8M \u0110\u1ED8C NH\u1EA4T ph\u1EA9m ch\u1EA5t [${rarity}].
@@ -2815,9 +2790,10 @@ B\u1EA2NG M\xC0U PIXEL 32x32 CHO PH\xC9P (K\xFD t\u1EF1: M\xE3 m\xE0u Hex):
 ${paletteStr}
 
 H\u01AF\u1EDANG D\u1EAAN T\u01AF DUY (B\u1EAFt bu\u1ED9c ph\u1EA3i c\xF3 th\u1EBB <thinking> tr\u01B0\u1EDBc khi xu\u1EA5t m\xE3):
-\u0110\u1EC3 v\u1EBD pixel art chu\u1EA9n 32x32:
-1. Ph\xE2n t\xEDch m\xE0u s\u1EAFc v\xE0 h\xECnh d\xE1ng v\u1EADt th\u1EC3 ph\xF9 h\u1EE3p v\u1EDBi m\xF4 t\u1EA3. V\u1EADt th\u1EC3 n\xEAn \u0111\u01B0\u1EE3c c\xE1ch \u0111i\u1EC7u th\xFA v\u1ECB, kh\xF4ng c\u1EA7n b\xF3 bu\u1ED9c v\xE0o n\xF4ng nghi\u1EC7p.
-2. \u0110\u1EBFm ch\xEDnh x\xE1c s\u1ED1 l\u01B0\u1EE3ng k\xFD t\u1EF1 tr\xEAn m\u1ED7i d\xF2ng. Khung canvas l\xE0 32x32, m\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng 32 k\xFD t\u1EF1, t\u1ED5ng c\u1ED9ng 32 d\xF2ng. N\u1EBFu thi\u1EBFu/th\u1EEBa k\xFD t\u1EF1, h\xECnh s\u1EBD b\u1ECB c\u1EAFt m\xE9o!
+\u0110\u1EC3 t\u1EA1o ra v\u1EADt ph\u1EA9m th\u1EF1c s\u1EF1 ng\u1EABu nhi\xEAn v\xE0 v\u1EBD pixel art chu\u1EA9n 32x32:
+1. B\u1ED0C TH\u0102M CH\u1EE6 \u0110\u1EC0: \u0110\u1EA7u ti\xEAn, h\xE3y li\u1EC7t k\xEA 3 danh t\u1EEB ho\xE0n to\xE0n ng\u1EABu nhi\xEAn (v\xED d\u1EE5: c\xE1i ch\u1EA3o, con t\xF4m, chi\u1EBFc \xF4). Nh\u1EAFm m\u1EAFt ch\u1ECDn 1 c\xE1i l\xE0m ch\u1EE7 \u0111\u1EC1 ch\xEDnh.
+2. THI\u1EBET K\u1EBE: Bi\u1EBFn danh t\u1EEB v\u1EEBa ch\u1ECDn th\xE0nh m\u1ED9t v\u1EADt ph\u1EA9m mang thu\u1ED9c t\xEDnh \u0111\u1EB7c bi\u1EC7t. Ph\xE2n t\xEDch m\xE0u s\u1EAFc v\xE0 h\xECnh d\xE1ng v\u1EADt th\u1EC3.
+3. V\u1EBC PIXEL: \u0110\u1EBFm ch\xEDnh x\xE1c s\u1ED1 l\u01B0\u1EE3ng k\xFD t\u1EF1 tr\xEAn m\u1ED7i d\xF2ng. Khung canvas l\xE0 32x32, m\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng 32 k\xFD t\u1EF1, t\u1ED5ng c\u1ED9ng 32 d\xF2ng. N\u1EBFu thi\u1EBFu/th\u1EEBa k\xFD t\u1EF1, h\xECnh s\u1EBD b\u1ECB c\u1EAFt m\xE9o!
 
 QUY T\u1EAEC \u0110\u1EA6U RA B\u1EAET BU\u1ED8C:
 Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\u1ED1i m\xE3 \`\`\`json ch\u1EE9a c\u1EA5u tr\xFAc:

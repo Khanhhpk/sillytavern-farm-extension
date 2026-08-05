@@ -110,32 +110,7 @@ export async function generateAIUniqueItemData(rarity) {
 ${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể, hãy tự do sáng tạo)'}
 Nếu thấy phù hợp, hãy thiết kế vật phẩm liên kết với bối cảnh này, nếu không thì tự do sáng tạo.`;
     } else {
-      const RANDOM_THEMES = [
-        "đồ dùng học tập (bút, thước, tẩy...)",
-        "ẩm thực đường phố (bánh mì, xiên nướng...)",
-        "nhạc cụ cổ điển (piano, violin, sáo...)",
-        "đồ chơi trẻ em (lắc kêu, gấu bông, xe phanh...)",
-        "thực vật kỳ lạ (nấm độc, hoa ăn thịt...)",
-        "động vật biển sâu (sứa, bạch tuộc, cá vây chân...)",
-        "côn trùng (bọ rùa, nhện, chuồn chuồn...)",
-        "trang phục/phụ kiện (mũ len, tất rách, kính râm...)",
-        "đồ gia dụng điện tử (quạt trần, máy sấy, lò vi sóng...)",
-        "dụng cụ sửa chữa (cờ lê, búa, ốc vít...)",
-        "đồ nội thất (ghế bành, đèn ngủ, thảm chùi chân...)",
-        "phương tiện giao thông (xe đạp, xích lô, ván trượt...)",
-        "mỹ phẩm/trang điểm (son môi, phấn phủ, gương tay...)",
-        "thiết bị thể thao (quả bóng, vợt, tạ...)",
-        "một sinh vật thần thoại vô danh",
-        "một loại trái cây lai tạo",
-        "một món đồ cổ từ nền văn minh đã mất",
-        "một meme internet phổ biến hóa thạch",
-        "cảm xúc con người được vật chất hóa",
-        "dụng cụ vệ sinh (chổi, cây lau nhà, xô nước...)",
-        "đồ dùng cắm trại (lều, la bàn, đèn pin...)"
-      ];
-      const randomTheme = RANDOM_THEMES[Math.floor(Math.random() * RANDOM_THEMES.length)];
-      contextStr = `CHỦ ĐỀ BẮT BUỘC CHO LẦN NÀY: "${randomTheme}".
-Hãy lấy cảm hứng từ chủ đề này và biến nó thành một VẬT PHẨM ĐỘC NHẤT, bất ngờ và sáng tạo nhất có thể. Đừng đi lối mòn, hãy để trí tưởng tượng bay xa!`;
+      contextStr = `KHÔNG CÓ CHỦ ĐỀ CỐ ĐỊNH. Để đảm bảo tính ngẫu nhiên tuyệt đối, bạn PHẢI tự bốc thăm một chủ đề bất kỳ (đồ gia dụng, món ăn, sinh vật biển, nhạc cụ, đồ nghề thợ mộc, phương tiện giao thông, đồ dùng học tập...) trước khi bắt đầu thiết kế. Không được dùng lại các chủ đề viễn tưởng/ma thuật/cyberpunk nhàm chán.`;
     }
 
     const sysPrompt = `Bạn là một AI thiết kế vật phẩm game nhập vai và chuyên gia Pixel Art (32x32).
@@ -146,9 +121,10 @@ BẢNG MÀU PIXEL 32x32 CHO PHÉP (Ký tự: Mã màu Hex):
 ${paletteStr}
 
 HƯỚNG DẪN TƯ DUY (Bắt buộc phải có thẻ <thinking> trước khi xuất mã):
-Để vẽ pixel art chuẩn 32x32:
-1. Phân tích màu sắc và hình dáng vật thể phù hợp với mô tả. Vật thể nên được cách điệu thú vị, không cần bó buộc vào nông nghiệp.
-2. Đếm chính xác số lượng ký tự trên mỗi dòng. Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!
+Để tạo ra vật phẩm thực sự ngẫu nhiên và vẽ pixel art chuẩn 32x32:
+1. BỐC THĂM CHỦ ĐỀ: Đầu tiên, hãy liệt kê 3 danh từ hoàn toàn ngẫu nhiên (ví dụ: cái chảo, con tôm, chiếc ô). Nhắm mắt chọn 1 cái làm chủ đề chính.
+2. THIẾT KẾ: Biến danh từ vừa chọn thành một vật phẩm mang thuộc tính đặc biệt. Phân tích màu sắc và hình dáng vật thể.
+3. VẼ PIXEL: Đếm chính xác số lượng ký tự trên mỗi dòng. Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!
 
 QUY TẮC ĐẦU RA BẮT BUỘC:
 Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json chứa cấu trúc:
