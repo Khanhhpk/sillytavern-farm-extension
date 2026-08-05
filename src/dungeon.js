@@ -11,14 +11,14 @@ let team = []; // Currently placed pets
 let enemies = []; // Spawned enemies
 
 const PET_STATS = {
-    slime: { hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
-    octo: { hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8 },
-    slimePink: { hp: 120, atk: 8, range: 40, speed: 35, cd: 1.2 },
-    octoCream: { hp: 90, atk: 12, range: 60, speed: 45, cd: 0.9 },
-    bunny: { hp: 70, atk: 20, range: 120, speed: 60, cd: 1.5 }, // ranged
-    ghostBlob: { hp: 60, atk: 25, range: 80, speed: 70, cd: 1 }, // assassin
+    slime: { name: 'Slime', desc: 'Chiến binh cân bằng, không có gì nổi bật.', hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
+    octo: { name: 'Bạch Tuộc', desc: 'Đánh nhanh thắng nhanh.', hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8 },
+    slimePink: { name: 'Slime Hồng', desc: 'Hồi máu: Hồi máu cho đồng minh ít máu nhất.', hp: 120, atk: 15, range: 80, speed: 35, cd: 1.5, skill: 'heal' },
+    octoCream: { name: 'Bạch Tuộc Kem', desc: 'Máu trâu, đánh chậm.', hp: 150, atk: 12, range: 60, speed: 45, cd: 1.5 },
+    bunny: { name: 'Thỏ Nâu', desc: 'Xạ thủ: Tầm đánh cực xa, sát thương cao.', hp: 70, atk: 25, range: 150, speed: 60, cd: 1.5 },
+    ghostBlob: { name: 'Ma Trắng', desc: 'Sát thủ: Luôn nhắm vào kẻ thù xa nhất.', hp: 60, atk: 35, range: 40, speed: 100, cd: 1.2, skill: 'assassin' },
     // defaults
-    default: { hp: 100, atk: 10, range: 40, speed: 40, cd: 1 }
+    default: { name: 'Pet Vô Danh', desc: 'Không có kỹ năng đặc biệt.', hp: 100, atk: 10, range: 40, speed: 40, cd: 1 }
 };
 
 const ENEMY_TYPES = [
@@ -94,39 +94,82 @@ function initPlacementPhase() {
         slot.className = 'dg-slot';
         slot.innerHTML = petSVG(petId, 32);
         slot.dataset.pet = petId;
+        slot.draggable = true;
         
-        slot.addEventListener('click', () => {
-            if (phase !== 'placement') return;
-            if (team.length >= 4) { All.toast('Tối đa 4 thành viên!'); return; }
-            if (slot.classList.contains('placed')) return;
-            
-            slot.classList.add('placed');
-            
-            // Add to arena
+        slot.addEventListener('mouseenter', () => {
             const stat = PET_STATS[petId] || PET_STATS.default;
-            const el = document.createElement('div');
-            el.className = 'dg-entity pet';
-            el.innerHTML = `
-                <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
-                ${petSVG(petId, 32)}
-            `;
-            // Random placement position on left side
-            const x = 40 + Math.random() * 60;
-            const y = 40 + Math.random() * (arena.clientHeight - 80);
+            const tooltip = document.createElement('div');
+            tooltip.className = 'dg-tooltip';
+            tooltip.id = 'dg-tooltip';
+            tooltip.innerHTML = `<b style="color:#ffd94d">${stat.name}</b><br/>HP: ${stat.hp} | ATK: ${stat.atk}<br/>Tầm đánh: ${stat.range} | Tốc đánh: ${stat.cd}s<br/><span style="color:#b08a5c; white-space: normal; display: block; max-width: 180px;">${stat.desc}</span>`;
+            document.body.appendChild(tooltip);
             
-            el.style.left = x + 'px';
-            el.style.top = y + 'px';
+            const rect = slot.getBoundingClientRect();
+            tooltip.style.left = rect.left + rect.width / 2 + 'px';
+            tooltip.style.top = rect.top + 'px';
+        });
+        slot.addEventListener('mouseleave', () => {
+            const t = document.getElementById('dg-tooltip');
+            if (t) t.remove();
+        });
+        
+        slot.addEventListener('dragstart', (e) => {
+            if (phase !== 'placement') { e.preventDefault(); return; }
+            if (team.length >= 4) { All.toast('Tối đa 4 thành viên!'); e.preventDefault(); return; }
+            if (slot.classList.contains('placed')) { e.preventDefault(); return; }
             
-            arena.appendChild(el);
+            const t = document.getElementById('dg-tooltip');
+            if (t) t.remove();
             
-            team.push({
-                id: petId, x, y, hp: stat.hp, maxHp: stat.hp, atk: stat.atk,
-                range: stat.range, speed: stat.speed, cd: 0, maxCd: stat.cd, el, type: 'pet',
-                dockSlot: slot
-            });
+            e.dataTransfer.setData('text/plain', petId);
+            slot.id = 'dg-dragging-' + petId;
         });
         
         dock.appendChild(slot);
+    });
+    
+    arena.addEventListener('dragover', (e) => {
+        if (phase !== 'placement') return;
+        e.preventDefault();
+    });
+    
+    arena.addEventListener('drop', (e) => {
+        if (phase !== 'placement') return;
+        e.preventDefault();
+        const petId = e.dataTransfer.getData('text/plain');
+        if (!petId) return;
+        
+        const slot = document.getElementById('dg-dragging-' + petId);
+        if (!slot || slot.classList.contains('placed')) return;
+        
+        slot.classList.add('placed');
+        
+        const stat = PET_STATS[petId] || PET_STATS.default;
+        const el = document.createElement('div');
+        el.className = 'dg-entity pet';
+        el.innerHTML = `
+            <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+            ${petSVG(petId, 32)}
+        `;
+        
+        const rect = arena.getBoundingClientRect();
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+        if (x > rect.width / 2 - 20) x = rect.width / 2 - 20;
+        if (x < 20) x = 20;
+        if (y < 20) y = 20;
+        if (y > rect.height - 20) y = rect.height - 20;
+        
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        
+        arena.appendChild(el);
+        
+        team.push({
+            id: petId, x, y, hp: stat.hp, maxHp: stat.hp, atk: stat.atk,
+            range: stat.range, speed: stat.speed, cd: 0, maxCd: stat.cd, el, type: 'pet',
+            skill: stat.skill, dockSlot: slot
+        });
     });
 
     All.$id('dg-start-btn').addEventListener('click', () => {
@@ -232,21 +275,58 @@ function updateEntities(groupA, groupB, dt) {
         // Cooldown tick
         if (a.cd > 0) a.cd -= dt;
         
-        // Find closest enemy
+        // Find target based on skill
         /** @type {any} */
         let closest = null;
         let minDist = Infinity;
         
-        groupB.forEach(b => {
-            if (b.hp <= 0) return;
-            const dx = b.x - a.x;
-            const dy = b.y - a.y;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < minDist) {
-                minDist = dist;
-                closest = { b, dx, dy, dist };
+        if (a.skill === 'heal') {
+            let minHpPct = 1.0;
+            groupA.forEach(ally => {
+                if (ally.hp <= 0) return;
+                const dist = Math.sqrt(Math.pow(ally.x - a.x, 2) + Math.pow(ally.y - a.y, 2));
+                const hpPct = ally.hp / ally.maxHp;
+                if (hpPct < minHpPct && dist < a.range * 4) { // Heal range is generous
+                    minHpPct = hpPct;
+                    closest = { b: ally, dx: ally.x - a.x, dy: ally.y - a.y, dist };
+                }
+            });
+            if (!closest) { // follow someone
+                groupA.forEach(ally => {
+                    if (ally === a || ally.hp <= 0) return;
+                    const dx = ally.x - a.x;
+                    const dy = ally.y - a.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closest = { b: ally, dx, dy, dist };
+                    }
+                });
             }
-        });
+        } else if (a.skill === 'assassin') {
+            let maxDist = -1;
+            groupB.forEach(b => {
+                if (b.hp <= 0) return;
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist > maxDist) {
+                    maxDist = dist;
+                    closest = { b, dx, dy, dist };
+                }
+            });
+        } else {
+            groupB.forEach(b => {
+                if (b.hp <= 0) return;
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < minDist) {
+                    minDist = dist;
+                    closest = { b, dx, dy, dist };
+                }
+            });
+        }
         
         if (closest) {
             // Face target
@@ -256,27 +336,36 @@ function updateEntities(groupA, groupB, dt) {
             if (closest.dx > 0 && a.type === 'enemy') a.el.classList.add('flip');
             else if (closest.dx <= 0 && a.type === 'enemy') a.el.classList.remove('flip');
             
-            if (closest.dist <= a.range) {
-                // Attack!
+            if (closest.dist <= a.range || (a.skill === 'heal' && closest.dist <= 10)) {
+                // Attack or Heal
                 if (a.cd <= 0) {
-                    closest.b.hp -= a.atk;
                     a.cd = a.maxCd;
-                    
-                    // Show dmg text
-                    const dmg = document.createElement('div');
-                    dmg.className = 'dg-dmg';
-                    dmg.textContent = (-a.atk).toString();
-                    dmg.style.left = closest.b.x + 'px';
-                    dmg.style.top = closest.b.y + 'px';
-                    arena.appendChild(dmg);
-                    setTimeout(() => dmg.remove(), 800);
+                    if (a.skill === 'heal') {
+                        closest.b.hp = Math.min(closest.b.maxHp, closest.b.hp + a.atk);
+                        const dmg = document.createElement('div');
+                        dmg.className = 'dg-dmg heal';
+                        dmg.textContent = '+' + a.atk;
+                        dmg.style.left = closest.b.x + 'px';
+                        dmg.style.top = closest.b.y + 'px';
+                        arena.appendChild(dmg);
+                        setTimeout(() => dmg.remove(), 800);
+                    } else {
+                        closest.b.hp -= a.atk;
+                        const dmg = document.createElement('div');
+                        dmg.className = 'dg-dmg';
+                        dmg.textContent = (-a.atk).toString();
+                        dmg.style.left = closest.b.x + 'px';
+                        dmg.style.top = closest.b.y + 'px';
+                        arena.appendChild(dmg);
+                        setTimeout(() => dmg.remove(), 800);
+                    }
                     
                     // Update HP bar
                     const pct = Math.max(0, closest.b.hp / closest.b.maxHp) * 100;
                     closest.b.el.querySelector('.dg-hp-fill').style.width = pct + '%';
                 }
             } else {
-                // Move towards
+                // Move towards target
                 const speed = a.speed * dt;
                 a.x += (closest.dx / closest.dist) * speed;
                 a.y += (closest.dy / closest.dist) * speed;
@@ -301,7 +390,7 @@ function endDungeon(isWin) {
         ctx.S.coins += coins;
         All.save();
         All.renderStatus();
-        rewardText = `<div style="color:white; font-size: 16px;">Phần thưởng: ${spriteSVG('coin', 16)} ${coins} G</div>`;
+        rewardText = `<div style="color:white; font-size: 16px;">Phần thưởng: ${spriteSVG('coin', 16).replace('display:block', 'display:inline-block; vertical-align:middle; margin-top:-2px')} ${coins} G</div>`;
     }
     
     overlay.innerHTML = `
