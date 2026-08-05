@@ -2780,7 +2780,32 @@ async function generateAIUniqueItemData(rarity) {
 ${worldbook ? worldbook : "(Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u th\u1EBF gi\u1EDBi c\u1EE5 th\u1EC3, h\xE3y t\u1EF1 do s\xE1ng t\u1EA1o)"}
 N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m li\xEAn k\u1EBFt v\u1EDBi b\u1ED1i c\u1EA3nh n\xE0y, n\u1EBFu kh\xF4ng th\xEC t\u1EF1 do s\xE1ng t\u1EA1o.`;
     } else {
-      contextStr = `KH\xD4NG C\xD3 CH\u1EE6 \u0110\u1EC0 C\u1ED0 \u0110\u1ECANH. M\u1ED7i l\u1EA7n t\u1EA1o v\u1EADt ph\u1EA9m, h\xE3y ch\u1ECDn m\u1ED9t ngu\u1ED3n c\u1EA3m h\u1EE9ng HO\xC0N TO\xC0N NG\u1EAAU NHI\xCAN v\xE0 KH\xD4NG LI\xCAN QUAN \u0110\u1EBEN NHAU t\u1EEB b\u1EA5t k\u1EF3 \u0111\xE2u trong v\u0169 tr\u1EE5 ki\u1EBFn th\u1EE9c c\u1EE7a b\u1EA1n. H\xE3y l\xE0m t\xF4i b\u1EA5t ng\u1EDD v\u1EDBi s\u1EF1 \u0111a d\u1EA1ng v\xF4 c\u1EF1c c\u1EE7a b\u1EA1n.`;
+      const RANDOM_THEMES = [
+        "\u0111\u1ED3 d\xF9ng h\u1ECDc t\u1EADp (b\xFAt, th\u01B0\u1EDBc, t\u1EA9y...)",
+        "\u1EA9m th\u1EF1c \u0111\u01B0\u1EDDng ph\u1ED1 (b\xE1nh m\xEC, xi\xEAn n\u01B0\u1EDBng...)",
+        "nh\u1EA1c c\u1EE5 c\u1ED5 \u0111i\u1EC3n (piano, violin, s\xE1o...)",
+        "\u0111\u1ED3 ch\u01A1i tr\u1EBB em (l\u1EAFc k\xEAu, g\u1EA5u b\xF4ng, xe phanh...)",
+        "th\u1EF1c v\u1EADt k\u1EF3 l\u1EA1 (n\u1EA5m \u0111\u1ED9c, hoa \u0103n th\u1ECBt...)",
+        "\u0111\u1ED9ng v\u1EADt bi\u1EC3n s\xE2u (s\u1EE9a, b\u1EA1ch tu\u1ED9c, c\xE1 v\xE2y ch\xE2n...)",
+        "c\xF4n tr\xF9ng (b\u1ECD r\xF9a, nh\u1EC7n, chu\u1ED3n chu\u1ED3n...)",
+        "trang ph\u1EE5c/ph\u1EE5 ki\u1EC7n (m\u0169 len, t\u1EA5t r\xE1ch, k\xEDnh r\xE2m...)",
+        "\u0111\u1ED3 gia d\u1EE5ng \u0111i\u1EC7n t\u1EED (qu\u1EA1t tr\u1EA7n, m\xE1y s\u1EA5y, l\xF2 vi s\xF3ng...)",
+        "d\u1EE5ng c\u1EE5 s\u1EEDa ch\u1EEFa (c\u1EDD l\xEA, b\xFAa, \u1ED1c v\xEDt...)",
+        "\u0111\u1ED3 n\u1ED9i th\u1EA5t (gh\u1EBF b\xE0nh, \u0111\xE8n ng\u1EE7, th\u1EA3m ch\xF9i ch\xE2n...)",
+        "ph\u01B0\u01A1ng ti\u1EC7n giao th\xF4ng (xe \u0111\u1EA1p, x\xEDch l\xF4, v\xE1n tr\u01B0\u1EE3t...)",
+        "m\u1EF9 ph\u1EA9m/trang \u0111i\u1EC3m (son m\xF4i, ph\u1EA5n ph\u1EE7, g\u01B0\u01A1ng tay...)",
+        "thi\u1EBFt b\u1ECB th\u1EC3 thao (qu\u1EA3 b\xF3ng, v\u1EE3t, t\u1EA1...)",
+        "m\u1ED9t sinh v\u1EADt th\u1EA7n tho\u1EA1i v\xF4 danh",
+        "m\u1ED9t lo\u1EA1i tr\xE1i c\xE2y lai t\u1EA1o",
+        "m\u1ED9t m\xF3n \u0111\u1ED3 c\u1ED5 t\u1EEB n\u1EC1n v\u0103n minh \u0111\xE3 m\u1EA5t",
+        "m\u1ED9t meme internet ph\u1ED5 bi\u1EBFn h\xF3a th\u1EA1ch",
+        "c\u1EA3m x\xFAc con ng\u01B0\u1EDDi \u0111\u01B0\u1EE3c v\u1EADt ch\u1EA5t h\xF3a",
+        "d\u1EE5ng c\u1EE5 v\u1EC7 sinh (ch\u1ED5i, c\xE2y lau nh\xE0, x\xF4 n\u01B0\u1EDBc...)",
+        "\u0111\u1ED3 d\xF9ng c\u1EAFm tr\u1EA1i (l\u1EC1u, la b\xE0n, \u0111\xE8n pin...)"
+      ];
+      const randomTheme = RANDOM_THEMES[Math.floor(Math.random() * RANDOM_THEMES.length)];
+      contextStr = `CH\u1EE6 \u0110\u1EC0 B\u1EAET BU\u1ED8C CHO L\u1EA6N N\xC0Y: "${randomTheme}".
+H\xE3y l\u1EA5y c\u1EA3m h\u1EE9ng t\u1EEB ch\u1EE7 \u0111\u1EC1 n\xE0y v\xE0 bi\u1EBFn n\xF3 th\xE0nh m\u1ED9t V\u1EACT PH\u1EA8M \u0110\u1ED8C NH\u1EA4T, b\u1EA5t ng\u1EDD v\xE0 s\xE1ng t\u1EA1o nh\u1EA5t c\xF3 th\u1EC3. \u0110\u1EEBng \u0111i l\u1ED1i m\xF2n, h\xE3y \u0111\u1EC3 tr\xED t\u01B0\u1EDFng t\u01B0\u1EE3ng bay xa!`;
     }
     const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m game nh\u1EADp vai v\xE0 chuy\xEAn gia Pixel Art (32x32).
 H\xE3y s\xE1ng t\u1EA1o 1 V\u1EACT PH\u1EA8M \u0110\u1ED8C NH\u1EA4T ph\u1EA9m ch\u1EA5t [${rarity}].

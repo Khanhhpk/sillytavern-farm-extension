@@ -110,7 +110,32 @@ export async function generateAIUniqueItemData(rarity) {
 ${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể, hãy tự do sáng tạo)'}
 Nếu thấy phù hợp, hãy thiết kế vật phẩm liên kết với bối cảnh này, nếu không thì tự do sáng tạo.`;
     } else {
-      contextStr = `KHÔNG CÓ CHỦ ĐỀ CỐ ĐỊNH. Mỗi lần tạo vật phẩm, hãy chọn một nguồn cảm hứng HOÀN TOÀN NGẪU NHIÊN và KHÔNG LIÊN QUAN ĐẾN NHAU từ bất kỳ đâu trong vũ trụ kiến thức của bạn. Hãy làm tôi bất ngờ với sự đa dạng vô cực của bạn.`;
+      const RANDOM_THEMES = [
+        "đồ dùng học tập (bút, thước, tẩy...)",
+        "ẩm thực đường phố (bánh mì, xiên nướng...)",
+        "nhạc cụ cổ điển (piano, violin, sáo...)",
+        "đồ chơi trẻ em (lắc kêu, gấu bông, xe phanh...)",
+        "thực vật kỳ lạ (nấm độc, hoa ăn thịt...)",
+        "động vật biển sâu (sứa, bạch tuộc, cá vây chân...)",
+        "côn trùng (bọ rùa, nhện, chuồn chuồn...)",
+        "trang phục/phụ kiện (mũ len, tất rách, kính râm...)",
+        "đồ gia dụng điện tử (quạt trần, máy sấy, lò vi sóng...)",
+        "dụng cụ sửa chữa (cờ lê, búa, ốc vít...)",
+        "đồ nội thất (ghế bành, đèn ngủ, thảm chùi chân...)",
+        "phương tiện giao thông (xe đạp, xích lô, ván trượt...)",
+        "mỹ phẩm/trang điểm (son môi, phấn phủ, gương tay...)",
+        "thiết bị thể thao (quả bóng, vợt, tạ...)",
+        "một sinh vật thần thoại vô danh",
+        "một loại trái cây lai tạo",
+        "một món đồ cổ từ nền văn minh đã mất",
+        "một meme internet phổ biến hóa thạch",
+        "cảm xúc con người được vật chất hóa",
+        "dụng cụ vệ sinh (chổi, cây lau nhà, xô nước...)",
+        "đồ dùng cắm trại (lều, la bàn, đèn pin...)"
+      ];
+      const randomTheme = RANDOM_THEMES[Math.floor(Math.random() * RANDOM_THEMES.length)];
+      contextStr = `CHỦ ĐỀ BẮT BUỘC CHO LẦN NÀY: "${randomTheme}".
+Hãy lấy cảm hứng từ chủ đề này và biến nó thành một VẬT PHẨM ĐỘC NHẤT, bất ngờ và sáng tạo nhất có thể. Đừng đi lối mòn, hãy để trí tưởng tượng bay xa!`;
     }
 
     const sysPrompt = `Bạn là một AI thiết kế vật phẩm game nhập vai và chuyên gia Pixel Art (32x32).
