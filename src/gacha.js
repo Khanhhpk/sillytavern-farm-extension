@@ -142,7 +142,7 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
     console.groupEnd();
 
     const ctrl = new AbortController();
-    const to = setTimeout(() => ctrl.abort(), 15000);
+    const to = setTimeout(() => ctrl.abort(), 60000); // Tăng timeout lên 60 giây vì AI cần thời gian suy nghĩ (thẻ <thinking>)
     const res = await fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(SEC.key ? { Authorization: 'Bearer ' + SEC.key } : {}) },
