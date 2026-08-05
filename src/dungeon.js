@@ -484,6 +484,7 @@ function combatLoop(time) {
 }
 
 function spawnDmg(target, amount, type) {
+    amount = Math.round(amount);
     const arena = All.$id('dg-arena');
     const dmg = document.createElement('div');
     dmg.className = 'dg-dmg' + (type ? ' ' + type : '');
@@ -498,7 +499,7 @@ function spawnDmg(target, amount, type) {
 }
 
 function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOverride) {
-    const atk = overrideAtk || attacker.atk;
+    const atk = Math.round(overrideAtk || attacker.atk);
     const skill = skillOverride || attacker.skill;
     
     if (skill === 'heal') {
@@ -868,8 +869,8 @@ function showWaveRewards() {
         const isAtk = Math.random() > 0.5;
         const amt = 1.1 + Math.random() * 0.2; // 10-30%
         fullTeam.forEach(p => {
-            if (isAtk) p.atk *= amt;
-            else { p.maxHp *= amt; p.hp *= amt; }
+            if (isAtk) p.atk = Math.round(p.atk * amt);
+            else { p.maxHp = Math.round(p.maxHp * amt); p.hp = Math.round(p.hp * amt); }
         });
         nextWaveSequence(overlay);
     };
