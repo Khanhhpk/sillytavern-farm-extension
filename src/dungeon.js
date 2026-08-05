@@ -34,10 +34,10 @@ const PET_STATS = {
 };
 
 const ENEMY_TYPES = [
-    { id: 'douya', name: 'Giá Đỗ', desc: 'Lính bầy đàn.', hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: 'melee' },
+    { id: 'douya', name: 'Giá Đỗ', desc: 'Lính bầy đàn.', hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: 'melee', sp: 'sprout' },
     { id: 'tomato', name: 'Cà Chua Tròn', desc: 'Cận chiến cơ bản.', hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: 'melee' },
     { id: 'radish', name: 'Củ Cải Tốc Độ', desc: 'Chạy cực nhanh.', hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: 'melee' },
-    { id: 'moonberry', name: 'Dâu Tây Gai', desc: 'Thích khách tập kích.', hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: 'assassin' },
+    { id: 'moonberry', name: 'Dâu Tây Gai', desc: 'Thích khách tập kích.', hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: 'assassin', sp: 'mysbG' },
     { id: 'chuncai', name: 'Rau Thuần', desc: 'Đeo bám dai dẳng.', hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: 'melee' },
     { id: 'lingjiao', name: 'Củ Ấu Giáp', desc: 'Cận chiến có giáp.', hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: 'melee' },
     { id: 'pumpkin', name: 'Bí Ngô Khổng Lồ', desc: 'Tanker chậm chạp.', hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: 'tank' },
@@ -311,7 +311,7 @@ function initPlacementPhase() {
         ENEMY_TYPES.forEach(stat => {
             codexList.innerHTML += `
                 <div class="dg-info-item" style="border-left: 2px solid #e06578;">
-                    <div class="dg-info-item-icon">${spriteSVG(stat.id, 32)}</div>
+                    <div class="dg-info-item-icon">${spriteSVG(stat.sp || stat.id, 32)}</div>
                     <div class="dg-info-item-desc">
                         <b style="color:#e06578;">${stat.name}</b>
                         HP: ${stat.hp} | ATK: ${stat.atk}<br/>
@@ -378,7 +378,7 @@ function startWave() {
         el.className = 'dg-entity enemy flip';
         el.innerHTML = `
             <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
-            ${spriteSVG(type.id, 32)}
+            ${spriteSVG(type.sp || type.id, 32)}
         `;
         
         const x = w - 40 - Math.random() * 60;

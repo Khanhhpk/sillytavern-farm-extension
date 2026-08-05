@@ -5389,10 +5389,10 @@ var PET_STATS = {
   default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 100, atk: 10, range: 40, speed: 40, cd: 1 }
 };
 var ENEMY_TYPES = [
-  { id: "douya", name: "Gi\xE1 \u0110\u1ED7", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: "melee" },
+  { id: "douya", name: "Gi\xE1 \u0110\u1ED7", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout" },
   { id: "tomato", name: "C\xE0 Chua Tr\xF2n", desc: "C\u1EADn chi\u1EBFn c\u01A1 b\u1EA3n.", hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: "melee" },
   { id: "radish", name: "C\u1EE7 C\u1EA3i T\u1ED1c \u0110\u1ED9", desc: "Ch\u1EA1y c\u1EF1c nhanh.", hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: "melee" },
-  { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: "assassin" },
+  { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: "assassin", sp: "mysbG" },
   { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: "melee" },
   { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: "melee" },
   { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: "tank" },
@@ -5625,7 +5625,7 @@ function initPlacementPhase() {
     ENEMY_TYPES.forEach((stat) => {
       codexList.innerHTML += `
                 <div class="dg-info-item" style="border-left: 2px solid #e06578;">
-                    <div class="dg-info-item-icon">${spriteSVG(stat.id, 32)}</div>
+                    <div class="dg-info-item-icon">${spriteSVG(stat.sp || stat.id, 32)}</div>
                     <div class="dg-info-item-desc">
                         <b style="color:#e06578;">${stat.name}</b>
                         HP: ${stat.hp} | ATK: ${stat.atk}<br/>
@@ -5684,7 +5684,7 @@ function startWave() {
     el.className = "dg-entity enemy flip";
     el.innerHTML = `
             <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
-            ${spriteSVG(type.id, 32)}
+            ${spriteSVG(type.sp || type.id, 32)}
         `;
     const x = w - 40 - Math.random() * 60;
     const y = 40 + Math.random() * (h - 80);
