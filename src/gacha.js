@@ -110,7 +110,7 @@ export async function generateAIUniqueItemData(rarity) {
 ${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể, hãy tự do sáng tạo)'}
 Nếu thấy phù hợp, hãy thiết kế vật phẩm liên kết với bối cảnh này, nếu không thì tự do sáng tạo.`;
     } else {
-      contextStr = `KHÔNG CÓ CHỦ ĐỀ CỐ ĐỊNH. Để đảm bảo tính ngẫu nhiên tuyệt đối, bạn PHẢI tự bốc thăm một chủ đề bất kỳ (đồ gia dụng, món ăn, sinh vật biển, nhạc cụ, đồ nghề thợ mộc, phương tiện giao thông, đồ dùng học tập...) trước khi bắt đầu thiết kế. Không được dùng lại các chủ đề viễn tưởng/ma thuật/cyberpunk nhàm chán.`;
+      contextStr = `KHÔNG CÓ CHỦ ĐỀ CỐ ĐỊNH. Để đảm bảo tính ngẫu nhiên tuyệt đối, bạn PHẢI tự bốc thăm một chủ đề bất kỳ trước khi bắt đầu thiết kế. Mọi thứ trong vũ trụ đều có thể trở thành vật phẩm.`;
     }
 
     const sysPrompt = `Bạn là một AI thiết kế vật phẩm game nhập vai và chuyên gia Pixel Art (32x32).
@@ -122,7 +122,7 @@ ${paletteStr}
 
 HƯỚNG DẪN TƯ DUY (Bắt buộc phải có thẻ <thinking> trước khi xuất mã):
 Để tạo ra vật phẩm thực sự ngẫu nhiên và vẽ pixel art chuẩn 32x32:
-1. BỐC THĂM CHỦ ĐỀ: Đầu tiên, hãy liệt kê 3 danh từ hoàn toàn ngẫu nhiên (ví dụ: cái chảo, con tôm, chiếc ô). Nhắm mắt chọn 1 cái làm chủ đề chính.
+1. BỐC THĂM CHỦ ĐỀ: Đầu tiên, hãy suy nghĩ ra 3 danh từ hoàn toàn ngẫu nhiên và không liên quan đến nhau. Chọn 1 trong số đó làm chủ đề chính.
 2. THIẾT KẾ: Biến danh từ vừa chọn thành một vật phẩm mang thuộc tính đặc biệt. Phân tích màu sắc và hình dáng vật thể.
 3. VẼ PIXEL: Đếm chính xác số lượng ký tự trên mỗi dòng. Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!
 

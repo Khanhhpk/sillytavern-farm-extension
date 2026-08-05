@@ -2780,7 +2780,7 @@ async function generateAIUniqueItemData(rarity) {
 ${worldbook ? worldbook : "(Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u th\u1EBF gi\u1EDBi c\u1EE5 th\u1EC3, h\xE3y t\u1EF1 do s\xE1ng t\u1EA1o)"}
 N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m li\xEAn k\u1EBFt v\u1EDBi b\u1ED1i c\u1EA3nh n\xE0y, n\u1EBFu kh\xF4ng th\xEC t\u1EF1 do s\xE1ng t\u1EA1o.`;
     } else {
-      contextStr = `KH\xD4NG C\xD3 CH\u1EE6 \u0110\u1EC0 C\u1ED0 \u0110\u1ECANH. \u0110\u1EC3 \u0111\u1EA3m b\u1EA3o t\xEDnh ng\u1EABu nhi\xEAn tuy\u1EC7t \u0111\u1ED1i, b\u1EA1n PH\u1EA2I t\u1EF1 b\u1ED1c th\u0103m m\u1ED9t ch\u1EE7 \u0111\u1EC1 b\u1EA5t k\u1EF3 (\u0111\u1ED3 gia d\u1EE5ng, m\xF3n \u0103n, sinh v\u1EADt bi\u1EC3n, nh\u1EA1c c\u1EE5, \u0111\u1ED3 ngh\u1EC1 th\u1EE3 m\u1ED9c, ph\u01B0\u01A1ng ti\u1EC7n giao th\xF4ng, \u0111\u1ED3 d\xF9ng h\u1ECDc t\u1EADp...) tr\u01B0\u1EDBc khi b\u1EAFt \u0111\u1EA7u thi\u1EBFt k\u1EBF. Kh\xF4ng \u0111\u01B0\u1EE3c d\xF9ng l\u1EA1i c\xE1c ch\u1EE7 \u0111\u1EC1 vi\u1EC5n t\u01B0\u1EDFng/ma thu\u1EADt/cyberpunk nh\xE0m ch\xE1n.`;
+      contextStr = `KH\xD4NG C\xD3 CH\u1EE6 \u0110\u1EC0 C\u1ED0 \u0110\u1ECANH. \u0110\u1EC3 \u0111\u1EA3m b\u1EA3o t\xEDnh ng\u1EABu nhi\xEAn tuy\u1EC7t \u0111\u1ED1i, b\u1EA1n PH\u1EA2I t\u1EF1 b\u1ED1c th\u0103m m\u1ED9t ch\u1EE7 \u0111\u1EC1 b\u1EA5t k\u1EF3 tr\u01B0\u1EDBc khi b\u1EAFt \u0111\u1EA7u thi\u1EBFt k\u1EBF. M\u1ECDi th\u1EE9 trong v\u0169 tr\u1EE5 \u0111\u1EC1u c\xF3 th\u1EC3 tr\u1EDF th\xE0nh v\u1EADt ph\u1EA9m.`;
     }
     const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m game nh\u1EADp vai v\xE0 chuy\xEAn gia Pixel Art (32x32).
 H\xE3y s\xE1ng t\u1EA1o 1 V\u1EACT PH\u1EA8M \u0110\u1ED8C NH\u1EA4T ph\u1EA9m ch\u1EA5t [${rarity}].
@@ -2791,7 +2791,7 @@ ${paletteStr}
 
 H\u01AF\u1EDANG D\u1EAAN T\u01AF DUY (B\u1EAFt bu\u1ED9c ph\u1EA3i c\xF3 th\u1EBB <thinking> tr\u01B0\u1EDBc khi xu\u1EA5t m\xE3):
 \u0110\u1EC3 t\u1EA1o ra v\u1EADt ph\u1EA9m th\u1EF1c s\u1EF1 ng\u1EABu nhi\xEAn v\xE0 v\u1EBD pixel art chu\u1EA9n 32x32:
-1. B\u1ED0C TH\u0102M CH\u1EE6 \u0110\u1EC0: \u0110\u1EA7u ti\xEAn, h\xE3y li\u1EC7t k\xEA 3 danh t\u1EEB ho\xE0n to\xE0n ng\u1EABu nhi\xEAn (v\xED d\u1EE5: c\xE1i ch\u1EA3o, con t\xF4m, chi\u1EBFc \xF4). Nh\u1EAFm m\u1EAFt ch\u1ECDn 1 c\xE1i l\xE0m ch\u1EE7 \u0111\u1EC1 ch\xEDnh.
+1. B\u1ED0C TH\u0102M CH\u1EE6 \u0110\u1EC0: \u0110\u1EA7u ti\xEAn, h\xE3y suy ngh\u0129 ra 3 danh t\u1EEB ho\xE0n to\xE0n ng\u1EABu nhi\xEAn v\xE0 kh\xF4ng li\xEAn quan \u0111\u1EBFn nhau. Ch\u1ECDn 1 trong s\u1ED1 \u0111\xF3 l\xE0m ch\u1EE7 \u0111\u1EC1 ch\xEDnh.
 2. THI\u1EBET K\u1EBE: Bi\u1EBFn danh t\u1EEB v\u1EEBa ch\u1ECDn th\xE0nh m\u1ED9t v\u1EADt ph\u1EA9m mang thu\u1ED9c t\xEDnh \u0111\u1EB7c bi\u1EC7t. Ph\xE2n t\xEDch m\xE0u s\u1EAFc v\xE0 h\xECnh d\xE1ng v\u1EADt th\u1EC3.
 3. V\u1EBC PIXEL: \u0110\u1EBFm ch\xEDnh x\xE1c s\u1ED1 l\u01B0\u1EE3ng k\xFD t\u1EF1 tr\xEAn m\u1ED7i d\xF2ng. Khung canvas l\xE0 32x32, m\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng 32 k\xFD t\u1EF1, t\u1ED5ng c\u1ED9ng 32 d\xF2ng. N\u1EBFu thi\u1EBFu/th\u1EEBa k\xFD t\u1EF1, h\xECnh s\u1EBD b\u1ECB c\u1EAFt m\xE9o!
 
