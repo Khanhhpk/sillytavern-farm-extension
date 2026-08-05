@@ -11,6 +11,9 @@ let team = []; // Currently placed pets
 let enemies = []; // Spawned enemies
 let projectiles = []; // Active projectiles
 
+let currentWave = 1;
+let totalGold = 0;
+
 const PET_STATS = {
     slime: { name: 'Slime Xanh', desc: 'Chiến binh cân bằng, không có gì nổi bật.', hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
     octo: { name: 'Bạch Tuộc', desc: 'Đánh nhanh thắng nhanh. Đánh càng lâu tốc đánh càng cao.', hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8, skill: 'frenzy' },
@@ -31,13 +34,18 @@ const PET_STATS = {
 };
 
 const ENEMY_TYPES = [
+    { id: 'douya', name: 'Giá Đỗ', desc: 'Lính bầy đàn.', hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: 'melee' },
     { id: 'tomato', name: 'Cà Chua Tròn', desc: 'Cận chiến cơ bản.', hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: 'melee' },
-    { id: 'pumpkin', name: 'Bí Ngô Khổng Lồ', desc: 'Tanker chậm chạp.', hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: 'tank' },
     { id: 'radish', name: 'Củ Cải Tốc Độ', desc: 'Chạy cực nhanh.', hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: 'melee' },
-    { id: 'fangW', name: 'Hoa Bá Vương', desc: 'Pháp sư bắn từ xa.', hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: 'ranged' },
     { id: 'moonberry', name: 'Dâu Tây Gai', desc: 'Thích khách tập kích.', hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: 'assassin' },
     { id: 'chuncai', name: 'Rau Thuần', desc: 'Đeo bám dai dẳng.', hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: 'melee' },
-    { id: 'lianou', name: 'Củ Sen Khổng Lồ', desc: 'Ném bùn từ xa.', hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: 'ranged' }
+    { id: 'lingjiao', name: 'Củ Ấu Giáp', desc: 'Cận chiến có giáp.', hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: 'melee' },
+    { id: 'pumpkin', name: 'Bí Ngô Khổng Lồ', desc: 'Tanker chậm chạp.', hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: 'tank' },
+    { id: 'fangW', name: 'Hoa Bá Vương', desc: 'Pháp sư bắn từ xa.', hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: 'ranged' },
+    { id: 'starbush', name: 'Bụi Sao', desc: 'Xạ thủ 3 tia.', hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: 'ranged', skill: 'multishot' },
+    { id: 'opalvine', name: 'Dây Leo Opal', desc: 'Trói chân đối thủ.', hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: 'ranged', skill: 'root' },
+    { id: 'lianou', name: 'Củ Sen Khổng Lồ', desc: 'Ném bùn từ xa.', hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: 'ranged' },
+    { id: 'dragoncry', name: 'Long Tinh', desc: 'Boss: Cực khỏe.', hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: 'tank', skill: 'cleave', elite: true }
 ];
 
 export function openDungeonView() {
@@ -181,7 +189,7 @@ function initPlacementPhase() {
                 
                 let x = e.clientX - rect.left - 16;
                 let y = e.clientY - rect.top - 16;
-                if (x > rect.width / 2 - 32) x = rect.width / 2 - 32;
+                if (x > rect.width - 32) x = rect.width - 32;
                 if (x < 0) x = 0;
                 if (y < 0) y = 0;
                 if (y > rect.height - 32) y = rect.height - 32;
@@ -230,7 +238,7 @@ function initPlacementPhase() {
                         el.style.position = 'absolute';
                         let nx = ev.clientX - arect.left - 16;
                         let ny = ev.clientY - arect.top - 16;
-                        if (nx > arect.width / 2 - 32) nx = arect.width / 2 - 32;
+                        if (nx > arect.width - 32) nx = arect.width - 32;
                         if (nx < 0) nx = 0;
                         if (ny < 0) ny = 0;
                         if (ny > arect.height - 32) ny = arect.height - 32;
@@ -329,23 +337,45 @@ function initPlacementPhase() {
     });
 }
 
+let fullTeam = [];
+
 function startCombat() {
     phase = 'combat';
     All.$id('dg-dock').style.display = 'none';
     All.$id('dg-start-btn').style.display = 'none';
     All.$id('dg-leave-btn').style.display = 'none'; // hide leave during combat
     
-    // Spawn enemies
+    currentWave = 1;
+    totalGold = 0;
+    fullTeam = [...team]; // Snapshot the current team
+    
+    startWave();
+}
+
+function startWave() {
+    phase = 'combat';
+    enemies = [];
+    projectiles = [];
     const arena = All.$id('dg-arena');
     const w = arena.clientWidth;
     const h = arena.clientHeight;
     
-    // Spawn 3-5 random enemies
-    const count = 3 + Math.floor(Math.random() * 3);
+    // Calculate enemies based on wave
+    const count = Math.min(10, 3 + Math.floor(currentWave * 0.8));
+    let spawnElite = currentWave % 3 === 0;
+    
     for(let i=0; i<count; i++) {
-        const type = ENEMY_TYPES[Math.floor(Math.random() * ENEMY_TYPES.length)];
+        let type;
+        if (spawnElite && i === 0) {
+            const elites = ENEMY_TYPES.filter(e => e.elite);
+            type = elites.length > 0 ? elites[Math.floor(Math.random() * elites.length)] : ENEMY_TYPES[ENEMY_TYPES.length-1];
+        } else {
+            const normals = ENEMY_TYPES.filter(e => !e.elite);
+            type = normals[Math.floor(Math.random() * normals.length)];
+        }
+        
         const el = document.createElement('div');
-        el.className = 'dg-entity enemy flip'; // flip facing left
+        el.className = 'dg-entity enemy flip';
         el.innerHTML = `
             <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
             ${spriteSVG(type.id, 32)}
@@ -359,14 +389,22 @@ function startCombat() {
         
         arena.appendChild(el);
         
+        // Scale hp and atk based on wave
+        const hpMultiplier = 1 + (currentWave - 1) * 0.3;
+        const atkMultiplier = 1 + (currentWave - 1) * 0.2;
+        
         enemies.push({
-            id: type.id, x, y, hp: type.hp, maxHp: type.hp, atk: type.atk,
-            range: type.range, speed: type.speed, cd: 0, maxCd: type.cd, el, type: 'enemy'
+            id: type.id, x, y, hp: type.hp * hpMultiplier, maxHp: type.hp * hpMultiplier, 
+            atk: type.atk * atkMultiplier,
+            range: type.range, speed: type.speed, cd: 0, maxCd: type.cd, el, type: 'enemy',
+            skill: type.skill, ai: type.ai
         });
     }
     
     lastTime = performance.now();
-    gameLoopId = requestAnimationFrame(combatLoop);
+    if (!gameLoopId) {
+        gameLoopId = requestAnimationFrame(combatLoop);
+    }
 }
 
 function stopCombatLoop() {
@@ -433,7 +471,7 @@ function combatLoop(time) {
     });
     
     if (enemies.length === 0) {
-        endDungeon(true);
+        showWaveRewards();
         return;
     }
     
@@ -576,6 +614,7 @@ function updateEntities(groupA, groupB, dt) {
         if (isStunned) return; // Can't move or attack
         
         // Find target
+        /** @type {any} */
         let closest = null;
         let minDist = Infinity;
         
@@ -754,17 +793,13 @@ function endDungeon(isWin) {
     const overlay = document.createElement('div');
     overlay.className = 'dg-overlay';
     
-    let rewardText = '';
-    if (isWin) {
-        const coins = 500 + Math.floor(Math.random() * 500);
-        ctx.S.coins += coins;
-        All.save();
-        All.renderStatus();
-        rewardText = `<div style="color:white; font-size: 16px;">Phần thưởng: ${spriteSVG('coin', 16).replace('display:block', 'display:inline-block; vertical-align:middle; margin-top:-2px')} ${coins} G</div>`;
-    }
+    ctx.S.coins += totalGold;
+    All.save();
+    All.renderStatus();
+    let rewardText = `<div style="color:white; font-size: 16px;">Phần thưởng: ${spriteSVG('coin', 16).replace('display:block', 'display:inline-block; vertical-align:middle; margin-top:-2px')} ${totalGold} G<br/>Sống sót đến Wave ${currentWave}</div>`;
     
     overlay.innerHTML = `
-        <div class="dg-title">${isWin ? 'Chiến Thắng!' : 'Thất Bại...'}</div>
+        <div class="dg-title">Game Over</div>
         ${rewardText}
         <div class="buy" id="dg-finish-btn" style="margin-top: 10px;">Thoát Hầm Ngục</div>
     `;
@@ -774,4 +809,109 @@ function endDungeon(isWin) {
     overlay.querySelector('#dg-finish-btn').addEventListener('click', () => {
         closeDungeonView();
     });
+}
+
+function showWaveRewards() {
+    phase = 'end'; // pause combat
+    stopCombatLoop();
+    projectiles.forEach(p => p.el.remove());
+    projectiles = [];
+    
+    // Calculate gold for this wave
+    const waveGold = 100 + currentWave * 50;
+    totalGold += waveGold;
+    
+    // Revive dead pets (50% HP) and heal living ones? User said "hồi sinh lại đồng đội đã hi sinh với lượng máu 50% sẽ tạm ngưng và hiển thị 3 lựa chọn"
+    const arena = All.$id('dg-arena');
+    fullTeam.forEach(p => {
+        if (p.hp <= 0) {
+            p.hp = p.maxHp * 0.5;
+            p.el.querySelector('.dg-hp-fill').style.width = '50%';
+            arena.appendChild(p.el);
+        }
+        // clear status
+        p.status = {};
+    });
+    team = [...fullTeam]; // Restore full team active status
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'dg-overlay';
+    overlay.style.backgroundColor = 'rgba(0,0,0,0.85)';
+    
+    overlay.innerHTML = `
+        <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Hoàn Thành!</div>
+        <div style="color:white; margin-bottom: 20px;">Nhận được ${waveGold} G (Tổng: ${totalGold} G)</div>
+        <div style="display:flex; gap: 15px;">
+            <div class="dg-reward-card" id="rew-heal">
+                <h4>Hồi Máu</h4>
+                <p>Hồi 100% HP cho toàn đội</p>
+            </div>
+            <div class="dg-reward-card" id="rew-buff">
+                <h4>Cường Hóa</h4>
+                <p>Tăng ngẫu nhiên 10-30% HP hoặc ATK cho toàn đội</p>
+            </div>
+            <div class="dg-reward-card" id="rew-ascend">
+                <h4>Thăng Hoa</h4>
+                <p>Chọn 1 Pet để x2 Chỉ Số</p>
+            </div>
+        </div>
+    `;
+    arena.appendChild(overlay);
+    
+    // Add CSS for cards if not exists
+    if (!document.getElementById('dg-reward-style')) {
+        const style = document.createElement('style');
+        style.id = 'dg-reward-style';
+        style.innerHTML = `
+            .dg-reward-card { background: #3c2a20; border: 2px solid #b08a5c; padding: 10px; border-radius: 8px; width: 120px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+            .dg-reward-card:hover { transform: scale(1.05); border-color: #ffda66; }
+            .dg-reward-card h4 { margin: 0 0 5px 0; color: #ffda66; }
+            .dg-reward-card p { margin: 0; font-size: 12px; color: #fff; }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    overlay.querySelector('#rew-heal').onclick = () => {
+        fullTeam.forEach(p => p.hp = p.maxHp);
+        nextWaveSequence(overlay);
+    };
+    
+    overlay.querySelector('#rew-buff').onclick = () => {
+        const isAtk = Math.random() > 0.5;
+        const amt = 1.1 + Math.random() * 0.2; // 10-30%
+        fullTeam.forEach(p => {
+            if (isAtk) p.atk *= amt;
+            else { p.maxHp *= amt; p.hp *= amt; }
+        });
+        nextWaveSequence(overlay);
+    };
+    
+    overlay.querySelector('#rew-ascend').onclick = () => {
+        overlay.innerHTML = '<div class="dg-title">Chọn 1 Pet Thăng Hoa</div><div id="dg-pet-select" style="display:flex; gap: 10px; margin-top:20px; flex-wrap:wrap; justify-content:center;"></div>';
+        const selectContainer = overlay.querySelector('#dg-pet-select');
+        fullTeam.forEach((p) => {
+            const btn = document.createElement('div');
+            btn.className = 'dg-reward-card';
+            btn.style.width = '80px';
+            btn.innerHTML = petSVG(p.id, 48);
+            btn.onclick = () => {
+                p.maxHp *= 2; p.hp = p.maxHp; p.atk *= 2;
+                nextWaveSequence(overlay);
+            };
+            selectContainer.appendChild(btn);
+        });
+    };
+}
+
+function nextWaveSequence(overlay) {
+    overlay.remove();
+    currentWave++;
+    
+    // Heal visuals update
+    fullTeam.forEach(p => {
+        const pct = Math.max(0, Math.min(100, p.hp / p.maxHp * 100));
+        p.el.querySelector('.dg-hp-fill').style.width = pct + '%';
+    });
+    
+    startWave();
 }

@@ -5368,6 +5368,8 @@ var lastTime = 0;
 var team = [];
 var enemies = [];
 var projectiles = [];
+var currentWave = 1;
+var totalGold = 0;
 var PET_STATS = {
   slime: { name: "Slime Xanh", desc: "Chi\u1EBFn binh c\xE2n b\u1EB1ng, kh\xF4ng c\xF3 g\xEC n\u1ED5i b\u1EADt.", hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
   octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "\u0110\xE1nh nhanh th\u1EAFng nhanh. \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao.", hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
@@ -5387,13 +5389,18 @@ var PET_STATS = {
   default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 100, atk: 10, range: 40, speed: 40, cd: 1 }
 };
 var ENEMY_TYPES = [
+  { id: "douya", name: "Gi\xE1 \u0110\u1ED7", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: "melee" },
   { id: "tomato", name: "C\xE0 Chua Tr\xF2n", desc: "C\u1EADn chi\u1EBFn c\u01A1 b\u1EA3n.", hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: "melee" },
-  { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: "tank" },
   { id: "radish", name: "C\u1EE7 C\u1EA3i T\u1ED1c \u0110\u1ED9", desc: "Ch\u1EA1y c\u1EF1c nhanh.", hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: "melee" },
-  { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: "ranged" },
   { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: "assassin" },
   { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: "melee" },
-  { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: "ranged" }
+  { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: "melee" },
+  { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: "tank" },
+  { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: "ranged" },
+  { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot" },
+  { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root" },
+  { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: "ranged" },
+  { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true }
 ];
 function openDungeonView() {
   isDungeonOpen = true;
@@ -5504,7 +5511,7 @@ function initPlacementPhase() {
                 `;
         let x = e.clientX - rect.left - 16;
         let y = e.clientY - rect.top - 16;
-        if (x > rect.width / 2 - 32) x = rect.width / 2 - 32;
+        if (x > rect.width - 32) x = rect.width - 32;
         if (x < 0) x = 0;
         if (y < 0) y = 0;
         if (y > rect.height - 32) y = rect.height - 32;
@@ -5556,7 +5563,7 @@ function initPlacementPhase() {
             el.style.position = "absolute";
             let nx = ev.clientX - arect.left - 16;
             let ny = ev.clientY - arect.top - 16;
-            if (nx > arect.width / 2 - 32) nx = arect.width / 2 - 32;
+            if (nx > arect.width - 32) nx = arect.width - 32;
             if (nx < 0) nx = 0;
             if (ny < 0) ny = 0;
             if (ny > arect.height - 32) ny = arect.height - 32;
@@ -5644,17 +5651,35 @@ function initPlacementPhase() {
     closeDungeonView();
   });
 }
+var fullTeam = [];
 function startCombat() {
   phase = "combat";
   $id("dg-dock").style.display = "none";
   $id("dg-start-btn").style.display = "none";
   $id("dg-leave-btn").style.display = "none";
+  currentWave = 1;
+  totalGold = 0;
+  fullTeam = [...team];
+  startWave();
+}
+function startWave() {
+  phase = "combat";
+  enemies = [];
+  projectiles = [];
   const arena = $id("dg-arena");
   const w = arena.clientWidth;
   const h = arena.clientHeight;
-  const count = 3 + Math.floor(Math.random() * 3);
+  const count = Math.min(10, 3 + Math.floor(currentWave * 0.8));
+  let spawnElite = currentWave % 3 === 0;
   for (let i = 0; i < count; i++) {
-    const type = ENEMY_TYPES[Math.floor(Math.random() * ENEMY_TYPES.length)];
+    let type;
+    if (spawnElite && i === 0) {
+      const elites = ENEMY_TYPES.filter((e) => e.elite);
+      type = elites.length > 0 ? elites[Math.floor(Math.random() * elites.length)] : ENEMY_TYPES[ENEMY_TYPES.length - 1];
+    } else {
+      const normals = ENEMY_TYPES.filter((e) => !e.elite);
+      type = normals[Math.floor(Math.random() * normals.length)];
+    }
     const el = document.createElement("div");
     el.className = "dg-entity enemy flip";
     el.innerHTML = `
@@ -5666,23 +5691,29 @@ function startCombat() {
     el.style.left = x + "px";
     el.style.top = y + "px";
     arena.appendChild(el);
+    const hpMultiplier = 1 + (currentWave - 1) * 0.3;
+    const atkMultiplier = 1 + (currentWave - 1) * 0.2;
     enemies.push({
       id: type.id,
       x,
       y,
-      hp: type.hp,
-      maxHp: type.hp,
-      atk: type.atk,
+      hp: type.hp * hpMultiplier,
+      maxHp: type.hp * hpMultiplier,
+      atk: type.atk * atkMultiplier,
       range: type.range,
       speed: type.speed,
       cd: 0,
       maxCd: type.cd,
       el,
-      type: "enemy"
+      type: "enemy",
+      skill: type.skill,
+      ai: type.ai
     });
   }
   lastTime = performance.now();
-  gameLoopId = requestAnimationFrame(combatLoop);
+  if (!gameLoopId) {
+    gameLoopId = requestAnimationFrame(combatLoop);
+  }
 }
 function stopCombatLoop() {
   if (gameLoopId) cancelAnimationFrame(gameLoopId);
@@ -5733,7 +5764,7 @@ function combatLoop(time) {
     return true;
   });
   if (enemies.length === 0) {
-    endDungeon(true);
+    showWaveRewards();
     return;
   }
   if (team.length === 0) {
@@ -6016,16 +6047,12 @@ function endDungeon(isWin) {
   const arena = $id("dg-arena");
   const overlay = document.createElement("div");
   overlay.className = "dg-overlay";
-  let rewardText = "";
-  if (isWin) {
-    const coins = 500 + Math.floor(Math.random() * 500);
-    ctx.S.coins += coins;
-    save();
-    renderStatus();
-    rewardText = `<div style="color:white; font-size: 16px;">Ph\u1EA7n th\u01B0\u1EDFng: ${spriteSVG("coin", 16).replace("display:block", "display:inline-block; vertical-align:middle; margin-top:-2px")} ${coins} G</div>`;
-  }
+  ctx.S.coins += totalGold;
+  save();
+  renderStatus();
+  let rewardText = `<div style="color:white; font-size: 16px;">Ph\u1EA7n th\u01B0\u1EDFng: ${spriteSVG("coin", 16).replace("display:block", "display:inline-block; vertical-align:middle; margin-top:-2px")} ${totalGold} G<br/>S\u1ED1ng s\xF3t \u0111\u1EBFn Wave ${currentWave}</div>`;
   overlay.innerHTML = `
-        <div class="dg-title">${isWin ? "Chi\u1EBFn Th\u1EAFng!" : "Th\u1EA5t B\u1EA1i..."}</div>
+        <div class="dg-title">Game Over</div>
         ${rewardText}
         <div class="buy" id="dg-finish-btn" style="margin-top: 10px;">Tho\xE1t H\u1EA7m Ng\u1EE5c</div>
     `;
@@ -6033,6 +6060,99 @@ function endDungeon(isWin) {
   overlay.querySelector("#dg-finish-btn").addEventListener("click", () => {
     closeDungeonView();
   });
+}
+function showWaveRewards() {
+  phase = "end";
+  stopCombatLoop();
+  projectiles.forEach((p) => p.el.remove());
+  projectiles = [];
+  const waveGold = 100 + currentWave * 50;
+  totalGold += waveGold;
+  const arena = $id("dg-arena");
+  fullTeam.forEach((p) => {
+    if (p.hp <= 0) {
+      p.hp = p.maxHp * 0.5;
+      p.el.querySelector(".dg-hp-fill").style.width = "50%";
+      arena.appendChild(p.el);
+    }
+    p.status = {};
+  });
+  team = [...fullTeam];
+  const overlay = document.createElement("div");
+  overlay.className = "dg-overlay";
+  overlay.style.backgroundColor = "rgba(0,0,0,0.85)";
+  overlay.innerHTML = `
+        <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Ho\xE0n Th\xE0nh!</div>
+        <div style="color:white; margin-bottom: 20px;">Nh\u1EADn \u0111\u01B0\u1EE3c ${waveGold} G (T\u1ED5ng: ${totalGold} G)</div>
+        <div style="display:flex; gap: 15px;">
+            <div class="dg-reward-card" id="rew-heal">
+                <h4>H\u1ED3i M\xE1u</h4>
+                <p>H\u1ED3i 100% HP cho to\xE0n \u0111\u1ED9i</p>
+            </div>
+            <div class="dg-reward-card" id="rew-buff">
+                <h4>C\u01B0\u1EDDng H\xF3a</h4>
+                <p>T\u0103ng ng\u1EABu nhi\xEAn 10-30% HP ho\u1EB7c ATK cho to\xE0n \u0111\u1ED9i</p>
+            </div>
+            <div class="dg-reward-card" id="rew-ascend">
+                <h4>Th\u0103ng Hoa</h4>
+                <p>Ch\u1ECDn 1 Pet \u0111\u1EC3 x2 Ch\u1EC9 S\u1ED1</p>
+            </div>
+        </div>
+    `;
+  arena.appendChild(overlay);
+  if (!document.getElementById("dg-reward-style")) {
+    const style = document.createElement("style");
+    style.id = "dg-reward-style";
+    style.innerHTML = `
+            .dg-reward-card { background: #3c2a20; border: 2px solid #b08a5c; padding: 10px; border-radius: 8px; width: 120px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+            .dg-reward-card:hover { transform: scale(1.05); border-color: #ffda66; }
+            .dg-reward-card h4 { margin: 0 0 5px 0; color: #ffda66; }
+            .dg-reward-card p { margin: 0; font-size: 12px; color: #fff; }
+        `;
+    document.head.appendChild(style);
+  }
+  overlay.querySelector("#rew-heal").onclick = () => {
+    fullTeam.forEach((p) => p.hp = p.maxHp);
+    nextWaveSequence(overlay);
+  };
+  overlay.querySelector("#rew-buff").onclick = () => {
+    const isAtk = Math.random() > 0.5;
+    const amt = 1.1 + Math.random() * 0.2;
+    fullTeam.forEach((p) => {
+      if (isAtk) p.atk *= amt;
+      else {
+        p.maxHp *= amt;
+        p.hp *= amt;
+      }
+    });
+    nextWaveSequence(overlay);
+  };
+  overlay.querySelector("#rew-ascend").onclick = () => {
+    overlay.innerHTML = '<div class="dg-title">Ch\u1ECDn 1 Pet Th\u0103ng Hoa</div><div id="dg-pet-select" style="display:flex; gap: 10px; margin-top:20px; flex-wrap:wrap; justify-content:center;"></div>';
+    const selectContainer = overlay.querySelector("#dg-pet-select");
+    fullTeam.forEach((p) => {
+      const btn = document.createElement("div");
+      btn.className = "dg-reward-card";
+      btn.style.width = "80px";
+      btn.innerHTML = petSVG(p.id, 48);
+      btn.onclick = () => {
+        p.maxHp *= 2;
+        p.hp = p.maxHp;
+        p.atk *= 2;
+        nextWaveSequence(overlay);
+      };
+      selectContainer.appendChild(btn);
+    });
+  };
+}
+function nextWaveSequence(overlay) {
+  overlay.remove();
+  currentWave++;
+  fullTeam.forEach((p) => {
+    const pct = Math.max(0, Math.min(100, p.hp / p.maxHp * 100));
+    p.el.querySelector(".dg-hp-fill").style.width = pct + "%";
+  });
+  startWave();
 }
 
 // src/destroy.js
