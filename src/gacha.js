@@ -164,10 +164,28 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
     console.log('[Raw Content]:\n', content);
     console.groupEnd();
 
-    const jtxt = extractJson(content);
+    let jsonStr = content;
+    const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (match) jsonStr = match[1];
+
+    let jtxt = extractJson(jsonStr) || extractJson(content);
     if (jtxt) {
       const o = JSON.parse(jtxt);
-      if (o && o.name && o.desc && Array.isArray(o.spriteMap) && o.spriteMap.length === 32 && o.spriteMap.every(s => typeof s === 'string' && s.length === 32)) {
+      if (o && o.name && o.desc && Array.isArray(o.spriteMap)) {
+        // Tự động sửa lỗi AI vẽ nhầm kích thước (cắt hoặc bù thêm '.')
+        const fixedMap = [];
+        for (let i = 0; i < 32; i++) {
+          let row = typeof o.spriteMap[i] === 'string' ? o.spriteMap[i] : '';
+          if (row.length < 32) row = row.padEnd(32, '.');
+          if (row.length > 32) row = row.substring(0, 32);
+          fixedMap.push(row);
+        }
+        o.spriteMap = fixedMap;
+        
+        // Đảm bảo có giá để hiển thị, nếu AI thiếu thì fallback
+        if (typeof o.price !== 'number') {
+           o.price = rarity === 'Sử thi' ? 8000 : (rarity === 'Huyền thoại' ? 20000 : 2500);
+        }
         return o;
       }
     }

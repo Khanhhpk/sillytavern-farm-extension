@@ -2712,10 +2712,24 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
     console.groupCollapsed(`=== GACHA AI DEBUG: Ph\u1EA3n h\u1ED3i [${rarity}] ===`);
     console.log("[Raw Content]:\n", content);
     console.groupEnd();
-    const jtxt = extractJson(content);
+    let jsonStr = content;
+    const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (match) jsonStr = match[1];
+    let jtxt = extractJson(jsonStr) || extractJson(content);
     if (jtxt) {
       const o = JSON.parse(jtxt);
-      if (o && o.name && o.desc && Array.isArray(o.spriteMap) && o.spriteMap.length === 32 && o.spriteMap.every((s) => typeof s === "string" && s.length === 32)) {
+      if (o && o.name && o.desc && Array.isArray(o.spriteMap)) {
+        const fixedMap = [];
+        for (let i = 0; i < 32; i++) {
+          let row = typeof o.spriteMap[i] === "string" ? o.spriteMap[i] : "";
+          if (row.length < 32) row = row.padEnd(32, ".");
+          if (row.length > 32) row = row.substring(0, 32);
+          fixedMap.push(row);
+        }
+        o.spriteMap = fixedMap;
+        if (typeof o.price !== "number") {
+          o.price = rarity === "S\u1EED thi" ? 8e3 : rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : 2500;
+        }
         return o;
       }
     }
