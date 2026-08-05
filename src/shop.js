@@ -127,7 +127,72 @@ export function openPanel(kind) {
     // @ts-ignore
     All.$id('mbody').querySelectorAll('[data-passdlg]').forEach(b => b.addEventListener('click', () => openPassDlg(b.dataset.passdlg)));
   } else if (kind === 'bag') {
-    const btabs = `<div class="tabs"><span class="tab${bagTab === 'crop' ? ' active' : ''}" data-btab="crop">Nông sản</span><span class="tab${bagTab === 'pet' ? ' active' : ''}" data-btab="pet">Bé tròn</span><span class="tab${bagTab === 'relic' ? ' active' : ''}" data-btab="relic">Quà của bé tròn</span></div>`;
+    const btabs = `<div class="tabs"><span class="tab${bagTab === 'crop' ? ' active' : ''}" data-btab="crop">Nông sản</span><span class="tab${bagTab === 'gacha' ? ' active' : ''}" data-btab="gacha">Đồ Gacha</span><span class="tab${bagTab === 'pet' ? ' active' : ''}" data-btab="pet">Bé tròn</span><span class="tab${bagTab === 'relic' ? ' active' : ''}" data-btab="relic">Quà của bé tròn</span></div>`;
+    if (bagTab === 'gacha') {
+      const gachaKeys = Object.keys(ctx.S.bag || {}).filter(k => k.startsWith('unique@'));
+      const rows = gachaKeys.map(key => {
+        const n = ctx.S.bag[key];
+        const item = ctx.S.uniques?.[key] || { name: 'Vật phẩm Gacha', rarity: 'Đặc biệt', desc: '', color: '#4a90e2', sell: 2500, sp: 'strawhat' };
+        const d0 = mutDescOf(key);
+        const mdesc = d0 ? ' · ' + d0 : '';
+        if (bagSellMode) {
+          const on = !!bagSel[key];
+          return `
+        <div class="item selrow${on ? ' selon' : ''}" data-selkey="${key}"><span class="icon">${spriteSVG(item.sp, 32)}</span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/cái${esc(mdesc)}</div></span>
+          <span class="selmark">${on ? '✓' : ''}</span></div>`;
+        }
+        return `
+        <div class="item"><span class="icon">${spriteSVG(item.sp, 32)}</span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/cái · ${esc(item.desc || 'Vật phẩm độc nhất')}</div></span>
+          <span class="acts">
+            <span class="ibtn" data-takeout="${key}" title="Lấy ra (mang vào cốt truyện, không quy ra tiền)">${spriteSVG('emBang', 16)}</span>
+            <span class="ibtn" data-selldlg="${key}" title="Bán (tự chọn số lượng)">${spriteSVG('coin', 16)}</span>
+          </span></div>`;
+      }).join('');
+      let sellBar = '';
+      if (gachaKeys.length) {
+        if (bagSellMode) {
+          const total = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.bag[k]).reduce((s, k) => s + bagPrice(k) * ctx.S.bag[k], 0);
+          sellBar = `<div class="note" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:8px;white-space:nowrap;overflow:hidden">
+            <b style="overflow:hidden;text-overflow:ellipsis">${total > 0 ? 'Tổng ' + total.toLocaleString() + ' G' : 'Bấm vào từng mục để tick chọn thứ muốn bán'}</b><span style="flex:1"></span>
+            <span class="buy" id="sellSelGo" style="padding:4px 10px;font-size:11px;flex:none">Bán</span>
+            <span class="buy plain" id="sellSelNo" style="padding:4px 10px;font-size:11px;flex:none">Huỷ</span></div>`;
+        } else {
+          sellBar = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div class="note" style="flex:1">Bấm «!» để lấy đồ Gacha ra mang vào cốt truyện</div>
+            <span class="buy" id="sellModeGo" style="flex:none">Bán một chạm</span></div>`;
+        }
+      }
+      openModal('Balo', btabs + sellBar + (rows || '<div class="note">Chưa có vật phẩm Gacha nào, sang máy Gachapon quay thử đi!</div>'));
+      // @ts-ignore
+      All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
+      // @ts-ignore
+      All.$id('mbody').querySelectorAll('[data-selldlg]').forEach(b => b.addEventListener('click', () => openSellDlg(b.dataset.selldlg)));
+      // @ts-ignore
+      All.$id('mbody').querySelectorAll('[data-takeout]').forEach(b => b.addEventListener('click', () => openTakeout(b.dataset.takeout)));
+      const smGo = All.$id('sellModeGo');
+      if (smGo) smGo.addEventListener('click', () => { bagSellMode = true; bagSel = {}; openPanel('bag'); });
+      All.$id('mbody').querySelectorAll('[data-selkey]').forEach(el => el.addEventListener('click', () => {
+        // @ts-ignore
+        bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
+        openPanel('bag');
+      }));
+      const ssNo = All.$id('sellSelNo');
+      if (ssNo) ssNo.addEventListener('click', () => { bagSellMode = false; openPanel('bag'); });
+      const ssGo = All.$id('sellSelGo');
+      if (ssGo) ssGo.addEventListener('click', () => {
+        const keys = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.bag[k]);
+        if (!keys.length) return toast('Chưa tick cái nào cả');
+        let gain = 0;
+        keys.forEach(k => { gain += bagPrice(k) * ctx.S.bag[k]; delete ctx.S.bag[k]; });
+        ctx.S.coins += gain; ctx.S.totalSales += gain;
+        bagSellMode = false; save(); renderStatus();
+        toast('Bán một mẻ đồ Gacha: +' + gain.toLocaleString() + ' G');
+        openPanel('bag');
+      });
+      return;
+    }
     if (bagTab === 'relic') {                            // v1.0: quà của bé tròn —— quầy riêng cho mảnh vỡ và hạt giống bí ẩn
       const sh2 = ctx.S.shards || { prism: 0, star: 0 };
       const normTk = ctx.S.tickets?.norm || 0;
@@ -194,7 +259,8 @@ export function openPanel(kind) {
       }));
       return;
     }
-    const rows = Object.entries(ctx.S.bag).map(([key, n]) => {
+    const rows = Object.keys(ctx.S.bag).filter(k => !k.startsWith('unique@')).map(key => {
+      const n = ctx.S.bag[key];
       const id = key.split('@')[0], mut = key.indexOf('@') > 0;
       const d0 = mutDescOf(key);
       const mdesc = d0 ? ' · ' + d0 : '';

@@ -337,12 +337,16 @@ export const PETS = {
     mysbM: { p: { g:'#5a3f78', G:'#8a5cc0', K:'#3a2258', r:'#9a6ac8', R:'#c4a2e8', W:'#e8d8f8' }, m: [
       '.....G..g.......','....gGGGGg......','......GG........','....KrrrrK......','...KrRrWrrK.....','...KrrRrrrK.....','...KRrrrRrK.....','....KrrRrK......','.....KrrK.......','......KK........','................','................','................','................','................','................'] },
   };
+  export const DYNAMIC_SPR = {};
+export function registerDynamicSprite(name, mapArray) {
+  DYNAMIC_SPR[name] = mapArray;
+}
   const spriteCache = new Map();
   export function spriteSVG(name, px) {
     const key = name + '@' + px;
     if (spriteCache.has(key)) return spriteCache.get(key);
-    const map = SPR[name] || (C2[name] && C2[name].m); if (!map) return '';
-    const pal = SPR[name] ? P : C2[name].p;
+    const map = SPR[name] || DYNAMIC_SPR[name] || (C2[name] && C2[name].m); if (!map) return '';
+    const pal = (SPR[name] || DYNAMIC_SPR[name]) ? P : C2[name].p;
     const canvas = document.createElement('canvas');
     canvas.width = map[0].length || 16;
     canvas.height = map.length || 16;

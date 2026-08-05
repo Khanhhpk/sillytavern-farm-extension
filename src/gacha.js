@@ -2,11 +2,11 @@ import { now, save } from './state.js';
 import { ctx } from './store.js';
 import * as All from './all.js';
 import { CROPS, FERTS } from './data.js';
-import { spriteSVG, petSVG } from './graphics.js';
+import { spriteSVG, petSVG, registerDynamicSprite, P } from './graphics.js';
 import { toast } from './witch.js';
 import { renderStatus } from './render.js';
 import { openModal } from './shop.js';
-import { charName, CS } from './events.js';
+import { charName, CS, SEC, extractJson } from './events.js';
 
 export const GACHA_NORM_PITY = 100;
 export const GACHA_SPEC_PITY = 50;
@@ -19,7 +19,106 @@ export function initGachaState() {
   if (!ctx.S.uniques) ctx.S.uniques = {};
 }
 
-// Hệ thống tạo Vật Phẩm Độc Nhất (Rare -> Legendary) kết hợp thông tin thẻ nhân vật
+// Máy phát Procedural Sprite 32x32 dự phòng (khi AI chưa bật / offline)
+export function generateProcedural32x32Sprite(rarity) {
+  const map = [];
+  const borderChar = 'K';
+  const mainChar = rarity === 'Huyền thoại' ? 'C' : rarity === 'Sử thi' ? 'V' : 'B';
+  const subChar = rarity === 'Huyền thoại' ? 'Y' : rarity === 'Sử thi' ? 'v' : 'b';
+  const highlightChar = 'W';
+  const accentChar = rarity === 'Huyền thoại' ? 'R' : rarity === 'Sử thi' ? 'F' : 'E';
+
+  const type = Math.floor(Math.random() * 4); // 0: Vương miện/Ấn, 1: Tinh thể/Ngọc, 2: Kiếm/Thánh vật, 3: Bùa/Đồng hồ
+
+  for (let y = 0; y < 32; y++) {
+    let row = '';
+    for (let x = 0; x < 32; x++) {
+      const distFromCenter = Math.hypot(x - 15.5, y - 15.5);
+      const isLeft = x < 16;
+      const mirrorX = isLeft ? x : 31 - x;
+
+      let ch = '.';
+
+      if (type === 0) { // Vương miện / Ấn bảo vương
+        if (y >= 10 && y <= 22) {
+          const w = 12 - Math.floor(Math.abs(y - 16) * 0.4);
+          if (mirrorX >= 16 - w && mirrorX <= 15) {
+            if (mirrorX === 16 - w || y === 10 || y === 22) ch = borderChar;
+            else if (y === 11 || mirrorX === 16 - w + 1) ch = highlightChar;
+            else if ((x + y) % 3 === 0) ch = accentChar;
+            else ch = (x % 2 === 0) ? mainChar : subChar;
+          }
+        }
+      } else if (type === 1) { // Tinh thể / Quả cầu ma thuật
+        if (distFromCenter <= 11) {
+          if (distFromCenter >= 10.2) ch = borderChar;
+          else if (x <= 13 && y <= 13 && distFromCenter < 8) ch = highlightChar;
+          else if (distFromCenter < 5) ch = accentChar;
+          else ch = (x + y) % 2 === 0 ? mainChar : subChar;
+        }
+      } else if (type === 2) { // Bảo kiếm / Trượng phép chéo
+        const line = Math.abs(x - y);
+        if (line <= 3 && x >= 4 && x <= 27 && y >= 4 && y <= 27) {
+          if (line === 3) ch = borderChar;
+          else if (line === 0) ch = highlightChar;
+          else ch = (x + y) % 2 === 0 ? mainChar : subChar;
+        }
+      } else { // Bùa / Thánh chén
+        const dx = Math.abs(x - 15.5), dy = Math.abs(y - 15.5);
+        if (dx + dy <= 12 && dx + dy >= 2) {
+          if (dx + dy >= 11) ch = borderChar;
+          else if (dx <= 2 || dy <= 2) ch = highlightChar;
+          else ch = (x % 2 === 0) ? mainChar : subChar;
+        }
+      }
+
+      row += ch;
+    }
+    map.push(row);
+  }
+  return map;
+}
+
+// Gọi AI tạo Sprite Pixel 32x32 qua API (Secondary API)
+export async function generateAISprite(promptText, size = 32) {
+  if (!SEC.url || !SEC.model) return null;
+  try {
+    const simpleColors = Object.entries(P).filter(e => typeof e[1] === 'string');
+    const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(', ');
+    const sysPrompt = `Bạn là chuyên gia thiết kế Pixel Art (${size}x${size}). Hãy tạo 1 đồ vật pixel 32x32 theo chủ đề. CHỈ dùng các ký tự trong Bảng màu:
+${paletteStr}
+Mỗi dòng bắt buộc dài đúng ${size} ký tự. Dùng dấu '.' cho điểm trong suốt. CHỈ XUẤT 1 khối mã \`\`\`json chứa mảng gồm đúng ${size} chuỗi.`;
+
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 12000);
+    const res = await fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(SEC.key ? { Authorization: 'Bearer ' + SEC.key } : {}) },
+      body: JSON.stringify({
+        model: SEC.model,
+        messages: [
+          { role: 'system', content: sysPrompt },
+          { role: 'user', content: 'Vẽ vật phẩm pixel 32x32: ' + promptText }
+        ]
+      }),
+      signal: ctrl.signal
+    });
+    clearTimeout(to);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content || '';
+    const jtxt = extractJson(content);
+    if (jtxt) {
+      const arr = JSON.parse(jtxt);
+      if (Array.isArray(arr) && arr.length === size && arr.every(s => typeof s === 'string' && s.length === size)) {
+        return arr;
+      }
+    }
+  } catch(e) {}
+  return null;
+}
+
+// Hệ thống tạo Vật Phẩm Độc Nhất (kết hợp Lore context + Sprite 32x32)
 export function generateUniqueItem(isSpecial) {
   initGachaState();
   const roll = Math.random() * 100;
@@ -35,6 +134,10 @@ export function generateUniqueItem(isSpecial) {
     else if (roll < 30) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
   }
 
+  const randomThemes = [
+    'Băng giá cổ đại', 'Vũ trụ rực rỡ', 'Thần thoại linh giới', 'Cyberpunk kỳ ảo',
+    'Thủy cung phong ấn', 'Vĩnh hằng quang minh', 'Hư không ma pháp', 'Thánh địa phương Đông'
+  ];
   const prefixes = [
     'Thánh quang', 'Huyễn mộng', 'Băng giá', 'Thần thoại', 'Vũ trụ', 'Hư không',
     'Cổ đại', 'Linh khí', 'Ma pháp', 'Tinh tú', 'Vĩnh hằng', 'Huyền bí', 'Lăng quang'
@@ -44,6 +147,7 @@ export function generateUniqueItem(isSpecial) {
     'Chén thánh', 'Đồng hồ cát', 'Gương ảo ảnh', 'Viên ngọc', 'Sách phép', 'Ấn hiệu'
   ];
 
+  const theme = randomThemes[Math.floor(Math.random() * randomThemes.length)];
   const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
   const itemType = items[Math.floor(Math.random() * items.length)];
 
@@ -53,8 +157,15 @@ export function generateUniqueItem(isSpecial) {
     name = `${itemType} của ${cName}`;
   }
 
-  const desc = `Vật phẩm độc nhất [${rarity}] mang theo năng lượng huyền bí. Có thể "Lấy ra" trong Balo để dùng trong cốt truyện!`;
-  const key = `unique@${now()}_${Math.floor(Math.random() * 10000)}`;
+  const desc = `Vật phẩm độc nhất [${rarity}] thuộc chủ đề ${theme}. Mang theo ma lực kỳ diệu, có thể "Lấy ra" trong Balo để dùng trong cốt truyện!`;
+  const timestamp = now();
+  const randId = Math.floor(Math.random() * 10000);
+  const key = `unique@${timestamp}_${randId}`;
+  const spKey = `gacha_sp_${timestamp}_${randId}`;
+
+  // 1. Tạo sprite 32x32 ngay lập tức bằng procedural generator
+  const proceduralMap = generateProcedural32x32Sprite(rarity);
+  registerDynamicSprite(spKey, proceduralMap);
 
   ctx.S.uniques[key] = {
     key,
@@ -63,10 +174,22 @@ export function generateUniqueItem(isSpecial) {
     color,
     desc,
     sell: sellPrice,
-    sp: 'strawhat'
+    sp: spKey,
+    spriteMap: proceduralMap
   };
 
-  return { key, name, rarity, color, desc, sell: sellPrice };
+  // 2. Thử gọi AI ở background để cập nhật sprite 32x32 sắc nét hơn nếu API sẵn sàng
+  if (SEC.url && SEC.model) {
+    generateAISprite(name + ', chủ đề ' + theme, 32).then(aiMap => {
+      if (aiMap && ctx.S.uniques[key]) {
+        ctx.S.uniques[key].spriteMap = aiMap;
+        registerDynamicSprite(spKey, aiMap);
+        save();
+      }
+    });
+  }
+
+  return { key, name, rarity, color, desc, sell: sellPrice, sp: spKey };
 }
 
 // Thực hiện quay Gacha
@@ -106,13 +229,14 @@ export function executeGachaRoll(isSpecial, count) {
     if (rewardType === 'unique') {
       ctx.S.gachaPity[pityKey] = 0; // Reset Pity
       const item = generateUniqueItem(isSpecial);
-      ctx.S.bag[item.key] = 1;
+      // Lưu vào Balo như nông sản bình thường!
+      ctx.S.bag[item.key] = (ctx.S.bag[item.key] || 0) + 1;
       results.push({
         type: 'unique',
         name: item.name,
         rarity: item.rarity,
         color: item.color,
-        icon: spriteSVG('strawhat', 32),
+        icon: spriteSVG(item.sp, 32),
         desc: item.desc,
         isPity
       });
@@ -139,7 +263,6 @@ export function executeGachaRoll(isSpecial, count) {
         icon: spriteSVG('toolFert', 32)
       });
     } else {
-      // Shard (Mảnh lăng quang hoặc Mảnh ngôi sao)
       const isStar = Math.random() < 0.5;
       if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
       if (isStar) {

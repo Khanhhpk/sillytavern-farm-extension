@@ -1124,13 +1124,17 @@ var C2 = {
     "................"
   ] }
 };
+var DYNAMIC_SPR = {};
+function registerDynamicSprite(name, mapArray) {
+  DYNAMIC_SPR[name] = mapArray;
+}
 var spriteCache = /* @__PURE__ */ new Map();
 function spriteSVG(name, px) {
   const key = name + "@" + px;
   if (spriteCache.has(key)) return spriteCache.get(key);
-  const map = SPR[name] || C2[name] && C2[name].m;
+  const map = SPR[name] || DYNAMIC_SPR[name] || C2[name] && C2[name].m;
   if (!map) return "";
-  const pal = SPR[name] ? P : C2[name].p;
+  const pal = SPR[name] || DYNAMIC_SPR[name] ? P : C2[name].p;
   const canvas = document.createElement("canvas");
   canvas.width = map[0].length || 16;
   canvas.height = map.length || 16;
@@ -2512,6 +2516,96 @@ function initGachaState() {
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
   if (!ctx.S.uniques) ctx.S.uniques = {};
 }
+function generateProcedural32x32Sprite(rarity) {
+  const map = [];
+  const borderChar = "K";
+  const mainChar = rarity === "Huy\u1EC1n tho\u1EA1i" ? "C" : rarity === "S\u1EED thi" ? "V" : "B";
+  const subChar = rarity === "Huy\u1EC1n tho\u1EA1i" ? "Y" : rarity === "S\u1EED thi" ? "v" : "b";
+  const highlightChar = "W";
+  const accentChar = rarity === "Huy\u1EC1n tho\u1EA1i" ? "R" : rarity === "S\u1EED thi" ? "F" : "E";
+  const type = Math.floor(Math.random() * 4);
+  for (let y = 0; y < 32; y++) {
+    let row = "";
+    for (let x = 0; x < 32; x++) {
+      const distFromCenter = Math.hypot(x - 15.5, y - 15.5);
+      const isLeft = x < 16;
+      const mirrorX = isLeft ? x : 31 - x;
+      let ch = ".";
+      if (type === 0) {
+        if (y >= 10 && y <= 22) {
+          const w = 12 - Math.floor(Math.abs(y - 16) * 0.4);
+          if (mirrorX >= 16 - w && mirrorX <= 15) {
+            if (mirrorX === 16 - w || y === 10 || y === 22) ch = borderChar;
+            else if (y === 11 || mirrorX === 16 - w + 1) ch = highlightChar;
+            else if ((x + y) % 3 === 0) ch = accentChar;
+            else ch = x % 2 === 0 ? mainChar : subChar;
+          }
+        }
+      } else if (type === 1) {
+        if (distFromCenter <= 11) {
+          if (distFromCenter >= 10.2) ch = borderChar;
+          else if (x <= 13 && y <= 13 && distFromCenter < 8) ch = highlightChar;
+          else if (distFromCenter < 5) ch = accentChar;
+          else ch = (x + y) % 2 === 0 ? mainChar : subChar;
+        }
+      } else if (type === 2) {
+        const line = Math.abs(x - y);
+        if (line <= 3 && x >= 4 && x <= 27 && y >= 4 && y <= 27) {
+          if (line === 3) ch = borderChar;
+          else if (line === 0) ch = highlightChar;
+          else ch = (x + y) % 2 === 0 ? mainChar : subChar;
+        }
+      } else {
+        const dx = Math.abs(x - 15.5), dy = Math.abs(y - 15.5);
+        if (dx + dy <= 12 && dx + dy >= 2) {
+          if (dx + dy >= 11) ch = borderChar;
+          else if (dx <= 2 || dy <= 2) ch = highlightChar;
+          else ch = x % 2 === 0 ? mainChar : subChar;
+        }
+      }
+      row += ch;
+    }
+    map.push(row);
+  }
+  return map;
+}
+async function generateAISprite(promptText, size = 32) {
+  if (!SEC.url || !SEC.model) return null;
+  try {
+    const simpleColors = Object.entries(P).filter((e) => typeof e[1] === "string");
+    const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(", ");
+    const sysPrompt = `B\u1EA1n l\xE0 chuy\xEAn gia thi\u1EBFt k\u1EBF Pixel Art (${size}x${size}). H\xE3y t\u1EA1o 1 \u0111\u1ED3 v\u1EADt pixel 32x32 theo ch\u1EE7 \u0111\u1EC1. CH\u1EC8 d\xF9ng c\xE1c k\xFD t\u1EF1 trong B\u1EA3ng m\xE0u:
+${paletteStr}
+M\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng ${size} k\xFD t\u1EF1. D\xF9ng d\u1EA5u '.' cho \u0111i\u1EC3m trong su\u1ED1t. CH\u1EC8 XU\u1EA4T 1 kh\u1ED1i m\xE3 \`\`\`json ch\u1EE9a m\u1EA3ng g\u1ED3m \u0111\xFAng ${size} chu\u1ED7i.`;
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 12e3);
+    const res = await fetch(SEC.url.replace(/\/+$/, "") + "/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...SEC.key ? { Authorization: "Bearer " + SEC.key } : {} },
+      body: JSON.stringify({
+        model: SEC.model,
+        messages: [
+          { role: "system", content: sysPrompt },
+          { role: "user", content: "V\u1EBD v\u1EADt ph\u1EA9m pixel 32x32: " + promptText }
+        ]
+      }),
+      signal: ctrl.signal
+    });
+    clearTimeout(to);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content || "";
+    const jtxt = extractJson(content);
+    if (jtxt) {
+      const arr = JSON.parse(jtxt);
+      if (Array.isArray(arr) && arr.length === size && arr.every((s) => typeof s === "string" && s.length === size)) {
+        return arr;
+      }
+    }
+  } catch (e) {
+  }
+  return null;
+}
 function generateUniqueItem(isSpecial) {
   initGachaState();
   const roll = Math.random() * 100;
@@ -2539,6 +2633,16 @@ function generateUniqueItem(isSpecial) {
       sellPrice = 8e3;
     }
   }
+  const randomThemes = [
+    "B\u0103ng gi\xE1 c\u1ED5 \u0111\u1EA1i",
+    "V\u0169 tr\u1EE5 r\u1EF1c r\u1EE1",
+    "Th\u1EA7n tho\u1EA1i linh gi\u1EDBi",
+    "Cyberpunk k\u1EF3 \u1EA3o",
+    "Th\u1EE7y cung phong \u1EA5n",
+    "V\u0129nh h\u1EB1ng quang minh",
+    "H\u01B0 kh\xF4ng ma ph\xE1p",
+    "Th\xE1nh \u0111\u1ECBa ph\u01B0\u01A1ng \u0110\xF4ng"
+  ];
   const prefixes = [
     "Th\xE1nh quang",
     "Huy\u1EC5n m\u1ED9ng",
@@ -2568,6 +2672,7 @@ function generateUniqueItem(isSpecial) {
     "S\xE1ch ph\xE9p",
     "\u1EA4n hi\u1EC7u"
   ];
+  const theme = randomThemes[Math.floor(Math.random() * randomThemes.length)];
   const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
   const itemType = items[Math.floor(Math.random() * items.length)];
   let cName = charName();
@@ -2575,8 +2680,13 @@ function generateUniqueItem(isSpecial) {
   if (cName && CS.link && Math.random() < 0.6) {
     name = `${itemType} c\u1EE7a ${cName}`;
   }
-  const desc = `V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t [${rarity}] mang theo n\u0103ng l\u01B0\u1EE3ng huy\u1EC1n b\xED. C\xF3 th\u1EC3 "L\u1EA5y ra" trong Balo \u0111\u1EC3 d\xF9ng trong c\u1ED1t truy\u1EC7n!`;
-  const key = `unique@${now()}_${Math.floor(Math.random() * 1e4)}`;
+  const desc = `V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t [${rarity}] thu\u1ED9c ch\u1EE7 \u0111\u1EC1 ${theme}. Mang theo ma l\u1EF1c k\u1EF3 di\u1EC7u, c\xF3 th\u1EC3 "L\u1EA5y ra" trong Balo \u0111\u1EC3 d\xF9ng trong c\u1ED1t truy\u1EC7n!`;
+  const timestamp = now();
+  const randId = Math.floor(Math.random() * 1e4);
+  const key = `unique@${timestamp}_${randId}`;
+  const spKey = `gacha_sp_${timestamp}_${randId}`;
+  const proceduralMap = generateProcedural32x32Sprite(rarity);
+  registerDynamicSprite(spKey, proceduralMap);
   ctx.S.uniques[key] = {
     key,
     name,
@@ -2584,9 +2694,19 @@ function generateUniqueItem(isSpecial) {
     color,
     desc,
     sell: sellPrice,
-    sp: "strawhat"
+    sp: spKey,
+    spriteMap: proceduralMap
   };
-  return { key, name, rarity, color, desc, sell: sellPrice };
+  if (SEC.url && SEC.model) {
+    generateAISprite(name + ", ch\u1EE7 \u0111\u1EC1 " + theme, 32).then((aiMap) => {
+      if (aiMap && ctx.S.uniques[key]) {
+        ctx.S.uniques[key].spriteMap = aiMap;
+        registerDynamicSprite(spKey, aiMap);
+        save();
+      }
+    });
+  }
+  return { key, name, rarity, color, desc, sell: sellPrice, sp: spKey };
 }
 function executeGachaRoll(isSpecial, count) {
   initGachaState();
@@ -2618,13 +2738,13 @@ function executeGachaRoll(isSpecial, count) {
     if (rewardType === "unique") {
       ctx.S.gachaPity[pityKey] = 0;
       const item = generateUniqueItem(isSpecial);
-      ctx.S.bag[item.key] = 1;
+      ctx.S.bag[item.key] = (ctx.S.bag[item.key] || 0) + 1;
       results.push({
         type: "unique",
         name: item.name,
         rarity: item.rarity,
         color: item.color,
-        icon: spriteSVG("strawhat", 32),
+        icon: spriteSVG(item.sp, 32),
         desc: item.desc,
         isPity
       });
@@ -2943,7 +3063,84 @@ function openPanel(kind) {
     }));
     $id("mbody").querySelectorAll("[data-passdlg]").forEach((b) => b.addEventListener("click", () => openPassDlg(b.dataset.passdlg)));
   } else if (kind === "bag") {
-    const btabs = `<div class="tabs"><span class="tab${bagTab === "crop" ? " active" : ""}" data-btab="crop">N\xF4ng s\u1EA3n</span><span class="tab${bagTab === "pet" ? " active" : ""}" data-btab="pet">B\xE9 tr\xF2n</span><span class="tab${bagTab === "relic" ? " active" : ""}" data-btab="relic">Qu\xE0 c\u1EE7a b\xE9 tr\xF2n</span></div>`;
+    const btabs = `<div class="tabs"><span class="tab${bagTab === "crop" ? " active" : ""}" data-btab="crop">N\xF4ng s\u1EA3n</span><span class="tab${bagTab === "gacha" ? " active" : ""}" data-btab="gacha">\u0110\u1ED3 Gacha</span><span class="tab${bagTab === "pet" ? " active" : ""}" data-btab="pet">B\xE9 tr\xF2n</span><span class="tab${bagTab === "relic" ? " active" : ""}" data-btab="relic">Qu\xE0 c\u1EE7a b\xE9 tr\xF2n</span></div>`;
+    if (bagTab === "gacha") {
+      const gachaKeys = Object.keys(ctx.S.bag || {}).filter((k) => k.startsWith("unique@"));
+      const rows2 = gachaKeys.map((key) => {
+        const n = ctx.S.bag[key];
+        const item = ctx.S.uniques?.[key] || { name: "V\u1EADt ph\u1EA9m Gacha", rarity: "\u0110\u1EB7c bi\u1EC7t", desc: "", color: "#4a90e2", sell: 2500, sp: "strawhat" };
+        const d0 = mutDescOf(key);
+        const mdesc = d0 ? " \xB7 " + d0 : "";
+        if (bagSellMode) {
+          const on = !!bagSel[key];
+          return `
+        <div class="item selrow${on ? " selon" : ""}" data-selkey="${key}"><span class="icon">${spriteSVG(item.sp, 32)}</span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
+          <span class="selmark">${on ? "\u2713" : ""}</span></div>`;
+        }
+        return `
+        <div class="item"><span class="icon">${spriteSVG(item.sp, 32)}</span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/c\xE1i \xB7 ${esc(item.desc || "V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t")}</div></span>
+          <span class="acts">
+            <span class="ibtn" data-takeout="${key}" title="L\u1EA5y ra (mang v\xE0o c\u1ED1t truy\u1EC7n, kh\xF4ng quy ra ti\u1EC1n)">${spriteSVG("emBang", 16)}</span>
+            <span class="ibtn" data-selldlg="${key}" title="B\xE1n (t\u1EF1 ch\u1ECDn s\u1ED1 l\u01B0\u1EE3ng)">${spriteSVG("coin", 16)}</span>
+          </span></div>`;
+      }).join("");
+      let sellBar2 = "";
+      if (gachaKeys.length) {
+        if (bagSellMode) {
+          const total = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.bag[k]).reduce((s, k) => s + bagPrice(k) * ctx.S.bag[k], 0);
+          sellBar2 = `<div class="note" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:8px;white-space:nowrap;overflow:hidden">
+            <b style="overflow:hidden;text-overflow:ellipsis">${total > 0 ? "T\u1ED5ng " + total.toLocaleString() + " G" : "B\u1EA5m v\xE0o t\u1EEBng m\u1EE5c \u0111\u1EC3 tick ch\u1ECDn th\u1EE9 mu\u1ED1n b\xE1n"}</b><span style="flex:1"></span>
+            <span class="buy" id="sellSelGo" style="padding:4px 10px;font-size:11px;flex:none">B\xE1n</span>
+            <span class="buy plain" id="sellSelNo" style="padding:4px 10px;font-size:11px;flex:none">Hu\u1EF7</span></div>`;
+        } else {
+          sellBar2 = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div class="note" style="flex:1">B\u1EA5m \xAB!\xBB \u0111\u1EC3 l\u1EA5y \u0111\u1ED3 Gacha ra mang v\xE0o c\u1ED1t truy\u1EC7n</div>
+            <span class="buy" id="sellModeGo" style="flex:none">B\xE1n m\u1ED9t ch\u1EA1m</span></div>`;
+        }
+      }
+      openModal("Balo", btabs + sellBar2 + (rows2 || '<div class="note">Ch\u01B0a c\xF3 v\u1EADt ph\u1EA9m Gacha n\xE0o, sang m\xE1y Gachapon quay th\u1EED \u0111i!</div>'));
+      $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
+        bagTab = t.dataset.btab;
+        openPanel("bag");
+      }));
+      $id("mbody").querySelectorAll("[data-selldlg]").forEach((b) => b.addEventListener("click", () => openSellDlg(b.dataset.selldlg)));
+      $id("mbody").querySelectorAll("[data-takeout]").forEach((b) => b.addEventListener("click", () => openTakeout(b.dataset.takeout)));
+      const smGo2 = $id("sellModeGo");
+      if (smGo2) smGo2.addEventListener("click", () => {
+        bagSellMode = true;
+        bagSel = {};
+        openPanel("bag");
+      });
+      $id("mbody").querySelectorAll("[data-selkey]").forEach((el) => el.addEventListener("click", () => {
+        bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
+        openPanel("bag");
+      }));
+      const ssNo2 = $id("sellSelNo");
+      if (ssNo2) ssNo2.addEventListener("click", () => {
+        bagSellMode = false;
+        openPanel("bag");
+      });
+      const ssGo2 = $id("sellSelGo");
+      if (ssGo2) ssGo2.addEventListener("click", () => {
+        const keys = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.bag[k]);
+        if (!keys.length) return toast("Ch\u01B0a tick c\xE1i n\xE0o c\u1EA3");
+        let gain = 0;
+        keys.forEach((k) => {
+          gain += bagPrice(k) * ctx.S.bag[k];
+          delete ctx.S.bag[k];
+        });
+        ctx.S.coins += gain;
+        ctx.S.totalSales += gain;
+        bagSellMode = false;
+        save();
+        renderStatus();
+        toast("B\xE1n m\u1ED9t m\u1EBB \u0111\u1ED3 Gacha: +" + gain.toLocaleString() + " G");
+        openPanel("bag");
+      });
+      return;
+    }
     if (bagTab === "relic") {
       const sh2 = ctx.S.shards || { prism: 0, star: 0 };
       const normTk = ctx.S.tickets?.norm || 0;
@@ -3013,7 +3210,8 @@ function openPanel(kind) {
       }));
       return;
     }
-    const rows = Object.entries(ctx.S.bag).map(([key, n]) => {
+    const rows = Object.keys(ctx.S.bag).filter((k) => !k.startsWith("unique@")).map((key) => {
+      const n = ctx.S.bag[key];
       const id = key.split("@")[0], mut = key.indexOf("@") > 0;
       const d0 = mutDescOf(key);
       const mdesc = d0 ? " \xB7 " + d0 : "";
@@ -4742,6 +4940,15 @@ function loadState() {
   }));
   if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
   if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
+  if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
+  if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
+  if (!ctx.S.uniques) ctx.S.uniques = {};
+  Object.keys(ctx.S.uniques || {}).forEach((k) => {
+    const item = ctx.S.uniques[k];
+    if (item && item.sp && item.spriteMap) {
+      registerDynamicSprite(item.sp, item.spriteMap);
+    }
+  });
   if (!ctx.S.plots2) ctx.S.plots2 = emptyPlots();
   if (!ctx.S.plots3) ctx.S.plots3 = emptyPlots();
   if (ctx.S.unlockedBlocks2 == null) ctx.S.unlockedBlocks2 = 1;
