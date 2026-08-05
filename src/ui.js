@@ -16,6 +16,7 @@ export let $id;
 export let fieldEl;
 export let decoLayer;
 export let fxLayer;
+export let dungeonView;
 let swX = null, swY = null;
 
 export function applyTheme() { ctx.ui.classList.remove('theme-sakura', 'theme-sky'); ctx.ui.classList.add('theme-' + (ctx.S && ctx.S.theme === 'sky' ? 'sky' : 'sakura')); }
@@ -89,12 +90,14 @@ export function initUI() {
         <div id="witch" title="Phù thuỷ tròn"></div>
         <div class="mode-tip" id="modetip"></div>
         <div class="toolbar" id="toolbar"></div>
+        <div class="dungeon-view" id="dungeon-view" style="display:none"></div>
       </div>
     </div>
     <div class="bottombar">
         <div class="btn" data-open="shop">${spriteSVG('shopIcon', 22)}Cửa hàng</div>
         <div class="btn" data-open="bag">${spriteSVG('bagIcon', 22)}Balo</div>
         <div class="btn" data-open="gacha">${spriteSVG('gachapon', 22)}Gachapon</div>
+        <div class="btn" data-open="dungeon">${spriteSVG('dungeonGate', 22)}Hầm ngục</div>
         <div class="btn" data-open="cfg">${spriteSVG('gearIcon', 22)}Cài đặt</div>
     </div>
     <div class="modal" id="modal">
@@ -137,6 +140,8 @@ export function initUI() {
   fxLayer = document.createElement('div');
   fxLayer.style.cssText = 'position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:8;';
   fieldEl.appendChild(fxLayer);
+
+  dungeonView = $id('dungeon-view');
 
 ctx.ui.addEventListener('click', e => {                     // Bấm bất cứ đâu ngoài pager = thu quả cầu lại (giai đoạn capture, chạy trước các xử lý click khác)
   const pager = $id('pager');

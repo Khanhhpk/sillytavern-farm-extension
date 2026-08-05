@@ -33,6 +33,9 @@ export function openPanel(kind) {
   if (kind === 'gacha') {
     return openGachaModal();
   }
+  if (kind === 'dungeon') {
+    return All.openDungeonView();
+  }
   if (kind === 'shop') {
     const tabs = [['seed', 'Hạt giống'], ['fert', 'Phân bón'], ['pet', 'Thú cưng'], ['pass', 'Vé'], ['ticket', 'Vé Gacha']];
     let items = '';

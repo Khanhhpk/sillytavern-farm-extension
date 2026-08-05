@@ -11,4 +11,5 @@ export * from './pets.js';
 export * from './witch.js';
 export * from './gacha.js';
 export * from './graphics.js';
+export * from './dungeon.js';
 export * from './destroy.js';

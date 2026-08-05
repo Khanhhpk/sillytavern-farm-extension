@@ -102,6 +102,24 @@ export const P = {
       ".....fFFFFFFMKKKKKKMFFFFFFf.....",
       ".....fFFFFFFMKKKKKKMFFFFFFf.....",
       ".....ffffffffffffffffffffff....."
+    ],
+    dungeonGate:[
+      "................",
+      "....MMMMMMMM....",
+      "...MLLLLLLLLM...",
+      "..MLLMCMMCMLLM..",
+      "..MLMvvvvvvMLM..",
+      "..MLvVuuuuVvLM..",
+      "..MLvVuBKuVvLM..",
+      "..MLvVKuuKVvLM..",
+      "..MLvVuuWKVvLM..",
+      "..MLvVKuuuVvLM..",
+      "..MLvVKKuBVvLM..",
+      "..MLvVuKKuVvLM..",
+      "..MLvVuuuuVvLM..",
+      "..MLMvvvvvvMLM..",
+      ".MMLMvvvvvvMLMM.",
+      ".MMMMvvvvvvMMMM."
     ]
   };
   /* Nếu bảng màu thiếu màu xanh k/i trong toolWater thì bù vào */

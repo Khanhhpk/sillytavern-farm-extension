@@ -17,7 +17,7 @@
 <body>
 
   <div class="panel">
-    <h3>Nhập bản vẽ (16x16)</h3>
+    <h3>Nhập bản vẽ (Kích thước động)</h3>
     <div class="help">
       Xoá các dấu ngoặc kép và phẩy, chỉ để lại ký tự.<br>
       Dùng dấu chấm (<code>.</code>) cho vùng trong suốt.
@@ -92,23 +92,36 @@
       const isPet = sel.value === 'PETS';
       const palette = isPet ? PET_P : P;
       
-      // Xoá nền
-      ctx.clearRect(0, 0, 256, 256);
-      
       // Lấy code và lọc ra các dòng
       const lines = ta.value.split('\n').map(l => l.trim().replace(/['",\[\]]/g, '')).filter(l => l.length > 0);
       
-      const pxSize = 256 / 16;
+      const gridHeight = lines.length;
+      const gridWidth = gridHeight > 0 ? Math.max(...lines.map(l => l.length)) : 0;
       
-      for (let y = 0; y < Math.min(16, lines.length); y++) {
-        const row = lines[y];
-        for (let x = 0; x < Math.min(16, row.length); x++) {
-          const char = row[x];
-          if (char !== '.') {
-            const color = palette[char];
-            if (color) {
-              ctx.fillStyle = color;
-              ctx.fillRect(x * pxSize, y * pxSize, pxSize, pxSize);
+      if (gridWidth > 0 && gridHeight > 0) {
+        // Đặt kích thước thật của canvas bằng số lượng pixel
+        canvas.width = gridWidth;
+        canvas.height = gridHeight;
+        
+        // Đặt kích thước hiển thị (CSS) để scale lên, cố định 16px cho 1 ô vuông, tối đa 512px
+        const dispWidth = Math.min(512, gridWidth * 16);
+        const dispHeight = Math.min(512, gridHeight * 16);
+        canvas.style.width = `${dispWidth}px`;
+        canvas.style.height = `${dispHeight}px`;
+
+        // Xoá nền
+        ctx.clearRect(0, 0, gridWidth, gridHeight);
+        
+        for (let y = 0; y < gridHeight; y++) {
+          const row = lines[y];
+          for (let x = 0; x < row.length; x++) {
+            const char = row[x];
+            if (char !== '.') {
+              const color = palette[char];
+              if (color) {
+                ctx.fillStyle = color;
+                ctx.fillRect(x, y, 1, 1);
+              }
             }
           }
         }
