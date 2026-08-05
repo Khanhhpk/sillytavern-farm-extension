@@ -58,7 +58,7 @@ export const eventFresh = () => ctx.S.dayEvent && ctx.S.dayEvent.who === charNam
 export const todayEvent = () => (CS.link && eventFresh()) ? ctx.S.dayEvent.ev : null;
 
 /* Trích world book: chỉ đọc, ưu tiên đèn xanh dương, thiếu thì bù đèn xanh lá, cắt còn 2000 chữ */
-async function collectWorldbook() {
+export async function collectWorldbook() {
   try {
     let blue = '', green = '';
     let entries = [];

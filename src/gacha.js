@@ -6,7 +6,7 @@ import { spriteSVG, petSVG, registerDynamicSprite, P } from './graphics.js';
 import { toast } from './witch.js';
 import { renderStatus } from './render.js';
 import { openModal } from './shop.js';
-import { charName, CS, SEC, extractJson } from './events.js';
+import { charName, CS, SEC, extractJson, collectWorldbook } from './events.js';
 
 export const GACHA_NORM_PITY = 100;
 export const GACHA_SPEC_PITY = 50;
@@ -104,9 +104,13 @@ export async function generateAIUniqueItemData(rarity) {
     const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(', ');
 
     let contextStr = '';
-    const cName = charName();
-    if (cName && CS.link) {
-      contextStr = `Nhân vật hiện tại: ${cName}. Nếu thấy phù hợp, có thể liên kết với nhân vật này, hoặc hoàn toàn tự do sáng tạo chủ đề ngẫu nhiên khác.`;
+    if (CS.link) {
+      const cName = charName();
+      const worldbook = await collectWorldbook();
+      contextStr = `Nhân vật hiện tại: ${cName}.
+Trích xuất bối cảnh thế giới (Worldbook) & Lịch sử trò chuyện gần nhất:
+${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể, hãy tự do sáng tạo)'}
+Nếu thấy phù hợp, hãy liên kết thiết kế vật phẩm với bối cảnh hoặc nhân vật này, nếu không thì tự do sáng tạo.`;
     } else {
       contextStr = `Hãy tự do tưởng tượng một chủ đề ngẫu nhiên bất kỳ (kỳ ảo, viễn tưởng, cổ đại, ma thuật, vũ trụ, thủy cung, phong ấn...) không giới hạn.`;
     }
