@@ -3545,6 +3545,10 @@ function openPanel(kind) {
       <div style="display:flex;gap:8px;margin-top:6px">
         <span class="buy plain" id="openSandboxBtn">\u{1F3A8} M\u1EDF X\u01B0\u1EDFng Ch\u1EBF T\xE1c AI</span>
       </div>
+      <div class="shead">Th\xF4ng tin & T\xE1c gi\u1EA3</div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <span class="buy plain" id="openCreditBtn">\u{1F4DC} Xem Credit (L\u1EDDi c\u1EA3m \u01A1n)</span>
+      </div>
       <div class="note" style="margin:12px 0 8px">
         <b>H\u01B0\u1EDBng d\u1EABn ch\u01A1i</b><br>\xB7 Li\xEAn k\u1EBFt th\u1EBB nh\xE2n v\u1EADt: b\u1EADt l\xEAn s\u1EBD t\u1EA1o s\u1EF1 ki\u1EC7n d\u1EF1a theo th\u1EBB nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i<br>
         \xB7 \u1EA2nh h\u01B0\u1EDFng c\u1ED1t truy\u1EC7n: b\u1EADt l\xEAn c\xF3 th\u1EC3 t\xE1c \u0111\u1ED9ng ng\u01B0\u1EE3c v\xE0o c\u1ED1t truy\u1EC7n hi\u1EC7n t\u1EA1i<br>
@@ -3572,6 +3576,29 @@ function openPanel(kind) {
     $id("secTest").addEventListener("click", () => testSecApi());
     $id("secModels").addEventListener("click", () => fetchModelList());
     if ($id("openSandboxBtn")) $id("openSandboxBtn").addEventListener("click", openSandbox);
+    if ($id("openCreditBtn")) {
+      $id("openCreditBtn").addEventListener("click", () => {
+        openModal("Credit & L\u1EDDi c\u1EA3m \u01A1n", `
+          <div style="line-height:1.6; color:#4a3219; font-size:13px; text-align:left; padding:8px;">
+            <b style="color:#a83a52;">T\xEAn s\u1EA3n ph\u1EA9m g\u1ED1c (\u539F\u771F\u540D):</b><br>
+            \u3010\u8C01\u8981\u5728\u9152\u9986\u5F53\u519C\u6C11\u554A\uFF01v1.1\u3011<br><br>
+            
+            <b style="color:#a83a52;">T\xEAn ti\u1EBFng Vi\u1EC7t (\u8D8A\u5357\u8BED\u8BD1\u540D):</b><br>
+            \u3010Ai th\xE8m l\xE0m n\xF4ng d\xE2n trong t\u1EEDu qu\xE1n ch\u1EE9! v1.1\u3011 Script Tr\u1EE3 th\u1EE7 T\u1EEDu qu\xE1n<br><br>
+
+            <b style="color:#a83a52;">T\xE1c gi\u1EA3 g\u1ED1c (\u539F\u4F5C\u8005):</b><br>
+            \u6EE1\u8EAB\u732B\u6BDB\u055E\u2022\u2022\u055E - Tranh th\u1EE7 l\xE9n meo<br><br>
+
+            <b style="color:#a83a52;">Mod v\xE0 update game hi\u1EC7n t\u1EA1i credit t\u1EEB:</b><br>
+            Dev: Kaiz
+          </div>
+          <div style="margin-top:16px;text-align:center;">
+            <span class="buy plain" id="closeCreditBtn">Quay l\u1EA1i C\xE0i \u0111\u1EB7t</span>
+          </div>
+        `);
+        $id("closeCreditBtn")?.addEventListener("click", () => openPanel("cfg"));
+      });
+    }
     $id("mbody").querySelectorAll("[data-settheme]").forEach((b) => b.addEventListener("click", () => {
       ctx.S.theme = b.dataset.settheme;
       save();

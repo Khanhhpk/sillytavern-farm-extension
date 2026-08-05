@@ -423,6 +423,10 @@ export function openPanel(kind) {
       <div style="display:flex;gap:8px;margin-top:6px">
         <span class="buy plain" id="openSandboxBtn">🎨 Mở Xưởng Chế Tác AI</span>
       </div>
+      <div class="shead">Thông tin & Tác giả</div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <span class="buy plain" id="openCreditBtn">📜 Xem Credit (Lời cảm ơn)</span>
+      </div>
       <div class="note" style="margin:12px 0 8px">
         <b>Hướng dẫn chơi</b><br>· Liên kết thẻ nhân vật: bật lên sẽ tạo sự kiện dựa theo thẻ nhân vật hiện tại<br>
         · Ảnh hưởng cốt truyện: bật lên có thể tác động ngược vào cốt truyện hiện tại<br>
@@ -446,6 +450,29 @@ export function openPanel(kind) {
     All.$id('secTest').addEventListener('click', () => testSecApi());
     All.$id('secModels').addEventListener('click', () => fetchModelList());
     if (All.$id('openSandboxBtn')) All.$id('openSandboxBtn').addEventListener('click', openSandbox);
+    if (All.$id('openCreditBtn')) {
+      All.$id('openCreditBtn').addEventListener('click', () => {
+        openModal('Credit & Lời cảm ơn', `
+          <div style="line-height:1.6; color:#4a3219; font-size:13px; text-align:left; padding:8px;">
+            <b style="color:#a83a52;">Tên sản phẩm gốc (原真名):</b><br>
+            【谁要在酒馆当农民啊！v1.1】<br><br>
+            
+            <b style="color:#a83a52;">Tên tiếng Việt (越南语译名):</b><br>
+            【Ai thèm làm nông dân trong tửu quán chứ! v1.1】 Script Trợ thủ Tửu quán<br><br>
+
+            <b style="color:#a83a52;">Tác giả gốc (原作者):</b><br>
+            满身猫毛՞••՞ - Tranh thủ lén meo<br><br>
+
+            <b style="color:#a83a52;">Mod và update game hiện tại credit từ:</b><br>
+            Dev: Kaiz
+          </div>
+          <div style="margin-top:16px;text-align:center;">
+            <span class="buy plain" id="closeCreditBtn">Quay lại Cài đặt</span>
+          </div>
+        `);
+        All.$id('closeCreditBtn')?.addEventListener('click', () => openPanel('cfg'));
+      });
+    }
     All.$id('mbody').querySelectorAll('[data-settheme]').forEach(b => b.addEventListener('click', () => {
       // @ts-ignore
       ctx.S.theme = b.dataset.settheme; save(); applyTheme(); openPanel('cfg');
