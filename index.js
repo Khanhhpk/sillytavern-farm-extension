@@ -2993,7 +2993,7 @@ function openGachaModal() {
       </div>
     </div>
   `;
-  openModal("M\xE1y Gachapon V\u01B0\u1EDDn Rau", bodyHTML);
+  openModal("M\xE1y Gachapon", bodyHTML);
   const updateCounts = () => {
     initGachaState();
     const elN = $id("gachaNormCount");

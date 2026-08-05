@@ -448,7 +448,7 @@ export function openGachaModal() {
     </div>
   `;
 
-  openModal('Máy Gachapon Vườn Rau', bodyHTML);
+  openModal('Máy Gachapon', bodyHTML);
 
   const updateCounts = () => {
     initGachaState();
