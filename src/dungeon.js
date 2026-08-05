@@ -361,7 +361,7 @@ function startWave() {
     const h = arena.clientHeight;
     
     // Calculate enemies based on wave
-    const count = Math.min(10, 3 + Math.floor(currentWave * 0.8));
+    const count = Math.min(10, 2 + Math.floor(currentWave * 0.6));
     let spawnElite = currentWave % 3 === 0;
     
     for(let i=0; i<count; i++) {
@@ -389,13 +389,15 @@ function startWave() {
         
         arena.appendChild(el);
         
-        // Scale hp and atk based on wave
-        const hpMultiplier = 1 + (currentWave - 1) * 0.3;
-        const atkMultiplier = 1 + (currentWave - 1) * 0.2;
+        // Scale hp and atk based on wave (reduced difficulty)
+        const hpMultiplier = 1 + (currentWave - 1) * 0.15;
+        const atkMultiplier = 1 + (currentWave - 1) * 0.1;
         
         enemies.push({
-            id: type.id, x, y, hp: type.hp * hpMultiplier, maxHp: type.hp * hpMultiplier, 
-            atk: type.atk * atkMultiplier,
+            id: type.id, x, y, 
+            hp: Math.round(type.hp * hpMultiplier), 
+            maxHp: Math.round(type.hp * hpMultiplier), 
+            atk: Math.round(type.atk * atkMultiplier),
             range: type.range, speed: type.speed, cd: 0, maxCd: type.cd, el, type: 'enemy',
             skill: type.skill, ai: type.ai
         });

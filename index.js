@@ -5681,7 +5681,7 @@ function startWave() {
   const arena = $id("dg-arena");
   const w = arena.clientWidth;
   const h = arena.clientHeight;
-  const count = Math.min(10, 3 + Math.floor(currentWave * 0.8));
+  const count = Math.min(10, 2 + Math.floor(currentWave * 0.6));
   let spawnElite = currentWave % 3 === 0;
   for (let i = 0; i < count; i++) {
     let type;
@@ -5703,15 +5703,15 @@ function startWave() {
     el.style.left = x + "px";
     el.style.top = y + "px";
     arena.appendChild(el);
-    const hpMultiplier = 1 + (currentWave - 1) * 0.3;
-    const atkMultiplier = 1 + (currentWave - 1) * 0.2;
+    const hpMultiplier = 1 + (currentWave - 1) * 0.15;
+    const atkMultiplier = 1 + (currentWave - 1) * 0.1;
     enemies.push({
       id: type.id,
       x,
       y,
-      hp: type.hp * hpMultiplier,
-      maxHp: type.hp * hpMultiplier,
-      atk: type.atk * atkMultiplier,
+      hp: Math.round(type.hp * hpMultiplier),
+      maxHp: Math.round(type.hp * hpMultiplier),
+      atk: Math.round(type.atk * atkMultiplier),
       range: type.range,
       speed: type.speed,
       cd: 0,
