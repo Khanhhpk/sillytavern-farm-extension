@@ -45,7 +45,9 @@ const ENEMY_TYPES = [
     { id: 'starbush', name: 'Bụi Sao', desc: 'Xạ thủ 3 tia.', hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: 'ranged', skill: 'multishot' },
     { id: 'opalvine', name: 'Dây Leo Opal', desc: 'Trói chân đối thủ.', hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: 'ranged', skill: 'root' },
     { id: 'lianou', name: 'Củ Sen Khổng Lồ', desc: 'Ném bùn từ xa.', hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: 'ranged' },
-    { id: 'dragoncry', name: 'Long Tinh', desc: 'Boss: Cực khỏe.', hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: 'tank', skill: 'cleave', elite: true }
+    { id: 'dragoncry', name: 'Long Tinh', desc: 'Boss: Cực khỏe.', hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: 'tank', skill: 'cleave', elite: true },
+    { id: 'pumpkin', name: 'Vua Bí Ngô', desc: 'Boss: Tank AoE slam.', hp: 800, atk: 35, range: 50, speed: 15, cd: 2.5, ai: 'tank', skill: 'cleave', elite: true, sp: 'pumpkin' },
+    { id: 'fangW', name: 'Phù Thủy Hoa', desc: 'Boss: Pháo đài bắn xa.', hp: 400, atk: 45, range: 160, speed: 18, cd: 1.8, ai: 'ranged', skill: 'multishot', elite: true, sp: 'fangW' }
 ];
 
 export function openDungeonView() {
@@ -98,8 +100,12 @@ function initPlacementPhase() {
     enemies = [];
     projectiles = [];
     
+    const best = ctx.S.dungeonBest || { wave: 0, gold: 0 };
+    const bestHtml = best.wave > 0 ? `<div style="color:#b08a5c; font-size:12px; text-align:center; margin-top:4px;">🏆 Kỷ lục: Wave ${best.wave} · ${best.gold} G</div>` : '';
+
     All.dungeonView.innerHTML = `
         <div class="dg-arena" id="dg-arena">
+            <div class="dg-hud" id="dg-hud" style="display:none;"></div>
             <div class="dg-info-panel" id="dg-info-panel" style="display:none;">
                 <div class="dg-info-close" id="dg-info-close">×</div>
                 <h3>Chỉ Số Thú Cưng</h3>
@@ -111,13 +117,14 @@ function initPlacementPhase() {
                 <div class="dg-info-list" id="dg-codex-list"></div>
             </div>
         </div>
-        <div style="display:flex; justify-content:center; margin-top: 5px;">
+        <div style="display:flex; justify-content:center; margin-top: 5px; flex-wrap:wrap;">
             <div class="buy" id="dg-start-btn">Bắt Đầu Trận Chiến</div>
             <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px;">Thoát</div>
             <div class="buy plain" id="dg-surrender-btn" style="margin-left: 10px; display:none; background: #e06578; color: white;">Kết Thúc Sớm</div>
             <div class="buy plain" id="dg-info-btn" style="margin-left: 10px; width: 32px; padding: 0; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:black;" title="Thông tin Thú cưng">?</div>
             <div class="buy plain" id="dg-codex-btn" style="margin-left: 10px; padding: 0 10px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:#e06578;" title="Từ điển quái">Quái Vật</div>
         </div>
+        ${bestHtml}
         <div class="dg-dock" id="dg-dock"></div>
     `;
 
@@ -358,13 +365,43 @@ function startCombat() {
     startWave();
 }
 
+function updateHUD() {
+    const hud = All.$id('dg-hud');
+    if (!hud) return;
+    const isBoss = currentWave % 10 === 0;
+    hud.style.display = 'block';
+    hud.innerHTML = `<span style="color:#ffd94d; font-weight:bold;">Wave ${currentWave}</span>${isBoss ? ' 👑' : ''} <span style="color:#a4dc8c; margin-left:10px;">${spriteSVG('coin', 12).replace('display:block','display:inline-block;vertical-align:middle')} ${totalGold} G</span>`;
+}
+
 function startWave() {
+    const isBossWave = currentWave % 10 === 0;
+    
+    if (isBossWave) {
+        // Show boss warning banner
+        phase = 'end'; // pause briefly
+        const arena = All.$id('dg-arena');
+        const banner = document.createElement('div');
+        banner.className = 'dg-boss-banner';
+        banner.innerHTML = '⚠ BOSS WAVE ⚠';
+        arena.appendChild(banner);
+        setTimeout(() => {
+            banner.remove();
+            _doStartWave();
+        }, 2000);
+    } else {
+        _doStartWave();
+    }
+}
+
+function _doStartWave() {
     phase = 'combat';
     enemies = [];
     projectiles = [];
     const arena = All.$id('dg-arena');
     const w = arena.clientWidth;
     const h = arena.clientHeight;
+    
+    updateHUD();
     
     // Calculate enemies based on wave
     let count = Math.min(10, 2 + Math.floor(currentWave * 0.6));
@@ -510,7 +547,7 @@ function spawnDmg(target, amount, type) {
     const arena = All.$id('dg-arena');
     const dmg = document.createElement('div');
     dmg.className = 'dg-dmg' + (type ? ' ' + type : '');
-    dmg.textContent = (amount > 0 ? '+' : '') + amount;
+    dmg.textContent = type === 'miss' ? 'MISS!' : (amount > 0 ? '+' : '') + amount;
     dmg.style.left = target.x + 'px';
     dmg.style.top = target.y + 'px';
     arena.appendChild(dmg);
@@ -539,15 +576,31 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
         return;
     }
     
+    // Dodge check (pets only)
+    if (target.type === 'pet') {
+        const dodgeChance = target.id === 'ghostBlob' ? 0.15 : 0.05;
+        if (Math.random() < dodgeChance) {
+            spawnDmg(target, 0, 'miss');
+            target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - atk);
+            return;
+        }
+    }
+    
     // Base damage
     let finalDmg = atk;
     let isCrit = false;
     
     if (attacker && attacker.type === 'pet') {
-        if (Math.random() < 0.15) { // 15% crit
+        const critChance = attacker.critRate || 0.15;
+        if (Math.random() < critChance) {
             finalDmg = Math.round(finalDmg * 1.5);
             isCrit = true;
         }
+    }
+    
+    // Armor reduction
+    if (target.armor && target.armor > 0) {
+        finalDmg = Math.round(finalDmg * (1 - target.armor));
     }
     
     if (skill === 'sniper' && attacker) {
@@ -836,13 +889,28 @@ function endDungeon(isWin) {
     overlay.className = 'dg-overlay';
     
     ctx.S.coins += totalGold;
+    
+    // Highscore check
+    if (!ctx.S.dungeonBest) ctx.S.dungeonBest = { wave: 0, gold: 0 };
+    let isNewRecord = false;
+    if (currentWave > ctx.S.dungeonBest.wave) {
+        ctx.S.dungeonBest.wave = currentWave;
+        ctx.S.dungeonBest.gold = totalGold;
+        isNewRecord = true;
+    } else if (currentWave === ctx.S.dungeonBest.wave && totalGold > ctx.S.dungeonBest.gold) {
+        ctx.S.dungeonBest.gold = totalGold;
+        isNewRecord = true;
+    }
+    
     All.save();
     All.renderStatus();
     let rewardText = `<div style="color:white; font-size: 16px;">Phần thưởng: ${spriteSVG('coin', 16).replace('display:block', 'display:inline-block; vertical-align:middle; margin-top:-2px')} ${totalGold} G<br/>Sống sót đến Wave ${currentWave}</div>`;
+    const recordHtml = isNewRecord ? '<div class="dg-new-record">🏆 KỶ LỤC MỚI! 🏆</div>' : `<div style="color:#b08a5c; font-size:13px;">Kỷ lục: Wave ${ctx.S.dungeonBest.wave} · ${ctx.S.dungeonBest.gold} G</div>`;
     
     overlay.innerHTML = `
         <div class="dg-title">Game Over</div>
         ${rewardText}
+        ${recordHtml}
         <div class="buy" id="dg-finish-btn" style="margin-top: 10px;">Thoát Hầm Ngục</div>
     `;
     
@@ -889,7 +957,10 @@ function showWaveRewards() {
         { id: 'ascend', name: 'Thăng Hoa', desc: 'Chọn 1 Pet để x1.5 Chỉ Số', color: '#9c27b0' },
         { id: 'gold', name: 'Kho Báu', desc: `Nhận thêm ${waveGold * 2} G ngay lập tức`, color: '#ffeb3b' },
         { id: 'blood', name: 'Huyết Chiến', desc: 'Giảm 20% HP tối đa của toàn đội nhưng tăng 50% ATK', color: '#f44336' },
-        { id: 'steel', name: 'Bức Tường Thép', desc: 'Tăng 50% HP tối đa nhưng giảm 10% ATK', color: '#607d8b' }
+        { id: 'steel', name: 'Bức Tường Thép', desc: 'Tăng 50% HP tối đa nhưng giảm 10% ATK', color: '#607d8b' },
+        { id: 'speed', name: 'Tốc Chiến', desc: 'Tăng 30% tốc đánh cho toàn đội', color: '#00bcd4' },
+        { id: 'armor', name: 'Hộ Giáp', desc: 'Giảm 20% sát thương nhận vào cho toàn đội', color: '#78909c' },
+        { id: 'ambush', name: 'Phục Kích', desc: 'Tăng tỷ lệ chí mạng lên 30% cho toàn đội', color: '#ff5722' }
     ];
     
     // Pick 3 random
@@ -929,7 +1000,7 @@ function showWaveRewards() {
         <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Hoàn Thành!</div>
         <div style="color:white; margin-bottom: 10px;">Nhận được ${waveGold} G (Tổng: ${totalGold} G)</div>
         ${bossDropHtml}
-        <div style="display:flex; gap: 15px;">
+        <div style="display:flex; gap: 15px; flex-wrap:wrap; justify-content:center;">
             ${cardsHtml}
         </div>
     `;
@@ -983,6 +1054,24 @@ function showWaveRewards() {
                     p.maxHp = Math.round(p.maxHp * 1.5);
                     p.hp = Math.round(p.hp * 1.5);
                     p.atk = Math.round(p.atk * 0.9);
+                });
+                nextWaveSequence(overlay);
+            }
+            else if (c.id === 'speed') {
+                fullTeam.forEach(p => {
+                    p.maxCd = Math.round(p.maxCd * 70) / 100; // reduce by 30%
+                });
+                nextWaveSequence(overlay);
+            }
+            else if (c.id === 'armor') {
+                fullTeam.forEach(p => {
+                    p.armor = Math.min(0.6, (p.armor || 0) + 0.2); // cap at 60%
+                });
+                nextWaveSequence(overlay);
+            }
+            else if (c.id === 'ambush') {
+                fullTeam.forEach(p => {
+                    p.critRate = Math.min(0.6, (p.critRate || 0.15) + 0.15); // +15%, cap 60%
                 });
                 nextWaveSequence(overlay);
             }

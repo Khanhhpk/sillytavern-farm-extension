@@ -420,4 +420,14 @@ export const styleCSS = `
     .dg-reward-card:hover { transform: scale(1.05); border-color: #ffda66; background: #4e382d; }
     .dg-reward-card h4 { margin: 0 0 5px 0; color: #ffda66; }
     .dg-reward-card p { margin: 0; font-size: 12px; color: #fff; line-height: 1.4; }
+    
+    .dg-hud { position: absolute; top: 8px; left: 10px; z-index: 25; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 6px; font-size: 13px; color: white; pointer-events: none; }
+    
+    .dg-boss-banner { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold; color: #ff2222; text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000; letter-spacing: 4px; animation: bossBlink 0.5s ease-in-out infinite alternate; pointer-events: none; background: rgba(0,0,0,0.5); }
+    @keyframes bossBlink { 0% { opacity: 0.6; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1.05); } }
+    
+    .dg-dmg.miss { color: #aaaaaa; font-style: italic; font-size: 13px; }
+    
+    .dg-new-record { color: #ffd700; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #ffd700, 0 0 30px #ff8c00; animation: newRecordPulse 0.8s ease-in-out infinite alternate; margin: 5px 0; }
+    @keyframes newRecordPulse { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
 `;
