@@ -9,7 +9,7 @@ import { gameDay, settle, fmtLeft } from './utils.js';
 import { curBlocks, curPlots, blockPrice, save } from './state.js';
 import { SPRITE_PX } from './orb.js';
 import { CS, eventPending, todayEvent, setInjection, saveCharState, updateInjection, requestDayEvent } from './events.js';
-import { applyPageSkin, renderPager } from './ui.js';
+import { applyPageSkin, renderPager, sh } from './ui.js';
 import { buyBlock, harvest, plant, water, fertilize, shovel, rollMutation } from './logic.js';
 import { weatherOf } from './utils.js';
 import { growMs } from './logic.js';
@@ -151,7 +151,7 @@ export function renderPlots() {
         // @ts-ignore
         if (next) signEl.dataset.buy = String(b);
         signEl.innerHTML = shtml;
-        blockEl.appendChild(signEl); console.log('[Farm] Added sign to block', b);
+        blockEl.appendChild(signEl);
       } else {
         if (signEl.className !== sclassName) signEl.className = sclassName;
         // @ts-ignore
@@ -333,7 +333,7 @@ All.$id('bmut').addEventListener('click', (e) => {
   All.$id('mutPopup').classList.toggle('open');
 });
 /* Bấm ngoài popup thì đóng */
-document.addEventListener('click', (e) => {
+sh.addEventListener('click', (e) => {
   const popup = All.$id('mutPopup');
   // @ts-ignore
   if (popup.classList.contains('open') && !e.target.closest('.mut-popup') && !e.target.closest('.bmut')) {

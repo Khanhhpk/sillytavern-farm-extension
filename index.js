@@ -7,17 +7,11 @@ var ctx = {
   eventSource: null,
   event_types: null,
   saveSettingsDebounced: null,
-  generateRaw: null,
   S: null,
   ui: null,
   orb: null,
   win: null,
-  bagWin: null,
-  passWin: null,
-  shopWin: null,
-  msg: null,
-  saveTimer: null,
-  witchTimer: null
+  saveTimer: null
 };
 var setExtensionContext = (params) => {
   Object.assign(ctx, params);
@@ -124,6 +118,70 @@ var P = {
   m: "#7d5a42",
   s: "#684a36"
 };
+var GACHA_P = {
+  "0": "#ffffff",
+  "1": "#e0e0e0",
+  "2": "#c0c0c0",
+  "3": "#a0a0a0",
+  "4": "#808080",
+  "5": "#606060",
+  "6": "#404040",
+  "7": "#202020",
+  "8": "#101010",
+  "9": "#000000",
+  "a": "#ff0000",
+  "b": "#cc0000",
+  "c": "#990000",
+  "d": "#ff6666",
+  "e": "#ff9999",
+  "f": "#ff6600",
+  "g": "#cc5200",
+  "h": "#ff9933",
+  "i": "#8b4513",
+  "j": "#a0522d",
+  "k": "#cd853f",
+  "l": "#deb887",
+  "m": "#ffff00",
+  "n": "#ffd700",
+  "o": "#ffcc00",
+  "p": "#ffdab9",
+  "q": "#eee8aa",
+  "r": "#bdb76b",
+  "s": "#00ff00",
+  "t": "#32cd32",
+  "u": "#008000",
+  "v": "#006400",
+  "w": "#98fb98",
+  "x": "#90ee90",
+  "y": "#adff2f",
+  "z": "#556b2f",
+  "A": "#0000ff",
+  "B": "#0000cc",
+  "C": "#00008b",
+  "D": "#4169e1",
+  "E": "#6495ed",
+  "F": "#87ceeb",
+  "G": "#00ffff",
+  "H": "#00ced1",
+  "I": "#20b2aa",
+  "J": "#008080",
+  "K": "#7fffd4",
+  "L": "#ff00ff",
+  "M": "#c71585",
+  "N": "#800080",
+  "O": "#4b0082",
+  "P": "#9370db",
+  "Q": "#da70d6",
+  "R": "#ffc0cb",
+  "S": "#ffb6c1",
+  "T": "#ff69b4",
+  "U": "#db7093",
+  "V": "#ffe4c4",
+  "W": "#ffe4e1",
+  "X": "#faf0e6",
+  "Y": "#ffefd5",
+  "Z": "#ffebcd"
+};
 function mulberry32(a) {
   return function() {
     a |= 0;
@@ -165,7 +223,46 @@ var SPR = {
   emNote: ["................", "................", "................", ".....KKKKK......", ".....K...K......", ".....K...K......", ".....K...K......", "...KKK..KKK.....", "...KKK..KKK.....", "................", "................", "................", "................", "................", "................", "................"],
   lotus: ["................", "................", "......Ff........", ".....pFfp.......", "....pFppFp......", "....fpFFpf......", ".....fppf.......", "...DGGGGGGD.....", "..DGGGGGGGGD....", "...DDGGGGDD.....", "................", "..b..bbb...b....", ".bBbbBBBbbBb....", "..bb..b..bb.....", "................", "................"],
   gem: ["................", "................", ".......v........", "......vVv.......", ".....vVWVv......", ".....vVVVv......", "....vVVWVVv.....", "....vVVVVVv.....", "...vVVWVVVVv....", "..BbvVVVVVvBb...", ".bBBvVVVVVvBBb..", ".bbbvvvvvvvbbb..", "..MMMMMMMMMMM...", "...MMMMMMMMM....", "................", "................"],
-  emBang: ["................", "................", ".....ffff.......", ".....fpFf.......", ".....fFFf.......", ".....fFFf.......", ".....fFFf.......", ".....fFFf.......", "......ff........", "................", ".....ffff.......", ".....fFFf.......", ".....ffff.......", "................", "................", "................"]
+  emBang: ["................", "................", ".....ffff.......", ".....fpFf.......", ".....fFFf.......", ".....fFFf.......", ".....fFFf.......", ".....fFFf.......", "......ff........", "................", ".....ffff.......", ".....fFFf.......", ".....ffff.......", "................", "................", "................"],
+  ticketNorm: ["................", "....ffffffff....", "...fFFFFFFFFf...", "...fFCCCCCCFf...", "..fFCCCCCCCCFf..", "..fFCCCCCCWCFf..", "..fFCCCCWWCCFf..", "..fFCCCCCCWCFf..", "..fFCCCCCCCCFf..", "..fFCCCCCCCCFf..", "...fFCCCCCCFf...", "...fFFFFFFFFf...", "....ffffffff....", "................", "................", "................"],
+  ticketSpec: ["................", "....ffffffff....", "...ffffffffff...", "...fvVVVVVVvf...", "..fvVVVVVVVVvf..", "..fvVVVWWVVVvf..", "..fvVVWWWWVVvf..", "..fvVVVWWVVVvf..", "..fvVVVVVVVVvf..", "..fvVVVVVVVVvf..", "...fvVVVVVVvf...", "...ffffffffff...", "....ffffffff....", "................", "................", "................"],
+  ticketSuper: ["................", "....ffffffff....", "...ffffffffff...", "...fxOOOOOOxf...", "..fxOOOOOOOOxf..", "..fxOOOWWOOOxf..", "..fxOOWWWWOOxf..", "..fxOOOWWOOOxf..", "..fxOOOOOOOOxf..", "..fxOOOOOOOOxf..", "...fxOOOOOOxf...", "...ffffffffff...", "....ffffffff....", "................", "................", "................"],
+  gachaCapsuleNorm: ["................", ".....ffff.......", "...fCCCCCCf.....", "..fCCCCWCCCf....", "..fCCCCCCCCf....", "..ffffffffff....", "..fvvvvvvvvf....", "..fvvvvWvvvf....", "...fvvvvvvf.....", ".....ffff.......", "................", "................", "................", "................", "................", "................"],
+  gachaCapsuleSpec: ["................", ".....ffff.......", "...fYYYYYYf.....", "..fYYYYWYYYf....", "..fYYYYYYYYf....", "..ffffffffff....", "..fvvvvvvvvf....", "..fvvvvWvvvf....", "...fvvvvvvf.....", ".....ffff.......", "................", "................", "................", "................", "................", "................"],
+  gachapon: [
+    ".............ffffff.............",
+    "...........ffFFFFFFff...........",
+    "..........fFFFFFFFFFFf..........",
+    ".........fFFFFFFFFFFFFf.........",
+    "........fFFFFFFFFFFFFFFf........",
+    ".......fBBBBBBBBBBBBBBBBf.......",
+    "......fBiiiBBBBBBBBBBBBBBf......",
+    "......fBiiWiBBBBBBBBBBBBBf......",
+    ".....fBBiiiiBBBBBBBBBBBBBBf.....",
+    ".....fBBBBDGGDBBBBUCCUBBBBf.....",
+    ".....fBBBBGWWGFnnFCWWCBBBBf.....",
+    ".....fBBBBGGGGnWWnCCCCBBBBf.....",
+    ".....fBBBBDGGDnnnnUCCUBBBBf.....",
+    ".....fBBfFFfDEFnnFOQdvvdBBf.....",
+    ".....fBBFWWFEWWEOWWOvWWvBBf.....",
+    "......fBFFFFEEEEOOOOvvvvBf......",
+    "......fBfFFfDEEDQOOQdvvdBf......",
+    ".......fbbbbbbbbbbbbbbbbf.......",
+    "......ffffffffffffffffffff......",
+    "......fFFFFFFFFFFFFFFFFFFf......",
+    "......fFFFFFFFFFFFFFFFFFFf......",
+    "......fFFFFFFFFFFFFFFFFFFf......",
+    ".....fFFFFFFFMMMMMMFFFFFFFf.....",
+    ".....fFFFFFFMMLLLLMMFFFFFFf.....",
+    ".....fFFFFFFMLLWWLLMFFFFFFf.....",
+    ".....fFFFFFFMLLWWLLMFFFFFFf.....",
+    ".....fFFFFFFMMLLLLMMFFFFFFf.....",
+    ".....fFFFFFFFMMMMMMFFFFFFFf.....",
+    ".....fFFFFFFMMMMMMMMFFFFFFf.....",
+    ".....fFFFFFFMKKKKKKMFFFFFFf.....",
+    ".....fFFFFFFMKKKKKKMFFFFFFf.....",
+    ".....ffffffffffffffffffffff....."
+  ]
 };
 P.k = P.k || "#c4e3f0";
 P.i = P.i || "#a9cede";
@@ -493,6 +590,24 @@ var PET_SPR = {
     "....xxxxxxxx....",
     "......jjjj......",
     "................"
+  ],
+  penguin: [
+    "................",
+    "................",
+    ".....333333.....",
+    "....33WWWW33....",
+    "...33WWWWWW33...",
+    "...3WKKWWKKW3...",
+    "..33WnWooWnW33..",
+    "..33WWWWWWWW33..",
+    "..33WWWWWWWW33..",
+    "...33WWWWWW33...",
+    "....33333333....",
+    ".....oo..oo.....",
+    "................",
+    "................",
+    "................",
+    "................"
   ]
 };
 var petLinear = (x1, y1, x2, y2, stops) => ({ type: "linear", x1, y1, x2, y2, stops });
@@ -577,7 +692,8 @@ var PETS = {
   prismBlob: { name: "B\xE9 l\u0103ng quang", page: 3, price: 8e3, cry: ["Keng~", "(kh\xFAc x\u1EA1 ra m\u1ED9t d\u1EA3i c\u1EA7u v\u1ED3ng)", "Kengg!"], desc: "Lo\u1EA1i s\u1EA3n xu\u1EA5t \xB7 t\xECm kho b\xE1u mang v\u1EC1 m\u1EA3nh l\u0103ng quang (\u0111\u1ED5i \u0111\u01B0\u1EE3c m\u1ED9t \u0111\u01A1n \u1EDF trang \u0111\u01A1n h\xE0ng ph\xF9 thu\u1EF7)" },
   starBell: { name: "B\xE9 chu\xF4ng sao", page: 3, price: 8e3, cry: ["Leng keng~", "\u2606!", "(l\u1EAFc l\u1EAFc nh\u1EB9)"], desc: "Lo\u1EA1i s\u1EA3n xu\u1EA5t \xB7 t\xECm kho b\xE1u rung r\u01A1i m\u1EA3nh ng\xF4i sao (tri\u1EC7u h\u1ED3i \u0111\u01B0\u1EE3c ph\xF9 thu\u1EF7 tr\xF2n)" },
   /* —— Át chủ bài (#43: giữ id slimeNight để không hỏng save; page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
-  slimeNight: { name: "B\xE9 soda \u0111\xE0o", page: 1, price: 9999, cry: ["B\u1ED1p\u2014\u2014!", "(n\u1ED5i m\u1ED9t bong b\xF3ng nh\u1ECF)", "X\xEC~", "(v\u1ECB ng\xF2n ng\u1ECDt)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 tinh linh soda v\u1ECB \u0111\xE0o \xB7 d\u1EC5 th\u01B0\u01A1ng qu\xE1 m\u1EE9c n\xEAn \u0111\u1EAFt nh\u1EA5t" }
+  slimeNight: { name: "B\xE9 soda \u0111\xE0o", page: 1, price: 9999, cry: ["B\u1ED1p\u2014\u2014!", "(n\u1ED5i m\u1ED9t bong b\xF3ng nh\u1ECF)", "X\xEC~", "(v\u1ECB ng\xF2n ng\u1ECDt)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 tinh linh soda v\u1ECB \u0111\xE0o \xB7 d\u1EC5 th\u01B0\u01A1ng qu\xE1 m\u1EE9c n\xEAn \u0111\u1EAFt nh\u1EA5t" },
+  penguin: { name: "Chim c\xE1nh c\u1EE5t", page: 1, price: 1e5, cry: ["Pingu!", "N\xFAp n\xFAp~", "Tr\u01B0\u1EE3t tuy\u1EBFt n\xE0o!", "C\xE1nh c\u1EE5t!"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 AFK m\u1ED7i 1 ti\u1EBFng mang v\u1EC1 1 v\xE9 gacha ng\u1EABu nhi\xEAn (70% v\xE9 th\u01B0\u1EDDng, 30% v\xE9 \u0111\u1EB7c bi\u1EC7t)" }
 };
 var PASSES = {
   water: { name: "V\xE9 v\xF9ng n\u01B0\u1EDBc", price: 6e3, desc: "M\u1EDF kho\xE1 ru\u1ED9ng v\xF9ng n\u01B0\u1EDBc (trang 2) + quy\u1EC1n mua b\xE9 tr\xF2n trang 2 v\xE0 h\u1EA1t gi\u1ED1ng thu\u1EF7 sinh, t\u1EB7ng k\xE8m \xF4 ru\u1ED9ng n\u1ED5i \u0111\u1EA7u ti\xEAn" },
@@ -1073,16 +1189,20 @@ var C2 = {
     "................"
   ] }
 };
+var DYNAMIC_SPR = {};
+function registerDynamicSprite(name, mapArray) {
+  DYNAMIC_SPR[name] = mapArray;
+}
 var spriteCache = /* @__PURE__ */ new Map();
 function spriteSVG(name, px) {
   const key = name + "@" + px;
   if (spriteCache.has(key)) return spriteCache.get(key);
-  const map = SPR[name] || C2[name] && C2[name].m;
+  const map = SPR[name] || DYNAMIC_SPR[name] || C2[name] && C2[name].m;
   if (!map) return "";
-  const pal = SPR[name] ? P : C2[name].p;
+  const pal = DYNAMIC_SPR[name] ? GACHA_P : SPR[name] ? P : C2[name].p;
   const canvas = document.createElement("canvas");
-  canvas.width = 16;
-  canvas.height = 16;
+  canvas.width = map[0].length || 16;
+  canvas.height = map.length || 16;
   const ctx2 = canvas.getContext("2d");
   map.forEach((row, y) => {
     for (let x = 0; x < row.length; x++) {
@@ -1597,6 +1717,24 @@ var styleCSS = `
     .pick { display: flex; align-items: center; gap: 5px; padding: 4px 9px; background: #faf0dc;
       border: 2px solid #c2a274; border-radius: 7px; font-size: 12px; font-weight: bold; color: #6b4f2e; cursor: pointer; }
     .pick.active { border-color: var(--accLine); background: var(--accBg); color: var(--accFg); }
+    /* Gachapon Animations & FX */
+    @keyframes gachaShake {
+      0% { transform: rotate(0deg); }
+      20% { transform: rotate(-6deg); }
+      40% { transform: rotate(6deg); }
+      60% { transform: rotate(-4deg); }
+      80% { transform: rotate(4deg); }
+      100% { transform: rotate(0deg); }
+    }
+    @keyframes gachaDrop {
+      0% { transform: translateY(-40px) scale(0.2); opacity: 0; }
+      60% { transform: translateY(10px) scale(1.2); opacity: 1; }
+      80% { transform: translateY(-4px) scale(0.95); }
+      100% { transform: translateY(0) scale(1); }
+    }
+    .gacha-item-card.rarity-Hi\u1EBFm { border-color: #4a90e2 !important; background: #f0f7ff !important; }
+    .gacha-item-card.rarity-S\u1EED-thi { border-color: #a335ee !important; background: #faf0ff !important; }
+    .gacha-item-card.rarity-Huy\u1EC1n-tho\u1EA1i { border-color: #ff8000 !important; background: #fff8f0 !important; box-shadow: 0 0 10px rgba(255,128,0,0.6) !important; }
 `;
 
 // src/ui.js
@@ -1679,6 +1817,7 @@ function initUI() {
     <div class="bottombar">
         <div class="btn" data-open="shop">${spriteSVG("shopIcon", 22)}C\u1EEDa h\xE0ng</div>
         <div class="btn" data-open="bag">${spriteSVG("bagIcon", 22)}Balo</div>
+        <div class="btn" data-open="gacha">${spriteSVG("gachapon", 22)}Gachapon</div>
         <div class="btn" data-open="cfg">${spriteSVG("gearIcon", 22)}C\xE0i \u0111\u1EB7t</div>
     </div>
     <div class="modal" id="modal">
@@ -1720,8 +1859,9 @@ function initUI() {
     const pager = $id("pager");
     if (pager && pager.classList.contains("open") && !e.target.closest("#pager")) pager.classList.remove("open");
   }, true);
-  $id("pager") && $id("pager").addEventListener("click", (e) => {
-    const pager = $id("pager");
+  const pagerEl = $id("pager");
+  if (pagerEl) pagerEl.addEventListener("click", (e) => {
+    const pager = pagerEl;
     const t = e.target.closest("[data-pg]");
     if (!t) {
       pager.classList.toggle("open");
@@ -1793,7 +1933,7 @@ function plant(pi, cropId) {
   }
   ctx.S.seeds[cropId]--;
   const g = growMs(realId);
-  const c = { id: realId, matureAt: now() + g, yieldBonus: 0, wateredUntil: 0, fertUsed: {} };
+  const c = { id: realId, matureAt: now() + g, wateredUntil: 0, fertUsed: {} };
   if (CROPS[realId].regrow) c.left = REGROW_MAX;
   if (isRain()) {
     c.matureAt = now() + g * 0.9;
@@ -1873,6 +2013,9 @@ function bagName(key) {
   return (parts[1] ? parts[1] + "\xB7" : "") + (CROPS[parts[0]] || { name: "?" }).name;
 }
 function bagPrice(key) {
+  if (key.startsWith("unique@")) {
+    return ctx.S.uniques?.[key]?.sell || 0;
+  }
   const parts = key.split("@");
   return Math.round((CROPS[parts[0]] || { sell: 0 }).sell * (parts[1] ? 1.25 : 1));
 }
@@ -1887,7 +2030,7 @@ function harvest(pi, quiet) {
   if (!c || now() < c.matureAt) return null;
   rollMutation(c, pi);
   const def = CROPS[c.id];
-  let n = 1 + (c.yieldBonus || 0);
+  let n = 1;
   const dev = todayEvent();
   if (dev && dev.double_yield && (!dev.favored_crop || def.name === dev.favored_crop)) n *= 2;
   const key = c.mut ? c.id + "@" + c.mut : c.id;
@@ -1899,8 +2042,6 @@ function harvest(pi, quiet) {
     ctx.S.coins += shinyGain;
     delete c.shiny;
   }
-  c.yieldBonus = 0;
-  if (c.left == null && def.regrow) c.left = REGROW_MAX;
   if (def.regrow && c.left - 1 > 0) {
     c.left--;
     c.matureAt = now() + regrowMs(c.id);
@@ -1949,6 +2090,21 @@ function sell(key, n) {
   renderStatus();
   openPanel("bag");
   toast("B\xE1n \u0111\u01B0\u1EE3c " + gain + " G");
+}
+function sellSeed(id, n) {
+  const have = ctx.S.seeds[id] || 0;
+  n = Math.min(n, have);
+  if (n <= 0) return;
+  const def = CROPS[id] || { seed: 100 };
+  const gain = Math.floor((def.seed || 100) * 0.5) * n;
+  ctx.S.seeds[id] = have - n;
+  if (ctx.S.seeds[id] === 0) delete ctx.S.seeds[id];
+  ctx.S.coins += gain;
+  ctx.S.totalSales += gain;
+  save();
+  renderStatus();
+  openPanel("bag");
+  toast("B\xE1n h\u1EA1t gi\u1ED1ng thu \u0111\u01B0\u1EE3c " + gain + " G");
 }
 
 // src/pets.js
@@ -2415,6 +2571,7 @@ function initPets() {
       activeDrag.dropped = true;
     } else {
       cancelAnimationFrame(dragAnimFrame);
+      dragAnimFrame = null;
       el.style.transform = "";
       el.style.transition = "";
       activeDrag = null;
@@ -2430,6 +2587,518 @@ function initPets() {
     if (!el) return;
     handlePetClick(el, el.dataset.pet);
   });
+}
+
+// src/gacha.js
+var GACHA_NORM_PITY = 100;
+var GACHA_SPEC_PITY = 50;
+function initGachaState() {
+  if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+  if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
+  if (!ctx.S.uniques) ctx.S.uniques = {};
+}
+async function pMap(array, asyncFn, concurrency) {
+  const results = [];
+  const executing = [];
+  for (const item of array) {
+    const p = Promise.resolve().then(() => asyncFn(item));
+    results.push(p);
+    if (concurrency <= array.length) {
+      const e = p.then(() => executing.splice(executing.indexOf(e), 1));
+      executing.push(e);
+      if (executing.length >= concurrency) {
+        await Promise.race(executing);
+      }
+    }
+  }
+  return Promise.all(results);
+}
+function generateProcedural32x32Sprite(rarity) {
+  const map = [];
+  const borderChar = "K";
+  const mainChar = rarity === "Huy\u1EC1n tho\u1EA1i" ? "C" : rarity === "S\u1EED thi" ? "V" : "B";
+  const subChar = rarity === "Huy\u1EC1n tho\u1EA1i" ? "Y" : rarity === "S\u1EED thi" ? "v" : "b";
+  const highlightChar = "W";
+  const accentChar = rarity === "Huy\u1EC1n tho\u1EA1i" ? "R" : rarity === "S\u1EED thi" ? "F" : "E";
+  const type = Math.floor(Math.random() * 4);
+  for (let y = 0; y < 32; y++) {
+    let row = "";
+    for (let x = 0; x < 32; x++) {
+      const distFromCenter = Math.hypot(x - 15.5, y - 15.5);
+      const isLeft = x < 16;
+      const mirrorX = isLeft ? x : 31 - x;
+      let ch = ".";
+      if (type === 0) {
+        if (y >= 10 && y <= 22) {
+          const w = 12 - Math.floor(Math.abs(y - 16) * 0.4);
+          if (mirrorX >= 16 - w && mirrorX <= 15) {
+            if (mirrorX === 16 - w || y === 10 || y === 22) ch = borderChar;
+            else if (y === 11 || mirrorX === 16 - w + 1) ch = highlightChar;
+            else if ((x + y) % 3 === 0) ch = accentChar;
+            else ch = x % 2 === 0 ? mainChar : subChar;
+          }
+        }
+      } else if (type === 1) {
+        if (distFromCenter <= 11) {
+          if (distFromCenter >= 10.2) ch = borderChar;
+          else if (x <= 13 && y <= 13 && distFromCenter < 8) ch = highlightChar;
+          else if (distFromCenter < 5) ch = accentChar;
+          else ch = (x + y) % 2 === 0 ? mainChar : subChar;
+        }
+      } else if (type === 2) {
+        const line = Math.abs(x - y);
+        if (line <= 3 && x >= 4 && x <= 27 && y >= 4 && y <= 27) {
+          if (line === 3) ch = borderChar;
+          else if (line === 0) ch = highlightChar;
+          else ch = (x + y) % 2 === 0 ? mainChar : subChar;
+        }
+      } else {
+        const dx = Math.abs(x - 15.5), dy = Math.abs(y - 15.5);
+        if (dx + dy <= 12 && dx + dy >= 2) {
+          if (dx + dy >= 11) ch = borderChar;
+          else if (dx <= 2 || dy <= 2) ch = highlightChar;
+          else ch = x % 2 === 0 ? mainChar : subChar;
+        }
+      }
+      row += ch;
+    }
+    map.push(row);
+  }
+  return map;
+}
+async function generateAIUniqueItemData(rarity) {
+  if (!SEC.url || !SEC.model) return null;
+  try {
+    const simpleColors = Object.entries(GACHA_P).filter((e) => typeof e[1] === "string");
+    const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(", ");
+    let contextStr = "";
+    if (CS.link) {
+      const worldbook = await collectWorldbook();
+      contextStr = `Tr\xEDch xu\u1EA5t b\u1ED1i c\u1EA3nh th\u1EBF gi\u1EDBi (Worldbook) & L\u1ECBch s\u1EED tr\xF2 chuy\u1EC7n g\u1EA7n nh\u1EA5t:
+${worldbook ? worldbook : "(Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u th\u1EBF gi\u1EDBi c\u1EE5 th\u1EC3, h\xE3y t\u1EF1 do s\xE1ng t\u1EA1o)"}
+N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m li\xEAn k\u1EBFt v\u1EDBi b\u1ED1i c\u1EA3nh n\xE0y, n\u1EBFu kh\xF4ng th\xEC t\u1EF1 do s\xE1ng t\u1EA1o.`;
+    } else {
+      contextStr = `H\xE3y t\u1EF1 do t\u01B0\u1EDFng t\u01B0\u1EE3ng m\u1ED9t ch\u1EE7 \u0111\u1EC1 ng\u1EABu nhi\xEAn b\u1EA5t k\u1EF3 (k\u1EF3 \u1EA3o, vi\u1EC5n t\u01B0\u1EDFng, c\u1ED5 \u0111\u1EA1i, ma thu\u1EADt, v\u0169 tr\u1EE5, th\u1EE7y cung, phong \u1EA5n...) kh\xF4ng gi\u1EDBi h\u1EA1n.`;
+    }
+    const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m game nh\u1EADp vai v\xE0 chuy\xEAn gia Pixel Art (32x32).
+H\xE3y s\xE1ng t\u1EA1o 1 V\u1EACT PH\u1EA8M \u0110\u1ED8C NH\u1EA4T ph\u1EA9m ch\u1EA5t [${rarity}].
+${contextStr}
+
+B\u1EA2NG M\xC0U PIXEL 32x32 CHO PH\xC9P (K\xFD t\u1EF1: M\xE3 m\xE0u Hex):
+${paletteStr}
+
+H\u01AF\u1EDANG D\u1EAAN T\u01AF DUY (B\u1EAFt bu\u1ED9c ph\u1EA3i c\xF3 th\u1EBB <thinking> tr\u01B0\u1EDBc khi xu\u1EA5t m\xE3):
+\u0110\u1EC3 v\u1EBD pixel art chu\u1EA9n 32x32:
+1. Ph\xE2n t\xEDch m\xE0u s\u1EAFc v\xE0 h\xECnh d\xE1ng v\u1EADt th\u1EC3 ph\xF9 h\u1EE3p v\u1EDBi m\xF4 t\u1EA3. V\u1EADt th\u1EC3 n\xEAn \u0111\u01B0\u1EE3c c\xE1ch \u0111i\u1EC7u th\xFA v\u1ECB, kh\xF4ng c\u1EA7n b\xF3 bu\u1ED9c v\xE0o n\xF4ng nghi\u1EC7p.
+2. \u0110\u1EBFm ch\xEDnh x\xE1c s\u1ED1 l\u01B0\u1EE3ng k\xFD t\u1EF1 tr\xEAn m\u1ED7i d\xF2ng. Khung canvas l\xE0 32x32, m\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng 32 k\xFD t\u1EF1, t\u1ED5ng c\u1ED9ng 32 d\xF2ng. N\u1EBFu thi\u1EBFu/th\u1EEBa k\xFD t\u1EF1, h\xECnh s\u1EBD b\u1ECB c\u1EAFt m\xE9o!
+
+QUY T\u1EAEC \u0110\u1EA6U RA B\u1EAET BU\u1ED8C:
+Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\u1ED1i m\xE3 \`\`\`json ch\u1EE9a c\u1EA5u tr\xFAc:
+{
+  "name": "T\xEAn v\u1EADt ph\u1EA9m (2~5 ch\u1EEF, \u1EA5n t\u01B0\u1EE3ng, s\xE1ng t\u1EA1o)",
+  "desc": "M\xF4 t\u1EA3 1 c\xE2u v\u1EC1 c\xF4ng d\u1EE5ng/hi\u1EC7u \u1EE9ng khi d\xF9ng trong c\u1ED1t truy\u1EC7n (d\u01B0\u1EDBi 35 ch\u1EEF)",
+  "price": M\u1ED9t s\u1ED1 nguy\xEAn \u0111\u1ECBnh gi\xE1 G c\u1EE7a v\u1EADt ph\u1EA9m (G\u1EE3i \xFD: quanh m\u1EE9c ${rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "S\u1EED thi" ? 8e3 : 2500}G, c\xF3 th\u1EC3 t\u1EF1 do t\u0103ng gi\u1EA3m tu\u1EF3 \xFD),
+  "spriteMap": [ m\u1EA3ng g\u1ED3m \u0110\xDANG 32 chu\u1ED7i, m\u1ED7i chu\u1ED7i D\xC0I CH\xCDNH X\xC1C 32 k\xFD t\u1EF1 ch\u1EC9 d\xF9ng k\xFD t\u1EF1 B\u1EA3ng m\xE0u v\xE0 d\u1EA5u '.' cho \u0111i\u1EC3m trong su\u1ED1t ]
+}`;
+    const userPrompt = `H\xE3y s\xE1ng t\u1EA1o 1 v\u1EADt ph\u1EA9m \u0111\u1EB7c bi\u1EC7t ng\u1EABu nhi\xEAn ph\u1EA9m ch\u1EA5t ${rarity}.`;
+    console.groupCollapsed(`=== GACHA AI DEBUG: B\u1EAFt \u0111\u1EA7u t\u1EA1o [${rarity}] ===`);
+    console.log("[System Prompt]:\n", sysPrompt);
+    console.log("[User Prompt]:\n", userPrompt);
+    console.groupEnd();
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 15e4);
+    const res = await fetch(SEC.url.replace(/\/+$/, "") + "/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...SEC.key ? { Authorization: "Bearer " + SEC.key } : {} },
+      body: JSON.stringify({
+        model: SEC.model,
+        messages: [
+          { role: "system", content: sysPrompt },
+          { role: "user", content: userPrompt }
+        ]
+      }),
+      signal: ctrl.signal
+    });
+    clearTimeout(to);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content || "";
+    console.groupCollapsed(`=== GACHA AI DEBUG: Ph\u1EA3n h\u1ED3i [${rarity}] ===`);
+    console.log("[Raw Content]:\n", content);
+    console.groupEnd();
+    let jsonStr = content;
+    const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (match) jsonStr = match[1];
+    let jtxt = extractJson(jsonStr) || extractJson(content);
+    if (jtxt) {
+      const o = JSON.parse(jtxt);
+      if (o && o.name && o.desc && Array.isArray(o.spriteMap)) {
+        const fixedMap = [];
+        for (let i = 0; i < 32; i++) {
+          let row = typeof o.spriteMap[i] === "string" ? o.spriteMap[i] : "";
+          if (row.length < 32) row = row.padEnd(32, ".");
+          if (row.length > 32) row = row.substring(0, 32);
+          fixedMap.push(row);
+        }
+        o.spriteMap = fixedMap;
+        if (typeof o.price !== "number") {
+          o.price = rarity === "S\u1EED thi" ? 8e3 : rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : 2500;
+        }
+        return o;
+      }
+    }
+  } catch (e) {
+  }
+  return null;
+}
+async function generateUniqueItem(ticketType) {
+  initGachaState();
+  const roll = Math.random() * 100;
+  let rarity = "Hi\u1EBFm";
+  let color = "#4a90e2";
+  let sellPrice = 2500;
+  if (ticketType === "super") {
+    rarity = "Huy\u1EC1n tho\u1EA1i";
+    color = "#ff8000";
+    sellPrice = 2e4;
+  } else if (ticketType === "spec") {
+    if (roll < 20) {
+      rarity = "Huy\u1EC1n tho\u1EA1i";
+      color = "#ff8000";
+      sellPrice = 2e4;
+    } else if (roll < 65) {
+      rarity = "S\u1EED thi";
+      color = "#a335ee";
+      sellPrice = 8e3;
+    }
+  } else {
+    if (roll < 5) {
+      rarity = "Huy\u1EC1n tho\u1EA1i";
+      color = "#ff8000";
+      sellPrice = 2e4;
+    } else if (roll < 30) {
+      rarity = "S\u1EED thi";
+      color = "#a335ee";
+      sellPrice = 8e3;
+    }
+  }
+  const timestamp = now();
+  const randId = Math.floor(Math.random() * 1e4);
+  const key = `unique@${timestamp}_${randId}`;
+  const spKey = `gacha_sp_${timestamp}_${randId}`;
+  let finalName = `B\u1EA3o v\u1EADt \u2726 ${randId}`;
+  let finalDesc = `V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t [${rarity}] mang theo ma l\u1EF1c k\u1EF3 di\u1EC7u. C\xF3 th\u1EC3 "L\u1EA5y ra" trong Balo \u0111\u1EC3 d\xF9ng trong c\u1ED1t truy\u1EC7n!`;
+  let finalSpriteMap = null;
+  if (SEC.url && SEC.model) {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const aiData = await generateAIUniqueItemData(rarity);
+      if (aiData) {
+        finalName = aiData.name;
+        finalDesc = aiData.desc;
+        if (aiData.price !== void 0) sellPrice = parseInt(aiData.price) || sellPrice;
+        finalSpriteMap = aiData.spriteMap;
+        break;
+      }
+    }
+  }
+  if (!finalSpriteMap) {
+    finalSpriteMap = generateProcedural32x32Sprite(rarity);
+  }
+  registerDynamicSprite(spKey, finalSpriteMap);
+  ctx.S.uniques[key] = {
+    key,
+    name: finalName,
+    rarity,
+    color,
+    desc: finalDesc,
+    sell: sellPrice,
+    sp: spKey,
+    spriteMap: finalSpriteMap
+  };
+  ctx.S.bag[key] = (ctx.S.bag[key] || 0) + 1;
+  save();
+  return { key, name: finalName, rarity, color, desc: finalDesc, sell: sellPrice, sp: spKey };
+}
+async function executeGachaRoll(ticketType, count, updateLoadingText) {
+  initGachaState();
+  const ticketKey = ticketType;
+  const pityKey = ticketType === "super" ? "spec" : ticketType;
+  const maxPity = ticketType === "spec" ? GACHA_SPEC_PITY : GACHA_NORM_PITY;
+  const haveTickets = ctx.S.tickets[ticketKey] || 0;
+  if (haveTickets < count) {
+    const tName = ticketType === "super" ? "Si\xEAu c\u01B0\u1EDDng" : ticketType === "spec" ? "\u0110\u1EB7c bi\u1EC7t" : "Th\u01B0\u1EDDng";
+    toast(`B\u1EA1n c\u1EA7n ${count} V\xE9 quay ${tName}!`);
+    return null;
+  }
+  ctx.S.tickets[ticketKey] -= count;
+  const seedIds = Object.keys(CROPS).filter((k) => !CROPS[k].hidden && k !== "mystery");
+  const fertIds = Object.keys(FERTS);
+  const rollsPlan = [];
+  for (let i = 0; i < count; i++) {
+    ctx.S.gachaPity[pityKey]++;
+    const isPity = ctx.S.gachaPity[pityKey] >= maxPity;
+    let rewardType = "";
+    if (ticketType === "super") {
+      rewardType = "unique";
+    } else if (isPity) {
+      rewardType = "unique";
+    } else {
+      const roll = Math.random() * 100;
+      if (roll < 40) rewardType = "seed";
+      else if (roll < 80) rewardType = "fert";
+      else if (roll < 90) rewardType = "shard";
+      else rewardType = "unique";
+    }
+    if (rewardType === "unique") {
+      ctx.S.gachaPity[pityKey] = 0;
+    }
+    rollsPlan.push({ type: rewardType, isPity });
+  }
+  const uniquePlans = rollsPlan.filter((r) => r.type === "unique");
+  let uniqueCount = 0;
+  const uniqueResults = await pMap(uniquePlans, async (plan) => {
+    uniqueCount++;
+    if (updateLoadingText) {
+      updateLoadingText(uniquePlans.length > 1 ? `\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt... (${uniqueCount}/${uniquePlans.length})` : "\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt...");
+    }
+    const item = await generateUniqueItem(ticketType);
+    return {
+      type: "unique",
+      name: item.name,
+      rarity: item.rarity,
+      color: item.color,
+      icon: spriteSVG(item.sp, 32),
+      desc: item.desc,
+      spKey: item.sp,
+      isPity: plan.isPity
+    };
+  }, 3);
+  let uIndex = 0;
+  const finalResults = [];
+  for (const plan of rollsPlan) {
+    if (plan.type === "unique") {
+      finalResults.push(uniqueResults[uIndex++]);
+    } else if (plan.type === "seed") {
+      const sid = seedIds[Math.floor(Math.random() * seedIds.length)];
+      const amount = ticketType === "spec" ? 5 : 2;
+      ctx.S.seeds[sid] = (ctx.S.seeds[sid] || 0) + amount;
+      finalResults.push({ type: "seed", name: `H\u1EA1t ${CROPS[sid].name} \xD7${amount}`, rarity: "Th\u01B0\u1EDDng", color: "#6cb457", icon: spriteSVG(CROPS[sid].sp, 32) });
+    } else if (plan.type === "fert") {
+      const fid = fertIds[Math.floor(Math.random() * fertIds.length)];
+      const amount = ticketType === "spec" ? 3 : 1;
+      ctx.S.ferts[fid] = (ctx.S.ferts[fid] || 0) + amount;
+      finalResults.push({ type: "fert", name: `${FERTS[fid].name} \xD7${amount}`, rarity: "Th\u01B0\u1EDDng", color: "#e8963a", icon: spriteSVG("toolFert", 32) });
+    } else {
+      const isStar = Math.random() < 0.5;
+      if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
+      if (isStar) {
+        ctx.S.shards.star++;
+        finalResults.push({ type: "shard", name: "M\u1EA3nh ng\xF4i sao \xD71", rarity: "Hi\u1EBFm", color: "#b094e0", icon: spriteSVG("shardStar", 32) });
+      } else {
+        ctx.S.shards.prism++;
+        finalResults.push({ type: "shard", name: "M\u1EA3nh l\u0103ng quang \xD71", rarity: "Hi\u1EBFm", color: "#4a8098", icon: spriteSVG("shardPrism", 32) });
+      }
+    }
+  }
+  save();
+  renderStatus();
+  return finalResults;
+}
+function openGachaModal() {
+  initGachaState();
+  const normTicket = ctx.S.tickets?.norm || 0;
+  const specTicket = ctx.S.tickets?.spec || 0;
+  const superTicket = ctx.S.tickets?.super || 0;
+  const normPity = ctx.S.gachaPity?.norm || 0;
+  const specPity = ctx.S.gachaPity?.spec || 0;
+  const bodyHTML = `
+    <div class="gacha-wrap" style="text-align:center; position:relative; overflow:hidden; padding:4px 0;">
+      <!-- Header Th\xF4ng tin v\xE9 & Mua nhanh -->
+      <div style="display:flex; flex-direction:column; align-items:center; background:rgba(0,0,0,0.04); padding:8px 12px; border-radius:8px; margin-bottom:12px; gap:8px;">
+        <div style="font-weight:bold; font-size:13px; color:#3a2c22; text-align:center; display:flex; flex-wrap:wrap; justify-content:center; gap:6px;">
+          <span>Th\u01B0\u1EDDng: <span id="gachaNormCount" style="color:#4a7a26;">${normTicket}</span></span> <span style="color:#ccc;">|</span>
+          <span>\u0110\u1EB7c Bi\u1EC7t: <span id="gachaSpecCount" style="color:#8a2acc;">${specTicket}</span></span> <span style="color:#ccc;">|</span>
+          <span>Si\xEAu C\u01B0\u1EDDng: <span id="gachaSuperCount" style="color:#ff4500;">${superTicket}</span></span>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
+          <span class="buy" id="gachaBuyNormBtn" style="padding:4px 8px; font-size:11px;">+ V\xE9 Th\u01B0\u1EDDng (1000G)</span>
+          <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 \u0110\u1EB7c bi\u1EC7t (5000G)</span>
+          <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 Si\xEAu c\u01B0\u1EDDng (500KG)</span>
+        </div>
+      </div>
+
+      <!-- M\xE1y Gachapon & Slot -->
+      <div class="gacha-machine-box" style="position:relative; width:130px; height:130px; margin:0 auto 10px; display:flex; justify-content:center; align-items:center;">
+        <div id="gachaMachineSprite" style="display:inline-block; transition:transform 0.15s ease;">
+          ${spriteSVG("gachapon", 120)}
+        </div>
+        <div id="gachaSlot" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%);"></div>
+      </div>
+
+      <!-- Thanh B\u1EA3o Hi\u1EC3m (Pity Bars) -->
+      <div style="display:flex; flex-direction:column; gap:8px; background:rgba(0,0,0,0.03); padding:10px 12px; border-radius:8px; margin-bottom:14px;">
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#4a7a26; margin-bottom:3px;">
+            <span>B\u1EA3o hi\u1EC3m Quay Th\u01B0\u1EDDng</span>
+            <span><span id="gachaNormPityTxt">${normPity}</span>/${GACHA_NORM_PITY}</span>
+          </div>
+          <div style="background:#e0e0e0; height:8px; border-radius:4px; overflow:hidden;">
+            <div id="gachaNormPityBar" style="background:linear-gradient(90deg, #6cb457, #4e903a); height:100%; width:${Math.min(100, normPity / GACHA_NORM_PITY * 100)}%; transition:width 0.3s;"></div>
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#8a2acc; margin-bottom:3px;">
+            <span>B\u1EA3o hi\u1EC3m Quay \u0110\u1EB7c Bi\u1EC7t</span>
+            <span><span id="gachaSpecPityTxt">${specPity}</span>/${GACHA_SPEC_PITY}</span>
+          </div>
+          <div style="background:#e0e0e0; height:8px; border-radius:4px; overflow:hidden;">
+            <div id="gachaSpecPityBar" style="background:linear-gradient(90deg, #a335ee, #ff8000); height:100%; width:${Math.min(100, specPity / GACHA_SPEC_PITY * 100)}%; transition:width 0.3s;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- C\xE1c N\xFAt Quay -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <span class="buy" id="gachaRollNorm1" style="padding:10px 0; font-size:13px; font-weight:bold; background:#6cb457; border:1px solid #4e903a; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Th\u01B0\u1EDDng \xD71</span>
+        <span class="buy" id="gachaRollNorm10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#4e903a; border:1px solid #3c702c; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Th\u01B0\u1EDDng \xD710</span>
+        <span class="buy" id="gachaRollSpec1" style="padding:10px 0; font-size:13px; font-weight:bold; background:#a335ee; border:1px solid #8a2acc; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay \u0110\u1EB7c Bi\u1EC7t \xD71</span>
+        <span class="buy" id="gachaRollSpec10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#8a2acc; border:1px solid #6a1aa3; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay \u0110\u1EB7c Bi\u1EC7t \xD710</span>
+        <span class="buy" id="gachaRollSuper1" style="grid-column: 1 / -1; padding:10px 0; font-size:13px; font-weight:bold; background:linear-gradient(90deg, #ff8000, #ff4500); border:1px solid #cc3700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Si\xEAu C\u01B0\u1EDDng \xD71 (100% Huy\u1EC1n Tho\u1EA1i)</span>
+      </div>
+
+      <!-- Result Overlay Animation (L\u01B0\u1EDBi k\u1EBFt qu\u1EA3) -->
+      <div id="gachaResultOverlay" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,0.97); z-index:20; border-radius:8px; padding:12px; flex-direction:column; justify-content:center; align-items:center; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+        <div id="gachaCapsuleAnim" style="position:relative; width:48px; height:48px; margin-bottom:10px;"></div>
+        <div id="gachaResultTitle" style="font-weight:bold; font-size:16px; margin:4px 0 8px; color:#5a3f78;"></div>
+        <div id="gachaResultGrid" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-height:220px; overflow-y:auto; margin-bottom:14px; width:100%; padding:4px;"></div>
+        <span class="buy" id="gachaCloseResultBtn" style="padding:6px 20px; font-size:12px;">X\xE1c nh\u1EADn nh\u1EADn th\u01B0\u1EDFng</span>
+      </div>
+
+      <!-- Showcase Modal (Khoe t\u1EEBng m\xF3n \u0111\u1ED9c nh\u1EA5t) -->
+      <div id="gachaShowcaseOverlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:40; flex-direction:column; justify-content:center; align-items:center; border-radius:8px; padding:20px; text-align:center;">
+        <div id="gachaShowcaseCard" style="background:#fff; border-radius:12px; padding:20px; box-shadow:0 0 20px rgba(255,128,0,0.5); width:100%; max-width:300px; max-height:85vh; display:flex; flex-direction:column; position:relative; overflow:hidden;">
+          <div id="gachaShowcaseRarity" style="font-size:12px; font-weight:bold; margin-bottom:10px; text-transform:uppercase; flex:none;"></div>
+          <div id="gachaShowcaseIcon" style="margin:10px auto; display:flex; justify-content:center; flex:none;"></div>
+          <div id="gachaShowcaseName" style="font-size:18px; font-weight:bold; margin:15px 0 8px; color:#3a2c22; flex:none;"></div>
+          <div id="gachaShowcaseDesc" style="font-size:12px; color:#555; overflow-y:auto; flex:1; padding-right:4px;"></div>
+          <span class="buy" id="gachaShowcaseNextBtn" style="margin-top:20px; padding:8px 24px; font-size:13px; background:#a335ee; border-color:#8a2acc; color:#fff; flex:none; align-self:center;">Ti\u1EBFp t\u1EE5c</span>
+        </div>
+      </div>
+
+      <!-- Loading Overlay (Ch\u1EDD AI T\u1EC9nh th\u1EE9c) -->
+      <div id="gachaLoadingOverlay" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,0.85); z-index:30; flex-direction:column; justify-content:center; align-items:center; border-radius:8px;">
+        <div style="width:48px; height:48px; animation: gachaShake 0.5s infinite alternate;">${spriteSVG("gachapon", 48)}</div>
+        <div id="gachaLoadingText" style="margin-top:12px; font-size:13px; font-weight:bold; color:#5a3f78;">\u0110ang quay...</div>
+      </div>
+    </div>
+  `;
+  openModal("M\xE1y Gachapon", bodyHTML);
+  const updateCounts = () => {
+    initGachaState();
+    const elN = $id("gachaNormCount");
+    if (elN) elN.textContent = String(ctx.S.tickets.norm);
+    const elS = $id("gachaSpecCount");
+    if (elS) elS.textContent = String(ctx.S.tickets.spec);
+    const pN = ctx.S.gachaPity.norm, pS = ctx.S.gachaPity.spec;
+    const txtN = $id("gachaNormPityTxt");
+    if (txtN) txtN.textContent = String(pN);
+    const txtS = $id("gachaSpecPityTxt");
+    if (txtS) txtS.textContent = String(pS);
+    const barN = $id("gachaNormPityBar");
+    if (barN) barN.style.width = Math.min(100, pN / GACHA_NORM_PITY * 100) + "%";
+    const barS = $id("gachaSpecPityBar");
+    if (barS) barS.style.width = Math.min(100, pS / GACHA_SPEC_PITY * 100) + "%";
+  };
+  $id("gachaBuyNormBtn")?.addEventListener("click", () => {
+    openBuyDlg("ticket", "norm", "gacha");
+  });
+  $id("gachaBuySpecBtn")?.addEventListener("click", () => {
+    openBuyDlg("ticket", "spec", "gacha");
+  });
+  $id("gachaBuySuperBtn")?.addEventListener("click", () => {
+    openBuyDlg("ticket", "super", "gacha");
+  });
+  const triggerGridResult = (ticketType, count, results) => {
+    const overlay = $id("gachaResultOverlay");
+    const animSlot = $id("gachaCapsuleAnim");
+    const title = $id("gachaResultTitle");
+    const grid = $id("gachaResultGrid");
+    if (!overlay || !animSlot || !title || !grid) return;
+    const capsuleIcon = ticketType === "super" ? spriteSVG("gachaCapsuleSpec", 48) : ticketType === "spec" ? spriteSVG("gachaCapsuleSpec", 48) : spriteSVG("gachaCapsuleNorm", 48);
+    animSlot.innerHTML = capsuleIcon;
+    animSlot.style.animation = "gachaDrop 0.5s ease-out";
+    const tName = ticketType === "super" ? "Si\xEAu c\u01B0\u1EDDng" : ticketType === "spec" ? "\u0110\u1EB7c bi\u1EC7t" : "Th\u01B0\u1EDDng";
+    title.textContent = `K\u1EBFt qu\u1EA3 Quay ${tName} \xD7${count}`;
+    grid.innerHTML = results.map((r) => `
+      <div class="gacha-item-card rarity-${r.rarity.replace(/\s+/g, "-")}" style="border:2px solid ${r.color}; border-radius:8px; padding:6px 8px; background:#fff; display:flex; flex-direction:column; align-items:center; width:100px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
+        <div style="font-size:10px; font-weight:bold; color:${r.color}; margin-bottom:2px;">${r.rarity}${r.isPity ? " \u2605B\u1EA3o hi\u1EC3m" : ""}</div>
+        <div style="margin:2px 0;">${r.icon}</div>
+        <div style="font-size:11px; font-weight:bold; color:#3a2c22; margin-top:2px;">${r.name}</div>
+      </div>
+    `).join("");
+    overlay.style.display = "flex";
+    updateCounts();
+  };
+  $id("gachaCloseResultBtn")?.addEventListener("click", () => {
+    const overlay = $id("gachaResultOverlay");
+    if (overlay) overlay.style.display = "none";
+  });
+  const doRoll = async (ticketType, count) => {
+    const machine = $id("gachaMachineSprite");
+    const loadOverlay = $id("gachaLoadingOverlay");
+    const loadText = $id("gachaLoadingText");
+    if (machine) machine.style.animation = "gachaShake 0.2s ease infinite";
+    if (loadOverlay) loadOverlay.style.display = "flex";
+    if (loadText) loadText.textContent = "\u0110ang quay...";
+    const results = await executeGachaRoll(ticketType, count, (txt) => {
+      if (loadText) loadText.textContent = txt;
+    });
+    if (machine) machine.style.animation = "";
+    if (loadOverlay) loadOverlay.style.display = "none";
+    if (results) {
+      const uniques = results.filter((r) => r.type === "unique");
+      if (uniques.length > 0) {
+        let currentShowcase = 0;
+        const showcaseOverlay = $id("gachaShowcaseOverlay");
+        const scRarity = $id("gachaShowcaseRarity");
+        const scIcon = $id("gachaShowcaseIcon");
+        const scName = $id("gachaShowcaseName");
+        const scDesc = $id("gachaShowcaseDesc");
+        const scCard = $id("gachaShowcaseCard");
+        const showNextUnique = () => {
+          if (currentShowcase >= uniques.length) {
+            showcaseOverlay.style.display = "none";
+            triggerGridResult(ticketType, count, results);
+            return;
+          }
+          const u = uniques[currentShowcase];
+          scRarity.textContent = u.rarity;
+          scRarity.style.color = u.color;
+          scCard.style.boxShadow = `0 0 30px ${u.color}80`;
+          scIcon.innerHTML = spriteSVG(u.spKey, 64);
+          scName.textContent = u.name;
+          scDesc.textContent = u.desc;
+          showcaseOverlay.style.display = "flex";
+          scCard.style.animation = "none";
+          void scCard.offsetWidth;
+          scCard.style.animation = "gachaDrop 0.5s ease-out";
+        };
+        $id("gachaShowcaseNextBtn").onclick = () => {
+          currentShowcase++;
+          showNextUnique();
+        };
+        showNextUnique();
+      } else {
+        triggerGridResult(ticketType, count, results);
+      }
+    }
+  };
+  $id("gachaRollNorm1")?.addEventListener("click", () => doRoll("norm", 1));
+  $id("gachaRollNorm10")?.addEventListener("click", () => doRoll("norm", 10));
+  $id("gachaRollSpec1")?.addEventListener("click", () => doRoll("spec", 1));
+  $id("gachaRollSpec10")?.addEventListener("click", () => doRoll("spec", 10));
+  $id("gachaRollSuper1")?.addEventListener("click", () => doRoll("super", 1));
 }
 
 // src/shop.js
@@ -2449,8 +3118,11 @@ var bagTab = "crop";
 var bagSellMode = false;
 var bagSel = {};
 function openPanel(kind) {
+  if (kind === "gacha") {
+    return openGachaModal();
+  }
   if (kind === "shop") {
-    const tabs = [["seed", "H\u1EA1t gi\u1ED1ng"], ["fert", "Ph\xE2n b\xF3n"], ["pet", "Th\xFA c\u01B0ng"], ["pass", "V\xE9"]];
+    const tabs = [["seed", "H\u1EA1t gi\u1ED1ng"], ["fert", "Ph\xE2n b\xF3n"], ["pet", "Th\xFA c\u01B0ng"], ["pass", "V\xE9"], ["ticket", "V\xE9 Gacha"]];
     let items = "";
     if (shopTab === "seed") {
       items = [1, 2, 3].map((z) => {
@@ -2486,6 +3158,20 @@ function openPanel(kind) {
           <div class="meta">${pd.desc}${lockNote}</div></span>
           ${priceHtml}${btn}</div>`;
       }).join("");
+    } else if (shopTab === "ticket") {
+      items = `
+        <div class="item"><span class="icon">${spriteSVG("ticketNorm", 32)}</span>
+          <span class="info"><div class="name">V\xE9 Quay Th\u01B0\u1EDDng</div><div class="meta">D\xF9ng quay m\xE1y Gachapon nh\u1EADn qu\xE0 ng\u1EABu nhi\xEAn \xB7 \u0110ang c\xF3 ${ctx.S.tickets?.norm || 0}</div></span>
+          <span class="price">${spriteSVG("coin", 16)}1,000</span>
+          <span class="buy${ctx.S.coins < 1e3 ? " off" : ""}" data-buyticket="norm">Mua</span></div>
+        <div class="item"><span class="icon">${spriteSVG("ticketSpec", 32)}</span>
+          <span class="info"><div class="name">V\xE9 Quay \u0110\u1EB7c Bi\u1EC7t</div><div class="meta">D\xF9ng quay Gachapon \u0110\u1EB7c Bi\u1EC7t t\u0103ng t\u1EF7 l\u1EC7 ra \u0111\u1ED3 \u0111\u1ED9c nh\u1EA5t \xB7 \u0110ang c\xF3 ${ctx.S.tickets?.spec || 0}</div></span>
+          <span class="price">${spriteSVG("coin", 16)}5,000</span>
+          <span class="buy${ctx.S.coins < 5e3 ? " off" : ""}" data-buyticket="spec">Mua</span></div>
+        <div class="item"><span class="icon">${spriteSVG("ticketSuper", 32)}</span>
+          <span class="info"><div class="name" style="color:#ff4500;">V\xE9 Quay Si\xEAu C\u01B0\u1EDDng</div><div class="meta">D\xF9ng quay 1 ph\xE1t 100% ra b\u1EA3o v\u1EADt AI ph\u1EA9m ch\u1EA5t Huy\u1EC1n Tho\u1EA1i \xB7 \u0110ang c\xF3 ${ctx.S.tickets?.super || 0}</div></span>
+          <span class="price">${spriteSVG("coin", 16)}500,000</span>
+          <span class="buy${ctx.S.coins < 5e5 ? " off" : ""}" data-buyticket="super" style="background:#ff4500; border:1px solid #cc3700; color:#fff;">Mua</span></div>`;
     } else {
       items = Object.keys(PASSES).map((k) => {
         const ps = PASSES[k];
@@ -2507,6 +3193,9 @@ function openPanel(kind) {
     }));
     $id("mbody").querySelectorAll("[data-buyseed]").forEach((b) => b.addEventListener("click", () => openBuyDlg("seed", b.dataset.buyseed)));
     $id("mbody").querySelectorAll("[data-buyfert]").forEach((b) => b.addEventListener("click", () => openBuyDlg("fert", b.dataset.buyfert)));
+    $id("mbody").querySelectorAll("[data-buyticket]").forEach((b) => b.addEventListener("click", () => {
+      openBuyDlg("ticket", b.dataset.buyticket, "shop");
+    }));
     $id("mbody").querySelectorAll("[data-buypet]").forEach((b) => b.addEventListener("click", () => {
       const id = b.dataset.buypet, pd = PETS[id];
       if (ctx.S.pets.indexOf(id) >= 0) return;
@@ -2524,10 +3213,175 @@ function openPanel(kind) {
     }));
     $id("mbody").querySelectorAll("[data-passdlg]").forEach((b) => b.addEventListener("click", () => openPassDlg(b.dataset.passdlg)));
   } else if (kind === "bag") {
-    const btabs = `<div class="tabs"><span class="tab${bagTab === "crop" ? " active" : ""}" data-btab="crop">N\xF4ng s\u1EA3n</span><span class="tab${bagTab === "pet" ? " active" : ""}" data-btab="pet">B\xE9 tr\xF2n</span><span class="tab${bagTab === "relic" ? " active" : ""}" data-btab="relic">Qu\xE0 c\u1EE7a b\xE9 tr\xF2n</span></div>`;
+    const btabs = `<div class="tabs"><span class="tab${bagTab === "crop" ? " active" : ""}" data-btab="crop">N\xF4ng s\u1EA3n</span><span class="tab${bagTab === "seed" ? " active" : ""}" data-btab="seed">H\u1EA1t gi\u1ED1ng</span><span class="tab${bagTab === "gacha" ? " active" : ""}" data-btab="gacha">\u0110\u1ED3 Gacha</span><span class="tab${bagTab === "pet" ? " active" : ""}" data-btab="pet">B\xE9 tr\xF2n</span><span class="tab${bagTab === "relic" ? " active" : ""}" data-btab="relic">Qu\xE0 c\u1EE7a b\xE9 tr\xF2n</span></div>`;
+    if (bagTab === "seed") {
+      const seedKeys = Object.keys(ctx.S.seeds || {}).filter((k) => k !== "mystery");
+      const rows2 = seedKeys.map((key) => {
+        const n = ctx.S.seeds[key];
+        if (n <= 0) return "";
+        const def = CROPS[key];
+        const price = Math.floor((def.seed || 100) * 0.5);
+        if (bagSellMode) {
+          const on = !!bagSel[key];
+          return `
+        <div class="item selrow${on ? " selon" : ""}" data-selkey="${key}"><span class="icon">${spriteSVG(def.sp, 32)}</span>
+          <span class="info"><div class="name">H\u1EA1t ${def.name} \xD7${n}</div><div class="meta">Gi\xE1 thu mua: ${price} G/h\u1EA1t</div></span>
+          <span class="selmark">${on ? "\u2713" : ""}</span></div>`;
+        }
+        return `
+        <div class="item"><span class="icon">${spriteSVG(def.sp, 32)}</span>
+          <span class="info"><div class="name">H\u1EA1t ${def.name} \xD7${n}</div><div class="meta">Gi\xE1 thu mua: ${price} G/h\u1EA1t</div></span>
+          <span class="acts">
+            <span class="ibtn" data-sellseeddlg="${key}" title="B\xE1n (t\u1EF1 ch\u1ECDn s\u1ED1 l\u01B0\u1EE3ng)">${spriteSVG("coin", 16)}</span>
+          </span></div>`;
+      }).join("");
+      let sellBar2 = "";
+      if (seedKeys.length) {
+        if (bagSellMode) {
+          const total = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.seeds[k]).reduce((s, k) => {
+            const def = CROPS[k];
+            const p = Math.floor((def.seed || 100) * 0.5);
+            return s + p * ctx.S.seeds[k];
+          }, 0);
+          sellBar2 = `<div class="note" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:8px;white-space:nowrap;overflow:hidden">
+            <b style="overflow:hidden;text-overflow:ellipsis">${total > 0 ? "T\u1ED5ng " + total.toLocaleString() + " G" : "B\u1EA5m v\xE0o t\u1EEBng m\u1EE5c \u0111\u1EC3 tick ch\u1ECDn th\u1EE9 mu\u1ED1n b\xE1n"}</b><span style="flex:1"></span>
+            <span class="buy" id="sellSelGo" style="padding:4px 10px;font-size:11px;flex:none">B\xE1n</span>
+            <span class="buy plain" id="sellSelNo" style="padding:4px 10px;font-size:11px;flex:none">Hu\u1EF7</span></div>`;
+        } else {
+          sellBar2 = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div class="note" style="flex:1"></div>
+            <span class="buy" id="sellModeGo" style="flex:none">B\xE1n m\u1ED9t ch\u1EA1m</span></div>`;
+        }
+      }
+      openModal("Balo", btabs + sellBar2 + (rows2 || '<div class="note">B\u1EA1n ch\u01B0a c\xF3 h\u1EA1t gi\u1ED1ng n\xE0o, ra c\u1EEDa h\xE0ng mua th\xEAm \u0111i!</div>'));
+      $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
+        bagTab = t.dataset.btab;
+        openPanel("bag");
+      }));
+      $id("mbody").querySelectorAll("[data-sellseeddlg]").forEach((b) => b.addEventListener("click", () => openSellSeedDlg(b.dataset.sellseeddlg)));
+      const smGo2 = $id("sellModeGo");
+      if (smGo2) smGo2.addEventListener("click", () => {
+        bagSellMode = true;
+        bagSel = {};
+        openPanel("bag");
+      });
+      $id("mbody").querySelectorAll("[data-selkey]").forEach((el) => el.addEventListener("click", () => {
+        bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
+        openPanel("bag");
+      }));
+      const ssNo2 = $id("sellSelNo");
+      if (ssNo2) ssNo2.addEventListener("click", () => {
+        bagSellMode = false;
+        openPanel("bag");
+      });
+      const ssGo2 = $id("sellSelGo");
+      if (ssGo2) ssGo2.addEventListener("click", () => {
+        const keys = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.seeds[k]);
+        if (!keys.length) return toast("Ch\u01B0a tick c\xE1i n\xE0o c\u1EA3");
+        let gain = 0;
+        keys.forEach((k) => {
+          const def = CROPS[k];
+          const p = Math.floor((def.seed || 100) * 0.5);
+          gain += p * ctx.S.seeds[k];
+          delete ctx.S.seeds[k];
+        });
+        ctx.S.coins += gain;
+        ctx.S.totalSales += gain;
+        bagSellMode = false;
+        save();
+        renderStatus();
+        toast("B\xE1n m\u1ED9t m\u1EBB h\u1EA1t gi\u1ED1ng: +" + gain.toLocaleString() + " G");
+        openPanel("bag");
+      });
+      return;
+    }
+    if (bagTab === "gacha") {
+      const gachaKeys = Object.keys(ctx.S.bag || {}).filter((k) => k.startsWith("unique@"));
+      const rows2 = gachaKeys.map((key) => {
+        const n = ctx.S.bag[key];
+        const item = ctx.S.uniques?.[key] || { name: "V\u1EADt ph\u1EA9m Gacha", rarity: "\u0110\u1EB7c bi\u1EC7t", desc: "", color: "#4a90e2", sell: 2500, sp: "strawhat" };
+        const d0 = mutDescOf(key);
+        const mdesc = d0 ? " \xB7 " + d0 : "";
+        if (bagSellMode) {
+          const on = !!bagSel[key];
+          return `
+        <div class="item selrow${on ? " selon" : ""}" data-selkey="${key}"><span class="icon">${spriteSVG(item.sp, 32)}</span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
+          <span class="selmark">${on ? "\u2713" : ""}</span></div>`;
+        }
+        return `
+        <div class="item"><span class="icon">${spriteSVG(item.sp, 32)}</span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/c\xE1i \xB7 ${esc(item.desc || "V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t")}</div></span>
+          <span class="acts">
+            <span class="ibtn" data-takeout="${key}" title="L\u1EA5y ra (mang v\xE0o c\u1ED1t truy\u1EC7n, kh\xF4ng quy ra ti\u1EC1n)">${spriteSVG("emBang", 16)}</span>
+            <span class="ibtn" data-selldlg="${key}" title="B\xE1n (t\u1EF1 ch\u1ECDn s\u1ED1 l\u01B0\u1EE3ng)">${spriteSVG("coin", 16)}</span>
+          </span></div>`;
+      }).join("");
+      let sellBar2 = "";
+      if (gachaKeys.length) {
+        if (bagSellMode) {
+          const total = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.bag[k]).reduce((s, k) => s + bagPrice(k) * ctx.S.bag[k], 0);
+          sellBar2 = `<div class="note" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:8px;white-space:nowrap;overflow:hidden">
+            <b style="overflow:hidden;text-overflow:ellipsis">${total > 0 ? "T\u1ED5ng " + total.toLocaleString() + " G" : "B\u1EA5m v\xE0o t\u1EEBng m\u1EE5c \u0111\u1EC3 tick ch\u1ECDn th\u1EE9 mu\u1ED1n b\xE1n"}</b><span style="flex:1"></span>
+            <span class="buy" id="sellSelGo" style="padding:4px 10px;font-size:11px;flex:none">B\xE1n</span>
+            <span class="buy plain" id="sellSelNo" style="padding:4px 10px;font-size:11px;flex:none">Hu\u1EF7</span></div>`;
+        } else {
+          sellBar2 = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div class="note" style="flex:1">B\u1EA5m \xAB!\xBB \u0111\u1EC3 l\u1EA5y \u0111\u1ED3 Gacha ra mang v\xE0o c\u1ED1t truy\u1EC7n</div>
+            <span class="buy" id="sellModeGo" style="flex:none">B\xE1n m\u1ED9t ch\u1EA1m</span></div>`;
+        }
+      }
+      openModal("Balo", btabs + sellBar2 + (rows2 || '<div class="note">Ch\u01B0a c\xF3 v\u1EADt ph\u1EA9m Gacha n\xE0o, sang m\xE1y Gachapon quay th\u1EED \u0111i!</div>'));
+      $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
+        bagTab = t.dataset.btab;
+        openPanel("bag");
+      }));
+      $id("mbody").querySelectorAll("[data-selldlg]").forEach((b) => b.addEventListener("click", () => openSellDlg(b.dataset.selldlg)));
+      $id("mbody").querySelectorAll("[data-takeout]").forEach((b) => b.addEventListener("click", () => openTakeout(b.dataset.takeout)));
+      const smGo2 = $id("sellModeGo");
+      if (smGo2) smGo2.addEventListener("click", () => {
+        bagSellMode = true;
+        bagSel = {};
+        openPanel("bag");
+      });
+      $id("mbody").querySelectorAll("[data-selkey]").forEach((el) => el.addEventListener("click", () => {
+        bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
+        openPanel("bag");
+      }));
+      const ssNo2 = $id("sellSelNo");
+      if (ssNo2) ssNo2.addEventListener("click", () => {
+        bagSellMode = false;
+        openPanel("bag");
+      });
+      const ssGo2 = $id("sellSelGo");
+      if (ssGo2) ssGo2.addEventListener("click", () => {
+        const keys = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.bag[k]);
+        if (!keys.length) return toast("Ch\u01B0a tick c\xE1i n\xE0o c\u1EA3");
+        let gain = 0;
+        keys.forEach((k) => {
+          gain += bagPrice(k) * ctx.S.bag[k];
+          delete ctx.S.bag[k];
+        });
+        ctx.S.coins += gain;
+        ctx.S.totalSales += gain;
+        bagSellMode = false;
+        save();
+        renderStatus();
+        toast("B\xE1n m\u1ED9t m\u1EBB \u0111\u1ED3 Gacha: +" + gain.toLocaleString() + " G");
+        openPanel("bag");
+      });
+      return;
+    }
     if (bagTab === "relic") {
       const sh2 = ctx.S.shards || { prism: 0, star: 0 };
-      const relicRows = (ctx.S.seeds.mystery > 0 ? `
+      const normTk = ctx.S.tickets?.norm || 0;
+      const specTk = ctx.S.tickets?.spec || 0;
+      const ticketRows = (normTk > 0 ? `
+      <div class="item"><span class="icon">${spriteSVG("ticketNorm", 30)}</span>
+        <span class="info"><div class="name">V\xE9 Quay Th\u01B0\u1EDDng \xD7${normTk}</div><div class="meta">D\xF9ng \u1EDF m\xE1y Gachapon</div></span></div>` : "") + (specTk > 0 ? `
+      <div class="item"><span class="icon">${spriteSVG("ticketSpec", 30)}</span>
+        <span class="info"><div class="name">V\xE9 Quay \u0110\u1EB7c Bi\u1EC7t \xD7${specTk}</div><div class="meta">D\xF9ng \u1EDF m\xE1y Gachapon</div></span></div>` : "");
+      const relicRows = ticketRows + (ctx.S.seeds.mystery > 0 ? `
       <div class="item"><span class="icon">${spriteSVG("seedLight", 30)}</span>
         <span class="info"><div class="name">H\u1EA1t gi\u1ED1ng b\xED \u1EA9n \xD7${ctx.S.seeds.mystery}</div><div class="meta">Tr\u1ED3ng xu\u1ED1ng s\u1EBD ra ng\u1EABu nhi\xEAn m\u1ED9t h\u1ECD (ch\u1ECDn khi gieo h\u1EA1t / khi ch\u1ECDc b\xE9 m\u1EA7m s\u01B0\u01A1ng)</div></span></div>` : "") + (sh2.prism > 0 ? `
       <div class="item"><span class="icon">${spriteSVG("shardPrism", 30)}</span>
@@ -2541,6 +3395,7 @@ function openPanel(kind) {
         openPanel("bag");
       }));
       $id("mbody").querySelectorAll("[data-useshard]").forEach((b) => b.addEventListener("click", useStarShard));
+      $id("mbody").querySelectorAll("[data-takeout]").forEach((b) => b.addEventListener("click", () => openTakeout(b.dataset.takeout)));
       return;
     }
     if (bagTab === "pet") {
@@ -2575,7 +3430,8 @@ function openPanel(kind) {
       }));
       return;
     }
-    const rows = Object.entries(ctx.S.bag).map(([key, n]) => {
+    const rows = Object.keys(ctx.S.bag).filter((k) => !k.startsWith("unique@")).map((key) => {
+      const n = ctx.S.bag[key];
       const id = key.split("@")[0], mut = key.indexOf("@") > 0;
       const d0 = mutDescOf(key);
       const mdesc = d0 ? " \xB7 " + d0 : "";
@@ -2689,6 +3545,10 @@ function openPanel(kind) {
       <div style="display:flex;gap:8px;margin-top:6px">
         <span class="buy plain" id="openSandboxBtn">\u{1F3A8} M\u1EDF X\u01B0\u1EDFng Ch\u1EBF T\xE1c AI</span>
       </div>
+      <div class="shead">Th\xF4ng tin & T\xE1c gi\u1EA3</div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <span class="buy plain" id="openCreditBtn">\u{1F4DC} Xem Credit (L\u1EDDi c\u1EA3m \u01A1n)</span>
+      </div>
       <div class="note" style="margin:12px 0 8px">
         <b>H\u01B0\u1EDBng d\u1EABn ch\u01A1i</b><br>\xB7 Li\xEAn k\u1EBFt th\u1EBB nh\xE2n v\u1EADt: b\u1EADt l\xEAn s\u1EBD t\u1EA1o s\u1EF1 ki\u1EC7n d\u1EF1a theo th\u1EBB nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i<br>
         \xB7 \u1EA2nh h\u01B0\u1EDFng c\u1ED1t truy\u1EC7n: b\u1EADt l\xEAn c\xF3 th\u1EC3 t\xE1c \u0111\u1ED9ng ng\u01B0\u1EE3c v\xE0o c\u1ED1t truy\u1EC7n hi\u1EC7n t\u1EA1i<br>
@@ -2716,6 +3576,29 @@ function openPanel(kind) {
     $id("secTest").addEventListener("click", () => testSecApi());
     $id("secModels").addEventListener("click", () => fetchModelList());
     if ($id("openSandboxBtn")) $id("openSandboxBtn").addEventListener("click", openSandbox);
+    if ($id("openCreditBtn")) {
+      $id("openCreditBtn").addEventListener("click", () => {
+        openModal("Credit & L\u1EDDi c\u1EA3m \u01A1n", `
+          <div style="line-height:1.6; color:#4a3219; font-size:13px; text-align:left; padding:8px;">
+            <b style="color:#a83a52;">T\xEAn s\u1EA3n ph\u1EA9m g\u1ED1c (\u539F\u771F\u540D):</b><br>
+            \u3010\u8C01\u8981\u5728\u9152\u9986\u5F53\u519C\u6C11\u554A\uFF01v1.1\u3011<br><br>
+            
+            <b style="color:#a83a52;">T\xEAn ti\u1EBFng Vi\u1EC7t (\u8D8A\u5357\u8BED\u8BD1\u540D):</b><br>
+            \u3010Ai th\xE8m l\xE0m n\xF4ng d\xE2n trong t\u1EEDu qu\xE1n ch\u1EE9! v1.1\u3011 Script Tr\u1EE3 th\u1EE7 T\u1EEDu qu\xE1n<br><br>
+
+            <b style="color:#a83a52;">T\xE1c gi\u1EA3 g\u1ED1c (\u539F\u4F5C\u8005):</b><br>
+            \u6EE1\u8EAB\u732B\u6BDB\u055E\u2022\u2022\u055E - Tranh th\u1EE7 l\xE9n meo<br><br>
+
+            <b style="color:#a83a52;">Mod v\xE0 update game hi\u1EC7n t\u1EA1i credit t\u1EEB:</b><br>
+            Dev: Kaiz
+          </div>
+          <div style="margin-top:16px;text-align:center;">
+            <span class="buy plain" id="closeCreditBtn">Quay l\u1EA1i C\xE0i \u0111\u1EB7t</span>
+          </div>
+        `);
+        $id("closeCreditBtn")?.addEventListener("click", () => openPanel("cfg"));
+      });
+    }
     $id("mbody").querySelectorAll("[data-settheme]").forEach((b) => b.addEventListener("click", () => {
       ctx.S.theme = b.dataset.settheme;
       save();
@@ -3037,7 +3920,6 @@ function renderPlots() {
         if (next) signEl.dataset.buy = String(b);
         signEl.innerHTML = shtml;
         blockEl.appendChild(signEl);
-        console.log("[Farm] Added sign to block", b);
       } else {
         if (signEl.className !== sclassName) signEl.className = sclassName;
         if (!next && signEl.style.opacity !== "0.55") signEl.style.opacity = "0.55";
@@ -3244,7 +4126,7 @@ function initRender() {
     e.stopPropagation();
     $id("mutPopup").classList.toggle("open");
   });
-  document.addEventListener("click", (e) => {
+  sh.addEventListener("click", (e) => {
     const popup = $id("mutPopup");
     if (popup.classList.contains("open") && !e.target.closest(".mut-popup") && !e.target.closest(".bmut")) {
       popup.classList.remove("open");
@@ -3464,6 +4346,24 @@ function openSellDlg(key) {
     sell(key, clampN($id("sellN").value, 1, have, 1) | 0);
   });
 }
+function openSellSeedDlg(id) {
+  const have = ctx.S.seeds[id] || 0;
+  if (have <= 0) return;
+  const def = CROPS[id];
+  if (!def) return;
+  const price = Math.floor((def.seed || 100) * 0.5);
+  const name = "H\u1EA1t " + def.name;
+  openModal("B\xE1n \xB7 " + name, `
+    <div class="note" style="margin-bottom:8px">Gi\xE1 thu mua ${price} G \xB7 \u0111ang c\xF3 ${have} h\u1EA1t</div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <input class="inp" id="sellSeedN" type="number" min="1" max="${have}" value="1" style="width:90px">
+      <span style="font-size:12px;color:#7a5c38">/ ${have}</span>
+      <span class="buy" id="sellSeedGo">X\xE1c nh\u1EADn b\xE1n</span>
+    </div>`);
+  $id("sellSeedGo").addEventListener("click", () => {
+    sellSeed(id, clampN($id("sellSeedN").value, 1, have, 1) | 0);
+  });
+}
 function buildTicket(k) {
   const water2 = k === "water";
   return `
@@ -3507,10 +4407,16 @@ function openPassDlg(k) {
     $id("passNo").addEventListener("click", () => openPanel("shop"));
   }
 }
-function openBuyDlg(kind, id) {
-  const def = kind === "seed" ? CROPS[id] : FERTS[id];
-  const price = kind === "seed" ? def.seed : def.price;
-  const name = kind === "seed" ? "H\u1EA1t " + def.name : def.name;
+function openBuyDlg(kind, id, returnTo = "shop") {
+  let def, price, name;
+  if (kind === "ticket") {
+    price = id === "super" ? 5e5 : id === "norm" ? 1e3 : 5e3;
+    name = id === "super" ? "V\xE9 Quay Si\xEAu C\u01B0\u1EDDng" : id === "norm" ? "V\xE9 Quay Th\u01B0\u1EDDng" : "V\xE9 Quay \u0110\u1EB7c Bi\u1EC7t";
+  } else {
+    def = kind === "seed" ? CROPS[id] : FERTS[id];
+    price = kind === "seed" ? def.seed : def.price;
+    name = kind === "seed" ? "H\u1EA1t " + def.name : def.name;
+  }
   if (ctx.S.coins < price) return toast("C\xF2n thi\u1EBFu " + (price - ctx.S.coins).toLocaleString() + " G");
   const maxN = Math.max(1, Math.floor(ctx.S.coins / Math.max(1, price)));
   openModal("Mua \xB7 " + name, `
@@ -3531,11 +4437,15 @@ function openBuyDlg(kind, id) {
     if (ctx.S.coins < cost) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng r\u1ED3i");
     ctx.S.coins -= cost;
     if (kind === "seed") ctx.S.seeds[id] = (ctx.S.seeds[id] || 0) + n;
-    else ctx.S.ferts[id] = (ctx.S.ferts[id] || 0) + n;
+    else if (kind === "fert") ctx.S.ferts[id] = (ctx.S.ferts[id] || 0) + n;
+    else if (kind === "ticket") {
+      if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+      ctx.S.tickets[id] = (ctx.S.tickets[id] || 0) + n;
+    }
     save();
     renderStatus();
     toast("\u0110\xE3 mua " + name + " \xD7" + n);
-    openPanel("shop");
+    openPanel(returnTo);
   });
 }
 var toastTimer = null;
@@ -3617,7 +4527,30 @@ function settle() {
       wChanged = true;
       return;
     }
-    if (now() - ctx.S.petFind[id] < TREASURE_CD) return;
+    const elapsed = now() - ctx.S.petFind[id];
+    if (id === "penguin") {
+      const PENGUIN_CD = 60 * 60 * 1e3;
+      if (elapsed >= PENGUIN_CD) {
+        const hours = Math.floor(elapsed / PENGUIN_CD);
+        ctx.S.petFind[id] += hours * PENGUIN_CD;
+        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+        let normGained = 0;
+        let specGained = 0;
+        for (let i = 0; i < hours; i++) {
+          if (Math.random() < 0.3) specGained++;
+          else normGained++;
+        }
+        ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + normGained;
+        ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + specGained;
+        const msg = [];
+        if (normGained > 0) msg.push(`${normGained} V\xE9 Th\u01B0\u1EDDng`);
+        if (specGained > 0) msg.push(`${specGained} V\xE9 \u0110\u1EB7c Bi\u1EC7t`);
+        toast(`Ch\xFA chim c\xE1nh c\u1EE5t v\u1EEBa \u0111i xa v\u1EC1 mang t\u1EB7ng b\u1EA1n: ${msg.join(" v\xE0 ")}!`);
+        wChanged = true;
+      }
+      return;
+    }
+    if (elapsed < TREASURE_CD) return;
     ctx.S.petFind[id] = now();
     tGain += 10 + Math.floor(Math.random() * 41);
     if ((id === "impBlob" || id === "angelBlob") && Math.random() < 0.2) {
@@ -3647,12 +4580,15 @@ function settle() {
   if (wChanged) save();
   if (!isRain()) return;
   const d = gameDay();
+  let rChanged = false;
   eachPage((plots) => plots.forEach((p) => {
     const c = p.crop;
     if (!c || now() >= c.matureAt || c.rainDay === d) return;
     c.matureAt = now() + (c.matureAt - now()) * 0.9;
     c.rainDay = d;
+    rChanged = true;
   }));
+  if (rChanged) save();
 }
 var pageUnlocked = (p) => p === 1 || p === 2 && ctx.S.passes.water || p === 3 && ctx.S.passes.mine;
 var fmtLeft = (ms) => {
@@ -3734,7 +4670,6 @@ async function collectWorldbook() {
       try {
         const charId = ctx2.characterId !== void 0 ? ctx2.characterId : window.this_character;
         const charData = ctx2.characters?.[charId]?.data || window.characters?.[charId]?.data;
-        console.log("[FARM DEBUG] Character Data:", charData ? "Found charId:" + charId : "Null");
         if (charData) {
           if (charData.extensions?.world) activeNames.add(charData.extensions.world);
           if (charData.world) activeNames.add(charData.world);
@@ -3743,9 +4678,7 @@ async function collectWorldbook() {
         const chatWorldName = ctx2.chatMetadata?.[wiKey];
         if (chatWorldName && typeof chatWorldName === "string") activeNames.add(chatWorldName);
       } catch (e) {
-        console.log("[FARM DEBUG] Error getting active names:", e);
       }
-      console.log("[FARM DEBUG] Active Worldbook Names to Fetch:", Array.from(activeNames));
       for (const name of activeNames) {
         try {
           const res = await fetch("/api/worldinfo/get", {
@@ -3760,16 +4693,13 @@ async function collectWorldbook() {
             const data = await res.json();
             if (data && data.entries) {
               const vals = Array.isArray(data.entries) ? data.entries : Object.values(data.entries);
-              console.log("[FARM DEBUG] Fetched", vals.length, "entries from:", name);
               entries = entries.concat(vals);
             }
           }
         } catch (e) {
-          console.log("[FARM DEBUG] Fetch Exception for", name, ":", e);
         }
       }
     } catch (e) {
-      console.log("[FARM DEBUG] Outer Exception:", e);
     }
     try {
       const charId = ctx2.characterId !== void 0 ? ctx2.characterId : window.this_character;
@@ -3782,7 +4712,6 @@ async function collectWorldbook() {
         }
       }
     } catch (e) {
-      console.log("[FARM DEBUG] Embedded Book Exception:", e);
     }
     if (!entries || entries.length === 0) return "";
     let chatContext = "";
@@ -3794,7 +4723,6 @@ async function collectWorldbook() {
         chatContext = "\n==== RECENT CHAT HISTORY ====\n" + recentMsgs + "\n=============================\n";
       }
     } catch (e) {
-      console.log("[FARM DEBUG] Chat History Exception:", e);
     }
     const disabledContent = /* @__PURE__ */ new Set();
     for (const en of entries) {
@@ -3892,10 +4820,10 @@ async function requestDayEvent(force) {
   renderBanner();
   try {
     const wb = await collectWorldbook();
-    console.log("====== [FARM DEBUG] WORLDBOOK EXTRACTED ======");
-    console.log(wb);
-    console.log("================================================");
     const prompt = buildEventPrompt(wb);
+    console.log("====== [FARM DEBUG] PROMPT SENT TO LLM ======");
+    console.log(prompt);
+    console.log("===============================================");
     const reqBody = {
       model: SEC.model,
       messages: [
@@ -3904,16 +4832,15 @@ async function requestDayEvent(force) {
       ],
       max_tokens: 2e3 + Object.keys(CROPS).length * 100
     };
+    const ctrl = new AbortController();
+    const timeoutId = window.setTimeout(() => ctrl.abort(), 9e4);
     const resPromise = fetch(SEC.url.replace(/\/+$/, "") + "/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", ...SEC.key ? { Authorization: "Bearer " + SEC.key } : {} },
-      body: JSON.stringify(reqBody)
-    }).then((r) => r.json());
-    const data = await Promise.race([
-      resPromise,
-      new Promise((_, rej) => window.setTimeout(() => rej(new Error("timeout")), 9e4))
-      // v0.8: 15 mô tả nên lượng sinh ra lớn, 30s→90s
-    ]);
+      body: JSON.stringify(reqBody),
+      signal: ctrl.signal
+    }).then((r) => r.json()).finally(() => window.clearTimeout(timeoutId));
+    const data = await resPromise;
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
     const raw = data.choices && data.choices[0] && data.choices[0].message ? String(data.choices[0].message.content) : "";
     const jtxt = extractJson(raw);
@@ -4055,12 +4982,12 @@ QUY T\u1EAEC \u0110\u1EA6U RA B\u1EAET BU\u1ED8C:
       const data = await res.json();
       const content = data.choices?.[0]?.message?.content || "";
       let jsonStr = "";
-      const codeMatch = content.match(/```(?:json)?\s*(\[[\s\ctx.S]*?\])\s*```/i);
+      const codeMatch = content.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/i);
       if (codeMatch) {
         jsonStr = codeMatch[1];
       } else {
         const arrMatch = content.match(/\[\s*"(?:[^"\\]|\\.)*"(?:\s*,\s*"(?:[^"\\]|\\.)*")*\s*\]/);
-        jsonStr = arrMatch ? arrMatch[0] : (content.match(/\[[\s\ctx.S]*?\]/) || [""])[0];
+        jsonStr = arrMatch ? arrMatch[0] : (content.match(/\[[\s\S]*?\]/) || [""])[0];
       }
       if (jsonStr) {
         ta.value = jsonStr.trim();
@@ -4300,6 +5227,15 @@ function loadState() {
   }));
   if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
   if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
+  if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+  if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
+  if (!ctx.S.uniques) ctx.S.uniques = {};
+  Object.keys(ctx.S.uniques || {}).forEach((k) => {
+    const item = ctx.S.uniques[k];
+    if (item && item.sp && item.spriteMap) {
+      registerDynamicSprite(item.sp, item.spriteMap);
+    }
+  });
   if (!ctx.S.plots2) ctx.S.plots2 = emptyPlots();
   if (!ctx.S.plots3) ctx.S.plots3 = emptyPlots();
   if (ctx.S.unlockedBlocks2 == null) ctx.S.unlockedBlocks2 = 1;
@@ -4308,7 +5244,7 @@ function loadState() {
     const c = p.crop;
     if (!c) return;
     if (!c.fertUsed) c.fertUsed = {};
-    if (CROPS[c.id].regrow && c.left == null) c.left = REGROW_MAX;
+    if (CROPS[c.id]?.regrow && c.left == null) c.left = REGROW_MAX;
   }));
 }
 var pagePlots = (pg) => pg === 2 ? ctx.S.plots2 : pg === 3 ? ctx.S.plots3 : ctx.S.plots;
@@ -4380,6 +5316,14 @@ function destroy() {
   }
   try {
     if (toastTimer) window.clearTimeout(toastTimer);
+  } catch (e) {
+  }
+  try {
+    if (resizeTimer) window.clearTimeout(resizeTimer);
+  } catch (e) {
+  }
+  try {
+    if (renderTimeout) window.clearTimeout(renderTimeout);
   } catch (e) {
   }
   while (disposers.length) {
@@ -4484,7 +5428,7 @@ function initFarm() {
   if (CS.link) requestDayEvent();
   const diag = [];
   if (ctx.S) diag.push("S");
-  if (ctx.CS) diag.push("CS");
+  if (CS) diag.push("CS");
   if (ctx.ui) diag.push("ui");
   console.log("[Farm] ST Context k\u1EBFt n\u1ED1i th\xE0nh c\xF4ng \u2014 " + diag.join(", "));
   console.log("Farm initialized");
@@ -4507,13 +5451,11 @@ async function init() {
     });
     let ev_src = context.eventSource || window.eventSource;
     let ev_types = context.event_types || context.eventTypes || window.event_types;
-    let gen_raw = context.generateRaw || window.generateRaw;
     setExtensionContext({
       extension_settings: ext_set,
       saveSettingsDebounced: save_set,
       eventSource: ev_src,
-      event_types: ev_types,
-      generateRaw: gen_raw
+      event_types: ev_types
     });
   } catch (e) {
     console.error("[Farm] L\u1ED7i khi k\u1EBFt n\u1ED1i ST Context:", e);
@@ -4522,13 +5464,11 @@ async function init() {
     });
     let ev_src = window.eventSource;
     let ev_types = window.event_types;
-    let gen_raw = window.generateRaw;
     setExtensionContext({
       extension_settings: ext_set,
       saveSettingsDebounced: save_set,
       eventSource: ev_src,
-      event_types: ev_types,
-      generateRaw: gen_raw
+      event_types: ev_types
     });
   }
   initFarm();

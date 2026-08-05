@@ -12,6 +12,17 @@ export const P = {
     a:'#b99b84', c:'#9c7d66', d:'#cbb096', e:'#8a6a52',
     w:'#9d7458', g:'#b08a6d', m:'#7d5a42', s:'#684a36',
   };
+
+  /* ===== Bảng màu riêng siêu chi tiết cho Gacha AI (62 màu: 0-9, a-z, A-Z) ===== */
+  export const GACHA_P = {
+    '0': '#ffffff', '1': '#e0e0e0', '2': '#c0c0c0', '3': '#a0a0a0', '4': '#808080', '5': '#606060', '6': '#404040', '7': '#202020', '8': '#101010', '9': '#000000',
+    'a': '#ff0000', 'b': '#cc0000', 'c': '#990000', 'd': '#ff6666', 'e': '#ff9999', 'f': '#ff6600', 'g': '#cc5200', 'h': '#ff9933', 'i': '#8b4513', 'j': '#a0522d', 'k': '#cd853f', 'l': '#deb887',
+    'm': '#ffff00', 'n': '#ffd700', 'o': '#ffcc00', 'p': '#ffdab9', 'q': '#eee8aa', 'r': '#bdb76b',
+    's': '#00ff00', 't': '#32cd32', 'u': '#008000', 'v': '#006400', 'w': '#98fb98', 'x': '#90ee90', 'y': '#adff2f', 'z': '#556b2f',
+    'A': '#0000ff', 'B': '#0000cc', 'C': '#00008b', 'D': '#4169e1', 'E': '#6495ed', 'F': '#87ceeb', 'G': '#00ffff', 'H': '#00ced1', 'I': '#20b2aa', 'J': '#008080', 'K': '#7fffd4',
+    'L': '#ff00ff', 'M': '#c71585', 'N': '#800080', 'O': '#4b0082', 'P': '#9370db', 'Q': '#da70d6', 'R': '#ffc0cb', 'S': '#ffb6c1', 'T': '#ff69b4', 'U': '#db7093',
+    'V': '#ffe4c4', 'W': '#ffe4e1', 'X': '#faf0e6', 'Y': '#ffefd5', 'Z': '#ffebcd'
+  };
   export function mulberry32(a) {
     return function () {
       a |= 0; a = (a + 0x6D2B79F5) | 0;
@@ -53,6 +64,45 @@ export const P = {
     lotus:["................","................","......Ff........",".....pFfp.......","....pFppFp......","....fpFFpf......",".....fppf.......","...DGGGGGGD.....","..DGGGGGGGGD....","...DDGGGGDD.....","................","..b..bbb...b....",".bBbbBBBbbBb....","..bb..b..bb.....","................","................"],
     gem:["................","................",".......v........","......vVv.......",".....vVWVv......",".....vVVVv......","....vVVWVVv.....","....vVVVVVv.....","...vVVWVVVVv....","..BbvVVVVVvBb...",".bBBvVVVVVvBBb..",".bbbvvvvvvvbbb..","..MMMMMMMMMMM...","...MMMMMMMMM....","................","................"],
     emBang:["................","................",".....ffff.......",".....fpFf.......",".....fFFf.......",".....fFFf.......",".....fFFf.......",".....fFFf.......","......ff........","................",".....ffff.......",".....fFFf.......",".....ffff.......","................","................","................"],
+    ticketNorm:["................","....ffffffff....","...fFFFFFFFFf...","...fFCCCCCCFf...","..fFCCCCCCCCFf..","..fFCCCCCCWCFf..","..fFCCCCWWCCFf..","..fFCCCCCCWCFf..","..fFCCCCCCCCFf..","..fFCCCCCCCCFf..","...fFCCCCCCFf...","...fFFFFFFFFf...","....ffffffff....","................","................","................"],
+    ticketSpec:["................","....ffffffff....","...ffffffffff...","...fvVVVVVVvf...","..fvVVVVVVVVvf..","..fvVVVWWVVVvf..","..fvVVWWWWVVvf..","..fvVVVWWVVVvf..","..fvVVVVVVVVvf..","..fvVVVVVVVVvf..","...fvVVVVVVvf...","...ffffffffff...","....ffffffff....","................","................","................"],
+    ticketSuper:["................","....ffffffff....","...ffffffffff...","...fxOOOOOOxf...","..fxOOOOOOOOxf..","..fxOOOWWOOOxf..","..fxOOWWWWOOxf..","..fxOOOWWOOOxf..","..fxOOOOOOOOxf..","..fxOOOOOOOOxf..","...fxOOOOOOxf...","...ffffffffff...","....ffffffff....","................","................","................"],
+    gachaCapsuleNorm:["................",".....ffff.......","...fCCCCCCf.....","..fCCCCWCCCf....","..fCCCCCCCCf....","..ffffffffff....","..fvvvvvvvvf....","..fvvvvWvvvf....","...fvvvvvvf.....",".....ffff.......","................","................","................","................","................","................"],
+    gachaCapsuleSpec:["................",".....ffff.......","...fYYYYYYf.....","..fYYYYWYYYf....","..fYYYYYYYYf....","..ffffffffff....","..fvvvvvvvvf....","..fvvvvWvvvf....","...fvvvvvvf.....",".....ffff.......","................","................","................","................","................","................"],
+    gachapon:[
+      ".............ffffff.............",
+      "...........ffFFFFFFff...........",
+      "..........fFFFFFFFFFFf..........",
+      ".........fFFFFFFFFFFFFf.........",
+      "........fFFFFFFFFFFFFFFf........",
+      ".......fBBBBBBBBBBBBBBBBf.......",
+      "......fBiiiBBBBBBBBBBBBBBf......",
+      "......fBiiWiBBBBBBBBBBBBBf......",
+      ".....fBBiiiiBBBBBBBBBBBBBBf.....",
+      ".....fBBBBDGGDBBBBUCCUBBBBf.....",
+      ".....fBBBBGWWGFnnFCWWCBBBBf.....",
+      ".....fBBBBGGGGnWWnCCCCBBBBf.....",
+      ".....fBBBBDGGDnnnnUCCUBBBBf.....",
+      ".....fBBfFFfDEFnnFOQdvvdBBf.....",
+      ".....fBBFWWFEWWEOWWOvWWvBBf.....",
+      "......fBFFFFEEEEOOOOvvvvBf......",
+      "......fBfFFfDEEDQOOQdvvdBf......",
+      ".......fbbbbbbbbbbbbbbbbf.......",
+      "......ffffffffffffffffffff......",
+      "......fFFFFFFFFFFFFFFFFFFf......",
+      "......fFFFFFFFFFFFFFFFFFFf......",
+      "......fFFFFFFFFFFFFFFFFFFf......",
+      ".....fFFFFFFFMMMMMMFFFFFFFf.....",
+      ".....fFFFFFFMMLLLLMMFFFFFFf.....",
+      ".....fFFFFFFMLLWWLLMFFFFFFf.....",
+      ".....fFFFFFFMLLWWLLMFFFFFFf.....",
+      ".....fFFFFFFMMLLLLMMFFFFFFf.....",
+      ".....fFFFFFFFMMMMMMFFFFFFFf.....",
+      ".....fFFFFFFMMMMMMMMFFFFFFf.....",
+      ".....fFFFFFFMKKKKKKMFFFFFFf.....",
+      ".....fFFFFFFMKKKKKKMFFFFFFf.....",
+      ".....ffffffffffffffffffffff....."
+    ]
   };
   /* Nếu bảng màu thiếu màu xanh k/i trong toolWater thì bù vào */
   P.k = P.k || '#c4e3f0'; P.i = P.i || '#a9cede';
@@ -151,6 +201,11 @@ export const PET_P = {
   "y...xxiiiixx..yY","Yy.xiiiiiiiix..y","y.xiiiiiiiiiix..",".xiiiiiiiiiiiix.",
   ".xiiQQiiiiQQiix.",".xiriiiiQiiiirx.",".xiiiiiiiiiiiix.","..xiiiiiiiiix...",
   "...xiiiiiiix....","....xxxxxxxx....","......jjjj......","................"],
+  penguin:[
+  "................","................",".....333333.....","....33WWWW33....",
+  "...33WWWWWW33...","...3WKKWWKKW3...","..33WnWooWnW33..","..33WWWWWWWW33..",
+  "..33WWWWWWWW33..","...33WWWWWW33...","....33333333....",".....oo..oo.....",
+  "................","................","................","................"]
   };
   /* ===== v0.8c (#43): hệ thống da chuyển sắc (bộ sưu tập codex 0718) —— màu phủ theo từng sprite, giá trị có thể là màu đơn hoặc gradient tuyến tính ===== */
   const petLinear = (x1, y1, x2, y2, stops) => ({ type: 'linear', x1, y1, x2, y2, stops });
@@ -227,6 +282,7 @@ export const PETS = {
     starBell:   { name: 'Bé chuông sao', page: 3, price: 8000, cry: ['Leng keng~', '☆!', '(lắc lắc nhẹ)'], desc: 'Loại sản xuất · tìm kho báu rung rơi mảnh ngôi sao (triệu hồi được phù thuỷ tròn)' },
     /* —— Át chủ bài (#43: giữ id slimeNight để không hỏng save; page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
     slimeNight: { name: 'Bé soda đào',   page: 1, price: 9999, cry: ['Bốp——!', '(nổi một bong bóng nhỏ)', 'Xì~', '(vị ngòn ngọt)'], desc: 'Loại tìm kho báu · tinh linh soda vị đào · dễ thương quá mức nên đắt nhất' },
+    penguin:    { name: 'Chim cánh cụt', page: 1, price: 100000, cry: ['Pingu!', 'Núp núp~', 'Trượt tuyết nào!', 'Cánh cụt!'], desc: 'Loại đặc biệt · AFK mỗi 1 tiếng mang về 1 vé gacha ngẫu nhiên (70% vé thường, 30% vé đặc biệt)' },
   };
   export const PASSES = {
     water: { name: 'Vé vùng nước', price: 6000,  desc: 'Mở khoá ruộng vùng nước (trang 2) + quyền mua bé tròn trang 2 và hạt giống thuỷ sinh, tặng kèm ô ruộng nổi đầu tiên' },
@@ -293,15 +349,19 @@ export const PETS = {
     mysbM: { p: { g:'#5a3f78', G:'#8a5cc0', K:'#3a2258', r:'#9a6ac8', R:'#c4a2e8', W:'#e8d8f8' }, m: [
       '.....G..g.......','....gGGGGg......','......GG........','....KrrrrK......','...KrRrWrrK.....','...KrrRrrrK.....','...KRrrrRrK.....','....KrrRrK......','.....KrrK.......','......KK........','................','................','................','................','................','................'] },
   };
+  export const DYNAMIC_SPR = {};
+export function registerDynamicSprite(name, mapArray) {
+  DYNAMIC_SPR[name] = mapArray;
+}
   const spriteCache = new Map();
   export function spriteSVG(name, px) {
     const key = name + '@' + px;
     if (spriteCache.has(key)) return spriteCache.get(key);
-    const map = SPR[name] || (C2[name] && C2[name].m); if (!map) return '';
-    const pal = SPR[name] ? P : C2[name].p;
+    const map = SPR[name] || DYNAMIC_SPR[name] || (C2[name] && C2[name].m); if (!map) return '';
+    const pal = DYNAMIC_SPR[name] ? GACHA_P : ((SPR[name]) ? P : C2[name].p);
     const canvas = document.createElement('canvas');
-    canvas.width = 16;
-    canvas.height = 16;
+    canvas.width = map[0].length || 16;
+    canvas.height = map.length || 16;
     const ctx = canvas.getContext('2d');
     map.forEach((row, y) => {
       for (let x = 0; x < row.length; x++) { 

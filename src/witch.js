@@ -8,7 +8,7 @@ import { CS, clampN } from './events.js';
 import { renderStatus } from './render.js';
 import { openModal, closeModal, openPanel } from './shop.js';
 import { fmtLeft } from './utils.js';
-import { bagName, mutDescOf, bagPrice, sell } from './logic.js';
+import { bagName, mutDescOf, bagPrice, sell, sellSeed } from './logic.js';
 import { renderPager } from './ui.js';
 import { pageUnlocked } from './utils.js';
 
@@ -148,6 +148,26 @@ export function openSellDlg(key) {
   });
 }
 
+export function openSellSeedDlg(id) {
+  const have = ctx.S.seeds[id] || 0;
+  if (have <= 0) return;
+  const def = CROPS[id];
+  if (!def) return;
+  const price = Math.floor((def.seed || 100) * 0.5);
+  const name = 'Hạt ' + def.name;
+  openModal('Bán · ' + name, `
+    <div class="note" style="margin-bottom:8px">Giá thu mua ${price} G · đang có ${have} hạt</div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <input class="inp" id="sellSeedN" type="number" min="1" max="${have}" value="1" style="width:90px">
+      <span style="font-size:12px;color:#7a5c38">/ ${have}</span>
+      <span class="buy" id="sellSeedGo">Xác nhận bán</span>
+    </div>`);
+  All.$id('sellSeedGo').addEventListener('click', () => {
+    // @ts-ignore
+    sellSeed(id, clampN(All.$id('sellSeedN').value, 1, have, 1) | 0);
+  });
+}
+
 /* Vé: popup hiện trọn mặt vé (tấm vé cũng là đồ sưu tầm) */
 export function buildTicket(k) {
   const water = k === 'water';
@@ -192,10 +212,16 @@ export function openPassDlg(k) {
 }
 
 /* v0.9 (#47): popup mua hàng loạt —— bấm mua hạt giống/phân bón → nhập số lượng → xác nhận, cảm giác giống hệt lúc bán (thời 72 ô thì đây là nhu cầu thiết yếu) */
-export function openBuyDlg(kind, id) {
-  const def = kind === 'seed' ? CROPS[id] : FERTS[id];
-  const price = kind === 'seed' ? def.seed : def.price;
-  const name = kind === 'seed' ? 'Hạt ' + def.name : def.name;
+export function openBuyDlg(kind, id, returnTo = 'shop') {
+  let def, price, name;
+  if (kind === 'ticket') {
+    price = id === 'super' ? 500000 : (id === 'norm' ? 1000 : 5000);
+    name = id === 'super' ? 'Vé Quay Siêu Cường' : (id === 'norm' ? 'Vé Quay Thường' : 'Vé Quay Đặc Biệt');
+  } else {
+    def = kind === 'seed' ? CROPS[id] : FERTS[id];
+    price = kind === 'seed' ? def.seed : def.price;
+    name = kind === 'seed' ? 'Hạt ' + def.name : def.name;
+  }
   if (ctx.S.coins < price) return toast('Còn thiếu ' + (price - ctx.S.coins).toLocaleString() + ' G');
   const maxN = Math.max(1, Math.floor(ctx.S.coins / Math.max(1, price)));
   openModal('Mua · ' + name, `
@@ -213,10 +239,14 @@ export function openBuyDlg(kind, id) {
     if (ctx.S.coins < cost) return toast('Không đủ vàng rồi');
     ctx.S.coins -= cost;
     if (kind === 'seed') ctx.S.seeds[id] = (ctx.S.seeds[id] || 0) + n;
-    else ctx.S.ferts[id] = (ctx.S.ferts[id] || 0) + n;
+    else if (kind === 'fert') ctx.S.ferts[id] = (ctx.S.ferts[id] || 0) + n;
+    else if (kind === 'ticket') {
+      if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+      ctx.S.tickets[id] = (ctx.S.tickets[id] || 0) + n;
+    }
     save(); renderStatus();
     toast('Đã mua ' + name + ' ×' + n);
-    openPanel('shop');
+    openPanel(returnTo);
   });
 }
 

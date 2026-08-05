@@ -5,12 +5,13 @@ import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, 
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
 import { pendingPick, renderStatus, renderAll, setPendingPick } from './render.js';
 import { fmtDur, mutDescOf, bagName, bagPrice } from './logic.js';
-import { openBuyDlg, toast, openPassDlg, useStarShard, openSellDlg, openTakeout } from './witch.js';
+import { openBuyDlg, toast, openPassDlg, useStarShard, openSellDlg, openSellSeedDlg, openTakeout } from './witch.js';
 import { save, freshState } from './state.js';
 import { renderPets } from './pets.js';
 import { esc, SEC, CS, clampN, saveSec, openSandbox, saveCharState, fetchModelList, testSecApi } from './events.js';
 import { applyTheme, sh } from './ui.js';
 import { pageUnlocked } from './utils.js';
+import { openGachaModal } from './gacha.js';
 
 /* ---------- Bảng ---------- */
 export function openModal(title, bodyHTML) {
@@ -29,8 +30,11 @@ export let shopTab = 'seed';
 export let bagTab = 'crop';
 export let bagSellMode = false, bagSel = {};              // Bán một chạm: chế độ tick chọn (mặc định chọn hết)
 export function openPanel(kind) {
+  if (kind === 'gacha') {
+    return openGachaModal();
+  }
   if (kind === 'shop') {
-    const tabs = [['seed', 'Hạt giống'], ['fert', 'Phân bón'], ['pet', 'Thú cưng'], ['pass', 'Vé']];
+    const tabs = [['seed', 'Hạt giống'], ['fert', 'Phân bón'], ['pet', 'Thú cưng'], ['pass', 'Vé'], ['ticket', 'Vé Gacha']];
     let items = '';
     if (shopTab === 'seed') {
       items = [1, 2, 3].map(z => {                      // v0.8: chia nhóm theo khu, họ hidden không bày bán
@@ -68,6 +72,20 @@ export function openPanel(kind) {
           <div class="meta">${pd.desc}${lockNote}</div></span>
           ${priceHtml}${btn}</div>`;
       }).join('');
+    } else if (shopTab === 'ticket') {
+      items = `
+        <div class="item"><span class="icon">${spriteSVG('ticketNorm', 32)}</span>
+          <span class="info"><div class="name">Vé Quay Thường</div><div class="meta">Dùng quay máy Gachapon nhận quà ngẫu nhiên · Đang có ${ctx.S.tickets?.norm || 0}</div></span>
+          <span class="price">${spriteSVG('coin', 16)}1,000</span>
+          <span class="buy${ctx.S.coins < 1000 ? ' off' : ''}" data-buyticket="norm">Mua</span></div>
+        <div class="item"><span class="icon">${spriteSVG('ticketSpec', 32)}</span>
+          <span class="info"><div class="name">Vé Quay Đặc Biệt</div><div class="meta">Dùng quay Gachapon Đặc Biệt tăng tỷ lệ ra đồ độc nhất · Đang có ${ctx.S.tickets?.spec || 0}</div></span>
+          <span class="price">${spriteSVG('coin', 16)}5,000</span>
+          <span class="buy${ctx.S.coins < 5000 ? ' off' : ''}" data-buyticket="spec">Mua</span></div>
+        <div class="item"><span class="icon">${spriteSVG('ticketSuper', 32)}</span>
+          <span class="info"><div class="name" style="color:#ff4500;">Vé Quay Siêu Cường</div><div class="meta">Dùng quay 1 phát 100% ra bảo vật AI phẩm chất Huyền Thoại · Đang có ${ctx.S.tickets?.super || 0}</div></span>
+          <span class="price">${spriteSVG('coin', 16)}500,000</span>
+          <span class="buy${ctx.S.coins < 500000 ? ' off' : ''}" data-buyticket="super" style="background:#ff4500; border:1px solid #cc3700; color:#fff;">Mua</span></div>`;
     } else {
       items = Object.keys(PASSES).map(k => {
         const ps = PASSES[k];
@@ -89,6 +107,10 @@ export function openPanel(kind) {
     All.$id('mbody').querySelectorAll('[data-buyseed]').forEach(b => b.addEventListener('click', () => openBuyDlg('seed', b.dataset.buyseed)));
     // @ts-ignore
     All.$id('mbody').querySelectorAll('[data-buyfert]').forEach(b => b.addEventListener('click', () => openBuyDlg('fert', b.dataset.buyfert)));
+    All.$id('mbody').querySelectorAll('[data-buyticket]').forEach(b => b.addEventListener('click', () => {
+      // @ts-ignore
+      openBuyDlg('ticket', b.dataset.buyticket, 'shop');
+    }));
     All.$id('mbody').querySelectorAll('[data-buypet]').forEach(b => b.addEventListener('click', () => {
       // @ts-ignore
       const id = b.dataset.buypet, pd = PETS[id];
@@ -102,10 +124,154 @@ export function openPanel(kind) {
     // @ts-ignore
     All.$id('mbody').querySelectorAll('[data-passdlg]').forEach(b => b.addEventListener('click', () => openPassDlg(b.dataset.passdlg)));
   } else if (kind === 'bag') {
-    const btabs = `<div class="tabs"><span class="tab${bagTab === 'crop' ? ' active' : ''}" data-btab="crop">Nông sản</span><span class="tab${bagTab === 'pet' ? ' active' : ''}" data-btab="pet">Bé tròn</span><span class="tab${bagTab === 'relic' ? ' active' : ''}" data-btab="relic">Quà của bé tròn</span></div>`;
+    const btabs = `<div class="tabs"><span class="tab${bagTab === 'crop' ? ' active' : ''}" data-btab="crop">Nông sản</span><span class="tab${bagTab === 'seed' ? ' active' : ''}" data-btab="seed">Hạt giống</span><span class="tab${bagTab === 'gacha' ? ' active' : ''}" data-btab="gacha">Đồ Gacha</span><span class="tab${bagTab === 'pet' ? ' active' : ''}" data-btab="pet">Bé tròn</span><span class="tab${bagTab === 'relic' ? ' active' : ''}" data-btab="relic">Quà của bé tròn</span></div>`;
+    if (bagTab === 'seed') {
+      const seedKeys = Object.keys(ctx.S.seeds || {}).filter(k => k !== 'mystery');
+      const rows = seedKeys.map(key => {
+        const n = ctx.S.seeds[key];
+        if (n <= 0) return '';
+        const def = CROPS[key];
+        const price = Math.floor((def.seed || 100) * 0.5);
+        if (bagSellMode) {
+          const on = !!bagSel[key];
+          return `
+        <div class="item selrow${on ? ' selon' : ''}" data-selkey="${key}"><span class="icon">${spriteSVG(def.sp, 32)}</span>
+          <span class="info"><div class="name">Hạt ${def.name} ×${n}</div><div class="meta">Giá thu mua: ${price} G/hạt</div></span>
+          <span class="selmark">${on ? '✓' : ''}</span></div>`;
+        }
+        return `
+        <div class="item"><span class="icon">${spriteSVG(def.sp, 32)}</span>
+          <span class="info"><div class="name">Hạt ${def.name} ×${n}</div><div class="meta">Giá thu mua: ${price} G/hạt</div></span>
+          <span class="acts">
+            <span class="ibtn" data-sellseeddlg="${key}" title="Bán (tự chọn số lượng)">${spriteSVG('coin', 16)}</span>
+          </span></div>`;
+      }).join('');
+      let sellBar = '';
+      if (seedKeys.length) {
+        if (bagSellMode) {
+          const total = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.seeds[k]).reduce((s, k) => {
+            const def = CROPS[k];
+            const p = Math.floor((def.seed || 100) * 0.5);
+            return s + p * ctx.S.seeds[k];
+          }, 0);
+          sellBar = `<div class="note" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:8px;white-space:nowrap;overflow:hidden">
+            <b style="overflow:hidden;text-overflow:ellipsis">${total > 0 ? 'Tổng ' + total.toLocaleString() + ' G' : 'Bấm vào từng mục để tick chọn thứ muốn bán'}</b><span style="flex:1"></span>
+            <span class="buy" id="sellSelGo" style="padding:4px 10px;font-size:11px;flex:none">Bán</span>
+            <span class="buy plain" id="sellSelNo" style="padding:4px 10px;font-size:11px;flex:none">Huỷ</span></div>`;
+        } else {
+          sellBar = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div class="note" style="flex:1"></div>
+            <span class="buy" id="sellModeGo" style="flex:none">Bán một chạm</span></div>`;
+        }
+      }
+      openModal('Balo', btabs + sellBar + (rows || '<div class="note">Bạn chưa có hạt giống nào, ra cửa hàng mua thêm đi!</div>'));
+      // @ts-ignore
+      All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
+      // @ts-ignore
+      All.$id('mbody').querySelectorAll('[data-sellseeddlg]').forEach(b => b.addEventListener('click', () => openSellSeedDlg(b.dataset.sellseeddlg)));
+      const smGo = All.$id('sellModeGo');
+      if (smGo) smGo.addEventListener('click', () => { bagSellMode = true; bagSel = {}; openPanel('bag'); });
+      All.$id('mbody').querySelectorAll('[data-selkey]').forEach(el => el.addEventListener('click', () => {
+        // @ts-ignore
+        bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
+        openPanel('bag');
+      }));
+      const ssNo = All.$id('sellSelNo');
+      if (ssNo) ssNo.addEventListener('click', () => { bagSellMode = false; openPanel('bag'); });
+      const ssGo = All.$id('sellSelGo');
+      if (ssGo) ssGo.addEventListener('click', () => {
+        const keys = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.seeds[k]);
+        if (!keys.length) return toast('Chưa tick cái nào cả');
+        let gain = 0;
+        keys.forEach(k => { 
+          const def = CROPS[k];
+          const p = Math.floor((def.seed || 100) * 0.5);
+          gain += p * ctx.S.seeds[k]; 
+          delete ctx.S.seeds[k]; 
+        });
+        ctx.S.coins += gain; ctx.S.totalSales += gain;
+        bagSellMode = false; save(); renderStatus();
+        toast('Bán một mẻ hạt giống: +' + gain.toLocaleString() + ' G');
+        openPanel('bag');
+      });
+      return;
+    }
+    if (bagTab === 'gacha') {
+      const gachaKeys = Object.keys(ctx.S.bag || {}).filter(k => k.startsWith('unique@'));
+      const rows = gachaKeys.map(key => {
+        const n = ctx.S.bag[key];
+        const item = ctx.S.uniques?.[key] || { name: 'Vật phẩm Gacha', rarity: 'Đặc biệt', desc: '', color: '#4a90e2', sell: 2500, sp: 'strawhat' };
+        const d0 = mutDescOf(key);
+        const mdesc = d0 ? ' · ' + d0 : '';
+        if (bagSellMode) {
+          const on = !!bagSel[key];
+          return `
+        <div class="item selrow${on ? ' selon' : ''}" data-selkey="${key}"><span class="icon">${spriteSVG(item.sp, 32)}</span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/cái${esc(mdesc)}</div></span>
+          <span class="selmark">${on ? '✓' : ''}</span></div>`;
+        }
+        return `
+        <div class="item"><span class="icon">${spriteSVG(item.sp, 32)}</span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/cái · ${esc(item.desc || 'Vật phẩm độc nhất')}</div></span>
+          <span class="acts">
+            <span class="ibtn" data-takeout="${key}" title="Lấy ra (mang vào cốt truyện, không quy ra tiền)">${spriteSVG('emBang', 16)}</span>
+            <span class="ibtn" data-selldlg="${key}" title="Bán (tự chọn số lượng)">${spriteSVG('coin', 16)}</span>
+          </span></div>`;
+      }).join('');
+      let sellBar = '';
+      if (gachaKeys.length) {
+        if (bagSellMode) {
+          const total = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.bag[k]).reduce((s, k) => s + bagPrice(k) * ctx.S.bag[k], 0);
+          sellBar = `<div class="note" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:8px;white-space:nowrap;overflow:hidden">
+            <b style="overflow:hidden;text-overflow:ellipsis">${total > 0 ? 'Tổng ' + total.toLocaleString() + ' G' : 'Bấm vào từng mục để tick chọn thứ muốn bán'}</b><span style="flex:1"></span>
+            <span class="buy" id="sellSelGo" style="padding:4px 10px;font-size:11px;flex:none">Bán</span>
+            <span class="buy plain" id="sellSelNo" style="padding:4px 10px;font-size:11px;flex:none">Huỷ</span></div>`;
+        } else {
+          sellBar = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div class="note" style="flex:1">Bấm «!» để lấy đồ Gacha ra mang vào cốt truyện</div>
+            <span class="buy" id="sellModeGo" style="flex:none">Bán một chạm</span></div>`;
+        }
+      }
+      openModal('Balo', btabs + sellBar + (rows || '<div class="note">Chưa có vật phẩm Gacha nào, sang máy Gachapon quay thử đi!</div>'));
+      // @ts-ignore
+      All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
+      // @ts-ignore
+      All.$id('mbody').querySelectorAll('[data-selldlg]').forEach(b => b.addEventListener('click', () => openSellDlg(b.dataset.selldlg)));
+      // @ts-ignore
+      All.$id('mbody').querySelectorAll('[data-takeout]').forEach(b => b.addEventListener('click', () => openTakeout(b.dataset.takeout)));
+      const smGo = All.$id('sellModeGo');
+      if (smGo) smGo.addEventListener('click', () => { bagSellMode = true; bagSel = {}; openPanel('bag'); });
+      All.$id('mbody').querySelectorAll('[data-selkey]').forEach(el => el.addEventListener('click', () => {
+        // @ts-ignore
+        bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
+        openPanel('bag');
+      }));
+      const ssNo = All.$id('sellSelNo');
+      if (ssNo) ssNo.addEventListener('click', () => { bagSellMode = false; openPanel('bag'); });
+      const ssGo = All.$id('sellSelGo');
+      if (ssGo) ssGo.addEventListener('click', () => {
+        const keys = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.bag[k]);
+        if (!keys.length) return toast('Chưa tick cái nào cả');
+        let gain = 0;
+        keys.forEach(k => { gain += bagPrice(k) * ctx.S.bag[k]; delete ctx.S.bag[k]; });
+        ctx.S.coins += gain; ctx.S.totalSales += gain;
+        bagSellMode = false; save(); renderStatus();
+        toast('Bán một mẻ đồ Gacha: +' + gain.toLocaleString() + ' G');
+        openPanel('bag');
+      });
+      return;
+    }
     if (bagTab === 'relic') {                            // v1.0: quà của bé tròn —— quầy riêng cho mảnh vỡ và hạt giống bí ẩn
       const sh2 = ctx.S.shards || { prism: 0, star: 0 };
-      const relicRows = (ctx.S.seeds.mystery > 0 ? `
+      const normTk = ctx.S.tickets?.norm || 0;
+      const specTk = ctx.S.tickets?.spec || 0;
+      const ticketRows = (normTk > 0 ? `
+      <div class="item"><span class="icon">${spriteSVG('ticketNorm', 30)}</span>
+        <span class="info"><div class="name">Vé Quay Thường ×${normTk}</div><div class="meta">Dùng ở máy Gachapon</div></span></div>` : '') +
+        (specTk > 0 ? `
+      <div class="item"><span class="icon">${spriteSVG('ticketSpec', 30)}</span>
+        <span class="info"><div class="name">Vé Quay Đặc Biệt ×${specTk}</div><div class="meta">Dùng ở máy Gachapon</div></span></div>` : '');
+      const relicRows = ticketRows + (ctx.S.seeds.mystery > 0 ? `
       <div class="item"><span class="icon">${spriteSVG('seedLight', 30)}</span>
         <span class="info"><div class="name">Hạt giống bí ẩn ×${ctx.S.seeds.mystery}</div><div class="meta">Trồng xuống sẽ ra ngẫu nhiên một họ (chọn khi gieo hạt / khi chọc bé mầm sương)</div></span></div>` : '') +
         (sh2.prism > 0 ? `
@@ -119,6 +285,7 @@ export function openPanel(kind) {
       // @ts-ignore
       All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
       All.$id('mbody').querySelectorAll('[data-useshard]').forEach(b => b.addEventListener('click', useStarShard));
+      All.$id('mbody').querySelectorAll('[data-takeout]').forEach(b => b.addEventListener('click', () => openTakeout(b.dataset.takeout)));
       return;
     }
     if (bagTab === 'pet') {
@@ -149,7 +316,8 @@ export function openPanel(kind) {
       }));
       return;
     }
-    const rows = Object.entries(ctx.S.bag).map(([key, n]) => {
+    const rows = Object.keys(ctx.S.bag).filter(k => !k.startsWith('unique@')).map(key => {
+      const n = ctx.S.bag[key];
       const id = key.split('@')[0], mut = key.indexOf('@') > 0;
       const d0 = mutDescOf(key);
       const mdesc = d0 ? ' · ' + d0 : '';
@@ -255,6 +423,10 @@ export function openPanel(kind) {
       <div style="display:flex;gap:8px;margin-top:6px">
         <span class="buy plain" id="openSandboxBtn">🎨 Mở Xưởng Chế Tác AI</span>
       </div>
+      <div class="shead">Thông tin & Tác giả</div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <span class="buy plain" id="openCreditBtn">📜 Xem Credit (Lời cảm ơn)</span>
+      </div>
       <div class="note" style="margin:12px 0 8px">
         <b>Hướng dẫn chơi</b><br>· Liên kết thẻ nhân vật: bật lên sẽ tạo sự kiện dựa theo thẻ nhân vật hiện tại<br>
         · Ảnh hưởng cốt truyện: bật lên có thể tác động ngược vào cốt truyện hiện tại<br>
@@ -278,6 +450,29 @@ export function openPanel(kind) {
     All.$id('secTest').addEventListener('click', () => testSecApi());
     All.$id('secModels').addEventListener('click', () => fetchModelList());
     if (All.$id('openSandboxBtn')) All.$id('openSandboxBtn').addEventListener('click', openSandbox);
+    if (All.$id('openCreditBtn')) {
+      All.$id('openCreditBtn').addEventListener('click', () => {
+        openModal('Credit & Lời cảm ơn', `
+          <div style="line-height:1.6; color:#4a3219; font-size:13px; text-align:left; padding:8px;">
+            <b style="color:#a83a52;">Tên sản phẩm gốc (原真名):</b><br>
+            【谁要在酒馆当农民啊！v1.1】<br><br>
+            
+            <b style="color:#a83a52;">Tên tiếng Việt (越南语译名):</b><br>
+            【Ai thèm làm nông dân trong tửu quán chứ! v1.1】 Script Trợ thủ Tửu quán<br><br>
+
+            <b style="color:#a83a52;">Tác giả gốc (原作者):</b><br>
+            满身猫毛՞••՞ - Tranh thủ lén meo<br><br>
+
+            <b style="color:#a83a52;">Mod và update game hiện tại credit từ:</b><br>
+            Dev: Kaiz
+          </div>
+          <div style="margin-top:16px;text-align:center;">
+            <span class="buy plain" id="closeCreditBtn">Quay lại Cài đặt</span>
+          </div>
+        `);
+        All.$id('closeCreditBtn')?.addEventListener('click', () => openPanel('cfg'));
+      });
+    }
     All.$id('mbody').querySelectorAll('[data-settheme]').forEach(b => b.addEventListener('click', () => {
       // @ts-ignore
       ctx.S.theme = b.dataset.settheme; save(); applyTheme(); openPanel('cfg');

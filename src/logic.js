@@ -28,7 +28,7 @@ export function plant(pi, cropId) {
   }
   ctx.S.seeds[cropId]--;
   const g = growMs(realId);
-  const c = { id: realId, matureAt: now() + g, yieldBonus: 0, wateredUntil: 0, fertUsed: {} };
+  const c = { id: realId, matureAt: now() + g, wateredUntil: 0, fertUsed: {} };
   if (CROPS[realId].regrow) c.left = REGROW_MAX;
   if (isRain()) { c.matureAt = now() + g * 0.9; c.rainDay = gameDay(); }   // Sửa #10: trồng vào ngày mưa được giảm thẳng 10%
   const ev = todayEvent();                                                  // Sự kiện thế giới quan: trồng trong ngày cũng được hưởng
@@ -99,6 +99,9 @@ export function bagName(key) {
   return (parts[1] ? parts[1] + '·' : '') + (CROPS[parts[0]] || { name: '?' }).name;   // Dự phòng: id lạ cũng không làm nổ balo
 }
 export function bagPrice(key) {
+  if (key.startsWith('unique@')) {
+    return ctx.S.uniques?.[key]?.sell || 0;
+  }
   const parts = key.split('@');
   return Math.round((CROPS[parts[0]] || { sell: 0 }).sell * (parts[1] ? 1.25 : 1));   // Hàng đột biến bán được ×1.25
 }
@@ -113,7 +116,7 @@ export function harvest(pi, quiet) {
   if (!c || now() < c.matureAt) return null;
   rollMutation(c, pi);                                  // Cửa thu hoạch gieo bù (chống việc bấm quá nhanh trong 1 giây sau khi chín làm bỏ qua bước xét)
   const def = CROPS[c.id];
-  let n = 1 + (c.yieldBonus || 0);                      // v1.1: hệ số sản lượng nghỉ hưu (sự kiện chỉ ảnh hưởng thời gian sinh trưởng)
+  let n = 1;                      // v1.1: hệ số sản lượng nghỉ hưu (sự kiện chỉ ảnh hưởng thời gian sinh trưởng)
   const dev = todayEvent();
   if (dev && dev.double_yield && (!dev.favored_crop || def.name === dev.favored_crop)) n *= 2;   // v1.1: ngày bội thu gấp đôi (phúc lợi dân may)
   const key = c.mut ? c.id + '@' + c.mut : c.id;
@@ -121,8 +124,6 @@ export function harvest(pi, quiet) {
   ctx.S.bag[key] = (ctx.S.bag[key] || 0) + n;
   let shinyGain = 0;                                    // Phân lấp lánh v1.0 B′: khi thu hoạch kết toán 25% giá bán thành vàng
   if (c.shiny) { shinyGain = Math.ceil(def.sell * 0.25) * n; ctx.S.coins += shinyGain; delete c.shiny; }
-  c.yieldBonus = 0;
-  if (c.left == null && def.regrow) c.left = REGROW_MAX;
   if (def.regrow && c.left - 1 > 0) {                 // Sửa #4: tối đa 3 vụ
     c.left--;
     c.matureAt = now() + regrowMs(c.id);
@@ -156,5 +157,17 @@ export function sell(key, n) {
   if (ctx.S.bag[key] === 0) delete ctx.S.bag[key];
   ctx.S.coins += gain; ctx.S.totalSales += gain;
   save(); renderStatus(); openPanel('bag'); toast('Bán được ' + gain + ' G');
+}
+
+export function sellSeed(id, n) {
+  const have = ctx.S.seeds[id] || 0;
+  n = Math.min(n, have);
+  if (n <= 0) return;
+  const def = CROPS[id] || { seed: 100 };
+  const gain = Math.floor((def.seed || 100) * 0.5) * n;
+  ctx.S.seeds[id] = have - n;
+  if (ctx.S.seeds[id] === 0) delete ctx.S.seeds[id];
+  ctx.S.coins += gain; ctx.S.totalSales += gain;
+  save(); renderStatus(); openPanel('bag'); toast('Bán hạt giống thu được ' + gain + ' G');
 }
 

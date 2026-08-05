@@ -7,17 +7,11 @@ export const ctx = {
     eventSource: null,
     event_types: null,
     saveSettingsDebounced: null,
-    generateRaw: null,
     S: null,
     ui: null,
     orb: null,
     win: null,
-    bagWin: null,
-    passWin: null,
-    shopWin: null,
-    msg: null,
-    saveTimer: null,
-    witchTimer: null
+    saveTimer: null
 };
 
 export const setExtensionContext = (params) => {

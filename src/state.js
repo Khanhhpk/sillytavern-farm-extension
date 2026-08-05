@@ -48,6 +48,16 @@ export function loadState() {
   
   if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
   if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
+  if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+  if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
+  if (!ctx.S.uniques) ctx.S.uniques = {};
+
+  Object.keys(ctx.S.uniques || {}).forEach(k => {
+    const item = ctx.S.uniques[k];
+    if (item && item.sp && item.spriteMap) {
+      All.registerDynamicSprite(item.sp, item.spriteMap);
+    }
+  });
   if (!ctx.S.plots2) ctx.S.plots2 = emptyPlots();
   if (!ctx.S.plots3) ctx.S.plots3 = emptyPlots();
   if (ctx.S.unlockedBlocks2 == null) ctx.S.unlockedBlocks2 = 1;
@@ -56,7 +66,7 @@ export function loadState() {
   [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach(arr => arr.forEach(p => {
     const c = p.crop; if (!c) return;
     if (!c.fertUsed) c.fertUsed = {};
-    if (CROPS[c.id].regrow && c.left == null) c.left = REGROW_MAX;
+    if (CROPS[c.id]?.regrow && c.left == null) c.left = REGROW_MAX;
   }));
 }
 /* v0.8: hàm hỗ trợ cho trang */
