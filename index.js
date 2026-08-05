@@ -2795,14 +2795,14 @@ function openGachaModal() {
   const bodyHTML = `
     <div class="gacha-wrap" style="text-align:center; position:relative; overflow:hidden; padding:4px 0;">
       <!-- Header Th\xF4ng tin v\xE9 & Mua nhanh -->
-      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.04); padding:8px 12px; border-radius:8px; margin-bottom:12px;">
-        <div style="font-size:12px; font-weight:bold; color:#5a3f78; text-align:left;">
-          V\xE9 th\u01B0\u1EDDng: <span id="gachaNormCount" style="color:#2e6a50; font-size:13px;">${normTicket}</span> | 
-          V\xE9 \u0111\u1EB7c bi\u1EC7t: <span id="gachaSpecCount" style="color:#8a2acc; font-size:13px;">${specTicket}</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.04); padding:8px 12px; border-radius:8px; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+        <div style="font-size:13px; font-weight:bold; color:#5a3f78; text-align:left; flex:1; min-width:140px;">
+          V\xE9 th\u01B0\u1EDDng: <span id="gachaNormCount" style="color:#2e6a50; font-size:14px;">${normTicket}</span> | 
+          \u0110\u1EB7c bi\u1EC7t: <span id="gachaSpecCount" style="color:#8a2acc; font-size:14px;">${specTicket}</span>
         </div>
-        <div style="display:flex; gap:6px;">
+        <div style="display:flex; gap:6px; flex:none;">
           <span class="buy" id="gachaBuyNormBtn" style="padding:4px 8px; font-size:11px;">+ V\xE9 Th\u01B0\u1EDDng (1000G)</span>
-          <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border-color:#6a4a9a;">+ V\xE9 \u0110\u1EB7c bi\u1EC7t (5000G)</span>
+          <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 \u0110\u1EB7c bi\u1EC7t (5000G)</span>
         </div>
       </div>
 
@@ -2839,10 +2839,10 @@ function openGachaModal() {
 
       <!-- C\xE1c N\xFAt Quay -->
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-        <span class="buy" id="gachaRollNorm1" style="padding:9px 0; font-size:12px; background:#6cb457; text-align:center;">Quay Th\u01B0\u1EDDng \xD71</span>
-        <span class="buy" id="gachaRollNorm10" style="padding:9px 0; font-size:12px; background:#4e903a; text-align:center;">Quay Th\u01B0\u1EDDng \xD710</span>
-        <span class="buy" id="gachaRollSpec1" style="padding:9px 0; font-size:12px; background:#a335ee; border-color:#8a2acc; text-align:center;">Quay \u0110\u1EB7c Bi\u1EC7t \xD71</span>
-        <span class="buy" id="gachaRollSpec10" style="padding:9px 0; font-size:12px; background:#8a2acc; border-color:#6a1aa3; text-align:center;">Quay \u0110\u1EB7c Bi\u1EC7t \xD710</span>
+        <span class="buy" id="gachaRollNorm1" style="padding:10px 0; font-size:13px; font-weight:bold; background:#6cb457; border:1px solid #4e903a; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Th\u01B0\u1EDDng \xD71</span>
+        <span class="buy" id="gachaRollNorm10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#4e903a; border:1px solid #3c702c; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Th\u01B0\u1EDDng \xD710</span>
+        <span class="buy" id="gachaRollSpec1" style="padding:10px 0; font-size:13px; font-weight:bold; background:#a335ee; border:1px solid #8a2acc; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay \u0110\u1EB7c Bi\u1EC7t \xD71</span>
+        <span class="buy" id="gachaRollSpec10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#8a2acc; border:1px solid #6a1aa3; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay \u0110\u1EB7c Bi\u1EC7t \xD710</span>
       </div>
 
       <!-- Result Overlay Animation (L\u01B0\u1EDBi k\u1EBFt qu\u1EA3) -->
