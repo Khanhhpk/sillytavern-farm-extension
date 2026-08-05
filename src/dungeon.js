@@ -9,32 +9,36 @@ let lastTime = 0;
 
 let team = []; // Currently placed pets
 let enemies = []; // Spawned enemies
+let projectiles = []; // Active projectiles
 
 const PET_STATS = {
     slime: { name: 'Slime Xanh', desc: 'Chiến binh cân bằng, không có gì nổi bật.', hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
-    octo: { name: 'Bạch Tuộc', desc: 'Đánh nhanh thắng nhanh.', hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8 },
-    slimePink: { name: 'Slime Hồng', desc: 'Hồi máu: Hồi máu cho đồng minh.', hp: 120, atk: 15, range: 80, speed: 35, cd: 1.5, skill: 'heal' },
-    slimeNight: { name: 'Soda Đào', desc: 'Phép thuật: Đánh xa, sát thương ổn định.', hp: 90, atk: 18, range: 100, speed: 45, cd: 1.2 },
-    octoCream: { name: 'Bạch Tuộc Kem', desc: 'Máu trâu, đánh chậm.', hp: 150, atk: 12, range: 60, speed: 45, cd: 1.5 },
-    bunny: { name: 'Sứa Xoăn', desc: 'Xạ thủ: Tầm đánh cực xa, sát thương cao.', hp: 70, atk: 25, range: 150, speed: 60, cd: 1.5 },
-    batBlob: { name: 'Bé Bí Ẩn', desc: 'Chiến binh bóng đêm nhanh nhẹn.', hp: 85, atk: 14, range: 50, speed: 55, cd: 1.1 },
+    octo: { name: 'Bạch Tuộc', desc: 'Đánh nhanh thắng nhanh. Đánh càng lâu tốc đánh càng cao.', hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8, skill: 'frenzy' },
+    slimePink: { name: 'Slime Hồng', desc: 'Hồi máu đơn mục tiêu cho đồng minh yếu nhất.', hp: 120, atk: 15, range: 80, speed: 35, cd: 1.5, skill: 'heal' },
+    slimeNight: { name: 'Soda Đào', desc: 'Đánh xa xuyên thấu mọi kẻ địch trên đường bay.', hp: 90, atk: 18, range: 100, speed: 45, cd: 1.2, skill: 'pierce' },
+    octoCream: { name: 'Bạch Tuộc Kem', desc: '20% tỷ lệ làm choáng kẻ địch 1 giây.', hp: 150, atk: 12, range: 60, speed: 45, cd: 1.5, skill: 'stun' },
+    bunny: { name: 'Sứa Xoăn', desc: 'Xạ thủ: Bắn càng xa sát thương càng lớn.', hp: 70, atk: 25, range: 150, speed: 60, cd: 1.5, skill: 'sniper' },
+    batBlob: { name: 'Bé Bí Ẩn', desc: 'Hồi máu cho bản thân bằng 50% sát thương gây ra.', hp: 85, atk: 14, range: 50, speed: 55, cd: 1.1, skill: 'lifesteal' },
     ghostBlob: { name: 'Ma Trắng', desc: 'Sát thủ: Luôn nhắm vào kẻ thù xa nhất.', hp: 60, atk: 35, range: 40, speed: 100, cd: 1.2, skill: 'assassin' },
-    impBlob: { name: 'Quỷ Nhỏ', desc: 'Sát thương cực khủng, máu giấy.', hp: 50, atk: 40, range: 40, speed: 60, cd: 1 },
-    angelBlob: { name: 'Thiên Thần', desc: 'Thiên sứ hồi máu liên tục.', hp: 110, atk: 10, range: 80, speed: 40, cd: 1.2, skill: 'heal' },
-    witchBlob: { name: 'Phù Thủy', desc: 'Sát thương phép thuật từ xa.', hp: 75, atk: 22, range: 120, speed: 50, cd: 1.3 },
-    starBell: { name: 'Chuông Sao', desc: 'Hỗ trợ đồng đội.', hp: 95, atk: 12, range: 90, speed: 40, cd: 1 },
-    cloudMallow: { name: 'Kẹo Dẻo Mây', desc: 'Tanker siêu trâu bò.', hp: 200, atk: 8, range: 40, speed: 30, cd: 2 },
-    dewSprout: { name: 'Mầm Sương', desc: 'Chiến binh thiên nhiên mạnh mẽ.', hp: 105, atk: 14, range: 50, speed: 45, cd: 1.2 },
-    prismBlob: { name: 'Lăng Kính', desc: 'Bắn tỉa từ xa.', hp: 80, atk: 20, range: 140, speed: 40, cd: 1.4 },
-    penguin: { name: 'Cánh Cụt', desc: 'Võ sĩ cận chiến băng giá.', hp: 120, atk: 16, range: 45, speed: 50, cd: 1 },
-    // defaults
+    impBlob: { name: 'Quỷ Nhỏ', desc: 'Đánh lan: Gây sát thương AoE xung quanh mục tiêu.', hp: 50, atk: 40, range: 40, speed: 60, cd: 1, skill: 'cleave' },
+    angelBlob: { name: 'Thiên Thần', desc: 'Hồi máu diện rộng cho các đồng minh lân cận.', hp: 110, atk: 10, range: 80, speed: 40, cd: 1.2, skill: 'aoe_heal' },
+    witchBlob: { name: 'Phù Thủy', desc: 'Đòn đánh khiến mục tiêu bị trúng độc.', hp: 75, atk: 22, range: 120, speed: 50, cd: 1.3, skill: 'poison' },
+    starBell: { name: 'Chuông Sao', desc: 'Tăng 20% sát thương cho đồng minh lân cận.', hp: 95, atk: 12, range: 90, speed: 40, cd: 1, skill: 'buff_atk' },
+    cloudMallow: { name: 'Kẹo Dẻo Mây', desc: 'Khiêu khích: Buộc kẻ địch tấn công mình.', hp: 200, atk: 8, range: 40, speed: 30, cd: 2, skill: 'taunt' },
+    dewSprout: { name: 'Mầm Sương', desc: '25% tỷ lệ trói chân kẻ địch trong 2 giây.', hp: 105, atk: 14, range: 50, speed: 45, cd: 1.2, skill: 'root' },
+    prismBlob: { name: 'Lăng Kính', desc: 'Bắn 3 tia sáng cùng lúc (sát thương chia nửa).', hp: 80, atk: 20, range: 140, speed: 40, cd: 1.4, skill: 'multishot' },
+    penguin: { name: 'Cánh Cụt', desc: 'Đòn đánh làm giảm tốc độ di chuyển và tốc đánh.', hp: 120, atk: 16, range: 45, speed: 50, cd: 1, skill: 'freeze' },
     default: { name: 'Pet Vô Danh', desc: 'Không có kỹ năng đặc biệt.', hp: 100, atk: 10, range: 40, speed: 40, cd: 1 }
 };
 
 const ENEMY_TYPES = [
-    { id: 'tomato', hp: 80, atk: 12, range: 40, speed: 30, cd: 1 },
-    { id: 'pumpkin', hp: 200, atk: 25, range: 50, speed: 20, cd: 1.5 },
-    { id: 'radish', hp: 50, atk: 8, range: 30, speed: 60, cd: 0.5 },
+    { id: 'tomato', name: 'Cà Chua Tròn', desc: 'Cận chiến cơ bản.', hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: 'melee' },
+    { id: 'pumpkin', name: 'Bí Ngô Khổng Lồ', desc: 'Tanker chậm chạp.', hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: 'tank' },
+    { id: 'radish', name: 'Củ Cải Tốc Độ', desc: 'Chạy cực nhanh.', hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: 'melee' },
+    { id: 'fangW', name: 'Hoa Bá Vương', desc: 'Pháp sư bắn từ xa.', hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: 'ranged' },
+    { id: 'moonberry', name: 'Dâu Tây Gai', desc: 'Thích khách tập kích.', hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: 'assassin' },
+    { id: 'chuncai', name: 'Rau Thuần', desc: 'Đeo bám dai dẳng.', hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: 'melee' },
+    { id: 'lianou', name: 'Củ Sen Khổng Lồ', desc: 'Ném bùn từ xa.', hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: 'ranged' }
 ];
 
 export function openDungeonView() {
@@ -85,6 +89,7 @@ function initPlacementPhase() {
     phase = 'placement';
     team = [];
     enemies = [];
+    projectiles = [];
     
     All.dungeonView.innerHTML = `
         <div class="dg-arena" id="dg-arena">
@@ -93,11 +98,17 @@ function initPlacementPhase() {
                 <h3>Chỉ Số Thú Cưng</h3>
                 <div class="dg-info-list" id="dg-info-list"></div>
             </div>
+            <div class="dg-info-panel" id="dg-codex-panel" style="display:none; border-left-color:#e06578;">
+                <div class="dg-info-close" id="dg-codex-close">×</div>
+                <h3 style="color:#e06578;">Từ Điển Quái</h3>
+                <div class="dg-info-list" id="dg-codex-list"></div>
+            </div>
         </div>
         <div style="display:flex; justify-content:center; margin-top: 5px;">
             <div class="buy" id="dg-start-btn">Bắt Đầu Trận Chiến</div>
             <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px;">Thoát</div>
             <div class="buy plain" id="dg-info-btn" style="margin-left: 10px; width: 32px; padding: 0; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:black;" title="Thông tin Thú cưng">?</div>
+            <div class="buy plain" id="dg-codex-btn" style="margin-left: 10px; padding: 0 10px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:#e06578;" title="Từ điển quái">Quái Vật</div>
         </div>
         <div class="dg-dock" id="dg-dock"></div>
     `;
@@ -248,13 +259,23 @@ function initPlacementPhase() {
         dock.appendChild(slot);
     });
     
-    // Info Sidebar logic
+    // Info & Codex Sidebar logic
     const infoBtn = All.$id('dg-info-btn');
     const infoPanel = All.$id('dg-info-panel');
     const infoList = All.$id('dg-info-list');
     const infoClose = All.$id('dg-info-close');
     
+    const codexBtn = All.$id('dg-codex-btn');
+    const codexPanel = All.$id('dg-codex-panel');
+    const codexList = All.$id('dg-codex-list');
+    const codexClose = All.$id('dg-codex-close');
+    
     infoBtn.addEventListener('click', () => {
+        if (infoPanel.style.display === 'flex') {
+            infoPanel.style.display = 'none';
+            return;
+        }
+        codexPanel.style.display = 'none';
         infoList.innerHTML = '';
         ctx.S.pets.forEach(petId => {
             const stat = PET_STATS[petId] || PET_STATS.default;
@@ -273,9 +294,31 @@ function initPlacementPhase() {
         infoPanel.style.display = 'flex';
     });
     
-    infoClose.addEventListener('click', () => {
+    codexBtn.addEventListener('click', () => {
+        if (codexPanel.style.display === 'flex') {
+            codexPanel.style.display = 'none';
+            return;
+        }
         infoPanel.style.display = 'none';
+        codexList.innerHTML = '';
+        ENEMY_TYPES.forEach(stat => {
+            codexList.innerHTML += `
+                <div class="dg-info-item" style="border-left: 2px solid #e06578;">
+                    <div class="dg-info-item-icon">${spriteSVG(stat.id, 32)}</div>
+                    <div class="dg-info-item-desc">
+                        <b style="color:#e06578;">${stat.name}</b>
+                        HP: ${stat.hp} | ATK: ${stat.atk}<br/>
+                        Tầm đánh: ${stat.range} | Tốc đánh: ${stat.cd}s<br/>
+                        <span style="color:#b08a5c;">${stat.desc}</span>
+                    </div>
+                </div>
+            `;
+        });
+        codexPanel.style.display = 'flex';
     });
+    
+    infoClose.addEventListener('click', () => { infoPanel.style.display = 'none'; });
+    codexClose.addEventListener('click', () => { codexPanel.style.display = 'none'; });
 
     All.$id('dg-start-btn').addEventListener('click', () => {
         if (team.length === 0) return All.toast('Chưa chọn đội hình!');
@@ -341,6 +384,38 @@ function combatLoop(time) {
     updateEntities(team, enemies, dt);
     updateEntities(enemies, team, dt);
     
+    // Update projectiles
+    const arena = All.$id('dg-arena');
+    projectiles = projectiles.filter(p => {
+        if (!p.target || p.target.hp <= 0) {
+            p.el.remove();
+            return false;
+        }
+        
+        const dx = p.tx - p.x;
+        const dy = p.ty - p.y;
+        const dist = Math.hypot(dx, dy);
+        
+        if (dist < 10) {
+            // Hit!
+            applyEffect(p.from, p.target, p.fromGroup, p.toGroup, p.atk, p.skill);
+            p.el.remove();
+            return false;
+        } else {
+            const move = p.speed * dt;
+            p.x += (dx / dist) * move;
+            p.y += (dy / dist) * move;
+            
+            // Adjust tx/ty to follow moving target
+            p.tx = p.target.x;
+            p.ty = p.target.y - 16;
+            
+            p.el.style.left = p.x + 'px';
+            p.el.style.top = p.y + 'px';
+            return true;
+        }
+    });
+    
     // Check end conditions
     team = team.filter(e => {
         if (e.hp <= 0) {
@@ -371,6 +446,87 @@ function combatLoop(time) {
     gameLoopId = requestAnimationFrame(combatLoop);
 }
 
+function spawnDmg(target, amount, type) {
+    const arena = All.$id('dg-arena');
+    const dmg = document.createElement('div');
+    dmg.className = 'dg-dmg' + (type ? ' ' + type : '');
+    dmg.textContent = (amount > 0 ? '+' : '') + amount;
+    dmg.style.left = target.x + 'px';
+    dmg.style.top = target.y + 'px';
+    arena.appendChild(dmg);
+    setTimeout(() => dmg.remove(), 800);
+    
+    const pct = Math.max(0, target.hp / target.maxHp) * 100;
+    target.el.querySelector('.dg-hp-fill').style.width = pct + '%';
+}
+
+function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOverride) {
+    const atk = overrideAtk || attacker.atk;
+    const skill = skillOverride || attacker.skill;
+    
+    if (skill === 'heal') {
+        target.hp = Math.min(target.maxHp, target.hp + atk);
+        spawnDmg(target, atk, 'heal');
+        return;
+    }
+    if (skill === 'aoe_heal') {
+        myGroup.forEach(ally => {
+            if (ally.hp > 0 && Math.hypot(ally.x - attacker.x, ally.y - attacker.y) <= attacker.range) {
+                ally.hp = Math.min(ally.maxHp, ally.hp + atk);
+                spawnDmg(ally, atk, 'heal');
+            }
+        });
+        return;
+    }
+    
+    // Base damage
+    let finalDmg = atk;
+    if (skill === 'sniper' && attacker) {
+        const dist = Math.hypot(target.x - attacker.x, target.y - attacker.y);
+        finalDmg += Math.floor(dist * 0.2); // extra damage based on distance
+    }
+    
+    target.hp -= finalDmg;
+    spawnDmg(target, -finalDmg);
+    
+    if (skill === 'lifesteal' && attacker) {
+        const ls = Math.floor(finalDmg * 0.5);
+        attacker.hp = Math.min(attacker.maxHp, attacker.hp + ls);
+        spawnDmg(attacker, ls, 'heal');
+    }
+    
+    if (!target.status) target.status = {};
+    if (skill === 'stun' && Math.random() < 0.2) target.status.stun = 1;
+    if (skill === 'poison') target.status.poison = 3;
+    if (skill === 'freeze') target.status.freeze = 3;
+    if (skill === 'root' && Math.random() < 0.25) target.status.root = 2;
+    
+    if (skill === 'cleave' && attacker) {
+        enemyGroup.forEach(e => {
+            if (e !== target && e.hp > 0 && Math.hypot(e.x - target.x, e.y - target.y) <= 40) {
+                e.hp -= Math.floor(finalDmg * 0.5);
+                spawnDmg(e, -Math.floor(finalDmg * 0.5));
+            }
+        });
+    }
+    if (skill === 'pierce' && attacker) {
+        enemyGroup.forEach(e => {
+            if (e !== target && e.hp > 0) {
+                // simple line check
+                const distToTarget = Math.hypot(target.x - attacker.x, target.y - attacker.y);
+                const distToE = Math.hypot(e.x - attacker.x, e.y - attacker.y);
+                if (distToE < distToTarget + 50 && distToE > distToTarget - 50) {
+                    const dot = ((e.x - attacker.x) * (target.x - attacker.x) + (e.y - attacker.y) * (target.y - attacker.y)) / (distToTarget * distToTarget);
+                    if (dot > 0.8 && dot < 1.5) { 
+                        e.hp -= finalDmg;
+                        spawnDmg(e, -finalDmg);
+                    }
+                }
+            }
+        });
+    }
+}
+
 function updateEntities(groupA, groupB, dt) {
     const arena = All.$id('dg-arena');
     
@@ -380,58 +536,103 @@ function updateEntities(groupA, groupB, dt) {
         // Cooldown tick
         if (a.cd > 0) a.cd -= dt;
         
-        // Find target based on skill
-        /** @type {any} */
+        // Status Effects
+        if (!a.status) a.status = {};
+        let isStunned = false;
+        let isRooted = false;
+        let speedMult = 1;
+        let atkSpdMult = 1;
+        
+        for (let eff in a.status) {
+            if (a.status[eff] > 0) {
+                a.status[eff] -= dt;
+                if (eff === 'stun') isStunned = true;
+                if (eff === 'root') isRooted = true;
+                if (eff === 'freeze') { speedMult *= 0.5; atkSpdMult *= 0.5; }
+                if (eff === 'poison' && Math.random() < dt) {
+                    a.hp -= 2;
+                    spawnDmg(a, -2);
+                }
+                if (eff === 'buff_atk') atkSpdMult *= 1.2;
+            }
+        }
+        
+        // Update status UI
+        let statusHtml = '';
+        if (a.status.stun > 0) statusHtml += '<div class="dg-status-icon dg-status-stun"></div>';
+        if (a.status.poison > 0) statusHtml += '<div class="dg-status-icon dg-status-poison"></div>';
+        if (a.status.freeze > 0) statusHtml += '<div class="dg-status-icon dg-status-freeze"></div>';
+        if (a.status.root > 0) statusHtml += '<div class="dg-status-icon dg-status-root"></div>';
+        if (a.status.taunt > 0) statusHtml += '<div class="dg-status-icon dg-status-taunt"></div>';
+        if (a.status.buff_atk > 0) statusHtml += '<div class="dg-status-icon dg-status-buff"></div>';
+        
+        let statusDiv = a.el.querySelector('.dg-status');
+        if (!statusDiv) {
+            statusDiv = document.createElement('div');
+            statusDiv.className = 'dg-status';
+            a.el.appendChild(statusDiv);
+        }
+        statusDiv.innerHTML = statusHtml;
+        
+        if (isStunned) return; // Can't move or attack
+        
+        // Find target
         let closest = null;
         let minDist = Infinity;
         
-        if (a.skill === 'heal') {
+        let taunters = groupB.filter(b => b.hp > 0 && b.status && b.status.taunt > 0);
+        let targetGroup = taunters.length > 0 ? taunters : groupB;
+        
+        if (a.skill === 'heal' || a.skill === 'aoe_heal') {
+            targetGroup = groupA; // target allies
             let minHpPct = 1.0;
-            groupA.forEach(ally => {
+            targetGroup.forEach(ally => {
                 if (ally.hp <= 0) return;
-                const dist = Math.sqrt(Math.pow(ally.x - a.x, 2) + Math.pow(ally.y - a.y, 2));
+                const dist = Math.hypot(ally.x - a.x, ally.y - a.y);
                 const hpPct = ally.hp / ally.maxHp;
-                if (hpPct < minHpPct && dist < a.range * 4) { // Heal range is generous
+                if (hpPct < minHpPct && dist < a.range * 4) { 
                     minHpPct = hpPct;
                     closest = { b: ally, dx: ally.x - a.x, dy: ally.y - a.y, dist };
                 }
             });
-            if (!closest) { // follow someone
-                groupA.forEach(ally => {
+            if (!closest) {
+                targetGroup.forEach(ally => {
                     if (ally === a || ally.hp <= 0) return;
                     const dx = ally.x - a.x;
                     const dy = ally.y - a.y;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    const dist = Math.hypot(dx, dy);
                     if (dist < minDist) {
                         minDist = dist;
                         closest = { b: ally, dx, dy, dist };
                     }
                 });
             }
-        } else if (a.skill === 'assassin') {
+        } else if (a.skill === 'assassin' || a.ai === 'assassin') {
             let maxDist = -1;
-            groupB.forEach(b => {
+            targetGroup.forEach(b => {
                 if (b.hp <= 0) return;
                 const dx = b.x - a.x;
                 const dy = b.y - a.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
+                const dist = Math.hypot(dx, dy);
                 if (dist > maxDist) {
                     maxDist = dist;
                     closest = { b, dx, dy, dist };
                 }
             });
         } else {
-            groupB.forEach(b => {
+            targetGroup.forEach(b => {
                 if (b.hp <= 0) return;
                 const dx = b.x - a.x;
                 const dy = b.y - a.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
+                const dist = Math.hypot(dx, dy);
                 if (dist < minDist) {
                     minDist = dist;
                     closest = { b, dx, dy, dist };
                 }
             });
         }
+        
+        a.el.classList.remove('walk');
         
         if (closest) {
             // Face target
@@ -441,41 +642,103 @@ function updateEntities(groupA, groupB, dt) {
             if (closest.dx > 0 && a.type === 'enemy') a.el.classList.add('flip');
             else if (closest.dx <= 0 && a.type === 'enemy') a.el.classList.remove('flip');
             
-            if (closest.dist <= a.range || (a.skill === 'heal' && closest.dist <= 10)) {
-                // Attack or Heal
-                if (a.cd <= 0) {
-                    a.cd = a.maxCd;
-                    if (a.skill === 'heal') {
-                        closest.b.hp = Math.min(closest.b.maxHp, closest.b.hp + a.atk);
-                        const dmg = document.createElement('div');
-                        dmg.className = 'dg-dmg heal';
-                        dmg.textContent = '+' + a.atk;
-                        dmg.style.left = closest.b.x + 'px';
-                        dmg.style.top = closest.b.y + 'px';
-                        arena.appendChild(dmg);
-                        setTimeout(() => dmg.remove(), 800);
-                    } else {
-                        closest.b.hp -= a.atk;
-                        const dmg = document.createElement('div');
-                        dmg.className = 'dg-dmg';
-                        dmg.textContent = (-a.atk).toString();
-                        dmg.style.left = closest.b.x + 'px';
-                        dmg.style.top = closest.b.y + 'px';
-                        arena.appendChild(dmg);
-                        setTimeout(() => dmg.remove(), 800);
-                    }
-                    
-                    // Update HP bar
-                    const pct = Math.max(0, closest.b.hp / closest.b.maxHp) * 100;
-                    closest.b.el.querySelector('.dg-hp-fill').style.width = pct + '%';
-                }
-            } else {
-                // Move towards target
-                const speed = a.speed * dt;
-                a.x += (closest.dx / closest.dist) * speed;
-                a.y += (closest.dy / closest.dist) * speed;
+            let isRanged = a.range >= 80 || a.ai === 'ranged';
+            let inRange = closest.dist <= a.range || (a.skill === 'heal' && closest.dist <= 10);
+            let tooClose = isRanged && closest.dist < a.range * 0.4 && closest.b.type !== a.type;
+            
+            if (tooClose && !isRooted) {
+                // Kite
+                a.el.classList.add('walk');
+                const speed = a.speed * speedMult * dt;
+                a.x -= (closest.dx / closest.dist) * speed;
+                a.y -= (closest.dy / closest.dist) * speed;
+                
+                const arenaRect = arena.getBoundingClientRect();
+                a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
+                a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
+                
                 a.el.style.left = a.x + 'px';
                 a.el.style.top = a.y + 'px';
+            } 
+            else if (!inRange && !isRooted) {
+                // Chase
+                a.el.classList.add('walk');
+                const speed = a.speed * speedMult * dt;
+                if ((a.skill === 'assassin' || a.ai === 'assassin') && closest.dist > 150) {
+                    a.x = closest.b.x + (closest.dx > 0 ? -30 : 30);
+                    a.y = closest.b.y;
+                } else {
+                    a.x += (closest.dx / closest.dist) * speed;
+                    a.y += (closest.dy / closest.dist) * speed;
+                }
+                
+                const arenaRect = arena.getBoundingClientRect();
+                a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
+                a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
+                
+                a.el.style.left = a.x + 'px';
+                a.el.style.top = a.y + 'px';
+            } 
+            
+            if (inRange) {
+                if (a.cd <= 0) {
+                    a.cd = a.maxCd / atkSpdMult;
+                    
+                    a.el.classList.add('attack');
+                    setTimeout(() => { if(a.el) a.el.classList.remove('attack'); }, 200);
+                    
+                    if (a.skill === 'frenzy') {
+                        if (!a.frenzyStacks) a.frenzyStacks = 0;
+                        a.frenzyStacks = Math.min(10, a.frenzyStacks + 1);
+                        a.cd = a.maxCd / (1 + a.frenzyStacks * 0.05);
+                    }
+                    if (a.skill === 'taunt') {
+                        a.status.taunt = 3;
+                    }
+                    if (a.skill === 'buff_atk') {
+                        groupA.forEach(ally => {
+                            if (ally.hp > 0 && Math.hypot(ally.x - a.x, ally.y - a.y) < 100) {
+                                if (!ally.status) ally.status = {};
+                                ally.status.buff_atk = 2;
+                            }
+                        });
+                    }
+
+                    if (isRanged && a.skill !== 'heal' && a.skill !== 'aoe_heal') {
+                        let p = {
+                            x: a.x, y: a.y - 16,
+                            tx: closest.b.x, ty: closest.b.y - 16,
+                            target: closest.b,
+                            atk: a.atk, skill: a.skill,
+                            from: a, fromGroup: groupA, toGroup: targetGroup,
+                            speed: 300,
+                            el: document.createElement('div')
+                        };
+                        p.el.className = 'dg-projectile';
+                        p.el.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#f0d" /></svg>'; 
+                        p.el.style.left = p.x + 'px';
+                        p.el.style.top = p.y + 'px';
+                        arena.appendChild(p.el);
+                        
+                        if (a.skill === 'multishot') {
+                            projectiles.push(p);
+                            let target2 = targetGroup[Math.floor(Math.random() * targetGroup.length)];
+                            let target3 = targetGroup[Math.floor(Math.random() * targetGroup.length)];
+                            if (target2 && target2 !== p.target) {
+                                let p2 = {...p, tx: target2.x, ty: target2.y-16, target: target2, atk: a.atk*0.5, el: p.el.cloneNode(true)};
+                                arena.appendChild(p2.el); projectiles.push(p2);
+                            }
+                            if (target3 && target3 !== p.target && target3 !== target2) {
+                                let p3 = {...p, tx: target3.x, ty: target3.y-16, target: target3, atk: a.atk*0.5, el: p.el.cloneNode(true)};
+                                arena.appendChild(p3.el); projectiles.push(p3);
+                            }
+                        } else {
+                            projectiles.push(p);
+                        }
+                    } else {
+                        applyEffect(a, closest.b, groupA, targetGroup);
+                    }
+                }
             }
         }
     });
@@ -484,6 +747,9 @@ function updateEntities(groupA, groupB, dt) {
 function endDungeon(isWin) {
     phase = 'end';
     stopCombatLoop();
+    
+    projectiles.forEach(p => p.el.remove());
+    projectiles = [];
     
     const arena = All.$id('dg-arena');
     const overlay = document.createElement('div');

@@ -389,4 +389,29 @@ export const styleCSS = `
     .dg-info-item-icon { width: 40px; height: 40px; flex-shrink: 0; background: rgba(0,0,0,0.2); border-radius: 4px; display: flex; align-items: center; justify-content: center; }
     .dg-info-item-desc { font-size: 11px; line-height: 1.3; color: #ddd; }
     .dg-info-item-desc b { color: #a4dc8c; font-size: 13px; display: block; margin-bottom: 2px; }
+    
+    .dg-projectile { position: absolute; width: 16px; height: 16px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; }
+    .dg-projectile img, .dg-projectile svg { width: 100%; height: 100%; }
+    
+    .dg-status { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; pointer-events: none; z-index: 3; }
+    .dg-status-icon { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #000; }
+    .dg-status-stun { background: #ffd700; box-shadow: 0 0 4px #ffd700; }
+    .dg-status-poison { background: #9932cc; box-shadow: 0 0 4px #9932cc; }
+    .dg-status-freeze { background: #00ffff; box-shadow: 0 0 4px #00ffff; }
+    .dg-status-root { background: #8b4513; box-shadow: 0 0 4px #8b4513; }
+    .dg-status-taunt { background: #ff4500; box-shadow: 0 0 4px #ff4500; }
+    .dg-status-buff { background: #ff8c00; box-shadow: 0 0 4px #ff8c00; }
+    
+    @keyframes dgHop {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    .dg-entity.walk > svg, .dg-entity.walk > img { animation: dgHop 0.3s linear infinite; }
+    
+    @keyframes dgAttack {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2) rotate(15deg); }
+        100% { transform: scale(1); }
+    }
+    .dg-entity.attack > svg, .dg-entity.attack > img { animation: dgAttack 0.2s ease-out forwards; }
 `;
