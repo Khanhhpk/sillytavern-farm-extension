@@ -2879,9 +2879,9 @@ function openGachaModal() {
     <div class="gacha-wrap" style="text-align:center; position:relative; overflow:hidden; padding:4px 0;">
       <!-- Header Th\xF4ng tin v\xE9 & Mua nhanh -->
       <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.04); padding:8px 12px; border-radius:8px; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-        <div style="font-size:13px; font-weight:bold; color:#5a3f78; text-align:left; flex:1; min-width:140px;">
-          V\xE9 th\u01B0\u1EDDng: <span id="gachaNormCount" style="color:#2e6a50; font-size:14px;">${normTicket}</span> | 
-          \u0110\u1EB7c bi\u1EC7t: <span id="gachaSpecCount" style="color:#8a2acc; font-size:14px;">${specTicket}</span>
+        <div style="font-weight:bold; font-size:14px; color:#3a2c22;">
+          V\xE9 Th\u01B0\u1EDDng: <span id="gachaNormCount" style="color:#4a7a26; font-size:14px; margin-right:8px;">${normTicket}</span> | 
+          V\xE9 \u0110\u1EB7c Bi\u1EC7t: <span id="gachaSpecCount" style="color:#8a2acc; font-size:14px;">${specTicket}</span>
         </div>
         <div style="display:flex; gap:6px; flex:none;">
           <span class="buy" id="gachaBuyNormBtn" style="padding:4px 8px; font-size:11px;">+ V\xE9 Th\u01B0\u1EDDng (1000G)</span>
@@ -2938,7 +2938,7 @@ function openGachaModal() {
 
       <!-- Showcase Modal (Khoe t\u1EEBng m\xF3n \u0111\u1ED9c nh\u1EA5t) -->
       <div id="gachaShowcaseOverlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:40; flex-direction:column; justify-content:center; align-items:center; border-radius:8px; padding:20px; text-align:center;">
-        <div id="gachaShowcaseCard" style="background:#fff; border-radius:12px; padding:20px; box-shadow:0 0 20px rgba(255,128,0,0.5); width:100%; max-width:240px; position:relative; overflow:hidden;">
+        <div id="gachaShowcaseCard" style="background:#fff; border-radius:12px; padding:20px; box-shadow:0 0 20px rgba(255,128,0,0.5); width:100%; max-width:300px; position:relative; overflow:hidden;">
           <div id="gachaShowcaseRarity" style="font-size:12px; font-weight:bold; margin-bottom:10px; text-transform:uppercase;"></div>
           <div id="gachaShowcaseIcon" style="margin:10px auto; display:flex; justify-content:center;"></div>
           <div id="gachaShowcaseName" style="font-size:18px; font-weight:bold; margin:25px 0 8px; color:#3a2c22;"></div>
