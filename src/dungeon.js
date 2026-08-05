@@ -906,9 +906,29 @@ function showWaveRewards() {
         `;
     });
 
+    let bossDropHtml = '';
+    if (isBoss) {
+        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+        const r = Math.random();
+        let dropText = '';
+        if (r < 0.01) {
+            ctx.S.tickets.super = (ctx.S.tickets.super || 0) + 1;
+            dropText = '1 Vé Siêu Cường';
+        } else if (r < 0.40) {
+            ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 2;
+            dropText = '2 Vé Đặc Biệt';
+        } else {
+            ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 3;
+            dropText = '3 Vé Thường';
+        }
+        bossDropHtml = `<div style="color:#4caf50; margin-bottom:15px; font-weight:bold; font-size:16px;">✨ Rơi ra từ Boss: ${dropText}! ✨</div>`;
+        All.save();
+    }
+
     overlay.innerHTML = `
         <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Hoàn Thành!</div>
-        <div style="color:white; margin-bottom: 20px;">Nhận được ${waveGold} G (Tổng: ${totalGold} G)</div>
+        <div style="color:white; margin-bottom: 10px;">Nhận được ${waveGold} G (Tổng: ${totalGold} G)</div>
+        ${bossDropHtml}
         <div style="display:flex; gap: 15px;">
             ${cardsHtml}
         </div>

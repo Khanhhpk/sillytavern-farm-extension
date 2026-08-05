@@ -6157,9 +6157,28 @@ function showWaveRewards() {
             </div>
         `;
   });
+  let bossDropHtml = "";
+  if (isBoss) {
+    if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+    const r = Math.random();
+    let dropText = "";
+    if (r < 0.01) {
+      ctx.S.tickets.super = (ctx.S.tickets.super || 0) + 1;
+      dropText = "1 V\xE9 Si\xEAu C\u01B0\u1EDDng";
+    } else if (r < 0.4) {
+      ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 2;
+      dropText = "2 V\xE9 \u0110\u1EB7c Bi\u1EC7t";
+    } else {
+      ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 3;
+      dropText = "3 V\xE9 Th\u01B0\u1EDDng";
+    }
+    bossDropHtml = `<div style="color:#4caf50; margin-bottom:15px; font-weight:bold; font-size:16px;">\u2728 R\u01A1i ra t\u1EEB Boss: ${dropText}! \u2728</div>`;
+    save();
+  }
   overlay.innerHTML = `
         <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Ho\xE0n Th\xE0nh!</div>
-        <div style="color:white; margin-bottom: 20px;">Nh\u1EADn \u0111\u01B0\u1EE3c ${waveGold} G (T\u1ED5ng: ${totalGold} G)</div>
+        <div style="color:white; margin-bottom: 10px;">Nh\u1EADn \u0111\u01B0\u1EE3c ${waveGold} G (T\u1ED5ng: ${totalGold} G)</div>
+        ${bossDropHtml}
         <div style="display:flex; gap: 15px;">
             ${cardsHtml}
         </div>
