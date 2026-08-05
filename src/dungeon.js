@@ -858,19 +858,7 @@ function showWaveRewards() {
     `;
     arena.appendChild(overlay);
     
-    // Add CSS for cards if not exists
-    if (!document.getElementById('dg-reward-style')) {
-        const style = document.createElement('style');
-        style.id = 'dg-reward-style';
-        style.innerHTML = `
-            .dg-reward-card { background: #3c2a20; border: 2px solid #b08a5c; padding: 10px; border-radius: 8px; width: 120px; text-align: center; cursor: pointer; transition: transform 0.2s; }
-            .dg-reward-card:hover { transform: scale(1.05); border-color: #ffda66; }
-            .dg-reward-card h4 { margin: 0 0 5px 0; color: #ffda66; }
-            .dg-reward-card p { margin: 0; font-size: 12px; color: #fff; }
-        `;
-        document.head.appendChild(style);
-    }
-    
+
     overlay.querySelector('#rew-heal').onclick = () => {
         fullTeam.forEach(p => p.hp = p.maxHp);
         nextWaveSequence(overlay);

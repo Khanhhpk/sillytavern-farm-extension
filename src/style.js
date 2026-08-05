@@ -414,4 +414,9 @@ export const styleCSS = `
         100% { transform: scale(1); }
     }
     .dg-entity.attack > svg, .dg-entity.attack > img { animation: dgAttack 0.2s ease-out forwards; }
+    
+    .dg-reward-card { background: #3c2a20; border: 2px solid #b08a5c; padding: 10px; border-radius: 8px; width: 120px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+    .dg-reward-card:hover { transform: scale(1.05); border-color: #ffda66; background: #4e382d; }
+    .dg-reward-card h4 { margin: 0 0 5px 0; color: #ffda66; }
+    .dg-reward-card p { margin: 0; font-size: 12px; color: #fff; line-height: 1.4; }
 `;
