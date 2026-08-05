@@ -404,12 +404,12 @@ export function openGachaModal() {
 
       <!-- Showcase Modal (Khoe từng món độc nhất) -->
       <div id="gachaShowcaseOverlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:40; flex-direction:column; justify-content:center; align-items:center; border-radius:8px; padding:20px; text-align:center;">
-        <div id="gachaShowcaseCard" style="background:#fff; border-radius:12px; padding:20px; box-shadow:0 0 20px rgba(255,128,0,0.5); width:100%; max-width:300px; position:relative; overflow:hidden;">
-          <div id="gachaShowcaseRarity" style="font-size:12px; font-weight:bold; margin-bottom:10px; text-transform:uppercase;"></div>
-          <div id="gachaShowcaseIcon" style="margin:10px auto; display:flex; justify-content:center;"></div>
-          <div id="gachaShowcaseName" style="font-size:18px; font-weight:bold; margin:25px 0 8px; color:#3a2c22;"></div>
-          <div id="gachaShowcaseDesc" style="font-size:12px; color:#555;"></div>
-          <span class="buy" id="gachaShowcaseNextBtn" style="margin-top:20px; padding:6px 24px; font-size:13px; background:#a335ee; border-color:#8a2acc;">Tiếp tục</span>
+        <div id="gachaShowcaseCard" style="background:#fff; border-radius:12px; padding:20px; box-shadow:0 0 20px rgba(255,128,0,0.5); width:100%; max-width:300px; max-height:85vh; display:flex; flex-direction:column; position:relative; overflow:hidden;">
+          <div id="gachaShowcaseRarity" style="font-size:12px; font-weight:bold; margin-bottom:10px; text-transform:uppercase; flex:none;"></div>
+          <div id="gachaShowcaseIcon" style="margin:10px auto; display:flex; justify-content:center; flex:none;"></div>
+          <div id="gachaShowcaseName" style="font-size:18px; font-weight:bold; margin:15px 0 8px; color:#3a2c22; flex:none;"></div>
+          <div id="gachaShowcaseDesc" style="font-size:12px; color:#555; overflow-y:auto; flex:1; padding-right:4px;"></div>
+          <span class="buy" id="gachaShowcaseNextBtn" style="margin-top:20px; padding:8px 24px; font-size:13px; background:#a335ee; border-color:#8a2acc; flex:none; align-self:center;">Tiếp tục</span>
         </div>
       </div>
 
