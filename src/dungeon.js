@@ -860,7 +860,8 @@ function showWaveRewards() {
     projectiles = [];
     
     // Calculate gold for this wave
-    const waveGold = 100 + currentWave * 50;
+    const isBoss = currentWave % 10 === 0;
+    const waveGold = (100 + currentWave * 50) * (isBoss ? 3 : 1);
     totalGold += waveGold;
     
     const arena = All.$id('dg-arena');

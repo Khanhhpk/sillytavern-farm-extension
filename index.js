@@ -6119,7 +6119,8 @@ function showWaveRewards() {
   stopCombatLoop();
   projectiles.forEach((p) => p.el.remove());
   projectiles = [];
-  const waveGold = 100 + currentWave * 50;
+  const isBoss = currentWave % 10 === 0;
+  const waveGold = (100 + currentWave * 50) * (isBoss ? 3 : 1);
   totalGold += waveGold;
   const arena = $id("dg-arena");
   fullTeam.forEach((p) => {
