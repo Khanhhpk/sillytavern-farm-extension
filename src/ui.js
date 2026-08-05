@@ -94,6 +94,7 @@ export function initUI() {
     <div class="bottombar">
         <div class="btn" data-open="shop">${spriteSVG('shopIcon', 22)}Cửa hàng</div>
         <div class="btn" data-open="bag">${spriteSVG('bagIcon', 22)}Balo</div>
+        <div class="btn" data-open="gacha">${spriteSVG('gachapon', 22)}Gachapon</div>
         <div class="btn" data-open="cfg">${spriteSVG('gearIcon', 22)}Cài đặt</div>
     </div>
     <div class="modal" id="modal">

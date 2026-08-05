@@ -53,6 +53,44 @@ export const P = {
     lotus:["................","................","......Ff........",".....pFfp.......","....pFppFp......","....fpFFpf......",".....fppf.......","...DGGGGGGD.....","..DGGGGGGGGD....","...DDGGGGDD.....","................","..b..bbb...b....",".bBbbBBBbbBb....","..bb..b..bb.....","................","................"],
     gem:["................","................",".......v........","......vVv.......",".....vVWVv......",".....vVVVv......","....vVVWVVv.....","....vVVVVVv.....","...vVVWVVVVv....","..BbvVVVVVvBb...",".bBBvVVVVVvBBb..",".bbbvvvvvvvbbb..","..MMMMMMMMMMM...","...MMMMMMMMM....","................","................"],
     emBang:["................","................",".....ffff.......",".....fpFf.......",".....fFFf.......",".....fFFf.......",".....fFFf.......",".....fFFf.......","......ff........","................",".....ffff.......",".....fFFf.......",".....ffff.......","................","................","................"],
+    ticketNorm:["................","....ffffffff....","...fFFFFFFFFf...","...fFCCCCCCFf...","..fFCCCCCCCCFf..","..fFCCCCCCWCFf..","..fFCCCCWWCCFf..","..fFCCCCCCWCFf..","..fFCCCCCCCCFf..","..fFCCCCCCCCFf..","...fFCCCCCCFf...","...fFFFFFFFFf...","....ffffffff....","................","................","................"],
+    ticketSpec:["................","....ffffffff....","...ffffffffff...","...fvVVVVVVvf...","..fvVVVVVVVVvf..","..fvVVVWWVVVvf..","..fvVVWWWWVVvf..","..fvVVVWWVVVvf..","..fvVVVVVVVVvf..","..fvVVVVVVVVvf..","...fvVVVVVVvf...","...ffffffffff...","....ffffffff....","................","................","................"],
+    gachaCapsuleNorm:["................",".....ffff.......","...fCCCCCCf.....","..fCCCCWCCCf....","..fCCCCCCCCf....","..ffffffffff....","..fvvvvvvvvf....","..fvvvvWvvvf....","...fvvvvvvf.....",".....ffff.......","................","................","................","................","................","................"],
+    gachaCapsuleSpec:["................",".....ffff.......","...fYYYYYYf.....","..fYYYYWYYYf....","..fYYYYYYYYf....","..ffffffffff....","..fvvvvvvvvf....","..fvvvvWvvvf....","...fvvvvvvf.....",".....ffff.......","................","................","................","................","................","................"],
+    gachapon:[
+      ".............ffffff.............",
+      "...........ffFFFFFFff...........",
+      "..........fFFFFFFFFFFf..........",
+      ".........fFFFFFFFFFFFFf.........",
+      "........fFFFFFFFFFFFFFFf........",
+      ".......fBBBBBBBBBBBBBBBBf.......",
+      "......fBiiiBBBBBBBBBBBBBBf......",
+      "......fBiiWiBBBBBBBBBBBBBf......",
+      ".....fBBiiiiBBBBBBBBBBBBBBf.....",
+      ".....fBBBBDGGDBBBBUCCUBBBBf.....",
+      ".....fBBBBGWWGFnnFCWWCBBBBf.....",
+      ".....fBBBBGGGGnWWnCCCCBBBBf.....",
+      ".....fBBBBDGGDnnnnUCCUBBBBf.....",
+      ".....fBBfFFfDEFnnFOQdvvdBBf.....",
+      ".....fBBFWWFEWWEOWWOvWWvBBf.....",
+      "......fBFFFFEEEEOOOOvvvvBf......",
+      "......fBfFFfDEEDQOOQdvvdBf......",
+      ".......fbbbbbbbbbbbbbbbbf.......",
+      "......ffffffffffffffffffff......",
+      "......fFFFFFFFFFFFFFFFFFFf......",
+      "......fFFFFFFFFFFFFFFFFFFf......",
+      "......fFFFFFFFFFFFFFFFFFFf......",
+      ".....fFFFFFFFMMMMMMFFFFFFFf.....",
+      ".....fFFFFFFMMLLLLMMFFFFFFf.....",
+      ".....fFFFFFFMLLWWLLMFFFFFFf.....",
+      ".....fFFFFFFMLLWWLLMFFFFFFf.....",
+      ".....fFFFFFFMMLLLLMMFFFFFFf.....",
+      ".....fFFFFFFFMMMMMMFFFFFFFf.....",
+      ".....fFFFFFFMMMMMMMMFFFFFFf.....",
+      ".....fFFFFFFMKKKKKKMFFFFFFf.....",
+      ".....fFFFFFFMKKKKKKMFFFFFFf.....",
+      ".....ffffffffffffffffffffff....."
+    ]
   };
   /* Nếu bảng màu thiếu màu xanh k/i trong toolWater thì bù vào */
   P.k = P.k || '#c4e3f0'; P.i = P.i || '#a9cede';
@@ -151,6 +189,11 @@ export const PET_P = {
   "y...xxiiiixx..yY","Yy.xiiiiiiiix..y","y.xiiiiiiiiiix..",".xiiiiiiiiiiiix.",
   ".xiiQQiiiiQQiix.",".xiriiiiQiiiirx.",".xiiiiiiiiiiiix.","..xiiiiiiiiix...",
   "...xiiiiiiix....","....xxxxxxxx....","......jjjj......","................"],
+  penguin:[
+  "................","................",".....333333.....","....33WWWW33....",
+  "...33WWWWWW33...","...3WKKWWKKW3...","..33WnWooWnW33..","..33WWWWWWWW33..",
+  "..33WWWWWWWW33..","...33WWWWWW33...","....33333333....",".....oo..oo.....",
+  "................","................","................","................"]
   };
   /* ===== v0.8c (#43): hệ thống da chuyển sắc (bộ sưu tập codex 0718) —— màu phủ theo từng sprite, giá trị có thể là màu đơn hoặc gradient tuyến tính ===== */
   const petLinear = (x1, y1, x2, y2, stops) => ({ type: 'linear', x1, y1, x2, y2, stops });
@@ -227,6 +270,7 @@ export const PETS = {
     starBell:   { name: 'Bé chuông sao', page: 3, price: 8000, cry: ['Leng keng~', '☆!', '(lắc lắc nhẹ)'], desc: 'Loại sản xuất · tìm kho báu rung rơi mảnh ngôi sao (triệu hồi được phù thuỷ tròn)' },
     /* —— Át chủ bài (#43: giữ id slimeNight để không hỏng save; page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
     slimeNight: { name: 'Bé soda đào',   page: 1, price: 9999, cry: ['Bốp——!', '(nổi một bong bóng nhỏ)', 'Xì~', '(vị ngòn ngọt)'], desc: 'Loại tìm kho báu · tinh linh soda vị đào · dễ thương quá mức nên đắt nhất' },
+    penguin:    { name: 'Chim cánh cụt', page: 1, price: 100000, cry: ['Pingu!', 'Núp núp~', 'Trượt tuyết nào!', 'Cánh cụt!'], desc: 'Loại đặc biệt · AFK mỗi 1 tiếng mang về 1 vé gacha ngẫu nhiên (70% vé thường, 30% vé đặc biệt)' },
   };
   export const PASSES = {
     water: { name: 'Vé vùng nước', price: 6000,  desc: 'Mở khoá ruộng vùng nước (trang 2) + quyền mua bé tròn trang 2 và hạt giống thuỷ sinh, tặng kèm ô ruộng nổi đầu tiên' },
@@ -300,8 +344,8 @@ export const PETS = {
     const map = SPR[name] || (C2[name] && C2[name].m); if (!map) return '';
     const pal = SPR[name] ? P : C2[name].p;
     const canvas = document.createElement('canvas');
-    canvas.width = 16;
-    canvas.height = 16;
+    canvas.width = map[0].length || 16;
+    canvas.height = map.length || 16;
     const ctx = canvas.getContext('2d');
     map.forEach((row, y) => {
       for (let x = 0; x < row.length; x++) { 

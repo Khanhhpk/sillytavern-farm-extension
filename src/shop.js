@@ -11,6 +11,7 @@ import { renderPets } from './pets.js';
 import { esc, SEC, CS, clampN, saveSec, openSandbox, saveCharState, fetchModelList, testSecApi } from './events.js';
 import { applyTheme, sh } from './ui.js';
 import { pageUnlocked } from './utils.js';
+import { openGachaModal } from './gacha.js';
 
 /* ---------- Bảng ---------- */
 export function openModal(title, bodyHTML) {
@@ -29,8 +30,11 @@ export let shopTab = 'seed';
 export let bagTab = 'crop';
 export let bagSellMode = false, bagSel = {};              // Bán một chạm: chế độ tick chọn (mặc định chọn hết)
 export function openPanel(kind) {
+  if (kind === 'gacha') {
+    return openGachaModal();
+  }
   if (kind === 'shop') {
-    const tabs = [['seed', 'Hạt giống'], ['fert', 'Phân bón'], ['pet', 'Thú cưng'], ['pass', 'Vé']];
+    const tabs = [['seed', 'Hạt giống'], ['fert', 'Phân bón'], ['pet', 'Thú cưng'], ['pass', 'Vé'], ['ticket', 'Vé Gacha']];
     let items = '';
     if (shopTab === 'seed') {
       items = [1, 2, 3].map(z => {                      // v0.8: chia nhóm theo khu, họ hidden không bày bán
@@ -68,6 +72,16 @@ export function openPanel(kind) {
           <div class="meta">${pd.desc}${lockNote}</div></span>
           ${priceHtml}${btn}</div>`;
       }).join('');
+    } else if (shopTab === 'ticket') {
+      items = `
+        <div class="item"><span class="icon">${spriteSVG('ticketNorm', 32)}</span>
+          <span class="info"><div class="name">Vé Quay Thường</div><div class="meta">Dùng quay máy Gachapon nhận quà ngẫu nhiên · Đang có ${ctx.S.tickets?.norm || 0}</div></span>
+          <span class="price">${spriteSVG('coin', 16)}1,000</span>
+          <span class="buy${ctx.S.coins < 1000 ? ' off' : ''}" data-buyticket="norm">Mua</span></div>
+        <div class="item"><span class="icon">${spriteSVG('ticketSpec', 32)}</span>
+          <span class="info"><div class="name">Vé Quay Đặc Biệt</div><div class="meta">Dùng quay Gachapon Đặc Biệt tăng tỷ lệ ra đồ độc nhất · Đang có ${ctx.S.tickets?.spec || 0}</div></span>
+          <span class="price">${spriteSVG('coin', 16)}5,000</span>
+          <span class="buy${ctx.S.coins < 5000 ? ' off' : ''}" data-buyticket="spec">Mua</span></div>`;
     } else {
       items = Object.keys(PASSES).map(k => {
         const ps = PASSES[k];
@@ -89,6 +103,17 @@ export function openPanel(kind) {
     All.$id('mbody').querySelectorAll('[data-buyseed]').forEach(b => b.addEventListener('click', () => openBuyDlg('seed', b.dataset.buyseed)));
     // @ts-ignore
     All.$id('mbody').querySelectorAll('[data-buyfert]').forEach(b => b.addEventListener('click', () => openBuyDlg('fert', b.dataset.buyfert)));
+    All.$id('mbody').querySelectorAll('[data-buyticket]').forEach(b => b.addEventListener('click', () => {
+      // @ts-ignore
+      const type = b.dataset.buyticket;
+      const cost = type === 'spec' ? 5000 : 1000;
+      if (ctx.S.coins < cost) return toast('Còn thiếu ' + (cost - ctx.S.coins).toLocaleString() + ' G');
+      ctx.S.coins -= cost;
+      if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
+      ctx.S.tickets[type] = (ctx.S.tickets[type] || 0) + 1;
+      save(); renderStatus(); openPanel('shop');
+      toast('Đã mua 1 Vé Quay ' + (type === 'spec' ? 'Đặc Biệt' : 'Thường') + '!');
+    }));
     All.$id('mbody').querySelectorAll('[data-buypet]').forEach(b => b.addEventListener('click', () => {
       // @ts-ignore
       const id = b.dataset.buypet, pd = PETS[id];
@@ -105,7 +130,26 @@ export function openPanel(kind) {
     const btabs = `<div class="tabs"><span class="tab${bagTab === 'crop' ? ' active' : ''}" data-btab="crop">Nông sản</span><span class="tab${bagTab === 'pet' ? ' active' : ''}" data-btab="pet">Bé tròn</span><span class="tab${bagTab === 'relic' ? ' active' : ''}" data-btab="relic">Quà của bé tròn</span></div>`;
     if (bagTab === 'relic') {                            // v1.0: quà của bé tròn —— quầy riêng cho mảnh vỡ và hạt giống bí ẩn
       const sh2 = ctx.S.shards || { prism: 0, star: 0 };
-      const relicRows = (ctx.S.seeds.mystery > 0 ? `
+      const normTk = ctx.S.tickets?.norm || 0;
+      const specTk = ctx.S.tickets?.spec || 0;
+      const ticketRows = (normTk > 0 ? `
+      <div class="item"><span class="icon">${spriteSVG('ticketNorm', 30)}</span>
+        <span class="info"><div class="name">Vé Quay Thường ×${normTk}</div><div class="meta">Dùng ở máy Gachapon</div></span></div>` : '') +
+        (specTk > 0 ? `
+      <div class="item"><span class="icon">${spriteSVG('ticketSpec', 30)}</span>
+        <span class="info"><div class="name">Vé Quay Đặc Biệt ×${specTk}</div><div class="meta">Dùng ở máy Gachapon</div></span></div>` : '');
+      const uniqueRows = Object.keys(ctx.S.bag || {}).filter(k => k.startsWith('unique@')).map(k => {
+        const item = ctx.S.uniques?.[k] || { name: 'Vật phẩm bí ẩn', rarity: 'Đặc biệt', desc: '', color: '#4a90e2' };
+        const count = ctx.S.bag[k];
+        return `
+        <div class="item"><span class="icon">${spriteSVG('strawhat', 30)}</span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${count} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div>
+          <div class="meta">${item.desc || 'Vật phẩm độc nhất có thể mang vào cốt truyện'}</div></span>
+          <span class="acts">
+            <span class="ibtn" data-takeout="${k}" title="Lấy ra (mang vào cốt truyện)">${spriteSVG('emBang', 16)}</span>
+          </span></div>`;
+      }).join('');
+      const relicRows = ticketRows + uniqueRows + (ctx.S.seeds.mystery > 0 ? `
       <div class="item"><span class="icon">${spriteSVG('seedLight', 30)}</span>
         <span class="info"><div class="name">Hạt giống bí ẩn ×${ctx.S.seeds.mystery}</div><div class="meta">Trồng xuống sẽ ra ngẫu nhiên một họ (chọn khi gieo hạt / khi chọc bé mầm sương)</div></span></div>` : '') +
         (sh2.prism > 0 ? `
@@ -119,6 +163,7 @@ export function openPanel(kind) {
       // @ts-ignore
       All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
       All.$id('mbody').querySelectorAll('[data-useshard]').forEach(b => b.addEventListener('click', useStarShard));
+      All.$id('mbody').querySelectorAll('[data-takeout]').forEach(b => b.addEventListener('click', () => openTakeout(b.dataset.takeout)));
       return;
     }
     if (bagTab === 'pet') {

@@ -70,6 +70,17 @@ export function settle() {
       tSeed = ids[Math.floor(Math.random() * ids.length)];
       ctx.S.seeds[tSeed] = (ctx.S.seeds[tSeed] || 0) + 1;
     }
+    if (id === 'penguin') {
+      const PENGUIN_CD = 60 * 60 * 1000;
+      if (now() - ctx.S.petFind[id] >= PENGUIN_CD) {
+        ctx.S.petFind[id] = now();
+        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
+        const isSpec = Math.random() < 0.3;
+        if (isSpec) ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 1;
+        else ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1;
+        toast(`Chú chim cánh cụt vừa mang về 1 Vé Quay ${isSpec ? 'Đặc Biệt' : 'Thường'}!`);
+      }
+    }
     wChanged = true;
   });
   if (tGain) {

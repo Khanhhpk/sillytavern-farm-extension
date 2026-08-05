@@ -338,5 +338,24 @@ export const styleCSS = `
     .pick { display: flex; align-items: center; gap: 5px; padding: 4px 9px; background: #faf0dc;
       border: 2px solid #c2a274; border-radius: 7px; font-size: 12px; font-weight: bold; color: #6b4f2e; cursor: pointer; }
     .pick.active { border-color: var(--accLine); background: var(--accBg); color: var(--accFg); }
+    /* Gachapon Animations & FX */
+    @keyframes gachaShake {
+      0% { transform: rotate(0deg); }
+      20% { transform: rotate(-6deg); }
+      40% { transform: rotate(6deg); }
+      60% { transform: rotate(-4deg); }
+      80% { transform: rotate(4deg); }
+      100% { transform: rotate(0deg); }
+    }
+    @keyframes gachaDrop {
+      0% { transform: translateY(-40px) scale(0.2); opacity: 0; }
+      60% { transform: translateY(10px) scale(1.2); opacity: 1; }
+      80% { transform: translateY(-4px) scale(0.95); }
+      100% { transform: translateY(0) scale(1); }
+    }
+    .gacha-item-card.rarity-Hiếm { border-color: #4a90e2 !important; background: #f0f7ff !important; }
+    .gacha-item-card.rarity-Sử-thi { border-color: #a335ee !important; background: #faf0ff !important; }
+    .gacha-item-card.rarity-Huyền-thoại { border-color: #ff8000 !important; background: #fff8f0 !important; box-shadow: 0 0 10px rgba(255,128,0,0.6) !important; }
 `;
+
 

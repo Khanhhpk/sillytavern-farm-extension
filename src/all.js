@@ -9,4 +9,5 @@ export * from './render.js';
 export * from './shop.js';
 export * from './pets.js';
 export * from './witch.js';
+export * from './gacha.js';
 export * from './destroy.js';
