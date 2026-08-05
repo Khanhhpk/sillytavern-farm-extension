@@ -36,7 +36,7 @@ var CROPS = {
   douya: { name: "Gi\xE1 \u0111\u1ED7", grow: 5, seed: 5, sell: 12, sp: "sprout" },
   radish: { name: "C\u1EE7 c\u1EA3i cherry", grow: 10, seed: 25, sell: 45, sp: "radish" },
   tomato: { name: "C\xE0 chua", grow: 20, regrowM: 15, seed: 100, sell: 90, sp: "tomato", regrow: true },
-  moonberry: { name: "D\xE2u t\xE2y", grow: 90, seed: 350, sell: 800, sp: "mysbG" },
+  moonberry: { name: "D\xE2u t\xE2y", grow: 90, seed: 350, sell: 800, sp: "moonberry" },
   pumpkin: { name: "B\xED ng\xF4", grow: 120, seed: 500, sell: 1300, sp: "pumpkin" },
   /* —— Vùng nước (trang 2) —— */
   chuncai: { name: "Rau thu\u1EA7n", grow: 10, seed: 40, sell: 60, sp: "chuncai", zone: 2 },
