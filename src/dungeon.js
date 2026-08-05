@@ -22,7 +22,6 @@ const PET_STATS = {
     ghostBlob: { name: 'Ma Trắng', desc: 'Sát thủ: Luôn nhắm vào kẻ thù xa nhất.', hp: 60, atk: 35, range: 40, speed: 100, cd: 1.2, skill: 'assassin' },
     impBlob: { name: 'Quỷ Nhỏ', desc: 'Đánh lan: Gây sát thương AoE xung quanh mục tiêu.', hp: 50, atk: 40, range: 40, speed: 60, cd: 1, skill: 'cleave' },
     angelBlob: { name: 'Thiên Thần', desc: 'Hồi máu diện rộng cho các đồng minh lân cận.', hp: 110, atk: 10, range: 80, speed: 40, cd: 1.2, skill: 'aoe_heal' },
-    witchBlob: { name: 'Phù Thủy', desc: 'Đòn đánh khiến mục tiêu bị trúng độc.', hp: 75, atk: 22, range: 120, speed: 50, cd: 1.3, skill: 'poison' },
     starBell: { name: 'Chuông Sao', desc: 'Tăng 20% sát thương cho đồng minh lân cận.', hp: 95, atk: 12, range: 90, speed: 40, cd: 1, skill: 'buff_atk' },
     cloudMallow: { name: 'Kẹo Dẻo Mây', desc: 'Khiêu khích: Buộc kẻ địch tấn công mình.', hp: 200, atk: 8, range: 40, speed: 30, cd: 2, skill: 'taunt' },
     dewSprout: { name: 'Mầm Sương', desc: '25% tỷ lệ trói chân kẻ địch trong 2 giây.', hp: 105, atk: 14, range: 50, speed: 45, cd: 1.2, skill: 'root' },
