@@ -2090,6 +2090,21 @@ function sell(key, n) {
   openPanel("bag");
   toast("B\xE1n \u0111\u01B0\u1EE3c " + gain + " G");
 }
+function sellSeed(id, n) {
+  const have = ctx.S.seeds[id] || 0;
+  n = Math.min(n, have);
+  if (n <= 0) return;
+  const def = CROPS[id] || { seed: 100 };
+  const gain = Math.floor((def.seed || 100) * 0.5) * n;
+  ctx.S.seeds[id] = have - n;
+  if (ctx.S.seeds[id] === 0) delete ctx.S.seeds[id];
+  ctx.S.coins += gain;
+  ctx.S.totalSales += gain;
+  save();
+  renderStatus();
+  openPanel("bag");
+  toast("B\xE1n h\u1EA1t gi\u1ED1ng thu \u0111\u01B0\u1EE3c " + gain + " G");
+}
 
 // src/pets.js
 function petBubble(el, txt) {
@@ -2576,8 +2591,6 @@ function initPets() {
 // src/gacha.js
 var GACHA_NORM_PITY = 100;
 var GACHA_SPEC_PITY = 50;
-var GACHA_NORM_PRICE = 1e3;
-var GACHA_SPEC_PRICE = 5e3;
 function initGachaState() {
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
@@ -2986,22 +2999,10 @@ function openGachaModal() {
     if (barS) barS.style.width = Math.min(100, pS / GACHA_SPEC_PITY * 100) + "%";
   };
   $id("gachaBuyNormBtn")?.addEventListener("click", () => {
-    if (ctx.S.coins < GACHA_NORM_PRICE) return toast(`C\xF2n thi\u1EBFu ${GACHA_NORM_PRICE - ctx.S.coins} G!`);
-    ctx.S.coins -= GACHA_NORM_PRICE;
-    ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1;
-    save();
-    renderStatus();
-    updateCounts();
-    toast("\u0110\xE3 mua 1 V\xE9 Quay Th\u01B0\u1EDDng!");
+    openBuyDlg("ticket", "norm");
   });
   $id("gachaBuySpecBtn")?.addEventListener("click", () => {
-    if (ctx.S.coins < GACHA_SPEC_PRICE) return toast(`C\xF2n thi\u1EBFu ${GACHA_SPEC_PRICE - ctx.S.coins} G!`);
-    ctx.S.coins -= GACHA_SPEC_PRICE;
-    ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 1;
-    save();
-    renderStatus();
-    updateCounts();
-    toast("\u0110\xE3 mua 1 V\xE9 Quay \u0110\u1EB7c Bi\u1EC7t!");
+    openBuyDlg("ticket", "spec");
   });
   const triggerGridResult = (isSpecial, count, results) => {
     const overlay = $id("gachaResultOverlay");
@@ -3200,7 +3201,88 @@ function openPanel(kind) {
     }));
     $id("mbody").querySelectorAll("[data-passdlg]").forEach((b) => b.addEventListener("click", () => openPassDlg(b.dataset.passdlg)));
   } else if (kind === "bag") {
-    const btabs = `<div class="tabs"><span class="tab${bagTab === "crop" ? " active" : ""}" data-btab="crop">N\xF4ng s\u1EA3n</span><span class="tab${bagTab === "gacha" ? " active" : ""}" data-btab="gacha">\u0110\u1ED3 Gacha</span><span class="tab${bagTab === "pet" ? " active" : ""}" data-btab="pet">B\xE9 tr\xF2n</span><span class="tab${bagTab === "relic" ? " active" : ""}" data-btab="relic">Qu\xE0 c\u1EE7a b\xE9 tr\xF2n</span></div>`;
+    const btabs = `<div class="tabs"><span class="tab${bagTab === "crop" ? " active" : ""}" data-btab="crop">N\xF4ng s\u1EA3n</span><span class="tab${bagTab === "seed" ? " active" : ""}" data-btab="seed">H\u1EA1t gi\u1ED1ng</span><span class="tab${bagTab === "gacha" ? " active" : ""}" data-btab="gacha">\u0110\u1ED3 Gacha</span><span class="tab${bagTab === "pet" ? " active" : ""}" data-btab="pet">B\xE9 tr\xF2n</span><span class="tab${bagTab === "relic" ? " active" : ""}" data-btab="relic">Qu\xE0 c\u1EE7a b\xE9 tr\xF2n</span></div>`;
+    if (bagTab === "seed") {
+      const seedKeys = Object.keys(ctx.S.seeds || {}).filter((k) => k !== "mystery");
+      const rows2 = seedKeys.map((key) => {
+        const n = ctx.S.seeds[key];
+        if (n <= 0) return "";
+        const def = CROPS[key];
+        const price = Math.floor((def.seed || 100) * 0.5);
+        if (bagSellMode) {
+          const on = !!bagSel[key];
+          return `
+        <div class="item selrow${on ? " selon" : ""}" data-selkey="${key}"><span class="icon">${spriteSVG(def.sp, 32)}</span>
+          <span class="info"><div class="name">H\u1EA1t ${def.name} \xD7${n}</div><div class="meta">Gi\xE1 thu mua: ${price} G/h\u1EA1t</div></span>
+          <span class="selmark">${on ? "\u2713" : ""}</span></div>`;
+        }
+        return `
+        <div class="item"><span class="icon">${spriteSVG(def.sp, 32)}</span>
+          <span class="info"><div class="name">H\u1EA1t ${def.name} \xD7${n}</div><div class="meta">Gi\xE1 thu mua: ${price} G/h\u1EA1t</div></span>
+          <span class="acts">
+            <span class="ibtn" data-sellseeddlg="${key}" title="B\xE1n (t\u1EF1 ch\u1ECDn s\u1ED1 l\u01B0\u1EE3ng)">${spriteSVG("coin", 16)}</span>
+          </span></div>`;
+      }).join("");
+      let sellBar2 = "";
+      if (seedKeys.length) {
+        if (bagSellMode) {
+          const total = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.seeds[k]).reduce((s, k) => {
+            const def = CROPS[k];
+            const p = Math.floor((def.seed || 100) * 0.5);
+            return s + p * ctx.S.seeds[k];
+          }, 0);
+          sellBar2 = `<div class="note" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:8px;white-space:nowrap;overflow:hidden">
+            <b style="overflow:hidden;text-overflow:ellipsis">${total > 0 ? "T\u1ED5ng " + total.toLocaleString() + " G" : "B\u1EA5m v\xE0o t\u1EEBng m\u1EE5c \u0111\u1EC3 tick ch\u1ECDn th\u1EE9 mu\u1ED1n b\xE1n"}</b><span style="flex:1"></span>
+            <span class="buy" id="sellSelGo" style="padding:4px 10px;font-size:11px;flex:none">B\xE1n</span>
+            <span class="buy plain" id="sellSelNo" style="padding:4px 10px;font-size:11px;flex:none">Hu\u1EF7</span></div>`;
+        } else {
+          sellBar2 = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div class="note" style="flex:1"></div>
+            <span class="buy" id="sellModeGo" style="flex:none">B\xE1n m\u1ED9t ch\u1EA1m</span></div>`;
+        }
+      }
+      openModal("Balo", btabs + sellBar2 + (rows2 || '<div class="note">B\u1EA1n ch\u01B0a c\xF3 h\u1EA1t gi\u1ED1ng n\xE0o, ra c\u1EEDa h\xE0ng mua th\xEAm \u0111i!</div>'));
+      $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
+        bagTab = t.dataset.btab;
+        openPanel("bag");
+      }));
+      $id("mbody").querySelectorAll("[data-sellseeddlg]").forEach((b) => b.addEventListener("click", () => openSellSeedDlg(b.dataset.sellseeddlg)));
+      const smGo2 = $id("sellModeGo");
+      if (smGo2) smGo2.addEventListener("click", () => {
+        bagSellMode = true;
+        bagSel = {};
+        openPanel("bag");
+      });
+      $id("mbody").querySelectorAll("[data-selkey]").forEach((el) => el.addEventListener("click", () => {
+        bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
+        openPanel("bag");
+      }));
+      const ssNo2 = $id("sellSelNo");
+      if (ssNo2) ssNo2.addEventListener("click", () => {
+        bagSellMode = false;
+        openPanel("bag");
+      });
+      const ssGo2 = $id("sellSelGo");
+      if (ssGo2) ssGo2.addEventListener("click", () => {
+        const keys = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.seeds[k]);
+        if (!keys.length) return toast("Ch\u01B0a tick c\xE1i n\xE0o c\u1EA3");
+        let gain = 0;
+        keys.forEach((k) => {
+          const def = CROPS[k];
+          const p = Math.floor((def.seed || 100) * 0.5);
+          gain += p * ctx.S.seeds[k];
+          delete ctx.S.seeds[k];
+        });
+        ctx.S.coins += gain;
+        ctx.S.totalSales += gain;
+        bagSellMode = false;
+        save();
+        renderStatus();
+        toast("B\xE1n m\u1ED9t m\u1EBB h\u1EA1t gi\u1ED1ng: +" + gain.toLocaleString() + " G");
+        openPanel("bag");
+      });
+      return;
+    }
     if (bagTab === "gacha") {
       const gachaKeys = Object.keys(ctx.S.bag || {}).filter((k) => k.startsWith("unique@"));
       const rows2 = gachaKeys.map((key) => {
@@ -4225,6 +4307,24 @@ function openSellDlg(key) {
     sell(key, clampN($id("sellN").value, 1, have, 1) | 0);
   });
 }
+function openSellSeedDlg(id) {
+  const have = ctx.S.seeds[id] || 0;
+  if (have <= 0) return;
+  const def = CROPS[id];
+  if (!def) return;
+  const price = Math.floor((def.seed || 100) * 0.5);
+  const name = "H\u1EA1t " + def.name;
+  openModal("B\xE1n \xB7 " + name, `
+    <div class="note" style="margin-bottom:8px">Gi\xE1 thu mua ${price} G \xB7 \u0111ang c\xF3 ${have} h\u1EA1t</div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <input class="inp" id="sellSeedN" type="number" min="1" max="${have}" value="1" style="width:90px">
+      <span style="font-size:12px;color:#7a5c38">/ ${have}</span>
+      <span class="buy" id="sellSeedGo">X\xE1c nh\u1EADn b\xE1n</span>
+    </div>`);
+  $id("sellSeedGo").addEventListener("click", () => {
+    sellSeed(id, clampN($id("sellSeedN").value, 1, have, 1) | 0);
+  });
+}
 function buildTicket(k) {
   const water2 = k === "water";
   return `
@@ -4269,9 +4369,15 @@ function openPassDlg(k) {
   }
 }
 function openBuyDlg(kind, id) {
-  const def = kind === "seed" ? CROPS[id] : FERTS[id];
-  const price = kind === "seed" ? def.seed : def.price;
-  const name = kind === "seed" ? "H\u1EA1t " + def.name : def.name;
+  let def, price, name;
+  if (kind === "ticket") {
+    price = id === "norm" ? 1e3 : 5e3;
+    name = id === "norm" ? "V\xE9 Quay Th\u01B0\u1EDDng" : "V\xE9 Quay \u0110\u1EB7c Bi\u1EC7t";
+  } else {
+    def = kind === "seed" ? CROPS[id] : FERTS[id];
+    price = kind === "seed" ? def.seed : def.price;
+    name = kind === "seed" ? "H\u1EA1t " + def.name : def.name;
+  }
   if (ctx.S.coins < price) return toast("C\xF2n thi\u1EBFu " + (price - ctx.S.coins).toLocaleString() + " G");
   const maxN = Math.max(1, Math.floor(ctx.S.coins / Math.max(1, price)));
   openModal("Mua \xB7 " + name, `
@@ -4292,11 +4398,16 @@ function openBuyDlg(kind, id) {
     if (ctx.S.coins < cost) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng r\u1ED3i");
     ctx.S.coins -= cost;
     if (kind === "seed") ctx.S.seeds[id] = (ctx.S.seeds[id] || 0) + n;
-    else ctx.S.ferts[id] = (ctx.S.ferts[id] || 0) + n;
+    else if (kind === "fert") ctx.S.ferts[id] = (ctx.S.ferts[id] || 0) + n;
+    else if (kind === "ticket") {
+      if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
+      ctx.S.tickets[id] = (ctx.S.tickets[id] || 0) + n;
+    }
     save();
     renderStatus();
     toast("\u0110\xE3 mua " + name + " \xD7" + n);
-    openPanel("shop");
+    if (kind === "ticket") openPanel("gacha");
+    else openPanel("shop");
   });
 }
 var toastTimer = null;

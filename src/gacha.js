@@ -3,7 +3,7 @@ import { ctx } from './store.js';
 import * as All from './all.js';
 import { CROPS, FERTS } from './data.js';
 import { spriteSVG, petSVG, registerDynamicSprite, P, GACHA_P } from './graphics.js';
-import { toast } from './witch.js';
+import { toast, openBuyDlg } from './witch.js';
 import { renderStatus } from './render.js';
 import { openModal } from './shop.js';
 import { charName, CS, SEC, extractJson, collectWorldbook } from './events.js';
@@ -453,19 +453,11 @@ export function openGachaModal() {
   };
 
   All.$id('gachaBuyNormBtn')?.addEventListener('click', () => {
-    if (ctx.S.coins < GACHA_NORM_PRICE) return toast(`Còn thiếu ${GACHA_NORM_PRICE - ctx.S.coins} G!`);
-    ctx.S.coins -= GACHA_NORM_PRICE;
-    ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1;
-    save(); renderStatus(); updateCounts();
-    toast('Đã mua 1 Vé Quay Thường!');
+    openBuyDlg('ticket', 'norm');
   });
 
   All.$id('gachaBuySpecBtn')?.addEventListener('click', () => {
-    if (ctx.S.coins < GACHA_SPEC_PRICE) return toast(`Còn thiếu ${GACHA_SPEC_PRICE - ctx.S.coins} G!`);
-    ctx.S.coins -= GACHA_SPEC_PRICE;
-    ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 1;
-    save(); renderStatus(); updateCounts();
-    toast('Đã mua 1 Vé Quay Đặc Biệt!');
+    openBuyDlg('ticket', 'spec');
   });
 
   const triggerGridResult = (isSpecial, count, results) => {

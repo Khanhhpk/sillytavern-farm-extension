@@ -159,3 +159,15 @@ export function sell(key, n) {
   save(); renderStatus(); openPanel('bag'); toast('Bán được ' + gain + ' G');
 }
 
+export function sellSeed(id, n) {
+  const have = ctx.S.seeds[id] || 0;
+  n = Math.min(n, have);
+  if (n <= 0) return;
+  const def = CROPS[id] || { seed: 100 };
+  const gain = Math.floor((def.seed || 100) * 0.5) * n;
+  ctx.S.seeds[id] = have - n;
+  if (ctx.S.seeds[id] === 0) delete ctx.S.seeds[id];
+  ctx.S.coins += gain; ctx.S.totalSales += gain;
+  save(); renderStatus(); openPanel('bag'); toast('Bán hạt giống thu được ' + gain + ' G');
+}
+

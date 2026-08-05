@@ -5,7 +5,7 @@ import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, 
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
 import { pendingPick, renderStatus, renderAll, setPendingPick } from './render.js';
 import { fmtDur, mutDescOf, bagName, bagPrice } from './logic.js';
-import { openBuyDlg, toast, openPassDlg, useStarShard, openSellDlg, openTakeout } from './witch.js';
+import { openBuyDlg, toast, openPassDlg, useStarShard, openSellDlg, openSellSeedDlg, openTakeout } from './witch.js';
 import { save, freshState } from './state.js';
 import { renderPets } from './pets.js';
 import { esc, SEC, CS, clampN, saveSec, openSandbox, saveCharState, fetchModelList, testSecApi } from './events.js';
@@ -127,7 +127,78 @@ export function openPanel(kind) {
     // @ts-ignore
     All.$id('mbody').querySelectorAll('[data-passdlg]').forEach(b => b.addEventListener('click', () => openPassDlg(b.dataset.passdlg)));
   } else if (kind === 'bag') {
-    const btabs = `<div class="tabs"><span class="tab${bagTab === 'crop' ? ' active' : ''}" data-btab="crop">Nông sản</span><span class="tab${bagTab === 'gacha' ? ' active' : ''}" data-btab="gacha">Đồ Gacha</span><span class="tab${bagTab === 'pet' ? ' active' : ''}" data-btab="pet">Bé tròn</span><span class="tab${bagTab === 'relic' ? ' active' : ''}" data-btab="relic">Quà của bé tròn</span></div>`;
+    const btabs = `<div class="tabs"><span class="tab${bagTab === 'crop' ? ' active' : ''}" data-btab="crop">Nông sản</span><span class="tab${bagTab === 'seed' ? ' active' : ''}" data-btab="seed">Hạt giống</span><span class="tab${bagTab === 'gacha' ? ' active' : ''}" data-btab="gacha">Đồ Gacha</span><span class="tab${bagTab === 'pet' ? ' active' : ''}" data-btab="pet">Bé tròn</span><span class="tab${bagTab === 'relic' ? ' active' : ''}" data-btab="relic">Quà của bé tròn</span></div>`;
+    if (bagTab === 'seed') {
+      const seedKeys = Object.keys(ctx.S.seeds || {}).filter(k => k !== 'mystery');
+      const rows = seedKeys.map(key => {
+        const n = ctx.S.seeds[key];
+        if (n <= 0) return '';
+        const def = CROPS[key];
+        const price = Math.floor((def.seed || 100) * 0.5);
+        if (bagSellMode) {
+          const on = !!bagSel[key];
+          return `
+        <div class="item selrow${on ? ' selon' : ''}" data-selkey="${key}"><span class="icon">${spriteSVG(def.sp, 32)}</span>
+          <span class="info"><div class="name">Hạt ${def.name} ×${n}</div><div class="meta">Giá thu mua: ${price} G/hạt</div></span>
+          <span class="selmark">${on ? '✓' : ''}</span></div>`;
+        }
+        return `
+        <div class="item"><span class="icon">${spriteSVG(def.sp, 32)}</span>
+          <span class="info"><div class="name">Hạt ${def.name} ×${n}</div><div class="meta">Giá thu mua: ${price} G/hạt</div></span>
+          <span class="acts">
+            <span class="ibtn" data-sellseeddlg="${key}" title="Bán (tự chọn số lượng)">${spriteSVG('coin', 16)}</span>
+          </span></div>`;
+      }).join('');
+      let sellBar = '';
+      if (seedKeys.length) {
+        if (bagSellMode) {
+          const total = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.seeds[k]).reduce((s, k) => {
+            const def = CROPS[k];
+            const p = Math.floor((def.seed || 100) * 0.5);
+            return s + p * ctx.S.seeds[k];
+          }, 0);
+          sellBar = `<div class="note" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:8px;white-space:nowrap;overflow:hidden">
+            <b style="overflow:hidden;text-overflow:ellipsis">${total > 0 ? 'Tổng ' + total.toLocaleString() + ' G' : 'Bấm vào từng mục để tick chọn thứ muốn bán'}</b><span style="flex:1"></span>
+            <span class="buy" id="sellSelGo" style="padding:4px 10px;font-size:11px;flex:none">Bán</span>
+            <span class="buy plain" id="sellSelNo" style="padding:4px 10px;font-size:11px;flex:none">Huỷ</span></div>`;
+        } else {
+          sellBar = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div class="note" style="flex:1"></div>
+            <span class="buy" id="sellModeGo" style="flex:none">Bán một chạm</span></div>`;
+        }
+      }
+      openModal('Balo', btabs + sellBar + (rows || '<div class="note">Bạn chưa có hạt giống nào, ra cửa hàng mua thêm đi!</div>'));
+      // @ts-ignore
+      All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
+      // @ts-ignore
+      All.$id('mbody').querySelectorAll('[data-sellseeddlg]').forEach(b => b.addEventListener('click', () => openSellSeedDlg(b.dataset.sellseeddlg)));
+      const smGo = All.$id('sellModeGo');
+      if (smGo) smGo.addEventListener('click', () => { bagSellMode = true; bagSel = {}; openPanel('bag'); });
+      All.$id('mbody').querySelectorAll('[data-selkey]').forEach(el => el.addEventListener('click', () => {
+        // @ts-ignore
+        bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
+        openPanel('bag');
+      }));
+      const ssNo = All.$id('sellSelNo');
+      if (ssNo) ssNo.addEventListener('click', () => { bagSellMode = false; openPanel('bag'); });
+      const ssGo = All.$id('sellSelGo');
+      if (ssGo) ssGo.addEventListener('click', () => {
+        const keys = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.seeds[k]);
+        if (!keys.length) return toast('Chưa tick cái nào cả');
+        let gain = 0;
+        keys.forEach(k => { 
+          const def = CROPS[k];
+          const p = Math.floor((def.seed || 100) * 0.5);
+          gain += p * ctx.S.seeds[k]; 
+          delete ctx.S.seeds[k]; 
+        });
+        ctx.S.coins += gain; ctx.S.totalSales += gain;
+        bagSellMode = false; save(); renderStatus();
+        toast('Bán một mẻ hạt giống: +' + gain.toLocaleString() + ' G');
+        openPanel('bag');
+      });
+      return;
+    }
     if (bagTab === 'gacha') {
       const gachaKeys = Object.keys(ctx.S.bag || {}).filter(k => k.startsWith('unique@'));
       const rows = gachaKeys.map(key => {
