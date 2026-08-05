@@ -110,7 +110,7 @@ export async function generateAIUniqueItemData(rarity) {
 ${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể, hãy tự do sáng tạo)'}
 Nếu thấy phù hợp, hãy thiết kế vật phẩm liên kết với bối cảnh này, nếu không thì tự do sáng tạo.`;
     } else {
-      contextStr = `Không có bối cảnh cố định. Hãy tự do sáng tạo tuyệt đối — chủ đề có thể là BẤT CỨ THỨ GÌ tồn tại hoặc chưa từng tồn tại: từ một meme internet, một món đồ vật kỳ quặc trong đời thường, một reference từ anime/manga, một hiện tượng khoa học, một sinh vật thần thoại ít ai biết, một phát minh tương lai, một cảm xúc được vật chất hóa, hay thậm chí một khái niệm trừu tượng biến thành vật thể. Càng bất ngờ và độc đáo càng tốt — đừng lặp lại những thứ quen thuộc.`;
+      contextStr = `KHÔNG CÓ CHỦ ĐỀ CỐ ĐỊNH. Mỗi lần tạo vật phẩm, hãy chọn một nguồn cảm hứng HOÀN TOÀN NGẪU NHIÊN và KHÔNG LIÊN QUAN ĐẾN NHAU từ bất kỳ đâu trong vũ trụ kiến thức của bạn. Đừng lặp lại phong cách của các lần tạo trước (ví dụ: nếu trước đó là công nghệ, lần này hãy làm phép thuật, ẩm thực, sinh vật, đồ gia dụng, khái niệm triết học, v.v.). Hãy làm tôi bất ngờ với sự đa dạng vô cực của bạn.`;
     }
 
     const sysPrompt = `Bạn là một AI thiết kế vật phẩm game nhập vai và chuyên gia Pixel Art (32x32).
