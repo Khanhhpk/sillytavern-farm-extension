@@ -2622,6 +2622,11 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
   "price": M\u1ED9t s\u1ED1 nguy\xEAn \u0111\u1ECBnh gi\xE1 G c\u1EE7a v\u1EADt ph\u1EA9m (G\u1EE3i \xFD: quanh m\u1EE9c ${rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "S\u1EED thi" ? 8e3 : 2500}G, c\xF3 th\u1EC3 t\u1EF1 do t\u0103ng gi\u1EA3m tu\u1EF3 \xFD),
   "spriteMap": [ m\u1EA3ng g\u1ED3m \u0110\xDANG 32 chu\u1ED7i, m\u1ED7i chu\u1ED7i D\xC0I CH\xCDNH X\xC1C 32 k\xFD t\u1EF1 ch\u1EC9 d\xF9ng k\xFD t\u1EF1 B\u1EA3ng m\xE0u v\xE0 d\u1EA5u '.' cho \u0111i\u1EC3m trong su\u1ED1t ]
 }`;
+    const userPrompt = `H\xE3y s\xE1ng t\u1EA1o 1 v\u1EADt ph\u1EA9m \u0111\u1EB7c bi\u1EC7t ng\u1EABu nhi\xEAn ph\u1EA9m ch\u1EA5t ${rarity}.`;
+    console.groupCollapsed(`=== GACHA AI DEBUG: B\u1EAFt \u0111\u1EA7u t\u1EA1o [${rarity}] ===`);
+    console.log("[System Prompt]:\n", sysPrompt);
+    console.log("[User Prompt]:\n", userPrompt);
+    console.groupEnd();
     const ctrl = new AbortController();
     const to = setTimeout(() => ctrl.abort(), 15e3);
     const res = await fetch(SEC.url.replace(/\/+$/, "") + "/chat/completions", {
@@ -2631,7 +2636,7 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
         model: SEC.model,
         messages: [
           { role: "system", content: sysPrompt },
-          { role: "user", content: `H\xE3y s\xE1ng t\u1EA1o 1 v\u1EADt ph\u1EA9m \u0111\u1EB7c bi\u1EC7t ng\u1EABu nhi\xEAn ph\u1EA9m ch\u1EA5t ${rarity}.` }
+          { role: "user", content: userPrompt }
         ]
       }),
       signal: ctrl.signal
@@ -2640,6 +2645,9 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
     if (!res.ok) return null;
     const data = await res.json();
     const content = data.choices?.[0]?.message?.content || "";
+    console.groupCollapsed(`=== GACHA AI DEBUG: Ph\u1EA3n h\u1ED3i [${rarity}] ===`);
+    console.log("[Raw Content]:\n", content);
+    console.groupEnd();
     const jtxt = extractJson(content);
     if (jtxt) {
       const o = JSON.parse(jtxt);

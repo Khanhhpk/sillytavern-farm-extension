@@ -134,6 +134,13 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
   "spriteMap": [ mảng gồm ĐÚNG 32 chuỗi, mỗi chuỗi DÀI CHÍNH XÁC 32 ký tự chỉ dùng ký tự Bảng màu và dấu '.' cho điểm trong suốt ]
 }`;
 
+    const userPrompt = `Hãy sáng tạo 1 vật phẩm đặc biệt ngẫu nhiên phẩm chất ${rarity}.`;
+
+    console.groupCollapsed(`=== GACHA AI DEBUG: Bắt đầu tạo [${rarity}] ===`);
+    console.log('[System Prompt]:\n', sysPrompt);
+    console.log('[User Prompt]:\n', userPrompt);
+    console.groupEnd();
+
     const ctrl = new AbortController();
     const to = setTimeout(() => ctrl.abort(), 15000);
     const res = await fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
@@ -143,7 +150,7 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
         model: SEC.model,
         messages: [
           { role: 'system', content: sysPrompt },
-          { role: 'user', content: `Hãy sáng tạo 1 vật phẩm đặc biệt ngẫu nhiên phẩm chất ${rarity}.` }
+          { role: 'user', content: userPrompt }
         ]
       }),
       signal: ctrl.signal
@@ -152,6 +159,11 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
     if (!res.ok) return null;
     const data = await res.json();
     const content = data.choices?.[0]?.message?.content || '';
+    
+    console.groupCollapsed(`=== GACHA AI DEBUG: Phản hồi [${rarity}] ===`);
+    console.log('[Raw Content]:\n', content);
+    console.groupEnd();
+
     const jtxt = extractJson(content);
     if (jtxt) {
       const o = JSON.parse(jtxt);
