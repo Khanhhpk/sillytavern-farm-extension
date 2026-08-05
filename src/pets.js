@@ -267,6 +267,8 @@ export function petFert(el, cry) {                             // Bé bí ẩn: 
 export function initPets() {
   wander = window.setInterval(() => {                  // Nhịp tuần tra: cứ 7s lại giao điểm đến / ru ngủ / mở tiểu phẩm cho các bé đang rảnh
     if (!ctx.win || !ctx.win.classList.contains('open')) return;           // Tối ưu: Dừng tuần tra và tính toán vị trí khi bảng bị ẩn
+    const ov = All.$id('mascots');
+    if (!ov || ov.clientWidth === 0) return;
     if (!scene && now() >= nextSceneAt) tryScene();
     sh.querySelectorAll('#mascots .pet').forEach(el => {
       // @ts-ignore

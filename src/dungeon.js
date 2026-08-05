@@ -97,7 +97,7 @@ function initPlacementPhase() {
         <div style="display:flex; justify-content:center; margin-top: 5px;">
             <div class="buy" id="dg-start-btn">Bắt Đầu Trận Chiến</div>
             <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px;">Thoát</div>
-            <div class="buy plain" id="dg-info-btn" style="margin-left: 10px; width: 32px; padding: 0; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:white;" title="Thông tin Thú cưng">?</div>
+            <div class="buy plain" id="dg-info-btn" style="margin-left: 10px; width: 32px; padding: 0; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:black;" title="Thông tin Thú cưng">?</div>
         </div>
         <div class="dg-dock" id="dg-dock"></div>
     `;
@@ -116,6 +116,7 @@ function initPlacementPhase() {
         slot.dataset.pet = petId;
         
         slot.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
             if (phase !== 'placement') return;
             if (team.length >= 4) { All.toast('Tối đa 4 thành viên!'); return; }
             if (slot.classList.contains('placed')) return;
@@ -128,6 +129,7 @@ function initPlacementPhase() {
             dragEl.style.position = 'fixed';
             dragEl.style.zIndex = '1000';
             dragEl.style.transform = 'translate(-50%, -50%)';
+            dragEl.style.transition = 'none'; // Disable transition for instant drag
             dragEl.innerHTML = petSVG(petId, 32);
             document.body.appendChild(dragEl);
             
@@ -191,10 +193,12 @@ function initPlacementPhase() {
                 // Allow moving/removing placed pets
                 let isPlacedDragging = false;
                 el.addEventListener('pointerdown', (ev) => {
+                    ev.preventDefault();
                     if (phase !== 'placement') return;
                     isPlacedDragging = true;
                     el.style.position = 'fixed';
                     el.style.zIndex = '1000';
+                    el.style.transition = 'none'; // Disable transition when dragging
                     el.style.left = ev.clientX + 'px';
                     el.style.top = ev.clientY + 'px';
                     el.setPointerCapture(ev.pointerId);
@@ -209,6 +213,7 @@ function initPlacementPhase() {
                     isPlacedDragging = false;
                     el.releasePointerCapture(ev.pointerId);
                     el.style.zIndex = '';
+                    el.style.transition = ''; // Restore transition
                     
                     const arect = arena.getBoundingClientRect();
                     if (ev.clientX >= arect.left && ev.clientX <= arect.right &&
