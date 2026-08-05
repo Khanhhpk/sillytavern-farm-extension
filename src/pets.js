@@ -20,7 +20,7 @@ export function petBubble(el, txt) {
    v0.7①: di chuyển kiểu nhảy —— bé không thuộc nhóm bay sẽ nhích tới điểm đích bằng từng cú nhảy nhỏ (mỗi cú = xê dịch ngang tuyến tính một bước + thân bay lên hạ xuống theo parabol), mây/ma thì trượt */
 export const petPos = {}, petTgt = {}, petHopT = {};            // Toạ độ / điểm đến / bộ đếm nhảy liên tiếp lúc chạy, không ghi vào save
 export const WORK_BAND = 74;                                    // Chiều cao hàng dưới ≈ một ô ruộng (dành cho loại làm việc, loại đi dạo tính từ phía trên nó)
-export const FLOATY = { cloudMallow: 1, ghostBlob: 1, bunny: 1 };   // Danh sách bay: không nhảy, trượt đều (#43: bé sứa xoăn nhập hội, thành bộ ba bay lơ lửng)
+export const FLOATY = { cloudMallow: 1, ghostBlob: 1, jellyfish: 1 };   // Danh sách bay: không nhảy, trượt đều (#43: bé sứa xoăn nhập hội, thành bộ ba bay lơ lửng)
 export const GAITS = {                                          // Dáng đi: len = độ dài một bước nhảy, dur = chu kỳ một cú nhảy (ms), hy = độ cao nhảy
   octo:      { len: 8,  dur: 260, hy: -4 },              // Bạch tuộc: bước lắt nhắt bò sát đất
   octoCream: { len: 8,  dur: 290, hy: -4 },              // Bạch tuộc kem: bò còn chậm rì hơn nữa
@@ -250,15 +250,16 @@ export function petHarvest(el, cry) {                          // Bé sứa xoă
   petBubble(el, cry + ' cuộn về được: ' + ks.map(k => k + '×' + got[k]).join(', '));
 }
 export function petFert(el, cry) {                             // Bé bí ẩn: chọc một cái là bón phân hàng loạt (#42: mỗi lần đều chọn lại)
-  pickFrom('Bé bí ẩn: dùng loại phân nào?', ctx.S.ferts, x => FERTS[x].name, fid => {
+  pickFrom('Bé bí ẩn: dùng loại phân nào?', ctx.S.ferts, x => FERTS[x]?.name || 'Phân bón lạ', fid => {
     let k = 0;
     for (let pi = 0; pi < curBlocks() * 4 && ctx.S.ferts[fid] > 0; pi++) {
       const c = curPlots()[pi].crop;
       if (!c || now() >= c.matureAt || (c.fertUsed && c.fertUsed[fid])) continue;
       if (fertilize(pi, fid, true)) k++;
     }
-    const pe = sh.querySelector('.pet[data-pet="batBlob"]') || el;
-    petBubble(pe, cry + (k ? ' đã bón ' + k + ' ô ' + FERTS[fid].name + '!' : ' không có ô nào cần bón phân'));
+    const pe = sh.querySelector('.pet[data-pet="mystery_blob"]') || el;
+    const fname = FERTS[fid]?.name || 'loại phân này';
+    petBubble(pe, cry + (k ? ' đã bón ' + k + ' ô ' + fname + '!' : ' không có ô nào cần bón phân'));
   });
 }
 
@@ -267,6 +268,8 @@ export function petFert(el, cry) {                             // Bé bí ẩn: 
 export function initPets() {
   wander = window.setInterval(() => {                  // Nhịp tuần tra: cứ 7s lại giao điểm đến / ru ngủ / mở tiểu phẩm cho các bé đang rảnh
     if (!ctx.win || !ctx.win.classList.contains('open')) return;           // Tối ưu: Dừng tuần tra và tính toán vị trí khi bảng bị ẩn
+    const ov = All.$id('mascots');
+    if (!ov || ov.clientWidth === 0) return;
     if (!scene && now() >= nextSceneAt) tryScene();
     sh.querySelectorAll('#mascots .pet').forEach(el => {
       // @ts-ignore

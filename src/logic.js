@@ -13,8 +13,8 @@ import { openPanel } from './shop.js';
 
 /* ---------- Logic game ---------- */
 export const fmtDur = m => m < 60 ? m + ' phút' : (m % 60 === 0 ? (m / 60) + ' giờ' : (m / 60).toFixed(1) + ' giờ');
-export function growMs(cropId) { return TEST_MODE ? GROW : CROPS[cropId].grow * MIN; }   // v1.0: tra bảng A
-export function regrowMs(cropId) { const c = CROPS[cropId]; return TEST_MODE ? REGROW : (c.regrowM || Math.round(c.grow * 0.6)) * MIN; }
+export function growMs(cropId) { return TEST_MODE ? GROW : (CROPS[cropId]?.grow || 30) * MIN; }
+export function regrowMs(cropId) { const c = CROPS[cropId] || {}; return TEST_MODE ? REGROW : (c.regrowM || Math.round((c.grow || 30) * 0.6)) * MIN; }
 export function plant(pi, cropId) {
   if ((ctx.S.seeds[cropId] || 0) <= 0) return toast('Hết hạt giống này rồi');
   let realId = cropId;
@@ -23,16 +23,22 @@ export function plant(pi, cropId) {
     realId = fam + (ctx.S.page === 2 ? 'W' : ctx.S.page === 3 ? 'M' : 'G');
   }
   else {
-    const z = CROPS[cropId].zone || 1;                  // v0.8: cây kén đất
-    if (z !== ctx.S.page) return toast(CROPS[cropId].name + ' phải trồng ở ' + ZONE_NAME[z] + ' (trang ' + z + ')');
+    const c = CROPS[cropId];
+    if (!c) {
+      toast('Hạt giống này đã hỏng (không tồn tại trong phiên bản này)!');
+      ctx.S.seeds[cropId] = 0;
+      return;
+    }
+    const z = c.zone || 1;                  // v0.8: cây kén đất
+    if (z !== ctx.S.page) return toast(c.name + ' phải trồng ở ' + ZONE_NAME[z] + ' (trang ' + z + ')');
   }
   ctx.S.seeds[cropId]--;
   const g = growMs(realId);
   const c = { id: realId, matureAt: now() + g, wateredUntil: 0, fertUsed: {} };
-  if (CROPS[realId].regrow) c.left = REGROW_MAX;
+  if (CROPS[realId] && CROPS[realId].regrow) c.left = REGROW_MAX;
   if (isRain()) { c.matureAt = now() + g * 0.9; c.rainDay = gameDay(); }   // Sửa #10: trồng vào ngày mưa được giảm thẳng 10%
   const ev = todayEvent();                                                  // Sự kiện thế giới quan: trồng trong ngày cũng được hưởng
-  if (ev && ev.time_mult !== 1 && (!ev.favored_crop || CROPS[realId].name === ev.favored_crop)) {
+  if (ev && ev.time_mult !== 1 && (!ev.favored_crop || (CROPS[realId] && CROPS[realId].name === ev.favored_crop))) {
     c.matureAt = now() + Math.round((c.matureAt - now()) * ev.time_mult);   // Sự kiện thế giới quan: hệ số thời gian sinh trưởng (<1 = nhanh hơn = tích cực)
     c.evDay = gameDay();
   }

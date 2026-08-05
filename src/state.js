@@ -33,17 +33,28 @@ export function loadState() {
   if (!ctx.S.theme) ctx.S.theme = 'sakura';
   if (!ctx.S.page) ctx.S.page = 1;
   if (ctx.S.dragPet === undefined) ctx.S.dragPet = false;
+  const petRenameMap = { 'bunny': 'jellyfish', 'slimeNight': 'peach_soda', 'batBlob': 'mystery_blob' };
+  if (ctx.S.pets) ctx.S.pets = ctx.S.pets.map(p => petRenameMap[p] || p);
+  if (ctx.S.petsOut) ctx.S.petsOut = ctx.S.petsOut.map(p => petRenameMap[p] || p);
+  if (petRenameMap[ctx.S.dragPet]) ctx.S.dragPet = petRenameMap[ctx.S.dragPet];
   
+  Object.keys(ctx.S.jobCfg || {}).forEach(k => {
+    if (petRenameMap[k]) {
+      ctx.S.jobCfg[petRenameMap[k]] = ctx.S.jobCfg[k];
+      delete ctx.S.jobCfg[k];
+    }
+  });
+
   Object.keys(ctx.S.bag || {}).forEach(k => {
     const base = k.split('@')[0];
-    if (base === 'mysbG' || base === 'mysbW' || base === 'mysbM') {
-      const nk = k.replace(base, 'moonberry');
+    if (base === 'mysbG' || base === 'mysbW' || base === 'mysbM' || base === 'moonberry') {
+      const nk = k.replace(base, 'strawberry');
       ctx.S.bag[nk] = (ctx.S.bag[nk] || 0) + ctx.S.bag[k];
       delete ctx.S.bag[k];
     }
   });
   [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach(arr => (arr || []).forEach(p => {
-    if (p.crop && (p.crop.id === 'mysbG' || p.crop.id === 'mysbW' || p.crop.id === 'mysbM')) p.crop.id = 'moonberry';
+    if (p.crop && (p.crop.id === 'mysbG' || p.crop.id === 'mysbW' || p.crop.id === 'mysbM' || p.crop.id === 'moonberry')) p.crop.id = 'strawberry';
   }));
   
   if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
@@ -51,6 +62,7 @@ export function loadState() {
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
   if (!ctx.S.uniques) ctx.S.uniques = {};
+  if (!ctx.S.dungeonBest) ctx.S.dungeonBest = { wave: 0, gold: 0 };
 
   Object.keys(ctx.S.uniques || {}).forEach(k => {
     const item = ctx.S.uniques[k];

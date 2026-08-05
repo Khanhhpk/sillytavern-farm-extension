@@ -102,6 +102,24 @@ export const P = {
       ".....fFFFFFFMKKKKKKMFFFFFFf.....",
       ".....fFFFFFFMKKKKKKMFFFFFFf.....",
       ".....ffffffffffffffffffffff....."
+    ],
+    dungeonGate:[
+      "................",
+      "....MMMMMMMM....",
+      "...MLLLLLLLLM...",
+      "..MLLMCMMCMLLM..",
+      "..MLMvvvvvvMLM..",
+      "..MLvVuuuuVvLM..",
+      "..MLvVuBKuVvLM..",
+      "..MLvVKuuKVvLM..",
+      "..MLvVuuWKVvLM..",
+      "..MLvVKuuuVvLM..",
+      "..MLvVKKuBVvLM..",
+      "..MLvVuKKuVvLM..",
+      "..MLvVuuuuVvLM..",
+      "..MLMvvvvvvMLM..",
+      ".MMLMvvvvvvMLMM.",
+      ".MMMMvvvvvvMMMM."
     ]
   };
   /* Nếu bảng màu thiếu màu xanh k/i trong toolWater thì bù vào */
@@ -136,7 +154,7 @@ export const PET_P = {
   ".....pppppp.....","....pppppppp....","...ppWWpppppp...","..ppWWpppppppp..",
   "..pppppppppppp..","..ppffppppffpp..",".pppppppppppppp.",".pFppppffppppFp.",
   ".pppppppppppppp.",".FppppppppppppF.","..FFFFFFFFFFFF..","................"],
-  slimeNight:[
+  peach_soda:[
   ".......O........","......OOO.......",".......t........",".....TTTTTT.....",
   "....TTTTTTTT....","...TCTTTTTTTT...","..TCTTTTTTTTTT..",".TTTTDTTTTDTTTT.",
   ".TTPPTTDDTTPPTT.",".TTTTTTTTTTTTTT.","..tTTTTTTTTTTt..",".tTT.tTTTT.tTTt.",
@@ -151,12 +169,12 @@ export const PET_P = {
   "....AAAAAAAA....","...AAWWAAAAAA...","...AWWAAAAAAA...","..AAAAAAAAAAAA..",
   "..AAAAAAAAAAAA..","..AAKKAAAAKKAA..","..AnAAAAAAAAnA..","..AAAAAAAAAAAA..",
   "..AAAAAAAAAAAA..","..AA.AA..AA.AA..","..zz.zz..zz.zz..","................"],
-  bunny:[
+  jellyfish:[
   "......S.........",".....SSS........","......S.........",".....IIIIII.....",
   "....IIIIIIII....","...IIBIIIIIII...","..IIBIIIIIIIII..",".IIIIYIIIIYIIII.",
   ".IIPPIISSIIPPII.",".IIIIIIIIIIIIII.","..iIIIIIIIIIIi..","...iiiiiiiiii...",
   "...LL..LL..LL...","..LL...LL...LL..","..L....L....L...",".LL...LL...LL..."],
-  batBlob:[
+  mystery_blob:[
   "................","...oo......oo...","...ooo....ooo...","...oooo..oooo...",
   "....oooooooo....","...oooooooooo...","..oooooooooooo..","..ooKKooooKKoo..",
   "ttooooonnooooott",".toooooooooooot.",".onoooooooooono.",".oooooooooooooo.",
@@ -210,18 +228,18 @@ export const PET_P = {
   /* ===== v0.8c (#43): hệ thống da chuyển sắc (bộ sưu tập codex 0718) —— màu phủ theo từng sprite, giá trị có thể là màu đơn hoặc gradient tuyến tính ===== */
   const petLinear = (x1, y1, x2, y2, stops) => ({ type: 'linear', x1, y1, x2, y2, stops });
   const PET_FX = {
-    batBlob: {                                            // Bé bí ẩn: bản cam dịu thứ hai (wen chốt: pha sữa giảm độ tinh khiết nhưng giữ dòng máu cam; bản oải hương để dành cho kho da DLC)
+    mystery_blob: {                                            // Bé bí ẩn: bản cam dịu thứ hai (wen chốt: pha sữa giảm độ tinh khiết nhưng giữ dòng máu cam; bản oải hương để dành cho kho da DLC)
       o: petLinear(1, 2, 15, 14, [['0%', '#ffe0a6'], ['46%', '#f7b374'], ['100%', '#ea9060']]),
       t: petLinear(0, 7, 16, 15, [['0%', '#d18a58'], ['100%', '#b06a44']]),
       K: '#6b4548', n: '#ffcdd8',
     },
-    slimeNight: {                                         // Bé soda đào (giữ id slimeNight để không hỏng save, #43)
+    peach_soda: {
       T: petLinear(1, 2, 15, 14, [['0%', '#ffe8a6'], ['35%', '#ffbdc9'], ['64%', '#ff94bf'], ['100%', '#c99bf5']]),
       t: petLinear(0, 4, 16, 15, [['0%', '#f28bc2'], ['100%', '#9b78de']]),
       C: '#effffb', D: '#5b4568', P: '#65e0cf',
       O: petLinear(0, 0, 15, 3, [['0%', '#b9fff3'], ['100%', '#9ba7ff']]),
     },
-    bunny: {                                              // Bé sứa xoăn (giữ id bunny để không hỏng save, #43)
+    jellyfish: {
       I: petLinear(1, 2, 15, 14, [['0%', '#c8f4ff'], ['28%', '#8cddff'], ['62%', '#58b7f2'], ['100%', '#6576dc']]),
       i: petLinear(0, 7, 16, 15, [['0%', '#579dd1'], ['100%', '#5459aa']]),
       B: '#effcff', Y: '#fff0a6', P: '#ff8fca',
@@ -273,15 +291,15 @@ export const PETS = {
     cloudMallow:{ job: 'water', name: 'Bé bông mây',  page: 1, price: 1500,  cry: ['Bông bông~', 'Vù——', '(bay lơ lửng)'], desc: 'Loại làm việc · ra sân là mây mưa nhỏ tự động tưới' },
     /* —— Trang 2 (vé vùng nước) —— */
     ghostBlob:  { name: 'Bé ma nhỏ',     page: 2, price: 1500, cry: ['Uuu~', 'Bay bay…', '(xuyên qua tay bạn)'], desc: 'Loại tìm kho báu · bay được vào những chỗ người khác không vào nổi' },
-    batBlob:    { job: 'fert', name: 'Bé bí ẩn',      page: 2, price: 1800, cry: ['……?', '(nghiêng đầu)', '?!'], desc: 'Loại làm việc · chọc một cái là bón phân hàng loạt · phân của nó bón ra cái gì thì không ai đoán nổi' },
-    bunny:      { job: 'harvest', name: 'Bé sứa xoăn', page: 2, price: 2200, cry: ['Ục grù~', '(cuộn cuộn xúc tu)', 'Bốp ục!'], desc: 'Loại làm việc · chọc một cái là xúc tu nhẹ nhàng cuộn rau chín vào balo' },   // #43: giữ id bunny để không hỏng save
+    mystery_blob:    { job: 'fert', name: 'Bé bí ẩn',      page: 2, price: 1800, cry: ['……?', '(nghiêng đầu)', '?!'], desc: 'Loại làm việc · chọc một cái là bón phân hàng loạt · phân của nó bón ra cái gì thì không ai đoán nổi' },
+    jellyfish:      { job: 'harvest', name: 'Bé sứa xoăn', page: 2, price: 2200, cry: ['Ục grù~', '(cuộn cuộn xúc tu)', 'Bốp ục!'], desc: 'Loại làm việc · chọc một cái là xúc tu nhẹ nhàng cuộn rau chín vào balo' },
     impBlob:    { name: 'Bé quỷ nhỏ',    page: 2, price: 3000, cry: ['Hì hì.', 'Hư!', '(giấu cái gì đó đi)'], desc: 'Loại tìm kho báu · khi tìm kho báu sẽ tha về hạt giống bí ẩn đen sì' },
     angelBlob:  { name: 'Bé thiên thần', page: 2, price: 3000, cry: ['Ting~', '(phát sáng dịu dàng)', 'Chúc phúc cho bạn.'], desc: 'Loại tìm kho báu · khi tìm kho báu sẽ ngậm về hạt giống bí ẩn ánh lấp lánh' },
     /* —— Trang 3 (vé khu mỏ) —— */
     prismBlob:  { name: 'Bé lăng quang', page: 3, price: 8000, cry: ['Keng~', '(khúc xạ ra một dải cầu vồng)', 'Kengg!'], desc: 'Loại sản xuất · tìm kho báu mang về mảnh lăng quang (đổi được một đơn ở trang đơn hàng phù thuỷ)' },
     starBell:   { name: 'Bé chuông sao', page: 3, price: 8000, cry: ['Leng keng~', '☆!', '(lắc lắc nhẹ)'], desc: 'Loại sản xuất · tìm kho báu rung rơi mảnh ngôi sao (triệu hồi được phù thuỷ tròn)' },
-    /* —— Át chủ bài (#43: giữ id slimeNight để không hỏng save; page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
-    slimeNight: { name: 'Bé soda đào',   page: 1, price: 9999, cry: ['Bốp——!', '(nổi một bong bóng nhỏ)', 'Xì~', '(vị ngòn ngọt)'], desc: 'Loại tìm kho báu · tinh linh soda vị đào · dễ thương quá mức nên đắt nhất' },
+    /* —— Át chủ bài (page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
+    peach_soda: { name: 'Bé soda đào',   page: 1, price: 9999, cry: ['Bốp——!', '(nổi một bong bóng nhỏ)', 'Xì~', '(vị ngòn ngọt)'], desc: 'Loại tìm kho báu · tinh linh soda vị đào · dễ thương quá mức nên đắt nhất' },
     penguin:    { name: 'Chim cánh cụt', page: 1, price: 100000, cry: ['Pingu!', 'Núp núp~', 'Trượt tuyết nào!', 'Cánh cụt!'], desc: 'Loại đặc biệt · AFK mỗi 1 tiếng mang về 1 vé gacha ngẫu nhiên (70% vé thường, 30% vé đặc biệt)' },
   };
   export const PASSES = {
@@ -342,11 +360,11 @@ export const PETS = {
       '.....KYyYYK.....','....KYYYYYYK....','....KYYYYYYK....','..KKKPPPPPPKKK..',
       '.KYYKPpPPPKYYYK.','KYyYYYYYYYYYYyYK','.KKKKKKKKKKKKKK.','.........kPk....',
       '..........kPk...','................','................','................'] },   // Huy hiệu mặt tiền: nón rơm ruy băng hồng (wen chốt, chỗ ký tên tác giả)
-    mysbG: { p: { g:'#4d7a26', G:'#79b544', K:'#8a2a35', r:'#d94f5c', R:'#e8808e', y:'#ffe0a8' }, m: [
+    strawberry: { p: { g:'#4d7a26', G:'#79b544', K:'#8a2a35', r:'#d94f5c', R:'#e8808e', y:'#ffe0a8' }, m: [
       '................','................','................','................','......G..g......','.....gGGGGg.....','.......GG.......','.....KrrrrK.....','....KrryrryK....','....KrrrrrrK....','....KryrrryK....','.....KrrrrK.....','......KrrK......','.......KK.......','................','................'] },
-    mysbW: { p: { g:'#2e6a50', G:'#4d9a6e', K:'#2e6a80', r:'#7fd4dd', R:'#b8ecf0', W:'#f0fcff' }, m: [
+    strawberryW: { p: { g:'#2e6a50', G:'#4d9a6e', K:'#2e6a80', r:'#7fd4dd', R:'#b8ecf0', W:'#f0fcff' }, m: [
       '.....G..g.......','....gGGGGg......','......GG........','....KrrrrK......','...KrrWrrrK.....','...KrRRrrrK.....','...KrrrrRrK.....','....KrrrrK......','.....KrrK.......','......KK........','.......W........','................','................','................','................','................'] },
-    mysbM: { p: { g:'#5a3f78', G:'#8a5cc0', K:'#3a2258', r:'#9a6ac8', R:'#c4a2e8', W:'#e8d8f8' }, m: [
+    strawberryM: { p: { g:'#5a3f78', G:'#8a5cc0', K:'#3a2258', r:'#9a6ac8', R:'#c4a2e8', W:'#e8d8f8' }, m: [
       '.....G..g.......','....gGGGGg......','......GG........','....KrrrrK......','...KrRrWrrK.....','...KrrRrrrK.....','...KRrrrRrK.....','....KrrRrK......','.....KrrK.......','......KK........','................','................','................','................','................','................'] },
   };
   export const DYNAMIC_SPR = {};

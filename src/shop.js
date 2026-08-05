@@ -33,6 +33,9 @@ export function openPanel(kind) {
   if (kind === 'gacha') {
     return openGachaModal();
   }
+  if (kind === 'dungeon') {
+    return All.openDungeonView();
+  }
   if (kind === 'shop') {
     const tabs = [['seed', 'Hạt giống'], ['fert', 'Phân bón'], ['pet', 'Thú cưng'], ['pass', 'Vé'], ['ticket', 'Vé Gacha']];
     let items = '';
@@ -131,6 +134,7 @@ export function openPanel(kind) {
         const n = ctx.S.seeds[key];
         if (n <= 0) return '';
         const def = CROPS[key];
+        if (!def) return ''; // fallback for unknown keys
         const price = Math.floor((def.seed || 100) * 0.5);
         if (bagSellMode) {
           const on = !!bagSel[key];
@@ -151,6 +155,7 @@ export function openPanel(kind) {
         if (bagSellMode) {
           const total = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.seeds[k]).reduce((s, k) => {
             const def = CROPS[k];
+            if (!def) return s;
             const p = Math.floor((def.seed || 100) * 0.5);
             return s + p * ctx.S.seeds[k];
           }, 0);
@@ -185,8 +190,10 @@ export function openPanel(kind) {
         let gain = 0;
         keys.forEach(k => { 
           const def = CROPS[k];
-          const p = Math.floor((def.seed || 100) * 0.5);
-          gain += p * ctx.S.seeds[k]; 
+          if (def) {
+            const p = Math.floor((def.seed || 100) * 0.5);
+            gain += p * ctx.S.seeds[k]; 
+          }
           delete ctx.S.seeds[k]; 
         });
         ctx.S.coins += gain; ctx.S.totalSales += gain;
@@ -319,17 +326,18 @@ export function openPanel(kind) {
     const rows = Object.keys(ctx.S.bag).filter(k => !k.startsWith('unique@')).map(key => {
       const n = ctx.S.bag[key];
       const id = key.split('@')[0], mut = key.indexOf('@') > 0;
+      const def = CROPS[id] || { sp: 'seedLight', name: 'Nông sản lạ' };
       const d0 = mutDescOf(key);
       const mdesc = d0 ? ' · ' + d0 : '';
       if (bagSellMode) {
         const on = !!bagSel[key];
         return `
-      <div class="item selrow${on ? ' selon' : ''}" data-selkey="${key}"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
+      <div class="item selrow${on ? ' selon' : ''}" data-selkey="${key}"><span class="icon">${spriteSVG(def.sp, 32)}</span>
         <span class="info"><div class="name">${bagName(key)} ×${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">✦</span>' : ''}</div><div class="meta">${bagPrice(key)} G/cái${esc(mdesc)}</div></span>
         <span class="selmark">${on ? '✓' : ''}</span></div>`;
       }
       return `
-      <div class="item"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
+      <div class="item"><span class="icon">${spriteSVG(def.sp, 32)}</span>
         <span class="info"><div class="name">${bagName(key)} ×${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">✦</span>' : ''}</div><div class="meta">${bagPrice(key)} G/cái${esc(mdesc)}</div></span>
         <span class="acts">
           <span class="ibtn" data-takeout="${key}" title="Lấy ra (mang vào cốt truyện, không quy ra tiền)">${spriteSVG('emBang', 16)}</span>

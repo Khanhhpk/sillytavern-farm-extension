@@ -36,7 +36,7 @@ var CROPS = {
   douya: { name: "Gi\xE1 \u0111\u1ED7", grow: 5, seed: 5, sell: 12, sp: "sprout" },
   radish: { name: "C\u1EE7 c\u1EA3i cherry", grow: 10, seed: 25, sell: 45, sp: "radish" },
   tomato: { name: "C\xE0 chua", grow: 20, regrowM: 15, seed: 100, sell: 90, sp: "tomato", regrow: true },
-  moonberry: { name: "D\xE2u t\xE2y", grow: 90, seed: 350, sell: 800, sp: "mysbG" },
+  strawberry: { name: "D\xE2u t\xE2y", grow: 90, seed: 350, sell: 800, sp: "strawberry" },
   pumpkin: { name: "B\xED ng\xF4", grow: 120, seed: 500, sell: 1300, sp: "pumpkin" },
   /* —— Vùng nước (trang 2) —— */
   chuncai: { name: "Rau thu\u1EA7n", grow: 10, seed: 40, sell: 60, sp: "chuncai", zone: 2 },
@@ -262,6 +262,24 @@ var SPR = {
     ".....fFFFFFFMKKKKKKMFFFFFFf.....",
     ".....fFFFFFFMKKKKKKMFFFFFFf.....",
     ".....ffffffffffffffffffffff....."
+  ],
+  dungeonGate: [
+    "................",
+    "....MMMMMMMM....",
+    "...MLLLLLLLLM...",
+    "..MLLMCMMCMLLM..",
+    "..MLMvvvvvvMLM..",
+    "..MLvVuuuuVvLM..",
+    "..MLvVuBKuVvLM..",
+    "..MLvVKuuKVvLM..",
+    "..MLvVuuWKVvLM..",
+    "..MLvVKuuuVvLM..",
+    "..MLvVKKuBVvLM..",
+    "..MLvVuKKuVvLM..",
+    "..MLvVuuuuVvLM..",
+    "..MLMvvvvvvMLM..",
+    ".MMLMvvvvvvMLMM.",
+    ".MMMMvvvvvvMMMM."
   ]
 };
 P.k = P.k || "#c4e3f0";
@@ -357,7 +375,7 @@ var PET_SPR = {
     "..FFFFFFFFFFFF..",
     "................"
   ],
-  slimeNight: [
+  peach_soda: [
     ".......O........",
     "......OOO.......",
     ".......t........",
@@ -411,7 +429,7 @@ var PET_SPR = {
     "..zz.zz..zz.zz..",
     "................"
   ],
-  bunny: [
+  jellyfish: [
     "......S.........",
     ".....SSS........",
     "......S.........",
@@ -429,7 +447,7 @@ var PET_SPR = {
     "..L....L....L...",
     ".LL...LL...LL..."
   ],
-  batBlob: [
+  mystery_blob: [
     "................",
     "...oo......oo...",
     "...ooo....ooo...",
@@ -612,15 +630,14 @@ var PET_SPR = {
 };
 var petLinear = (x1, y1, x2, y2, stops) => ({ type: "linear", x1, y1, x2, y2, stops });
 var PET_FX = {
-  batBlob: {
+  mystery_blob: {
     // Bé bí ẩn: bản cam dịu thứ hai (wen chốt: pha sữa giảm độ tinh khiết nhưng giữ dòng máu cam; bản oải hương để dành cho kho da DLC)
     o: petLinear(1, 2, 15, 14, [["0%", "#ffe0a6"], ["46%", "#f7b374"], ["100%", "#ea9060"]]),
     t: petLinear(0, 7, 16, 15, [["0%", "#d18a58"], ["100%", "#b06a44"]]),
     K: "#6b4548",
     n: "#ffcdd8"
   },
-  slimeNight: {
-    // Bé soda đào (giữ id slimeNight để không hỏng save, #43)
+  peach_soda: {
     T: petLinear(1, 2, 15, 14, [["0%", "#ffe8a6"], ["35%", "#ffbdc9"], ["64%", "#ff94bf"], ["100%", "#c99bf5"]]),
     t: petLinear(0, 4, 16, 15, [["0%", "#f28bc2"], ["100%", "#9b78de"]]),
     C: "#effffb",
@@ -628,8 +645,7 @@ var PET_FX = {
     P: "#65e0cf",
     O: petLinear(0, 0, 15, 3, [["0%", "#b9fff3"], ["100%", "#9ba7ff"]])
   },
-  bunny: {
-    // Bé sứa xoăn (giữ id bunny để không hỏng save, #43)
+  jellyfish: {
     I: petLinear(1, 2, 15, 14, [["0%", "#c8f4ff"], ["28%", "#8cddff"], ["62%", "#58b7f2"], ["100%", "#6576dc"]]),
     i: petLinear(0, 7, 16, 15, [["0%", "#579dd1"], ["100%", "#5459aa"]]),
     B: "#effcff",
@@ -683,16 +699,15 @@ var PETS = {
   cloudMallow: { job: "water", name: "B\xE9 b\xF4ng m\xE2y", page: 1, price: 1500, cry: ["B\xF4ng b\xF4ng~", "V\xF9\u2014\u2014", "(bay l\u01A1 l\u1EEDng)"], desc: "Lo\u1EA1i l\xE0m vi\u1EC7c \xB7 ra s\xE2n l\xE0 m\xE2y m\u01B0a nh\u1ECF t\u1EF1 \u0111\u1ED9ng t\u01B0\u1EDBi" },
   /* —— Trang 2 (vé vùng nước) —— */
   ghostBlob: { name: "B\xE9 ma nh\u1ECF", page: 2, price: 1500, cry: ["Uuu~", "Bay bay\u2026", "(xuy\xEAn qua tay b\u1EA1n)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 bay \u0111\u01B0\u1EE3c v\xE0o nh\u1EEFng ch\u1ED7 ng\u01B0\u1EDDi kh\xE1c kh\xF4ng v\xE0o n\u1ED5i" },
-  batBlob: { job: "fert", name: "B\xE9 b\xED \u1EA9n", page: 2, price: 1800, cry: ["\u2026\u2026?", "(nghi\xEAng \u0111\u1EA7u)", "?!"], desc: "Lo\u1EA1i l\xE0m vi\u1EC7c \xB7 ch\u1ECDc m\u1ED9t c\xE1i l\xE0 b\xF3n ph\xE2n h\xE0ng lo\u1EA1t \xB7 ph\xE2n c\u1EE7a n\xF3 b\xF3n ra c\xE1i g\xEC th\xEC kh\xF4ng ai \u0111o\xE1n n\u1ED5i" },
-  bunny: { job: "harvest", name: "B\xE9 s\u1EE9a xo\u0103n", page: 2, price: 2200, cry: ["\u1EE4c gr\xF9~", "(cu\u1ED9n cu\u1ED9n x\xFAc tu)", "B\u1ED1p \u1EE5c!"], desc: "Lo\u1EA1i l\xE0m vi\u1EC7c \xB7 ch\u1ECDc m\u1ED9t c\xE1i l\xE0 x\xFAc tu nh\u1EB9 nh\xE0ng cu\u1ED9n rau ch\xEDn v\xE0o balo" },
-  // #43: giữ id bunny để không hỏng save
+  mystery_blob: { job: "fert", name: "B\xE9 b\xED \u1EA9n", page: 2, price: 1800, cry: ["\u2026\u2026?", "(nghi\xEAng \u0111\u1EA7u)", "?!"], desc: "Lo\u1EA1i l\xE0m vi\u1EC7c \xB7 ch\u1ECDc m\u1ED9t c\xE1i l\xE0 b\xF3n ph\xE2n h\xE0ng lo\u1EA1t \xB7 ph\xE2n c\u1EE7a n\xF3 b\xF3n ra c\xE1i g\xEC th\xEC kh\xF4ng ai \u0111o\xE1n n\u1ED5i" },
+  jellyfish: { job: "harvest", name: "B\xE9 s\u1EE9a xo\u0103n", page: 2, price: 2200, cry: ["\u1EE4c gr\xF9~", "(cu\u1ED9n cu\u1ED9n x\xFAc tu)", "B\u1ED1p \u1EE5c!"], desc: "Lo\u1EA1i l\xE0m vi\u1EC7c \xB7 ch\u1ECDc m\u1ED9t c\xE1i l\xE0 x\xFAc tu nh\u1EB9 nh\xE0ng cu\u1ED9n rau ch\xEDn v\xE0o balo" },
   impBlob: { name: "B\xE9 qu\u1EF7 nh\u1ECF", page: 2, price: 3e3, cry: ["H\xEC h\xEC.", "H\u01B0!", "(gi\u1EA5u c\xE1i g\xEC \u0111\xF3 \u0111i)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 khi t\xECm kho b\xE1u s\u1EBD tha v\u1EC1 h\u1EA1t gi\u1ED1ng b\xED \u1EA9n \u0111en s\xEC" },
   angelBlob: { name: "B\xE9 thi\xEAn th\u1EA7n", page: 2, price: 3e3, cry: ["Ting~", "(ph\xE1t s\xE1ng d\u1ECBu d\xE0ng)", "Ch\xFAc ph\xFAc cho b\u1EA1n."], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 khi t\xECm kho b\xE1u s\u1EBD ng\u1EADm v\u1EC1 h\u1EA1t gi\u1ED1ng b\xED \u1EA9n \xE1nh l\u1EA5p l\xE1nh" },
   /* —— Trang 3 (vé khu mỏ) —— */
   prismBlob: { name: "B\xE9 l\u0103ng quang", page: 3, price: 8e3, cry: ["Keng~", "(kh\xFAc x\u1EA1 ra m\u1ED9t d\u1EA3i c\u1EA7u v\u1ED3ng)", "Kengg!"], desc: "Lo\u1EA1i s\u1EA3n xu\u1EA5t \xB7 t\xECm kho b\xE1u mang v\u1EC1 m\u1EA3nh l\u0103ng quang (\u0111\u1ED5i \u0111\u01B0\u1EE3c m\u1ED9t \u0111\u01A1n \u1EDF trang \u0111\u01A1n h\xE0ng ph\xF9 thu\u1EF7)" },
   starBell: { name: "B\xE9 chu\xF4ng sao", page: 3, price: 8e3, cry: ["Leng keng~", "\u2606!", "(l\u1EAFc l\u1EAFc nh\u1EB9)"], desc: "Lo\u1EA1i s\u1EA3n xu\u1EA5t \xB7 t\xECm kho b\xE1u rung r\u01A1i m\u1EA3nh ng\xF4i sao (tri\u1EC7u h\u1ED3i \u0111\u01B0\u1EE3c ph\xF9 thu\u1EF7 tr\xF2n)" },
-  /* —— Át chủ bài (#43: giữ id slimeNight để không hỏng save; page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
-  slimeNight: { name: "B\xE9 soda \u0111\xE0o", page: 1, price: 9999, cry: ["B\u1ED1p\u2014\u2014!", "(n\u1ED5i m\u1ED9t bong b\xF3ng nh\u1ECF)", "X\xEC~", "(v\u1ECB ng\xF2n ng\u1ECDt)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 tinh linh soda v\u1ECB \u0111\xE0o \xB7 d\u1EC5 th\u01B0\u01A1ng qu\xE1 m\u1EE9c n\xEAn \u0111\u1EAFt nh\u1EA5t" },
+  /* —— Át chủ bài (page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
+  peach_soda: { name: "B\xE9 soda \u0111\xE0o", page: 1, price: 9999, cry: ["B\u1ED1p\u2014\u2014!", "(n\u1ED5i m\u1ED9t bong b\xF3ng nh\u1ECF)", "X\xEC~", "(v\u1ECB ng\xF2n ng\u1ECDt)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 tinh linh soda v\u1ECB \u0111\xE0o \xB7 d\u1EC5 th\u01B0\u01A1ng qu\xE1 m\u1EE9c n\xEAn \u0111\u1EAFt nh\u1EA5t" },
   penguin: { name: "Chim c\xE1nh c\u1EE5t", page: 1, price: 1e5, cry: ["Pingu!", "N\xFAp n\xFAp~", "Tr\u01B0\u1EE3t tuy\u1EBFt n\xE0o!", "C\xE1nh c\u1EE5t!"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 AFK m\u1ED7i 1 ti\u1EBFng mang v\u1EC1 1 v\xE9 gacha ng\u1EABu nhi\xEAn (70% v\xE9 th\u01B0\u1EDDng, 30% v\xE9 \u0111\u1EB7c bi\u1EC7t)" }
 };
 var PASSES = {
@@ -1134,7 +1149,7 @@ var C2 = {
     "................"
   ] },
   // Huy hiệu mặt tiền: nón rơm ruy băng hồng (wen chốt, chỗ ký tên tác giả)
-  mysbG: { p: { g: "#4d7a26", G: "#79b544", K: "#8a2a35", r: "#d94f5c", R: "#e8808e", y: "#ffe0a8" }, m: [
+  strawberry: { p: { g: "#4d7a26", G: "#79b544", K: "#8a2a35", r: "#d94f5c", R: "#e8808e", y: "#ffe0a8" }, m: [
     "................",
     "................",
     "................",
@@ -1152,7 +1167,7 @@ var C2 = {
     "................",
     "................"
   ] },
-  mysbW: { p: { g: "#2e6a50", G: "#4d9a6e", K: "#2e6a80", r: "#7fd4dd", R: "#b8ecf0", W: "#f0fcff" }, m: [
+  strawberryW: { p: { g: "#2e6a50", G: "#4d9a6e", K: "#2e6a80", r: "#7fd4dd", R: "#b8ecf0", W: "#f0fcff" }, m: [
     ".....G..g.......",
     "....gGGGGg......",
     "......GG........",
@@ -1170,7 +1185,7 @@ var C2 = {
     "................",
     "................"
   ] },
-  mysbM: { p: { g: "#5a3f78", G: "#8a5cc0", K: "#3a2258", r: "#9a6ac8", R: "#c4a2e8", W: "#e8d8f8" }, m: [
+  strawberryM: { p: { g: "#5a3f78", G: "#8a5cc0", K: "#3a2258", r: "#9a6ac8", R: "#c4a2e8", W: "#e8d8f8" }, m: [
     ".....G..g.......",
     "....gGGGGg......",
     "......GG........",
@@ -1494,7 +1509,7 @@ var styleCSS = `
     .pet.walk .pbody { animation: pethop var(--hopd, .33s) linear infinite; }   /* v0.7\u2460: \u0111i b\u1ED9 = nh\u1EA3y li\xEAn ti\u1EBFp theo \u0111\u01B0\u1EDDng parabol */
     .pet[data-pet="cloudMallow"] .pbody,
     .pet[data-pet="ghostBlob"] .pbody,
-    .pet[data-pet="bunny"] .pbody { animation: petfloat 3.2s ease-in-out infinite; }  /* M\xE2y / ma / s\u1EE9a: ki\u1EC3u bay l\u01A1 l\u1EEDng (\u0111\xE8 l\xEAn walk) */
+    .pet[data-pet="jellyfish"] .pbody { animation: petfloat 3.2s ease-in-out infinite; }  /* M\xE2y / ma / s\u1EE9a: ki\u1EC3u bay l\u01A1 l\u1EEDng (\u0111\xE8 l\xEAn walk) */
     .pet.sleep .pbody { animation: petsleep 3.6s ease-in-out infinite; }   /* v0.7\u2461: ng\u1EE7 = th\u1EDF ch\u1EADm (\u0111\xE8 l\xEAn bay, ma c\u0169ng ph\u1EA3i h\u1EA1 c\xE1nh m\xE0 ng\u1EE7) */
     .pet.flip .pbody img { transform: scaleX(-1); }
     .zzz { position: absolute; bottom: calc(100% - 8px); left: 68%; font-size: 12px; font-weight: bold;
@@ -1735,6 +1750,80 @@ var styleCSS = `
     .gacha-item-card.rarity-Hi\u1EBFm { border-color: #4a90e2 !important; background: #f0f7ff !important; }
     .gacha-item-card.rarity-S\u1EED-thi { border-color: #a335ee !important; background: #faf0ff !important; }
     .gacha-item-card.rarity-Huy\u1EC1n-tho\u1EA1i { border-color: #ff8000 !important; background: #fff8f0 !important; box-shadow: 0 0 10px rgba(255,128,0,0.6) !important; }
+    /* Dungeon View */
+    .dungeon-view { display: none; position: absolute; inset: 0; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; }
+    .dungeon-view.open { display: flex; }
+    .dg-arena { flex: 1; position: relative; border: 4px solid #3f3a50; border-radius: 8px; background: rgba(0,0,0,0.1); overflow: hidden; }
+    .dg-dock { height: 60px; background: rgba(58,48,30,.7); margin-top: 10px; border-radius: 8px; border: 2px solid #8a6a42; display: flex; align-items: center; padding: 0 10px; gap: 10px; overflow-x: auto; overflow-y: hidden; }
+    .dg-slot { width: 44px; height: 44px; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+    .dg-slot:hover { border-color: #d9ba8a; background: rgba(255,255,255,.2); }
+    .dg-slot.placed { opacity: 0.4; pointer-events: none; }
+    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; user-select: none; }
+    .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
+    .dg-entity.flip img { transform: scaleX(-1); }
+    .dg-hp-bar { position: absolute; top: -8px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
+    .dg-hp-fill { height: 100%; background: #a4dc8c; }
+    .dg-entity.enemy .dg-hp-fill { background: #e06578; }
+    .dg-dmg { position: absolute; font-size: 14px; font-weight: bold; color: #ff4444; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; pointer-events: none; z-index: 10; animation: dmgFloat 0.8s ease-out forwards; }
+    .dg-dmg.heal { color: #a4dc8c; }
+    .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
+    @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
+    .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+    .dg-title { font-size: 32px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 2px; }
+    .dg-dock::-webkit-scrollbar { height: 8px; display: block; }
+    .dg-dock::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+    .dg-dock::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 4px; }
+    .dg-info-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 250px; background: rgba(40,35,50,0.95); border-left: 2px solid #b08a5c; z-index: 30; padding: 10px; color: white; display: flex; flex-direction: column; overflow-y: auto; }
+    .dg-info-panel::-webkit-scrollbar { width: 6px; }
+    .dg-info-panel::-webkit-scrollbar-track { background: transparent; }
+    .dg-info-panel::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 3px; }
+    .dg-info-panel h3 { margin: 0 0 10px 0; color: #ffd94d; font-size: 16px; text-align: center; border-bottom: 1px solid #665; padding-bottom: 5px; }
+    .dg-info-close { position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 20px; font-weight: bold; color: #aaa; }
+    .dg-info-close:hover { color: white; }
+    .dg-info-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; }
+    .dg-info-item-icon { width: 40px; height: 40px; flex-shrink: 0; background: rgba(0,0,0,0.2); border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+    .dg-info-item-desc { font-size: 11px; line-height: 1.3; color: #ddd; }
+    .dg-info-item-desc b { color: #a4dc8c; font-size: 13px; display: block; margin-bottom: 2px; }
+    
+    .dg-projectile { position: absolute; width: 16px; height: 16px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; }
+    .dg-projectile img, .dg-projectile svg { width: 100%; height: 100%; }
+    
+    .dg-status { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; pointer-events: none; z-index: 3; }
+    .dg-status-icon { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #000; }
+    .dg-status-stun { background: #ffd700; box-shadow: 0 0 4px #ffd700; }
+    .dg-status-poison { background: #9932cc; box-shadow: 0 0 4px #9932cc; }
+    .dg-status-freeze { background: #00ffff; box-shadow: 0 0 4px #00ffff; }
+    .dg-status-root { background: #8b4513; box-shadow: 0 0 4px #8b4513; }
+    .dg-status-taunt { background: #ff4500; box-shadow: 0 0 4px #ff4500; }
+    .dg-status-buff { background: #ff8c00; box-shadow: 0 0 4px #ff8c00; }
+    
+    @keyframes dgHop {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    .dg-entity.walk > svg, .dg-entity.walk > img { animation: dgHop 0.3s linear infinite; }
+    
+    @keyframes dgAttack {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2) rotate(15deg); }
+        100% { transform: scale(1); }
+    }
+    .dg-entity.attack > svg, .dg-entity.attack > img { animation: dgAttack 0.2s ease-out forwards; }
+    
+    .dg-reward-card { background: #3c2a20; border: 2px solid #b08a5c; padding: 10px; border-radius: 8px; width: 120px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+    .dg-reward-card:hover { transform: scale(1.05); border-color: #ffda66; background: #4e382d; }
+    .dg-reward-card h4 { margin: 0 0 5px 0; color: #ffda66; }
+    .dg-reward-card p { margin: 0; font-size: 12px; color: #fff; line-height: 1.4; }
+    
+    .dg-hud { position: absolute; top: 8px; left: 10px; z-index: 25; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 6px; font-size: 13px; color: white; pointer-events: none; }
+    
+    .dg-boss-banner { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold; color: #ff2222; text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000; letter-spacing: 4px; animation: bossBlink 0.5s ease-in-out infinite alternate; pointer-events: none; background: rgba(0,0,0,0.5); }
+    @keyframes bossBlink { 0% { opacity: 0.6; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1.05); } }
+    
+    .dg-dmg.miss { color: #aaaaaa; font-style: italic; font-size: 13px; }
+    
+    .dg-new-record { color: #ffd700; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #ffd700, 0 0 30px #ff8c00; animation: newRecordPulse 0.8s ease-in-out infinite alternate; margin: 5px 0; }
+    @keyframes newRecordPulse { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
 `;
 
 // src/ui.js
@@ -1744,6 +1833,7 @@ var $id;
 var fieldEl;
 var decoLayer;
 var fxLayer;
+var dungeonView;
 var swX = null;
 var swY = null;
 function applyTheme() {
@@ -1812,12 +1902,14 @@ function initUI() {
         <div id="witch" title="Ph\xF9 thu\u1EF7 tr\xF2n"></div>
         <div class="mode-tip" id="modetip"></div>
         <div class="toolbar" id="toolbar"></div>
+        <div class="dungeon-view" id="dungeon-view" style="display:none"></div>
       </div>
     </div>
     <div class="bottombar">
         <div class="btn" data-open="shop">${spriteSVG("shopIcon", 22)}C\u1EEDa h\xE0ng</div>
         <div class="btn" data-open="bag">${spriteSVG("bagIcon", 22)}Balo</div>
         <div class="btn" data-open="gacha">${spriteSVG("gachapon", 22)}Gachapon</div>
+        <div class="btn" data-open="dungeon">${spriteSVG("dungeonGate", 22)}H\u1EA7m ng\u1EE5c</div>
         <div class="btn" data-open="cfg">${spriteSVG("gearIcon", 22)}C\xE0i \u0111\u1EB7t</div>
     </div>
     <div class="modal" id="modal">
@@ -1855,6 +1947,7 @@ function initUI() {
   fxLayer = document.createElement("div");
   fxLayer.style.cssText = "position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:8;";
   fieldEl.appendChild(fxLayer);
+  dungeonView = $id("dungeon-view");
   ctx.ui.addEventListener("click", (e) => {
     const pager = $id("pager");
     if (pager && pager.classList.contains("open") && !e.target.closest("#pager")) pager.classList.remove("open");
@@ -1915,11 +2008,11 @@ function initUI() {
 // src/logic.js
 var fmtDur = (m) => m < 60 ? m + " ph\xFAt" : m % 60 === 0 ? m / 60 + " gi\u1EDD" : (m / 60).toFixed(1) + " gi\u1EDD";
 function growMs(cropId) {
-  return TEST_MODE ? GROW : CROPS[cropId].grow * MIN;
+  return TEST_MODE ? GROW : (CROPS[cropId]?.grow || 30) * MIN;
 }
 function regrowMs(cropId) {
-  const c = CROPS[cropId];
-  return TEST_MODE ? REGROW : (c.regrowM || Math.round(c.grow * 0.6)) * MIN;
+  const c = CROPS[cropId] || {};
+  return TEST_MODE ? REGROW : (c.regrowM || Math.round((c.grow || 30) * 0.6)) * MIN;
 }
 function plant(pi, cropId) {
   if ((ctx.S.seeds[cropId] || 0) <= 0) return toast("H\u1EBFt h\u1EA1t gi\u1ED1ng n\xE0y r\u1ED3i");
@@ -1928,19 +2021,25 @@ function plant(pi, cropId) {
     const fam = ["dream", "key", "fang"][Math.floor(Math.random() * 3)];
     realId = fam + (ctx.S.page === 2 ? "W" : ctx.S.page === 3 ? "M" : "G");
   } else {
-    const z = CROPS[cropId].zone || 1;
-    if (z !== ctx.S.page) return toast(CROPS[cropId].name + " ph\u1EA3i tr\u1ED3ng \u1EDF " + ZONE_NAME[z] + " (trang " + z + ")");
+    const c2 = CROPS[cropId];
+    if (!c2) {
+      toast("H\u1EA1t gi\u1ED1ng n\xE0y \u0111\xE3 h\u1ECFng (kh\xF4ng t\u1ED3n t\u1EA1i trong phi\xEAn b\u1EA3n n\xE0y)!");
+      ctx.S.seeds[cropId] = 0;
+      return;
+    }
+    const z = c2.zone || 1;
+    if (z !== ctx.S.page) return toast(c2.name + " ph\u1EA3i tr\u1ED3ng \u1EDF " + ZONE_NAME[z] + " (trang " + z + ")");
   }
   ctx.S.seeds[cropId]--;
   const g = growMs(realId);
   const c = { id: realId, matureAt: now() + g, wateredUntil: 0, fertUsed: {} };
-  if (CROPS[realId].regrow) c.left = REGROW_MAX;
+  if (CROPS[realId] && CROPS[realId].regrow) c.left = REGROW_MAX;
   if (isRain()) {
     c.matureAt = now() + g * 0.9;
     c.rainDay = gameDay();
   }
   const ev = todayEvent();
-  if (ev && ev.time_mult !== 1 && (!ev.favored_crop || CROPS[realId].name === ev.favored_crop)) {
+  if (ev && ev.time_mult !== 1 && (!ev.favored_crop || CROPS[realId] && CROPS[realId].name === ev.favored_crop)) {
     c.matureAt = now() + Math.round((c.matureAt - now()) * ev.time_mult);
     c.evDay = gameDay();
   }
@@ -2120,7 +2219,7 @@ var petPos = {};
 var petTgt = {};
 var petHopT = {};
 var WORK_BAND = 74;
-var FLOATY = { cloudMallow: 1, ghostBlob: 1, bunny: 1 };
+var FLOATY = { cloudMallow: 1, ghostBlob: 1, jellyfish: 1 };
 var GAITS = {
   // Dáng đi: len = độ dài một bước nhảy, dur = chu kỳ một cú nhảy (ms), hy = độ cao nhảy
   octo: { len: 8, dur: 260, hy: -4 },
@@ -2395,20 +2494,23 @@ function petHarvest(el, cry) {
   petBubble(el, cry + " cu\u1ED9n v\u1EC1 \u0111\u01B0\u1EE3c: " + ks.map((k) => k + "\xD7" + got[k]).join(", "));
 }
 function petFert(el, cry) {
-  pickFrom("B\xE9 b\xED \u1EA9n: d\xF9ng lo\u1EA1i ph\xE2n n\xE0o?", ctx.S.ferts, (x) => FERTS[x].name, (fid) => {
+  pickFrom("B\xE9 b\xED \u1EA9n: d\xF9ng lo\u1EA1i ph\xE2n n\xE0o?", ctx.S.ferts, (x) => FERTS[x]?.name || "Ph\xE2n b\xF3n l\u1EA1", (fid) => {
     let k = 0;
     for (let pi = 0; pi < curBlocks() * 4 && ctx.S.ferts[fid] > 0; pi++) {
       const c = curPlots()[pi].crop;
       if (!c || now() >= c.matureAt || c.fertUsed && c.fertUsed[fid]) continue;
       if (fertilize(pi, fid, true)) k++;
     }
-    const pe = sh.querySelector('.pet[data-pet="batBlob"]') || el;
-    petBubble(pe, cry + (k ? " \u0111\xE3 b\xF3n " + k + " \xF4 " + FERTS[fid].name + "!" : " kh\xF4ng c\xF3 \xF4 n\xE0o c\u1EA7n b\xF3n ph\xE2n"));
+    const pe = sh.querySelector('.pet[data-pet="mystery_blob"]') || el;
+    const fname = FERTS[fid]?.name || "lo\u1EA1i ph\xE2n n\xE0y";
+    petBubble(pe, cry + (k ? " \u0111\xE3 b\xF3n " + k + " \xF4 " + fname + "!" : " kh\xF4ng c\xF3 \xF4 n\xE0o c\u1EA7n b\xF3n ph\xE2n"));
   });
 }
 function initPets() {
   wander = window.setInterval(() => {
     if (!ctx.win || !ctx.win.classList.contains("open")) return;
+    const ov = $id("mascots");
+    if (!ov || ov.clientWidth === 0) return;
     if (!scene && now() >= nextSceneAt) tryScene();
     sh.querySelectorAll("#mascots .pet").forEach((el) => {
       const id = el.dataset.pet;
@@ -2672,13 +2774,20 @@ async function generateAIUniqueItemData(rarity) {
     const simpleColors = Object.entries(GACHA_P).filter((e) => typeof e[1] === "string");
     const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(", ");
     let contextStr = "";
+    let thinkingInstructions = "";
     if (CS.link) {
       const worldbook = await collectWorldbook();
       contextStr = `Tr\xEDch xu\u1EA5t b\u1ED1i c\u1EA3nh th\u1EBF gi\u1EDBi (Worldbook) & L\u1ECBch s\u1EED tr\xF2 chuy\u1EC7n g\u1EA7n nh\u1EA5t:
 ${worldbook ? worldbook : "(Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u th\u1EBF gi\u1EDBi c\u1EE5 th\u1EC3, h\xE3y t\u1EF1 do s\xE1ng t\u1EA1o)"}
 N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m li\xEAn k\u1EBFt v\u1EDBi b\u1ED1i c\u1EA3nh n\xE0y, n\u1EBFu kh\xF4ng th\xEC t\u1EF1 do s\xE1ng t\u1EA1o.`;
+      thinkingInstructions = `1. T\xCCM \xDD T\u01AF\u1EDENG: \u0110\u1ECDc k\u1EF9 b\u1ED1i c\u1EA3nh th\u1EBF gi\u1EDBi \u0111\u01B0\u1EE3c cung c\u1EA5p. Ch\u1ECDn ra 1 y\u1EBFu t\u1ED1 \u0111\u1EB7c tr\u01B0ng nh\u1EA5t (nh\xE2n v\u1EADt, ph\xE9p thu\u1EADt, s\u1EF1 ki\u1EC7n, \u0111\u1ED3 v\u1EADt...) \u0111\u1EC3 l\xE0m c\u1EA3m h\u1EE9ng.
+2. THI\u1EBET K\u1EBE: Bi\u1EBFn \xFD t\u01B0\u1EDFng \u0111\xF3 th\xE0nh m\u1ED9t v\u1EADt ph\u1EA9m mang thu\u1ED9c t\xEDnh \u0111\u1EB7c bi\u1EC7t. Ph\xE2n t\xEDch m\xE0u s\u1EAFc v\xE0 h\xECnh d\xE1ng v\u1EADt th\u1EC3.
+3. V\u1EBC PIXEL: \u0110\u1EBFm ch\xEDnh x\xE1c s\u1ED1 l\u01B0\u1EE3ng k\xFD t\u1EF1 tr\xEAn m\u1ED7i d\xF2ng. Khung canvas l\xE0 32x32, m\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng 32 k\xFD t\u1EF1, t\u1ED5ng c\u1ED9ng 32 d\xF2ng. N\u1EBFu thi\u1EBFu/th\u1EEBa k\xFD t\u1EF1, h\xECnh s\u1EBD b\u1ECB c\u1EAFt m\xE9o!`;
     } else {
-      contextStr = `H\xE3y t\u1EF1 do t\u01B0\u1EDFng t\u01B0\u1EE3ng m\u1ED9t ch\u1EE7 \u0111\u1EC1 ng\u1EABu nhi\xEAn b\u1EA5t k\u1EF3 (k\u1EF3 \u1EA3o, vi\u1EC5n t\u01B0\u1EDFng, c\u1ED5 \u0111\u1EA1i, ma thu\u1EADt, v\u0169 tr\u1EE5, th\u1EE7y cung, phong \u1EA5n...) kh\xF4ng gi\u1EDBi h\u1EA1n.`;
+      contextStr = `KH\xD4NG C\xD3 CH\u1EE6 \u0110\u1EC0 C\u1ED0 \u0110\u1ECANH. \u0110\u1EC3 \u0111\u1EA3m b\u1EA3o t\xEDnh ng\u1EABu nhi\xEAn tuy\u1EC7t \u0111\u1ED1i, b\u1EA1n PH\u1EA2I t\u1EF1 b\u1ED1c th\u0103m m\u1ED9t ch\u1EE7 \u0111\u1EC1 b\u1EA5t k\u1EF3 tr\u01B0\u1EDBc khi b\u1EAFt \u0111\u1EA7u thi\u1EBFt k\u1EBF. M\u1ECDi th\u1EE9 trong v\u0169 tr\u1EE5 \u0111\u1EC1u c\xF3 th\u1EC3 tr\u1EDF th\xE0nh v\u1EADt ph\u1EA9m.`;
+      thinkingInstructions = `1. B\u1ED0C TH\u0102M CH\u1EE6 \u0110\u1EC0: \u0110\u1EA7u ti\xEAn, h\xE3y suy ngh\u0129 ra 3 danh t\u1EEB ho\xE0n to\xE0n ng\u1EABu nhi\xEAn v\xE0 kh\xF4ng li\xEAn quan \u0111\u1EBFn nhau. Ch\u1ECDn 1 trong s\u1ED1 \u0111\xF3 l\xE0m ch\u1EE7 \u0111\u1EC1 ch\xEDnh.
+2. THI\u1EBET K\u1EBE: Bi\u1EBFn danh t\u1EEB v\u1EEBa ch\u1ECDn th\xE0nh m\u1ED9t v\u1EADt ph\u1EA9m mang thu\u1ED9c t\xEDnh \u0111\u1EB7c bi\u1EC7t. Ph\xE2n t\xEDch m\xE0u s\u1EAFc v\xE0 h\xECnh d\xE1ng v\u1EADt th\u1EC3.
+3. V\u1EBC PIXEL: \u0110\u1EBFm ch\xEDnh x\xE1c s\u1ED1 l\u01B0\u1EE3ng k\xFD t\u1EF1 tr\xEAn m\u1ED7i d\xF2ng. Khung canvas l\xE0 32x32, m\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng 32 k\xFD t\u1EF1, t\u1ED5ng c\u1ED9ng 32 d\xF2ng. N\u1EBFu thi\u1EBFu/th\u1EEBa k\xFD t\u1EF1, h\xECnh s\u1EBD b\u1ECB c\u1EAFt m\xE9o!`;
     }
     const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m game nh\u1EADp vai v\xE0 chuy\xEAn gia Pixel Art (32x32).
 H\xE3y s\xE1ng t\u1EA1o 1 V\u1EACT PH\u1EA8M \u0110\u1ED8C NH\u1EA4T ph\u1EA9m ch\u1EA5t [${rarity}].
@@ -2689,8 +2798,7 @@ ${paletteStr}
 
 H\u01AF\u1EDANG D\u1EAAN T\u01AF DUY (B\u1EAFt bu\u1ED9c ph\u1EA3i c\xF3 th\u1EBB <thinking> tr\u01B0\u1EDBc khi xu\u1EA5t m\xE3):
 \u0110\u1EC3 v\u1EBD pixel art chu\u1EA9n 32x32:
-1. Ph\xE2n t\xEDch m\xE0u s\u1EAFc v\xE0 h\xECnh d\xE1ng v\u1EADt th\u1EC3 ph\xF9 h\u1EE3p v\u1EDBi m\xF4 t\u1EA3. V\u1EADt th\u1EC3 n\xEAn \u0111\u01B0\u1EE3c c\xE1ch \u0111i\u1EC7u th\xFA v\u1ECB, kh\xF4ng c\u1EA7n b\xF3 bu\u1ED9c v\xE0o n\xF4ng nghi\u1EC7p.
-2. \u0110\u1EBFm ch\xEDnh x\xE1c s\u1ED1 l\u01B0\u1EE3ng k\xFD t\u1EF1 tr\xEAn m\u1ED7i d\xF2ng. Khung canvas l\xE0 32x32, m\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng 32 k\xFD t\u1EF1, t\u1ED5ng c\u1ED9ng 32 d\xF2ng. N\u1EBFu thi\u1EBFu/th\u1EEBa k\xFD t\u1EF1, h\xECnh s\u1EBD b\u1ECB c\u1EAFt m\xE9o!
+${thinkingInstructions}
 
 QUY T\u1EAEC \u0110\u1EA6U RA B\u1EAET BU\u1ED8C:
 Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\u1ED1i m\xE3 \`\`\`json ch\u1EE9a c\u1EA5u tr\xFAc:
@@ -3121,6 +3229,9 @@ function openPanel(kind) {
   if (kind === "gacha") {
     return openGachaModal();
   }
+  if (kind === "dungeon") {
+    return openDungeonView();
+  }
   if (kind === "shop") {
     const tabs = [["seed", "H\u1EA1t gi\u1ED1ng"], ["fert", "Ph\xE2n b\xF3n"], ["pet", "Th\xFA c\u01B0ng"], ["pass", "V\xE9"], ["ticket", "V\xE9 Gacha"]];
     let items = "";
@@ -3220,6 +3331,7 @@ function openPanel(kind) {
         const n = ctx.S.seeds[key];
         if (n <= 0) return "";
         const def = CROPS[key];
+        if (!def) return "";
         const price = Math.floor((def.seed || 100) * 0.5);
         if (bagSellMode) {
           const on = !!bagSel[key];
@@ -3240,6 +3352,7 @@ function openPanel(kind) {
         if (bagSellMode) {
           const total = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.seeds[k]).reduce((s, k) => {
             const def = CROPS[k];
+            if (!def) return s;
             const p = Math.floor((def.seed || 100) * 0.5);
             return s + p * ctx.S.seeds[k];
           }, 0);
@@ -3281,8 +3394,10 @@ function openPanel(kind) {
         let gain = 0;
         keys.forEach((k) => {
           const def = CROPS[k];
-          const p = Math.floor((def.seed || 100) * 0.5);
-          gain += p * ctx.S.seeds[k];
+          if (def) {
+            const p = Math.floor((def.seed || 100) * 0.5);
+            gain += p * ctx.S.seeds[k];
+          }
           delete ctx.S.seeds[k];
         });
         ctx.S.coins += gain;
@@ -3433,17 +3548,18 @@ function openPanel(kind) {
     const rows = Object.keys(ctx.S.bag).filter((k) => !k.startsWith("unique@")).map((key) => {
       const n = ctx.S.bag[key];
       const id = key.split("@")[0], mut = key.indexOf("@") > 0;
+      const def = CROPS[id] || { sp: "seedLight", name: "N\xF4ng s\u1EA3n l\u1EA1" };
       const d0 = mutDescOf(key);
       const mdesc = d0 ? " \xB7 " + d0 : "";
       if (bagSellMode) {
         const on = !!bagSel[key];
         return `
-      <div class="item selrow${on ? " selon" : ""}" data-selkey="${key}"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
+      <div class="item selrow${on ? " selon" : ""}" data-selkey="${key}"><span class="icon">${spriteSVG(def.sp, 32)}</span>
         <span class="info"><div class="name">${bagName(key)} \xD7${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">\u2726</span>' : ""}</div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
         <span class="selmark">${on ? "\u2713" : ""}</span></div>`;
       }
       return `
-      <div class="item"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
+      <div class="item"><span class="icon">${spriteSVG(def.sp, 32)}</span>
         <span class="info"><div class="name">${bagName(key)} \xD7${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">\u2726</span>' : ""}</div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
         <span class="acts">
           <span class="ibtn" data-takeout="${key}" title="L\u1EA5y ra (mang v\xE0o c\u1ED1t truy\u1EC7n, kh\xF4ng quy ra ti\u1EC1n)">${spriteSVG("emBang", 16)}</span>
@@ -4091,11 +4207,11 @@ function initRender() {
       renderToolbar();
       return;
     }
-    if (k === "seed") return pickFrom("Ch\u1ECDn h\u1EA1t gi\u1ED1ng \u0111\u1EC3 gieo", ctx.S.seeds, (id) => CROPS[id].name, (id) => {
+    if (k === "seed") return pickFrom("Ch\u1ECDn h\u1EA1t gi\u1ED1ng \u0111\u1EC3 gieo", ctx.S.seeds, (id) => CROPS[id]?.name || "H\u1EA1t gi\u1ED1ng l\u1EA1", (id) => {
       mode = { t: "seed", id };
       renderToolbar();
     });
-    if (k === "fert") return pickFrom("Ch\u1ECDn ph\xE2n b\xF3n", ctx.S.ferts, (id) => FERTS[id].name, (id) => {
+    if (k === "fert") return pickFrom("Ch\u1ECDn ph\xE2n b\xF3n", ctx.S.ferts, (id) => FERTS[id]?.name || "Ph\xE2n b\xF3n l\u1EA1", (id) => {
       mode = { t: "fert", id };
       renderToolbar();
     });
@@ -5214,22 +5330,33 @@ function loadState() {
   if (!ctx.S.theme) ctx.S.theme = "sakura";
   if (!ctx.S.page) ctx.S.page = 1;
   if (ctx.S.dragPet === void 0) ctx.S.dragPet = false;
+  const petRenameMap = { "bunny": "jellyfish", "slimeNight": "peach_soda", "batBlob": "mystery_blob" };
+  if (ctx.S.pets) ctx.S.pets = ctx.S.pets.map((p) => petRenameMap[p] || p);
+  if (ctx.S.petsOut) ctx.S.petsOut = ctx.S.petsOut.map((p) => petRenameMap[p] || p);
+  if (petRenameMap[ctx.S.dragPet]) ctx.S.dragPet = petRenameMap[ctx.S.dragPet];
+  Object.keys(ctx.S.jobCfg || {}).forEach((k) => {
+    if (petRenameMap[k]) {
+      ctx.S.jobCfg[petRenameMap[k]] = ctx.S.jobCfg[k];
+      delete ctx.S.jobCfg[k];
+    }
+  });
   Object.keys(ctx.S.bag || {}).forEach((k) => {
     const base = k.split("@")[0];
-    if (base === "mysbG" || base === "mysbW" || base === "mysbM") {
-      const nk = k.replace(base, "moonberry");
+    if (base === "mysbG" || base === "mysbW" || base === "mysbM" || base === "moonberry") {
+      const nk = k.replace(base, "strawberry");
       ctx.S.bag[nk] = (ctx.S.bag[nk] || 0) + ctx.S.bag[k];
       delete ctx.S.bag[k];
     }
   });
   [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach((arr) => (arr || []).forEach((p) => {
-    if (p.crop && (p.crop.id === "mysbG" || p.crop.id === "mysbW" || p.crop.id === "mysbM")) p.crop.id = "moonberry";
+    if (p.crop && (p.crop.id === "mysbG" || p.crop.id === "mysbW" || p.crop.id === "mysbM" || p.crop.id === "moonberry")) p.crop.id = "strawberry";
   }));
   if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
   if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
   if (!ctx.S.uniques) ctx.S.uniques = {};
+  if (!ctx.S.dungeonBest) ctx.S.dungeonBest = { wave: 0, gold: 0 };
   Object.keys(ctx.S.uniques || {}).forEach((k) => {
     const item = ctx.S.uniques[k];
     if (item && item.sp && item.spriteMap) {
@@ -5273,6 +5400,948 @@ function save(immediate) {
   };
   if (immediate) doSave();
   else ctx.saveTimer = setTimeout(doSave, 500);
+}
+
+// src/dungeon.js
+var isDungeonOpen = false;
+var phase = "placement";
+var gameLoopId = null;
+var lastTime = 0;
+var team = [];
+var enemies = [];
+var projectiles = [];
+var currentWave = 1;
+var totalGold = 0;
+var PET_STATS = {
+  slime: { name: "Slime Xanh", desc: "Chi\u1EBFn binh c\xE2n b\u1EB1ng, kh\xF4ng c\xF3 g\xEC n\u1ED5i b\u1EADt.", hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
+  octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "\u0110\xE1nh nhanh th\u1EAFng nhanh. \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao.", hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
+  slimePink: { name: "Slime H\u1ED3ng", desc: "H\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu cho \u0111\u1ED3ng minh y\u1EBFu nh\u1EA5t.", hp: 120, atk: 15, range: 80, speed: 35, cd: 1.5, skill: "heal" },
+  peach_soda: { name: "Soda \u0110\xE0o", desc: "\u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.", hp: 90, atk: 18, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
+  octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "20% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.", hp: 150, atk: 12, range: 60, speed: 45, cd: 1.5, skill: "stun" },
+  jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "X\u1EA1 th\u1EE7: B\u1EAFn c\xE0ng xa s\xE1t th\u01B0\u01A1ng c\xE0ng l\u1EDBn.", hp: 70, atk: 25, range: 150, speed: 60, cd: 1.5, skill: "sniper" },
+  mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "H\u1ED3i m\xE1u cho b\u1EA3n th\xE2n b\u1EB1ng 50% s\xE1t th\u01B0\u01A1ng g\xE2y ra.", hp: 85, atk: 14, range: 50, speed: 55, cd: 1.1, skill: "lifesteal" },
+  ghostBlob: { name: "Ma Tr\u1EAFng", desc: "S\xE1t th\u1EE7: Lu\xF4n nh\u1EAFm v\xE0o k\u1EBB th\xF9 xa nh\u1EA5t.", hp: 60, atk: 35, range: 40, speed: 100, cd: 1.2, skill: "assassin" },
+  impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "\u0110\xE1nh lan: G\xE2y s\xE1t th\u01B0\u01A1ng AoE xung quanh m\u1EE5c ti\xEAu.", hp: 50, atk: 40, range: 40, speed: 60, cd: 1, skill: "cleave" },
+  angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "H\u1ED3i m\xE1u di\u1EC7n r\u1ED9ng cho c\xE1c \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 110, atk: 10, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal" },
+  starBell: { name: "Chu\xF4ng Sao", desc: "T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 95, atk: 12, range: 90, speed: 40, cd: 1, skill: "buff_atk" },
+  cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "Khi\xEAu kh\xEDch: Bu\u1ED9c k\u1EBB \u0111\u1ECBch t\u1EA5n c\xF4ng m\xECnh.", hp: 200, atk: 8, range: 40, speed: 30, cd: 2, skill: "taunt" },
+  dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "25% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.", hp: 105, atk: 14, range: 50, speed: 45, cd: 1.2, skill: "root" },
+  prismBlob: { name: "L\u0103ng K\xEDnh", desc: "B\u1EAFn 3 tia s\xE1ng c\xF9ng l\xFAc (s\xE1t th\u01B0\u01A1ng chia n\u1EEDa).", hp: 80, atk: 20, range: 140, speed: 40, cd: 1.4, skill: "multishot" },
+  penguin: { name: "C\xE1nh C\u1EE5t", desc: "\u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh.", hp: 120, atk: 16, range: 45, speed: 50, cd: 1, skill: "freeze" },
+  default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 100, atk: 10, range: 40, speed: 40, cd: 1 }
+};
+var ENEMY_TYPES = [
+  { id: "douya", name: "Gi\xE1 \u0110\u1ED7", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout" },
+  { id: "tomato", name: "C\xE0 Chua Tr\xF2n", desc: "C\u1EADn chi\u1EBFn c\u01A1 b\u1EA3n.", hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: "melee" },
+  { id: "radish", name: "C\u1EE7 C\u1EA3i T\u1ED1c \u0110\u1ED9", desc: "Ch\u1EA1y c\u1EF1c nhanh.", hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: "melee" },
+  { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: "assassin", sp: "moonberry" },
+  { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: "melee" },
+  { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: "melee" },
+  { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: "tank" },
+  { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: "ranged" },
+  { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot" },
+  { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root" },
+  { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: "ranged" },
+  { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true },
+  { id: "pumpkin", name: "Vua B\xED Ng\xF4", desc: "Boss: Tank AoE slam.", hp: 800, atk: 35, range: 50, speed: 15, cd: 2.5, ai: "tank", skill: "cleave", elite: true, sp: "pumpkin" },
+  { id: "fangW", name: "Ph\xF9 Th\u1EE7y Hoa", desc: "Boss: Ph\xE1o \u0111\xE0i b\u1EAFn xa.", hp: 400, atk: 45, range: 160, speed: 18, cd: 1.8, ai: "ranged", skill: "multishot", elite: true, sp: "fangW" }
+];
+function openDungeonView() {
+  isDungeonOpen = true;
+  const titleH1 = $id("drag").querySelector("h1");
+  titleH1.innerHTML = `${spriteSVG("dungeonGate", 16)}Ai m\xE0 th\xE8m \u0111i Dungeon ch\u1EE9!`;
+  $id("blocks").style.display = "none";
+  $id("pager").style.display = "none";
+  $id("toolbar").style.display = "none";
+  $id("mascots").style.display = "none";
+  dungeonView.style.display = "flex";
+  const fieldEl2 = $id("scroll").querySelector(".field");
+  if (fieldEl2) fieldEl2.style.minHeight = "420px";
+  initPlacementPhase();
+}
+function closeDungeonView() {
+  if (!isDungeonOpen) return;
+  isDungeonOpen = false;
+  stopCombatLoop();
+  const titleH1 = $id("drag").querySelector("h1");
+  titleH1.innerHTML = `${spriteSVG("strawhat", 16)}Ai th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!`;
+  $id("blocks").style.display = "";
+  $id("pager").style.display = "";
+  $id("toolbar").style.display = "";
+  $id("mascots").style.display = "";
+  dungeonView.style.display = "none";
+  dungeonView.innerHTML = "";
+  const fieldEl2 = $id("scroll").querySelector(".field");
+  if (fieldEl2) fieldEl2.style.minHeight = "";
+}
+function initPlacementPhase() {
+  phase = "placement";
+  team = [];
+  enemies = [];
+  projectiles = [];
+  const best = ctx.S.dungeonBest || { wave: 0, gold: 0 };
+  const bestHtml = best.wave > 0 ? `<div style="color:#b08a5c; font-size:12px; text-align:center; margin-top:4px;">\u{1F3C6} K\u1EF7 l\u1EE5c: Wave ${best.wave} \xB7 ${best.gold} G</div>` : "";
+  dungeonView.innerHTML = `
+        <div class="dg-arena" id="dg-arena">
+            <div class="dg-hud" id="dg-hud" style="display:none;"></div>
+            <div class="dg-info-panel" id="dg-info-panel" style="display:none;">
+                <div class="dg-info-close" id="dg-info-close">\xD7</div>
+                <h3>Ch\u1EC9 S\u1ED1 Th\xFA C\u01B0ng</h3>
+                <div class="dg-info-list" id="dg-info-list"></div>
+            </div>
+            <div class="dg-info-panel" id="dg-codex-panel" style="display:none; border-left-color:#e06578;">
+                <div class="dg-info-close" id="dg-codex-close">\xD7</div>
+                <h3 style="color:#e06578;">T\u1EEB \u0110i\u1EC3n Qu\xE1i</h3>
+                <div class="dg-info-list" id="dg-codex-list"></div>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:center; margin-top: 5px; flex-wrap:wrap;">
+            <div class="buy" id="dg-start-btn">B\u1EAFt \u0110\u1EA7u Tr\u1EADn Chi\u1EBFn</div>
+            <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px;">Tho\xE1t</div>
+            <div class="buy plain" id="dg-surrender-btn" style="margin-left: 10px; display:none; background: #e06578; color: white;">K\u1EBFt Th\xFAc S\u1EDBm</div>
+            <div class="buy plain" id="dg-info-btn" style="margin-left: 10px; width: 32px; padding: 0; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:black;" title="Th\xF4ng tin Th\xFA c\u01B0ng">?</div>
+            <div class="buy plain" id="dg-codex-btn" style="margin-left: 10px; padding: 0 10px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:#e06578;" title="T\u1EEB \u0111i\u1EC3n qu\xE1i">Qu\xE1i V\u1EADt</div>
+        </div>
+        ${bestHtml}
+        <div class="dg-dock" id="dg-dock"></div>
+    `;
+  const arena = $id("dg-arena");
+  const dock = $id("dg-dock");
+  let draggingPet = null;
+  let dragEl = null;
+  ctx.S.pets.forEach((petId) => {
+    const slot = document.createElement("div");
+    slot.className = "dg-slot";
+    slot.innerHTML = petSVG(petId, 32);
+    slot.dataset.pet = petId;
+    slot.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      if (phase !== "placement") return;
+      if (team.length >= 4) {
+        toast("T\u1ED1i \u0111a 4 th\xE0nh vi\xEAn!");
+        return;
+      }
+      if (slot.classList.contains("placed")) return;
+      draggingPet = { id: petId, slot };
+      dragEl = document.createElement("div");
+      dragEl.className = "dg-entity pet";
+      dragEl.style.pointerEvents = "none";
+      dragEl.style.position = "fixed";
+      dragEl.style.zIndex = "100000";
+      dragEl.style.transition = "none";
+      dragEl.innerHTML = petSVG(petId, 32);
+      arena.appendChild(dragEl);
+      dragEl.style.left = e.clientX - 16 + "px";
+      dragEl.style.top = e.clientY - 16 + "px";
+      slot.setPointerCapture(e.pointerId);
+    });
+    slot.addEventListener("pointermove", (e) => {
+      if (!draggingPet || !dragEl) return;
+      dragEl.style.left = e.clientX - 16 + "px";
+      dragEl.style.top = e.clientY - 16 + "px";
+    });
+    slot.addEventListener("pointerup", (e) => {
+      if (!draggingPet || !dragEl) return;
+      const pId = draggingPet.id;
+      const currentSlot = draggingPet.slot;
+      dragEl.remove();
+      dragEl = null;
+      draggingPet = null;
+      currentSlot.releasePointerCapture(e.pointerId);
+      const rect = arena.getBoundingClientRect();
+      if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+        currentSlot.classList.add("placed");
+        const stat = PET_STATS[pId] || PET_STATS.default;
+        const el = document.createElement("div");
+        el.className = "dg-entity pet";
+        el.innerHTML = `
+                    <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                    ${petSVG(pId, 32)}
+                `;
+        let x = e.clientX - rect.left - 16;
+        let y = e.clientY - rect.top - 16;
+        if (x > rect.width - 32) x = rect.width - 32;
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (y > rect.height - 32) y = rect.height - 32;
+        el.style.position = "absolute";
+        el.style.left = x + "px";
+        el.style.top = y + "px";
+        arena.appendChild(el);
+        const memberObj = {
+          id: pId,
+          x,
+          y,
+          hp: stat.hp,
+          maxHp: stat.hp,
+          atk: stat.atk,
+          range: stat.range,
+          speed: stat.speed,
+          cd: 0,
+          maxCd: stat.cd,
+          el,
+          type: "pet",
+          skill: stat.skill,
+          dockSlot: currentSlot
+        };
+        team.push(memberObj);
+        let isPlacedDragging = false;
+        el.addEventListener("pointerdown", (ev) => {
+          ev.preventDefault();
+          if (phase !== "placement") return;
+          isPlacedDragging = true;
+          el.style.position = "fixed";
+          el.style.zIndex = "100000";
+          el.style.transition = "none";
+          el.style.left = ev.clientX - 16 + "px";
+          el.style.top = ev.clientY - 16 + "px";
+          el.setPointerCapture(ev.pointerId);
+        });
+        el.addEventListener("pointermove", (ev) => {
+          if (!isPlacedDragging) return;
+          el.style.left = ev.clientX - 16 + "px";
+          el.style.top = ev.clientY - 16 + "px";
+        });
+        el.addEventListener("pointerup", (ev) => {
+          if (!isPlacedDragging) return;
+          isPlacedDragging = false;
+          el.releasePointerCapture(ev.pointerId);
+          el.style.zIndex = "";
+          const arect = arena.getBoundingClientRect();
+          if (ev.clientX >= arect.left && ev.clientX <= arect.right && ev.clientY >= arect.top && ev.clientY <= arect.bottom) {
+            el.style.position = "absolute";
+            let nx = ev.clientX - arect.left - 16;
+            let ny = ev.clientY - arect.top - 16;
+            if (nx > arect.width - 32) nx = arect.width - 32;
+            if (nx < 0) nx = 0;
+            if (ny < 0) ny = 0;
+            if (ny > arect.height - 32) ny = arect.height - 32;
+            el.style.left = nx + "px";
+            el.style.top = ny + "px";
+            el.offsetHeight;
+            el.style.transition = "";
+            memberObj.x = nx;
+            memberObj.y = ny;
+          } else {
+            el.remove();
+            const idx = team.indexOf(memberObj);
+            if (idx !== -1) team.splice(idx, 1);
+            currentSlot.classList.remove("placed");
+          }
+        });
+      }
+    });
+    dock.appendChild(slot);
+  });
+  const infoBtn = $id("dg-info-btn");
+  const infoPanel = $id("dg-info-panel");
+  const infoList = $id("dg-info-list");
+  const infoClose = $id("dg-info-close");
+  const codexBtn = $id("dg-codex-btn");
+  const codexPanel = $id("dg-codex-panel");
+  const codexList = $id("dg-codex-list");
+  const codexClose = $id("dg-codex-close");
+  infoBtn.addEventListener("click", () => {
+    if (infoPanel.style.display === "flex") {
+      infoPanel.style.display = "none";
+      return;
+    }
+    codexPanel.style.display = "none";
+    infoList.innerHTML = "";
+    ctx.S.pets.forEach((petId) => {
+      const stat = PET_STATS[petId] || PET_STATS.default;
+      infoList.innerHTML += `
+                <div class="dg-info-item">
+                    <div class="dg-info-item-icon">${petSVG(petId, 32)}</div>
+                    <div class="dg-info-item-desc">
+                        <b>${stat.name}</b>
+                        HP: ${stat.hp} | ATK: ${stat.atk}<br/>
+                        T\u1EA7m \u0111\xE1nh: ${stat.range} | T\u1ED1c \u0111\xE1nh: ${stat.cd}s<br/>
+                        <span style="color:#b08a5c;">${stat.desc}</span>
+                    </div>
+                </div>
+            `;
+    });
+    infoPanel.style.display = "flex";
+  });
+  codexBtn.addEventListener("click", () => {
+    if (codexPanel.style.display === "flex") {
+      codexPanel.style.display = "none";
+      return;
+    }
+    infoPanel.style.display = "none";
+    codexList.innerHTML = "";
+    ENEMY_TYPES.forEach((stat) => {
+      codexList.innerHTML += `
+                <div class="dg-info-item" style="border-left: 2px solid #e06578;">
+                    <div class="dg-info-item-icon">${spriteSVG(stat.sp || stat.id, 32)}</div>
+                    <div class="dg-info-item-desc">
+                        <b style="color:#e06578;">${stat.name}</b>
+                        HP: ${stat.hp} | ATK: ${stat.atk}<br/>
+                        T\u1EA7m \u0111\xE1nh: ${stat.range} | T\u1ED1c \u0111\xE1nh: ${stat.cd}s<br/>
+                        <span style="color:#b08a5c;">${stat.desc}</span>
+                    </div>
+                </div>
+            `;
+    });
+    codexPanel.style.display = "flex";
+  });
+  infoClose.addEventListener("click", () => {
+    infoPanel.style.display = "none";
+  });
+  codexClose.addEventListener("click", () => {
+    codexPanel.style.display = "none";
+  });
+  $id("dg-start-btn").addEventListener("click", () => {
+    if (team.length === 0) return toast("Ch\u01B0a ch\u1ECDn \u0111\u1ED9i h\xECnh!");
+    startCombat();
+  });
+  $id("dg-leave-btn").addEventListener("click", () => {
+    closeDungeonView();
+  });
+  $id("dg-surrender-btn").addEventListener("click", () => {
+    endDungeon(false);
+  });
+}
+var fullTeam = [];
+function startCombat() {
+  phase = "combat";
+  $id("dg-dock").style.display = "none";
+  $id("dg-start-btn").style.display = "none";
+  $id("dg-leave-btn").style.display = "none";
+  $id("dg-surrender-btn").style.display = "block";
+  currentWave = 1;
+  totalGold = 0;
+  fullTeam = [...team];
+  startWave();
+}
+function updateHUD() {
+  const hud = $id("dg-hud");
+  if (!hud) return;
+  const isBoss = currentWave % 10 === 0;
+  hud.style.display = "block";
+  hud.innerHTML = `<span style="color:#ffd94d; font-weight:bold;">Wave ${currentWave}</span>${isBoss ? " \u{1F451}" : ""} <span style="color:#a4dc8c; margin-left:10px;">${spriteSVG("coin", 12).replace("display:block", "display:inline-block;vertical-align:middle")} ${totalGold} G</span>`;
+}
+function startWave() {
+  const isBossWave = currentWave % 10 === 0;
+  if (isBossWave) {
+    phase = "end";
+    const arena = $id("dg-arena");
+    const banner = document.createElement("div");
+    banner.className = "dg-boss-banner";
+    banner.innerHTML = "\u26A0 BOSS WAVE \u26A0";
+    arena.appendChild(banner);
+    setTimeout(() => {
+      banner.remove();
+      _doStartWave();
+    }, 2e3);
+  } else {
+    _doStartWave();
+  }
+}
+function _doStartWave() {
+  phase = "combat";
+  enemies = [];
+  projectiles = [];
+  const arena = $id("dg-arena");
+  const w = arena.clientWidth;
+  const h = arena.clientHeight;
+  updateHUD();
+  let count = Math.min(10, 2 + Math.floor(currentWave * 0.6));
+  let spawnElite = currentWave % 3 === 0;
+  let isBossWave = currentWave % 10 === 0;
+  if (isBossWave) {
+    count = Math.max(3, Math.floor(count / 2));
+  }
+  for (let i = 0; i < count; i++) {
+    let type;
+    if (spawnElite && i === 0 || isBossWave && i === 0) {
+      const elites = ENEMY_TYPES.filter((e) => e.elite);
+      type = elites.length > 0 ? elites[Math.floor(Math.random() * elites.length)] : ENEMY_TYPES[ENEMY_TYPES.length - 1];
+    } else {
+      const normals = ENEMY_TYPES.filter((e) => !e.elite);
+      type = normals[Math.floor(Math.random() * normals.length)];
+    }
+    const el = document.createElement("div");
+    el.className = "dg-entity enemy flip";
+    el.innerHTML = `
+            <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+            ${spriteSVG(type.sp || type.id, 32)}
+        `;
+    const x = 20 + Math.random() * (w - 60);
+    const y = 40 + Math.random() * (h - 80);
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+    arena.appendChild(el);
+    let hpMultiplier = 1 + (currentWave - 1) * 0.15;
+    let atkMultiplier = 1 + (currentWave - 1) * 0.1;
+    if (currentWave > 10) {
+      const extra = currentWave - 10;
+      hpMultiplier *= Math.pow(1.05, extra);
+      atkMultiplier *= Math.pow(1.02, extra);
+    }
+    if (isBossWave) {
+      hpMultiplier *= 2;
+      atkMultiplier *= 1.5;
+    }
+    enemies.push({
+      id: type.id,
+      x,
+      y,
+      hp: Math.round(type.hp * hpMultiplier),
+      maxHp: Math.round(type.hp * hpMultiplier),
+      atk: Math.round(type.atk * atkMultiplier),
+      range: type.range,
+      speed: type.speed,
+      cd: 0,
+      maxCd: type.cd,
+      el,
+      type: "enemy",
+      skill: type.skill,
+      ai: type.ai
+    });
+  }
+  lastTime = performance.now();
+  if (!gameLoopId) {
+    gameLoopId = requestAnimationFrame(combatLoop);
+  }
+}
+function stopCombatLoop() {
+  if (gameLoopId) cancelAnimationFrame(gameLoopId);
+  gameLoopId = null;
+}
+function combatLoop(time) {
+  if (phase !== "combat") return;
+  const dt = (time - lastTime) / 1e3;
+  lastTime = time;
+  updateEntities(team, enemies, dt);
+  updateEntities(enemies, team, dt);
+  const arena = $id("dg-arena");
+  projectiles = projectiles.filter((p) => {
+    if (!p.target || p.target.hp <= 0) {
+      p.el.remove();
+      return false;
+    }
+    const dx = p.tx - p.x;
+    const dy = p.ty - p.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 10) {
+      applyEffect(p.from, p.target, p.fromGroup, p.toGroup, p.atk, p.skill);
+      p.el.remove();
+      return false;
+    } else {
+      const move = p.speed * dt;
+      p.x += dx / dist * move;
+      p.y += dy / dist * move;
+      p.tx = p.target.x;
+      p.ty = p.target.y - 16;
+      p.el.style.left = p.x + "px";
+      p.el.style.top = p.y + "px";
+      return true;
+    }
+  });
+  team = team.filter((e) => {
+    if (e.hp <= 0) {
+      e.el.remove();
+      return false;
+    }
+    return true;
+  });
+  enemies = enemies.filter((e) => {
+    if (e.hp <= 0) {
+      e.el.remove();
+      return false;
+    }
+    return true;
+  });
+  if (enemies.length === 0) {
+    showWaveRewards();
+    return;
+  }
+  if (team.length === 0) {
+    endDungeon(false);
+    return;
+  }
+  gameLoopId = requestAnimationFrame(combatLoop);
+}
+function spawnDmg(target, amount, type) {
+  amount = Math.round(amount);
+  const arena = $id("dg-arena");
+  const dmg = document.createElement("div");
+  dmg.className = "dg-dmg" + (type ? " " + type : "");
+  dmg.textContent = type === "miss" ? "MISS!" : (amount > 0 ? "+" : "") + amount;
+  dmg.style.left = target.x + "px";
+  dmg.style.top = target.y + "px";
+  arena.appendChild(dmg);
+  setTimeout(() => dmg.remove(), 800);
+  const pct = Math.max(0, target.hp / target.maxHp) * 100;
+  target.el.querySelector(".dg-hp-fill").style.width = pct + "%";
+}
+function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOverride) {
+  const atk = Math.round(overrideAtk || attacker.atk);
+  const skill = skillOverride || attacker.skill;
+  if (skill === "heal") {
+    target.hp = Math.min(target.maxHp, target.hp + atk);
+    spawnDmg(target, atk, "heal");
+    return;
+  }
+  if (skill === "aoe_heal") {
+    myGroup.forEach((ally) => {
+      if (ally.hp > 0 && Math.hypot(ally.x - attacker.x, ally.y - attacker.y) <= attacker.range) {
+        ally.hp = Math.min(ally.maxHp, ally.hp + atk);
+        spawnDmg(ally, atk, "heal");
+      }
+    });
+    return;
+  }
+  if (target.type === "pet") {
+    const dodgeChance = target.id === "ghostBlob" ? 0.15 : 0.05;
+    if (Math.random() < dodgeChance) {
+      spawnDmg(target, 0, "miss");
+      target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - atk);
+      return;
+    }
+  }
+  let finalDmg = atk;
+  let isCrit = false;
+  if (attacker && attacker.type === "pet") {
+    const critChance = attacker.critRate || 0.15;
+    if (Math.random() < critChance) {
+      finalDmg = Math.round(finalDmg * 1.5);
+      isCrit = true;
+    }
+  }
+  if (target.armor && target.armor > 0) {
+    finalDmg = Math.round(finalDmg * (1 - target.armor));
+  }
+  if (skill === "sniper" && attacker) {
+    const dist = Math.hypot(target.x - attacker.x, target.y - attacker.y);
+    finalDmg += Math.floor(dist * 0.2);
+  }
+  target.hp -= finalDmg;
+  target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - finalDmg);
+  spawnDmg(target, -finalDmg, isCrit ? "crit" : "");
+  if (skill === "lifesteal" && attacker) {
+    const ls = Math.floor(finalDmg * 0.5);
+    attacker.hp = Math.min(attacker.maxHp, attacker.hp + ls);
+    spawnDmg(attacker, ls, "heal");
+  }
+  if (!target.status) target.status = {};
+  if (skill === "stun" && Math.random() < 0.2) target.status.stun = 1;
+  if (skill === "poison") target.status.poison = 3;
+  if (skill === "freeze") target.status.freeze = 3;
+  if (skill === "root" && Math.random() < 0.25) target.status.root = 2;
+  if (skill === "cleave" && attacker) {
+    enemyGroup.forEach((e) => {
+      if (e !== target && e.hp > 0 && Math.hypot(e.x - target.x, e.y - target.y) <= 40) {
+        e.hp -= Math.floor(finalDmg * 0.5);
+        spawnDmg(e, -Math.floor(finalDmg * 0.5));
+      }
+    });
+  }
+  if (skill === "pierce" && attacker) {
+    enemyGroup.forEach((e) => {
+      if (e !== target && e.hp > 0) {
+        const distToTarget = Math.hypot(target.x - attacker.x, target.y - attacker.y);
+        const distToE = Math.hypot(e.x - attacker.x, e.y - attacker.y);
+        if (distToE < distToTarget + 50 && distToE > distToTarget - 50) {
+          const dot = ((e.x - attacker.x) * (target.x - attacker.x) + (e.y - attacker.y) * (target.y - attacker.y)) / (distToTarget * distToTarget);
+          if (dot > 0.8 && dot < 1.5) {
+            e.hp -= finalDmg;
+            spawnDmg(e, -finalDmg);
+          }
+        }
+      }
+    });
+  }
+}
+function updateEntities(groupA, groupB, dt) {
+  const arena = $id("dg-arena");
+  groupA.forEach((a) => {
+    if (a.hp <= 0) return;
+    if (a.cd > 0) a.cd -= dt;
+    if (!a.status) a.status = {};
+    let isStunned = false;
+    let isRooted = false;
+    let speedMult = 1;
+    let atkSpdMult = 1;
+    for (let eff in a.status) {
+      if (a.status[eff] > 0) {
+        a.status[eff] -= dt;
+        if (eff === "stun") isStunned = true;
+        if (eff === "root") isRooted = true;
+        if (eff === "freeze") {
+          speedMult *= 0.5;
+          atkSpdMult *= 0.5;
+        }
+        if (eff === "poison" && Math.random() < dt) {
+          a.hp -= 2;
+          spawnDmg(a, -2);
+        }
+        if (eff === "buff_atk") atkSpdMult *= 1.2;
+      }
+    }
+    let statusHtml = "";
+    if (a.status.stun > 0) statusHtml += '<div class="dg-status-icon dg-status-stun"></div>';
+    if (a.status.poison > 0) statusHtml += '<div class="dg-status-icon dg-status-poison"></div>';
+    if (a.status.freeze > 0) statusHtml += '<div class="dg-status-icon dg-status-freeze"></div>';
+    if (a.status.root > 0) statusHtml += '<div class="dg-status-icon dg-status-root"></div>';
+    if (a.status.taunt > 0) statusHtml += '<div class="dg-status-icon dg-status-taunt"></div>';
+    if (a.status.buff_atk > 0) statusHtml += '<div class="dg-status-icon dg-status-buff"></div>';
+    let statusDiv = a.el.querySelector(".dg-status");
+    if (!statusDiv) {
+      statusDiv = document.createElement("div");
+      statusDiv.className = "dg-status";
+      a.el.appendChild(statusDiv);
+    }
+    statusDiv.innerHTML = statusHtml;
+    if (isStunned) return;
+    let closest = null;
+    let minDist = Infinity;
+    let taunters = groupB.filter((b) => b.hp > 0 && b.status && b.status.taunt > 0);
+    let targetGroup = taunters.length > 0 ? taunters : groupB;
+    if (a.skill === "heal" || a.skill === "aoe_heal") {
+      targetGroup = groupA;
+      let minHpPct = 1;
+      targetGroup.forEach((ally) => {
+        if (ally.hp <= 0) return;
+        const dist = Math.hypot(ally.x - a.x, ally.y - a.y);
+        const hpPct = ally.hp / ally.maxHp;
+        if (hpPct < minHpPct && dist < a.range * 4) {
+          minHpPct = hpPct;
+          closest = { b: ally, dx: ally.x - a.x, dy: ally.y - a.y, dist };
+        }
+      });
+      if (!closest) {
+        targetGroup.forEach((ally) => {
+          if (ally === a || ally.hp <= 0) return;
+          const dx = ally.x - a.x;
+          const dy = ally.y - a.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < minDist) {
+            minDist = dist;
+            closest = { b: ally, dx, dy, dist };
+          }
+        });
+      }
+    } else if (a.skill === "assassin" || a.ai === "assassin") {
+      let maxDist = -1;
+      let validTargets = targetGroup.filter((b) => b.hp > 0 && b.hp - (b.incomingDmg || 0) > 0);
+      if (validTargets.length === 0) validTargets = targetGroup.filter((b) => b.hp > 0);
+      validTargets.forEach((b) => {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > maxDist) {
+          maxDist = dist;
+          closest = { b, dx, dy, dist };
+        }
+      });
+    } else {
+      let validTargets = targetGroup.filter((b) => b.hp > 0 && b.hp - (b.incomingDmg || 0) > 0);
+      if (validTargets.length === 0) validTargets = targetGroup.filter((b) => b.hp > 0);
+      validTargets.forEach((b) => {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = { b, dx, dy, dist };
+        }
+      });
+    }
+    a.el.classList.remove("walk");
+    if (closest) {
+      if (closest.dx < 0 && a.type === "pet") a.el.classList.add("flip");
+      else if (closest.dx >= 0 && a.type === "pet") a.el.classList.remove("flip");
+      if (closest.dx > 0 && a.type === "enemy") a.el.classList.add("flip");
+      else if (closest.dx <= 0 && a.type === "enemy") a.el.classList.remove("flip");
+      let isRanged = a.range >= 80 || a.ai === "ranged";
+      let inRange = closest.dist <= a.range || a.skill === "heal" && closest.dist <= 10;
+      let tooClose = isRanged && closest.dist < a.range * 0.4 && closest.b.type !== a.type;
+      if (tooClose && !isRooted) {
+        a.el.classList.add("walk");
+        const speed = a.speed * speedMult * dt;
+        a.x -= closest.dx / closest.dist * speed;
+        a.y -= closest.dy / closest.dist * speed;
+        const arenaRect = arena.getBoundingClientRect();
+        a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
+        a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
+        a.el.style.left = a.x + "px";
+        a.el.style.top = a.y + "px";
+      } else if (!inRange && !isRooted) {
+        a.el.classList.add("walk");
+        const speed = a.speed * speedMult * dt;
+        if ((a.skill === "assassin" || a.ai === "assassin") && closest.dist > 150) {
+          a.x = closest.b.x + (closest.dx > 0 ? -30 : 30);
+          a.y = closest.b.y;
+        } else {
+          a.x += closest.dx / closest.dist * speed;
+          a.y += closest.dy / closest.dist * speed;
+        }
+        const arenaRect = arena.getBoundingClientRect();
+        a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
+        a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
+        a.el.style.left = a.x + "px";
+        a.el.style.top = a.y + "px";
+      }
+      if (inRange) {
+        if (a.cd <= 0) {
+          a.cd = a.maxCd / atkSpdMult;
+          a.el.classList.add("attack");
+          setTimeout(() => {
+            if (a.el) a.el.classList.remove("attack");
+          }, 200);
+          if (a.skill === "frenzy") {
+            if (!a.frenzyStacks) a.frenzyStacks = 0;
+            a.frenzyStacks = Math.min(10, a.frenzyStacks + 1);
+            a.cd = a.maxCd / (1 + a.frenzyStacks * 0.05);
+          }
+          if (a.skill === "taunt") {
+            a.status.taunt = 3;
+          }
+          if (a.skill === "buff_atk") {
+            groupA.forEach((ally) => {
+              if (ally.hp > 0 && Math.hypot(ally.x - a.x, ally.y - a.y) < 100) {
+                if (!ally.status) ally.status = {};
+                ally.status.buff_atk = 2;
+              }
+            });
+          }
+          if (isRanged && a.skill !== "heal" && a.skill !== "aoe_heal") {
+            closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
+            let p = {
+              x: a.x,
+              y: a.y - 16,
+              tx: closest.b.x,
+              ty: closest.b.y - 16,
+              target: closest.b,
+              atk: a.atk,
+              skill: a.skill,
+              from: a,
+              fromGroup: groupA,
+              toGroup: targetGroup,
+              speed: 300,
+              el: document.createElement("div")
+            };
+            p.el.className = "dg-projectile";
+            p.el.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#f0d" /></svg>';
+            p.el.style.left = p.x + "px";
+            p.el.style.top = p.y + "px";
+            arena.appendChild(p.el);
+            if (a.skill === "multishot") {
+              projectiles.push(p);
+              let target2 = targetGroup[Math.floor(Math.random() * targetGroup.length)];
+              let target3 = targetGroup[Math.floor(Math.random() * targetGroup.length)];
+              if (target2 && target2 !== p.target) {
+                target2.incomingDmg = (target2.incomingDmg || 0) + a.atk * 0.5;
+                let p2 = { ...p, tx: target2.x, ty: target2.y - 16, target: target2, atk: a.atk * 0.5, el: p.el.cloneNode(true) };
+                arena.appendChild(p2.el);
+                projectiles.push(p2);
+              }
+              if (target3 && target3 !== p.target && target3 !== target2) {
+                target3.incomingDmg = (target3.incomingDmg || 0) + a.atk * 0.5;
+                let p3 = { ...p, tx: target3.x, ty: target3.y - 16, target: target3, atk: a.atk * 0.5, el: p.el.cloneNode(true) };
+                arena.appendChild(p3.el);
+                projectiles.push(p3);
+              }
+            } else {
+              projectiles.push(p);
+            }
+          } else {
+            closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
+            applyEffect(a, closest.b, groupA, targetGroup);
+          }
+        }
+      }
+    }
+  });
+}
+function endDungeon(isWin) {
+  phase = "end";
+  stopCombatLoop();
+  projectiles.forEach((p) => p.el.remove());
+  projectiles = [];
+  const surrenderBtn = $id("dg-surrender-btn");
+  if (surrenderBtn) surrenderBtn.style.display = "none";
+  const arena = $id("dg-arena");
+  const overlay = document.createElement("div");
+  overlay.className = "dg-overlay";
+  ctx.S.coins += totalGold;
+  if (!ctx.S.dungeonBest) ctx.S.dungeonBest = { wave: 0, gold: 0 };
+  let isNewRecord = false;
+  if (currentWave > ctx.S.dungeonBest.wave) {
+    ctx.S.dungeonBest.wave = currentWave;
+    ctx.S.dungeonBest.gold = totalGold;
+    isNewRecord = true;
+  } else if (currentWave === ctx.S.dungeonBest.wave && totalGold > ctx.S.dungeonBest.gold) {
+    ctx.S.dungeonBest.gold = totalGold;
+    isNewRecord = true;
+  }
+  save();
+  renderStatus();
+  let rewardText = `<div style="color:white; font-size: 16px;">Ph\u1EA7n th\u01B0\u1EDFng: ${spriteSVG("coin", 16).replace("display:block", "display:inline-block; vertical-align:middle; margin-top:-2px")} ${totalGold} G<br/>S\u1ED1ng s\xF3t \u0111\u1EBFn Wave ${currentWave}</div>`;
+  const recordHtml = isNewRecord ? '<div class="dg-new-record">\u{1F3C6} K\u1EF6 L\u1EE4C M\u1EDAI! \u{1F3C6}</div>' : `<div style="color:#b08a5c; font-size:13px;">K\u1EF7 l\u1EE5c: Wave ${ctx.S.dungeonBest.wave} \xB7 ${ctx.S.dungeonBest.gold} G</div>`;
+  overlay.innerHTML = `
+        <div class="dg-title">Game Over</div>
+        ${rewardText}
+        ${recordHtml}
+        <div class="buy" id="dg-finish-btn" style="margin-top: 10px;">Tho\xE1t H\u1EA7m Ng\u1EE5c</div>
+    `;
+  arena.appendChild(overlay);
+  overlay.querySelector("#dg-finish-btn").addEventListener("click", () => {
+    closeDungeonView();
+  });
+}
+function showWaveRewards() {
+  phase = "end";
+  stopCombatLoop();
+  projectiles.forEach((p) => p.el.remove());
+  projectiles = [];
+  const isBoss = currentWave % 10 === 0;
+  const waveGold = (100 + currentWave * 50) * (isBoss ? 3 : 1);
+  totalGold += waveGold;
+  const arena = $id("dg-arena");
+  fullTeam.forEach((p) => {
+    if (p.hp <= 0) {
+      p.hp = p.maxHp * 0.5;
+      arena.appendChild(p.el);
+    } else {
+      p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2);
+    }
+    const pct = Math.max(0, p.hp / p.maxHp) * 100;
+    p.el.querySelector(".dg-hp-fill").style.width = pct + "%";
+    p.status = {};
+  });
+  team = [...fullTeam];
+  const overlay = document.createElement("div");
+  overlay.className = "dg-overlay";
+  overlay.style.backgroundColor = "rgba(0,0,0,0.85)";
+  const allRewards = [
+    { id: "heal", name: "H\u1ED3i M\xE1u", desc: "H\u1ED3i 100% HP cho to\xE0n \u0111\u1ED9i", color: "#4caf50" },
+    { id: "buff", name: "C\u01B0\u1EDDng H\xF3a", desc: "T\u0103ng ng\u1EABu nhi\xEAn 10-30% HP ho\u1EB7c ATK cho to\xE0n \u0111\u1ED9i", color: "#2196f3" },
+    { id: "ascend", name: "Th\u0103ng Hoa", desc: "Ch\u1ECDn 1 Pet \u0111\u1EC3 x1.5 Ch\u1EC9 S\u1ED1", color: "#9c27b0" },
+    { id: "gold", name: "Kho B\xE1u", desc: `Nh\u1EADn th\xEAm ${waveGold * 2} G ngay l\u1EADp t\u1EE9c`, color: "#ffeb3b" },
+    { id: "blood", name: "Huy\u1EBFt Chi\u1EBFn", desc: "Gi\u1EA3m 20% HP t\u1ED1i \u0111a c\u1EE7a to\xE0n \u0111\u1ED9i nh\u01B0ng t\u0103ng 50% ATK", color: "#f44336" },
+    { id: "steel", name: "B\u1EE9c T\u01B0\u1EDDng Th\xE9p", desc: "T\u0103ng 50% HP t\u1ED1i \u0111a nh\u01B0ng gi\u1EA3m 10% ATK", color: "#607d8b" },
+    { id: "speed", name: "T\u1ED1c Chi\u1EBFn", desc: "T\u0103ng 30% t\u1ED1c \u0111\xE1nh cho to\xE0n \u0111\u1ED9i", color: "#00bcd4" },
+    { id: "armor", name: "H\u1ED9 Gi\xE1p", desc: "Gi\u1EA3m 20% s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o cho to\xE0n \u0111\u1ED9i", color: "#78909c" },
+    { id: "ambush", name: "Ph\u1EE5c K\xEDch", desc: "T\u0103ng t\u1EF7 l\u1EC7 ch\xED m\u1EA1ng l\xEAn 30% cho to\xE0n \u0111\u1ED9i", color: "#ff5722" }
+  ];
+  const shuffled = allRewards.sort(() => 0.5 - Math.random());
+  const choices = shuffled.slice(0, 3);
+  let cardsHtml = "";
+  choices.forEach((c) => {
+    cardsHtml += `
+            <div class="dg-reward-card" id="rew-${c.id}" style="border-top: 4px solid ${c.color}">
+                <h4>${c.name}</h4>
+                <p>${c.desc}</p>
+            </div>
+        `;
+  });
+  let bossDropHtml = "";
+  if (isBoss) {
+    if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+    const r = Math.random();
+    let dropText = "";
+    if (r < 0.01) {
+      ctx.S.tickets.super = (ctx.S.tickets.super || 0) + 1;
+      dropText = "1 V\xE9 Si\xEAu C\u01B0\u1EDDng";
+    } else if (r < 0.4) {
+      ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 2;
+      dropText = "2 V\xE9 \u0110\u1EB7c Bi\u1EC7t";
+    } else {
+      ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 3;
+      dropText = "3 V\xE9 Th\u01B0\u1EDDng";
+    }
+    bossDropHtml = `<div style="color:#4caf50; margin-bottom:15px; font-weight:bold; font-size:16px;">\u2728 R\u01A1i ra t\u1EEB Boss: ${dropText}! \u2728</div>`;
+    save();
+  }
+  overlay.innerHTML = `
+        <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Ho\xE0n Th\xE0nh!</div>
+        <div style="color:white; margin-bottom: 10px;">Nh\u1EADn \u0111\u01B0\u1EE3c ${waveGold} G (T\u1ED5ng: ${totalGold} G)</div>
+        ${bossDropHtml}
+        <div style="display:flex; gap: 15px; flex-wrap:wrap; justify-content:center;">
+            ${cardsHtml}
+        </div>
+    `;
+  arena.appendChild(overlay);
+  choices.forEach((c) => {
+    overlay.querySelector("#rew-" + c.id).onclick = () => {
+      if (c.id === "heal") {
+        fullTeam.forEach((p) => p.hp = p.maxHp);
+        nextWaveSequence(overlay);
+      } else if (c.id === "buff") {
+        const isAtk = Math.random() > 0.5;
+        const amt = 1.1 + Math.random() * 0.2;
+        fullTeam.forEach((p) => {
+          if (isAtk) p.atk = Math.round(p.atk * amt);
+          else {
+            p.maxHp = Math.round(p.maxHp * amt);
+            p.hp = Math.round(p.hp * amt);
+          }
+        });
+        nextWaveSequence(overlay);
+      } else if (c.id === "ascend") {
+        overlay.innerHTML = '<div class="dg-title">Ch\u1ECDn 1 Pet Th\u0103ng Hoa</div><div id="dg-pet-select" style="display:flex; gap: 10px; margin-top:20px; flex-wrap:wrap; justify-content:center;"></div>';
+        const selectContainer = overlay.querySelector("#dg-pet-select");
+        fullTeam.forEach((p) => {
+          const btn = document.createElement("div");
+          btn.className = "dg-reward-card";
+          btn.style.width = "80px";
+          btn.innerHTML = petSVG(p.id, 48);
+          btn.onclick = () => {
+            p.maxHp = Math.round(p.maxHp * 1.5);
+            p.hp = p.maxHp;
+            p.atk = Math.round(p.atk * 1.5);
+            nextWaveSequence(overlay);
+          };
+          selectContainer.appendChild(btn);
+        });
+      } else if (c.id === "gold") {
+        totalGold += waveGold * 2;
+        nextWaveSequence(overlay);
+      } else if (c.id === "blood") {
+        fullTeam.forEach((p) => {
+          p.maxHp = Math.round(p.maxHp * 0.8);
+          p.hp = Math.min(p.hp, p.maxHp);
+          p.atk = Math.round(p.atk * 1.5);
+        });
+        nextWaveSequence(overlay);
+      } else if (c.id === "steel") {
+        fullTeam.forEach((p) => {
+          p.maxHp = Math.round(p.maxHp * 1.5);
+          p.hp = Math.round(p.hp * 1.5);
+          p.atk = Math.round(p.atk * 0.9);
+        });
+        nextWaveSequence(overlay);
+      } else if (c.id === "speed") {
+        fullTeam.forEach((p) => {
+          p.maxCd = Math.round(p.maxCd * 70) / 100;
+        });
+        nextWaveSequence(overlay);
+      } else if (c.id === "armor") {
+        fullTeam.forEach((p) => {
+          p.armor = Math.min(0.6, (p.armor || 0) + 0.2);
+        });
+        nextWaveSequence(overlay);
+      } else if (c.id === "ambush") {
+        fullTeam.forEach((p) => {
+          p.critRate = Math.min(0.6, (p.critRate || 0.15) + 0.15);
+        });
+        nextWaveSequence(overlay);
+      }
+    };
+  });
+}
+function nextWaveSequence(overlay) {
+  overlay.remove();
+  currentWave++;
+  fullTeam.forEach((p) => {
+    const pct = Math.max(0, Math.min(100, p.hp / p.maxHp * 100));
+    p.el.querySelector(".dg-hp-fill").style.width = pct + "%";
+  });
+  startWave();
 }
 
 // src/destroy.js

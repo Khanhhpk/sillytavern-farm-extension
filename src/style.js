@@ -115,7 +115,7 @@ export const styleCSS = `
     .pet.walk .pbody { animation: pethop var(--hopd, .33s) linear infinite; }   /* v0.7①: đi bộ = nhảy liên tiếp theo đường parabol */
     .pet[data-pet="cloudMallow"] .pbody,
     .pet[data-pet="ghostBlob"] .pbody,
-    .pet[data-pet="bunny"] .pbody { animation: petfloat 3.2s ease-in-out infinite; }  /* Mây / ma / sứa: kiểu bay lơ lửng (đè lên walk) */
+    .pet[data-pet="jellyfish"] .pbody { animation: petfloat 3.2s ease-in-out infinite; }  /* Mây / ma / sứa: kiểu bay lơ lửng (đè lên walk) */
     .pet.sleep .pbody { animation: petsleep 3.6s ease-in-out infinite; }   /* v0.7②: ngủ = thở chậm (đè lên bay, ma cũng phải hạ cánh mà ngủ) */
     .pet.flip .pbody img { transform: scaleX(-1); }
     .zzz { position: absolute; bottom: calc(100% - 8px); left: 68%; font-size: 12px; font-weight: bold;
@@ -356,6 +356,78 @@ export const styleCSS = `
     .gacha-item-card.rarity-Hiếm { border-color: #4a90e2 !important; background: #f0f7ff !important; }
     .gacha-item-card.rarity-Sử-thi { border-color: #a335ee !important; background: #faf0ff !important; }
     .gacha-item-card.rarity-Huyền-thoại { border-color: #ff8000 !important; background: #fff8f0 !important; box-shadow: 0 0 10px rgba(255,128,0,0.6) !important; }
+    /* Dungeon View */
+    .dungeon-view { display: none; position: absolute; inset: 0; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; }
+    .dungeon-view.open { display: flex; }
+    .dg-arena { flex: 1; position: relative; border: 4px solid #3f3a50; border-radius: 8px; background: rgba(0,0,0,0.1); overflow: hidden; }
+    .dg-dock { height: 60px; background: rgba(58,48,30,.7); margin-top: 10px; border-radius: 8px; border: 2px solid #8a6a42; display: flex; align-items: center; padding: 0 10px; gap: 10px; overflow-x: auto; overflow-y: hidden; }
+    .dg-slot { width: 44px; height: 44px; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+    .dg-slot:hover { border-color: #d9ba8a; background: rgba(255,255,255,.2); }
+    .dg-slot.placed { opacity: 0.4; pointer-events: none; }
+    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; user-select: none; }
+    .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
+    .dg-entity.flip img { transform: scaleX(-1); }
+    .dg-hp-bar { position: absolute; top: -8px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
+    .dg-hp-fill { height: 100%; background: #a4dc8c; }
+    .dg-entity.enemy .dg-hp-fill { background: #e06578; }
+    .dg-dmg { position: absolute; font-size: 14px; font-weight: bold; color: #ff4444; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; pointer-events: none; z-index: 10; animation: dmgFloat 0.8s ease-out forwards; }
+    .dg-dmg.heal { color: #a4dc8c; }
+    .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
+    @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
+    .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+    .dg-title { font-size: 32px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 2px; }
+    .dg-dock::-webkit-scrollbar { height: 8px; display: block; }
+    .dg-dock::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+    .dg-dock::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 4px; }
+    .dg-info-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 250px; background: rgba(40,35,50,0.95); border-left: 2px solid #b08a5c; z-index: 30; padding: 10px; color: white; display: flex; flex-direction: column; overflow-y: auto; }
+    .dg-info-panel::-webkit-scrollbar { width: 6px; }
+    .dg-info-panel::-webkit-scrollbar-track { background: transparent; }
+    .dg-info-panel::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 3px; }
+    .dg-info-panel h3 { margin: 0 0 10px 0; color: #ffd94d; font-size: 16px; text-align: center; border-bottom: 1px solid #665; padding-bottom: 5px; }
+    .dg-info-close { position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 20px; font-weight: bold; color: #aaa; }
+    .dg-info-close:hover { color: white; }
+    .dg-info-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; }
+    .dg-info-item-icon { width: 40px; height: 40px; flex-shrink: 0; background: rgba(0,0,0,0.2); border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+    .dg-info-item-desc { font-size: 11px; line-height: 1.3; color: #ddd; }
+    .dg-info-item-desc b { color: #a4dc8c; font-size: 13px; display: block; margin-bottom: 2px; }
+    
+    .dg-projectile { position: absolute; width: 16px; height: 16px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; }
+    .dg-projectile img, .dg-projectile svg { width: 100%; height: 100%; }
+    
+    .dg-status { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; pointer-events: none; z-index: 3; }
+    .dg-status-icon { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #000; }
+    .dg-status-stun { background: #ffd700; box-shadow: 0 0 4px #ffd700; }
+    .dg-status-poison { background: #9932cc; box-shadow: 0 0 4px #9932cc; }
+    .dg-status-freeze { background: #00ffff; box-shadow: 0 0 4px #00ffff; }
+    .dg-status-root { background: #8b4513; box-shadow: 0 0 4px #8b4513; }
+    .dg-status-taunt { background: #ff4500; box-shadow: 0 0 4px #ff4500; }
+    .dg-status-buff { background: #ff8c00; box-shadow: 0 0 4px #ff8c00; }
+    
+    @keyframes dgHop {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    .dg-entity.walk > svg, .dg-entity.walk > img { animation: dgHop 0.3s linear infinite; }
+    
+    @keyframes dgAttack {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2) rotate(15deg); }
+        100% { transform: scale(1); }
+    }
+    .dg-entity.attack > svg, .dg-entity.attack > img { animation: dgAttack 0.2s ease-out forwards; }
+    
+    .dg-reward-card { background: #3c2a20; border: 2px solid #b08a5c; padding: 10px; border-radius: 8px; width: 120px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+    .dg-reward-card:hover { transform: scale(1.05); border-color: #ffda66; background: #4e382d; }
+    .dg-reward-card h4 { margin: 0 0 5px 0; color: #ffda66; }
+    .dg-reward-card p { margin: 0; font-size: 12px; color: #fff; line-height: 1.4; }
+    
+    .dg-hud { position: absolute; top: 8px; left: 10px; z-index: 25; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 6px; font-size: 13px; color: white; pointer-events: none; }
+    
+    .dg-boss-banner { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold; color: #ff2222; text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000; letter-spacing: 4px; animation: bossBlink 0.5s ease-in-out infinite alternate; pointer-events: none; background: rgba(0,0,0,0.5); }
+    @keyframes bossBlink { 0% { opacity: 0.6; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1.05); } }
+    
+    .dg-dmg.miss { color: #aaaaaa; font-style: italic; font-size: 13px; }
+    
+    .dg-new-record { color: #ffd700; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #ffd700, 0 0 30px #ff8c00; animation: newRecordPulse 0.8s ease-in-out infinite alternate; margin: 5px 0; }
+    @keyframes newRecordPulse { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
 `;
-
-
