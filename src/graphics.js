@@ -169,7 +169,7 @@ export const PET_P = {
   "....AAAAAAAA....","...AAWWAAAAAA...","...AWWAAAAAAA...","..AAAAAAAAAAAA..",
   "..AAAAAAAAAAAA..","..AAKKAAAAKKAA..","..AnAAAAAAAAnA..","..AAAAAAAAAAAA..",
   "..AAAAAAAAAAAA..","..AA.AA..AA.AA..","..zz.zz..zz.zz..","................"],
-  bunny:[
+  jellyfish:[
   "......S.........",".....SSS........","......S.........",".....IIIIII.....",
   "....IIIIIIII....","...IIBIIIIIII...","..IIBIIIIIIIII..",".IIIIYIIIIYIIII.",
   ".IIPPIISSIIPPII.",".IIIIIIIIIIIIII.","..iIIIIIIIIIIi..","...iiiiiiiiii...",
@@ -228,18 +228,18 @@ export const PET_P = {
   /* ===== v0.8c (#43): hệ thống da chuyển sắc (bộ sưu tập codex 0718) —— màu phủ theo từng sprite, giá trị có thể là màu đơn hoặc gradient tuyến tính ===== */
   const petLinear = (x1, y1, x2, y2, stops) => ({ type: 'linear', x1, y1, x2, y2, stops });
   const PET_FX = {
-    batBlob: {                                            // Bé bí ẩn: bản cam dịu thứ hai (wen chốt: pha sữa giảm độ tinh khiết nhưng giữ dòng máu cam; bản oải hương để dành cho kho da DLC)
+    mystery_blob: {                                            // Bé bí ẩn: bản cam dịu thứ hai (wen chốt: pha sữa giảm độ tinh khiết nhưng giữ dòng máu cam; bản oải hương để dành cho kho da DLC)
       o: petLinear(1, 2, 15, 14, [['0%', '#ffe0a6'], ['46%', '#f7b374'], ['100%', '#ea9060']]),
       t: petLinear(0, 7, 16, 15, [['0%', '#d18a58'], ['100%', '#b06a44']]),
       K: '#6b4548', n: '#ffcdd8',
     },
-    slimeNight: {                                         // Bé soda đào (giữ id slimeNight để không hỏng save, #43)
+    peach_soda: {                                         // Bé soda đào (giữ id slimeNight để không hỏng save, #43)
       T: petLinear(1, 2, 15, 14, [['0%', '#ffe8a6'], ['35%', '#ffbdc9'], ['64%', '#ff94bf'], ['100%', '#c99bf5']]),
       t: petLinear(0, 4, 16, 15, [['0%', '#f28bc2'], ['100%', '#9b78de']]),
       C: '#effffb', D: '#5b4568', P: '#65e0cf',
       O: petLinear(0, 0, 15, 3, [['0%', '#b9fff3'], ['100%', '#9ba7ff']]),
     },
-    bunny: {                                              // Bé sứa xoăn (giữ id bunny để không hỏng save, #43)
+    jellyfish: {                                              // Bé sứa xoăn (giữ id bunny để không hỏng save, #43)
       I: petLinear(1, 2, 15, 14, [['0%', '#c8f4ff'], ['28%', '#8cddff'], ['62%', '#58b7f2'], ['100%', '#6576dc']]),
       i: petLinear(0, 7, 16, 15, [['0%', '#579dd1'], ['100%', '#5459aa']]),
       B: '#effcff', Y: '#fff0a6', P: '#ff8fca',
@@ -291,15 +291,15 @@ export const PETS = {
     cloudMallow:{ job: 'water', name: 'Bé bông mây',  page: 1, price: 1500,  cry: ['Bông bông~', 'Vù——', '(bay lơ lửng)'], desc: 'Loại làm việc · ra sân là mây mưa nhỏ tự động tưới' },
     /* —— Trang 2 (vé vùng nước) —— */
     ghostBlob:  { name: 'Bé ma nhỏ',     page: 2, price: 1500, cry: ['Uuu~', 'Bay bay…', '(xuyên qua tay bạn)'], desc: 'Loại tìm kho báu · bay được vào những chỗ người khác không vào nổi' },
-    batBlob:    { job: 'fert', name: 'Bé bí ẩn',      page: 2, price: 1800, cry: ['……?', '(nghiêng đầu)', '?!'], desc: 'Loại làm việc · chọc một cái là bón phân hàng loạt · phân của nó bón ra cái gì thì không ai đoán nổi' },
-    bunny:      { job: 'harvest', name: 'Bé sứa xoăn', page: 2, price: 2200, cry: ['Ục grù~', '(cuộn cuộn xúc tu)', 'Bốp ục!'], desc: 'Loại làm việc · chọc một cái là xúc tu nhẹ nhàng cuộn rau chín vào balo' },   // #43: giữ id bunny để không hỏng save
+    mystery_blob:    { job: 'fert', name: 'Bé bí ẩn',      page: 2, price: 1800, cry: ['……?', '(nghiêng đầu)', '?!'], desc: 'Loại làm việc · chọc một cái là bón phân hàng loạt · phân của nó bón ra cái gì thì không ai đoán nổi' },
+    jellyfish:      { job: 'harvest', name: 'Bé sứa xoăn', page: 2, price: 2200, cry: ['Ục grù~', '(cuộn cuộn xúc tu)', 'Bốp ục!'], desc: 'Loại làm việc · chọc một cái là xúc tu nhẹ nhàng cuộn rau chín vào balo' },   // #43: giữ id bunny để không hỏng save
     impBlob:    { name: 'Bé quỷ nhỏ',    page: 2, price: 3000, cry: ['Hì hì.', 'Hư!', '(giấu cái gì đó đi)'], desc: 'Loại tìm kho báu · khi tìm kho báu sẽ tha về hạt giống bí ẩn đen sì' },
     angelBlob:  { name: 'Bé thiên thần', page: 2, price: 3000, cry: ['Ting~', '(phát sáng dịu dàng)', 'Chúc phúc cho bạn.'], desc: 'Loại tìm kho báu · khi tìm kho báu sẽ ngậm về hạt giống bí ẩn ánh lấp lánh' },
     /* —— Trang 3 (vé khu mỏ) —— */
     prismBlob:  { name: 'Bé lăng quang', page: 3, price: 8000, cry: ['Keng~', '(khúc xạ ra một dải cầu vồng)', 'Kengg!'], desc: 'Loại sản xuất · tìm kho báu mang về mảnh lăng quang (đổi được một đơn ở trang đơn hàng phù thuỷ)' },
     starBell:   { name: 'Bé chuông sao', page: 3, price: 8000, cry: ['Leng keng~', '☆!', '(lắc lắc nhẹ)'], desc: 'Loại sản xuất · tìm kho báu rung rơi mảnh ngôi sao (triệu hồi được phù thuỷ tròn)' },
     /* —— Át chủ bài (#43: giữ id slimeNight để không hỏng save; page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
-    slimeNight: { name: 'Bé soda đào',   page: 1, price: 9999, cry: ['Bốp——!', '(nổi một bong bóng nhỏ)', 'Xì~', '(vị ngòn ngọt)'], desc: 'Loại tìm kho báu · tinh linh soda vị đào · dễ thương quá mức nên đắt nhất' },
+    peach_soda: { name: 'Bé soda đào',   page: 1, price: 9999, cry: ['Bốp——!', '(nổi một bong bóng nhỏ)', 'Xì~', '(vị ngòn ngọt)'], desc: 'Loại tìm kho báu · tinh linh soda vị đào · dễ thương quá mức nên đắt nhất' },
     penguin:    { name: 'Chim cánh cụt', page: 1, price: 100000, cry: ['Pingu!', 'Núp núp~', 'Trượt tuyết nào!', 'Cánh cụt!'], desc: 'Loại đặc biệt · AFK mỗi 1 tiếng mang về 1 vé gacha ngẫu nhiên (70% vé thường, 30% vé đặc biệt)' },
   };
   export const PASSES = {

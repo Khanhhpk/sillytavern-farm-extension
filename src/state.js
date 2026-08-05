@@ -33,7 +33,18 @@ export function loadState() {
   if (!ctx.S.theme) ctx.S.theme = 'sakura';
   if (!ctx.S.page) ctx.S.page = 1;
   if (ctx.S.dragPet === undefined) ctx.S.dragPet = false;
+  const petRenameMap = { 'bunny': 'jellyfish', 'slimeNight': 'peach_soda', 'batBlob': 'mystery_blob' };
+  if (ctx.S.pets) ctx.S.pets = ctx.S.pets.map(p => petRenameMap[p] || p);
+  if (ctx.S.petsOut) ctx.S.petsOut = ctx.S.petsOut.map(p => petRenameMap[p] || p);
+  if (petRenameMap[ctx.S.dragPet]) ctx.S.dragPet = petRenameMap[ctx.S.dragPet];
   
+  Object.keys(ctx.S.jobCfg || {}).forEach(k => {
+    if (petRenameMap[k]) {
+      ctx.S.jobCfg[petRenameMap[k]] = ctx.S.jobCfg[k];
+      delete ctx.S.jobCfg[k];
+    }
+  });
+
   Object.keys(ctx.S.bag || {}).forEach(k => {
     const base = k.split('@')[0];
     if (base === 'mysbG' || base === 'mysbW' || base === 'mysbM' || base === 'moonberry') {

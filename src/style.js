@@ -115,7 +115,7 @@ export const styleCSS = `
     .pet.walk .pbody { animation: pethop var(--hopd, .33s) linear infinite; }   /* v0.7①: đi bộ = nhảy liên tiếp theo đường parabol */
     .pet[data-pet="cloudMallow"] .pbody,
     .pet[data-pet="ghostBlob"] .pbody,
-    .pet[data-pet="bunny"] .pbody { animation: petfloat 3.2s ease-in-out infinite; }  /* Mây / ma / sứa: kiểu bay lơ lửng (đè lên walk) */
+    .pet[data-pet="jellyfish"] .pbody { animation: petfloat 3.2s ease-in-out infinite; }  /* Mây / ma / sứa: kiểu bay lơ lửng (đè lên walk) */
     .pet.sleep .pbody { animation: petsleep 3.6s ease-in-out infinite; }   /* v0.7②: ngủ = thở chậm (đè lên bay, ma cũng phải hạ cánh mà ngủ) */
     .pet.flip .pbody img { transform: scaleX(-1); }
     .zzz { position: absolute; bottom: calc(100% - 8px); left: 68%; font-size: 12px; font-weight: bold;
