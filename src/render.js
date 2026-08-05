@@ -310,8 +310,8 @@ export function initRender() {
   if (k === 'expand') { toolbarOpen = true; renderToolbar(); return; }
   if (k === 'collapse') { toolbarOpen = false; mode = null; renderToolbar(); return; }
   if (mode && mode.t === k) { mode = null; renderToolbar(); return; }
-  if (k === 'seed') return pickFrom('Chọn hạt giống để gieo', ctx.S.seeds, id => CROPS[id].name, id => { mode = { t: 'seed', id }; renderToolbar(); });
-  if (k === 'fert') return pickFrom('Chọn phân bón', ctx.S.ferts, id => FERTS[id].name, id => { mode = { t: 'fert', id }; renderToolbar(); });
+  if (k === 'seed') return pickFrom('Chọn hạt giống để gieo', ctx.S.seeds, id => CROPS[id]?.name || 'Hạt giống lạ', id => { mode = { t: 'seed', id }; renderToolbar(); });
+  if (k === 'fert') return pickFrom('Chọn phân bón', ctx.S.ferts, id => FERTS[id]?.name || 'Phân bón lạ', id => { mode = { t: 'fert', id }; renderToolbar(); });
   mode = { t: k };
   renderToolbar();
 });

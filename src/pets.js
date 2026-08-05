@@ -250,7 +250,7 @@ export function petHarvest(el, cry) {                          // Bé sứa xoă
   petBubble(el, cry + ' cuộn về được: ' + ks.map(k => k + '×' + got[k]).join(', '));
 }
 export function petFert(el, cry) {                             // Bé bí ẩn: chọc một cái là bón phân hàng loạt (#42: mỗi lần đều chọn lại)
-  pickFrom('Bé bí ẩn: dùng loại phân nào?', ctx.S.ferts, x => FERTS[x].name, fid => {
+  pickFrom('Bé bí ẩn: dùng loại phân nào?', ctx.S.ferts, x => FERTS[x]?.name || 'Phân bón lạ', fid => {
     let k = 0;
     for (let pi = 0; pi < curBlocks() * 4 && ctx.S.ferts[fid] > 0; pi++) {
       const c = curPlots()[pi].crop;
@@ -258,7 +258,8 @@ export function petFert(el, cry) {                             // Bé bí ẩn: 
       if (fertilize(pi, fid, true)) k++;
     }
     const pe = sh.querySelector('.pet[data-pet="mystery_blob"]') || el;
-    petBubble(pe, cry + (k ? ' đã bón ' + k + ' ô ' + FERTS[fid].name + '!' : ' không có ô nào cần bón phân'));
+    const fname = FERTS[fid]?.name || 'loại phân này';
+    petBubble(pe, cry + (k ? ' đã bón ' + k + ' ô ' + fname + '!' : ' không có ô nào cần bón phân'));
   });
 }
 

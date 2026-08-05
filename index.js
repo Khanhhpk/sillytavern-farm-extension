@@ -1998,11 +1998,11 @@ function initUI() {
 // src/logic.js
 var fmtDur = (m) => m < 60 ? m + " ph\xFAt" : m % 60 === 0 ? m / 60 + " gi\u1EDD" : (m / 60).toFixed(1) + " gi\u1EDD";
 function growMs(cropId) {
-  return TEST_MODE ? GROW : CROPS[cropId].grow * MIN;
+  return TEST_MODE ? GROW : (CROPS[cropId]?.grow || 30) * MIN;
 }
 function regrowMs(cropId) {
-  const c = CROPS[cropId];
-  return TEST_MODE ? REGROW : (c.regrowM || Math.round(c.grow * 0.6)) * MIN;
+  const c = CROPS[cropId] || {};
+  return TEST_MODE ? REGROW : (c.regrowM || Math.round((c.grow || 30) * 0.6)) * MIN;
 }
 function plant(pi, cropId) {
   if ((ctx.S.seeds[cropId] || 0) <= 0) return toast("H\u1EBFt h\u1EA1t gi\u1ED1ng n\xE0y r\u1ED3i");
@@ -2011,19 +2011,25 @@ function plant(pi, cropId) {
     const fam = ["dream", "key", "fang"][Math.floor(Math.random() * 3)];
     realId = fam + (ctx.S.page === 2 ? "W" : ctx.S.page === 3 ? "M" : "G");
   } else {
-    const z = CROPS[cropId].zone || 1;
-    if (z !== ctx.S.page) return toast(CROPS[cropId].name + " ph\u1EA3i tr\u1ED3ng \u1EDF " + ZONE_NAME[z] + " (trang " + z + ")");
+    const c2 = CROPS[cropId];
+    if (!c2) {
+      toast("H\u1EA1t gi\u1ED1ng n\xE0y \u0111\xE3 h\u1ECFng (kh\xF4ng t\u1ED3n t\u1EA1i trong phi\xEAn b\u1EA3n n\xE0y)!");
+      ctx.S.seeds[cropId] = 0;
+      return;
+    }
+    const z = c2.zone || 1;
+    if (z !== ctx.S.page) return toast(c2.name + " ph\u1EA3i tr\u1ED3ng \u1EDF " + ZONE_NAME[z] + " (trang " + z + ")");
   }
   ctx.S.seeds[cropId]--;
   const g = growMs(realId);
   const c = { id: realId, matureAt: now() + g, wateredUntil: 0, fertUsed: {} };
-  if (CROPS[realId].regrow) c.left = REGROW_MAX;
+  if (CROPS[realId] && CROPS[realId].regrow) c.left = REGROW_MAX;
   if (isRain()) {
     c.matureAt = now() + g * 0.9;
     c.rainDay = gameDay();
   }
   const ev = todayEvent();
-  if (ev && ev.time_mult !== 1 && (!ev.favored_crop || CROPS[realId].name === ev.favored_crop)) {
+  if (ev && ev.time_mult !== 1 && (!ev.favored_crop || CROPS[realId] && CROPS[realId].name === ev.favored_crop)) {
     c.matureAt = now() + Math.round((c.matureAt - now()) * ev.time_mult);
     c.evDay = gameDay();
   }
@@ -2478,7 +2484,7 @@ function petHarvest(el, cry) {
   petBubble(el, cry + " cu\u1ED9n v\u1EC1 \u0111\u01B0\u1EE3c: " + ks.map((k) => k + "\xD7" + got[k]).join(", "));
 }
 function petFert(el, cry) {
-  pickFrom("B\xE9 b\xED \u1EA9n: d\xF9ng lo\u1EA1i ph\xE2n n\xE0o?", ctx.S.ferts, (x) => FERTS[x].name, (fid) => {
+  pickFrom("B\xE9 b\xED \u1EA9n: d\xF9ng lo\u1EA1i ph\xE2n n\xE0o?", ctx.S.ferts, (x) => FERTS[x]?.name || "Ph\xE2n b\xF3n l\u1EA1", (fid) => {
     let k = 0;
     for (let pi = 0; pi < curBlocks() * 4 && ctx.S.ferts[fid] > 0; pi++) {
       const c = curPlots()[pi].crop;
@@ -2486,7 +2492,8 @@ function petFert(el, cry) {
       if (fertilize(pi, fid, true)) k++;
     }
     const pe = sh.querySelector('.pet[data-pet="mystery_blob"]') || el;
-    petBubble(pe, cry + (k ? " \u0111\xE3 b\xF3n " + k + " \xF4 " + FERTS[fid].name + "!" : " kh\xF4ng c\xF3 \xF4 n\xE0o c\u1EA7n b\xF3n ph\xE2n"));
+    const fname = FERTS[fid]?.name || "lo\u1EA1i ph\xE2n n\xE0y";
+    petBubble(pe, cry + (k ? " \u0111\xE3 b\xF3n " + k + " \xF4 " + fname + "!" : " kh\xF4ng c\xF3 \xF4 n\xE0o c\u1EA7n b\xF3n ph\xE2n"));
   });
 }
 function initPets() {
@@ -4184,11 +4191,11 @@ function initRender() {
       renderToolbar();
       return;
     }
-    if (k === "seed") return pickFrom("Ch\u1ECDn h\u1EA1t gi\u1ED1ng \u0111\u1EC3 gieo", ctx.S.seeds, (id) => CROPS[id].name, (id) => {
+    if (k === "seed") return pickFrom("Ch\u1ECDn h\u1EA1t gi\u1ED1ng \u0111\u1EC3 gieo", ctx.S.seeds, (id) => CROPS[id]?.name || "H\u1EA1t gi\u1ED1ng l\u1EA1", (id) => {
       mode = { t: "seed", id };
       renderToolbar();
     });
-    if (k === "fert") return pickFrom("Ch\u1ECDn ph\xE2n b\xF3n", ctx.S.ferts, (id) => FERTS[id].name, (id) => {
+    if (k === "fert") return pickFrom("Ch\u1ECDn ph\xE2n b\xF3n", ctx.S.ferts, (id) => FERTS[id]?.name || "Ph\xE2n b\xF3n l\u1EA1", (id) => {
       mode = { t: "fert", id };
       renderToolbar();
     });
