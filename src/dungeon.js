@@ -11,12 +11,22 @@ let team = []; // Currently placed pets
 let enemies = []; // Spawned enemies
 
 const PET_STATS = {
-    slime: { name: 'Slime', desc: 'Chiến binh cân bằng, không có gì nổi bật.', hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
+    slime: { name: 'Slime Xanh', desc: 'Chiến binh cân bằng, không có gì nổi bật.', hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
     octo: { name: 'Bạch Tuộc', desc: 'Đánh nhanh thắng nhanh.', hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8 },
-    slimePink: { name: 'Slime Hồng', desc: 'Hồi máu: Hồi máu cho đồng minh ít máu nhất.', hp: 120, atk: 15, range: 80, speed: 35, cd: 1.5, skill: 'heal' },
+    slimePink: { name: 'Slime Hồng', desc: 'Hồi máu: Hồi máu cho đồng minh.', hp: 120, atk: 15, range: 80, speed: 35, cd: 1.5, skill: 'heal' },
+    slimeNight: { name: 'Soda Đào', desc: 'Phép thuật: Đánh xa, sát thương ổn định.', hp: 90, atk: 18, range: 100, speed: 45, cd: 1.2 },
     octoCream: { name: 'Bạch Tuộc Kem', desc: 'Máu trâu, đánh chậm.', hp: 150, atk: 12, range: 60, speed: 45, cd: 1.5 },
-    bunny: { name: 'Thỏ Nâu', desc: 'Xạ thủ: Tầm đánh cực xa, sát thương cao.', hp: 70, atk: 25, range: 150, speed: 60, cd: 1.5 },
+    bunny: { name: 'Sứa Xoăn', desc: 'Xạ thủ: Tầm đánh cực xa, sát thương cao.', hp: 70, atk: 25, range: 150, speed: 60, cd: 1.5 },
+    batBlob: { name: 'Bé Bí Ẩn', desc: 'Chiến binh bóng đêm nhanh nhẹn.', hp: 85, atk: 14, range: 50, speed: 55, cd: 1.1 },
     ghostBlob: { name: 'Ma Trắng', desc: 'Sát thủ: Luôn nhắm vào kẻ thù xa nhất.', hp: 60, atk: 35, range: 40, speed: 100, cd: 1.2, skill: 'assassin' },
+    impBlob: { name: 'Quỷ Nhỏ', desc: 'Sát thương cực khủng, máu giấy.', hp: 50, atk: 40, range: 40, speed: 60, cd: 1 },
+    angelBlob: { name: 'Thiên Thần', desc: 'Thiên sứ hồi máu liên tục.', hp: 110, atk: 10, range: 80, speed: 40, cd: 1.2, skill: 'heal' },
+    witchBlob: { name: 'Phù Thủy', desc: 'Sát thương phép thuật từ xa.', hp: 75, atk: 22, range: 120, speed: 50, cd: 1.3 },
+    starBell: { name: 'Chuông Sao', desc: 'Hỗ trợ đồng đội.', hp: 95, atk: 12, range: 90, speed: 40, cd: 1 },
+    cloudMallow: { name: 'Kẹo Dẻo Mây', desc: 'Tanker siêu trâu bò.', hp: 200, atk: 8, range: 40, speed: 30, cd: 2 },
+    dewSprout: { name: 'Mầm Sương', desc: 'Chiến binh thiên nhiên mạnh mẽ.', hp: 105, atk: 14, range: 50, speed: 45, cd: 1.2 },
+    prismBlob: { name: 'Lăng Kính', desc: 'Bắn tỉa từ xa.', hp: 80, atk: 20, range: 140, speed: 40, cd: 1.4 },
+    penguin: { name: 'Cánh Cụt', desc: 'Võ sĩ cận chiến băng giá.', hp: 120, atk: 16, range: 45, speed: 50, cd: 1 },
     // defaults
     default: { name: 'Pet Vô Danh', desc: 'Không có kỹ năng đặc biệt.', hp: 100, atk: 10, range: 40, speed: 40, cd: 1 }
 };
@@ -87,7 +97,7 @@ function initPlacementPhase() {
         <div style="display:flex; justify-content:center; margin-top: 5px;">
             <div class="buy" id="dg-start-btn">Bắt Đầu Trận Chiến</div>
             <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px;">Thoát</div>
-            <div class="buy plain" id="dg-info-btn" style="margin-left: 10px; width: 32px; padding: 0;" title="Thông tin Thú cưng">?</div>
+            <div class="buy plain" id="dg-info-btn" style="margin-left: 10px; width: 32px; padding: 0; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:white;" title="Thông tin Thú cưng">?</div>
         </div>
         <div class="dg-dock" id="dg-dock"></div>
     `;
@@ -115,7 +125,9 @@ function initPlacementPhase() {
             dragEl = document.createElement('div');
             dragEl.className = 'dg-entity pet';
             dragEl.style.pointerEvents = 'none';
+            dragEl.style.position = 'fixed';
             dragEl.style.zIndex = '1000';
+            dragEl.style.transform = 'translate(-50%, -50%)';
             dragEl.innerHTML = petSVG(petId, 32);
             document.body.appendChild(dragEl);
             
@@ -163,15 +175,65 @@ function initPlacementPhase() {
                 if (y < 20) y = 20;
                 if (y > rect.height - 20) y = rect.height - 20;
                 
+                el.style.position = 'absolute';
                 el.style.left = x + 'px';
                 el.style.top = y + 'px';
                 
                 arena.appendChild(el);
                 
-                team.push({
+                const memberObj = {
                     id: pId, x, y, hp: stat.hp, maxHp: stat.hp, atk: stat.atk,
                     range: stat.range, speed: stat.speed, cd: 0, maxCd: stat.cd, el, type: 'pet',
                     skill: stat.skill, dockSlot: currentSlot
+                };
+                team.push(memberObj);
+                
+                // Allow moving/removing placed pets
+                let isPlacedDragging = false;
+                el.addEventListener('pointerdown', (ev) => {
+                    if (phase !== 'placement') return;
+                    isPlacedDragging = true;
+                    el.style.position = 'fixed';
+                    el.style.zIndex = '1000';
+                    el.style.left = ev.clientX + 'px';
+                    el.style.top = ev.clientY + 'px';
+                    el.setPointerCapture(ev.pointerId);
+                });
+                el.addEventListener('pointermove', (ev) => {
+                    if (!isPlacedDragging) return;
+                    el.style.left = ev.clientX + 'px';
+                    el.style.top = ev.clientY + 'px';
+                });
+                el.addEventListener('pointerup', (ev) => {
+                    if (!isPlacedDragging) return;
+                    isPlacedDragging = false;
+                    el.releasePointerCapture(ev.pointerId);
+                    el.style.zIndex = '';
+                    
+                    const arect = arena.getBoundingClientRect();
+                    if (ev.clientX >= arect.left && ev.clientX <= arect.right &&
+                        ev.clientY >= arect.top && ev.clientY <= arect.bottom) {
+                        
+                        el.style.position = 'absolute';
+                        let nx = ev.clientX - arect.left;
+                        let ny = ev.clientY - arect.top;
+                        if (nx > arect.width / 2 - 20) nx = arect.width / 2 - 20;
+                        if (nx < 20) nx = 20;
+                        if (ny < 20) ny = 20;
+                        if (ny > arect.height - 20) ny = arect.height - 20;
+                        
+                        el.style.left = nx + 'px';
+                        el.style.top = ny + 'px';
+                        
+                        memberObj.x = nx;
+                        memberObj.y = ny;
+                    } else {
+                        // Removed from arena
+                        el.remove();
+                        const idx = team.indexOf(memberObj);
+                        if (idx !== -1) team.splice(idx, 1);
+                        currentSlot.classList.remove('placed');
+                    }
                 });
             }
         });
