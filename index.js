@@ -5436,19 +5436,18 @@ function initPlacementPhase() {
       dragEl.className = "dg-entity pet";
       dragEl.style.pointerEvents = "none";
       dragEl.style.position = "fixed";
-      dragEl.style.zIndex = "1000";
-      dragEl.style.transform = "translate(-50%, -50%)";
+      dragEl.style.zIndex = "100000";
       dragEl.style.transition = "none";
       dragEl.innerHTML = petSVG(petId, 32);
-      document.body.appendChild(dragEl);
-      dragEl.style.left = e.clientX + "px";
-      dragEl.style.top = e.clientY + "px";
+      arena.appendChild(dragEl);
+      dragEl.style.left = e.clientX - 16 + "px";
+      dragEl.style.top = e.clientY - 16 + "px";
       slot.setPointerCapture(e.pointerId);
     });
     slot.addEventListener("pointermove", (e) => {
       if (!draggingPet || !dragEl) return;
-      dragEl.style.left = e.clientX + "px";
-      dragEl.style.top = e.clientY + "px";
+      dragEl.style.left = e.clientX - 16 + "px";
+      dragEl.style.top = e.clientY - 16 + "px";
     });
     slot.addEventListener("pointerup", (e) => {
       if (!draggingPet || !dragEl) return;
@@ -5468,12 +5467,12 @@ function initPlacementPhase() {
                     <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
                     ${petSVG(pId, 32)}
                 `;
-        let x = e.clientX - rect.left;
-        let y = e.clientY - rect.top;
-        if (x > rect.width / 2 - 20) x = rect.width / 2 - 20;
-        if (x < 20) x = 20;
-        if (y < 20) y = 20;
-        if (y > rect.height - 20) y = rect.height - 20;
+        let x = e.clientX - rect.left - 16;
+        let y = e.clientY - rect.top - 16;
+        if (x > rect.width / 2 - 32) x = rect.width / 2 - 32;
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (y > rect.height - 32) y = rect.height - 32;
         el.style.position = "absolute";
         el.style.left = x + "px";
         el.style.top = y + "px";
@@ -5501,34 +5500,35 @@ function initPlacementPhase() {
           if (phase !== "placement") return;
           isPlacedDragging = true;
           el.style.position = "fixed";
-          el.style.zIndex = "1000";
+          el.style.zIndex = "100000";
           el.style.transition = "none";
-          el.style.left = ev.clientX + "px";
-          el.style.top = ev.clientY + "px";
+          el.style.left = ev.clientX - 16 + "px";
+          el.style.top = ev.clientY - 16 + "px";
           el.setPointerCapture(ev.pointerId);
         });
         el.addEventListener("pointermove", (ev) => {
           if (!isPlacedDragging) return;
-          el.style.left = ev.clientX + "px";
-          el.style.top = ev.clientY + "px";
+          el.style.left = ev.clientX - 16 + "px";
+          el.style.top = ev.clientY - 16 + "px";
         });
         el.addEventListener("pointerup", (ev) => {
           if (!isPlacedDragging) return;
           isPlacedDragging = false;
           el.releasePointerCapture(ev.pointerId);
           el.style.zIndex = "";
-          el.style.transition = "";
           const arect = arena.getBoundingClientRect();
           if (ev.clientX >= arect.left && ev.clientX <= arect.right && ev.clientY >= arect.top && ev.clientY <= arect.bottom) {
             el.style.position = "absolute";
-            let nx = ev.clientX - arect.left;
-            let ny = ev.clientY - arect.top;
-            if (nx > arect.width / 2 - 20) nx = arect.width / 2 - 20;
-            if (nx < 20) nx = 20;
-            if (ny < 20) ny = 20;
-            if (ny > arect.height - 20) ny = arect.height - 20;
+            let nx = ev.clientX - arect.left - 16;
+            let ny = ev.clientY - arect.top - 16;
+            if (nx > arect.width / 2 - 32) nx = arect.width / 2 - 32;
+            if (nx < 0) nx = 0;
+            if (ny < 0) ny = 0;
+            if (ny > arect.height - 32) ny = arect.height - 32;
             el.style.left = nx + "px";
             el.style.top = ny + "px";
+            el.offsetHeight;
+            el.style.transition = "";
             memberObj.x = nx;
             memberObj.y = ny;
           } else {
