@@ -284,7 +284,7 @@ export async function executeGachaRoll(isSpecial, count, updateLoadingText) {
     } else {
       const roll = Math.random() * 100;
       if (roll < 40) rewardType = 'seed';
-      else if (roll < 70) rewardType = 'fert';
+      else if (roll < 80) rewardType = 'fert';
       else if (roll < 90) rewardType = 'shard';
       else rewardType = 'unique';
     }
