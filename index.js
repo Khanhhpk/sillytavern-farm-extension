@@ -2914,13 +2914,13 @@ function openGachaModal() {
   const bodyHTML = `
     <div class="gacha-wrap" style="text-align:center; position:relative; overflow:hidden; padding:4px 0;">
       <!-- Header Th\xF4ng tin v\xE9 & Mua nhanh -->
-      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.04); padding:8px 12px; border-radius:8px; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-        <div style="font-weight:bold; font-size:14px; color:#3a2c22; text-align:left;">
-          Th\u01B0\u1EDDng: <span id="gachaNormCount" style="color:#4a7a26; font-size:14px; margin-right:8px;">${normTicket}</span> | 
-          \u0110\u1EB7c Bi\u1EC7t: <span id="gachaSpecCount" style="color:#8a2acc; font-size:14px; margin-right:8px;">${specTicket}</span> | 
-          Si\xEAu C\u01B0\u1EDDng: <span id="gachaSuperCount" style="color:#ff4500; font-size:14px;">${superTicket}</span>
+      <div style="display:flex; flex-direction:column; align-items:center; background:rgba(0,0,0,0.04); padding:8px 12px; border-radius:8px; margin-bottom:12px; gap:8px;">
+        <div style="font-weight:bold; font-size:13px; color:#3a2c22; text-align:center; display:flex; flex-wrap:wrap; justify-content:center; gap:6px;">
+          <span>Th\u01B0\u1EDDng: <span id="gachaNormCount" style="color:#4a7a26;">${normTicket}</span></span> <span style="color:#ccc;">|</span>
+          <span>\u0110\u1EB7c Bi\u1EC7t: <span id="gachaSpecCount" style="color:#8a2acc;">${specTicket}</span></span> <span style="color:#ccc;">|</span>
+          <span>Si\xEAu C\u01B0\u1EDDng: <span id="gachaSuperCount" style="color:#ff4500;">${superTicket}</span></span>
         </div>
-        <div style="display:flex; gap:6px; flex:none; flex-wrap:wrap; justify-content:flex-end;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
           <span class="buy" id="gachaBuyNormBtn" style="padding:4px 8px; font-size:11px;">+ V\xE9 Th\u01B0\u1EDDng (1000G)</span>
           <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 \u0110\u1EB7c bi\u1EC7t (5000G)</span>
           <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 Si\xEAu c\u01B0\u1EDDng (500KG)</span>

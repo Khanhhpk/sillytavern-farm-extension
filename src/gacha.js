@@ -368,13 +368,13 @@ export function openGachaModal() {
   const bodyHTML = `
     <div class="gacha-wrap" style="text-align:center; position:relative; overflow:hidden; padding:4px 0;">
       <!-- Header Thông tin vé & Mua nhanh -->
-      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.04); padding:8px 12px; border-radius:8px; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-        <div style="font-weight:bold; font-size:14px; color:#3a2c22; text-align:left;">
-          Thường: <span id="gachaNormCount" style="color:#4a7a26; font-size:14px; margin-right:8px;">${normTicket}</span> | 
-          Đặc Biệt: <span id="gachaSpecCount" style="color:#8a2acc; font-size:14px; margin-right:8px;">${specTicket}</span> | 
-          Siêu Cường: <span id="gachaSuperCount" style="color:#ff4500; font-size:14px;">${superTicket}</span>
+      <div style="display:flex; flex-direction:column; align-items:center; background:rgba(0,0,0,0.04); padding:8px 12px; border-radius:8px; margin-bottom:12px; gap:8px;">
+        <div style="font-weight:bold; font-size:13px; color:#3a2c22; text-align:center; display:flex; flex-wrap:wrap; justify-content:center; gap:6px;">
+          <span>Thường: <span id="gachaNormCount" style="color:#4a7a26;">${normTicket}</span></span> <span style="color:#ccc;">|</span>
+          <span>Đặc Biệt: <span id="gachaSpecCount" style="color:#8a2acc;">${specTicket}</span></span> <span style="color:#ccc;">|</span>
+          <span>Siêu Cường: <span id="gachaSuperCount" style="color:#ff4500;">${superTicket}</span></span>
         </div>
-        <div style="display:flex; gap:6px; flex:none; flex-wrap:wrap; justify-content:flex-end;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
           <span class="buy" id="gachaBuyNormBtn" style="padding:4px 8px; font-size:11px;">+ Vé Thường (1000G)</span>
           <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé Đặc biệt (5000G)</span>
           <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé Siêu cường (500KG)</span>
