@@ -17,7 +17,7 @@ export const CROPS = {
     douya:     { name: 'Giá đỗ',        grow: 5,   seed: 5,    sell: 12,   sp: 'sprout' },
     radish:    { name: 'Củ cải cherry', grow: 10,  seed: 25,   sell: 45,   sp: 'radish' },
     tomato:    { name: 'Cà chua',       grow: 20,  regrowM: 15, seed: 100, sell: 90,   sp: 'tomato', regrow: true },
-    moonberry: { name: 'Dâu tây',       grow: 90,  seed: 350,  sell: 800,  sp: 'moonberry' },
+    strawberry: { name: 'Dâu tây',       grow: 90,  seed: 350,  sell: 800,  sp: 'strawberry' },
     pumpkin:   { name: 'Bí ngô',        grow: 120, seed: 500,  sell: 1300, sp: 'pumpkin' },
     /* —— Vùng nước (trang 2) —— */
     chuncai:   { name: 'Rau thuần',     grow: 10,  seed: 40,   sell: 60,   sp: 'chuncai',  zone: 2 },
