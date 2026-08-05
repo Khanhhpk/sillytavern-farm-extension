@@ -2628,7 +2628,7 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
     console.log("[User Prompt]:\n", userPrompt);
     console.groupEnd();
     const ctrl = new AbortController();
-    const to = setTimeout(() => ctrl.abort(), 6e4);
+    const to = setTimeout(() => ctrl.abort(), 9e4);
     const res = await fetch(SEC.url.replace(/\/+$/, "") + "/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", ...SEC.key ? { Authorization: "Bearer " + SEC.key } : {} },
