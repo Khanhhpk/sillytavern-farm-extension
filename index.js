@@ -262,6 +262,24 @@ var SPR = {
     ".....fFFFFFFMKKKKKKMFFFFFFf.....",
     ".....fFFFFFFMKKKKKKMFFFFFFf.....",
     ".....ffffffffffffffffffffff....."
+  ],
+  dungeonGate: [
+    "................",
+    "....MMMMMMMM....",
+    "...MLLLLLLLLM...",
+    "..MLLMCMMCMLLM..",
+    "..MLMvvvvvvMLM..",
+    "..MLvVuuuuVvLM..",
+    "..MLvVuBKuVvLM..",
+    "..MLvVKuuKVvLM..",
+    "..MLvVuuWKVvLM..",
+    "..MLvVKuuuVvLM..",
+    "..MLvVKKuBVvLM..",
+    "..MLvVuKKuVvLM..",
+    "..MLvVuuuuVvLM..",
+    "..MLMvvvvvvMLM..",
+    ".MMLMvvvvvvMLMM.",
+    ".MMMMvvvvvvMMMM."
   ]
 };
 P.k = P.k || "#c4e3f0";
@@ -1735,6 +1753,25 @@ var styleCSS = `
     .gacha-item-card.rarity-Hi\u1EBFm { border-color: #4a90e2 !important; background: #f0f7ff !important; }
     .gacha-item-card.rarity-S\u1EED-thi { border-color: #a335ee !important; background: #faf0ff !important; }
     .gacha-item-card.rarity-Huy\u1EC1n-tho\u1EA1i { border-color: #ff8000 !important; background: #fff8f0 !important; box-shadow: 0 0 10px rgba(255,128,0,0.6) !important; }
+    /* Dungeon View */
+    .dungeon-view { display: none; position: absolute; inset: 0; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; }
+    .dungeon-view.open { display: flex; }
+    .dg-arena { flex: 1; position: relative; border: 4px solid #3f3a50; border-radius: 8px; background: rgba(0,0,0,0.1); overflow: hidden; }
+    .dg-dock { height: 60px; background: rgba(58,48,30,.7); margin-top: 10px; border-radius: 8px; border: 2px solid #8a6a42; display: flex; align-items: center; padding: 0 10px; gap: 10px; overflow-x: auto; }
+    .dg-slot { width: 44px; height: 44px; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+    .dg-slot:hover { border-color: #d9ba8a; background: rgba(255,255,255,.2); }
+    .dg-slot.placed { opacity: 0.4; pointer-events: none; }
+    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; user-select: none; }
+    .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
+    .dg-entity.flip img { transform: scaleX(-1); }
+    .dg-hp-bar { position: absolute; top: -8px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
+    .dg-hp-fill { height: 100%; background: #a4dc8c; }
+    .dg-entity.enemy .dg-hp-fill { background: #e06578; }
+    .dg-dmg { position: absolute; font-size: 14px; font-weight: bold; color: #ff4444; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; pointer-events: none; z-index: 10; animation: dmgFloat 0.8s ease-out forwards; }
+    .dg-dmg.heal { color: #a4dc8c; }
+    @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
+    .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+    .dg-title { font-size: 32px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 2px; }
 `;
 
 // src/ui.js
@@ -1744,6 +1781,7 @@ var $id;
 var fieldEl;
 var decoLayer;
 var fxLayer;
+var dungeonView;
 var swX = null;
 var swY = null;
 function applyTheme() {
@@ -1812,12 +1850,14 @@ function initUI() {
         <div id="witch" title="Ph\xF9 thu\u1EF7 tr\xF2n"></div>
         <div class="mode-tip" id="modetip"></div>
         <div class="toolbar" id="toolbar"></div>
+        <div class="dungeon-view" id="dungeon-view" style="display:none"></div>
       </div>
     </div>
     <div class="bottombar">
         <div class="btn" data-open="shop">${spriteSVG("shopIcon", 22)}C\u1EEDa h\xE0ng</div>
         <div class="btn" data-open="bag">${spriteSVG("bagIcon", 22)}Balo</div>
         <div class="btn" data-open="gacha">${spriteSVG("gachapon", 22)}Gachapon</div>
+        <div class="btn" data-open="dungeon">${spriteSVG("dungeonGate", 22)}H\u1EA7m ng\u1EE5c</div>
         <div class="btn" data-open="cfg">${spriteSVG("gearIcon", 22)}C\xE0i \u0111\u1EB7t</div>
     </div>
     <div class="modal" id="modal">
@@ -1855,6 +1895,7 @@ function initUI() {
   fxLayer = document.createElement("div");
   fxLayer.style.cssText = "position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:8;";
   fieldEl.appendChild(fxLayer);
+  dungeonView = $id("dungeon-view");
   ctx.ui.addEventListener("click", (e) => {
     const pager = $id("pager");
     if (pager && pager.classList.contains("open") && !e.target.closest("#pager")) pager.classList.remove("open");
@@ -3120,6 +3161,9 @@ var bagSel = {};
 function openPanel(kind) {
   if (kind === "gacha") {
     return openGachaModal();
+  }
+  if (kind === "dungeon") {
+    return openDungeonView();
   }
   if (kind === "shop") {
     const tabs = [["seed", "H\u1EA1t gi\u1ED1ng"], ["fert", "Ph\xE2n b\xF3n"], ["pet", "Th\xFA c\u01B0ng"], ["pass", "V\xE9"], ["ticket", "V\xE9 Gacha"]];
@@ -5273,6 +5317,264 @@ function save(immediate) {
   };
   if (immediate) doSave();
   else ctx.saveTimer = setTimeout(doSave, 500);
+}
+
+// src/dungeon.js
+var isDungeonOpen = false;
+var phase = "placement";
+var gameLoopId = null;
+var lastTime = 0;
+var team = [];
+var enemies = [];
+var PET_STATS = {
+  slime: { hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
+  octo: { hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8 },
+  slimePink: { hp: 120, atk: 8, range: 40, speed: 35, cd: 1.2 },
+  octoCream: { hp: 90, atk: 12, range: 60, speed: 45, cd: 0.9 },
+  bunny: { hp: 70, atk: 20, range: 120, speed: 60, cd: 1.5 },
+  // ranged
+  ghostBlob: { hp: 60, atk: 25, range: 80, speed: 70, cd: 1 },
+  // assassin
+  // defaults
+  default: { hp: 100, atk: 10, range: 40, speed: 40, cd: 1 }
+};
+var ENEMY_TYPES = [
+  { id: "tomato", hp: 80, atk: 12, range: 40, speed: 30, cd: 1 },
+  { id: "pumpkin", hp: 200, atk: 25, range: 50, speed: 20, cd: 1.5 },
+  { id: "radish", hp: 50, atk: 8, range: 30, speed: 60, cd: 0.5 }
+];
+function openDungeonView() {
+  isDungeonOpen = true;
+  const titleH1 = $id("drag").querySelector("h1");
+  titleH1.innerHTML = `\${spriteSVG('dungeonGate', 16)}Ai m\xE0 th\xE8m \u0111i Dungeon ch\u1EE9!`;
+  $id("blocks").style.display = "none";
+  $id("pager").style.display = "none";
+  $id("toolbar").style.display = "none";
+  $id("mascots").style.display = "none";
+  dungeonView.style.display = "flex";
+  initPlacementPhase();
+}
+function closeDungeonView() {
+  if (!isDungeonOpen) return;
+  isDungeonOpen = false;
+  stopCombatLoop();
+  const titleH1 = $id("drag").querySelector("h1");
+  titleH1.innerHTML = `\${spriteSVG('strawhat', 16)}Ai th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!`;
+  $id("blocks").style.display = "";
+  $id("pager").style.display = "";
+  $id("toolbar").style.display = "";
+  $id("mascots").style.display = "";
+  dungeonView.style.display = "none";
+  dungeonView.innerHTML = "";
+}
+function initPlacementPhase() {
+  phase = "placement";
+  team = [];
+  enemies = [];
+  dungeonView.innerHTML = `
+        <div class="dg-arena" id="dg-arena"></div>
+        <div style="display:flex; justify-content:center; margin-top: 5px;">
+            <div class="buy" id="dg-start-btn">B\u1EAFt \u0110\u1EA7u Tr\u1EADn Chi\u1EBFn</div>
+            <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px;">Tho\xE1t</div>
+        </div>
+        <div class="dg-dock" id="dg-dock"></div>
+    `;
+  const arena = $id("dg-arena");
+  const dock = $id("dg-dock");
+  ctx.S.pets.forEach((petId) => {
+    const slot = document.createElement("div");
+    slot.className = "dg-slot";
+    slot.innerHTML = petSVG(petId, 32);
+    slot.dataset.pet = petId;
+    slot.addEventListener("click", () => {
+      if (phase !== "placement") return;
+      if (team.length >= 4) {
+        toast("T\u1ED1i \u0111a 4 th\xE0nh vi\xEAn!");
+        return;
+      }
+      if (slot.classList.contains("placed")) return;
+      slot.classList.add("placed");
+      const stat = PET_STATS[petId] || PET_STATS.default;
+      const el = document.createElement("div");
+      el.className = "dg-entity pet";
+      el.innerHTML = `
+                <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                \${petSVG(petId, 32)}
+            `;
+      const x = 40 + Math.random() * 60;
+      const y = 40 + Math.random() * (arena.clientHeight - 80);
+      el.style.left = x + "px";
+      el.style.top = y + "px";
+      arena.appendChild(el);
+      team.push({
+        id: petId,
+        x,
+        y,
+        hp: stat.hp,
+        maxHp: stat.hp,
+        atk: stat.atk,
+        range: stat.range,
+        speed: stat.speed,
+        cd: 0,
+        maxCd: stat.cd,
+        el,
+        type: "pet",
+        dockSlot: slot
+      });
+    });
+    dock.appendChild(slot);
+  });
+  $id("dg-start-btn").addEventListener("click", () => {
+    if (team.length === 0) return toast("Ch\u01B0a ch\u1ECDn \u0111\u1ED9i h\xECnh!");
+    startCombat();
+  });
+  $id("dg-leave-btn").addEventListener("click", () => {
+    closeDungeonView();
+  });
+}
+function startCombat() {
+  phase = "combat";
+  $id("dg-dock").style.display = "none";
+  $id("dg-start-btn").style.display = "none";
+  $id("dg-leave-btn").style.display = "none";
+  const arena = $id("dg-arena");
+  const w = arena.clientWidth;
+  const h = arena.clientHeight;
+  const count = 3 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < count; i++) {
+    const type = ENEMY_TYPES[Math.floor(Math.random() * ENEMY_TYPES.length)];
+    const el = document.createElement("div");
+    el.className = "dg-entity enemy flip";
+    el.innerHTML = `
+            <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+            \${spriteSVG(type.id, 32)}
+        `;
+    const x = w - 40 - Math.random() * 60;
+    const y = 40 + Math.random() * (h - 80);
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+    arena.appendChild(el);
+    enemies.push({
+      id: type.id,
+      x,
+      y,
+      hp: type.hp,
+      maxHp: type.hp,
+      atk: type.atk,
+      range: type.range,
+      speed: type.speed,
+      cd: 0,
+      maxCd: type.cd,
+      el,
+      type: "enemy"
+    });
+  }
+  lastTime = performance.now();
+  gameLoopId = requestAnimationFrame(combatLoop);
+}
+function stopCombatLoop() {
+  if (gameLoopId) cancelAnimationFrame(gameLoopId);
+  gameLoopId = null;
+}
+function combatLoop(time) {
+  if (phase !== "combat") return;
+  const dt = (time - lastTime) / 1e3;
+  lastTime = time;
+  updateEntities(team, enemies, dt);
+  updateEntities(enemies, team, dt);
+  team = team.filter((e) => {
+    if (e.hp <= 0) {
+      e.el.remove();
+      return false;
+    }
+    return true;
+  });
+  enemies = enemies.filter((e) => {
+    if (e.hp <= 0) {
+      e.el.remove();
+      return false;
+    }
+    return true;
+  });
+  if (enemies.length === 0) {
+    endDungeon(true);
+    return;
+  }
+  if (team.length === 0) {
+    endDungeon(false);
+    return;
+  }
+  gameLoopId = requestAnimationFrame(combatLoop);
+}
+function updateEntities(groupA, groupB, dt) {
+  const arena = $id("dg-arena");
+  groupA.forEach((a) => {
+    if (a.hp <= 0) return;
+    if (a.cd > 0) a.cd -= dt;
+    let closest = null;
+    let minDist = Infinity;
+    groupB.forEach((b) => {
+      if (b.hp <= 0) return;
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = { b, dx, dy, dist };
+      }
+    });
+    if (closest) {
+      if (closest.dx < 0 && a.type === "pet") a.el.classList.add("flip");
+      else if (closest.dx >= 0 && a.type === "pet") a.el.classList.remove("flip");
+      if (closest.dx > 0 && a.type === "enemy") a.el.classList.add("flip");
+      else if (closest.dx <= 0 && a.type === "enemy") a.el.classList.remove("flip");
+      if (closest.dist <= a.range) {
+        if (a.cd <= 0) {
+          closest.b.hp -= a.atk;
+          a.cd = a.maxCd;
+          const dmg = document.createElement("div");
+          dmg.className = "dg-dmg";
+          dmg.textContent = (-a.atk).toString();
+          dmg.style.left = closest.b.x + "px";
+          dmg.style.top = closest.b.y + "px";
+          arena.appendChild(dmg);
+          setTimeout(() => dmg.remove(), 800);
+          const pct = Math.max(0, closest.b.hp / closest.b.maxHp) * 100;
+          closest.b.el.querySelector(".dg-hp-fill").style.width = pct + "%";
+        }
+      } else {
+        const speed = a.speed * dt;
+        a.x += closest.dx / closest.dist * speed;
+        a.y += closest.dy / closest.dist * speed;
+        a.el.style.left = a.x + "px";
+        a.el.style.top = a.y + "px";
+      }
+    }
+  });
+}
+function endDungeon(isWin) {
+  phase = "end";
+  stopCombatLoop();
+  const arena = $id("dg-arena");
+  const overlay = document.createElement("div");
+  overlay.className = "dg-overlay";
+  let rewardText = "";
+  if (isWin) {
+    const coins = 500 + Math.floor(Math.random() * 500);
+    ctx.S.coins += coins;
+    save();
+    renderStatus();
+    rewardText = `<div style="color:white; font-size: 16px;">Ph\u1EA7n th\u01B0\u1EDFng: \${spriteSVG('coin', 16)} \${coins} G</div>`;
+  }
+  overlay.innerHTML = `
+        <div class="dg-title">\${isWin ? 'Chi\u1EBFn Th\u1EAFng!' : 'Th\u1EA5t B\u1EA1i...'}</div>
+        \${rewardText}
+        <div class="buy" id="dg-finish-btn" style="margin-top: 10px;">Tho\xE1t H\u1EA7m Ng\u1EE5c</div>
+    `;
+  arena.appendChild(overlay);
+  overlay.querySelector("#dg-finish-btn").addEventListener("click", () => {
+    closeDungeonView();
+  });
 }
 
 // src/destroy.js
