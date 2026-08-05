@@ -5346,12 +5346,14 @@ var ENEMY_TYPES = [
 function openDungeonView() {
   isDungeonOpen = true;
   const titleH1 = $id("drag").querySelector("h1");
-  titleH1.innerHTML = `\${spriteSVG('dungeonGate', 16)}Ai m\xE0 th\xE8m \u0111i Dungeon ch\u1EE9!`;
+  titleH1.innerHTML = `${spriteSVG("dungeonGate", 16)}Ai m\xE0 th\xE8m \u0111i Dungeon ch\u1EE9!`;
   $id("blocks").style.display = "none";
   $id("pager").style.display = "none";
   $id("toolbar").style.display = "none";
   $id("mascots").style.display = "none";
   dungeonView.style.display = "flex";
+  const fieldEl2 = $id("scroll").querySelector(".field");
+  if (fieldEl2) fieldEl2.style.minHeight = "420px";
   initPlacementPhase();
 }
 function closeDungeonView() {
@@ -5359,13 +5361,15 @@ function closeDungeonView() {
   isDungeonOpen = false;
   stopCombatLoop();
   const titleH1 = $id("drag").querySelector("h1");
-  titleH1.innerHTML = `\${spriteSVG('strawhat', 16)}Ai th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!`;
+  titleH1.innerHTML = `${spriteSVG("strawhat", 16)}Ai th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!`;
   $id("blocks").style.display = "";
   $id("pager").style.display = "";
   $id("toolbar").style.display = "";
   $id("mascots").style.display = "";
   dungeonView.style.display = "none";
   dungeonView.innerHTML = "";
+  const fieldEl2 = $id("scroll").querySelector(".field");
+  if (fieldEl2) fieldEl2.style.minHeight = "";
 }
 function initPlacementPhase() {
   phase = "placement";
@@ -5399,7 +5403,7 @@ function initPlacementPhase() {
       el.className = "dg-entity pet";
       el.innerHTML = `
                 <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
-                \${petSVG(petId, 32)}
+                ${petSVG(petId, 32)}
             `;
       const x = 40 + Math.random() * 60;
       const y = 40 + Math.random() * (arena.clientHeight - 80);
@@ -5447,7 +5451,7 @@ function startCombat() {
     el.className = "dg-entity enemy flip";
     el.innerHTML = `
             <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
-            \${spriteSVG(type.id, 32)}
+            ${spriteSVG(type.id, 32)}
         `;
     const x = w - 40 - Math.random() * 60;
     const y = 40 + Math.random() * (h - 80);
@@ -5564,11 +5568,11 @@ function endDungeon(isWin) {
     ctx.S.coins += coins;
     save();
     renderStatus();
-    rewardText = `<div style="color:white; font-size: 16px;">Ph\u1EA7n th\u01B0\u1EDFng: \${spriteSVG('coin', 16)} \${coins} G</div>`;
+    rewardText = `<div style="color:white; font-size: 16px;">Ph\u1EA7n th\u01B0\u1EDFng: ${spriteSVG("coin", 16)} ${coins} G</div>`;
   }
   overlay.innerHTML = `
-        <div class="dg-title">\${isWin ? 'Chi\u1EBFn Th\u1EAFng!' : 'Th\u1EA5t B\u1EA1i...'}</div>
-        \${rewardText}
+        <div class="dg-title">${isWin ? "Chi\u1EBFn Th\u1EAFng!" : "Th\u1EA5t B\u1EA1i..."}</div>
+        ${rewardText}
         <div class="buy" id="dg-finish-btn" style="margin-top: 10px;">Tho\xE1t H\u1EA7m Ng\u1EE5c</div>
     `;
   arena.appendChild(overlay);

@@ -32,7 +32,7 @@ export function openDungeonView() {
     
     // Change Title
     const titleH1 = All.$id('drag').querySelector('h1');
-    titleH1.innerHTML = `\${spriteSVG('dungeonGate', 16)}Ai mà thèm đi Dungeon chứ!`;
+    titleH1.innerHTML = `${spriteSVG('dungeonGate', 16)}Ai mà thèm đi Dungeon chứ!`;
 
     // Hide Farm Elements
     All.$id('blocks').style.display = 'none';
@@ -42,6 +42,8 @@ export function openDungeonView() {
 
     // Show Dungeon View
     All.dungeonView.style.display = 'flex';
+    const fieldEl = All.$id('scroll').querySelector('.field');
+    if (fieldEl) fieldEl.style.minHeight = '420px';
     
     initPlacementPhase();
 }
@@ -53,7 +55,7 @@ export function closeDungeonView() {
 
     // Revert Title
     const titleH1 = All.$id('drag').querySelector('h1');
-    titleH1.innerHTML = `\${spriteSVG('strawhat', 16)}Ai thèm làm nông dân chứ!`;
+    titleH1.innerHTML = `${spriteSVG('strawhat', 16)}Ai thèm làm nông dân chứ!`;
 
     // Show Farm Elements
     All.$id('blocks').style.display = '';
@@ -64,6 +66,9 @@ export function closeDungeonView() {
     // Hide Dungeon View
     All.dungeonView.style.display = 'none';
     All.dungeonView.innerHTML = '';
+    
+    const fieldEl = All.$id('scroll').querySelector('.field');
+    if (fieldEl) fieldEl.style.minHeight = '';
 }
 
 function initPlacementPhase() {
@@ -103,7 +108,7 @@ function initPlacementPhase() {
             el.className = 'dg-entity pet';
             el.innerHTML = `
                 <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
-                \${petSVG(petId, 32)}
+                ${petSVG(petId, 32)}
             `;
             // Random placement position on left side
             const x = 40 + Math.random() * 60;
@@ -153,7 +158,7 @@ function startCombat() {
         el.className = 'dg-entity enemy flip'; // flip facing left
         el.innerHTML = `
             <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
-            \${spriteSVG(type.id, 32)}
+            ${spriteSVG(type.id, 32)}
         `;
         
         const x = w - 40 - Math.random() * 60;
@@ -296,12 +301,12 @@ function endDungeon(isWin) {
         ctx.S.coins += coins;
         All.save();
         All.renderStatus();
-        rewardText = `<div style="color:white; font-size: 16px;">Phần thưởng: \${spriteSVG('coin', 16)} \${coins} G</div>`;
+        rewardText = `<div style="color:white; font-size: 16px;">Phần thưởng: ${spriteSVG('coin', 16)} ${coins} G</div>`;
     }
     
     overlay.innerHTML = `
-        <div class="dg-title">\${isWin ? 'Chiến Thắng!' : 'Thất Bại...'}</div>
-        \${rewardText}
+        <div class="dg-title">${isWin ? 'Chiến Thắng!' : 'Thất Bại...'}</div>
+        ${rewardText}
         <div class="buy" id="dg-finish-btn" style="margin-top: 10px;">Thoát Hầm Ngục</div>
     `;
     
