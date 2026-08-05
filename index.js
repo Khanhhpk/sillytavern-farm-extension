@@ -2879,12 +2879,12 @@ async function executeGachaRoll(ticketType, count, updateLoadingText) {
       finalResults.push(uniqueResults[uIndex++]);
     } else if (plan.type === "seed") {
       const sid = seedIds[Math.floor(Math.random() * seedIds.length)];
-      const amount = isSpecial ? 5 : 2;
+      const amount = ticketType === "spec" ? 5 : 2;
       ctx.S.seeds[sid] = (ctx.S.seeds[sid] || 0) + amount;
       finalResults.push({ type: "seed", name: `H\u1EA1t ${CROPS[sid].name} \xD7${amount}`, rarity: "Th\u01B0\u1EDDng", color: "#6cb457", icon: spriteSVG(CROPS[sid].sp, 32) });
     } else if (plan.type === "fert") {
       const fid = fertIds[Math.floor(Math.random() * fertIds.length)];
-      const amount = isSpecial ? 3 : 1;
+      const amount = ticketType === "spec" ? 3 : 1;
       ctx.S.ferts[fid] = (ctx.S.ferts[fid] || 0) + amount;
       finalResults.push({ type: "fert", name: `${FERTS[fid].name} \xD7${amount}`, rarity: "Th\u01B0\u1EDDng", color: "#e8963a", icon: spriteSVG("toolFert", 32) });
     } else {
