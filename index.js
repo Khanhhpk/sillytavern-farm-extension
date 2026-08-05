@@ -1948,6 +1948,9 @@ function bagName(key) {
   return (parts[1] ? parts[1] + "\xB7" : "") + (CROPS[parts[0]] || { name: "?" }).name;
 }
 function bagPrice(key) {
+  if (key.startsWith("unique@")) {
+    return ctx.S.uniques?.[key]?.sell || 0;
+  }
   const parts = key.split("@");
   return Math.round((CROPS[parts[0]] || { sell: 0 }).sell * (parts[1] ? 1.25 : 1));
 }
@@ -2606,11 +2609,18 @@ ${contextStr}
 B\u1EA2NG M\xC0U PIXEL 32x32 CHO PH\xC9P (K\xFD t\u1EF1: M\xE3 m\xE0u Hex):
 ${paletteStr}
 
-QUY T\u1EAEC \u0110\u1EA6U RA B\u1EAET BU\u1ED8C (Ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\u1ED1i JSON):
+H\u01AF\u1EDANG D\u1EAAN T\u01AF DUY (B\u1EAFt bu\u1ED9c ph\u1EA3i c\xF3 th\u1EBB <thinking> tr\u01B0\u1EDBc khi xu\u1EA5t m\xE3):
+\u0110\u1EC3 v\u1EBD pixel art chu\u1EA9n 32x32:
+1. Ph\xE2n t\xEDch m\xE0u s\u1EAFc v\xE0 h\xECnh d\xE1ng v\u1EADt th\u1EC3 ph\xF9 h\u1EE3p v\u1EDBi m\xF4 t\u1EA3. V\u1EADt th\u1EC3 n\xEAn \u0111\u01B0\u1EE3c c\xE1ch \u0111i\u1EC7u th\xFA v\u1ECB, kh\xF4ng c\u1EA7n b\xF3 bu\u1ED9c v\xE0o n\xF4ng nghi\u1EC7p.
+2. \u0110\u1EBFm ch\xEDnh x\xE1c s\u1ED1 l\u01B0\u1EE3ng k\xFD t\u1EF1 tr\xEAn m\u1ED7i d\xF2ng. Khung canvas l\xE0 32x32, m\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng 32 k\xFD t\u1EF1, t\u1ED5ng c\u1ED9ng 32 d\xF2ng. N\u1EBFu thi\u1EBFu/th\u1EEBa k\xFD t\u1EF1, h\xECnh s\u1EBD b\u1ECB c\u1EAFt m\xE9o!
+
+QUY T\u1EAEC \u0110\u1EA6U RA B\u1EAET BU\u1ED8C:
+Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\u1ED1i m\xE3 \`\`\`json ch\u1EE9a c\u1EA5u tr\xFAc:
 {
   "name": "T\xEAn v\u1EADt ph\u1EA9m (2~5 ch\u1EEF, \u1EA5n t\u01B0\u1EE3ng, s\xE1ng t\u1EA1o)",
   "desc": "M\xF4 t\u1EA3 1 c\xE2u v\u1EC1 c\xF4ng d\u1EE5ng/hi\u1EC7u \u1EE9ng khi d\xF9ng trong c\u1ED1t truy\u1EC7n (d\u01B0\u1EDBi 35 ch\u1EEF)",
-  "spriteMap": [ m\u1EA3ng g\u1ED3m \u0111\xFAng 32 chu\u1ED7i, m\u1ED7i chu\u1ED7i D\xC0I CH\xCDNH X\xC1C 32 k\xFD t\u1EF1 ch\u1EC9 d\xF9ng k\xFD t\u1EF1 B\u1EA3ng m\xE0u v\xE0 d\u1EA5u '.' cho \u0111i\u1EC3m trong su\u1ED1t ]
+  "price": M\u1ED9t s\u1ED1 nguy\xEAn \u0111\u1ECBnh gi\xE1 G c\u1EE7a v\u1EADt ph\u1EA9m (G\u1EE3i \xFD: quanh m\u1EE9c ${rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "S\u1EED thi" ? 8e3 : 2500}G, c\xF3 th\u1EC3 t\u1EF1 do t\u0103ng gi\u1EA3m tu\u1EF3 \xFD),
+  "spriteMap": [ m\u1EA3ng g\u1ED3m \u0110\xDANG 32 chu\u1ED7i, m\u1ED7i chu\u1ED7i D\xC0I CH\xCDNH X\xC1C 32 k\xFD t\u1EF1 ch\u1EC9 d\xF9ng k\xFD t\u1EF1 B\u1EA3ng m\xE0u v\xE0 d\u1EA5u '.' cho \u0111i\u1EC3m trong su\u1ED1t ]
 }`;
     const ctrl = new AbortController();
     const to = setTimeout(() => ctrl.abort(), 15e3);
@@ -2681,6 +2691,7 @@ async function generateUniqueItem(isSpecial) {
       if (aiData) {
         finalName = aiData.name;
         finalDesc = aiData.desc;
+        if (aiData.price !== void 0) sellPrice = parseInt(aiData.price) || sellPrice;
         finalSpriteMap = aiData.spriteMap;
         break;
       }
@@ -2857,7 +2868,7 @@ function openGachaModal() {
       <div id="gachaShowcaseOverlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:40; flex-direction:column; justify-content:center; align-items:center; border-radius:8px; padding:20px; text-align:center;">
         <div id="gachaShowcaseCard" style="background:#fff; border-radius:12px; padding:20px; box-shadow:0 0 20px rgba(255,128,0,0.5); width:100%; max-width:240px; position:relative; overflow:hidden;">
           <div id="gachaShowcaseRarity" style="font-size:12px; font-weight:bold; margin-bottom:10px; text-transform:uppercase;"></div>
-          <div id="gachaShowcaseIcon" style="margin:10px auto; transform:scale(1.5);"></div>
+          <div id="gachaShowcaseIcon" style="margin:10px auto; display:flex; justify-content:center;"></div>
           <div id="gachaShowcaseName" style="font-size:18px; font-weight:bold; margin:25px 0 8px; color:#3a2c22;"></div>
           <div id="gachaShowcaseDesc" style="font-size:12px; color:#555;"></div>
           <span class="buy" id="gachaShowcaseNextBtn" style="margin-top:20px; padding:6px 24px; font-size:13px; background:#a335ee; border-color:#8a2acc;">Ti\u1EBFp t\u1EE5c</span>
@@ -3190,18 +3201,7 @@ function openPanel(kind) {
         <span class="info"><div class="name">V\xE9 Quay Th\u01B0\u1EDDng \xD7${normTk}</div><div class="meta">D\xF9ng \u1EDF m\xE1y Gachapon</div></span></div>` : "") + (specTk > 0 ? `
       <div class="item"><span class="icon">${spriteSVG("ticketSpec", 30)}</span>
         <span class="info"><div class="name">V\xE9 Quay \u0110\u1EB7c Bi\u1EC7t \xD7${specTk}</div><div class="meta">D\xF9ng \u1EDF m\xE1y Gachapon</div></span></div>` : "");
-      const uniqueRows = Object.keys(ctx.S.bag || {}).filter((k) => k.startsWith("unique@")).map((k) => {
-        const item = ctx.S.uniques?.[k] || { name: "V\u1EADt ph\u1EA9m b\xED \u1EA9n", rarity: "\u0110\u1EB7c bi\u1EC7t", desc: "", color: "#4a90e2" };
-        const count = ctx.S.bag[k];
-        return `
-        <div class="item"><span class="icon">${spriteSVG("strawhat", 30)}</span>
-          <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${count} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div>
-          <div class="meta">${item.desc || "V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t c\xF3 th\u1EC3 mang v\xE0o c\u1ED1t truy\u1EC7n"}</div></span>
-          <span class="acts">
-            <span class="ibtn" data-takeout="${k}" title="L\u1EA5y ra (mang v\xE0o c\u1ED1t truy\u1EC7n)">${spriteSVG("emBang", 16)}</span>
-          </span></div>`;
-      }).join("");
-      const relicRows = ticketRows + uniqueRows + (ctx.S.seeds.mystery > 0 ? `
+      const relicRows = ticketRows + (ctx.S.seeds.mystery > 0 ? `
       <div class="item"><span class="icon">${spriteSVG("seedLight", 30)}</span>
         <span class="info"><div class="name">H\u1EA1t gi\u1ED1ng b\xED \u1EA9n \xD7${ctx.S.seeds.mystery}</div><div class="meta">Tr\u1ED3ng xu\u1ED1ng s\u1EBD ra ng\u1EABu nhi\xEAn m\u1ED9t h\u1ECD (ch\u1ECDn khi gieo h\u1EA1t / khi ch\u1ECDc b\xE9 m\u1EA7m s\u01B0\u01A1ng)</div></span></div>` : "") + (sh2.prism > 0 ? `
       <div class="item"><span class="icon">${spriteSVG("shardPrism", 30)}</span>

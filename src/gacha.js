@@ -120,11 +120,18 @@ ${contextStr}
 BẢNG MÀU PIXEL 32x32 CHO PHÉP (Ký tự: Mã màu Hex):
 ${paletteStr}
 
-QUY TẮC ĐẦU RA BẮT BUỘC (Chỉ xuất đúng 1 khối JSON):
+HƯỚNG DẪN TƯ DUY (Bắt buộc phải có thẻ <thinking> trước khi xuất mã):
+Để vẽ pixel art chuẩn 32x32:
+1. Phân tích màu sắc và hình dáng vật thể phù hợp với mô tả. Vật thể nên được cách điệu thú vị, không cần bó buộc vào nông nghiệp.
+2. Đếm chính xác số lượng ký tự trên mỗi dòng. Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!
+
+QUY TẮC ĐẦU RA BẮT BUỘC:
+Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json chứa cấu trúc:
 {
   "name": "Tên vật phẩm (2~5 chữ, ấn tượng, sáng tạo)",
   "desc": "Mô tả 1 câu về công dụng/hiệu ứng khi dùng trong cốt truyện (dưới 35 chữ)",
-  "spriteMap": [ mảng gồm đúng 32 chuỗi, mỗi chuỗi DÀI CHÍNH XÁC 32 ký tự chỉ dùng ký tự Bảng màu và dấu '.' cho điểm trong suốt ]
+  "price": Một số nguyên định giá G của vật phẩm (Gợi ý: quanh mức ${rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : 2500}G, có thể tự do tăng giảm tuỳ ý),
+  "spriteMap": [ mảng gồm ĐÚNG 32 chuỗi, mỗi chuỗi DÀI CHÍNH XÁC 32 ký tự chỉ dùng ký tự Bảng màu và dấu '.' cho điểm trong suốt ]
 }`;
 
     const ctrl = new AbortController();
@@ -187,6 +194,7 @@ export async function generateUniqueItem(isSpecial) {
       if (aiData) {
         finalName = aiData.name;
         finalDesc = aiData.desc;
+        if (aiData.price !== undefined) sellPrice = parseInt(aiData.price) || sellPrice;
         finalSpriteMap = aiData.spriteMap;
         break;
       }
@@ -386,7 +394,7 @@ export function openGachaModal() {
       <div id="gachaShowcaseOverlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:40; flex-direction:column; justify-content:center; align-items:center; border-radius:8px; padding:20px; text-align:center;">
         <div id="gachaShowcaseCard" style="background:#fff; border-radius:12px; padding:20px; box-shadow:0 0 20px rgba(255,128,0,0.5); width:100%; max-width:240px; position:relative; overflow:hidden;">
           <div id="gachaShowcaseRarity" style="font-size:12px; font-weight:bold; margin-bottom:10px; text-transform:uppercase;"></div>
-          <div id="gachaShowcaseIcon" style="margin:10px auto; transform:scale(1.5);"></div>
+          <div id="gachaShowcaseIcon" style="margin:10px auto; display:flex; justify-content:center;"></div>
           <div id="gachaShowcaseName" style="font-size:18px; font-weight:bold; margin:25px 0 8px; color:#3a2c22;"></div>
           <div id="gachaShowcaseDesc" style="font-size:12px; color:#555;"></div>
           <span class="buy" id="gachaShowcaseNextBtn" style="margin-top:20px; padding:6px 24px; font-size:13px; background:#a335ee; border-color:#8a2acc;">Tiếp tục</span>

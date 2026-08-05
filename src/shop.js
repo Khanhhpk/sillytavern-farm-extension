@@ -203,18 +203,7 @@ export function openPanel(kind) {
         (specTk > 0 ? `
       <div class="item"><span class="icon">${spriteSVG('ticketSpec', 30)}</span>
         <span class="info"><div class="name">Vé Quay Đặc Biệt ×${specTk}</div><div class="meta">Dùng ở máy Gachapon</div></span></div>` : '');
-      const uniqueRows = Object.keys(ctx.S.bag || {}).filter(k => k.startsWith('unique@')).map(k => {
-        const item = ctx.S.uniques?.[k] || { name: 'Vật phẩm bí ẩn', rarity: 'Đặc biệt', desc: '', color: '#4a90e2' };
-        const count = ctx.S.bag[k];
-        return `
-        <div class="item"><span class="icon">${spriteSVG('strawhat', 30)}</span>
-          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${count} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div>
-          <div class="meta">${item.desc || 'Vật phẩm độc nhất có thể mang vào cốt truyện'}</div></span>
-          <span class="acts">
-            <span class="ibtn" data-takeout="${k}" title="Lấy ra (mang vào cốt truyện)">${spriteSVG('emBang', 16)}</span>
-          </span></div>`;
-      }).join('');
-      const relicRows = ticketRows + uniqueRows + (ctx.S.seeds.mystery > 0 ? `
+      const relicRows = ticketRows + (ctx.S.seeds.mystery > 0 ? `
       <div class="item"><span class="icon">${spriteSVG('seedLight', 30)}</span>
         <span class="info"><div class="name">Hạt giống bí ẩn ×${ctx.S.seeds.mystery}</div><div class="meta">Trồng xuống sẽ ra ngẫu nhiên một họ (chọn khi gieo hạt / khi chọc bé mầm sương)</div></span></div>` : '') +
         (sh2.prism > 0 ? `

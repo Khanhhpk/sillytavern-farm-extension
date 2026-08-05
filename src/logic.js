@@ -99,6 +99,9 @@ export function bagName(key) {
   return (parts[1] ? parts[1] + '·' : '') + (CROPS[parts[0]] || { name: '?' }).name;   // Dự phòng: id lạ cũng không làm nổ balo
 }
 export function bagPrice(key) {
+  if (key.startsWith('unique@')) {
+    return ctx.S.uniques?.[key]?.sell || 0;
+  }
   const parts = key.split('@');
   return Math.round((CROPS[parts[0]] || { sell: 0 }).sell * (parts[1] ? 1.25 : 1));   // Hàng đột biến bán được ×1.25
 }
