@@ -48,7 +48,7 @@ export function loadState() {
   
   if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
   if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
-  if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
+  if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
   if (!ctx.S.uniques) ctx.S.uniques = {};
 

@@ -2592,7 +2592,7 @@ function initPets() {
 var GACHA_NORM_PITY = 100;
 var GACHA_SPEC_PITY = 50;
 function initGachaState() {
-  if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
+  if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
   if (!ctx.S.uniques) ctx.S.uniques = {};
 }
@@ -4411,7 +4411,7 @@ function openBuyDlg(kind, id, returnTo = "shop") {
     if (kind === "seed") ctx.S.seeds[id] = (ctx.S.seeds[id] || 0) + n;
     else if (kind === "fert") ctx.S.ferts[id] = (ctx.S.ferts[id] || 0) + n;
     else if (kind === "ticket") {
-      if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
+      if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
       ctx.S.tickets[id] = (ctx.S.tickets[id] || 0) + n;
     }
     save();
@@ -4523,7 +4523,7 @@ function settle() {
       const PENGUIN_CD = 60 * 60 * 1e3;
       if (now() - ctx.S.petFind[id] >= PENGUIN_CD) {
         ctx.S.petFind[id] = now();
-        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
+        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
         const isSpec = Math.random() < 0.3;
         if (isSpec) ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 1;
         else ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1;
@@ -5187,7 +5187,7 @@ function loadState() {
   }));
   if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
   if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
-  if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
+  if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
   if (!ctx.S.uniques) ctx.S.uniques = {};
   Object.keys(ctx.S.uniques || {}).forEach((k) => {

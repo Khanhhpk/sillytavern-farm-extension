@@ -241,7 +241,7 @@ export function openBuyDlg(kind, id, returnTo = 'shop') {
     if (kind === 'seed') ctx.S.seeds[id] = (ctx.S.seeds[id] || 0) + n;
     else if (kind === 'fert') ctx.S.ferts[id] = (ctx.S.ferts[id] || 0) + n;
     else if (kind === 'ticket') {
-      if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
+      if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
       ctx.S.tickets[id] = (ctx.S.tickets[id] || 0) + n;
     }
     save(); renderStatus();

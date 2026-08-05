@@ -74,7 +74,7 @@ export function settle() {
       const PENGUIN_CD = 60 * 60 * 1000;
       if (now() - ctx.S.petFind[id] >= PENGUIN_CD) {
         ctx.S.petFind[id] = now();
-        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
+        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
         const isSpec = Math.random() < 0.3;
         if (isSpec) ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 1;
         else ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1;
