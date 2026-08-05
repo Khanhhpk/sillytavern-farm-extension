@@ -429,8 +429,8 @@ function _doStartWave() {
             ${spriteSVG(type.sp || type.id, 32)}
         `;
         
-        // Spawn anywhere on the right half of the arena
-        const x = (w / 2) + Math.random() * (w / 2 - 40);
+        // Spawn anywhere in the arena
+        const x = 20 + Math.random() * (w - 60);
         const y = 40 + Math.random() * (h - 80);
         
         el.style.left = x + 'px';

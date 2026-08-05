@@ -5762,7 +5762,7 @@ function _doStartWave() {
             <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
             ${spriteSVG(type.sp || type.id, 32)}
         `;
-    const x = w / 2 + Math.random() * (w / 2 - 40);
+    const x = 20 + Math.random() * (w - 60);
     const y = 40 + Math.random() * (h - 80);
     el.style.left = x + "px";
     el.style.top = y + "px";
