@@ -56,7 +56,38 @@ export function settle() {
     const pd = PETS[id];
     if (!pd || pd.job) return;
     if (ctx.S.petFind[id] == null) { ctx.S.petFind[id] = now(); wChanged = true; return; }   // Lần đầu chỉ khởi động bộ đếm
-    if (now() - ctx.S.petFind[id] < TREASURE_CD) return;
+    
+    const elapsed = now() - ctx.S.petFind[id];
+
+    // Xử lý riêng cho Chim cánh cụt (stack vé theo giờ)
+    if (id === 'penguin') {
+      const PENGUIN_CD = 60 * 60 * 1000;
+      if (elapsed >= PENGUIN_CD) {
+        const hours = Math.floor(elapsed / PENGUIN_CD);
+        ctx.S.petFind[id] += hours * PENGUIN_CD;
+        
+        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+        let normGained = 0;
+        let specGained = 0;
+        for (let i = 0; i < hours; i++) {
+          if (Math.random() < 0.3) specGained++;
+          else normGained++;
+        }
+        
+        ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + normGained;
+        ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + specGained;
+        
+        const msg = [];
+        if (normGained > 0) msg.push(`${normGained} Vé Thường`);
+        if (specGained > 0) msg.push(`${specGained} Vé Đặc Biệt`);
+        toast(`Chú chim cánh cụt vừa đi xa về mang tặng bạn: ${msg.join(' và ')}!`);
+        wChanged = true;
+      }
+      return; // Cánh cụt chuyên đi nhặt vé, không nhặt vàng rác nữa
+    }
+
+    // Xử lý cho các pet nhặt kho báu bình thường
+    if (elapsed < TREASURE_CD) return;
     ctx.S.petFind[id] = now();
     tGain += 10 + Math.floor(Math.random() * 41);      // v1.0:10~50G
     if ((id === 'impBlob' || id === 'angelBlob') && Math.random() < 0.2) {    // #29: quỷ/thiên thần độc quyền · hạt giống bí ẩn (v1.0: 20%)
@@ -69,17 +100,6 @@ export function settle() {
       const ids = Object.keys(CROPS).filter(k => !CROPS[k].hidden);   // #34: họ bí ẩn không đi theo đường tìm kho báu thường
       tSeed = ids[Math.floor(Math.random() * ids.length)];
       ctx.S.seeds[tSeed] = (ctx.S.seeds[tSeed] || 0) + 1;
-    }
-    if (id === 'penguin') {
-      const PENGUIN_CD = 60 * 60 * 1000;
-      if (now() - ctx.S.petFind[id] >= PENGUIN_CD) {
-        ctx.S.petFind[id] = now();
-        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
-        const isSpec = Math.random() < 0.3;
-        if (isSpec) ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 1;
-        else ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1;
-        toast(`Chú chim cánh cụt vừa mang về 1 Vé Quay ${isSpec ? 'Đặc Biệt' : 'Thường'}!`);
-      }
     }
     wChanged = true;
   });

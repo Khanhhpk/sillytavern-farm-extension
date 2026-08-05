@@ -4527,7 +4527,30 @@ function settle() {
       wChanged = true;
       return;
     }
-    if (now() - ctx.S.petFind[id] < TREASURE_CD) return;
+    const elapsed = now() - ctx.S.petFind[id];
+    if (id === "penguin") {
+      const PENGUIN_CD = 60 * 60 * 1e3;
+      if (elapsed >= PENGUIN_CD) {
+        const hours = Math.floor(elapsed / PENGUIN_CD);
+        ctx.S.petFind[id] += hours * PENGUIN_CD;
+        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+        let normGained = 0;
+        let specGained = 0;
+        for (let i = 0; i < hours; i++) {
+          if (Math.random() < 0.3) specGained++;
+          else normGained++;
+        }
+        ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + normGained;
+        ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + specGained;
+        const msg = [];
+        if (normGained > 0) msg.push(`${normGained} V\xE9 Th\u01B0\u1EDDng`);
+        if (specGained > 0) msg.push(`${specGained} V\xE9 \u0110\u1EB7c Bi\u1EC7t`);
+        toast(`Ch\xFA chim c\xE1nh c\u1EE5t v\u1EEBa \u0111i xa v\u1EC1 mang t\u1EB7ng b\u1EA1n: ${msg.join(" v\xE0 ")}!`);
+        wChanged = true;
+      }
+      return;
+    }
+    if (elapsed < TREASURE_CD) return;
     ctx.S.petFind[id] = now();
     tGain += 10 + Math.floor(Math.random() * 41);
     if ((id === "impBlob" || id === "angelBlob") && Math.random() < 0.2) {
@@ -4546,17 +4569,6 @@ function settle() {
       const ids = Object.keys(CROPS).filter((k) => !CROPS[k].hidden);
       tSeed = ids[Math.floor(Math.random() * ids.length)];
       ctx.S.seeds[tSeed] = (ctx.S.seeds[tSeed] || 0) + 1;
-    }
-    if (id === "penguin") {
-      const PENGUIN_CD = 60 * 60 * 1e3;
-      if (now() - ctx.S.petFind[id] >= PENGUIN_CD) {
-        ctx.S.petFind[id] = now();
-        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
-        const isSpec = Math.random() < 0.3;
-        if (isSpec) ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 1;
-        else ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1;
-        toast(`Ch\xFA chim c\xE1nh c\u1EE5t v\u1EEBa mang v\u1EC1 1 V\xE9 Quay ${isSpec ? "\u0110\u1EB7c Bi\u1EC7t" : "Th\u01B0\u1EDDng"}!`);
-      }
     }
     wChanged = true;
   });
