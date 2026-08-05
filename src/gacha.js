@@ -2,7 +2,7 @@ import { now, save } from './state.js';
 import { ctx } from './store.js';
 import * as All from './all.js';
 import { CROPS, FERTS } from './data.js';
-import { spriteSVG, petSVG, registerDynamicSprite, P } from './graphics.js';
+import { spriteSVG, petSVG, registerDynamicSprite, P, GACHA_P } from './graphics.js';
 import { toast } from './witch.js';
 import { renderStatus } from './render.js';
 import { openModal } from './shop.js';
@@ -100,7 +100,7 @@ export function generateProcedural32x32Sprite(rarity) {
 export async function generateAIUniqueItemData(rarity) {
   if (!SEC.url || !SEC.model) return null;
   try {
-    const simpleColors = Object.entries(P).filter(e => typeof e[1] === 'string');
+    const simpleColors = Object.entries(GACHA_P).filter(e => typeof e[1] === 'string');
     const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(', ');
 
     let contextStr = '';

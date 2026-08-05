@@ -118,6 +118,70 @@ var P = {
   m: "#7d5a42",
   s: "#684a36"
 };
+var GACHA_P = {
+  "0": "#ffffff",
+  "1": "#e0e0e0",
+  "2": "#c0c0c0",
+  "3": "#a0a0a0",
+  "4": "#808080",
+  "5": "#606060",
+  "6": "#404040",
+  "7": "#202020",
+  "8": "#101010",
+  "9": "#000000",
+  "a": "#ff0000",
+  "b": "#cc0000",
+  "c": "#990000",
+  "d": "#ff6666",
+  "e": "#ff9999",
+  "f": "#ff6600",
+  "g": "#cc5200",
+  "h": "#ff9933",
+  "i": "#8b4513",
+  "j": "#a0522d",
+  "k": "#cd853f",
+  "l": "#deb887",
+  "m": "#ffff00",
+  "n": "#ffd700",
+  "o": "#ffcc00",
+  "p": "#ffdab9",
+  "q": "#eee8aa",
+  "r": "#bdb76b",
+  "s": "#00ff00",
+  "t": "#32cd32",
+  "u": "#008000",
+  "v": "#006400",
+  "w": "#98fb98",
+  "x": "#90ee90",
+  "y": "#adff2f",
+  "z": "#556b2f",
+  "A": "#0000ff",
+  "B": "#0000cc",
+  "C": "#00008b",
+  "D": "#4169e1",
+  "E": "#6495ed",
+  "F": "#87ceeb",
+  "G": "#00ffff",
+  "H": "#00ced1",
+  "I": "#20b2aa",
+  "J": "#008080",
+  "K": "#7fffd4",
+  "L": "#ff00ff",
+  "M": "#c71585",
+  "N": "#800080",
+  "O": "#4b0082",
+  "P": "#9370db",
+  "Q": "#da70d6",
+  "R": "#ffc0cb",
+  "S": "#ffb6c1",
+  "T": "#ff69b4",
+  "U": "#db7093",
+  "V": "#ffe4c4",
+  "W": "#ffe4e1",
+  "X": "#faf0e6",
+  "Y": "#ffefd5",
+  "Z": "#ffebcd"
+};
 function mulberry32(a) {
   return function() {
     a |= 0;
@@ -1134,7 +1198,7 @@ function spriteSVG(name, px) {
   if (spriteCache.has(key)) return spriteCache.get(key);
   const map = SPR[name] || DYNAMIC_SPR[name] || C2[name] && C2[name].m;
   if (!map) return "";
-  const pal = SPR[name] || DYNAMIC_SPR[name] ? P : C2[name].p;
+  const pal = DYNAMIC_SPR[name] ? GACHA_P : SPR[name] ? P : C2[name].p;
   const canvas = document.createElement("canvas");
   canvas.width = map[0].length || 16;
   canvas.height = map.length || 16;
@@ -2591,7 +2655,7 @@ function generateProcedural32x32Sprite(rarity) {
 async function generateAIUniqueItemData(rarity) {
   if (!SEC.url || !SEC.model) return null;
   try {
-    const simpleColors = Object.entries(P).filter((e) => typeof e[1] === "string");
+    const simpleColors = Object.entries(GACHA_P).filter((e) => typeof e[1] === "string");
     const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(", ");
     let contextStr = "";
     if (CS.link) {
