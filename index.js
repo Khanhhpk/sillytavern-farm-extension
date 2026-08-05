@@ -2569,16 +2569,33 @@ function generateProcedural32x32Sprite(rarity) {
   }
   return map;
 }
-async function generateAISprite(promptText, size = 32) {
+async function generateAIUniqueItemData(rarity) {
   if (!SEC.url || !SEC.model) return null;
   try {
     const simpleColors = Object.entries(P).filter((e) => typeof e[1] === "string");
     const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(", ");
-    const sysPrompt = `B\u1EA1n l\xE0 chuy\xEAn gia thi\u1EBFt k\u1EBF Pixel Art (${size}x${size}). H\xE3y t\u1EA1o 1 \u0111\u1ED3 v\u1EADt pixel 32x32 theo ch\u1EE7 \u0111\u1EC1. CH\u1EC8 d\xF9ng c\xE1c k\xFD t\u1EF1 trong B\u1EA3ng m\xE0u:
+    let contextStr = "";
+    const cName = charName();
+    if (cName && CS.link) {
+      contextStr = `Nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i: ${cName}. N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, c\xF3 th\u1EC3 li\xEAn k\u1EBFt v\u1EDBi nh\xE2n v\u1EADt n\xE0y, ho\u1EB7c ho\xE0n to\xE0n t\u1EF1 do s\xE1ng t\u1EA1o ch\u1EE7 \u0111\u1EC1 ng\u1EABu nhi\xEAn kh\xE1c.`;
+    } else {
+      contextStr = `H\xE3y t\u1EF1 do t\u01B0\u1EDFng t\u01B0\u1EE3ng m\u1ED9t ch\u1EE7 \u0111\u1EC1 ng\u1EABu nhi\xEAn b\u1EA5t k\u1EF3 (k\u1EF3 \u1EA3o, vi\u1EC5n t\u01B0\u1EDFng, c\u1ED5 \u0111\u1EA1i, ma thu\u1EADt, v\u0169 tr\u1EE5, th\u1EE7y cung, phong \u1EA5n...) kh\xF4ng gi\u1EDBi h\u1EA1n.`;
+    }
+    const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m game nh\u1EADp vai v\xE0 chuy\xEAn gia Pixel Art (32x32).
+H\xE3y s\xE1ng t\u1EA1o 1 V\u1EACT PH\u1EA8M \u0110\u1ED8C NH\u1EA4T ph\u1EA9m ch\u1EA5t [${rarity}].
+${contextStr}
+
+B\u1EA2NG M\xC0U PIXEL 32x32 CHO PH\xC9P (K\xFD t\u1EF1: M\xE3 m\xE0u Hex):
 ${paletteStr}
-M\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng ${size} k\xFD t\u1EF1. D\xF9ng d\u1EA5u '.' cho \u0111i\u1EC3m trong su\u1ED1t. CH\u1EC8 XU\u1EA4T 1 kh\u1ED1i m\xE3 \`\`\`json ch\u1EE9a m\u1EA3ng g\u1ED3m \u0111\xFAng ${size} chu\u1ED7i.`;
+
+QUY T\u1EAEC \u0110\u1EA6U RA B\u1EAET BU\u1ED8C (Ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\u1ED1i JSON):
+{
+  "name": "T\xEAn v\u1EADt ph\u1EA9m (2~5 ch\u1EEF, \u1EA5n t\u01B0\u1EE3ng, s\xE1ng t\u1EA1o)",
+  "desc": "M\xF4 t\u1EA3 1 c\xE2u v\u1EC1 c\xF4ng d\u1EE5ng/hi\u1EC7u \u1EE9ng khi d\xF9ng trong c\u1ED1t truy\u1EC7n (d\u01B0\u1EDBi 35 ch\u1EEF)",
+  "spriteMap": [ m\u1EA3ng g\u1ED3m \u0111\xFAng 32 chu\u1ED7i, m\u1ED7i chu\u1ED7i D\xC0I CH\xCDNH X\xC1C 32 k\xFD t\u1EF1 ch\u1EC9 d\xF9ng k\xFD t\u1EF1 B\u1EA3ng m\xE0u v\xE0 d\u1EA5u '.' cho \u0111i\u1EC3m trong su\u1ED1t ]
+}`;
     const ctrl = new AbortController();
-    const to = setTimeout(() => ctrl.abort(), 12e3);
+    const to = setTimeout(() => ctrl.abort(), 15e3);
     const res = await fetch(SEC.url.replace(/\/+$/, "") + "/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", ...SEC.key ? { Authorization: "Bearer " + SEC.key } : {} },
@@ -2586,7 +2603,7 @@ M\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng ${size} k\xFD t\u1EF1. D
         model: SEC.model,
         messages: [
           { role: "system", content: sysPrompt },
-          { role: "user", content: "V\u1EBD v\u1EADt ph\u1EA9m pixel 32x32: " + promptText }
+          { role: "user", content: `H\xE3y s\xE1ng t\u1EA1o 1 v\u1EADt ph\u1EA9m \u0111\u1EB7c bi\u1EC7t ng\u1EABu nhi\xEAn ph\u1EA9m ch\u1EA5t ${rarity}.` }
         ]
       }),
       signal: ctrl.signal
@@ -2597,9 +2614,9 @@ M\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng ${size} k\xFD t\u1EF1. D
     const content = data.choices?.[0]?.message?.content || "";
     const jtxt = extractJson(content);
     if (jtxt) {
-      const arr = JSON.parse(jtxt);
-      if (Array.isArray(arr) && arr.length === size && arr.every((s) => typeof s === "string" && s.length === size)) {
-        return arr;
+      const o = JSON.parse(jtxt);
+      if (o && o.name && o.desc && Array.isArray(o.spriteMap) && o.spriteMap.length === 32 && o.spriteMap.every((s) => typeof s === "string" && s.length === 32)) {
+        return o;
       }
     }
   } catch (e) {
@@ -2633,80 +2650,36 @@ function generateUniqueItem(isSpecial) {
       sellPrice = 8e3;
     }
   }
-  const randomThemes = [
-    "B\u0103ng gi\xE1 c\u1ED5 \u0111\u1EA1i",
-    "V\u0169 tr\u1EE5 r\u1EF1c r\u1EE1",
-    "Th\u1EA7n tho\u1EA1i linh gi\u1EDBi",
-    "Cyberpunk k\u1EF3 \u1EA3o",
-    "Th\u1EE7y cung phong \u1EA5n",
-    "V\u0129nh h\u1EB1ng quang minh",
-    "H\u01B0 kh\xF4ng ma ph\xE1p",
-    "Th\xE1nh \u0111\u1ECBa ph\u01B0\u01A1ng \u0110\xF4ng"
-  ];
-  const prefixes = [
-    "Th\xE1nh quang",
-    "Huy\u1EC5n m\u1ED9ng",
-    "B\u0103ng gi\xE1",
-    "Th\u1EA7n tho\u1EA1i",
-    "V\u0169 tr\u1EE5",
-    "H\u01B0 kh\xF4ng",
-    "C\u1ED5 \u0111\u1EA1i",
-    "Linh kh\xED",
-    "Ma ph\xE1p",
-    "Tinh t\xFA",
-    "V\u0129nh h\u1EB1ng",
-    "Huy\u1EC1n b\xED",
-    "L\u0103ng quang"
-  ];
-  const items = [
-    "V\u01B0\u01A1ng mi\u1EC7n",
-    "Nh\u1EABn b\xE1u",
-    "Quy\u1EC1n g\u1EADy",
-    "B\xF9a h\u1ED9 m\u1EC7nh",
-    "Tinh th\u1EC3",
-    "H\u1ED9p nh\u1EA1c",
-    "Ch\xE9n th\xE1nh",
-    "\u0110\u1ED3ng h\u1ED3 c\xE1t",
-    "G\u01B0\u01A1ng \u1EA3o \u1EA3nh",
-    "Vi\xEAn ng\u1ECDc",
-    "S\xE1ch ph\xE9p",
-    "\u1EA4n hi\u1EC7u"
-  ];
-  const theme = randomThemes[Math.floor(Math.random() * randomThemes.length)];
-  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-  const itemType = items[Math.floor(Math.random() * items.length)];
-  let cName = charName();
-  let name = `${prefix} ${itemType}`;
-  if (cName && CS.link && Math.random() < 0.6) {
-    name = `${itemType} c\u1EE7a ${cName}`;
-  }
-  const desc = `V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t [${rarity}] thu\u1ED9c ch\u1EE7 \u0111\u1EC1 ${theme}. Mang theo ma l\u1EF1c k\u1EF3 di\u1EC7u, c\xF3 th\u1EC3 "L\u1EA5y ra" trong Balo \u0111\u1EC3 d\xF9ng trong c\u1ED1t truy\u1EC7n!`;
   const timestamp = now();
   const randId = Math.floor(Math.random() * 1e4);
   const key = `unique@${timestamp}_${randId}`;
   const spKey = `gacha_sp_${timestamp}_${randId}`;
+  const defaultName = `B\u1EA3o v\u1EADt \u2726 ${randId}`;
+  const defaultDesc = `V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t [${rarity}] mang theo ma l\u1EF1c k\u1EF3 di\u1EC7u. C\xF3 th\u1EC3 "L\u1EA5y ra" trong Balo \u0111\u1EC3 d\xF9ng trong c\u1ED1t truy\u1EC7n!`;
   const proceduralMap = generateProcedural32x32Sprite(rarity);
   registerDynamicSprite(spKey, proceduralMap);
   ctx.S.uniques[key] = {
     key,
-    name,
+    name: defaultName,
     rarity,
     color,
-    desc,
+    desc: defaultDesc,
     sell: sellPrice,
     sp: spKey,
     spriteMap: proceduralMap
   };
   if (SEC.url && SEC.model) {
-    generateAISprite(name + ", ch\u1EE7 \u0111\u1EC1 " + theme, 32).then((aiMap) => {
-      if (aiMap && ctx.S.uniques[key]) {
-        ctx.S.uniques[key].spriteMap = aiMap;
-        registerDynamicSprite(spKey, aiMap);
+    generateAIUniqueItemData(rarity).then((aiData) => {
+      if (aiData && ctx.S.uniques[key]) {
+        ctx.S.uniques[key].name = aiData.name;
+        ctx.S.uniques[key].desc = aiData.desc;
+        ctx.S.uniques[key].spriteMap = aiData.spriteMap;
+        registerDynamicSprite(spKey, aiData.spriteMap);
         save();
       }
     });
   }
-  return { key, name, rarity, color, desc, sell: sellPrice, sp: spKey };
+  return { key, name: defaultName, rarity, color, desc: defaultDesc, sell: sellPrice, sp: spKey };
 }
 function executeGachaRoll(isSpecial, count) {
   initGachaState();
