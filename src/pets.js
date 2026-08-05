@@ -257,7 +257,7 @@ export function petFert(el, cry) {                             // Bé bí ẩn: 
       if (!c || now() >= c.matureAt || (c.fertUsed && c.fertUsed[fid])) continue;
       if (fertilize(pi, fid, true)) k++;
     }
-    const pe = sh.querySelector('.pet[data-pet="batBlob"]') || el;
+    const pe = sh.querySelector('.pet[data-pet="mystery_blob"]') || el;
     petBubble(pe, cry + (k ? ' đã bón ' + k + ' ô ' + FERTS[fid].name + '!' : ' không có ô nào cần bón phân'));
   });
 }
