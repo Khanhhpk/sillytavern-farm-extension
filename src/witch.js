@@ -212,7 +212,7 @@ export function openPassDlg(k) {
 }
 
 /* v0.9 (#47): popup mua hàng loạt —— bấm mua hạt giống/phân bón → nhập số lượng → xác nhận, cảm giác giống hệt lúc bán (thời 72 ô thì đây là nhu cầu thiết yếu) */
-export function openBuyDlg(kind, id) {
+export function openBuyDlg(kind, id, returnTo = 'shop') {
   let def, price, name;
   if (kind === 'ticket') {
     price = id === 'norm' ? 1000 : 5000;
@@ -246,7 +246,7 @@ export function openBuyDlg(kind, id) {
     }
     save(); renderStatus();
     toast('Đã mua ' + name + ' ×' + n);
-    if (kind === 'ticket') openPanel('gacha'); else openPanel('shop');
+    openPanel(returnTo);
   });
 }
 

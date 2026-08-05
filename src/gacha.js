@@ -453,11 +453,11 @@ export function openGachaModal() {
   };
 
   All.$id('gachaBuyNormBtn')?.addEventListener('click', () => {
-    openBuyDlg('ticket', 'norm');
+    openBuyDlg('ticket', 'norm', 'gacha');
   });
 
   All.$id('gachaBuySpecBtn')?.addEventListener('click', () => {
-    openBuyDlg('ticket', 'spec');
+    openBuyDlg('ticket', 'spec', 'gacha');
   });
 
   const triggerGridResult = (isSpecial, count, results) => {

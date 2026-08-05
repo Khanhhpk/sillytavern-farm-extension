@@ -2999,10 +2999,10 @@ function openGachaModal() {
     if (barS) barS.style.width = Math.min(100, pS / GACHA_SPEC_PITY * 100) + "%";
   };
   $id("gachaBuyNormBtn")?.addEventListener("click", () => {
-    openBuyDlg("ticket", "norm");
+    openBuyDlg("ticket", "norm", "gacha");
   });
   $id("gachaBuySpecBtn")?.addEventListener("click", () => {
-    openBuyDlg("ticket", "spec");
+    openBuyDlg("ticket", "spec", "gacha");
   });
   const triggerGridResult = (isSpecial, count, results) => {
     const overlay = $id("gachaResultOverlay");
@@ -3173,16 +3173,7 @@ function openPanel(kind) {
     $id("mbody").querySelectorAll("[data-buyseed]").forEach((b) => b.addEventListener("click", () => openBuyDlg("seed", b.dataset.buyseed)));
     $id("mbody").querySelectorAll("[data-buyfert]").forEach((b) => b.addEventListener("click", () => openBuyDlg("fert", b.dataset.buyfert)));
     $id("mbody").querySelectorAll("[data-buyticket]").forEach((b) => b.addEventListener("click", () => {
-      const type = b.dataset.buyticket;
-      const cost = type === "spec" ? 5e3 : 1e3;
-      if (ctx.S.coins < cost) return toast("C\xF2n thi\u1EBFu " + (cost - ctx.S.coins).toLocaleString() + " G");
-      ctx.S.coins -= cost;
-      if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
-      ctx.S.tickets[type] = (ctx.S.tickets[type] || 0) + 1;
-      save();
-      renderStatus();
-      openPanel("shop");
-      toast("\u0110\xE3 mua 1 V\xE9 Quay " + (type === "spec" ? "\u0110\u1EB7c Bi\u1EC7t" : "Th\u01B0\u1EDDng") + "!");
+      openBuyDlg("ticket", b.dataset.buyticket, "shop");
     }));
     $id("mbody").querySelectorAll("[data-buypet]").forEach((b) => b.addEventListener("click", () => {
       const id = b.dataset.buypet, pd = PETS[id];
@@ -4368,7 +4359,7 @@ function openPassDlg(k) {
     $id("passNo").addEventListener("click", () => openPanel("shop"));
   }
 }
-function openBuyDlg(kind, id) {
+function openBuyDlg(kind, id, returnTo = "shop") {
   let def, price, name;
   if (kind === "ticket") {
     price = id === "norm" ? 1e3 : 5e3;
@@ -4406,8 +4397,7 @@ function openBuyDlg(kind, id) {
     save();
     renderStatus();
     toast("\u0110\xE3 mua " + name + " \xD7" + n);
-    if (kind === "ticket") openPanel("gacha");
-    else openPanel("shop");
+    openPanel(returnTo);
   });
 }
 var toastTimer = null;

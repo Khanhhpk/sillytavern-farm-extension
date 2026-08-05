@@ -105,14 +105,7 @@ export function openPanel(kind) {
     All.$id('mbody').querySelectorAll('[data-buyfert]').forEach(b => b.addEventListener('click', () => openBuyDlg('fert', b.dataset.buyfert)));
     All.$id('mbody').querySelectorAll('[data-buyticket]').forEach(b => b.addEventListener('click', () => {
       // @ts-ignore
-      const type = b.dataset.buyticket;
-      const cost = type === 'spec' ? 5000 : 1000;
-      if (ctx.S.coins < cost) return toast('Còn thiếu ' + (cost - ctx.S.coins).toLocaleString() + ' G');
-      ctx.S.coins -= cost;
-      if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0 };
-      ctx.S.tickets[type] = (ctx.S.tickets[type] || 0) + 1;
-      save(); renderStatus(); openPanel('shop');
-      toast('Đã mua 1 Vé Quay ' + (type === 'spec' ? 'Đặc Biệt' : 'Thường') + '!');
+      openBuyDlg('ticket', b.dataset.buyticket, 'shop');
     }));
     All.$id('mbody').querySelectorAll('[data-buypet]').forEach(b => b.addEventListener('click', () => {
       // @ts-ignore
