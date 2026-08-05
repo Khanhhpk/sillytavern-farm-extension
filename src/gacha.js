@@ -105,12 +105,10 @@ export async function generateAIUniqueItemData(rarity) {
 
     let contextStr = '';
     if (CS.link) {
-      const cName = charName();
       const worldbook = await collectWorldbook();
-      contextStr = `Nhân vật hiện tại: ${cName}.
-Trích xuất bối cảnh thế giới (Worldbook) & Lịch sử trò chuyện gần nhất:
+      contextStr = `Trích xuất bối cảnh thế giới (Worldbook) & Lịch sử trò chuyện gần nhất:
 ${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể, hãy tự do sáng tạo)'}
-Nếu thấy phù hợp, hãy liên kết thiết kế vật phẩm với bối cảnh hoặc nhân vật này, nếu không thì tự do sáng tạo.`;
+Nếu thấy phù hợp, hãy thiết kế vật phẩm liên kết với bối cảnh này, nếu không thì tự do sáng tạo.`;
     } else {
       contextStr = `Hãy tự do tưởng tượng một chủ đề ngẫu nhiên bất kỳ (kỳ ảo, viễn tưởng, cổ đại, ma thuật, vũ trụ, thủy cung, phong ấn...) không giới hạn.`;
     }

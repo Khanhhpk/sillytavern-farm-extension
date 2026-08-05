@@ -2592,12 +2592,10 @@ async function generateAIUniqueItemData(rarity) {
     const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(", ");
     let contextStr = "";
     if (CS.link) {
-      const cName = charName();
       const worldbook = await collectWorldbook();
-      contextStr = `Nh\xE2n v\u1EADt hi\u1EC7n t\u1EA1i: ${cName}.
-Tr\xEDch xu\u1EA5t b\u1ED1i c\u1EA3nh th\u1EBF gi\u1EDBi (Worldbook) & L\u1ECBch s\u1EED tr\xF2 chuy\u1EC7n g\u1EA7n nh\u1EA5t:
+      contextStr = `Tr\xEDch xu\u1EA5t b\u1ED1i c\u1EA3nh th\u1EBF gi\u1EDBi (Worldbook) & L\u1ECBch s\u1EED tr\xF2 chuy\u1EC7n g\u1EA7n nh\u1EA5t:
 ${worldbook ? worldbook : "(Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u th\u1EBF gi\u1EDBi c\u1EE5 th\u1EC3, h\xE3y t\u1EF1 do s\xE1ng t\u1EA1o)"}
-N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y li\xEAn k\u1EBFt thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m v\u1EDBi b\u1ED1i c\u1EA3nh ho\u1EB7c nh\xE2n v\u1EADt n\xE0y, n\u1EBFu kh\xF4ng th\xEC t\u1EF1 do s\xE1ng t\u1EA1o.`;
+N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m li\xEAn k\u1EBFt v\u1EDBi b\u1ED1i c\u1EA3nh n\xE0y, n\u1EBFu kh\xF4ng th\xEC t\u1EF1 do s\xE1ng t\u1EA1o.`;
     } else {
       contextStr = `H\xE3y t\u1EF1 do t\u01B0\u1EDFng t\u01B0\u1EE3ng m\u1ED9t ch\u1EE7 \u0111\u1EC1 ng\u1EABu nhi\xEAn b\u1EA5t k\u1EF3 (k\u1EF3 \u1EA3o, vi\u1EC5n t\u01B0\u1EDFng, c\u1ED5 \u0111\u1EA1i, ma thu\u1EADt, v\u0169 tr\u1EE5, th\u1EE7y cung, phong \u1EA5n...) kh\xF4ng gi\u1EDBi h\u1EA1n.`;
     }
