@@ -3308,6 +3308,7 @@ function openPanel(kind) {
         const n = ctx.S.seeds[key];
         if (n <= 0) return "";
         const def = CROPS[key];
+        if (!def) return "";
         const price = Math.floor((def.seed || 100) * 0.5);
         if (bagSellMode) {
           const on = !!bagSel[key];
@@ -3328,6 +3329,7 @@ function openPanel(kind) {
         if (bagSellMode) {
           const total = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.seeds[k]).reduce((s, k) => {
             const def = CROPS[k];
+            if (!def) return s;
             const p = Math.floor((def.seed || 100) * 0.5);
             return s + p * ctx.S.seeds[k];
           }, 0);
@@ -3369,8 +3371,10 @@ function openPanel(kind) {
         let gain = 0;
         keys.forEach((k) => {
           const def = CROPS[k];
-          const p = Math.floor((def.seed || 100) * 0.5);
-          gain += p * ctx.S.seeds[k];
+          if (def) {
+            const p = Math.floor((def.seed || 100) * 0.5);
+            gain += p * ctx.S.seeds[k];
+          }
           delete ctx.S.seeds[k];
         });
         ctx.S.coins += gain;
@@ -3521,17 +3525,18 @@ function openPanel(kind) {
     const rows = Object.keys(ctx.S.bag).filter((k) => !k.startsWith("unique@")).map((key) => {
       const n = ctx.S.bag[key];
       const id = key.split("@")[0], mut = key.indexOf("@") > 0;
+      const def = CROPS[id] || { sp: "seedLight", name: "N\xF4ng s\u1EA3n l\u1EA1" };
       const d0 = mutDescOf(key);
       const mdesc = d0 ? " \xB7 " + d0 : "";
       if (bagSellMode) {
         const on = !!bagSel[key];
         return `
-      <div class="item selrow${on ? " selon" : ""}" data-selkey="${key}"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
+      <div class="item selrow${on ? " selon" : ""}" data-selkey="${key}"><span class="icon">${spriteSVG(def.sp, 32)}</span>
         <span class="info"><div class="name">${bagName(key)} \xD7${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">\u2726</span>' : ""}</div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
         <span class="selmark">${on ? "\u2713" : ""}</span></div>`;
       }
       return `
-      <div class="item"><span class="icon">${spriteSVG(CROPS[id].sp, 32)}</span>
+      <div class="item"><span class="icon">${spriteSVG(def.sp, 32)}</span>
         <span class="info"><div class="name">${bagName(key)} \xD7${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">\u2726</span>' : ""}</div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
         <span class="acts">
           <span class="ibtn" data-takeout="${key}" title="L\u1EA5y ra (mang v\xE0o c\u1ED1t truy\u1EC7n, kh\xF4ng quy ra ti\u1EC1n)">${spriteSVG("emBang", 16)}</span>
