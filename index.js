@@ -1766,6 +1766,7 @@ var styleCSS = `
     .dg-entity.enemy .dg-hp-fill { background: #e06578; }
     .dg-dmg { position: absolute; font-size: 14px; font-weight: bold; color: #ff4444; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; pointer-events: none; z-index: 10; animation: dmgFloat 0.8s ease-out forwards; }
     .dg-dmg.heal { color: #a4dc8c; }
+    .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
     .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
     .dg-title { font-size: 32px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 2px; }
@@ -5463,6 +5464,7 @@ function initPlacementPhase() {
         <div style="display:flex; justify-content:center; margin-top: 5px;">
             <div class="buy" id="dg-start-btn">B\u1EAFt \u0110\u1EA7u Tr\u1EADn Chi\u1EBFn</div>
             <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px;">Tho\xE1t</div>
+            <div class="buy plain" id="dg-surrender-btn" style="margin-left: 10px; display:none; background: #e06578; color: white;">K\u1EBFt Th\xFAc S\u1EDBm</div>
             <div class="buy plain" id="dg-info-btn" style="margin-left: 10px; width: 32px; padding: 0; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:black;" title="Th\xF4ng tin Th\xFA c\u01B0ng">?</div>
             <div class="buy plain" id="dg-codex-btn" style="margin-left: 10px; padding: 0 10px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:#e06578;" title="T\u1EEB \u0111i\u1EC3n qu\xE1i">Qu\xE1i V\u1EADt</div>
         </div>
@@ -5662,6 +5664,9 @@ function initPlacementPhase() {
   $id("dg-leave-btn").addEventListener("click", () => {
     closeDungeonView();
   });
+  $id("dg-surrender-btn").addEventListener("click", () => {
+    endDungeon(false);
+  });
 }
 var fullTeam = [];
 function startCombat() {
@@ -5669,6 +5674,7 @@ function startCombat() {
   $id("dg-dock").style.display = "none";
   $id("dg-start-btn").style.display = "none";
   $id("dg-leave-btn").style.display = "none";
+  $id("dg-surrender-btn").style.display = "block";
   currentWave = 1;
   totalGold = 0;
   fullTeam = [...team];
@@ -5681,11 +5687,15 @@ function startWave() {
   const arena = $id("dg-arena");
   const w = arena.clientWidth;
   const h = arena.clientHeight;
-  const count = Math.min(10, 2 + Math.floor(currentWave * 0.6));
+  let count = Math.min(10, 2 + Math.floor(currentWave * 0.6));
   let spawnElite = currentWave % 3 === 0;
+  let isBossWave = currentWave % 10 === 0;
+  if (isBossWave) {
+    count = Math.max(3, Math.floor(count / 2));
+  }
   for (let i = 0; i < count; i++) {
     let type;
-    if (spawnElite && i === 0) {
+    if (spawnElite && i === 0 || isBossWave && i === 0) {
       const elites = ENEMY_TYPES.filter((e) => e.elite);
       type = elites.length > 0 ? elites[Math.floor(Math.random() * elites.length)] : ENEMY_TYPES[ENEMY_TYPES.length - 1];
     } else {
@@ -5703,8 +5713,17 @@ function startWave() {
     el.style.left = x + "px";
     el.style.top = y + "px";
     arena.appendChild(el);
-    const hpMultiplier = 1 + (currentWave - 1) * 0.15;
-    const atkMultiplier = 1 + (currentWave - 1) * 0.1;
+    let hpMultiplier = 1 + (currentWave - 1) * 0.15;
+    let atkMultiplier = 1 + (currentWave - 1) * 0.1;
+    if (currentWave > 10) {
+      const extra = currentWave - 10;
+      hpMultiplier *= Math.pow(1.05, extra);
+      atkMultiplier *= Math.pow(1.02, extra);
+    }
+    if (isBossWave) {
+      hpMultiplier *= 2;
+      atkMultiplier *= 1.5;
+    }
     enemies.push({
       id: type.id,
       x,
@@ -5816,12 +5835,20 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     return;
   }
   let finalDmg = atk;
+  let isCrit = false;
+  if (attacker && attacker.type === "pet") {
+    if (Math.random() < 0.15) {
+      finalDmg = Math.round(finalDmg * 1.5);
+      isCrit = true;
+    }
+  }
   if (skill === "sniper" && attacker) {
     const dist = Math.hypot(target.x - attacker.x, target.y - attacker.y);
     finalDmg += Math.floor(dist * 0.2);
   }
   target.hp -= finalDmg;
-  spawnDmg(target, -finalDmg);
+  target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - finalDmg);
+  spawnDmg(target, -finalDmg, isCrit ? "crit" : "");
   if (skill === "lifesteal" && attacker) {
     const ls = Math.floor(finalDmg * 0.5);
     attacker.hp = Math.min(attacker.maxHp, attacker.hp + ls);
@@ -5927,8 +5954,9 @@ function updateEntities(groupA, groupB, dt) {
       }
     } else if (a.skill === "assassin" || a.ai === "assassin") {
       let maxDist = -1;
-      targetGroup.forEach((b) => {
-        if (b.hp <= 0) return;
+      let validTargets = targetGroup.filter((b) => b.hp > 0 && b.hp - (b.incomingDmg || 0) > 0);
+      if (validTargets.length === 0) validTargets = targetGroup.filter((b) => b.hp > 0);
+      validTargets.forEach((b) => {
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const dist = Math.hypot(dx, dy);
@@ -5938,8 +5966,9 @@ function updateEntities(groupA, groupB, dt) {
         }
       });
     } else {
-      targetGroup.forEach((b) => {
-        if (b.hp <= 0) return;
+      let validTargets = targetGroup.filter((b) => b.hp > 0 && b.hp - (b.incomingDmg || 0) > 0);
+      if (validTargets.length === 0) validTargets = targetGroup.filter((b) => b.hp > 0);
+      validTargets.forEach((b) => {
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const dist = Math.hypot(dx, dy);
@@ -6008,6 +6037,7 @@ function updateEntities(groupA, groupB, dt) {
             });
           }
           if (isRanged && a.skill !== "heal" && a.skill !== "aoe_heal") {
+            closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
             let p = {
               x: a.x,
               y: a.y - 16,
@@ -6032,11 +6062,13 @@ function updateEntities(groupA, groupB, dt) {
               let target2 = targetGroup[Math.floor(Math.random() * targetGroup.length)];
               let target3 = targetGroup[Math.floor(Math.random() * targetGroup.length)];
               if (target2 && target2 !== p.target) {
+                target2.incomingDmg = (target2.incomingDmg || 0) + a.atk * 0.5;
                 let p2 = { ...p, tx: target2.x, ty: target2.y - 16, target: target2, atk: a.atk * 0.5, el: p.el.cloneNode(true) };
                 arena.appendChild(p2.el);
                 projectiles.push(p2);
               }
               if (target3 && target3 !== p.target && target3 !== target2) {
+                target3.incomingDmg = (target3.incomingDmg || 0) + a.atk * 0.5;
                 let p3 = { ...p, tx: target3.x, ty: target3.y - 16, target: target3, atk: a.atk * 0.5, el: p.el.cloneNode(true) };
                 arena.appendChild(p3.el);
                 projectiles.push(p3);
@@ -6045,6 +6077,7 @@ function updateEntities(groupA, groupB, dt) {
               projectiles.push(p);
             }
           } else {
+            closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
             applyEffect(a, closest.b, groupA, targetGroup);
           }
         }
@@ -6057,6 +6090,8 @@ function endDungeon(isWin) {
   stopCombatLoop();
   projectiles.forEach((p) => p.el.remove());
   projectiles = [];
+  const surrenderBtn = $id("dg-surrender-btn");
+  if (surrenderBtn) surrenderBtn.style.display = "none";
   const arena = $id("dg-arena");
   const overlay = document.createElement("div");
   overlay.className = "dg-overlay";
@@ -6085,67 +6120,97 @@ function showWaveRewards() {
   fullTeam.forEach((p) => {
     if (p.hp <= 0) {
       p.hp = p.maxHp * 0.5;
-      p.el.querySelector(".dg-hp-fill").style.width = "50%";
       arena.appendChild(p.el);
+    } else {
+      p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2);
     }
+    const pct = Math.max(0, p.hp / p.maxHp) * 100;
+    p.el.querySelector(".dg-hp-fill").style.width = pct + "%";
     p.status = {};
   });
   team = [...fullTeam];
   const overlay = document.createElement("div");
   overlay.className = "dg-overlay";
   overlay.style.backgroundColor = "rgba(0,0,0,0.85)";
+  const allRewards = [
+    { id: "heal", name: "H\u1ED3i M\xE1u", desc: "H\u1ED3i 100% HP cho to\xE0n \u0111\u1ED9i", color: "#4caf50" },
+    { id: "buff", name: "C\u01B0\u1EDDng H\xF3a", desc: "T\u0103ng ng\u1EABu nhi\xEAn 10-30% HP ho\u1EB7c ATK cho to\xE0n \u0111\u1ED9i", color: "#2196f3" },
+    { id: "ascend", name: "Th\u0103ng Hoa", desc: "Ch\u1ECDn 1 Pet \u0111\u1EC3 x1.5 Ch\u1EC9 S\u1ED1", color: "#9c27b0" },
+    { id: "gold", name: "Kho B\xE1u", desc: `Nh\u1EADn th\xEAm ${waveGold * 2} G ngay l\u1EADp t\u1EE9c`, color: "#ffeb3b" },
+    { id: "blood", name: "Huy\u1EBFt Chi\u1EBFn", desc: "Gi\u1EA3m 20% HP t\u1ED1i \u0111a c\u1EE7a to\xE0n \u0111\u1ED9i nh\u01B0ng t\u0103ng 50% ATK", color: "#f44336" },
+    { id: "steel", name: "B\u1EE9c T\u01B0\u1EDDng Th\xE9p", desc: "T\u0103ng 50% HP t\u1ED1i \u0111a nh\u01B0ng gi\u1EA3m 10% ATK", color: "#607d8b" }
+  ];
+  const shuffled = allRewards.sort(() => 0.5 - Math.random());
+  const choices = shuffled.slice(0, 3);
+  let cardsHtml = "";
+  choices.forEach((c) => {
+    cardsHtml += `
+            <div class="dg-reward-card" id="rew-${c.id}" style="border-top: 4px solid ${c.color}">
+                <h4>${c.name}</h4>
+                <p>${c.desc}</p>
+            </div>
+        `;
+  });
   overlay.innerHTML = `
         <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Ho\xE0n Th\xE0nh!</div>
         <div style="color:white; margin-bottom: 20px;">Nh\u1EADn \u0111\u01B0\u1EE3c ${waveGold} G (T\u1ED5ng: ${totalGold} G)</div>
         <div style="display:flex; gap: 15px;">
-            <div class="dg-reward-card" id="rew-heal">
-                <h4>H\u1ED3i M\xE1u</h4>
-                <p>H\u1ED3i 100% HP cho to\xE0n \u0111\u1ED9i</p>
-            </div>
-            <div class="dg-reward-card" id="rew-buff">
-                <h4>C\u01B0\u1EDDng H\xF3a</h4>
-                <p>T\u0103ng ng\u1EABu nhi\xEAn 10-30% HP ho\u1EB7c ATK cho to\xE0n \u0111\u1ED9i</p>
-            </div>
-            <div class="dg-reward-card" id="rew-ascend">
-                <h4>Th\u0103ng Hoa</h4>
-                <p>Ch\u1ECDn 1 Pet \u0111\u1EC3 x2 Ch\u1EC9 S\u1ED1</p>
-            </div>
+            ${cardsHtml}
         </div>
     `;
   arena.appendChild(overlay);
-  overlay.querySelector("#rew-heal").onclick = () => {
-    fullTeam.forEach((p) => p.hp = p.maxHp);
-    nextWaveSequence(overlay);
-  };
-  overlay.querySelector("#rew-buff").onclick = () => {
-    const isAtk = Math.random() > 0.5;
-    const amt = 1.1 + Math.random() * 0.2;
-    fullTeam.forEach((p) => {
-      if (isAtk) p.atk = Math.round(p.atk * amt);
-      else {
-        p.maxHp = Math.round(p.maxHp * amt);
-        p.hp = Math.round(p.hp * amt);
-      }
-    });
-    nextWaveSequence(overlay);
-  };
-  overlay.querySelector("#rew-ascend").onclick = () => {
-    overlay.innerHTML = '<div class="dg-title">Ch\u1ECDn 1 Pet Th\u0103ng Hoa</div><div id="dg-pet-select" style="display:flex; gap: 10px; margin-top:20px; flex-wrap:wrap; justify-content:center;"></div>';
-    const selectContainer = overlay.querySelector("#dg-pet-select");
-    fullTeam.forEach((p) => {
-      const btn = document.createElement("div");
-      btn.className = "dg-reward-card";
-      btn.style.width = "80px";
-      btn.innerHTML = petSVG(p.id, 48);
-      btn.onclick = () => {
-        p.maxHp *= 2;
-        p.hp = p.maxHp;
-        p.atk *= 2;
+  choices.forEach((c) => {
+    overlay.querySelector("#rew-" + c.id).onclick = () => {
+      if (c.id === "heal") {
+        fullTeam.forEach((p) => p.hp = p.maxHp);
         nextWaveSequence(overlay);
-      };
-      selectContainer.appendChild(btn);
-    });
-  };
+      } else if (c.id === "buff") {
+        const isAtk = Math.random() > 0.5;
+        const amt = 1.1 + Math.random() * 0.2;
+        fullTeam.forEach((p) => {
+          if (isAtk) p.atk = Math.round(p.atk * amt);
+          else {
+            p.maxHp = Math.round(p.maxHp * amt);
+            p.hp = Math.round(p.hp * amt);
+          }
+        });
+        nextWaveSequence(overlay);
+      } else if (c.id === "ascend") {
+        overlay.innerHTML = '<div class="dg-title">Ch\u1ECDn 1 Pet Th\u0103ng Hoa</div><div id="dg-pet-select" style="display:flex; gap: 10px; margin-top:20px; flex-wrap:wrap; justify-content:center;"></div>';
+        const selectContainer = overlay.querySelector("#dg-pet-select");
+        fullTeam.forEach((p) => {
+          const btn = document.createElement("div");
+          btn.className = "dg-reward-card";
+          btn.style.width = "80px";
+          btn.innerHTML = petSVG(p.id, 48);
+          btn.onclick = () => {
+            p.maxHp = Math.round(p.maxHp * 1.5);
+            p.hp = p.maxHp;
+            p.atk = Math.round(p.atk * 1.5);
+            nextWaveSequence(overlay);
+          };
+          selectContainer.appendChild(btn);
+        });
+      } else if (c.id === "gold") {
+        totalGold += waveGold * 2;
+        nextWaveSequence(overlay);
+      } else if (c.id === "blood") {
+        fullTeam.forEach((p) => {
+          p.maxHp = Math.round(p.maxHp * 0.8);
+          p.hp = Math.min(p.hp, p.maxHp);
+          p.atk = Math.round(p.atk * 1.5);
+        });
+        nextWaveSequence(overlay);
+      } else if (c.id === "steel") {
+        fullTeam.forEach((p) => {
+          p.maxHp = Math.round(p.maxHp * 1.5);
+          p.hp = Math.round(p.hp * 1.5);
+          p.atk = Math.round(p.atk * 0.9);
+        });
+        nextWaveSequence(overlay);
+      }
+    };
+  });
 }
 function nextWaveSequence(overlay) {
   overlay.remove();

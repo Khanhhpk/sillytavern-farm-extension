@@ -114,6 +114,7 @@ function initPlacementPhase() {
         <div style="display:flex; justify-content:center; margin-top: 5px;">
             <div class="buy" id="dg-start-btn">Bắt Đầu Trận Chiến</div>
             <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px;">Thoát</div>
+            <div class="buy plain" id="dg-surrender-btn" style="margin-left: 10px; display:none; background: #e06578; color: white;">Kết Thúc Sớm</div>
             <div class="buy plain" id="dg-info-btn" style="margin-left: 10px; width: 32px; padding: 0; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:black;" title="Thông tin Thú cưng">?</div>
             <div class="buy plain" id="dg-codex-btn" style="margin-left: 10px; padding: 0 10px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:#e06578;" title="Từ điển quái">Quái Vật</div>
         </div>
@@ -335,6 +336,10 @@ function initPlacementPhase() {
     All.$id('dg-leave-btn').addEventListener('click', () => {
         closeDungeonView();
     });
+
+    All.$id('dg-surrender-btn').addEventListener('click', () => {
+        endDungeon(false);
+    });
 }
 
 let fullTeam = [];
@@ -344,6 +349,7 @@ function startCombat() {
     All.$id('dg-dock').style.display = 'none';
     All.$id('dg-start-btn').style.display = 'none';
     All.$id('dg-leave-btn').style.display = 'none'; // hide leave during combat
+    All.$id('dg-surrender-btn').style.display = 'block'; // show surrender
     
     currentWave = 1;
     totalGold = 0;
@@ -361,12 +367,17 @@ function startWave() {
     const h = arena.clientHeight;
     
     // Calculate enemies based on wave
-    const count = Math.min(10, 2 + Math.floor(currentWave * 0.6));
+    let count = Math.min(10, 2 + Math.floor(currentWave * 0.6));
     let spawnElite = currentWave % 3 === 0;
+    let isBossWave = currentWave % 10 === 0;
+    
+    if (isBossWave) {
+        count = Math.max(3, Math.floor(count / 2));
+    }
     
     for(let i=0; i<count; i++) {
         let type;
-        if (spawnElite && i === 0) {
+        if ((spawnElite && i === 0) || (isBossWave && i === 0)) {
             const elites = ENEMY_TYPES.filter(e => e.elite);
             type = elites.length > 0 ? elites[Math.floor(Math.random() * elites.length)] : ENEMY_TYPES[ENEMY_TYPES.length-1];
         } else {
@@ -389,9 +400,18 @@ function startWave() {
         
         arena.appendChild(el);
         
-        // Scale hp and atk based on wave (reduced difficulty)
-        const hpMultiplier = 1 + (currentWave - 1) * 0.15;
-        const atkMultiplier = 1 + (currentWave - 1) * 0.1;
+        // Scale hp and atk based on wave (exponential after wave 10)
+        let hpMultiplier = 1 + (currentWave - 1) * 0.15;
+        let atkMultiplier = 1 + (currentWave - 1) * 0.1;
+        if (currentWave > 10) {
+            const extra = currentWave - 10;
+            hpMultiplier *= Math.pow(1.05, extra);
+            atkMultiplier *= Math.pow(1.02, extra);
+        }
+        if (isBossWave) {
+            hpMultiplier *= 2;
+            atkMultiplier *= 1.5;
+        }
         
         enemies.push({
             id: type.id, x, y, 
@@ -521,13 +541,23 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     
     // Base damage
     let finalDmg = atk;
+    let isCrit = false;
+    
+    if (attacker && attacker.type === 'pet') {
+        if (Math.random() < 0.15) { // 15% crit
+            finalDmg = Math.round(finalDmg * 1.5);
+            isCrit = true;
+        }
+    }
+    
     if (skill === 'sniper' && attacker) {
         const dist = Math.hypot(target.x - attacker.x, target.y - attacker.y);
         finalDmg += Math.floor(dist * 0.2); // extra damage based on distance
     }
     
     target.hp -= finalDmg;
-    spawnDmg(target, -finalDmg);
+    target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - finalDmg);
+    spawnDmg(target, -finalDmg, isCrit ? 'crit' : '');
     
     if (skill === 'lifesteal' && attacker) {
         const ls = Math.floor(finalDmg * 0.5);
@@ -650,8 +680,9 @@ function updateEntities(groupA, groupB, dt) {
             }
         } else if (a.skill === 'assassin' || a.ai === 'assassin') {
             let maxDist = -1;
-            targetGroup.forEach(b => {
-                if (b.hp <= 0) return;
+            let validTargets = targetGroup.filter(b => b.hp > 0 && (b.hp - (b.incomingDmg || 0) > 0));
+            if (validTargets.length === 0) validTargets = targetGroup.filter(b => b.hp > 0);
+            validTargets.forEach(b => {
                 const dx = b.x - a.x;
                 const dy = b.y - a.y;
                 const dist = Math.hypot(dx, dy);
@@ -661,8 +692,9 @@ function updateEntities(groupA, groupB, dt) {
                 }
             });
         } else {
-            targetGroup.forEach(b => {
-                if (b.hp <= 0) return;
+            let validTargets = targetGroup.filter(b => b.hp > 0 && (b.hp - (b.incomingDmg || 0) > 0));
+            if (validTargets.length === 0) validTargets = targetGroup.filter(b => b.hp > 0);
+            validTargets.forEach(b => {
                 const dx = b.x - a.x;
                 const dy = b.y - a.y;
                 const dist = Math.hypot(dx, dy);
@@ -746,6 +778,7 @@ function updateEntities(groupA, groupB, dt) {
                     }
 
                     if (isRanged && a.skill !== 'heal' && a.skill !== 'aoe_heal') {
+                        closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
                         let p = {
                             x: a.x, y: a.y - 16,
                             tx: closest.b.x, ty: closest.b.y - 16,
@@ -766,10 +799,12 @@ function updateEntities(groupA, groupB, dt) {
                             let target2 = targetGroup[Math.floor(Math.random() * targetGroup.length)];
                             let target3 = targetGroup[Math.floor(Math.random() * targetGroup.length)];
                             if (target2 && target2 !== p.target) {
+                                target2.incomingDmg = (target2.incomingDmg || 0) + a.atk * 0.5;
                                 let p2 = {...p, tx: target2.x, ty: target2.y-16, target: target2, atk: a.atk*0.5, el: p.el.cloneNode(true)};
                                 arena.appendChild(p2.el); projectiles.push(p2);
                             }
                             if (target3 && target3 !== p.target && target3 !== target2) {
+                                target3.incomingDmg = (target3.incomingDmg || 0) + a.atk * 0.5;
                                 let p3 = {...p, tx: target3.x, ty: target3.y-16, target: target3, atk: a.atk*0.5, el: p.el.cloneNode(true)};
                                 arena.appendChild(p3.el); projectiles.push(p3);
                             }
@@ -777,6 +812,7 @@ function updateEntities(groupA, groupB, dt) {
                             projectiles.push(p);
                         }
                     } else {
+                        closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
                         applyEffect(a, closest.b, groupA, targetGroup);
                     }
                 }
@@ -791,6 +827,9 @@ function endDungeon(isWin) {
     
     projectiles.forEach(p => p.el.remove());
     projectiles = [];
+    
+    const surrenderBtn = All.$id('dg-surrender-btn');
+    if (surrenderBtn) surrenderBtn.style.display = 'none';
     
     const arena = All.$id('dg-arena');
     const overlay = document.createElement('div');
@@ -824,14 +863,16 @@ function showWaveRewards() {
     const waveGold = 100 + currentWave * 50;
     totalGold += waveGold;
     
-    // Revive dead pets (50% HP) and heal living ones? User said "hồi sinh lại đồng đội đã hi sinh với lượng máu 50% sẽ tạm ngưng và hiển thị 3 lựa chọn"
     const arena = All.$id('dg-arena');
     fullTeam.forEach(p => {
         if (p.hp <= 0) {
-            p.hp = p.maxHp * 0.5;
-            p.el.querySelector('.dg-hp-fill').style.width = '50%';
+            p.hp = p.maxHp * 0.5; // Revive
             arena.appendChild(p.el);
+        } else {
+            p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2); // Heal living by 20%
         }
+        const pct = Math.max(0, p.hp / p.maxHp) * 100;
+        p.el.querySelector('.dg-hp-fill').style.width = pct + '%';
         // clear status
         p.status = {};
     });
@@ -841,57 +882,91 @@ function showWaveRewards() {
     overlay.className = 'dg-overlay';
     overlay.style.backgroundColor = 'rgba(0,0,0,0.85)';
     
+    const allRewards = [
+        { id: 'heal', name: 'Hồi Máu', desc: 'Hồi 100% HP cho toàn đội', color: '#4caf50' },
+        { id: 'buff', name: 'Cường Hóa', desc: 'Tăng ngẫu nhiên 10-30% HP hoặc ATK cho toàn đội', color: '#2196f3' },
+        { id: 'ascend', name: 'Thăng Hoa', desc: 'Chọn 1 Pet để x1.5 Chỉ Số', color: '#9c27b0' },
+        { id: 'gold', name: 'Kho Báu', desc: `Nhận thêm ${waveGold * 2} G ngay lập tức`, color: '#ffeb3b' },
+        { id: 'blood', name: 'Huyết Chiến', desc: 'Giảm 20% HP tối đa của toàn đội nhưng tăng 50% ATK', color: '#f44336' },
+        { id: 'steel', name: 'Bức Tường Thép', desc: 'Tăng 50% HP tối đa nhưng giảm 10% ATK', color: '#607d8b' }
+    ];
+    
+    // Pick 3 random
+    const shuffled = allRewards.sort(() => 0.5 - Math.random());
+    const choices = shuffled.slice(0, 3);
+    
+    let cardsHtml = '';
+    choices.forEach(c => {
+        cardsHtml += `
+            <div class="dg-reward-card" id="rew-${c.id}" style="border-top: 4px solid ${c.color}">
+                <h4>${c.name}</h4>
+                <p>${c.desc}</p>
+            </div>
+        `;
+    });
+
     overlay.innerHTML = `
         <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Hoàn Thành!</div>
         <div style="color:white; margin-bottom: 20px;">Nhận được ${waveGold} G (Tổng: ${totalGold} G)</div>
         <div style="display:flex; gap: 15px;">
-            <div class="dg-reward-card" id="rew-heal">
-                <h4>Hồi Máu</h4>
-                <p>Hồi 100% HP cho toàn đội</p>
-            </div>
-            <div class="dg-reward-card" id="rew-buff">
-                <h4>Cường Hóa</h4>
-                <p>Tăng ngẫu nhiên 10-30% HP hoặc ATK cho toàn đội</p>
-            </div>
-            <div class="dg-reward-card" id="rew-ascend">
-                <h4>Thăng Hoa</h4>
-                <p>Chọn 1 Pet để x2 Chỉ Số</p>
-            </div>
+            ${cardsHtml}
         </div>
     `;
     arena.appendChild(overlay);
-    
-
-    overlay.querySelector('#rew-heal').onclick = () => {
-        fullTeam.forEach(p => p.hp = p.maxHp);
-        nextWaveSequence(overlay);
-    };
-    
-    overlay.querySelector('#rew-buff').onclick = () => {
-        const isAtk = Math.random() > 0.5;
-        const amt = 1.1 + Math.random() * 0.2; // 10-30%
-        fullTeam.forEach(p => {
-            if (isAtk) p.atk = Math.round(p.atk * amt);
-            else { p.maxHp = Math.round(p.maxHp * amt); p.hp = Math.round(p.hp * amt); }
-        });
-        nextWaveSequence(overlay);
-    };
-    
-    overlay.querySelector('#rew-ascend').onclick = () => {
-        overlay.innerHTML = '<div class="dg-title">Chọn 1 Pet Thăng Hoa</div><div id="dg-pet-select" style="display:flex; gap: 10px; margin-top:20px; flex-wrap:wrap; justify-content:center;"></div>';
-        const selectContainer = overlay.querySelector('#dg-pet-select');
-        fullTeam.forEach((p) => {
-            const btn = document.createElement('div');
-            btn.className = 'dg-reward-card';
-            btn.style.width = '80px';
-            btn.innerHTML = petSVG(p.id, 48);
-            btn.onclick = () => {
-                p.maxHp *= 2; p.hp = p.maxHp; p.atk *= 2;
+    choices.forEach(c => {
+        overlay.querySelector('#rew-' + c.id).onclick = () => {
+            if (c.id === 'heal') {
+                fullTeam.forEach(p => p.hp = p.maxHp);
                 nextWaveSequence(overlay);
-            };
-            selectContainer.appendChild(btn);
-        });
-    };
+            }
+            else if (c.id === 'buff') {
+                const isAtk = Math.random() > 0.5;
+                const amt = 1.1 + Math.random() * 0.2; // 10-30%
+                fullTeam.forEach(p => {
+                    if (isAtk) p.atk = Math.round(p.atk * amt);
+                    else { p.maxHp = Math.round(p.maxHp * amt); p.hp = Math.round(p.hp * amt); }
+                });
+                nextWaveSequence(overlay);
+            }
+            else if (c.id === 'ascend') {
+                overlay.innerHTML = '<div class="dg-title">Chọn 1 Pet Thăng Hoa</div><div id="dg-pet-select" style="display:flex; gap: 10px; margin-top:20px; flex-wrap:wrap; justify-content:center;"></div>';
+                const selectContainer = overlay.querySelector('#dg-pet-select');
+                fullTeam.forEach((p) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'dg-reward-card';
+                    btn.style.width = '80px';
+                    btn.innerHTML = petSVG(p.id, 48);
+                    btn.onclick = () => {
+                        p.maxHp = Math.round(p.maxHp * 1.5); 
+                        p.hp = p.maxHp; 
+                        p.atk = Math.round(p.atk * 1.5);
+                        nextWaveSequence(overlay);
+                    };
+                    selectContainer.appendChild(btn);
+                });
+            }
+            else if (c.id === 'gold') {
+                totalGold += waveGold * 2;
+                nextWaveSequence(overlay);
+            }
+            else if (c.id === 'blood') {
+                fullTeam.forEach(p => {
+                    p.maxHp = Math.round(p.maxHp * 0.8);
+                    p.hp = Math.min(p.hp, p.maxHp);
+                    p.atk = Math.round(p.atk * 1.5);
+                });
+                nextWaveSequence(overlay);
+            }
+            else if (c.id === 'steel') {
+                fullTeam.forEach(p => {
+                    p.maxHp = Math.round(p.maxHp * 1.5);
+                    p.hp = Math.round(p.hp * 1.5);
+                    p.atk = Math.round(p.atk * 0.9);
+                });
+                nextWaveSequence(overlay);
+            }
+        };
+    });
 }
 
 function nextWaveSequence(overlay) {
