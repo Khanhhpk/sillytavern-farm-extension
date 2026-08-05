@@ -378,5 +378,15 @@ export const styleCSS = `
     .dg-dock::-webkit-scrollbar { height: 8px; display: block; }
     .dg-dock::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
     .dg-dock::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 4px; }
-    .dg-tooltip { position: absolute; background: rgba(0,0,0,0.85); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; z-index: 100; pointer-events: none; white-space: nowrap; border: 1px solid #b08a5c; box-shadow: 0 4px 6px rgba(0,0,0,0.5); transform: translate(-50%, -100%); margin-top: -10px; text-align: left; line-height: 1.4; }
+    .dg-info-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 250px; background: rgba(40,35,50,0.95); border-left: 2px solid #b08a5c; z-index: 30; padding: 10px; color: white; display: flex; flex-direction: column; overflow-y: auto; }
+    .dg-info-panel::-webkit-scrollbar { width: 6px; }
+    .dg-info-panel::-webkit-scrollbar-track { background: transparent; }
+    .dg-info-panel::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 3px; }
+    .dg-info-panel h3 { margin: 0 0 10px 0; color: #ffd94d; font-size: 16px; text-align: center; border-bottom: 1px solid #665; padding-bottom: 5px; }
+    .dg-info-close { position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 20px; font-weight: bold; color: #aaa; }
+    .dg-info-close:hover { color: white; }
+    .dg-info-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; }
+    .dg-info-item-icon { width: 40px; height: 40px; flex-shrink: 0; background: rgba(0,0,0,0.2); border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+    .dg-info-item-desc { font-size: 11px; line-height: 1.3; color: #ddd; }
+    .dg-info-item-desc b { color: #a4dc8c; font-size: 13px; display: block; margin-bottom: 2px; }
 `;

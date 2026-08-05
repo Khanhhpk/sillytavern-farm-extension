@@ -1775,7 +1775,17 @@ var styleCSS = `
     .dg-dock::-webkit-scrollbar { height: 8px; display: block; }
     .dg-dock::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
     .dg-dock::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 4px; }
-    .dg-tooltip { position: absolute; background: rgba(0,0,0,0.85); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; z-index: 100; pointer-events: none; white-space: nowrap; border: 1px solid #b08a5c; box-shadow: 0 4px 6px rgba(0,0,0,0.5); transform: translate(-50%, -100%); margin-top: -10px; text-align: left; line-height: 1.4; }
+    .dg-info-panel { position: absolute; top: 0; right: 0; bottom: 0; width: 250px; background: rgba(40,35,50,0.95); border-left: 2px solid #b08a5c; z-index: 30; padding: 10px; color: white; display: flex; flex-direction: column; overflow-y: auto; }
+    .dg-info-panel::-webkit-scrollbar { width: 6px; }
+    .dg-info-panel::-webkit-scrollbar-track { background: transparent; }
+    .dg-info-panel::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 3px; }
+    .dg-info-panel h3 { margin: 0 0 10px 0; color: #ffd94d; font-size: 16px; text-align: center; border-bottom: 1px solid #665; padding-bottom: 5px; }
+    .dg-info-close { position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 20px; font-weight: bold; color: #aaa; }
+    .dg-info-close:hover { color: white; }
+    .dg-info-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; }
+    .dg-info-item-icon { width: 40px; height: 40px; flex-shrink: 0; background: rgba(0,0,0,0.2); border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+    .dg-info-item-desc { font-size: 11px; line-height: 1.3; color: #ddd; }
+    .dg-info-item-desc b { color: #a4dc8c; font-size: 13px; display: block; margin-bottom: 2px; }
 `;
 
 // src/ui.js
@@ -5378,102 +5388,123 @@ function initPlacementPhase() {
   team = [];
   enemies = [];
   dungeonView.innerHTML = `
-        <div class="dg-arena" id="dg-arena"></div>
+        <div class="dg-arena" id="dg-arena">
+            <div class="dg-info-panel" id="dg-info-panel" style="display:none;">
+                <div class="dg-info-close" id="dg-info-close">\xD7</div>
+                <h3>Ch\u1EC9 S\u1ED1 Th\xFA C\u01B0ng</h3>
+                <div class="dg-info-list" id="dg-info-list"></div>
+            </div>
+        </div>
         <div style="display:flex; justify-content:center; margin-top: 5px;">
             <div class="buy" id="dg-start-btn">B\u1EAFt \u0110\u1EA7u Tr\u1EADn Chi\u1EBFn</div>
             <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px;">Tho\xE1t</div>
+            <div class="buy plain" id="dg-info-btn" style="margin-left: 10px; width: 32px; padding: 0;" title="Th\xF4ng tin Th\xFA c\u01B0ng">?</div>
         </div>
         <div class="dg-dock" id="dg-dock"></div>
     `;
   const arena = $id("dg-arena");
   const dock = $id("dg-dock");
+  let draggingPet = null;
+  let dragEl = null;
   ctx.S.pets.forEach((petId) => {
     const slot = document.createElement("div");
     slot.className = "dg-slot";
     slot.innerHTML = petSVG(petId, 32);
     slot.dataset.pet = petId;
-    slot.draggable = true;
-    slot.addEventListener("mouseenter", () => {
-      const stat = PET_STATS[petId] || PET_STATS.default;
-      const tooltip = document.createElement("div");
-      tooltip.className = "dg-tooltip";
-      tooltip.id = "dg-tooltip";
-      tooltip.innerHTML = `<b style="color:#ffd94d">${stat.name}</b><br/>HP: ${stat.hp} | ATK: ${stat.atk}<br/>T\u1EA7m \u0111\xE1nh: ${stat.range} | T\u1ED1c \u0111\xE1nh: ${stat.cd}s<br/><span style="color:#b08a5c; white-space: normal; display: block; max-width: 180px;">${stat.desc}</span>`;
-      document.body.appendChild(tooltip);
-      const rect = slot.getBoundingClientRect();
-      tooltip.style.left = rect.left + rect.width / 2 + "px";
-      tooltip.style.top = rect.top + "px";
-    });
-    slot.addEventListener("mouseleave", () => {
-      const t = document.getElementById("dg-tooltip");
-      if (t) t.remove();
-    });
-    slot.addEventListener("dragstart", (e) => {
-      if (phase !== "placement") {
-        e.preventDefault();
-        return;
-      }
+    slot.addEventListener("pointerdown", (e) => {
+      if (phase !== "placement") return;
       if (team.length >= 4) {
         toast("T\u1ED1i \u0111a 4 th\xE0nh vi\xEAn!");
-        e.preventDefault();
         return;
       }
-      if (slot.classList.contains("placed")) {
-        e.preventDefault();
-        return;
+      if (slot.classList.contains("placed")) return;
+      draggingPet = { id: petId, slot };
+      dragEl = document.createElement("div");
+      dragEl.className = "dg-entity pet";
+      dragEl.style.pointerEvents = "none";
+      dragEl.style.zIndex = "1000";
+      dragEl.innerHTML = petSVG(petId, 32);
+      document.body.appendChild(dragEl);
+      dragEl.style.left = e.clientX + "px";
+      dragEl.style.top = e.clientY + "px";
+      slot.setPointerCapture(e.pointerId);
+    });
+    slot.addEventListener("pointermove", (e) => {
+      if (!draggingPet || !dragEl) return;
+      dragEl.style.left = e.clientX + "px";
+      dragEl.style.top = e.clientY + "px";
+    });
+    slot.addEventListener("pointerup", (e) => {
+      if (!draggingPet || !dragEl) return;
+      const pId = draggingPet.id;
+      const currentSlot = draggingPet.slot;
+      dragEl.remove();
+      dragEl = null;
+      draggingPet = null;
+      currentSlot.releasePointerCapture(e.pointerId);
+      const rect = arena.getBoundingClientRect();
+      if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+        currentSlot.classList.add("placed");
+        const stat = PET_STATS[pId] || PET_STATS.default;
+        const el = document.createElement("div");
+        el.className = "dg-entity pet";
+        el.innerHTML = `
+                    <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                    ${petSVG(pId, 32)}
+                `;
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+        if (x > rect.width / 2 - 20) x = rect.width / 2 - 20;
+        if (x < 20) x = 20;
+        if (y < 20) y = 20;
+        if (y > rect.height - 20) y = rect.height - 20;
+        el.style.left = x + "px";
+        el.style.top = y + "px";
+        arena.appendChild(el);
+        team.push({
+          id: pId,
+          x,
+          y,
+          hp: stat.hp,
+          maxHp: stat.hp,
+          atk: stat.atk,
+          range: stat.range,
+          speed: stat.speed,
+          cd: 0,
+          maxCd: stat.cd,
+          el,
+          type: "pet",
+          skill: stat.skill,
+          dockSlot: currentSlot
+        });
       }
-      const t = document.getElementById("dg-tooltip");
-      if (t) t.remove();
-      e.dataTransfer.setData("text/plain", petId);
-      slot.id = "dg-dragging-" + petId;
     });
     dock.appendChild(slot);
   });
-  arena.addEventListener("dragover", (e) => {
-    if (phase !== "placement") return;
-    e.preventDefault();
-  });
-  arena.addEventListener("drop", (e) => {
-    if (phase !== "placement") return;
-    e.preventDefault();
-    const petId = e.dataTransfer.getData("text/plain");
-    if (!petId) return;
-    const slot = document.getElementById("dg-dragging-" + petId);
-    if (!slot || slot.classList.contains("placed")) return;
-    slot.classList.add("placed");
-    const stat = PET_STATS[petId] || PET_STATS.default;
-    const el = document.createElement("div");
-    el.className = "dg-entity pet";
-    el.innerHTML = `
-            <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
-            ${petSVG(petId, 32)}
-        `;
-    const rect = arena.getBoundingClientRect();
-    let x = e.clientX - rect.left;
-    let y = e.clientY - rect.top;
-    if (x > rect.width / 2 - 20) x = rect.width / 2 - 20;
-    if (x < 20) x = 20;
-    if (y < 20) y = 20;
-    if (y > rect.height - 20) y = rect.height - 20;
-    el.style.left = x + "px";
-    el.style.top = y + "px";
-    arena.appendChild(el);
-    team.push({
-      id: petId,
-      x,
-      y,
-      hp: stat.hp,
-      maxHp: stat.hp,
-      atk: stat.atk,
-      range: stat.range,
-      speed: stat.speed,
-      cd: 0,
-      maxCd: stat.cd,
-      el,
-      type: "pet",
-      skill: stat.skill,
-      dockSlot: slot
+  const infoBtn = $id("dg-info-btn");
+  const infoPanel = $id("dg-info-panel");
+  const infoList = $id("dg-info-list");
+  const infoClose = $id("dg-info-close");
+  infoBtn.addEventListener("click", () => {
+    infoList.innerHTML = "";
+    ctx.S.pets.forEach((petId) => {
+      const stat = PET_STATS[petId] || PET_STATS.default;
+      infoList.innerHTML += `
+                <div class="dg-info-item">
+                    <div class="dg-info-item-icon">${petSVG(petId, 32)}</div>
+                    <div class="dg-info-item-desc">
+                        <b>${stat.name}</b>
+                        HP: ${stat.hp} | ATK: ${stat.atk}<br/>
+                        T\u1EA7m \u0111\xE1nh: ${stat.range} | T\u1ED1c \u0111\xE1nh: ${stat.cd}s<br/>
+                        <span style="color:#b08a5c;">${stat.desc}</span>
+                    </div>
+                </div>
+            `;
     });
+    infoPanel.style.display = "flex";
+  });
+  infoClose.addEventListener("click", () => {
+    infoPanel.style.display = "none";
   });
   $id("dg-start-btn").addEventListener("click", () => {
     if (team.length === 0) return toast("Ch\u01B0a ch\u1ECDn \u0111\u1ED9i h\xECnh!");

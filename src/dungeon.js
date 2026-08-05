@@ -77,10 +77,17 @@ function initPlacementPhase() {
     enemies = [];
     
     All.dungeonView.innerHTML = `
-        <div class="dg-arena" id="dg-arena"></div>
+        <div class="dg-arena" id="dg-arena">
+            <div class="dg-info-panel" id="dg-info-panel" style="display:none;">
+                <div class="dg-info-close" id="dg-info-close">×</div>
+                <h3>Chỉ Số Thú Cưng</h3>
+                <div class="dg-info-list" id="dg-info-list"></div>
+            </div>
+        </div>
         <div style="display:flex; justify-content:center; margin-top: 5px;">
             <div class="buy" id="dg-start-btn">Bắt Đầu Trận Chiến</div>
             <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px;">Thoát</div>
+            <div class="buy plain" id="dg-info-btn" style="margin-left: 10px; width: 32px; padding: 0;" title="Thông tin Thú cưng">?</div>
         </div>
         <div class="dg-dock" id="dg-dock"></div>
     `;
@@ -88,88 +95,117 @@ function initPlacementPhase() {
     const arena = All.$id('dg-arena');
     const dock = All.$id('dg-dock');
 
+    let draggingPet = null;
+    let dragEl = null;
+
     // Render available pets
     ctx.S.pets.forEach(petId => {
         const slot = document.createElement('div');
         slot.className = 'dg-slot';
         slot.innerHTML = petSVG(petId, 32);
         slot.dataset.pet = petId;
-        slot.draggable = true;
         
-        slot.addEventListener('mouseenter', () => {
-            const stat = PET_STATS[petId] || PET_STATS.default;
-            const tooltip = document.createElement('div');
-            tooltip.className = 'dg-tooltip';
-            tooltip.id = 'dg-tooltip';
-            tooltip.innerHTML = `<b style="color:#ffd94d">${stat.name}</b><br/>HP: ${stat.hp} | ATK: ${stat.atk}<br/>Tầm đánh: ${stat.range} | Tốc đánh: ${stat.cd}s<br/><span style="color:#b08a5c; white-space: normal; display: block; max-width: 180px;">${stat.desc}</span>`;
-            document.body.appendChild(tooltip);
+        slot.addEventListener('pointerdown', (e) => {
+            if (phase !== 'placement') return;
+            if (team.length >= 4) { All.toast('Tối đa 4 thành viên!'); return; }
+            if (slot.classList.contains('placed')) return;
             
-            const rect = slot.getBoundingClientRect();
-            tooltip.style.left = rect.left + rect.width / 2 + 'px';
-            tooltip.style.top = rect.top + 'px';
-        });
-        slot.addEventListener('mouseleave', () => {
-            const t = document.getElementById('dg-tooltip');
-            if (t) t.remove();
+            draggingPet = { id: petId, slot: slot };
+            
+            dragEl = document.createElement('div');
+            dragEl.className = 'dg-entity pet';
+            dragEl.style.pointerEvents = 'none';
+            dragEl.style.zIndex = '1000';
+            dragEl.innerHTML = petSVG(petId, 32);
+            document.body.appendChild(dragEl);
+            
+            dragEl.style.left = e.clientX + 'px';
+            dragEl.style.top = e.clientY + 'px';
+            
+            slot.setPointerCapture(e.pointerId);
         });
         
-        slot.addEventListener('dragstart', (e) => {
-            if (phase !== 'placement') { e.preventDefault(); return; }
-            if (team.length >= 4) { All.toast('Tối đa 4 thành viên!'); e.preventDefault(); return; }
-            if (slot.classList.contains('placed')) { e.preventDefault(); return; }
+        slot.addEventListener('pointermove', (e) => {
+            if (!draggingPet || !dragEl) return;
+            dragEl.style.left = e.clientX + 'px';
+            dragEl.style.top = e.clientY + 'px';
+        });
+        
+        slot.addEventListener('pointerup', (e) => {
+            if (!draggingPet || !dragEl) return;
             
-            const t = document.getElementById('dg-tooltip');
-            if (t) t.remove();
+            const pId = draggingPet.id;
+            const currentSlot = draggingPet.slot;
             
-            e.dataTransfer.setData('text/plain', petId);
-            slot.id = 'dg-dragging-' + petId;
+            dragEl.remove();
+            dragEl = null;
+            draggingPet = null;
+            currentSlot.releasePointerCapture(e.pointerId);
+            
+            const rect = arena.getBoundingClientRect();
+            if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                
+                currentSlot.classList.add('placed');
+                
+                const stat = PET_STATS[pId] || PET_STATS.default;
+                const el = document.createElement('div');
+                el.className = 'dg-entity pet';
+                el.innerHTML = `
+                    <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                    ${petSVG(pId, 32)}
+                `;
+                
+                let x = e.clientX - rect.left;
+                let y = e.clientY - rect.top;
+                if (x > rect.width / 2 - 20) x = rect.width / 2 - 20;
+                if (x < 20) x = 20;
+                if (y < 20) y = 20;
+                if (y > rect.height - 20) y = rect.height - 20;
+                
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+                
+                arena.appendChild(el);
+                
+                team.push({
+                    id: pId, x, y, hp: stat.hp, maxHp: stat.hp, atk: stat.atk,
+                    range: stat.range, speed: stat.speed, cd: 0, maxCd: stat.cd, el, type: 'pet',
+                    skill: stat.skill, dockSlot: currentSlot
+                });
+            }
         });
         
         dock.appendChild(slot);
     });
     
-    arena.addEventListener('dragover', (e) => {
-        if (phase !== 'placement') return;
-        e.preventDefault();
+    // Info Sidebar logic
+    const infoBtn = All.$id('dg-info-btn');
+    const infoPanel = All.$id('dg-info-panel');
+    const infoList = All.$id('dg-info-list');
+    const infoClose = All.$id('dg-info-close');
+    
+    infoBtn.addEventListener('click', () => {
+        infoList.innerHTML = '';
+        ctx.S.pets.forEach(petId => {
+            const stat = PET_STATS[petId] || PET_STATS.default;
+            infoList.innerHTML += `
+                <div class="dg-info-item">
+                    <div class="dg-info-item-icon">${petSVG(petId, 32)}</div>
+                    <div class="dg-info-item-desc">
+                        <b>${stat.name}</b>
+                        HP: ${stat.hp} | ATK: ${stat.atk}<br/>
+                        Tầm đánh: ${stat.range} | Tốc đánh: ${stat.cd}s<br/>
+                        <span style="color:#b08a5c;">${stat.desc}</span>
+                    </div>
+                </div>
+            `;
+        });
+        infoPanel.style.display = 'flex';
     });
     
-    arena.addEventListener('drop', (e) => {
-        if (phase !== 'placement') return;
-        e.preventDefault();
-        const petId = e.dataTransfer.getData('text/plain');
-        if (!petId) return;
-        
-        const slot = document.getElementById('dg-dragging-' + petId);
-        if (!slot || slot.classList.contains('placed')) return;
-        
-        slot.classList.add('placed');
-        
-        const stat = PET_STATS[petId] || PET_STATS.default;
-        const el = document.createElement('div');
-        el.className = 'dg-entity pet';
-        el.innerHTML = `
-            <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
-            ${petSVG(petId, 32)}
-        `;
-        
-        const rect = arena.getBoundingClientRect();
-        let x = e.clientX - rect.left;
-        let y = e.clientY - rect.top;
-        if (x > rect.width / 2 - 20) x = rect.width / 2 - 20;
-        if (x < 20) x = 20;
-        if (y < 20) y = 20;
-        if (y > rect.height - 20) y = rect.height - 20;
-        
-        el.style.left = x + 'px';
-        el.style.top = y + 'px';
-        
-        arena.appendChild(el);
-        
-        team.push({
-            id: petId, x, y, hp: stat.hp, maxHp: stat.hp, atk: stat.atk,
-            range: stat.range, speed: stat.speed, cd: 0, maxCd: stat.cd, el, type: 'pet',
-            skill: stat.skill, dockSlot: slot
-        });
+    infoClose.addEventListener('click', () => {
+        infoPanel.style.display = 'none';
     });
 
     All.$id('dg-start-btn').addEventListener('click', () => {
