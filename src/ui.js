@@ -16,7 +16,7 @@ export let $id;
 export let fieldEl;
 export let decoLayer;
 export let fxLayer;
-export let swX = null, swY = null;
+let swX = null, swY = null;
 
 export function applyTheme() { ctx.ui.classList.remove('theme-sakura', 'theme-sky'); ctx.ui.classList.add('theme-' + (ctx.S && ctx.S.theme === 'sky' ? 'sky' : 'sakura')); }
 
@@ -141,8 +141,9 @@ ctx.ui.addEventListener('click', e => {                     // Bấm bất cứ 
   const pager = $id('pager');
   if (pager && pager.classList.contains('open') && !e.target.closest('#pager')) pager.classList.remove('open');
 }, true);
-$id('pager') && $id('pager').addEventListener('click', e => {
-  const pager = $id('pager');
+const pagerEl = $id('pager');
+if (pagerEl) pagerEl.addEventListener('click', e => {
+  const pager = pagerEl;
   // @ts-ignore
   const t = e.target.closest('[data-pg]');
   if (!t) { pager.classList.toggle('open'); return; }    // Bấm quả cầu = bung ra, bấm chỗ trống trên thanh = thu lại

@@ -34,7 +34,7 @@ function initFarm() {
 
   const diag = [];
   if (ctx.S) diag.push('S');
-  if (ctx.CS) diag.push('CS');
+  if (All.CS) diag.push('CS');
   if (ctx.ui) diag.push('ui');
   console.log('[Farm] ST Context kết nối thành công — ' + diag.join(', '));
   console.log('Farm initialized');
@@ -54,14 +54,12 @@ async function init() {
     let save_set = context.saveSettingsDebounced || window.saveSettingsDebounced || (() => {});
     let ev_src = context.eventSource || window.eventSource;
     let ev_types = context.event_types || context.eventTypes || window.event_types;
-    let gen_raw = context.generateRaw || window.generateRaw;
 
     setExtensionContext({
         extension_settings: ext_set,
         saveSettingsDebounced: save_set,
         eventSource: ev_src,
-        event_types: ev_types,
-        generateRaw: gen_raw
+        event_types: ev_types
     });
   } catch (e) {
     console.error('[Farm] Lỗi khi kết nối ST Context:', e);
@@ -69,14 +67,12 @@ async function init() {
     let save_set = window.saveSettingsDebounced || (() => {});
     let ev_src = window.eventSource;
     let ev_types = window.event_types;
-    let gen_raw = window.generateRaw;
     
     setExtensionContext({
         extension_settings: ext_set,
         saveSettingsDebounced: save_set,
         eventSource: ev_src,
-        event_types: ev_types,
-        generateRaw: gen_raw
+        event_types: ev_types
     });
   }
 

@@ -9,7 +9,7 @@ import { renderPlots } from './render.js';
 /* ---------- Bóng nổi: kéo / hít mép / phân xử cú bấm (C11 §4) ---------- */
 
 export const disposers = [];
-export let gesture = null, destroyed = false;
+export let gesture = null;
 export function placeOrb() {
   const vw = window.innerWidth, vh = window.innerHeight;
   const x = Math.min(Math.max(ctx.S.orb.fx * vw, 4), vw - 56);

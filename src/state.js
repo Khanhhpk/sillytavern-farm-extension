@@ -56,7 +56,7 @@ export function loadState() {
   [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach(arr => arr.forEach(p => {
     const c = p.crop; if (!c) return;
     if (!c.fertUsed) c.fertUsed = {};
-    if (CROPS[c.id].regrow && c.left == null) c.left = REGROW_MAX;
+    if (CROPS[c.id]?.regrow && c.left == null) c.left = REGROW_MAX;
   }));
 }
 /* v0.8: hàm hỗ trợ cho trang */

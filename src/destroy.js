@@ -1,13 +1,12 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
 
-import { tick } from './windows.js';
-import { heartbeat, setInjection } from './events.js';
+import { tick, toggleWin } from './windows.js';
+import { heartbeat, setInjection, renderTimeout } from './events.js';
 import { wander, petSleepT, endScene, petHopT } from './pets.js';
-import { toggleWin } from './windows.js';
 import { save } from './state.js';
 import { toastTimer } from './witch.js';
-import { disposers } from './orb.js';
+import { disposers, resizeTimer } from './orb.js';
 import { root } from './ui.js';
 import { RUNTIME_KEY } from './store.js';
 
@@ -24,6 +23,8 @@ export function destroy() {
   try { endScene(); } catch (e) {}
   try { if (ctx.saveTimer) { clearTimeout(ctx.saveTimer); save(true); } } catch (e) {}
   try { if (toastTimer) window.clearTimeout(toastTimer); } catch (e) {}
+  try { if (resizeTimer) window.clearTimeout(resizeTimer); } catch (e) {}
+  try { if (renderTimeout) window.clearTimeout(renderTimeout); } catch (e) {}
   while (disposers.length) { try { disposers.pop()(); } catch (e) {} }
   try { setInjection(''); } catch (e) {}
   try { root.remove(); } catch (e) {}

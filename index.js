@@ -7,17 +7,11 @@ var ctx = {
   eventSource: null,
   event_types: null,
   saveSettingsDebounced: null,
-  generateRaw: null,
   S: null,
   ui: null,
   orb: null,
   win: null,
-  bagWin: null,
-  passWin: null,
-  shopWin: null,
-  msg: null,
-  saveTimer: null,
-  witchTimer: null
+  saveTimer: null
 };
 var setExtensionContext = (params) => {
   Object.assign(ctx, params);
@@ -1720,8 +1714,9 @@ function initUI() {
     const pager = $id("pager");
     if (pager && pager.classList.contains("open") && !e.target.closest("#pager")) pager.classList.remove("open");
   }, true);
-  $id("pager") && $id("pager").addEventListener("click", (e) => {
-    const pager = $id("pager");
+  const pagerEl = $id("pager");
+  if (pagerEl) pagerEl.addEventListener("click", (e) => {
+    const pager = pagerEl;
     const t = e.target.closest("[data-pg]");
     if (!t) {
       pager.classList.toggle("open");
@@ -1793,7 +1788,7 @@ function plant(pi, cropId) {
   }
   ctx.S.seeds[cropId]--;
   const g = growMs(realId);
-  const c = { id: realId, matureAt: now() + g, yieldBonus: 0, wateredUntil: 0, fertUsed: {} };
+  const c = { id: realId, matureAt: now() + g, wateredUntil: 0, fertUsed: {} };
   if (CROPS[realId].regrow) c.left = REGROW_MAX;
   if (isRain()) {
     c.matureAt = now() + g * 0.9;
@@ -1887,7 +1882,7 @@ function harvest(pi, quiet) {
   if (!c || now() < c.matureAt) return null;
   rollMutation(c, pi);
   const def = CROPS[c.id];
-  let n = 1 + (c.yieldBonus || 0);
+  let n = 1;
   const dev = todayEvent();
   if (dev && dev.double_yield && (!dev.favored_crop || def.name === dev.favored_crop)) n *= 2;
   const key = c.mut ? c.id + "@" + c.mut : c.id;
@@ -1899,8 +1894,6 @@ function harvest(pi, quiet) {
     ctx.S.coins += shinyGain;
     delete c.shiny;
   }
-  c.yieldBonus = 0;
-  if (c.left == null && def.regrow) c.left = REGROW_MAX;
   if (def.regrow && c.left - 1 > 0) {
     c.left--;
     c.matureAt = now() + regrowMs(c.id);
@@ -2415,6 +2408,7 @@ function initPets() {
       activeDrag.dropped = true;
     } else {
       cancelAnimationFrame(dragAnimFrame);
+      dragAnimFrame = null;
       el.style.transform = "";
       el.style.transition = "";
       activeDrag = null;
@@ -3037,7 +3031,6 @@ function renderPlots() {
         if (next) signEl.dataset.buy = String(b);
         signEl.innerHTML = shtml;
         blockEl.appendChild(signEl);
-        console.log("[Farm] Added sign to block", b);
       } else {
         if (signEl.className !== sclassName) signEl.className = sclassName;
         if (!next && signEl.style.opacity !== "0.55") signEl.style.opacity = "0.55";
@@ -3244,7 +3237,7 @@ function initRender() {
     e.stopPropagation();
     $id("mutPopup").classList.toggle("open");
   });
-  document.addEventListener("click", (e) => {
+  sh.addEventListener("click", (e) => {
     const popup = $id("mutPopup");
     if (popup.classList.contains("open") && !e.target.closest(".mut-popup") && !e.target.closest(".bmut")) {
       popup.classList.remove("open");
@@ -3647,12 +3640,15 @@ function settle() {
   if (wChanged) save();
   if (!isRain()) return;
   const d = gameDay();
+  let rChanged = false;
   eachPage((plots) => plots.forEach((p) => {
     const c = p.crop;
     if (!c || now() >= c.matureAt || c.rainDay === d) return;
     c.matureAt = now() + (c.matureAt - now()) * 0.9;
     c.rainDay = d;
+    rChanged = true;
   }));
+  if (rChanged) save();
 }
 var pageUnlocked = (p) => p === 1 || p === 2 && ctx.S.passes.water || p === 3 && ctx.S.passes.mine;
 var fmtLeft = (ms) => {
@@ -3734,7 +3730,6 @@ async function collectWorldbook() {
       try {
         const charId = ctx2.characterId !== void 0 ? ctx2.characterId : window.this_character;
         const charData = ctx2.characters?.[charId]?.data || window.characters?.[charId]?.data;
-        console.log("[FARM DEBUG] Character Data:", charData ? "Found charId:" + charId : "Null");
         if (charData) {
           if (charData.extensions?.world) activeNames.add(charData.extensions.world);
           if (charData.world) activeNames.add(charData.world);
@@ -3743,9 +3738,7 @@ async function collectWorldbook() {
         const chatWorldName = ctx2.chatMetadata?.[wiKey];
         if (chatWorldName && typeof chatWorldName === "string") activeNames.add(chatWorldName);
       } catch (e) {
-        console.log("[FARM DEBUG] Error getting active names:", e);
       }
-      console.log("[FARM DEBUG] Active Worldbook Names to Fetch:", Array.from(activeNames));
       for (const name of activeNames) {
         try {
           const res = await fetch("/api/worldinfo/get", {
@@ -3760,16 +3753,13 @@ async function collectWorldbook() {
             const data = await res.json();
             if (data && data.entries) {
               const vals = Array.isArray(data.entries) ? data.entries : Object.values(data.entries);
-              console.log("[FARM DEBUG] Fetched", vals.length, "entries from:", name);
               entries = entries.concat(vals);
             }
           }
         } catch (e) {
-          console.log("[FARM DEBUG] Fetch Exception for", name, ":", e);
         }
       }
     } catch (e) {
-      console.log("[FARM DEBUG] Outer Exception:", e);
     }
     try {
       const charId = ctx2.characterId !== void 0 ? ctx2.characterId : window.this_character;
@@ -3782,7 +3772,6 @@ async function collectWorldbook() {
         }
       }
     } catch (e) {
-      console.log("[FARM DEBUG] Embedded Book Exception:", e);
     }
     if (!entries || entries.length === 0) return "";
     let chatContext = "";
@@ -3794,7 +3783,6 @@ async function collectWorldbook() {
         chatContext = "\n==== RECENT CHAT HISTORY ====\n" + recentMsgs + "\n=============================\n";
       }
     } catch (e) {
-      console.log("[FARM DEBUG] Chat History Exception:", e);
     }
     const disabledContent = /* @__PURE__ */ new Set();
     for (const en of entries) {
@@ -3892,9 +3880,6 @@ async function requestDayEvent(force) {
   renderBanner();
   try {
     const wb = await collectWorldbook();
-    console.log("====== [FARM DEBUG] WORLDBOOK EXTRACTED ======");
-    console.log(wb);
-    console.log("================================================");
     const prompt = buildEventPrompt(wb);
     const reqBody = {
       model: SEC.model,
@@ -3904,16 +3889,15 @@ async function requestDayEvent(force) {
       ],
       max_tokens: 2e3 + Object.keys(CROPS).length * 100
     };
+    const ctrl = new AbortController();
+    const timeoutId = window.setTimeout(() => ctrl.abort(), 9e4);
     const resPromise = fetch(SEC.url.replace(/\/+$/, "") + "/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", ...SEC.key ? { Authorization: "Bearer " + SEC.key } : {} },
-      body: JSON.stringify(reqBody)
-    }).then((r) => r.json());
-    const data = await Promise.race([
-      resPromise,
-      new Promise((_, rej) => window.setTimeout(() => rej(new Error("timeout")), 9e4))
-      // v0.8: 15 mô tả nên lượng sinh ra lớn, 30s→90s
-    ]);
+      body: JSON.stringify(reqBody),
+      signal: ctrl.signal
+    }).then((r) => r.json()).finally(() => window.clearTimeout(timeoutId));
+    const data = await resPromise;
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
     const raw = data.choices && data.choices[0] && data.choices[0].message ? String(data.choices[0].message.content) : "";
     const jtxt = extractJson(raw);
@@ -4055,12 +4039,12 @@ QUY T\u1EAEC \u0110\u1EA6U RA B\u1EAET BU\u1ED8C:
       const data = await res.json();
       const content = data.choices?.[0]?.message?.content || "";
       let jsonStr = "";
-      const codeMatch = content.match(/```(?:json)?\s*(\[[\s\ctx.S]*?\])\s*```/i);
+      const codeMatch = content.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/i);
       if (codeMatch) {
         jsonStr = codeMatch[1];
       } else {
         const arrMatch = content.match(/\[\s*"(?:[^"\\]|\\.)*"(?:\s*,\s*"(?:[^"\\]|\\.)*")*\s*\]/);
-        jsonStr = arrMatch ? arrMatch[0] : (content.match(/\[[\s\ctx.S]*?\]/) || [""])[0];
+        jsonStr = arrMatch ? arrMatch[0] : (content.match(/\[[\s\S]*?\]/) || [""])[0];
       }
       if (jsonStr) {
         ta.value = jsonStr.trim();
@@ -4308,7 +4292,7 @@ function loadState() {
     const c = p.crop;
     if (!c) return;
     if (!c.fertUsed) c.fertUsed = {};
-    if (CROPS[c.id].regrow && c.left == null) c.left = REGROW_MAX;
+    if (CROPS[c.id]?.regrow && c.left == null) c.left = REGROW_MAX;
   }));
 }
 var pagePlots = (pg) => pg === 2 ? ctx.S.plots2 : pg === 3 ? ctx.S.plots3 : ctx.S.plots;
@@ -4380,6 +4364,14 @@ function destroy() {
   }
   try {
     if (toastTimer) window.clearTimeout(toastTimer);
+  } catch (e) {
+  }
+  try {
+    if (resizeTimer) window.clearTimeout(resizeTimer);
+  } catch (e) {
+  }
+  try {
+    if (renderTimeout) window.clearTimeout(renderTimeout);
   } catch (e) {
   }
   while (disposers.length) {
@@ -4484,7 +4476,7 @@ function initFarm() {
   if (CS.link) requestDayEvent();
   const diag = [];
   if (ctx.S) diag.push("S");
-  if (ctx.CS) diag.push("CS");
+  if (CS) diag.push("CS");
   if (ctx.ui) diag.push("ui");
   console.log("[Farm] ST Context k\u1EBFt n\u1ED1i th\xE0nh c\xF4ng \u2014 " + diag.join(", "));
   console.log("Farm initialized");
@@ -4507,13 +4499,11 @@ async function init() {
     });
     let ev_src = context.eventSource || window.eventSource;
     let ev_types = context.event_types || context.eventTypes || window.event_types;
-    let gen_raw = context.generateRaw || window.generateRaw;
     setExtensionContext({
       extension_settings: ext_set,
       saveSettingsDebounced: save_set,
       eventSource: ev_src,
-      event_types: ev_types,
-      generateRaw: gen_raw
+      event_types: ev_types
     });
   } catch (e) {
     console.error("[Farm] L\u1ED7i khi k\u1EBFt n\u1ED1i ST Context:", e);
@@ -4522,13 +4512,11 @@ async function init() {
     });
     let ev_src = window.eventSource;
     let ev_types = window.event_types;
-    let gen_raw = window.generateRaw;
     setExtensionContext({
       extension_settings: ext_set,
       saveSettingsDebounced: save_set,
       eventSource: ev_src,
-      event_types: ev_types,
-      generateRaw: gen_raw
+      event_types: ev_types
     });
   }
   initFarm();

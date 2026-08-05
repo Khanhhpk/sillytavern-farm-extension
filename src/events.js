@@ -72,7 +72,6 @@ async function collectWorldbook() {
         try {
             const charId = ctx.characterId !== undefined ? ctx.characterId : window.this_character;
             const charData = ctx.characters?.[charId]?.data || window.characters?.[charId]?.data;
-            console.log('[FARM DEBUG] Character Data:', charData ? 'Found charId:' + charId : 'Null');
             if (charData) {
                 if (charData.extensions?.world) activeNames.add(charData.extensions.world);
                 if (charData.world) activeNames.add(charData.world);
@@ -80,10 +79,8 @@ async function collectWorldbook() {
             const wiKey = ST_WorldInfo?.METADATA_KEY || window.WI_METADATA_KEY || 'world_info';
             const chatWorldName = ctx.chatMetadata?.[wiKey];
             if (chatWorldName && typeof chatWorldName === 'string') activeNames.add(chatWorldName);
-        } catch(e) { console.log('[FARM DEBUG] Error getting active names:', e); }
+        } catch(e) {}
         
-        console.log('[FARM DEBUG] Active Worldbook Names to Fetch:', Array.from(activeNames));
-
         for (const name of activeNames) {
             try {
                 const res = await fetch('/api/worldinfo/get', {
@@ -101,15 +98,13 @@ async function collectWorldbook() {
                         const vals = Array.isArray(data.entries) 
                             ? data.entries 
                             : Object.values(data.entries);
-                        console.log('[FARM DEBUG] Fetched', vals.length, 'entries from:', name);
                         entries = entries.concat(vals);
                     }
                 }
             } catch(e) {
-                console.log('[FARM DEBUG] Fetch Exception for', name, ':', e);
             }
         }
-    } catch (e) { console.log('[FARM DEBUG] Outer Exception:', e); }
+    } catch (e) {}
 
     // 1. Embedded character_book (nhúng trong thẻ nhân vật)
     try {
@@ -124,7 +119,7 @@ async function collectWorldbook() {
            entries = entries.concat(vals);
         }
       }
-    } catch(e) { console.log('[FARM DEBUG] Embedded Book Exception:', e); }
+    } catch(e) {}
     
     if (!entries || entries.length === 0) return '';
     // Build recent chat history to include in the context
@@ -137,7 +132,7 @@ async function collectWorldbook() {
       if (recentMsgs) {
         chatContext = "\n==== RECENT CHAT HISTORY ====\n" + recentMsgs + "\n=============================\n";
       }
-    } catch(e) { console.log('[FARM DEBUG] Chat History Exception:', e); }
+    } catch(e) {}
 
     // Pass 1: thu thập tất cả content đang bị disable từ MỌI nguồn
     // (tránh trường hợp bản copy từ ctx.worldInfo có disable=false overwrite bản API có disable=true)
@@ -260,9 +255,6 @@ export async function requestDayEvent(force) {
   eventPending = true; renderBanner();
   try {
     const wb = await collectWorldbook();
-    console.log('====== [FARM DEBUG] WORLDBOOK EXTRACTED ======');
-    console.log(wb);
-    console.log('================================================');
     const prompt = buildEventPrompt(wb);
     const reqBody = {
       model: SEC.model,
@@ -272,16 +264,16 @@ export async function requestDayEvent(force) {
       ],
       max_tokens: 2000 + Object.keys(CROPS).length * 100
     };
+    const ctrl = new AbortController();
+    const timeoutId = window.setTimeout(() => ctrl.abort(), 90000);   // v0.8: 15 mô tả nên lượng sinh ra lớn, 30s→90s; dùng AbortController để huỷ fetch thật sự khi timeout
     const resPromise = fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(SEC.key ? { Authorization: 'Bearer ' + SEC.key } : {}) },
-      body: JSON.stringify(reqBody)
-    }).then(r => r.json());
+      body: JSON.stringify(reqBody),
+      signal: ctrl.signal
+    }).then(r => r.json()).finally(() => window.clearTimeout(timeoutId));
 
-    const data = await Promise.race([
-      resPromise,
-      new Promise((_, rej) => window.setTimeout(() => rej(new Error('timeout')), 90000)),   // v0.8: 15 mô tả nên lượng sinh ra lớn, 30s→90s
-    ]);
+    const data = await resPromise;
     
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
     const raw = data.choices && data.choices[0] && data.choices[0].message ? String(data.choices[0].message.content) : '';
@@ -295,33 +287,8 @@ export async function requestDayEvent(force) {
   } finally { eventPending = false; renderBanner(); }
 }
 
-async function secTest() {
-  const p = All.$id('secTest');
-  const ori = p.textContent;
-  p.textContent = 'Đang gọi…'; p.style.pointerEvents = 'none';
-  try {
-    const reqBody = {
-      model: SEC.model,
-      messages: [{ role: 'user', content: 'Chỉ trả lời đúng hai chữ: Có mặt' }],
-      max_tokens: 16
-    };
-    const resPromise = fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(SEC.key ? { Authorization: 'Bearer ' + SEC.key } : {}) },
-      body: JSON.stringify(reqBody)
-    }).then(r => r.json());
 
-    const res = await Promise.race([ resPromise, new Promise((_, rj) => window.setTimeout(() => rj(new Error('Timeout 10s')), 10000)) ]);
-    if (res.error) throw new Error(res.error.message || JSON.stringify(res.error));
-    const text = (res.choices?.[0]?.message?.content || '').trim();
-    toast('Kết nối OK! AI đáp: ' + text);
-  } catch (e) {
-    toast('Lỗi kết nối API: ' + e.message);
-  }
-  p.textContent = ori; p.style.pointerEvents = '';
-}
-
-let renderTimeout;
+export let renderTimeout;
 export function openSandbox() {
   const html = `
     <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -477,12 +444,12 @@ QUY TẮC ĐẦU RA BẮT BUỘC:
       
       // Trích xuất JSON mảng chuỗi mạnh mẽ hơn để tránh bắt nhầm ngoặc vuông trong phần thinking
       let jsonStr = '';
-      const codeMatch = content.match(/```(?:json)?\s*(\[[\s\ctx.S]*?\])\s*```/i);
+      const codeMatch = content.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/i);
       if (codeMatch) {
         jsonStr = codeMatch[1];
       } else {
         const arrMatch = content.match(/\[\s*"(?:[^"\\]|\\.)*"(?:\s*,\s*"(?:[^"\\]|\\.)*")*\s*\]/);
-        jsonStr = arrMatch ? arrMatch[0] : (content.match(/\[[\s\ctx.S]*?\]/) || [''])[0];
+        jsonStr = arrMatch ? arrMatch[0] : (content.match(/\[[\s\S]*?\]/) || [''])[0];
       }
       
       if (jsonStr) {

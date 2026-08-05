@@ -28,7 +28,7 @@ export function plant(pi, cropId) {
   }
   ctx.S.seeds[cropId]--;
   const g = growMs(realId);
-  const c = { id: realId, matureAt: now() + g, yieldBonus: 0, wateredUntil: 0, fertUsed: {} };
+  const c = { id: realId, matureAt: now() + g, wateredUntil: 0, fertUsed: {} };
   if (CROPS[realId].regrow) c.left = REGROW_MAX;
   if (isRain()) { c.matureAt = now() + g * 0.9; c.rainDay = gameDay(); }   // Sửa #10: trồng vào ngày mưa được giảm thẳng 10%
   const ev = todayEvent();                                                  // Sự kiện thế giới quan: trồng trong ngày cũng được hưởng
@@ -113,7 +113,7 @@ export function harvest(pi, quiet) {
   if (!c || now() < c.matureAt) return null;
   rollMutation(c, pi);                                  // Cửa thu hoạch gieo bù (chống việc bấm quá nhanh trong 1 giây sau khi chín làm bỏ qua bước xét)
   const def = CROPS[c.id];
-  let n = 1 + (c.yieldBonus || 0);                      // v1.1: hệ số sản lượng nghỉ hưu (sự kiện chỉ ảnh hưởng thời gian sinh trưởng)
+  let n = 1;                      // v1.1: hệ số sản lượng nghỉ hưu (sự kiện chỉ ảnh hưởng thời gian sinh trưởng)
   const dev = todayEvent();
   if (dev && dev.double_yield && (!dev.favored_crop || def.name === dev.favored_crop)) n *= 2;   // v1.1: ngày bội thu gấp đôi (phúc lợi dân may)
   const key = c.mut ? c.id + '@' + c.mut : c.id;
@@ -121,8 +121,6 @@ export function harvest(pi, quiet) {
   ctx.S.bag[key] = (ctx.S.bag[key] || 0) + n;
   let shinyGain = 0;                                    // Phân lấp lánh v1.0 B′: khi thu hoạch kết toán 25% giá bán thành vàng
   if (c.shiny) { shinyGain = Math.ceil(def.sell * 0.25) * n; ctx.S.coins += shinyGain; delete c.shiny; }
-  c.yieldBonus = 0;
-  if (c.left == null && def.regrow) c.left = REGROW_MAX;
   if (def.regrow && c.left - 1 > 0) {                 // Sửa #4: tối đa 3 vụ
     c.left--;
     c.matureAt = now() + regrowMs(c.id);

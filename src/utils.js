@@ -83,12 +83,15 @@ export function settle() {
   /* Sửa #10: ngày mưa giảm một lần 10% thời gian còn lại của cây chưa chín (#27 sửa kèm: bù lại const d bị mất); v0.8 ba trang cùng mưa */
   if (!isRain()) return;
   const d = gameDay();
+  let rChanged = false;
   eachPage(plots => plots.forEach(p => {
     const c = p.crop;
     if (!c || now() >= c.matureAt || c.rainDay === d) return;
     c.matureAt = now() + (c.matureAt - now()) * 0.9;
     c.rainDay = d;
+    rChanged = true;
   }));
+  if (rChanged) save();
 }
   export const pageUnlocked = p => p === 1 || (p === 2 && ctx.S.passes.water) || (p === 3 && ctx.S.passes.mine);
 

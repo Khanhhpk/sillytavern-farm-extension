@@ -449,6 +449,7 @@ export function initPets() {
     } else {
       // Không kéo, chỉ là click
       cancelAnimationFrame(dragAnimFrame);
+      dragAnimFrame = null;
       el.style.transform = '';
       el.style.transition = '';
       activeDrag = null;
