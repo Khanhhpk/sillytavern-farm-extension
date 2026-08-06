@@ -553,10 +553,10 @@ export function openHeroMode() {
         maxHp: finalHp, hp: finalHp, shield: 0,
         hpMult, atkMult,
         atk: finalAtk, 
-        cd: 0, maxCd: 1.0 / atkSpeed,
+        cd: 1.0 / atkSpeed, maxCd: 1.0 / atkSpeed,
         crit: critRate, critDmg: critDmg,
         dodge, lifesteal, cheatDeath, reflect, armorPen, dmgResist,
-        skillCd: 0, 
+        skillCd: maxCd, 
         skillMaxCd: maxCd,
         skillActiveTime: 0,
         combo: 0 // for starBell
