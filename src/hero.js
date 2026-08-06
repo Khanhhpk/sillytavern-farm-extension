@@ -781,14 +781,31 @@ function heroTick() {
       });
       
       runState.pets.forEach(p => {
+        if (!ctx.S.hero.roster[p.id]) ctx.S.hero.roster[p.id] = { level: 1, exp: 0, enhHp: 0, enhAtk: 0 };
         const petData = ctx.S.hero.roster[p.id];
-        if (!petData) return;
+        if (petData.exp === undefined || isNaN(petData.exp)) petData.exp = 0;
+        
         const pEl = All.$id('hpet-' + runState.pets.indexOf(p));
-        petData.exp = (petData.exp || 0) + Math.floor(totalExp / runState.pets.length);
-        const req = (petData.level || 1) * 100;
-        if (petData.exp >= req) {
-          petData.exp -= req;
-          petData.level = (petData.level || 1) + 1;
+        petData.exp += Math.floor(totalExp / runState.pets.length);
+        
+        let leveledUp = false;
+        while (petData.level < 30) {
+          const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
+          if (petData.exp >= nextExp) {
+            petData.exp -= nextExp;
+            petData.level++;
+            leveledUp = true;
+          } else {
+            break;
+          }
+        }
+        
+        if (petData.level >= 30) {
+          petData.level = 30;
+          petData.exp = Math.floor(100 * Math.pow(1.5, 29)); // Cap it
+        }
+        
+        if (leveledUp) {
           if (pEl) setTimeout(() => showFloatDamage('LEVEL UP!', pEl, '#f2c231'), 500);
           heroToast((PETS[p.id]?.name || 'Pet') + ' vừa lên cấp ' + petData.level + '!');
           const st = getPetStats(p.id);
@@ -816,6 +833,7 @@ function heroTick() {
       if (runState.stage > ctx.S.hero.maxStage) ctx.S.hero.maxStage = runState.stage;
       runState.pets.forEach(p => { if (p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2); });
       
+      save();
       renderHeroUI();
       spawnMonster();
     }, 1500);
@@ -1242,6 +1260,8 @@ function heroTick() {
       }
     });
   }
+  
+  updateHeroStats();
 }
 
 
