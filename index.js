@@ -409,6 +409,40 @@ var SPR = {
     "................",
     "................"
   ],
+  threeSlimesWalking: [
+    "................................",
+    "...........WW...................",
+    ".........WWWWWW.................",
+    "........WWWWWWWW.........W......",
+    ".........WWWWWW........WWWWW....",
+    "........................WWW.....",
+    "................................",
+    "..................FFFFFF........",
+    "................FFppppFFFF......",
+    "...............FppppppppppF.....",
+    "..............FppppWppWppppF....",
+    "..............FppppKppKppppF....",
+    "..............FppppppppppppF....",
+    ".....EEEEEE....FppppppppppF.....",
+    "...EEEEEEEEEE...FFFFFFFFFF......",
+    ".EEEEEEEEEEEEE..................",
+    "EEEEEbbbbbbEEEEEEEEEEEGGGGGGEEE.",
+    "EEEbbBBBBbbbbEEEEEE.GGEEEEGGGGEE",
+    "EEbBBBBBBBBBbbEEEEEGEEEEEEEEEEGE",
+    "EabBBBBWBBWBBBbbeeGEEEEWEEWEEEEG",
+    "aabBBBBKBBKBBBbbaaeGEEEEKEEKEEEG",
+    "aabBBBBBBBBBBBbbaaeGEEEEEEEEEEEG",
+    "eeabBBBBBBBBBbbcceaeGEEEEEEEEEEG",
+    "cceeebbbbbbbbbbcceeaaeGGGGGGGGGG",
+    "cccceeeeeeeeeeccMMMMMcaaaeeeeeaa",
+    "SccccceeTTeccSSMMMMMMMeeccaceeec",
+    "SSScceeeTTeeSSSSMMMMMceccceeeccc",
+    "TSSScceeeeeSSSSSTTSScccccccccccS",
+    "TTTSSccceecSSTTTTTSSSccSccccSSSS",
+    "aTTTSSSSSSSSSTTaTTTTSSSSSSSSSSST",
+    "aaTTTTTTTTTTTTaaaaTTTTTTTTTTTTTa",
+    "aaaaaTTTTTTTaaaaaaaaaTTTTTTTaaaa"
+  ],
   swordIcon: [
     "..............W.",
     ".............Wc.",
@@ -5196,7 +5230,7 @@ function renderPlots() {
             <div class="feature-name">\u0110\u1ECF \u0110en</div>
           </div>
           <div class="explore-slot" id="eslot-hero">
-            ${spriteSVG("swordIcon", 48)}
+            ${spriteSVG("threeSlimesWalking", 64)}
             <div class="feature-name">Anh H\xF9ng</div>
           </div>
         `;
