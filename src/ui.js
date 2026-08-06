@@ -49,6 +49,7 @@ export function applyViewState() {
   const witch = $id('witch');
   const banner = $id('banner');
   const viewToggle = $id('viewToggle');
+  const statBlocks = $id('stat-blocks');
   
   // Ẩn/hiện các thành phần chỉ thuộc về Nông trại
   if (ctrlrow) ctrlrow.style.display = isExplore ? 'none' : 'flex';
@@ -56,6 +57,7 @@ export function applyViewState() {
   if (decoLayer) decoLayer.style.display = isExplore ? 'none' : '';
   if (witch) witch.style.display = isExplore ? 'none' : '';
   if (banner) banner.style.display = isExplore ? 'none' : '';
+  if (statBlocks) statBlocks.style.display = isExplore ? 'none' : '';
   
   // Cập nhật nút chuyển tab
   if (viewToggle) {
@@ -115,7 +117,7 @@ export function initUI() {
     <div class="statusbar">
       <span class="stat">${spriteSVG('coin', 22)}<b id="coins">0</b></span>
       <span class="stat"><span id="wicon">${spriteSVG('sun', 22)}</span><span id="daytxt"></span></span>
-      <span class="stat">${spriteSVG('sprout', 18)}Ruộng <span id="blocktxt"></span></span>
+      <span class="stat" id="stat-blocks">${spriteSVG('sprout', 18)}Ruộng <span id="blocktxt"></span></span>
     </div>
     <div class="ctrlrow">
       <span class="chip witchchip" id="chipRegen" style="display:none">✦ Gieo lại sự kiện hôm nay</span>

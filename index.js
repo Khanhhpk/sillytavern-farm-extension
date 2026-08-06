@@ -1869,11 +1869,13 @@ function applyViewState() {
   const witch = $id("witch");
   const banner = $id("banner");
   const viewToggle = $id("viewToggle");
+  const statBlocks = $id("stat-blocks");
   if (ctrlrow) ctrlrow.style.display = isExplore ? "none" : "flex";
   if (mascots) mascots.style.display = isExplore ? "none" : "";
   if (decoLayer) decoLayer.style.display = isExplore ? "none" : "";
   if (witch) witch.style.display = isExplore ? "none" : "";
   if (banner) banner.style.display = isExplore ? "none" : "";
+  if (statBlocks) statBlocks.style.display = isExplore ? "none" : "";
   if (viewToggle) {
     viewToggle.innerHTML = isExplore ? `${spriteSVG("strawhat", 16)} <span>V\u1EC1 N\xF4ng Tr\u1EA1i</span>` : `${spriteSVG("mapIcon", 16)} <span>Kh\xE1m ph\xE1</span>`;
   }
@@ -1924,7 +1926,7 @@ function initUI() {
     <div class="statusbar">
       <span class="stat">${spriteSVG("coin", 22)}<b id="coins">0</b></span>
       <span class="stat"><span id="wicon">${spriteSVG("sun", 22)}</span><span id="daytxt"></span></span>
-      <span class="stat">${spriteSVG("sprout", 18)}Ru\u1ED9ng <span id="blocktxt"></span></span>
+      <span class="stat" id="stat-blocks">${spriteSVG("sprout", 18)}Ru\u1ED9ng <span id="blocktxt"></span></span>
     </div>
     <div class="ctrlrow">
       <span class="chip witchchip" id="chipRegen" style="display:none">\u2726 Gieo l\u1EA1i s\u1EF1 ki\u1EC7n h\xF4m nay</span>
