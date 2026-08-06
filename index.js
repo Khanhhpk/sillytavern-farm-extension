@@ -2497,6 +2497,7 @@ var styleCSS = `
     .hp-bar-mini { width: 32px; height: 4px; background: #111; border-radius: 2px; overflow: hidden; margin-bottom: 2px; border: 1px solid #000; }
     .hp-fill-mini { height: 100%; background: #4caf50; transition: width 0.2s; }
     .hero-mob .hp-fill-mini { background: #f44336; }
+    .cd-fill-mini { height: 100%; background: #ff9800; }
     
     .dmg-float { position: absolute; font-weight: bold; color: #ff5252; text-shadow: 0 0 2px #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; font-size: 14px; pointer-events: none; animation: dmgFloat 0.8s ease-out forwards; z-index: 10; transform: translate(-50%, 0); display: flex; align-items: center; justify-content: center; gap: 2px; }
     .dmg-float.crit { font-size: 18px; color: #ffeb3b; }
@@ -8353,15 +8354,19 @@ function spawnMonster() {
   const randomCrop = cropKeys[Math.floor(Math.random() * cropKeys.length)];
   const isBoss = runState.stage > 0 && runState.stage % 5 === 0;
   const hpMult = isBoss ? 5 : 1;
-  const maxHp = (runState.stage * 20 + 80) * hpMult;
-  const atk = (runState.stage * 4 + 5) * (isBoss ? 2 : 1);
+  const baseMaxHp = (runState.stage * 20 + 80) * hpMult;
+  const baseAtk = (runState.stage * 4 + 5) * (isBoss ? 2 : 1);
+  const baseCd = 2;
+  const maxHp = Math.floor(baseMaxHp * (0.8 + Math.random() * 0.4));
+  const atk = Math.floor(baseAtk * (0.8 + Math.random() * 0.4));
+  const maxCd = Math.max(0.5, baseCd * (0.8 + Math.random() * 0.4));
   runState.monster = {
     id: randomCrop,
     hp: maxHp,
     maxHp,
     atk,
-    cd: 2,
-    maxCd: 2,
+    cd: maxCd,
+    maxCd,
     isBoss,
     isDead: false
   };
@@ -8373,6 +8378,7 @@ function spawnMonster() {
     em.innerHTML = `
       <div class="hero-mob idle" id="hmob" style="transform: translateX(${monsterX}px) ${scale}; transform-origin: bottom right; transition: transform 0.1s linear; ${bossStyle}">
         <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-mob"></div></div>
+        <div class="hp-bar-mini"><div class="cd-fill-mini" id="cd-mob" style="width:0%"></div></div>
         ${spriteSVG(CROPS[randomCrop].sp || "seedLight", 32)}
       </div>`;
   }
@@ -8713,6 +8719,8 @@ function heroTick() {
     });
     const hpMob = $id("hp-mob");
     if (hpMob) hpMob.style.width = `${Math.max(0, runState.monster.hp / runState.monster.maxHp * 100)}%`;
+    const cdMob = $id("cd-mob");
+    if (cdMob) cdMob.style.width = `${Math.min(100, Math.max(0, (runState.monster.maxCd - runState.monster.cd) / runState.monster.maxCd * 100))}%`;
     if (runState.monster.atkDebuffTimer > 0) {
       runState.monster.atkDebuffTimer -= dt / 1e3;
       if (runState.monster.atkDebuffTimer <= 0) runState.monster.atkDebuff = null;
@@ -8738,7 +8746,7 @@ function heroTick() {
           return !(data.passive_eq && pSkill && pSkill[data.passive_eq] && pSkill[data.passive_eq].type === "stealth");
         });
         if (validTargets.length === 0) validTargets = alivePets;
-        const target = validTargets[validTargets.length - 1];
+        const target = validTargets[Math.floor(Math.random() * validTargets.length)];
         const mult = ctx.S.hero.style === "defense" ? 0.6 : 1;
         let isDodge = Math.random() < target.dodge;
         if (runState.monster.blindCd > 0) isDodge = true;

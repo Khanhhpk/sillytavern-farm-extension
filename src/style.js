@@ -500,6 +500,7 @@ export const styleCSS = `
     .hp-bar-mini { width: 32px; height: 4px; background: #111; border-radius: 2px; overflow: hidden; margin-bottom: 2px; border: 1px solid #000; }
     .hp-fill-mini { height: 100%; background: #4caf50; transition: width 0.2s; }
     .hero-mob .hp-fill-mini { background: #f44336; }
+    .cd-fill-mini { height: 100%; background: #ff9800; }
     
     .dmg-float { position: absolute; font-weight: bold; color: #ff5252; text-shadow: 0 0 2px #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; font-size: 14px; pointer-events: none; animation: dmgFloat 0.8s ease-out forwards; z-index: 10; transform: translate(-50%, 0); display: flex; align-items: center; justify-content: center; gap: 2px; }
     .dmg-float.crit { font-size: 18px; color: #ffeb3b; }

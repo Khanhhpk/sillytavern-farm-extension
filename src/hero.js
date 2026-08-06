@@ -618,16 +618,21 @@ function spawnMonster() {
   
   const isBoss = runState.stage > 0 && runState.stage % 5 === 0;
   const hpMult = isBoss ? 5 : 1;
-  const maxHp = (runState.stage * 20 + 80) * hpMult;
-  const atk = (runState.stage * 4 + 5) * (isBoss ? 2 : 1);
+  const baseMaxHp = (runState.stage * 20 + 80) * hpMult;
+  const baseAtk = (runState.stage * 4 + 5) * (isBoss ? 2 : 1);
+  const baseCd = 2.0;
+
+  const maxHp = Math.floor(baseMaxHp * (0.8 + Math.random() * 0.4));
+  const atk = Math.floor(baseAtk * (0.8 + Math.random() * 0.4));
+  const maxCd = Math.max(0.5, baseCd * (0.8 + Math.random() * 0.4));
   
   runState.monster = {
     id: randomCrop,
     hp: maxHp,
     maxHp: maxHp,
     atk: atk,
-    cd: 2.0,
-    maxCd: 2.0,
+    cd: maxCd,
+    maxCd: maxCd,
     isBoss: isBoss,
     isDead: false
   };
@@ -640,6 +645,7 @@ function spawnMonster() {
     em.innerHTML = `
       <div class="hero-mob idle" id="hmob" style="transform: translateX(${monsterX}px) ${scale}; transform-origin: bottom right; transition: transform 0.1s linear; ${bossStyle}">
         <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-mob"></div></div>
+        <div class="hp-bar-mini"><div class="cd-fill-mini" id="cd-mob" style="width:0%"></div></div>
         ${spriteSVG(CROPS[randomCrop].sp || 'seedLight', 32)}
       </div>`;
   }
@@ -983,6 +989,8 @@ function heroTick() {
     // Cập nhật máu quái
     const hpMob = All.$id('hp-mob');
     if (hpMob) hpMob.style.width = `${Math.max(0, (runState.monster.hp / runState.monster.maxHp) * 100)}%`;
+    const cdMob = All.$id('cd-mob');
+    if (cdMob) cdMob.style.width = `${Math.min(100, Math.max(0, ((runState.monster.maxCd - runState.monster.cd) / runState.monster.maxCd) * 100))}%`;
     
     // Update monster debuffs
     if (runState.monster.atkDebuffTimer > 0) { runState.monster.atkDebuffTimer -= dt/1000; if(runState.monster.atkDebuffTimer<=0) runState.monster.atkDebuff = null; }
@@ -1006,7 +1014,7 @@ function heroTick() {
            return !(data.passive_eq && pSkill && pSkill[data.passive_eq] && pSkill[data.passive_eq].type === 'stealth');
         });
         if (validTargets.length === 0) validTargets = alivePets;
-        const target = validTargets[validTargets.length - 1]; // Đánh con đứng bên phải (cuối mảng)
+        const target = validTargets[Math.floor(Math.random() * validTargets.length)]; // Đánh ngẫu nhiên
         
         const mult = ctx.S.hero.style === 'defense' ? 0.6 : 1.0;
         
