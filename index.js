@@ -8925,6 +8925,7 @@ function heroTick() {
           const pIdx = runState.pets.indexOf(target);
           const pEl = $id("hpet-" + pIdx);
           const mEl = $id("hmob-" + m.idx);
+          spawnAttackEffect("monster", mEl, pEl, true, false);
           if (mEl) {
             mEl.classList.remove("idle");
             mEl.classList.add("attack");
@@ -8938,6 +8939,11 @@ function heroTick() {
             if (m.atkDebuff) mAtkMult *= m.atkDebuff;
             let dmg = Math.max(1, Math.floor(m.atk * mAtkMult * (0.8 + Math.random() * 0.4)));
             if (target.dmgResist > 0) dmg = Math.floor(dmg * (1 - target.dmgResist));
+            if (runState.waveTime <= 2 && ctx.S.hero.roster[target.id]?.passive_eq) {
+              const pSkill = PET_SKILLS[target.id];
+              const pEq = ctx.S.hero.roster[target.id].passive_eq;
+              if (pSkill && pSkill[pEq] && pSkill[pEq].type === "invincible_start") dmg = 0;
+            }
             if (target.absorbCharge > 0) {
               target.absorbCharge--;
               if (pEl) setTimeout(() => showFloatDamage("ABSORBED", pEl, "#e040fb"), 150);
@@ -8961,9 +8967,11 @@ function heroTick() {
             }
             target.hp -= dmg;
             if (target.hp <= 0 && target.cheatDeath > 0) {
-              target.hp = Math.floor(target.maxHp * target.cheatDeath);
-              target.cheatDeath = 0;
-              if (pEl) setTimeout(() => showFloatDamage("SURVIVE", pEl, "#ffeb3b"), 150);
+              target.cheatDeath--;
+              target.hp = 1;
+              if (pEl) setTimeout(() => showFloatDamage("CHEAT DEATH", pEl, "#ffd94d"), 150);
+            } else if (target.hp < 0) {
+              target.hp = 0;
             }
             if (dmg > 0) {
               if (pEl) setTimeout(() => showFloatDamage("-" + dmg, pEl), 150);
