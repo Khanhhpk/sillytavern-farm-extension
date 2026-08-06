@@ -573,4 +573,33 @@ export const styleCSS = `
     .betside .mult { display: block; font-size: 17px; }
     .betside .chance { display: block; font-size: 11px; opacity: .75; font-weight: normal; }
     .betside.off { opacity: .4; cursor: not-allowed; filter: grayscale(1); }
+    
+    /* Hero UI Improvements */
+    .hero-bars-container { display: flex; flex-direction: column; width: 100%; gap: 1px; margin-top: 2px; }
+    .hero-bar-row { height: 4px; width: 100%; background: #110d14; border: 1px solid #4a3461; border-radius: 2px; position: relative; overflow: hidden; }
+    .hero-bar-fill { height: 100%; width: 0%; transition: width 0.1s linear; }
+    .fill-cd { background: linear-gradient(90deg, #d38b24, #e8b958); }
+    .fill-sk { background: linear-gradient(90deg, #4a3461, #8a6bc8); }
+
+    /* Combat Effects */
+    .fx-slash { position: absolute; pointer-events: none; z-index: 11; transform: translate(-50%, -50%); animation: fxSlash 0.2s ease-out forwards; }
+    @keyframes fxSlash { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5) rotate(-30deg); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5) rotate(20deg); } }
+    
+    .fx-impact { position: absolute; pointer-events: none; z-index: 11; transform: translate(-50%, -50%); animation: fxImpact 0.25s ease-out forwards; }
+    @keyframes fxImpact { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.2); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
+
+    .fx-heal { position: absolute; pointer-events: none; z-index: 11; transform: translate(-50%, -50%); animation: fxHeal 1s ease-out forwards; }
+    @keyframes fxHeal { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 100% { opacity: 0; transform: translate(-50%, -150%) scale(1.2); } }
+
+    .fx-buff { position: absolute; pointer-events: none; z-index: 11; transform: translate(-50%, -50%); animation: fxBuff 0.8s ease-out forwards; }
+    @keyframes fxBuff { 0% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: hue-rotate(0deg); } 100% { opacity: 0; transform: translate(-50%, -80%) scale(1.5); filter: hue-rotate(90deg); } }
+
+    .fx-stun { position: absolute; pointer-events: none; z-index: 11; transform: translate(-50%, -100%); animation: fxStun 1s linear infinite; }
+    @keyframes fxStun { 0% { transform: translate(-50%, -100%) rotate(0deg); } 100% { transform: translate(-50%, -100%) rotate(360deg); } }
+
+    .laser-beam { position: absolute; height: 4px; background: #ff88dd; z-index: 8; transform-origin: left center; pointer-events: none; animation: fxLaser 0.3s ease-out forwards; box-shadow: 0 0 8px #ff88dd, 0 0 15px #ff88dd; }
+    @keyframes fxLaser { 0% { opacity: 1; transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(3); } }
+
+    .pet-bump { animation: petBump 0.2s ease-out; }
+    @keyframes petBump { 0% { transform: translateX(0); } 50% { transform: translateX(12px) scale(1.1); } 100% { transform: translateX(0); } }
 `;

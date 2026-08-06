@@ -282,6 +282,258 @@ var SPR = {
     "..MLMvvvvvvMLM..",
     ".MMLMvvvvvvMLMM.",
     ".MMMMvvvvvvMMMM."
+  ],
+  fireball: [
+    "................",
+    ".......q........",
+    "......qQO.......",
+    ".....qOQOh......",
+    "....qOQWWh......",
+    "....qOQWWh......",
+    ".....qOQOh......",
+    "......qQO.......",
+    ".......q........",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
+  iceball: [
+    "................",
+    ".......b........",
+    "......bBu.......",
+    ".....bBuBW......",
+    "....bBuBWW......",
+    "....bBuBWW......",
+    ".....bBuBW......",
+    "......bBu.......",
+    ".......b........",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
+  lightning: [
+    ".......C........",
+    "......CCC.......",
+    "......CC........",
+    ".....CCC........",
+    ".....CCC........",
+    "....CCC.........",
+    "....CC..........",
+    "....C...........",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
+  arrow: [
+    "................",
+    ".......W........",
+    "......LWL.......",
+    "......LWL.......",
+    "......LWL.......",
+    "......LWL.......",
+    ".....LLWLL......",
+    ".....MMWMM......",
+    ".....MMWMM......",
+    "......MWM.......",
+    "......MWM.......",
+    ".......M........",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
+  leafBolt: [
+    "................",
+    ".......D........",
+    "......DGD.......",
+    ".....DGEGD......",
+    ".....DGEGD......",
+    "......DGD.......",
+    ".......D........",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
+  holyLight: [
+    ".......C........",
+    ".......W........",
+    "......CWC.......",
+    "...C..CWC..C....",
+    "...WCCWWWCCW....",
+    "...C..CWC..C....",
+    "......CWC.......",
+    ".......W........",
+    ".......C........",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
+  waterball: [
+    "................",
+    ".......u........",
+    "......uBu.......",
+    ".....uBWWu......",
+    "....uBWbbWu.....",
+    "....uBWbbWu.....",
+    ".....uBWBu......",
+    "......uuu.......",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
+  starBolt: [
+    "................",
+    ".......C........",
+    "......CWC.......",
+    "....CCWWWCC.....",
+    "...CWWWWWWC.....",
+    "....CCWWWCC.....",
+    "......CWC.......",
+    ".......C........",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
+  slashFx: [
+    "................",
+    "............W...",
+    "..........WW....",
+    "........WWW.....",
+    "......WWW.......",
+    "....WWW.........",
+    "..WWW...........",
+    "W.............W.",
+    ".W..........WW..",
+    "..W.......WW....",
+    "...W....WW......",
+    "....W.WW........",
+    ".....W..........",
+    "................",
+    "................",
+    "................"
+  ],
+  biteFx: [
+    "................",
+    "....L......L....",
+    "...LWL....LWL...",
+    "..LWWL....LWWL..",
+    "..LWLL....LLWL..",
+    "...LL......LL...",
+    "................",
+    "................",
+    "...LL......LL...",
+    "..LWLL....LLWL..",
+    "..LWWL....LWWL..",
+    "...LWL....LWL...",
+    "....L......L....",
+    "................",
+    "................",
+    "................"
+  ],
+  smashFx: [
+    "................",
+    "...Q........Q...",
+    "....Q......Q....",
+    ".....Q....Q.....",
+    "......QQQQ......",
+    "..Q...QOOQ...Q..",
+    "...Q.QOOOOQ.Q...",
+    "....QQOOOOQQ....",
+    "....QQOOOOQQ....",
+    "...Q.QOOOOQ.Q...",
+    "..Q...QOOQ...Q..",
+    "......QQQQ......",
+    ".....Q....Q.....",
+    "....Q......Q....",
+    "...Q........Q...",
+    "................"
+  ],
+  healFx: [
+    "................",
+    "................",
+    ".......F........",
+    "......FpF.......",
+    ".....FpWpF......",
+    "....FpWWWpF.....",
+    ".....FpWpF......",
+    "......FpF.......",
+    ".......F........",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
+  shieldFx: [
+    "......uuuu......",
+    "....uuBBBBuu....",
+    "...uBBWWWWBBu...",
+    "..uBBWWuuWWBBu..",
+    ".uBBWWu..uWWBBu.",
+    ".uBBWu....uWBBBu",
+    ".uBBWu....uWBBBu",
+    ".uBBWu....uWBBBu",
+    ".uBBWu....uWBBBu",
+    ".uBBWWu..uWWBBu.",
+    "..uBBWWuuWWBBu..",
+    "...uBBWWWWBBu...",
+    "....uuBBBBuu....",
+    "......uuuu......",
+    "................",
+    "................"
+  ],
+  stunFx: [
+    ".......C........",
+    "......CWC.......",
+    "...CCWWWWWCC....",
+    "....CCWWWCC.....",
+    "......CWC.......",
+    ".......C........",
+    "................",
+    "................",
+    ".......C........",
+    "......CWC.......",
+    "...CCWWWWWCC....",
+    "....CCWWWCC.....",
+    "......CWC.......",
+    ".......C........",
+    "................",
+    "................"
   ]
 };
 P.k = P.k || "#c4e3f0";
@@ -1969,6 +2221,35 @@ var styleCSS = `
     .betside .mult { display: block; font-size: 17px; }
     .betside .chance { display: block; font-size: 11px; opacity: .75; font-weight: normal; }
     .betside.off { opacity: .4; cursor: not-allowed; filter: grayscale(1); }
+    
+    /* Hero UI Improvements */
+    .hero-bars-container { display: flex; flex-direction: column; width: 100%; gap: 1px; margin-top: 2px; }
+    .hero-bar-row { height: 4px; width: 100%; background: #110d14; border: 1px solid #4a3461; border-radius: 2px; position: relative; overflow: hidden; }
+    .hero-bar-fill { height: 100%; width: 0%; transition: width 0.1s linear; }
+    .fill-cd { background: linear-gradient(90deg, #d38b24, #e8b958); }
+    .fill-sk { background: linear-gradient(90deg, #4a3461, #8a6bc8); }
+
+    /* Combat Effects */
+    .fx-slash { position: absolute; pointer-events: none; z-index: 11; transform: translate(-50%, -50%); animation: fxSlash 0.2s ease-out forwards; }
+    @keyframes fxSlash { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5) rotate(-30deg); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5) rotate(20deg); } }
+    
+    .fx-impact { position: absolute; pointer-events: none; z-index: 11; transform: translate(-50%, -50%); animation: fxImpact 0.25s ease-out forwards; }
+    @keyframes fxImpact { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.2); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
+
+    .fx-heal { position: absolute; pointer-events: none; z-index: 11; transform: translate(-50%, -50%); animation: fxHeal 1s ease-out forwards; }
+    @keyframes fxHeal { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 100% { opacity: 0; transform: translate(-50%, -150%) scale(1.2); } }
+
+    .fx-buff { position: absolute; pointer-events: none; z-index: 11; transform: translate(-50%, -50%); animation: fxBuff 0.8s ease-out forwards; }
+    @keyframes fxBuff { 0% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: hue-rotate(0deg); } 100% { opacity: 0; transform: translate(-50%, -80%) scale(1.5); filter: hue-rotate(90deg); } }
+
+    .fx-stun { position: absolute; pointer-events: none; z-index: 11; transform: translate(-50%, -100%); animation: fxStun 1s linear infinite; }
+    @keyframes fxStun { 0% { transform: translate(-50%, -100%) rotate(0deg); } 100% { transform: translate(-50%, -100%) rotate(360deg); } }
+
+    .laser-beam { position: absolute; height: 4px; background: #ff88dd; z-index: 8; transform-origin: left center; pointer-events: none; animation: fxLaser 0.3s ease-out forwards; box-shadow: 0 0 8px #ff88dd, 0 0 15px #ff88dd; }
+    @keyframes fxLaser { 0% { opacity: 1; transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(3); } }
+
+    .pet-bump { animation: petBump 0.2s ease-out; }
+    @keyframes petBump { 0% { transform: translateX(0); } 50% { transform: translateX(12px) scale(1.1); } 100% { transform: translateX(0); } }
 `;
 
 // src/ui.js
@@ -7584,47 +7865,59 @@ function heroTick() {
           const pSkill = PET_SKILLS[p.id] || PET_SKILLS.default;
           [{ req: "s5", sk: pSkill.s5 }, { req: "s15", sk: pSkill.s15 }].forEach((tier) => {
             if (ctx.S.hero.roster[p.id] && ctx.S.hero.roster[p.id][`${tier.req}_unlocked`] && tier.sk) {
+              const aIdx = runState.pets.indexOf(p);
+              const pEl = $id(`hpet-${aIdx}`);
               if (tier.sk.type === "heal_party" || tier.sk.type === "heal_self") {
                 const targets = tier.sk.type === "heal_party" ? alivePets : [p];
                 targets.forEach((ap) => {
                   ap.hp = Math.min(ap.maxHp, ap.hp + tier.sk.val);
-                  const aIdx = runState.pets.indexOf(ap);
-                  const aEl = $id(`hpet-${aIdx}`);
-                  setTimeout(() => showFloatDamage(`+${tier.sk.val}`, aEl, "#a4dc8c"), 0);
-                  const hpPet = $id(`hp-pet-${aIdx}`);
+                  const tIdx = runState.pets.indexOf(ap);
+                  const tEl = $id(`hpet-${tIdx}`);
+                  setTimeout(() => showFloatDamage(`+${tier.sk.val}`, tEl, "#a4dc8c"), 0);
+                  const hpPet = $id(`hp-pet-${tIdx}`);
                   if (hpPet) hpPet.style.width = `${ap.hp / ap.maxHp * 100}%`;
+                  spawnSkillEffect(pEl, tEl, tier.sk.type);
                 });
               }
               if (tier.sk.type === "shield_party") {
                 alivePets.forEach((ap) => {
                   ap.shield = tier.sk.val;
-                  const aIdx = runState.pets.indexOf(ap);
-                  const aEl = $id(`hpet-${aIdx}`);
-                  setTimeout(() => showFloatDamage(`SHIELD`, aEl, "#aaddff"), 0);
+                  const tIdx = runState.pets.indexOf(ap);
+                  const tEl = $id(`hpet-${tIdx}`);
+                  setTimeout(() => showFloatDamage(`SHIELD`, tEl, "#aaddff"), 0);
+                  spawnSkillEffect(pEl, tEl, tier.sk.type);
                 });
               }
               if (tier.sk.type === "random_dmg") {
                 const rdmg = Math.floor(p.atk * tier.sk.val);
                 runState.monster.hp -= rdmg;
                 setTimeout(() => showFloatDamage(`-${rdmg}`, mobEl, "#f24d4d"), 150);
+                spawnSkillEffect(pEl, mobEl, tier.sk.type);
               }
               if (tier.sk.type === "laser") {
                 const ldmg = Math.floor(p.atk * tier.sk.val);
                 runState.monster.hp -= ldmg;
                 setTimeout(() => showFloatDamage(`LASER -${ldmg}`, mobEl, "#ff88dd"), 150);
+                spawnSkillEffect(pEl, mobEl, tier.sk.type);
               }
               if (tier.sk.type === "random_buff") {
                 alivePets.forEach((ap) => {
                   ap.atk += Math.floor(ap.atk * 0.2);
+                  const tIdx = runState.pets.indexOf(ap);
+                  const tEl = $id(`hpet-${tIdx}`);
+                  setTimeout(() => showFloatDamage(`ATK BUFF`, tEl, "#ffd94d"), 0);
+                  spawnSkillEffect(pEl, tEl, tier.sk.type);
                 });
-                const aEl = $id(`hpet-0`);
-                setTimeout(() => showFloatDamage(`ATK BUFF`, aEl, "#ffd94d"), 0);
               }
             }
           });
         }
+        const skBar = $id(`sk-pet-${runState.pets.indexOf(p)}`);
+        if (skBar) skBar.style.width = `${Math.min(100, Math.max(0, (p.skillMaxCd - p.skillCd) / p.skillMaxCd * 100))}%`;
       }
       p.cd -= dt / 1e3;
+      const cdBar = $id(`cd-pet-${runState.pets.indexOf(p)}`);
+      if (cdBar) cdBar.style.width = `${Math.min(100, Math.max(0, (p.maxCd - p.cd) / p.maxCd * 100))}%`;
       if (p.cd <= 0) {
         p.cd = p.maxCd;
         const mult = ctx.S.hero.style === "attack" ? 1.5 : 1;
@@ -7676,7 +7969,7 @@ function heroTick() {
                 }, 200);
               }, 150);
             }
-            spawnProjectile(pEl, mobEl, false, isCrit ? "#f2c231" : null);
+            spawnAttackEffect(p.id, pEl, mobEl, false, isCrit);
             setTimeout(() => showFloatDamage(`-${dmg}`, mobEl, isCrit ? "#f2c231" : null), 150);
             if (isStun) setTimeout(() => showFloatDamage("STUN!", mobEl, "#ccc"), 200);
           }, i * 200);
@@ -7696,7 +7989,7 @@ function heroTick() {
         const isDodge = Math.random() < target.dodge;
         const pIdx = runState.pets.indexOf(target);
         const pEl = $id(`hpet-${pIdx}`);
-        spawnProjectile(mobEl, pEl, true);
+        spawnAttackEffect("monster", mobEl, pEl, true, false);
         if (mobEl) {
           mobEl.classList.remove("idle");
           mobEl.classList.add("attack");
@@ -7828,20 +8121,77 @@ function showFloatDamage(text, target, color = null) {
   target.appendChild(fl);
   setTimeout(() => fl.remove(), 800);
 }
-function spawnProjectile(startEl, targetEl, isEnemy, color = null) {
+function spawnSkillEffect(startEl, targetEl, skillType) {
+  if (!startEl) return;
+  const scene2 = document.querySelector(".hero-scene");
+  if (!scene2) return;
+  const sRect = scene2.getBoundingClientRect();
+  if (skillType === "heal_party" || skillType === "heal_self") {
+    if (!targetEl) return;
+    const fx = document.createElement("div");
+    fx.className = "fx-heal";
+    fx.innerHTML = spriteSVG("healFx", 24);
+    scene2.appendChild(fx);
+    const tRect = targetEl.getBoundingClientRect();
+    fx.style.left = tRect.left - sRect.left + tRect.width / 2 + "px";
+    fx.style.top = tRect.top - sRect.top + tRect.height / 2 + "px";
+    setTimeout(() => fx.remove(), 1e3);
+  } else if (skillType === "shield_party") {
+    if (!targetEl) return;
+    const fx = document.createElement("div");
+    fx.className = "fx-shield";
+    fx.innerHTML = spriteSVG("shieldFx", 32);
+    fx.style.position = "absolute";
+    fx.style.pointerEvents = "none";
+    scene2.appendChild(fx);
+    const tRect = targetEl.getBoundingClientRect();
+    fx.style.left = tRect.left - sRect.left + tRect.width / 2 - 16 + "px";
+    fx.style.top = tRect.top - sRect.top + tRect.height / 2 - 16 + "px";
+    setTimeout(() => fx.remove(), 2e3);
+  } else if (skillType === "random_buff") {
+    if (!targetEl) return;
+    const fx = document.createElement("div");
+    fx.className = "fx-buff";
+    fx.innerHTML = spriteSVG("holyLight", 32);
+    scene2.appendChild(fx);
+    const tRect = targetEl.getBoundingClientRect();
+    fx.style.left = tRect.left - sRect.left + tRect.width / 2 + "px";
+    fx.style.top = tRect.top - sRect.top + tRect.height / 2 + "px";
+    setTimeout(() => fx.remove(), 800);
+  } else if (skillType === "laser") {
+    if (!targetEl) return;
+    const tRect = targetEl.getBoundingClientRect();
+    const startRect = startEl.getBoundingClientRect();
+    const sx = startRect.left - sRect.left + startRect.width / 2;
+    const sy = startRect.top - sRect.top + startRect.height / 2;
+    const ex = tRect.left - sRect.left + tRect.width / 2;
+    const ey = tRect.top - sRect.top + tRect.height / 2;
+    const dist = Math.hypot(ex - sx, ey - sy);
+    const angle = Math.atan2(ey - sy, ex - sx);
+    const fx = document.createElement("div");
+    fx.className = "laser-beam";
+    fx.style.width = dist + "px";
+    fx.style.left = sx + "px";
+    fx.style.top = sy + "px";
+    fx.style.transform = `rotate(${angle}rad)`;
+    scene2.appendChild(fx);
+    setTimeout(() => fx.remove(), 300);
+  } else if (skillType === "random_dmg") {
+    if (!targetEl) return;
+    const fx = document.createElement("div");
+    fx.className = "fx-impact";
+    fx.innerHTML = spriteSVG("fireball", 48);
+    scene2.appendChild(fx);
+    const tRect = targetEl.getBoundingClientRect();
+    fx.style.left = tRect.left - sRect.left + tRect.width / 2 + "px";
+    fx.style.top = tRect.top - sRect.top + tRect.height / 2 + "px";
+    setTimeout(() => fx.remove(), 250);
+  }
+}
+function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
   if (!startEl || !targetEl) return;
   const scene2 = document.querySelector(".hero-scene");
   if (!scene2) return;
-  const proj = document.createElement("div");
-  proj.className = "dg-projectile";
-  if (isEnemy) {
-    proj.innerHTML = '<div style="width:8px;height:8px;background:#e06578;border-radius:50%;box-shadow:0 0 5px #ff0000;"></div>';
-  } else {
-    const c1 = color || "#aaddff";
-    const c2 = color || "#0088ff";
-    proj.innerHTML = `<div style="width:8px;height:8px;background:${c1};border-radius:50%;box-shadow:0 0 5px ${c2};"></div>`;
-  }
-  scene2.appendChild(proj);
   const sRect = scene2.getBoundingClientRect();
   const startRect = startEl.getBoundingClientRect();
   const targetRect = targetEl.getBoundingClientRect();
@@ -7849,15 +8199,70 @@ function spawnProjectile(startEl, targetEl, isEnemy, color = null) {
   const sy = startRect.top - sRect.top + startRect.height / 2;
   const ex = targetRect.left - sRect.left + targetRect.width / 2;
   const ey = targetRect.top - sRect.top + targetRect.height / 2;
-  proj.style.left = sx + "px";
-  proj.style.top = sy + "px";
-  const duration = 150;
-  proj.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
-  setTimeout(() => {
-    proj.style.left = ex + "px";
-    proj.style.top = ey + "px";
-  }, 10);
-  setTimeout(() => proj.remove(), duration + 10);
+  let animType = "projectile";
+  let spriteId = "fireball";
+  if (isEnemy) {
+    animType = "projectile";
+    spriteId = "fireball";
+  } else {
+    const meleeSlash = ["octo", "ghostBlob", "impBlob"];
+    const meleeSmash = ["slime", "octoCream"];
+    const meleeBite = ["slimePink"];
+    if (meleeSlash.includes(pId)) {
+      animType = "slash";
+      spriteId = "slashFx";
+    } else if (meleeSmash.includes(pId)) {
+      animType = "impact";
+      spriteId = "smashFx";
+    } else if (meleeBite.includes(pId)) {
+      animType = "impact";
+      spriteId = "biteFx";
+    } else if (pId === "jellyfish") {
+      animType = "projectile";
+      spriteId = Math.random() > 0.5 ? "iceball" : "lightning";
+    } else if (pId === "dewSprout") {
+      animType = "projectile";
+      spriteId = "leafBolt";
+    } else if (pId === "peach_soda") {
+      animType = "projectile";
+      spriteId = "waterball";
+    } else if (pId === "starBell") {
+      animType = "projectile";
+      spriteId = "starBolt";
+    } else if (pId === "angelBlob") {
+      animType = "projectile";
+      spriteId = "holyLight";
+    } else if (pId === "cloudMallow") {
+      animType = "projectile";
+      spriteId = "arrow";
+    } else {
+      animType = "projectile";
+      spriteId = "fireball";
+    }
+  }
+  if (animType === "projectile") {
+    const proj = document.createElement("div");
+    proj.className = "dg-projectile";
+    proj.innerHTML = isEnemy ? '<div style="width:8px;height:8px;background:#e06578;border-radius:50%;box-shadow:0 0 5px #ff0000;"></div>' : spriteSVG(spriteId, 16);
+    scene2.appendChild(proj);
+    proj.style.left = sx + "px";
+    proj.style.top = sy + "px";
+    const duration = 150;
+    proj.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+    setTimeout(() => {
+      proj.style.left = ex + "px";
+      proj.style.top = ey + "px";
+    }, 10);
+    setTimeout(() => proj.remove(), duration + 10);
+  } else {
+    const fx = document.createElement("div");
+    fx.className = animType === "slash" ? "fx-slash" : "fx-impact";
+    fx.innerHTML = spriteSVG(spriteId, 32);
+    scene2.appendChild(fx);
+    fx.style.left = ex + "px";
+    fx.style.top = ey + "px";
+    setTimeout(() => fx.remove(), animType === "slash" ? 200 : 250);
+  }
 }
 function showFloatDrop(icon, target) {
   if (!target) return;
@@ -7877,6 +8282,10 @@ function renderHeroUI() {
     container.innerHTML = runState.pets.map(
       (p, i) => `<div class="hero-pet idle" id="hpet-${i}" style="z-index:${10 - i}; ${extraStyle} opacity: ${p.hp > 0 ? 1 : 0.3}">
          <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-pet-${i}" style="width:${p.hp / p.maxHp * 100}%"></div></div>
+         <div class="hero-bars-container">
+           <div class="hero-bar-row"><div class="hero-bar-fill fill-cd" id="cd-pet-${i}" style="width:0%"></div></div>
+           ${p.skillMaxCd > 0 ? `<div class="hero-bar-row"><div class="hero-bar-fill fill-sk" id="sk-pet-${i}" style="width:0%"></div></div>` : ""}
+         </div>
          ${petSVG(p.id, 32)}
        </div>`
     ).join("");

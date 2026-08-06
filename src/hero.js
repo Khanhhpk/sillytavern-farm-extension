@@ -523,47 +523,64 @@ function heroTick() {
           const pSkill = PET_SKILLS[p.id] || PET_SKILLS.default;
           [ {req:'s5', sk: pSkill.s5}, {req:'s15', sk: pSkill.s15} ].forEach(tier => {
             if (ctx.S.hero.roster[p.id] && ctx.S.hero.roster[p.id][`${tier.req}_unlocked`] && tier.sk) {
+              const aIdx = runState.pets.indexOf(p);
+              const pEl = All.$id(`hpet-${aIdx}`);
               if (tier.sk.type === 'heal_party' || tier.sk.type === 'heal_self') {
                 const targets = tier.sk.type === 'heal_party' ? alivePets : [p];
                 targets.forEach(ap => {
                   ap.hp = Math.min(ap.maxHp, ap.hp + tier.sk.val);
-                  const aIdx = runState.pets.indexOf(ap);
-                  const aEl = All.$id(`hpet-${aIdx}`);
-                  setTimeout(() => showFloatDamage(`+${tier.sk.val}`, aEl, '#a4dc8c'), 0);
-                  const hpPet = All.$id(`hp-pet-${aIdx}`);
+                  const tIdx = runState.pets.indexOf(ap);
+                  const tEl = All.$id(`hpet-${tIdx}`);
+                  setTimeout(() => showFloatDamage(`+${tier.sk.val}`, tEl, '#a4dc8c'), 0);
+                  const hpPet = All.$id(`hp-pet-${tIdx}`);
                   if (hpPet) hpPet.style.width = `${(ap.hp / ap.maxHp) * 100}%`;
+                  spawnSkillEffect(pEl, tEl, tier.sk.type);
                 });
               }
               if (tier.sk.type === 'shield_party') {
                 alivePets.forEach(ap => {
                   ap.shield = tier.sk.val;
-                  const aIdx = runState.pets.indexOf(ap);
-                  const aEl = All.$id(`hpet-${aIdx}`);
-                  setTimeout(() => showFloatDamage(`SHIELD`, aEl, '#aaddff'), 0);
+                  const tIdx = runState.pets.indexOf(ap);
+                  const tEl = All.$id(`hpet-${tIdx}`);
+                  setTimeout(() => showFloatDamage(`SHIELD`, tEl, '#aaddff'), 0);
+                  spawnSkillEffect(pEl, tEl, tier.sk.type);
                 });
               }
               if (tier.sk.type === 'random_dmg') {
                 const rdmg = Math.floor(p.atk * tier.sk.val);
                 runState.monster.hp -= rdmg;
                 setTimeout(() => showFloatDamage(`-${rdmg}`, mobEl, '#f24d4d'), 150);
+                spawnSkillEffect(pEl, mobEl, tier.sk.type);
               }
               if (tier.sk.type === 'laser') {
                 const ldmg = Math.floor(p.atk * tier.sk.val);
                 runState.monster.hp -= ldmg;
                 setTimeout(() => showFloatDamage(`LASER -${ldmg}`, mobEl, '#ff88dd'), 150);
+                spawnSkillEffect(pEl, mobEl, tier.sk.type);
               }
               if (tier.sk.type === 'random_buff') {
-                alivePets.forEach(ap => { ap.atk += Math.floor(ap.atk * 0.2); });
-                const aEl = All.$id(`hpet-0`);
-                setTimeout(() => showFloatDamage(`ATK BUFF`, aEl, '#ffd94d'), 0);
+                alivePets.forEach(ap => { 
+                  ap.atk += Math.floor(ap.atk * 0.2); 
+                  const tIdx = runState.pets.indexOf(ap);
+                  const tEl = All.$id(`hpet-${tIdx}`);
+                  setTimeout(() => showFloatDamage(`ATK BUFF`, tEl, '#ffd94d'), 0);
+                  spawnSkillEffect(pEl, tEl, tier.sk.type);
+                });
               }
             }
           });
         }
+        
+        // Update Skill UI Bar
+        const skBar = All.$id(`sk-pet-${runState.pets.indexOf(p)}`);
+        if (skBar) skBar.style.width = `${Math.min(100, Math.max(0, ((p.skillMaxCd - p.skillCd) / p.skillMaxCd) * 100))}%`;
       }
       
       // Đòn đánh thường
       p.cd -= dt / 1000;
+      const cdBar = All.$id(`cd-pet-${runState.pets.indexOf(p)}`);
+      if (cdBar) cdBar.style.width = `${Math.min(100, Math.max(0, ((p.maxCd - p.cd) / p.maxCd) * 100))}%`;
+
       if (p.cd <= 0) {
         p.cd = p.maxCd;
         const mult = ctx.S.hero.style === 'attack' ? 1.5 : 1.0;
@@ -607,7 +624,7 @@ function heroTick() {
             if (pEl) { pEl.classList.remove('idle'); pEl.classList.add('attack'); setTimeout(() => { pEl.classList.remove('attack'); pEl.classList.add('idle'); }, 300); }
             if (mobEl) { setTimeout(() => { mobEl.classList.remove('idle'); mobEl.classList.add('hurt'); setTimeout(() => { mobEl.classList.remove('hurt'); mobEl.classList.add('idle'); }, 200); }, 150); }
             
-            spawnProjectile(pEl, mobEl, false, isCrit ? '#f2c231' : null);
+            spawnAttackEffect(p.id, pEl, mobEl, false, isCrit);
             setTimeout(() => showFloatDamage(`-${dmg}`, mobEl, isCrit ? '#f2c231' : null), 150);
             if (isStun) setTimeout(() => showFloatDamage('STUN!', mobEl, '#ccc'), 200);
           }, i * 200); // Giãn cách đòn đánh nếu có multiHit
@@ -633,7 +650,7 @@ function heroTick() {
         const pIdx = runState.pets.indexOf(target);
         const pEl = All.$id(`hpet-${pIdx}`);
         
-        spawnProjectile(mobEl, pEl, true);
+        spawnAttackEffect('monster', mobEl, pEl, true, false);
         if (mobEl) { mobEl.classList.remove('idle'); mobEl.classList.add('attack'); setTimeout(() => { mobEl.classList.remove('attack'); mobEl.classList.add('idle'); }, 300); }
         
         if (isDodge) {
@@ -765,22 +782,86 @@ function showFloatDamage(text, target, color = null) {
   setTimeout(() => fl.remove(), 800);
 }
 
-function spawnProjectile(startEl, targetEl, isEnemy, color = null) {
-  if (!startEl || !targetEl) return;
+function spawnSkillEffect(startEl, targetEl, skillType) {
+  if (!startEl) return;
   const scene = document.querySelector('.hero-scene');
   if (!scene) return;
   
-  const proj = document.createElement('div');
-  proj.className = 'dg-projectile';
-  if (isEnemy) {
-    proj.innerHTML = '<div style="width:8px;height:8px;background:#e06578;border-radius:50%;box-shadow:0 0 5px #ff0000;"></div>';
-  } else {
-    const c1 = color || '#aaddff';
-    const c2 = color || '#0088ff';
-    proj.innerHTML = `<div style="width:8px;height:8px;background:${c1};border-radius:50%;box-shadow:0 0 5px ${c2};"></div>`;
-  }
+  const sRect = scene.getBoundingClientRect();
   
-  scene.appendChild(proj);
+  if (skillType === 'heal_party' || skillType === 'heal_self') {
+    if (!targetEl) return;
+    const fx = document.createElement('div');
+    fx.className = 'fx-heal';
+    fx.innerHTML = spriteSVG('healFx', 24);
+    scene.appendChild(fx);
+    const tRect = targetEl.getBoundingClientRect();
+    fx.style.left = (tRect.left - sRect.left + tRect.width/2) + 'px';
+    fx.style.top = (tRect.top - sRect.top + tRect.height/2) + 'px';
+    setTimeout(() => fx.remove(), 1000);
+  }
+  else if (skillType === 'shield_party') {
+    if (!targetEl) return;
+    const fx = document.createElement('div');
+    fx.className = 'fx-shield';
+    fx.innerHTML = spriteSVG('shieldFx', 32);
+    fx.style.position = 'absolute';
+    fx.style.pointerEvents = 'none';
+    scene.appendChild(fx);
+    const tRect = targetEl.getBoundingClientRect();
+    fx.style.left = (tRect.left - sRect.left + tRect.width/2 - 16) + 'px';
+    fx.style.top = (tRect.top - sRect.top + tRect.height/2 - 16) + 'px';
+    setTimeout(() => fx.remove(), 2000);
+  }
+  else if (skillType === 'random_buff') {
+    if (!targetEl) return;
+    const fx = document.createElement('div');
+    fx.className = 'fx-buff';
+    fx.innerHTML = spriteSVG('holyLight', 32);
+    scene.appendChild(fx);
+    const tRect = targetEl.getBoundingClientRect();
+    fx.style.left = (tRect.left - sRect.left + tRect.width/2) + 'px';
+    fx.style.top = (tRect.top - sRect.top + tRect.height/2) + 'px';
+    setTimeout(() => fx.remove(), 800);
+  }
+  else if (skillType === 'laser') {
+    if (!targetEl) return;
+    const tRect = targetEl.getBoundingClientRect();
+    const startRect = startEl.getBoundingClientRect();
+    const sx = startRect.left - sRect.left + startRect.width/2;
+    const sy = startRect.top - sRect.top + startRect.height/2;
+    const ex = tRect.left - sRect.left + tRect.width/2;
+    const ey = tRect.top - sRect.top + tRect.height/2;
+    
+    const dist = Math.hypot(ex - sx, ey - sy);
+    const angle = Math.atan2(ey - sy, ex - sx);
+    
+    const fx = document.createElement('div');
+    fx.className = 'laser-beam';
+    fx.style.width = dist + 'px';
+    fx.style.left = sx + 'px';
+    fx.style.top = sy + 'px';
+    fx.style.transform = `rotate(${angle}rad)`;
+    scene.appendChild(fx);
+    setTimeout(() => fx.remove(), 300);
+  }
+  else if (skillType === 'random_dmg') {
+    if (!targetEl) return;
+    const fx = document.createElement('div');
+    fx.className = 'fx-impact';
+    fx.innerHTML = spriteSVG('fireball', 48);
+    scene.appendChild(fx);
+    const tRect = targetEl.getBoundingClientRect();
+    fx.style.left = (tRect.left - sRect.left + tRect.width/2) + 'px';
+    fx.style.top = (tRect.top - sRect.top + tRect.height/2) + 'px';
+    setTimeout(() => fx.remove(), 250);
+  }
+}
+
+function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
+  if (!startEl || !targetEl) return;
+  const scene = document.querySelector('.hero-scene');
+  if (!scene) return;
   
   const sRect = scene.getBoundingClientRect();
   const startRect = startEl.getBoundingClientRect();
@@ -791,18 +872,50 @@ function spawnProjectile(startEl, targetEl, isEnemy, color = null) {
   const ex = targetRect.left - sRect.left + targetRect.width/2;
   const ey = targetRect.top - sRect.top + targetRect.height/2;
   
-  proj.style.left = sx + 'px';
-  proj.style.top = sy + 'px';
+  let animType = 'projectile';
+  let spriteId = 'fireball';
   
-  const duration = 150;
-  proj.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
-  
-  setTimeout(() => {
-    proj.style.left = ex + 'px';
-    proj.style.top = ey + 'px';
-  }, 10);
-  
-  setTimeout(() => proj.remove(), duration + 10);
+  if (isEnemy) {
+    animType = 'projectile'; spriteId = 'fireball';
+  } else {
+    // Determine type by pet ID
+    const meleeSlash = ['octo', 'ghostBlob', 'impBlob'];
+    const meleeSmash = ['slime', 'octoCream'];
+    const meleeBite = ['slimePink'];
+    
+    if (meleeSlash.includes(pId)) { animType = 'slash'; spriteId = 'slashFx'; }
+    else if (meleeSmash.includes(pId)) { animType = 'impact'; spriteId = 'smashFx'; }
+    else if (meleeBite.includes(pId)) { animType = 'impact'; spriteId = 'biteFx'; }
+    else if (pId === 'jellyfish') { animType = 'projectile'; spriteId = Math.random() > 0.5 ? 'iceball' : 'lightning'; }
+    else if (pId === 'dewSprout') { animType = 'projectile'; spriteId = 'leafBolt'; }
+    else if (pId === 'peach_soda') { animType = 'projectile'; spriteId = 'waterball'; }
+    else if (pId === 'starBell') { animType = 'projectile'; spriteId = 'starBolt'; }
+    else if (pId === 'angelBlob') { animType = 'projectile'; spriteId = 'holyLight'; }
+    else if (pId === 'cloudMallow') { animType = 'projectile'; spriteId = 'arrow'; } // Temp
+    else { animType = 'projectile'; spriteId = 'fireball'; } // default Prism, Mystery, Penguin
+  }
+
+  if (animType === 'projectile') {
+    const proj = document.createElement('div');
+    proj.className = 'dg-projectile';
+    proj.innerHTML = isEnemy ? '<div style="width:8px;height:8px;background:#e06578;border-radius:50%;box-shadow:0 0 5px #ff0000;"></div>' : spriteSVG(spriteId, 16);
+    scene.appendChild(proj);
+    proj.style.left = sx + 'px';
+    proj.style.top = sy + 'px';
+    const duration = 150;
+    proj.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+    setTimeout(() => { proj.style.left = ex + 'px'; proj.style.top = ey + 'px'; }, 10);
+    setTimeout(() => proj.remove(), duration + 10);
+  } else {
+    // Melee Effect directly on target
+    const fx = document.createElement('div');
+    fx.className = animType === 'slash' ? 'fx-slash' : 'fx-impact';
+    fx.innerHTML = spriteSVG(spriteId, 32);
+    scene.appendChild(fx);
+    fx.style.left = ex + 'px';
+    fx.style.top = ey + 'px';
+    setTimeout(() => fx.remove(), animType === 'slash' ? 200 : 250);
+  }
 }
 
 function showFloatDrop(icon, target) {
@@ -824,6 +937,10 @@ function renderHeroUI() {
     container.innerHTML = runState.pets.map((p, i) => 
       `<div class="hero-pet idle" id="hpet-${i}" style="z-index:${10-i}; ${extraStyle} opacity: ${p.hp > 0 ? 1 : 0.3}">
          <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-pet-${i}" style="width:${(p.hp/p.maxHp)*100}%"></div></div>
+         <div class="hero-bars-container">
+           <div class="hero-bar-row"><div class="hero-bar-fill fill-cd" id="cd-pet-${i}" style="width:0%"></div></div>
+           ${p.skillMaxCd > 0 ? `<div class="hero-bar-row"><div class="hero-bar-fill fill-sk" id="sk-pet-${i}" style="width:0%"></div></div>` : ''}
+         </div>
          ${petSVG(p.id, 32)}
        </div>`
     ).join('');
