@@ -8357,9 +8357,19 @@ function spawnMonster() {
   const baseMaxHp = (runState.stage * 20 + 80) * hpMult;
   const baseAtk = (runState.stage * 4 + 5) * (isBoss ? 2 : 1);
   const baseCd = 2;
-  const maxHp = Math.floor(baseMaxHp * (0.8 + Math.random() * 0.4));
-  const atk = Math.floor(baseAtk * (0.8 + Math.random() * 0.4));
-  const maxCd = Math.max(0.5, baseCd * (0.8 + Math.random() * 0.4));
+  let hpScale = 0.8 + Math.random() * 0.4;
+  let atkScale = 0.8 + Math.random() * 0.4;
+  let cdScale = 0.8 + Math.random() * 0.4;
+  if (!isBoss) {
+    cdScale = hpScale * atkScale;
+  } else {
+    hpScale = 0.9 + Math.random() * 0.3;
+    atkScale = 0.9 + Math.random() * 0.3;
+    cdScale = 0.7 + Math.random() * 0.4;
+  }
+  const maxHp = Math.floor(baseMaxHp * hpScale);
+  const atk = Math.floor(baseAtk * atkScale);
+  const maxCd = Math.max(0.5, baseCd * cdScale);
   runState.monster = {
     id: randomCrop,
     hp: maxHp,
