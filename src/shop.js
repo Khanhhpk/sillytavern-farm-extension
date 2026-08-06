@@ -214,12 +214,12 @@ export function openPanel(kind) {
           const on = !!bagSel[key];
           return `
         <div class="item selrow${on ? ' selon' : ''}" data-selkey="${key}"><span class="icon">${spriteSVG(item.sp, 32)}</span>
-          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff; white-space:nowrap;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/cái${esc(mdesc)}</div></span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${n} <span style="display:inline-block; font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff; white-space:nowrap;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/cái${esc(mdesc)}</div></span>
           <span class="selmark">${on ? '✓' : ''}</span></div>`;
         }
         return `
         <div class="item"><span class="icon">${spriteSVG(item.sp, 32)}</span>
-          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff; white-space:nowrap;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/cái · ${esc(item.desc || 'Vật phẩm độc nhất')}</div></span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${n} <span style="display:inline-block; font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff; white-space:nowrap;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/cái · ${esc(item.desc || 'Vật phẩm độc nhất')}</div></span>
           <span class="acts">
             <span class="ibtn" data-takeout="${key}" title="Lấy ra (mang vào cốt truyện, không quy ra tiền)">${spriteSVG('emBang', 16)}</span>
             <span class="ibtn" data-selldlg="${key}" title="Bán (tự chọn số lượng)">${spriteSVG('coin', 16)}</span>
