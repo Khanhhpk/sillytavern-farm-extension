@@ -8287,7 +8287,7 @@ function openHeroMode() {
         hpMult,
         atkMult,
         atk: finalAtk,
-        cd: 0,
+        cd: 1 / atkSpeed,
         maxCd: 1 / atkSpeed,
         crit: critRate,
         critDmg,
@@ -8297,7 +8297,7 @@ function openHeroMode() {
         reflect,
         armorPen,
         dmgResist,
-        skillCd: 0,
+        skillCd: maxCd,
         skillMaxCd: maxCd,
         skillActiveTime: 0,
         combo: 0
