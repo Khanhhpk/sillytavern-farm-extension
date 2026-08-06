@@ -202,7 +202,9 @@ export function openHeroPanel() {
   }));
   
   mbody.querySelector('#hero-deploy').addEventListener('click', () => {
-    if (ctx.S.hero.party.length === 0) return All.toast('Đội hình trống!');
+    if (ctx.S.hero.party.length === 0) {
+      return All.toast('Vui lòng xếp Đội hình trước khi Xuất chiến!');
+    }
     closeModal();
     openHeroMode();
   });
@@ -435,13 +437,26 @@ export function closeHeroMode() {
   if (orb) orb.style.display = 'flex';
 }
 
+let hToastTimer = null;
+export function heroToast(msg) {
+  const t = All.$id('hero-toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  if (hToastTimer) clearTimeout(hToastTimer);
+  hToastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
 export function cashOutHero() {
   if (ctx.S.hero.gold > 0) {
-    ctx.S.coins = (ctx.S.coins || 0) + ctx.S.hero.gold;
-    All.toast(`Đã rút ${ctx.S.hero.gold}G về trang trại!`);
+    const g = ctx.S.hero.gold;
+    ctx.S.coins = (ctx.S.coins || 0) + g;
+    heroToast(`Đã rút ${g.toLocaleString()}G về trang trại!`);
     ctx.S.hero.gold = 0;
     save();
     updateHeroStats();
+  } else {
+    heroToast('Chưa có Vàng để rút!');
   }
 }
 
@@ -748,6 +763,7 @@ function heroTick() {
           const pIdx = runState.pets.indexOf(p);
           const pEl = All.$id(`hpet-${pIdx}`);
           setTimeout(() => showFloatDamage('LEVEL UP!', pEl, '#f2c231'), 500);
+          heroToast(`${PET_SKILLS[p.id]?.name || 'Pet'} vừa lên cấp ${petData.level}!`);
           const st = getPetStats(p.id);
           const oldMax = p.maxHp;
           p.maxHp = Math.floor(st.maxHp * (p.hpMult || 1));

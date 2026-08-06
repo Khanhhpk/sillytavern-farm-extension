@@ -2127,6 +2127,8 @@ var styleCSS = `
     
     /* ---------- Hero Taskbar Mode ---------- */
     .hero-bar { position: fixed; bottom: 20px; right: 20px; width: 400px; height: 120px; background: #221d28; border: 3px solid #6b4d8a; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.1); z-index: 999999; display: flex; align-items: center; padding-right: 4px; overflow: hidden; pointer-events: auto; touch-action: none; font-family: sans-serif; }
+    .hero-toast { position: absolute; left: 50%; top: 4px; transform: translateX(-50%); background: rgba(31, 26, 38, 0.95); border: 1px solid #8a6bc8; color: #fff; padding: 2px 10px; border-radius: 8px; font-weight: bold; font-size: 11px; z-index: 1000; pointer-events: none; opacity: 0; transition: opacity 0.3s, top 0.3s; white-space: nowrap; }
+    .hero-toast.show { opacity: 1; top: 10px; }
     .hero-drag { width: 24px; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-right: 1px solid #4a3461; cursor: grab; color: #a58bd3; font-size: 14px; }
     .hero-drag:active { cursor: grabbing; background: rgba(0,0,0,0.5); }
     .hero-content { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; }
@@ -2389,6 +2391,7 @@ function initUI() {
   
   <div id="hero-bar" class="hero-bar" style="display:none">
     <div class="hero-drag" title="K\xE9o th\u1EA3" id="hero-drag"><i class="fa-solid fa-grip-vertical"></i></div>
+    <div class="hero-toast" id="hero-toast"></div>
     <div class="hero-content">
       <div class="hero-scene">
         <div class="hero-bg"></div>
@@ -7573,7 +7576,9 @@ function openHeroPanel() {
     openHeroPanel();
   }));
   mbody.querySelector("#hero-deploy").addEventListener("click", () => {
-    if (ctx.S.hero.party.length === 0) return toast("\u0110\u1ED9i h\xECnh tr\u1ED1ng!");
+    if (ctx.S.hero.party.length === 0) {
+      return toast("Vui l\xF2ng x\u1EBFp \u0110\u1ED9i h\xECnh tr\u01B0\u1EDBc khi Xu\u1EA5t chi\u1EBFn!");
+    }
     closeModal();
     openHeroMode();
   });
@@ -7791,13 +7796,25 @@ function closeHeroMode() {
   const orb = $id("orb");
   if (orb) orb.style.display = "flex";
 }
+var hToastTimer = null;
+function heroToast(msg) {
+  const t = $id("hero-toast");
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add("show");
+  if (hToastTimer) clearTimeout(hToastTimer);
+  hToastTimer = setTimeout(() => t.classList.remove("show"), 2e3);
+}
 function cashOutHero() {
   if (ctx.S.hero.gold > 0) {
-    ctx.S.coins = (ctx.S.coins || 0) + ctx.S.hero.gold;
-    toast(`\u0110\xE3 r\xFAt ${ctx.S.hero.gold}G v\u1EC1 trang tr\u1EA1i!`);
+    const g = ctx.S.hero.gold;
+    ctx.S.coins = (ctx.S.coins || 0) + g;
+    heroToast(`\u0110\xE3 r\xFAt ${g.toLocaleString()}G v\u1EC1 trang tr\u1EA1i!`);
     ctx.S.hero.gold = 0;
     save();
     updateHeroStats();
+  } else {
+    heroToast("Ch\u01B0a c\xF3 V\xE0ng \u0111\u1EC3 r\xFAt!");
   }
 }
 function spawnMonster() {
@@ -8081,6 +8098,7 @@ function heroTick() {
             const pIdx = runState.pets.indexOf(p);
             const pEl = $id(`hpet-${pIdx}`);
             setTimeout(() => showFloatDamage("LEVEL UP!", pEl, "#f2c231"), 500);
+            heroToast(`${PET_SKILLS[p.id]?.name || "Pet"} v\u1EEBa l\xEAn c\u1EA5p ${petData.level}!`);
             const st = getPetStats(p.id);
             const oldMax = p.maxHp;
             p.maxHp = Math.floor(st.maxHp * (p.hpMult || 1));

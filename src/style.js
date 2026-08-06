@@ -479,6 +479,8 @@ export const styleCSS = `
     
     /* ---------- Hero Taskbar Mode ---------- */
     .hero-bar { position: fixed; bottom: 20px; right: 20px; width: 400px; height: 120px; background: #221d28; border: 3px solid #6b4d8a; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.1); z-index: 999999; display: flex; align-items: center; padding-right: 4px; overflow: hidden; pointer-events: auto; touch-action: none; font-family: sans-serif; }
+    .hero-toast { position: absolute; left: 50%; top: 4px; transform: translateX(-50%); background: rgba(31, 26, 38, 0.95); border: 1px solid #8a6bc8; color: #fff; padding: 2px 10px; border-radius: 8px; font-weight: bold; font-size: 11px; z-index: 1000; pointer-events: none; opacity: 0; transition: opacity 0.3s, top 0.3s; white-space: nowrap; }
+    .hero-toast.show { opacity: 1; top: 10px; }
     .hero-drag { width: 24px; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-right: 1px solid #4a3461; cursor: grab; color: #a58bd3; font-size: 14px; }
     .hero-drag:active { cursor: grabbing; background: rgba(0,0,0,0.5); }
     .hero-content { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; }

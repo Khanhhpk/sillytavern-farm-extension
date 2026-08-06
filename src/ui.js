@@ -162,6 +162,7 @@ export function initUI() {
   
   <div id="hero-bar" class="hero-bar" style="display:none">
     <div class="hero-drag" title="Kéo thả" id="hero-drag"><i class="fa-solid fa-grip-vertical"></i></div>
+    <div class="hero-toast" id="hero-toast"></div>
     <div class="hero-content">
       <div class="hero-scene">
         <div class="hero-bg"></div>
