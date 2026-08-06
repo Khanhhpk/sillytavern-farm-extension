@@ -7814,7 +7814,9 @@ function spawnMonster() {
     maxHp,
     atk,
     cd: 2,
-    isBoss
+    maxCd: 2,
+    isBoss,
+    isDead: false
   };
   monsterX = 350;
   const em = $id("hero-enemy");
@@ -7822,7 +7824,7 @@ function spawnMonster() {
     const scale = isBoss ? "scale(1.5)" : "";
     const bossStyle = isBoss ? "filter: drop-shadow(0 0 5px #ff0000);" : "";
     em.innerHTML = `
-      <div class="hero-mob idle" id="hmob" style="transform: translateX(${monsterX}px) ${scale}; transform-origin: bottom right; ${bossStyle}">
+      <div class="hero-mob idle" id="hmob" style="transform: translateX(${monsterX}px) ${scale}; transform-origin: bottom right; transition: transform 0.1s linear; ${bossStyle}">
         <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-mob"></div></div>
         ${spriteSVG(CROPS[randomCrop].sp || "seedLight", 32)}
       </div>`;
@@ -7837,6 +7839,7 @@ function heroTick() {
   if (!runState || !runState.monster) return;
   const partyEl = $id("hero-party");
   const mobEl = $id("hmob");
+  if (runState.monster.isDead) return;
   if (monsterX > 130) {
     monsterX -= 40 * (dt / 1e3);
     if (mobEl) {
@@ -7923,7 +7926,7 @@ function heroTick() {
         const mult = ctx.S.hero.style === "attack" ? 1.5 : 1;
         for (let i = 0; i < p.multiHit; i++) {
           setTimeout(() => {
-            if (!runState || !runState.monster || runState.monster.hp <= 0) return;
+            if (!runState || !runState.monster || runState.monster.hp <= 0 || runState.monster.isDead) return;
             const isCrit = Math.random() < p.crit;
             const dmgBase = Math.max(1, Math.floor(p.atk * mult * (0.8 + Math.random() * 0.4)));
             let dmg = isCrit ? Math.floor(dmgBase * p.critDmg) : dmgBase;
@@ -8034,74 +8037,85 @@ function heroTick() {
         }
       }
     }
-    if (runState.monster.hp <= 0) {
+    if (runState.monster.hp <= 0 && !runState.monster.isDead) {
+      runState.monster.isDead = true;
       const m = runState.monster;
-      const goldDrop = Math.floor(Math.random() * runState.stage * (m.isBoss ? 15 : 3)) + 1;
-      let pGoldMult = 1;
-      runState.pets.forEach((p) => {
-        const data = ctx.S.hero.roster[p.id];
-        if (data && data.s15_unlocked && PET_SKILLS[p.id]?.s15?.type === "gold_drop") pGoldMult *= PET_SKILLS[p.id].s15.val;
-      });
-      ctx.S.hero.gold += Math.floor(goldDrop * pGoldMult);
-      const expDrop = (runState.stage * 10 + 5) * (m.isBoss ? 5 : 1);
-      runState.pets.forEach((p) => {
-        if (!ctx.S.hero.roster[p.id]) ctx.S.hero.roster[p.id] = { level: 1, exp: 0, enhHp: 0, enhAtk: 0, s5_unlocked: false, s15_unlocked: false };
-        let petData = ctx.S.hero.roster[p.id];
-        if (petData.exp === void 0 || isNaN(petData.exp)) petData.exp = 0;
-        petData.exp += Math.floor(expDrop / runState.pets.length);
-        let leveledUp = false;
-        while (petData.level < 30) {
-          const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
-          if (petData.exp >= nextExp) {
-            petData.exp -= nextExp;
-            petData.level++;
-            leveledUp = true;
-          } else {
-            break;
+      if (mobEl) {
+        mobEl.classList.remove("idle", "hurt", "attack");
+        mobEl.style.transition = "all 0.4s ease-out";
+        mobEl.style.opacity = "0";
+        mobEl.style.transform = `translateX(${monsterX + 10}px) scale(0.1)`;
+        setTimeout(() => showFloatDamage(`KO`, mobEl, "#ffaa00"), 0);
+      }
+      setTimeout(() => {
+        if (!runState || !runState.monster) return;
+        const goldDrop = Math.floor((runState.stage * 15 + 185) * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
+        let pGoldMult = 1;
+        runState.pets.forEach((p) => {
+          const data = ctx.S.hero.roster[p.id];
+          if (data && data.s15_unlocked && PET_SKILLS[p.id]?.s15?.type === "gold_drop") pGoldMult *= PET_SKILLS[p.id].s15.val;
+        });
+        ctx.S.hero.gold += Math.floor(goldDrop * pGoldMult);
+        const expDrop = (runState.stage * 10 + 5) * (m.isBoss ? 5 : 1);
+        runState.pets.forEach((p) => {
+          if (!ctx.S.hero.roster[p.id]) ctx.S.hero.roster[p.id] = { level: 1, exp: 0, enhHp: 0, enhAtk: 0, s5_unlocked: false, s15_unlocked: false };
+          let petData = ctx.S.hero.roster[p.id];
+          if (petData.exp === void 0 || isNaN(petData.exp)) petData.exp = 0;
+          petData.exp += Math.floor(expDrop / runState.pets.length);
+          let leveledUp = false;
+          while (petData.level < 30) {
+            const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
+            if (petData.exp >= nextExp) {
+              petData.exp -= nextExp;
+              petData.level++;
+              leveledUp = true;
+            } else {
+              break;
+            }
+          }
+          if (petData.level >= 30) {
+            petData.level = 30;
+            petData.exp = Math.floor(100 * Math.pow(1.5, 29));
+          }
+          if (leveledUp) {
+            const pIdx = runState.pets.indexOf(p);
+            const pEl = $id(`hpet-${pIdx}`);
+            setTimeout(() => showFloatDamage("LEVEL UP!", pEl, "#f2c231"), 500);
+            const st = getPetStats(p.id);
+            const oldMax = p.maxHp;
+            p.maxHp = Math.floor(st.maxHp * (p.hpMult || 1));
+            p.hp += p.maxHp - oldMax;
+            p.atk = Math.floor(st.atk * (p.atkMult || 1));
+          }
+        });
+        const r = Math.random();
+        if (m.isBoss) {
+          if (r < 0.5) {
+            ctx.S.tickets = ctx.S.tickets || {};
+            ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1;
+            showFloatDrop("ticketNorm", partyEl);
+          } else if (r < 0.8) {
+            ctx.S.ferts["f2"] = (ctx.S.ferts["f2"] || 0) + 1;
+            showFloatDrop("toolFert", partyEl);
+          }
+        } else {
+          if (r < 0.1) {
+            ctx.S.seeds[m.id] = (ctx.S.seeds[m.id] || 0) + 1;
+            showFloatDrop(CROPS[m.id].sp || "seedLight", partyEl);
+          } else if (r < 0.15) {
+            ctx.S.ferts["f1"] = (ctx.S.ferts["f1"] || 0) + 1;
+            showFloatDrop("toolFert", partyEl);
           }
         }
-        if (petData.level >= 30) {
-          petData.level = 30;
-          petData.exp = Math.floor(100 * Math.pow(1.5, 29));
-        }
-        if (leveledUp) {
-          const pIdx = runState.pets.indexOf(p);
-          const pEl = $id(`hpet-${pIdx}`);
-          setTimeout(() => showFloatDamage("LEVEL UP!", pEl, "#f2c231"), 500);
-          const st = getPetStats(p.id);
-          const oldMax = p.maxHp;
-          p.maxHp = Math.floor(st.maxHp * (p.hpMult || 1));
-          p.hp += p.maxHp - oldMax;
-          p.atk = Math.floor(st.atk * (p.atkMult || 1));
-        }
-      });
-      const r = Math.random();
-      if (m.isBoss) {
-        if (r < 0.5) {
-          ctx.S.tickets = ctx.S.tickets || {};
-          ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1;
-          showFloatDrop("ticketNorm", partyEl);
-        } else if (r < 0.8) {
-          ctx.S.ferts["f2"] = (ctx.S.ferts["f2"] || 0) + 1;
-          showFloatDrop("toolFert", partyEl);
-        }
-      } else {
-        if (r < 0.1) {
-          ctx.S.seeds[m.id] = (ctx.S.seeds[m.id] || 0) + 1;
-          showFloatDrop(CROPS[m.id].sp || "seedLight", partyEl);
-        } else if (r < 0.15) {
-          ctx.S.ferts["f1"] = (ctx.S.ferts["f1"] || 0) + 1;
-          showFloatDrop("toolFert", partyEl);
-        }
-      }
-      runState.stage++;
-      if (runState.stage > ctx.S.hero.maxStage) ctx.S.hero.maxStage = runState.stage;
-      runState.pets.forEach((p) => {
-        if (p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.1);
-      });
-      save();
-      renderHeroUI();
-      spawnMonster();
+        runState.stage++;
+        if (runState.stage > ctx.S.hero.maxStage) ctx.S.hero.maxStage = runState.stage;
+        runState.pets.forEach((p) => {
+          if (p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.1);
+        });
+        save();
+        renderHeroUI();
+        spawnMonster();
+      }, 500);
     }
   }
   updateHeroStats();

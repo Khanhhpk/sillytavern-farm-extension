@@ -461,7 +461,9 @@ function spawnMonster() {
     maxHp: maxHp,
     atk: atk,
     cd: 2.0,
-    isBoss: isBoss
+    maxCd: 2.0,
+    isBoss: isBoss,
+    isDead: false
   };
   monsterX = 350; // Quái ở xa 350px (bên phải taskbar)
   
@@ -470,7 +472,7 @@ function spawnMonster() {
     const scale = isBoss ? 'scale(1.5)' : '';
     const bossStyle = isBoss ? 'filter: drop-shadow(0 0 5px #ff0000);' : '';
     em.innerHTML = `
-      <div class="hero-mob idle" id="hmob" style="transform: translateX(${monsterX}px) ${scale}; transform-origin: bottom right; ${bossStyle}">
+      <div class="hero-mob idle" id="hmob" style="transform: translateX(${monsterX}px) ${scale}; transform-origin: bottom right; transition: transform 0.1s linear; ${bossStyle}">
         <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-mob"></div></div>
         ${spriteSVG(CROPS[randomCrop].sp || 'seedLight', 32)}
       </div>`;
@@ -491,6 +493,8 @@ function heroTick() {
   const mobEl = All.$id('hmob');
   
   // Di chuyển (Dừng khi monsterX <= 130px, vì Party chiếm từ 10px đến ~120px)
+  if (runState.monster.isDead) return;
+
   if (monsterX > 130) {
     monsterX -= (40 * (dt / 1000)); // tốc độ 40px/s
     if (mobEl) {
@@ -587,7 +591,7 @@ function heroTick() {
         
         for (let i = 0; i < p.multiHit; i++) {
           setTimeout(() => {
-            if (!runState || !runState.monster || runState.monster.hp <= 0) return;
+            if (!runState || !runState.monster || runState.monster.hp <= 0 || runState.monster.isDead) return;
             
             const isCrit = Math.random() < p.crit;
             const dmgBase = Math.max(1, Math.floor(p.atk * mult * (0.8 + Math.random() * 0.4)));
@@ -694,15 +698,26 @@ function heroTick() {
     }
     
     // 3. Monster Dies
-    if (runState.monster.hp <= 0) {
+    if (runState.monster.hp <= 0 && !runState.monster.isDead) {
+      runState.monster.isDead = true;
       const m = runState.monster;
-      const goldDrop = Math.floor(Math.random() * runState.stage * (m.isBoss ? 15 : 3)) + 1;
-      let pGoldMult = 1.0;
-      runState.pets.forEach(p => {
-         const data = ctx.S.hero.roster[p.id];
-         if (data && data.s15_unlocked && PET_SKILLS[p.id]?.s15?.type === 'gold_drop') pGoldMult *= PET_SKILLS[p.id].s15.val;
-      });
-      ctx.S.hero.gold += Math.floor(goldDrop * pGoldMult);
+      if (mobEl) {
+        mobEl.classList.remove('idle', 'hurt', 'attack');
+        mobEl.style.transition = 'all 0.4s ease-out';
+        mobEl.style.opacity = '0';
+        mobEl.style.transform = `translateX(${monsterX + 10}px) scale(0.1)`;
+        setTimeout(() => showFloatDamage(`KO`, mobEl, '#ffaa00'), 0);
+      }
+      
+      setTimeout(() => {
+        if (!runState || !runState.monster) return;
+        const goldDrop = Math.floor((runState.stage * 15 + 185) * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
+        let pGoldMult = 1.0;
+        runState.pets.forEach(p => {
+           const data = ctx.S.hero.roster[p.id];
+           if (data && data.s15_unlocked && PET_SKILLS[p.id]?.s15?.type === 'gold_drop') pGoldMult *= PET_SKILLS[p.id].s15.val;
+        });
+        ctx.S.hero.gold += Math.floor(goldDrop * pGoldMult);
       
       const expDrop = (runState.stage * 10 + 5) * (m.isBoss ? 5 : 1);
       runState.pets.forEach(p => {
@@ -760,6 +775,7 @@ function heroTick() {
       save();
       renderHeroUI();
       spawnMonster();
+    }, 500); // Chờ 500ms cho hiệu ứng bay màu quái
     }
   }
   
