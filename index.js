@@ -1774,8 +1774,8 @@ var styleCSS = `
     .dg-dmg.heal { color: #a4dc8c; }
     .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
-    .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
-    .dg-title { font-size: 32px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 2px; }
+    .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; overflow-y: auto; padding: 15px; box-sizing: border-box; }
+    .dg-title { font-size: 24px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 1px; text-align: center; margin-top: auto; }
     .dg-dock::-webkit-scrollbar { height: 8px; display: block; }
     .dg-dock::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
     .dg-dock::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 4px; }
@@ -1816,10 +1816,10 @@ var styleCSS = `
     }
     .dg-entity.attack > svg, .dg-entity.attack > img { animation: dgAttack 0.2s ease-out forwards; }
     
-    .dg-reward-card { background: #3c2a20; border: 2px solid #b08a5c; padding: 10px; border-radius: 8px; width: 120px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+    .dg-reward-card { background: #3c2a20; border: 2px solid #b08a5c; padding: 8px; border-radius: 8px; flex: 1 1 90px; min-width: 90px; max-width: 140px; text-align: center; cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; }
     .dg-reward-card:hover { transform: scale(1.05); border-color: #ffda66; background: #4e382d; }
-    .dg-reward-card h4 { margin: 0 0 5px 0; color: #ffda66; }
-    .dg-reward-card p { margin: 0; font-size: 12px; color: #fff; line-height: 1.4; }
+    .dg-reward-card h4 { margin: 0 0 5px 0; color: #ffda66; font-size: 14px; }
+    .dg-reward-card p { margin: 0; font-size: 11px; color: #fff; line-height: 1.3; }
     
     .dg-hud { position: absolute; top: 8px; left: 10px; z-index: 25; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 6px; font-size: 13px; color: white; pointer-events: none; }
     
@@ -6376,7 +6376,6 @@ function showWaveRewards() {
   team = [...fullTeam];
   const overlay = document.createElement("div");
   overlay.className = "dg-overlay";
-  overlay.style.backgroundColor = "rgba(0,0,0,0.85)";
   const allRewards = [
     { id: "heal", name: "H\u1ED3i M\xE1u", desc: "H\u1ED3i 100% HP cho to\xE0n \u0111\u1ED9i", color: "#4caf50" },
     { id: "buff", name: "C\u01B0\u1EDDng H\xF3a", desc: "T\u0103ng ng\u1EABu nhi\xEAn 10-30% HP ho\u1EB7c ATK cho to\xE0n \u0111\u1ED9i", color: "#2196f3" },
@@ -6419,9 +6418,9 @@ function showWaveRewards() {
   }
   overlay.innerHTML = `
         <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Ho\xE0n Th\xE0nh!</div>
-        <div style="color:white; margin-bottom: 10px;">Nh\u1EADn \u0111\u01B0\u1EE3c ${waveGold} G (T\u1ED5ng: ${totalGold} G)</div>
+        <div style="color:white; margin-bottom: 15px;">Nh\u1EADn \u0111\u01B0\u1EE3c ${waveGold} G (T\u1ED5ng: ${totalGold} G)</div>
         ${bossDropHtml}
-        <div style="display:flex; gap: 15px; flex-wrap:wrap; justify-content:center;">
+        <div style="display:flex; gap: 10px; flex-wrap:wrap; justify-content:center; width: 100%; margin-bottom: auto;">
             ${cardsHtml}
         </div>
     `;

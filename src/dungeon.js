@@ -1006,7 +1006,6 @@ function showWaveRewards() {
     
     const overlay = document.createElement('div');
     overlay.className = 'dg-overlay';
-    overlay.style.backgroundColor = 'rgba(0,0,0,0.85)';
     
     const allRewards = [
         { id: 'heal', name: 'Hồi Máu', desc: 'Hồi 100% HP cho toàn đội', color: '#4caf50' },
@@ -1055,9 +1054,9 @@ function showWaveRewards() {
 
     overlay.innerHTML = `
         <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Hoàn Thành!</div>
-        <div style="color:white; margin-bottom: 10px;">Nhận được ${waveGold} G (Tổng: ${totalGold} G)</div>
+        <div style="color:white; margin-bottom: 15px;">Nhận được ${waveGold} G (Tổng: ${totalGold} G)</div>
         ${bossDropHtml}
-        <div style="display:flex; gap: 15px; flex-wrap:wrap; justify-content:center;">
+        <div style="display:flex; gap: 10px; flex-wrap:wrap; justify-content:center; width: 100%; margin-bottom: auto;">
             ${cardsHtml}
         </div>
     `;
