@@ -7968,9 +7968,9 @@ function getPetStats(pId) {
 function openHeroPanel() {
   initHeroState();
   const styles = [
-    { id: "attack", name: "T\u1EA5n c\xF4ng (DPS x1.5)", icon: "emBang" },
-    { id: "defense", name: "Ph\xF2ng th\u1EE7 (Gi\xE1p x1.5)", icon: "emStar" },
-    { id: "balanced", name: "C\xE2n b\u1EB1ng", icon: "emLeaf" }
+    { id: "attack", name: "T\u1EA5n c\xF4ng (Dame x1.5, Nh\u1EADn x1.5)", icon: "emBang" },
+    { id: "defense", name: "Ph\xF2ng th\u1EE7 (Dame x0.6, Nh\u1EADn x0.6)", icon: "emStar" },
+    { id: "balanced", name: "C\xE2n b\u1EB1ng (M\u1EB7c \u0111\u1ECBnh)", icon: "emLeaf" }
   ];
   const partySlots = [0, 1, 2].map((i) => {
     const pId = ctx.S.hero.party[i];
