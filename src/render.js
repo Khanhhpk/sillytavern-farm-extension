@@ -126,7 +126,7 @@ export function renderPlots() {
           </div>
           <div class="explore-slot" id="eslot-hero">
             ${spriteSVG('threeSlimesWalking', 64)}
-            <div class="feature-name">Anh Hùng</div>
+            <div class="feature-name">Thám Hiểm</div>
           </div>
         `;
         const dBtn = All.$id('eslot-dungeon');
