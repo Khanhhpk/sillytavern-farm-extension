@@ -669,6 +669,7 @@ function spawnMonster() {
   renderMonstersUI();
 }
 
+// @ts-ignore
 window.focusMonster = function(idx) {
   if (!runState || !runState.monsters[idx] || runState.monsters[idx].hp <= 0) return;
   runState.focusTarget = idx;
