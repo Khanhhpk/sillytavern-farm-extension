@@ -487,21 +487,21 @@ export const styleCSS = `
     #hero-enemy { position: absolute; left: 0px; bottom: 16px; z-index: 1; display: flex; align-items: flex-end; height: 45px; }
     
     .hero-pet, .hero-mob { display: flex; flex-direction: column; align-items: center; position: relative; justify-content: flex-end; }
-    .hero-pet svg, .hero-mob svg { height: 32px; width: auto; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); transform-origin: bottom center; margin-bottom: 2px; }
+    .hero-pet svg, .hero-mob svg, .hero-pet img, .hero-mob img { display: block; height: 32px; width: auto; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); transform-origin: bottom center; margin-bottom: 2px; }
     
     .hp-bar-mini { width: 32px; height: 4px; background: #111; border-radius: 2px; overflow: hidden; margin-bottom: 2px; border: 1px solid #000; }
     .hp-fill-mini { height: 100%; background: #4caf50; transition: width 0.2s; }
     .hero-mob .hp-fill-mini { background: #f44336; }
     
     /* Animations */
-    .hero-pet.idle svg { animation: petBreathe 2s ease-in-out infinite; }
-    .hero-pet.idle:nth-child(2) svg { animation-delay: 0.3s; }
-    .hero-pet.idle:nth-child(3) svg { animation-delay: 0.6s; }
-    .hero-pet.attack svg { animation: petAttack 0.3s ease-in-out; }
+    .hero-pet.idle svg, .hero-pet.idle img { animation: petBreathe 2s ease-in-out infinite; }
+    .hero-pet.idle:nth-child(2) svg, .hero-pet.idle:nth-child(2) img { animation-delay: 0.3s; }
+    .hero-pet.idle:nth-child(3) svg, .hero-pet.idle:nth-child(3) img { animation-delay: 0.6s; }
+    .hero-pet.attack svg, .hero-pet.attack img { animation: petAttack 0.3s ease-in-out; }
     
-    .hero-mob.idle svg { animation: petBreathe 2.5s ease-in-out infinite alternate-reverse; }
-    .hero-mob.hurt svg { animation: mobHurt 0.2s ease-in-out; }
-    .hero-mob.attack svg { animation: mobAttack 0.3s ease-out; }
+    .hero-mob.idle svg, .hero-mob.idle img { animation: petBreathe 2.5s ease-in-out infinite alternate-reverse; }
+    .hero-mob.hurt svg, .hero-mob.hurt img { animation: mobHurt 0.2s ease-in-out; }
+    .hero-mob.attack svg, .hero-mob.attack img { animation: mobAttack 0.3s ease-out; }
     
     @keyframes petBreathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.9) scaleX(1.05); } }
     @keyframes petAttack { 0% { transform: translateY(0) translateX(0) rotate(0); } 30% { transform: translateY(-8px) translateX(8px) rotate(10deg); } 100% { transform: translateY(0) translateX(0) rotate(0); } }
