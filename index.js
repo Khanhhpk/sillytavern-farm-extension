@@ -3245,7 +3245,7 @@ function openGachaModal() {
         const confirmHTML = `
           <div style="text-align: center; padding: 20px;">
             <div style="font-size: 18px; font-weight: bold; color: #8a5cc0; margin-bottom: 10px;">Kh\xF4ng \u0111\u1EE7 v\xE9</div>
-            <div style="font-size: 14px; margin-bottom: 15px;">B\u1EA1n c\xF3 mu\u1ED1n d\xF9ng <b>${cost.toLocaleString()} G</b> \u0111\u1EC3 quay ${tName} \xD7${count} kh\xF4ng?</div>
+            <div style="font-size: 14px; margin-bottom: 15px; color: #3a2c22;">B\u1EA1n c\xF3 mu\u1ED1n d\xF9ng <b>${cost.toLocaleString()} G</b> \u0111\u1EC3 quay ${tName} \xD7${count} kh\xF4ng?</div>
             <div style="font-size: 12px; color: #7a5c38; margin-bottom: 20px;">Mua b\xF9 ${missing} v\xE9 ${tName} (${ticketPrice.toLocaleString()} G/v\xE9) \xB7 v\xE0ng hi\u1EC7n c\xF3 ${ctx.S.coins.toLocaleString()} G</div>
             <div style="display: flex; justify-content: center; gap: 10px;">
               <span class="buy" id="btnCancelRoll" style="background: #e3d5c8; color: #3a2c22; min-width: 80px; text-align: center;">Th\xF4i</span>

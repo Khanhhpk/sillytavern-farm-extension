@@ -532,7 +532,7 @@ export function openGachaModal() {
         const confirmHTML = `
           <div style="text-align: center; padding: 20px;">
             <div style="font-size: 18px; font-weight: bold; color: #8a5cc0; margin-bottom: 10px;">Không đủ vé</div>
-            <div style="font-size: 14px; margin-bottom: 15px;">Bạn có muốn dùng <b>${cost.toLocaleString()} G</b> để quay ${tName} ×${count} không?</div>
+            <div style="font-size: 14px; margin-bottom: 15px; color: #3a2c22;">Bạn có muốn dùng <b>${cost.toLocaleString()} G</b> để quay ${tName} ×${count} không?</div>
             <div style="font-size: 12px; color: #7a5c38; margin-bottom: 20px;">Mua bù ${missing} vé ${tName} (${ticketPrice.toLocaleString()} G/vé) · vàng hiện có ${ctx.S.coins.toLocaleString()} G</div>
             <div style="display: flex; justify-content: center; gap: 10px;">
               <span class="buy" id="btnCancelRoll" style="background: #e3d5c8; color: #3a2c22; min-width: 80px; text-align: center;">Thôi</span>
