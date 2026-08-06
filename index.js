@@ -1408,6 +1408,12 @@ var styleCSS = `
       --buyBg: linear-gradient(#eef6ff,#d2e6f8); --buyLine: #85aede; --buyFg: #2f66b8; --buyInset: #b4d2ee; --buyDeep: #5580b8;
       --accBg: #eaf4ff; --accLine: #3a77cc; --accFg: #24549e; --selGlowA: #c8e2f8; --selGlowB: #9cc8ee; --shead: #2b5cae;
       --banBg: linear-gradient(90deg, #24549e, #3a77cc 60%, #5da8e8); --banLine: #24549e; --banFg: #eaf4ff; --banIn: rgba(255,255,255,.18); --tagBg: #ffd94d; --tagFg: #6a4e10; }
+
+    .mtitle-text { font-weight: bold; font-size: 16px; color: var(--shead); letter-spacing: 1px; flex: 1; text-align: center; }
+
+    .toast { position: fixed; left: 50%; top: 80px; transform: translateX(-50%); background: var(--accBg); border: 2px solid var(--accLine); color: var(--accFg); padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 14px; z-index: 999999; box-shadow: 0 4px 10px rgba(0,0,0,0.3); pointer-events: none; opacity: 0; transition: opacity 0.3s, top 0.3s; }
+    .toast.show { opacity: 1; top: 90px; }
+
     #orb { position: fixed; width: 52px; height: 52px; z-index: 99998; cursor: pointer; touch-action: none;
       border-radius: 50%; background: linear-gradient(#f7ead2,#eed9b8); border: 3px solid #b08a5c;
       box-shadow: inset 0 2px 0 #fffaf0, 0 4px 10px rgba(0,0,0,.35);
@@ -1889,6 +1895,12 @@ var styleCSS = `
     .hp-fill-mini { height: 100%; background: #4caf50; transition: width 0.2s; }
     .hero-mob .hp-fill-mini { background: #f44336; }
     
+    .dmg-float { position: absolute; font-weight: bold; color: #ff5252; text-shadow: 0 0 2px #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; font-size: 14px; pointer-events: none; animation: dmgFloat 0.8s ease-out forwards; z-index: 10; transform: translate(-50%, 0); display: flex; align-items: center; justify-content: center; gap: 2px; }
+    .dmg-float.crit { font-size: 18px; color: #ffeb3b; }
+    .dmg-float.drop { color: #4caf50; animation: dmgFloat 1.2s ease-out forwards; font-size: 13px; }
+    .dg-projectile { position: absolute; pointer-events: none; z-index: 9; }
+    @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(1); } 50% { opacity: 1; transform: translate(-50%, -20px) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
+    
     /* Animations */
     .hero-pet.idle svg, .hero-pet.idle img { animation: petBreathe 2s ease-in-out infinite; }
     .hero-pet.idle:nth-child(2) svg, .hero-pet.idle:nth-child(2) img { animation-delay: 0.3s; }
@@ -2085,8 +2097,8 @@ function initUI() {
         <div class="mbody" id="mbody"></div>
       </div>
     </div>
-    <div class="toast" id="toast"></div>
   </div>
+  <div class="toast" id="toast"></div>
   
   <div id="hero-bar" class="hero-bar" style="display:none">
     <div class="hero-drag" title="K\xE9o th\u1EA3" id="hero-drag"><i class="fa-solid fa-grip-vertical"></i></div>

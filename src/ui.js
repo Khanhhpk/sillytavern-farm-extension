@@ -157,8 +157,8 @@ export function initUI() {
         <div class="mbody" id="mbody"></div>
       </div>
     </div>
-    <div class="toast" id="toast"></div>
   </div>
+  <div class="toast" id="toast"></div>
   
   <div id="hero-bar" class="hero-bar" style="display:none">
     <div class="hero-drag" title="Kéo thả" id="hero-drag"><i class="fa-solid fa-grip-vertical"></i></div>
