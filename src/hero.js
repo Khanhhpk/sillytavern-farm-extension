@@ -30,6 +30,25 @@ export const PET_SKILLS = {
   default: { s5: { type: 'atk_up', val: 0.2, desc: 'Nội tại: Tăng 20% ATK', price: 200000 }, s15: { type: 'crit_rate', val: 0.2, desc: 'Nội tại: Tỉ lệ bạo kích +20%', price: 500000 } }
 };
 
+export const PET_STATS = {
+  slime: { baseHp: 150, hpPerLv: 25, baseAtk: 8, atkPerLv: 2 },
+  octo: { baseHp: 80, hpPerLv: 15, baseAtk: 15, atkPerLv: 4 },
+  slimePink: { baseHp: 100, hpPerLv: 18, baseAtk: 12, atkPerLv: 3.5 },
+  octoCream: { baseHp: 110, hpPerLv: 20, baseAtk: 9, atkPerLv: 2.5 },
+  dewSprout: { baseHp: 120, hpPerLv: 22, baseAtk: 11, atkPerLv: 3 },
+  cloudMallow: { baseHp: 130, hpPerLv: 20, baseAtk: 8, atkPerLv: 2 },
+  ghostBlob: { baseHp: 70, hpPerLv: 12, baseAtk: 14, atkPerLv: 4 },
+  mystery_blob: { baseHp: 90, hpPerLv: 15, baseAtk: 16, atkPerLv: 5 },
+  jellyfish: { baseHp: 80, hpPerLv: 14, baseAtk: 13, atkPerLv: 4.5 },
+  impBlob: { baseHp: 150, hpPerLv: 24, baseAtk: 15, atkPerLv: 4 },
+  angelBlob: { baseHp: 120, hpPerLv: 25, baseAtk: 7, atkPerLv: 1.5 },
+  prismBlob: { baseHp: 100, hpPerLv: 18, baseAtk: 14, atkPerLv: 4 },
+  starBell: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3 },
+  peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3 },
+  penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5 },
+  default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3 }
+};
+
 export let runState = null;
 
 // Khởi tạo State cho Hero Mode
@@ -76,11 +95,13 @@ export function getPetStats(pId) {
   const enhHp = data.enhHp || 0;
   const enhAtk = data.enhAtk || 0;
   
+  const st = PET_STATS[pId] || PET_STATS.default;
+  
   return {
     level: data.level,
     exp: data.exp || 0,
-    maxHp: 100 + data.level * 20 + enhHp * 50,
-    atk: 10 + data.level * 3 + enhAtk * 10,
+    maxHp: Math.floor(st.baseHp + (data.level - 1) * st.hpPerLv + enhHp * 50),
+    atk: Math.floor(st.baseAtk + (data.level - 1) * st.atkPerLv + enhAtk * 10),
     nextExp: Math.floor(100 * Math.pow(1.5, data.level - 1)),
     enhHpCost: 5000 + enhHp * 2000,
     enhAtkCost: 5000 + enhAtk * 2000,

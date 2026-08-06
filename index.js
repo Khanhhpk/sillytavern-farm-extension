@@ -7141,6 +7141,24 @@ var PET_SKILLS = {
   penguin: { s5: { type: "dodge", val: 0.4, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 n\xE9 40%", price: 2e5 }, s15: { type: "gold_drop", val: 2, desc: "N\u1ED9i t\u1EA1i: V\xE0ng r\u1EDBt ra x2", price: 5e5 } },
   default: { s5: { type: "atk_up", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 20% ATK", price: 2e5 }, s15: { type: "crit_rate", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 b\u1EA1o k\xEDch +20%", price: 5e5 } }
 };
+var PET_STATS2 = {
+  slime: { baseHp: 150, hpPerLv: 25, baseAtk: 8, atkPerLv: 2 },
+  octo: { baseHp: 80, hpPerLv: 15, baseAtk: 15, atkPerLv: 4 },
+  slimePink: { baseHp: 100, hpPerLv: 18, baseAtk: 12, atkPerLv: 3.5 },
+  octoCream: { baseHp: 110, hpPerLv: 20, baseAtk: 9, atkPerLv: 2.5 },
+  dewSprout: { baseHp: 120, hpPerLv: 22, baseAtk: 11, atkPerLv: 3 },
+  cloudMallow: { baseHp: 130, hpPerLv: 20, baseAtk: 8, atkPerLv: 2 },
+  ghostBlob: { baseHp: 70, hpPerLv: 12, baseAtk: 14, atkPerLv: 4 },
+  mystery_blob: { baseHp: 90, hpPerLv: 15, baseAtk: 16, atkPerLv: 5 },
+  jellyfish: { baseHp: 80, hpPerLv: 14, baseAtk: 13, atkPerLv: 4.5 },
+  impBlob: { baseHp: 150, hpPerLv: 24, baseAtk: 15, atkPerLv: 4 },
+  angelBlob: { baseHp: 120, hpPerLv: 25, baseAtk: 7, atkPerLv: 1.5 },
+  prismBlob: { baseHp: 100, hpPerLv: 18, baseAtk: 14, atkPerLv: 4 },
+  starBell: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3 },
+  peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3 },
+  penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5 },
+  default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3 }
+};
 var runState = null;
 function initHeroState() {
   if (!ctx.S.hero) {
@@ -7180,11 +7198,12 @@ function getPetStats(pId) {
   const data = ctx.S.hero.roster[pId] || { level: 1, exp: 0, enhHp: 0, enhAtk: 0, s5_unlocked: false, s15_unlocked: false };
   const enhHp = data.enhHp || 0;
   const enhAtk = data.enhAtk || 0;
+  const st = PET_STATS2[pId] || PET_STATS2.default;
   return {
     level: data.level,
     exp: data.exp || 0,
-    maxHp: 100 + data.level * 20 + enhHp * 50,
-    atk: 10 + data.level * 3 + enhAtk * 10,
+    maxHp: Math.floor(st.baseHp + (data.level - 1) * st.hpPerLv + enhHp * 50),
+    atk: Math.floor(st.baseAtk + (data.level - 1) * st.atkPerLv + enhAtk * 10),
     nextExp: Math.floor(100 * Math.pow(1.5, data.level - 1)),
     enhHpCost: 5e3 + enhHp * 2e3,
     enhAtkCost: 5e3 + enhAtk * 2e3,
