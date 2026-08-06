@@ -1476,7 +1476,7 @@ var styleCSS = `
       .titlebar h1 .sub { display: none; }
       .statusbar { gap: 6px 10px; font-size: 12px; padding: 6px 10px; }
       .bottombar { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; }
-      .btn { font-size: 13px; padding: 7px 6px; }
+      .btn { font-size: 11px; padding: 6px 2px; }
       span.dside { display: none; }
       span.dbot { display: inline; }
     }
@@ -1685,10 +1685,10 @@ var styleCSS = `
     .mode-tip { position: absolute; left: 62px; bottom: 14px; background: var(--accBg); border: 2px solid var(--accLine);
       border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: bold; color: var(--accFg); z-index: 7; display: none; }
     .bottombar { display: flex; align-items: stretch; gap: 10px; padding: 10px 14px 12px; flex: none; }
-    .btn { flex: 1; padding: 8px 10px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #b08a5c;
+    .btn { flex: 1; padding: 6px 4px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #b08a5c;
       border-radius: 8px; box-shadow: inset 0 0 0 2px #fff6e0, inset 0 3px 0 #fffaf0, inset 0 -4px 0 #d9ba8a, 0 4px 0 #9a7a54;
-      font-size: 14px; font-weight: bold; color: #7a5c38; text-shadow: 1px 1px 0 #fff3dd; text-align: center;
-      display: flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; user-select: none; }
+      font-size: 12px; font-weight: bold; color: #7a5c38; text-shadow: 1px 1px 0 #fff3dd; text-align: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; user-select: none; white-space: nowrap; }
     .modal { position: absolute; inset: 0; background: rgba(60,40,20,.35); display: none; align-items: center;
       justify-content: center; z-index: 20; padding: 14px; }
     .modal.open { display: flex; }
