@@ -157,7 +157,30 @@ export function initUI() {
         <div class="mbody" id="mbody"></div>
       </div>
     </div>
-    <div class="toast" id="toast"></div>
+  </div>
+  <div class="toast" id="toast"></div>
+  
+  <div id="hero-bar" class="hero-bar" style="display:none">
+    <div class="hero-drag" title="Kéo thả" id="hero-drag"><i class="fa-solid fa-grip-vertical"></i></div>
+    <div class="hero-toast" id="hero-toast"></div>
+    <div class="hero-content">
+      <div class="hero-scene">
+        <div class="hero-bg"></div>
+        <div id="hero-party"></div>
+        <div id="hero-enemy"></div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stats-row">
+          <div class="h-lv">Stage <span id="hero-level">1</span></div>
+          <div class="hero-exp-wrap" style="visibility:hidden;"><div class="hero-exp-bar" id="hero-exp-bar"></div><div class="hero-exp-txt" id="hero-exp">0/100</div></div>
+          <div class="h-gold">${spriteSVG('coin', 12)}<span id="hero-gold">0</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-actions">
+      <div class="h-btn" id="hero-cashout" title="Rút Vàng">${spriteSVG('coin', 16)}</div>
+      <div class="h-btn" id="hero-close" title="Đóng Hero Mode">×</div>
+    </div>
   </div>`;
   sh.appendChild(ctx.ui);
   ctx.orb = $id('orb');

@@ -124,11 +124,17 @@ export function renderPlots() {
             ${spriteSVG('diceIcon', 48)}
             <div class="feature-name">Đỏ Đen</div>
           </div>
+          <div class="explore-slot" id="eslot-hero">
+            ${spriteSVG('threeSlimesWalking', 64)}
+            <div class="feature-name">Thám Hiểm</div>
+          </div>
         `;
         const dBtn = All.$id('eslot-dungeon');
         if (dBtn) dBtn.addEventListener('click', () => All.openPanel('dungeon'));
         const bBtn = All.$id('eslot-bet');
         if (bBtn) bBtn.addEventListener('click', () => All.openPanel('bet'));
+        const hBtn = All.$id('eslot-hero');
+        if (hBtn) hBtn.addEventListener('click', () => All.openHeroPanel());
       }
     }
     return;
