@@ -164,13 +164,14 @@ export function initUI() {
     <div class="hero-drag" title="Kéo thả" id="hero-drag"><i class="fa-solid fa-grip-vertical"></i></div>
     <div class="hero-content">
       <div class="hero-scene">
+        <div class="hero-bg"></div>
         <div id="hero-party"></div>
         <div id="hero-enemy"></div>
       </div>
       <div class="hero-stats">
         <div class="hero-stats-row">
-          <div class="h-lv">Lv.<span id="hero-level">1</span></div>
-          <div class="hero-exp-wrap"><div class="hero-exp-bar" id="hero-exp-bar"></div><div class="hero-exp-txt" id="hero-exp">0/100</div></div>
+          <div class="h-lv">Stage <span id="hero-level">1</span></div>
+          <div class="hero-exp-wrap" style="visibility:hidden;"><div class="hero-exp-bar" id="hero-exp-bar"></div><div class="hero-exp-txt" id="hero-exp">0/100</div></div>
           <div class="h-gold">${spriteSVG('coin', 12)}<span id="hero-gold">0</span></div>
         </div>
       </div>

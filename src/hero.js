@@ -11,22 +11,36 @@ let currentMonster = null;
 let monsterX = 100;
 let floatingDamageContainer = null;
 
+export let runState = null;
+
 // Khởi tạo State cho Hero Mode
 export function initHeroState() {
   if (!ctx.S.hero) {
-    ctx.S.hero = {
-      level: 1,
-      exp: 0,
-      gold: 0,
-      fx: 0.5,
-      fy: 0.9,
-      party: [], // Danh sách pet ID đang chiến đấu
-      style: 'balanced', // attack, defense, balanced
-      kills: 0
-    };
+    ctx.S.hero = {};
   }
+  if (!ctx.S.hero.party) ctx.S.hero.party = [];
+  if (!ctx.S.hero.roster) ctx.S.hero.roster = {};
+  if (typeof ctx.S.hero.gold !== 'number') ctx.S.hero.gold = 0;
+  if (typeof ctx.S.hero.maxStage !== 'number') ctx.S.hero.maxStage = 1;
   if (!ctx.S.hero.style) ctx.S.hero.style = 'balanced';
-  if (typeof ctx.S.hero.kills !== 'number') ctx.S.hero.kills = 0;
+  
+  if (ctx.S.hero.level !== undefined) {
+    delete ctx.S.hero.level;
+    delete ctx.S.hero.exp;
+  }
+}
+
+export function getPetStats(pId) {
+  const data = ctx.S.hero.roster[pId] || { level: 1, exp: 0 };
+  // Mỗi pet có base stat ngẫu nhiên hoặc dựa trên ID? Tạm lấy base chung.
+  return {
+    level: data.level,
+    exp: data.exp,
+    maxHp: 100 + data.level * 20,
+    atk: 10 + data.level * 3,
+    nextExp: data.level * 100,
+    upgradeCost: data.level * 50
+  };
 }
 
 export function openHeroPanel() {
@@ -41,14 +55,30 @@ export function openHeroPanel() {
   
   const partySlots = [0, 1, 2].map(i => {
     const pId = ctx.S.hero.party[i];
-    if (pId) return `<div class="hero-slot filled" data-rem="${i}">${petSVG(pId, 40)}</div>`;
+    if (pId) {
+      const st = getPetStats(pId);
+      return `<div class="hero-slot filled" data-rem="${i}">
+        ${petSVG(pId, 40)}
+        <div class="s-lv">Lv.${st.level}</div>
+      </div>`;
+    }
     return `<div class="hero-slot empty">Trống</div>`;
   }).join('');
   
   const allPets = ctx.S.pets || [];
   const petRoster = allPets.map(pId => {
     const inParty = ctx.S.hero.party.includes(pId);
-    return `<div class="hero-roster-pet${inParty ? ' used' : ''}" data-add="${pId}">${petSVG(pId, 32)}</div>`;
+    const st = getPetStats(pId);
+    return `<div class="hero-roster-item${inParty ? ' used' : ''}">
+      <div class="h-r-pet" data-add="${pId}">${petSVG(pId, 32)}</div>
+      <div class="h-r-info">
+        <div>Lv.${st.level} (ATK: ${st.atk} | HP: ${st.maxHp})</div>
+        <div class="h-r-bar"><div class="h-r-fill" style="width:${Math.min(100, st.exp/st.nextExp*100)}%"></div><span>${st.exp}/${st.nextExp}</span></div>
+      </div>
+      <div class="h-r-upg" data-upg="${pId}" title="Nâng cấp Level">
+        ${spriteSVG('coin', 12)} ${st.upgradeCost}
+      </div>
+    </div>`;
   }).join('');
   
   const styleBtns = styles.map(s => 
@@ -57,18 +87,17 @@ export function openHeroPanel() {
     </div>`
   ).join('');
 
-  openModal('Tổ đội Anh Hùng', `
-    <div class="hero-panel-stats">
-      <div>Lv. ${ctx.S.hero.level}</div>
-      <div>EXP: ${Math.floor(ctx.S.hero.exp)}/${ctx.S.hero.level * 100}</div>
-      <div>Gold: ${ctx.S.hero.gold}</div>
+  openModal('Phòng Tập Anh Hùng', `
+    <div class="hero-panel-stats" style="justify-content: space-between;">
+      <div>Max Stage: <b>${ctx.S.hero.maxStage}</b></div>
+      <div class="h-gold">${spriteSVG('coin', 16)} <b>${ctx.S.hero.gold}</b></div>
     </div>
     
     <div class="hero-panel-section">Đội hình ra trận (Max 3)</div>
     <div class="hero-party-slots">${partySlots}</div>
     
     <div class="hero-panel-section">Kho Thú Cưng</div>
-    <div class="hero-pet-roster">${petRoster || '<i>Bạn chưa có Thú cưng nào! Hãy vào Shop để đón các bé.</i>'}</div>
+    <div class="hero-pet-roster-list">${petRoster || '<i>Bạn chưa có Thú cưng nào! Hãy vào Shop để đón các bé.</i>'}</div>
     
     <div class="hero-panel-section">Lối đánh</div>
     <div class="hero-style-list">${styleBtns}</div>
@@ -83,11 +112,28 @@ export function openHeroPanel() {
     openHeroPanel();
   }));
   
-  mbody.querySelectorAll('.hero-roster-pet:not(.used)').forEach(el => el.addEventListener('click', () => {
+  mbody.querySelectorAll('.h-r-pet').forEach(el => el.addEventListener('click', () => {
+    const pId = el.dataset.add;
+    if (ctx.S.hero.party.includes(pId)) return;
     if (ctx.S.hero.party.length >= 3) return All.toast('Đội hình đã đầy! (Max 3)');
-    ctx.S.hero.party.push(el.dataset.add);
+    ctx.S.hero.party.push(pId);
     save();
     openHeroPanel();
+  }));
+  
+  mbody.querySelectorAll('.h-r-upg').forEach(el => el.addEventListener('click', () => {
+    const pId = el.dataset.upg;
+    const st = getPetStats(pId);
+    if (ctx.S.hero.gold >= st.upgradeCost) {
+      ctx.S.hero.gold -= st.upgradeCost;
+      if (!ctx.S.hero.roster[pId]) ctx.S.hero.roster[pId] = { level: 1, exp: 0 };
+      ctx.S.hero.roster[pId].level++;
+      save();
+      openHeroPanel();
+      All.toast('Nâng cấp thành công!');
+    } else {
+      All.toast('Không đủ vàng!');
+    }
   }));
   
   mbody.querySelectorAll('.hero-style-btn').forEach(el => el.addEventListener('click', () => {
@@ -97,6 +143,7 @@ export function openHeroPanel() {
   }));
   
   mbody.querySelector('#hero-deploy').addEventListener('click', () => {
+    if (ctx.S.hero.party.length === 0) return All.toast('Đội hình trống!');
     closeModal();
     openHeroMode();
   });
@@ -106,10 +153,26 @@ export function openHeroMode() {
   initHeroState();
   All.closeWin(); // Đóng bảng Farm chính thay vì chỉ ẩn display
   
+  if (ctx.S.hero.party.length === 0) {
+    All.toast('Vui lòng chọn Đội hình trước!');
+    openHeroPanel();
+    return;
+  }
+  
   const bar = All.$id('hero-bar');
   if (bar) bar.style.display = 'flex';
   
-  if (!currentMonster) spawnMonster();
+  // Khởi tạo Run
+  runState = {
+    stage: 1,
+    pets: ctx.S.hero.party.map(pId => {
+      const st = getPetStats(pId);
+      return { id: pId, maxHp: st.maxHp, hp: st.maxHp, atk: st.atk, cd: 0, maxCd: 1.0 };
+    }),
+    monster: null
+  };
+  
+  spawnMonster();
   renderHeroUI();
   placeHeroBar();
   
@@ -127,6 +190,7 @@ export function closeHeroMode() {
     clearInterval(heroLoop);
     heroLoop = null;
   }
+  runState = null;
   const orb = All.$id('orb');
   if (orb) orb.style.display = 'flex';
 }
@@ -142,27 +206,38 @@ export function cashOutHero() {
 }
 
 function spawnMonster() {
+  if (!runState) return;
   const cropKeys = Object.keys(CROPS);
   const randomCrop = cropKeys[Math.floor(Math.random() * cropKeys.length)];
   
-  const isBoss = ctx.S.hero.kills > 0 && ctx.S.hero.kills % 10 === 0;
+  const isBoss = runState.stage > 0 && runState.stage % 5 === 0;
   const hpMult = isBoss ? 5 : 1;
-  const maxHp = (ctx.S.hero.level * 10 + Math.floor(Math.random() * 10)) * hpMult;
+  const maxHp = (runState.stage * 20 + 80) * hpMult;
+  const atk = (runState.stage * 4 + 5) * (isBoss ? 2 : 1);
   
-  currentMonster = {
+  runState.monster = {
     id: randomCrop,
     hp: maxHp,
     maxHp: maxHp,
+    atk: atk,
+    cd: 2.0,
     isBoss: isBoss
   };
-  monsterX = 150; // Quái ở xa 150px
+  monsterX = 200; // Quái ở xa 200px
   
   const em = All.$id('hero-enemy');
   if (em) {
     const scale = isBoss ? 'transform: scale(1.5); transform-origin: bottom right;' : '';
     const bossStyle = isBoss ? 'filter: drop-shadow(0 0 5px #ff0000);' : '';
-    em.innerHTML = `<div class="hero-mob idle" id="hmob" style="${scale} ${bossStyle}">${spriteSVG(CROPS[randomCrop].sp || 'seedLight', 32)}</div>`;
+    em.innerHTML = `
+      <div class="hero-mob idle" id="hmob" style="${scale} ${bossStyle}">
+        <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-mob"></div></div>
+        ${spriteSVG(CROPS[randomCrop].sp || 'seedLight', 32)}
+      </div>`;
   }
+  
+  const mobHp = All.$id('hp-mob');
+  if (mobHp) mobHp.style.width = '100%';
 }
 
 function heroTick() {
@@ -170,75 +245,113 @@ function heroTick() {
   const dt = now - lastTick;
   lastTick = now;
   
-  if (!currentMonster) return;
+  if (!runState || !runState.monster) return;
   
   const partyEl = All.$id('hero-party');
   const mobEl = All.$id('hmob');
   
   // Di chuyển
   if (monsterX > 30) {
-    monsterX -= (30 * (dt / 1000)); // tốc độ 30px/s
+    monsterX -= (40 * (dt / 1000)); // tốc độ 40px/s
     if (mobEl) mobEl.style.transform = `translateX(${monsterX}px)`;
   } else {
-    // Tấn công (khi khoảng cách <= 30)
-    // Cập nhật hoạt ảnh
-    const pets = partyEl ? partyEl.querySelectorAll('.hero-pet') : [];
-    pets.forEach((p, i) => {
-      // Cho một pet ngẫu nhiên hoặc thay phiên tấn công
-      if (Math.random() < 0.3) {
-        p.classList.remove('idle');
-        p.classList.add('attack');
-        setTimeout(() => { p.classList.remove('attack'); p.classList.add('idle'); }, 300);
+    // Combat
+    const alivePets = runState.pets.filter(p => p.hp > 0);
+    if (alivePets.length === 0) {
+      runState.monster = null;
+      All.toast('Đội hình đã gục ngã! Về Stage 1...');
+      setTimeout(() => {
+        if (!runState) return;
+        runState.stage = 1;
+        runState.pets.forEach(p => p.hp = p.maxHp);
+        renderHeroUI();
+        spawnMonster();
+      }, 3000);
+      return;
+    }
+    
+    // 1. Pets Attack
+    alivePets.forEach(p => {
+      p.cd -= dt / 1000;
+      if (p.cd <= 0) {
+        p.cd = p.maxCd;
+        const mult = ctx.S.hero.style === 'attack' ? 1.5 : 1.0;
+        const dmg = Math.max(1, Math.floor(p.atk * mult * (0.8 + Math.random() * 0.4)));
+        runState.monster.hp -= dmg;
+        
+        // Hoạt ảnh
+        const pIdx = runState.pets.indexOf(p);
+        const pEl = All.$id(`hpet-${pIdx}`);
+        if (pEl) { pEl.classList.remove('idle'); pEl.classList.add('attack'); setTimeout(() => pEl.classList.add('idle'), 300); }
+        if (mobEl) { setTimeout(() => { mobEl.classList.remove('idle'); mobEl.classList.add('hurt'); setTimeout(() => mobEl.classList.add('idle'), 200); }, 150); }
+        
+        spawnProjectile(pEl, mobEl, false);
+        setTimeout(() => showFloatDamage(dmg, mobEl), 150);
       }
     });
     
-    if (mobEl) {
-      mobEl.classList.remove('idle');
-      mobEl.classList.add('hurt');
-      setTimeout(() => { mobEl.classList.remove('hurt'); mobEl.classList.add('idle'); }, 200);
+    // Cập nhật máu quái
+    const hpMob = All.$id('hp-mob');
+    if (hpMob) hpMob.style.width = `${Math.max(0, (runState.monster.hp / runState.monster.maxHp) * 100)}%`;
+    
+    // 2. Monster Attacks
+    if (runState.monster.hp > 0) {
+      runState.monster.cd -= dt / 1000;
+      if (runState.monster.cd <= 0) {
+        runState.monster.cd = 2.0;
+        const target = alivePets[0]; // Đánh con đầu tiên
+        const mult = ctx.S.hero.style === 'defense' ? 0.6 : 1.0;
+        const dmg = Math.max(1, Math.floor(runState.monster.atk * mult * (0.8 + Math.random() * 0.4)));
+        target.hp -= dmg;
+        if (target.hp < 0) target.hp = 0;
+        
+        const pIdx = runState.pets.indexOf(target);
+        const pEl = All.$id(`hpet-${pIdx}`);
+        
+        spawnProjectile(mobEl, pEl, true);
+        setTimeout(() => showFloatDamage(dmg, pEl), 150);
+        
+        if (mobEl) { mobEl.classList.remove('idle'); mobEl.classList.add('attack'); setTimeout(() => mobEl.classList.add('idle'), 300); }
+        if (pEl && target.hp <= 0) {
+          setTimeout(() => { pEl.style.opacity = '0.3'; }, 150);
+        }
+        
+        const hpPet = All.$id(`hp-pet-${pIdx}`);
+        if (hpPet) setTimeout(() => { hpPet.style.width = `${(target.hp / target.maxHp) * 100}%`; }, 150);
+      }
     }
     
-    // DPS dựa vào số lượng party và cấp độ, tính thêm Lối đánh
-    let mult = 1;
-    if (ctx.S.hero.style === 'attack') mult = 1.5;
-    else if (ctx.S.hero.style === 'defense') mult = 0.8;
-    
-    const damage = Math.max(1, Math.floor((ctx.S.hero.level * 2 + ctx.S.hero.party.length * 3) * (dt/1000) * 5 * mult)); 
-    currentMonster.hp -= damage;
-    showFloatDamage(damage, mobEl);
-    
-    if (currentMonster.hp <= 0) {
-      // Quái chết
-      ctx.S.hero.kills++;
-      const goldDrop = Math.floor(Math.random() * ctx.S.hero.level * (currentMonster.isBoss ? 10 : 2)) + 1;
-      const expDrop = (ctx.S.hero.level * 5 + Math.floor(Math.random() * 5)) * (currentMonster.isBoss ? 5 : 1);
-      
+    // 3. Monster Dies
+    if (runState.monster.hp <= 0) {
+      const m = runState.monster;
+      const goldDrop = Math.floor(Math.random() * runState.stage * (m.isBoss ? 15 : 3)) + 1;
       ctx.S.hero.gold += goldDrop;
-      ctx.S.hero.exp += expDrop;
+      
+      // Exp chia đều cho party
+      const expDrop = (runState.stage * 10 + 5) * (m.isBoss ? 5 : 1);
+      runState.pets.forEach(p => {
+        if (!ctx.S.hero.roster[p.id]) ctx.S.hero.roster[p.id] = { level: 1, exp: 0 };
+        ctx.S.hero.roster[p.id].exp += Math.floor(expDrop / runState.pets.length);
+      });
       
       // Rớt đồ (Loot)
       const r = Math.random();
-      if (currentMonster.isBoss) {
-        if (r < 0.5) { // 50% rớt vé norm
-          ctx.S.tickets = ctx.S.tickets || {};
-          ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1;
-          showFloatDrop('ticketNorm', partyEl);
-        } else if (r < 0.8) { // 30% rớt phân bón xịn
-          ctx.S.ferts['f2'] = (ctx.S.ferts['f2'] || 0) + 1;
-          showFloatDrop('toolFert', partyEl);
-        }
+      if (m.isBoss) {
+        if (r < 0.5) { ctx.S.tickets = ctx.S.tickets || {}; ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1; showFloatDrop('ticketNorm', partyEl); }
+        else if (r < 0.8) { ctx.S.ferts['f2'] = (ctx.S.ferts['f2'] || 0) + 1; showFloatDrop('toolFert', partyEl); }
       } else {
-        if (r < 0.1) { // 10% rớt hạt giống
-          ctx.S.seeds[currentMonster.id] = (ctx.S.seeds[currentMonster.id] || 0) + 1;
-          showFloatDrop(CROPS[currentMonster.id].sp || 'seedLight', partyEl);
-        } else if (r < 0.15) { // 5% rớt phân bón thường
-          ctx.S.ferts['f1'] = (ctx.S.ferts['f1'] || 0) + 1;
-          showFloatDrop('toolFert', partyEl);
-        }
+        if (r < 0.1) { ctx.S.seeds[m.id] = (ctx.S.seeds[m.id] || 0) + 1; showFloatDrop(CROPS[m.id].sp || 'seedLight', partyEl); }
+        else if (r < 0.15) { ctx.S.ferts['f1'] = (ctx.S.ferts['f1'] || 0) + 1; showFloatDrop('toolFert', partyEl); }
       }
-      save();
       
-      checkLevelUp();
+      runState.stage++;
+      if (runState.stage > ctx.S.hero.maxStage) ctx.S.hero.maxStage = runState.stage;
+      
+      // Hồi máu 1 chút khi qua ải
+      runState.pets.forEach(p => { if (p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.1); });
+      
+      save();
+      renderHeroUI();
       spawnMonster();
     }
   }
@@ -246,24 +359,53 @@ function heroTick() {
   updateHeroStats();
 }
 
-function checkLevelUp() {
-  const reqExp = ctx.S.hero.level * 100;
-  if (ctx.S.hero.exp >= reqExp) {
-    ctx.S.hero.exp -= reqExp;
-    ctx.S.hero.level++;
-    All.toast(`Hero Party đạt cấp ${ctx.S.hero.level}!`);
-  }
-}
-
 function showFloatDamage(dmg, target) {
   if (!target) return;
   const fl = document.createElement('div');
   fl.className = 'dmg-float' + (Math.random() > 0.8 ? ' crit' : '');
   fl.textContent = '-' + dmg;
-  fl.style.left = (Math.random() * 20 - 10) + 'px';
+  fl.style.left = (Math.random() * 30 - 15) + 'px'; // Random left offset
   fl.style.bottom = '30px';
   target.appendChild(fl);
   setTimeout(() => fl.remove(), 800);
+}
+
+function spawnProjectile(startEl, targetEl, isEnemy) {
+  if (!startEl || !targetEl) return;
+  const scene = document.querySelector('.hero-scene');
+  if (!scene) return;
+  
+  const proj = document.createElement('div');
+  proj.className = 'dg-projectile';
+  if (isEnemy) {
+    proj.innerHTML = '<div style="width:8px;height:8px;background:#e06578;border-radius:50%;box-shadow:0 0 5px #ff0000;"></div>';
+  } else {
+    proj.innerHTML = '<div style="width:10px;height:10px;background:#a4dc8c;border-radius:50%;box-shadow:0 0 8px #a4dc8c;"></div>';
+  }
+  
+  scene.appendChild(proj);
+  
+  const sRect = scene.getBoundingClientRect();
+  const startRect = startEl.getBoundingClientRect();
+  const targetRect = targetEl.getBoundingClientRect();
+  
+  const sx = startRect.left - sRect.left + startRect.width/2;
+  const sy = startRect.top - sRect.top + startRect.height/2;
+  const ex = targetRect.left - sRect.left + targetRect.width/2;
+  const ey = targetRect.top - sRect.top + targetRect.height/2;
+  
+  proj.style.left = sx + 'px';
+  proj.style.top = sy + 'px';
+  
+  const duration = 150;
+  proj.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+  
+  setTimeout(() => {
+    proj.style.left = ex + 'px';
+    proj.style.top = ey + 'px';
+  }, 10);
+  
+  setTimeout(() => proj.remove(), duration + 10);
 }
 
 function showFloatDrop(icon, target) {
@@ -278,12 +420,15 @@ function showFloatDrop(icon, target) {
 }
 
 function renderHeroUI() {
+  if (!runState) return;
   const container = All.$id('hero-party');
   if (container) {
-    // Nếu lối đánh phòng thủ thì thêm effect (màu aura xanh)
     const extraStyle = ctx.S.hero.style === 'defense' ? 'filter: drop-shadow(0 0 4px #4da6ff);' : '';
-    container.innerHTML = ctx.S.hero.party.map((pId, i) => 
-      `<div class="hero-pet idle" style="z-index:${10-i}; ${extraStyle}">${petSVG(pId, 32)}</div>`
+    container.innerHTML = runState.pets.map((p, i) => 
+      `<div class="hero-pet idle" id="hpet-${i}" style="z-index:${10-i}; ${extraStyle} opacity: ${p.hp > 0 ? 1 : 0.3}">
+         <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-pet-${i}" style="width:${(p.hp/p.maxHp)*100}%"></div></div>
+         ${petSVG(p.id, 32)}
+       </div>`
     ).join('');
   }
   updateHeroStats();
@@ -291,13 +436,9 @@ function renderHeroUI() {
 
 function updateHeroStats() {
   const lvEl = All.$id('hero-level');
-  const expEl = All.$id('hero-exp');
-  const expBar = All.$id('hero-exp-bar');
   const goldEl = All.$id('hero-gold');
   
-  if (lvEl) lvEl.textContent = ctx.S.hero.level;
-  if (expEl) expEl.textContent = `${Math.floor(ctx.S.hero.exp)}/${ctx.S.hero.level * 100}`;
-  if (expBar) expBar.style.width = `${Math.min(100, (ctx.S.hero.exp / (ctx.S.hero.level * 100)) * 100)}%`;
+  if (lvEl && runState) lvEl.textContent = runState.stage;
   if (goldEl) goldEl.textContent = ctx.S.hero.gold;
 }
 

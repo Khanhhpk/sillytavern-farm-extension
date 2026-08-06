@@ -456,17 +456,38 @@ export const styleCSS = `
     .betchain { font-size: 11px; color: #9a7a54; min-height: 15px; word-break: break-all; }
     .betpot { font-size: 15px; font-weight: bold; color: #c86a1a; margin: 8px 0 4px; }
     
+    .hero-pet-roster-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding: 4px; border: 1px solid #4a3461; border-radius: 4px; background: rgba(0,0,0,0.2); }
+    .hero-roster-item { display: flex; align-items: center; justify-content: space-between; padding: 6px; background: #2c2538; border: 1px solid #4a3461; border-radius: 4px; }
+    .hero-roster-item.used { opacity: 0.5; filter: grayscale(0.5); pointer-events: none; }
+    .h-r-pet { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 4px; cursor: pointer; }
+    .h-r-pet:hover { background: rgba(255,255,255,0.1); }
+    .h-r-info { flex: 1; margin: 0 10px; font-size: 11px; color: #d0c0e8; }
+    .h-r-bar { width: 100%; height: 10px; background: #110d14; border: 1px solid #4a3461; border-radius: 3px; position: relative; overflow: hidden; margin-top: 4px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: white; }
+    .h-r-fill { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #6b4d8a, #a58bd3); z-index: 0; transition: width 0.3s; }
+    .h-r-bar span { position: relative; z-index: 1; text-shadow: 0 1px 1px #000; }
+    .h-r-upg { display: flex; align-items: center; gap: 4px; padding: 4px 8px; background: #3b2a52; border: 1px solid #6b4d8a; border-radius: 4px; cursor: pointer; color: #f2c231; font-weight: bold; font-size: 11px; }
+    .h-r-upg:hover { background: #5a417d; }
+    .h-r-upg:active { transform: translateY(1px); }
+    
+    .s-lv { position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); font-size: 10px; background: #1f1a26; padding: 1px 4px; border: 1px solid #4a3461; border-radius: 4px; font-weight: bold; color: white; }
+    
     /* ---------- Hero Taskbar Mode ---------- */
-    .hero-bar { position: fixed; bottom: 20px; right: 20px; width: 300px; height: 80px; background: #221d28; border: 3px solid #6b4d8a; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.1); z-index: 999999; display: flex; align-items: center; padding-right: 4px; overflow: hidden; pointer-events: auto; touch-action: none; font-family: sans-serif; }
+    .hero-bar { position: fixed; bottom: 20px; right: 20px; width: 340px; height: 110px; background: #221d28; border: 3px solid #6b4d8a; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.1); z-index: 999999; display: flex; align-items: center; padding-right: 4px; overflow: hidden; pointer-events: auto; touch-action: none; font-family: sans-serif; }
     .hero-drag { width: 24px; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-right: 1px solid #4a3461; cursor: grab; color: #a58bd3; font-size: 14px; }
     .hero-drag:active { cursor: grabbing; background: rgba(0,0,0,0.5); }
     .hero-content { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; }
-    .hero-scene { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; position: relative; min-height: 0; }
-    .hero-scene::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, #191420, #2c2538); z-index: 0; }
-    .hero-scene::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 12px; background: #3b2a52; border-top: 1px solid #6b4d8a; z-index: 0; }
-    #hero-party, #hero-enemy { position: relative; z-index: 1; display: flex; gap: 4px; align-items: flex-end; height: 32px; }
-    .hero-pet, .hero-mob { display: flex; align-items: flex-end; position: relative; }
-    .hero-pet svg, .hero-mob svg { height: 28px; width: auto; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); transform-origin: bottom center; }
+    .hero-scene { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; position: relative; min-height: 0; overflow: hidden; }
+    .hero-bg { position: absolute; inset: 0; background: url('https://i.imgur.com/KzDqM8d.png') repeat-x; background-size: auto 100%; opacity: 0.3; animation: bgScroll 10s linear infinite; }
+    @keyframes bgScroll { 0% { background-position: 0 0; } 100% { background-position: -200px 0; } }
+    .hero-scene::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(44,37,56,0.8)); z-index: 0; pointer-events: none; }
+    .hero-scene::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 16px; background: #3b2a52; border-top: 2px solid #6b4d8a; z-index: 0; }
+    #hero-party, #hero-enemy { position: relative; z-index: 1; display: flex; gap: 8px; align-items: flex-end; height: 45px; }
+    .hero-pet, .hero-mob { display: flex; flex-direction: column; align-items: center; position: relative; justify-content: flex-end; }
+    .hero-pet svg, .hero-mob svg { height: 32px; width: auto; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); transform-origin: bottom center; margin-bottom: 2px; }
+    
+    .hp-bar-mini { width: 32px; height: 4px; background: #111; border-radius: 2px; overflow: hidden; margin-bottom: 2px; border: 1px solid #000; }
+    .hp-fill-mini { height: 100%; background: #4caf50; transition: width 0.2s; }
+    .hero-mob .hp-fill-mini { background: #f44336; }
     
     /* Animations */
     .hero-pet.idle svg { animation: petBreathe 2s ease-in-out infinite; }
