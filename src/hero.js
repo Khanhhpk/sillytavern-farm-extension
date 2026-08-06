@@ -699,6 +699,8 @@ function heroTick() {
         if (pSk.type === 'hp_regen') {
           const heal = p.maxHp * pSk.val * (dt / 1000);
           p.hp = Math.min(p.maxHp, p.hp + heal);
+          const hpPet = All.$id(`hp-pet-${pIdx}`);
+          if (hpPet) hpPet.style.width = `${(p.hp / p.maxHp) * 100}%`;
         }
         if (pSk.type === 'curse_aura') {
            const cDmg = runState.monster.maxHp * pSk.val * (dt / 1000);
