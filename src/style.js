@@ -481,6 +481,26 @@ export const styleCSS = `
     .dmg-float.crit { font-size: 16px; color: #ffaa00; font-style: italic; }
     @keyframes dFloat { 0% { opacity: 1; transform: translateY(0) scale(1); } 50% { transform: translateY(-15px) scale(1.2); } 100% { opacity: 0; transform: translateY(-20px) scale(1); } }
 
+    /* ---------- Hero Panel (Modal) ---------- */
+    .hero-panel-stats { display: flex; justify-content: space-around; background: #2c2538; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-weight: bold; color: #e0ccff; border: 1px solid #4a3461; }
+    .hero-panel-section { font-size: 13px; color: #a58bd3; font-weight: bold; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 1px; }
+    .hero-party-slots { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
+    .hero-slot { width: 60px; height: 60px; background: #191420; border: 2px dashed #4a3461; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6b4d8a; font-size: 11px; }
+    .hero-slot.filled { border: 2px solid #a58bd3; background: #2c2538; }
+    .hero-slot.filled:hover { border-color: #ff5555; background: #3b1a20; }
+    .hero-pet-roster { display: flex; flex-wrap: wrap; gap: 8px; max-height: 120px; overflow-y: auto; padding: 4px; background: #191420; border-radius: 8px; border: 1px solid #3b2a52; }
+    .hero-roster-pet { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: #2c2538; border: 2px solid transparent; border-radius: 6px; cursor: pointer; }
+    .hero-roster-pet:hover { background: #3b2a52; border-color: #a58bd3; }
+    .hero-roster-pet.used { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
+    .hero-style-list { display: flex; gap: 8px; }
+    .hero-style-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #191420; border: 2px solid #3b2a52; padding: 8px; border-radius: 8px; cursor: pointer; color: #a58bd3; font-size: 11px; font-weight: bold; gap: 4px; }
+    .hero-style-btn:hover { background: #2c2538; }
+    .hero-style-btn.active { border-color: #f2c231; color: #f2c231; background: #3b2a10; }
+    .hero-style-btn svg { fill: currentColor; }
+    .hero-deploy-btn { margin-top: 20px; width: 100%; padding: 12px; font-size: 16px; font-weight: bold; background: linear-gradient(to bottom, #6b4d8a, #4a3461); border: 2px solid #a58bd3; border-radius: 8px; color: #fff; cursor: pointer; text-shadow: 0 1px 2px #000; letter-spacing: 2px; }
+    .hero-deploy-btn:hover { background: linear-gradient(to bottom, #8a6bc8, #6b4d8a); }
+    .hero-deploy-btn:active { transform: translateY(2px); }
+
     .betsides { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
     .betside { padding: 10px 4px; border-radius: 8px; border: 3px solid; cursor: pointer;
       font-weight: bold; user-select: none; line-height: 1.35; }

@@ -134,7 +134,7 @@ export function renderPlots() {
         const bBtn = All.$id('eslot-bet');
         if (bBtn) bBtn.addEventListener('click', () => All.openPanel('bet'));
         const hBtn = All.$id('eslot-hero');
-        if (hBtn) hBtn.addEventListener('click', () => All.openHeroMode());
+        if (hBtn) hBtn.addEventListener('click', () => All.openHeroPanel());
       }
     }
     return;

@@ -1877,6 +1877,26 @@ var styleCSS = `
     .dmg-float.crit { font-size: 16px; color: #ffaa00; font-style: italic; }
     @keyframes dFloat { 0% { opacity: 1; transform: translateY(0) scale(1); } 50% { transform: translateY(-15px) scale(1.2); } 100% { opacity: 0; transform: translateY(-20px) scale(1); } }
 
+    /* ---------- Hero Panel (Modal) ---------- */
+    .hero-panel-stats { display: flex; justify-content: space-around; background: #2c2538; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-weight: bold; color: #e0ccff; border: 1px solid #4a3461; }
+    .hero-panel-section { font-size: 13px; color: #a58bd3; font-weight: bold; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 1px; }
+    .hero-party-slots { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
+    .hero-slot { width: 60px; height: 60px; background: #191420; border: 2px dashed #4a3461; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6b4d8a; font-size: 11px; }
+    .hero-slot.filled { border: 2px solid #a58bd3; background: #2c2538; }
+    .hero-slot.filled:hover { border-color: #ff5555; background: #3b1a20; }
+    .hero-pet-roster { display: flex; flex-wrap: wrap; gap: 8px; max-height: 120px; overflow-y: auto; padding: 4px; background: #191420; border-radius: 8px; border: 1px solid #3b2a52; }
+    .hero-roster-pet { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: #2c2538; border: 2px solid transparent; border-radius: 6px; cursor: pointer; }
+    .hero-roster-pet:hover { background: #3b2a52; border-color: #a58bd3; }
+    .hero-roster-pet.used { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
+    .hero-style-list { display: flex; gap: 8px; }
+    .hero-style-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #191420; border: 2px solid #3b2a52; padding: 8px; border-radius: 8px; cursor: pointer; color: #a58bd3; font-size: 11px; font-weight: bold; gap: 4px; }
+    .hero-style-btn:hover { background: #2c2538; }
+    .hero-style-btn.active { border-color: #f2c231; color: #f2c231; background: #3b2a10; }
+    .hero-style-btn svg { fill: currentColor; }
+    .hero-deploy-btn { margin-top: 20px; width: 100%; padding: 12px; font-size: 16px; font-weight: bold; background: linear-gradient(to bottom, #6b4d8a, #4a3461); border: 2px solid #a58bd3; border-radius: 8px; color: #fff; cursor: pointer; text-shadow: 0 1px 2px #000; letter-spacing: 2px; }
+    .hero-deploy-btn:hover { background: linear-gradient(to bottom, #8a6bc8, #6b4d8a); }
+    .hero-deploy-btn:active { transform: translateY(2px); }
+
     .betsides { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
     .betside { padding: 10px 4px; border-radius: 8px; border: 3px solid; cursor: pointer;
       font-weight: bold; user-select: none; line-height: 1.35; }
@@ -4484,7 +4504,7 @@ function renderPlots() {
         const bBtn = $id("eslot-bet");
         if (bBtn) bBtn.addEventListener("click", () => openPanel("bet"));
         const hBtn = $id("eslot-hero");
-        if (hBtn) hBtn.addEventListener("click", () => openHeroMode());
+        if (hBtn) hBtn.addEventListener("click", () => openHeroPanel());
       }
     }
     return;
@@ -7041,19 +7061,80 @@ function initHeroState() {
       gold: 0,
       fx: 0.5,
       fy: 0.9,
-      party: []
+      party: [],
       // Danh sách pet ID đang chiến đấu
+      style: "balanced"
+      // attack, defense, balanced
     };
   }
+  if (!ctx.S.hero.style) ctx.S.hero.style = "balanced";
+}
+function openHeroPanel() {
+  initHeroState();
+  const styles = [
+    { id: "attack", name: "T\u1EA5n c\xF4ng (DPS x1.5)", icon: "emBang" },
+    { id: "defense", name: "Ph\xF2ng th\u1EE7 (Gi\xE1p x1.5)", icon: "emStar" },
+    { id: "balanced", name: "C\xE2n b\u1EB1ng", icon: "emLeaf" }
+  ];
+  const partySlots = [0, 1, 2].map((i) => {
+    const pId = ctx.S.hero.party[i];
+    if (pId) return `<div class="hero-slot filled" data-rem="${i}">${petSVG(pId, 40)}</div>`;
+    return `<div class="hero-slot empty">Tr\u1ED1ng</div>`;
+  }).join("");
+  const allPets = ctx.S.pets || [];
+  const petRoster = allPets.map((pId) => {
+    const inParty = ctx.S.hero.party.includes(pId);
+    return `<div class="hero-roster-pet${inParty ? " used" : ""}" data-add="${pId}">${petSVG(pId, 32)}</div>`;
+  }).join("");
+  const styleBtns = styles.map(
+    (s) => `<div class="hero-style-btn${ctx.S.hero.style === s.id ? " active" : ""}" data-style="${s.id}">
+      ${spriteSVG(s.icon, 20)} ${s.name}
+    </div>`
+  ).join("");
+  openModal("T\u1ED5 \u0111\u1ED9i Anh H\xF9ng", `
+    <div class="hero-panel-stats">
+      <div>Lv. ${ctx.S.hero.level}</div>
+      <div>EXP: ${Math.floor(ctx.S.hero.exp)}/${ctx.S.hero.level * 100}</div>
+      <div>Gold: ${ctx.S.hero.gold}</div>
+    </div>
+    
+    <div class="hero-panel-section">\u0110\u1ED9i h\xECnh ra tr\u1EADn (Max 3)</div>
+    <div class="hero-party-slots">${partySlots}</div>
+    
+    <div class="hero-panel-section">Kho Th\xFA C\u01B0ng</div>
+    <div class="hero-pet-roster">${petRoster || "<i>B\u1EA1n ch\u01B0a c\xF3 Th\xFA c\u01B0ng n\xE0o! H\xE3y v\xE0o Shop \u0111\u1EC3 \u0111\xF3n c\xE1c b\xE9.</i>"}</div>
+    
+    <div class="hero-panel-section">L\u1ED1i \u0111\xE1nh</div>
+    <div class="hero-style-list">${styleBtns}</div>
+    
+    <div class="hero-deploy-btn" id="hero-deploy">XU\u1EA4T PH\xC1T!</div>
+  `);
+  const mbody = $id("mbody");
+  mbody.querySelectorAll(".hero-slot.filled").forEach((el) => el.addEventListener("click", () => {
+    ctx.S.hero.party.splice(parseInt(el.dataset.rem), 1);
+    save();
+    openHeroPanel();
+  }));
+  mbody.querySelectorAll(".hero-roster-pet:not(.used)").forEach((el) => el.addEventListener("click", () => {
+    if (ctx.S.hero.party.length >= 3) return toast("\u0110\u1ED9i h\xECnh \u0111\xE3 \u0111\u1EA7y! (Max 3)");
+    ctx.S.hero.party.push(el.dataset.add);
+    save();
+    openHeroPanel();
+  }));
+  mbody.querySelectorAll(".hero-style-btn").forEach((el) => el.addEventListener("click", () => {
+    ctx.S.hero.style = el.dataset.style;
+    save();
+    openHeroPanel();
+  }));
+  mbody.querySelector("#hero-deploy").addEventListener("click", () => {
+    closeModal();
+    openHeroMode();
+  });
 }
 function openHeroMode() {
   initHeroState();
   $id("win").style.display = "none";
   $id("hero-bar").style.display = "flex";
-  if (ctx.S.hero.party.length === 0) {
-    const availablePets = Object.keys(ctx.S.pets || {}).filter((k) => ctx.S.pets[k] >= 1);
-    ctx.S.hero.party = availablePets.slice(0, 3);
-  }
   if (!currentMonster) spawnMonster();
   renderHeroUI();
   placeHeroBar();
@@ -7110,7 +7191,10 @@ function heroTick() {
     setTimeout(() => {
       if (partyEl) partyEl.style.transform = "translateY(0) translateX(0)";
     }, 50);
-    const damage = Math.max(1, Math.floor((ctx.S.hero.level * 2 + ctx.S.hero.party.length * 3) * (dt / 1e3) * 5));
+    let mult = 1;
+    if (ctx.S.hero.style === "attack") mult = 1.5;
+    else if (ctx.S.hero.style === "defense") mult = 0.8;
+    const damage = Math.max(1, Math.floor((ctx.S.hero.level * 2 + ctx.S.hero.party.length * 3) * (dt / 1e3) * 5 * mult));
     currentMonster.hp -= damage;
     showFloatDamage(damage, mobEl);
     if (currentMonster.hp <= 0) {
@@ -7145,8 +7229,9 @@ function showFloatDamage(dmg, target) {
 function renderHeroUI() {
   const container = $id("hero-party");
   if (container) {
+    const extraStyle = ctx.S.hero.style === "defense" ? "filter: drop-shadow(0 0 4px #4da6ff);" : "";
     container.innerHTML = ctx.S.hero.party.map(
-      (pId, i) => `<div class="hero-pet" style="z-index:${10 - i}">${petSVG(pId, 32)}</div>`
+      (pId, i) => `<div class="hero-pet" style="z-index:${10 - i}; ${extraStyle}">${petSVG(pId, 32)}</div>`
     ).join("");
   }
   updateHeroStats();

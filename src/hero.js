@@ -3,6 +3,7 @@ import * as All from './all.js';
 import { spriteSVG, petSVG } from './graphics.js';
 import { CROPS } from './data.js';
 import { save } from './state.js';
+import { openModal, closeModal } from './shop.js';
 
 let heroLoop = null;
 let lastTick = 0;
@@ -20,20 +21,89 @@ export function initHeroState() {
       fx: 0.5,
       fy: 0.9,
       party: [], // Danh sách pet ID đang chiến đấu
+      style: 'balanced' // attack, defense, balanced
     };
   }
+  if (!ctx.S.hero.style) ctx.S.hero.style = 'balanced';
+}
+
+export function openHeroPanel() {
+  initHeroState();
+  
+  // Các lựa chọn lối đánh
+  const styles = [
+    { id: 'attack', name: 'Tấn công (DPS x1.5)', icon: 'emBang' },
+    { id: 'defense', name: 'Phòng thủ (Giáp x1.5)', icon: 'emStar' },
+    { id: 'balanced', name: 'Cân bằng', icon: 'emLeaf' }
+  ];
+  
+  const partySlots = [0, 1, 2].map(i => {
+    const pId = ctx.S.hero.party[i];
+    if (pId) return `<div class="hero-slot filled" data-rem="${i}">${petSVG(pId, 40)}</div>`;
+    return `<div class="hero-slot empty">Trống</div>`;
+  }).join('');
+  
+  const allPets = ctx.S.pets || [];
+  const petRoster = allPets.map(pId => {
+    const inParty = ctx.S.hero.party.includes(pId);
+    return `<div class="hero-roster-pet${inParty ? ' used' : ''}" data-add="${pId}">${petSVG(pId, 32)}</div>`;
+  }).join('');
+  
+  const styleBtns = styles.map(s => 
+    `<div class="hero-style-btn${ctx.S.hero.style === s.id ? ' active' : ''}" data-style="${s.id}">
+      ${spriteSVG(s.icon, 20)} ${s.name}
+    </div>`
+  ).join('');
+
+  openModal('Tổ đội Anh Hùng', `
+    <div class="hero-panel-stats">
+      <div>Lv. ${ctx.S.hero.level}</div>
+      <div>EXP: ${Math.floor(ctx.S.hero.exp)}/${ctx.S.hero.level * 100}</div>
+      <div>Gold: ${ctx.S.hero.gold}</div>
+    </div>
+    
+    <div class="hero-panel-section">Đội hình ra trận (Max 3)</div>
+    <div class="hero-party-slots">${partySlots}</div>
+    
+    <div class="hero-panel-section">Kho Thú Cưng</div>
+    <div class="hero-pet-roster">${petRoster || '<i>Bạn chưa có Thú cưng nào! Hãy vào Shop để đón các bé.</i>'}</div>
+    
+    <div class="hero-panel-section">Lối đánh</div>
+    <div class="hero-style-list">${styleBtns}</div>
+    
+    <div class="hero-deploy-btn" id="hero-deploy">XUẤT PHÁT!</div>
+  `);
+  
+  const mbody = All.$id('mbody');
+  mbody.querySelectorAll('.hero-slot.filled').forEach(el => el.addEventListener('click', () => {
+    ctx.S.hero.party.splice(parseInt(el.dataset.rem), 1);
+    save();
+    openHeroPanel();
+  }));
+  
+  mbody.querySelectorAll('.hero-roster-pet:not(.used)').forEach(el => el.addEventListener('click', () => {
+    if (ctx.S.hero.party.length >= 3) return All.toast('Đội hình đã đầy! (Max 3)');
+    ctx.S.hero.party.push(el.dataset.add);
+    save();
+    openHeroPanel();
+  }));
+  
+  mbody.querySelectorAll('.hero-style-btn').forEach(el => el.addEventListener('click', () => {
+    ctx.S.hero.style = el.dataset.style;
+    save();
+    openHeroPanel();
+  }));
+  
+  mbody.querySelector('#hero-deploy').addEventListener('click', () => {
+    closeModal();
+    openHeroMode();
+  });
 }
 
 export function openHeroMode() {
   initHeroState();
   All.$id('win').style.display = 'none';
   All.$id('hero-bar').style.display = 'flex';
-  
-  // Tự chọn party mặc định nếu rỗng
-  if (ctx.S.hero.party.length === 0) {
-    const availablePets = Object.keys(ctx.S.pets || {}).filter(k => ctx.S.pets[k] >= 1);
-    ctx.S.hero.party = availablePets.slice(0, 3);
-  }
   
   if (!currentMonster) spawnMonster();
   renderHeroUI();
@@ -103,8 +173,12 @@ function heroTick() {
     if (partyEl) partyEl.style.transform = `translateY(0) translateX(5px)`; // Nhào tới
     setTimeout(() => { if (partyEl) partyEl.style.transform = 'translateY(0) translateX(0)'; }, 50);
     
-    // DPS dựa vào số lượng party và cấp độ
-    const damage = Math.max(1, Math.floor((ctx.S.hero.level * 2 + ctx.S.hero.party.length * 3) * (dt/1000) * 5)); 
+    // DPS dựa vào số lượng party và cấp độ, tính thêm Lối đánh
+    let mult = 1;
+    if (ctx.S.hero.style === 'attack') mult = 1.5;
+    else if (ctx.S.hero.style === 'defense') mult = 0.8;
+    
+    const damage = Math.max(1, Math.floor((ctx.S.hero.level * 2 + ctx.S.hero.party.length * 3) * (dt/1000) * 5 * mult)); 
     currentMonster.hp -= damage;
     showFloatDamage(damage, mobEl);
     
@@ -147,8 +221,10 @@ function showFloatDamage(dmg, target) {
 function renderHeroUI() {
   const container = All.$id('hero-party');
   if (container) {
+    // Nếu lối đánh phòng thủ thì thêm effect (màu aura xanh)
+    const extraStyle = ctx.S.hero.style === 'defense' ? 'filter: drop-shadow(0 0 4px #4da6ff);' : '';
     container.innerHTML = ctx.S.hero.party.map((pId, i) => 
-      `<div class="hero-pet" style="z-index:${10-i}">${petSVG(pId, 32)}</div>`
+      `<div class="hero-pet" style="z-index:${10-i}; ${extraStyle}">${petSVG(pId, 32)}</div>`
     ).join('');
   }
   updateHeroStats();
