@@ -700,6 +700,503 @@ function heroTick() {
   const dt = now - lastTick;
   lastTick = now;
   
+  if (!runState || !runState.monsters) return;
+  runState.waveTime += dt / 1000;
+  
+  const partyEl = All.$id('hero-party');
+  
+  const alivePets = runState.pets.filter(p => p.hp > 0);
+  if (alivePets.length === 0) {
+    runState.monsters = [];
+    heroToast('Đội hình đã gục ngã! Về Stage 1...');
+    setTimeout(() => {
+      if (!runState) return;
+      runState.stage = 1;
+      runState.pets.forEach(p => p.hp = p.maxHp);
+      renderHeroUI();
+      spawnMonster();
+    }, 3000);
+    return;
+  }
+  
+  let allMonstersDead = true;
+  let anyMonsterInPosition = false;
+  
+  runState.monsters.forEach(m => {
+    if (m.hp <= 0) return;
+    allMonstersDead = false;
+    
+    const targetX = 200 + (m.idx * 45);
+    const mEl = All.$id('hmob-' + m.idx);
+    
+    if (m.x > targetX) {
+      m.x -= (40 * (dt / 1000));
+      m.x = Math.max(targetX, m.x);
+      if (mEl) mEl.style.left = m.x + 'px';
+    } else {
+      anyMonsterInPosition = true;
+    }
+  });
+  
+  if (allMonstersDead) {
+    // 3. Stage Clear
+    runState.monsters.forEach(m => {
+      if (!m.isDead) {
+        m.isDead = true;
+        const mEl = All.$id('hmob-' + m.idx);
+        if (mEl) {
+          mEl.classList.remove('idle', 'hurt', 'attack');
+          mEl.style.transition = 'all 0.4s ease-out';
+          mEl.style.opacity = '0';
+          mEl.style.transform = 'scale(0.1)';
+          setTimeout(() => showFloatDamage('KO', mEl, '#ffaa00'), 0);
+        }
+      }
+    });
+    
+    setTimeout(() => {
+      if (!runState || !runState.monsters) return;
+      
+      let totalGold = 0;
+      runState.monsters.forEach(m => {
+         totalGold += Math.floor((runState.stage * 30 + 100) * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
+      });
+      
+      let pGoldMult = 1.0;
+      runState.pets.forEach(p => {
+         const data = ctx.S.hero.roster[p.id];
+         if (data && data.passive_eq) {
+           const sk = PET_SKILLS[p.id]?.[data.passive_eq];
+           if (sk && sk.type === 'gold_drop') pGoldMult *= sk.val;
+         }
+      });
+      ctx.S.hero.gold += Math.floor(totalGold * pGoldMult);
+      
+      let totalExp = 0;
+      runState.monsters.forEach(m => {
+         totalExp += (runState.stage * 10 + 5) * (m.isBoss ? 5 : 1);
+      });
+      
+      runState.pets.forEach(p => {
+        const petData = ctx.S.hero.roster[p.id];
+        if (!petData) return;
+        const pEl = All.$id('hpet-' + runState.pets.indexOf(p));
+        petData.exp = (petData.exp || 0) + Math.floor(totalExp / runState.pets.length);
+        const req = (petData.level || 1) * 100;
+        if (petData.exp >= req) {
+          petData.exp -= req;
+          petData.level = (petData.level || 1) + 1;
+          if (pEl) setTimeout(() => showFloatDamage('LEVEL UP!', pEl, '#f2c231'), 500);
+          heroToast((PETS[p.id]?.name || 'Pet') + ' vừa lên cấp ' + petData.level + '!');
+          const st = getPetStats(p.id);
+          const oldMax = p.maxHp;
+          p.maxHp = Math.floor(st.maxHp * (p.hpMult || 1));
+          p.hp += (p.maxHp - oldMax);
+          p.atk = Math.floor(st.atk * (p.atkMult || 1));
+        }
+      });
+      
+      const boss = runState.monsters.find(m => m.isBoss);
+      if (boss) {
+        ctx.S.hero.pressure = (ctx.S.hero.pressure || 0) + 1;
+        const r = Math.random();
+        if (r < 0.5) { ctx.S.tickets = ctx.S.tickets || {}; ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1; showFloatDrop('ticketNorm', partyEl); }
+        else if (r < 0.8) { ctx.S.ferts['f2'] = (ctx.S.ferts['f2'] || 0) + 1; showFloatDrop('toolFert', partyEl); }
+      } else {
+        const m = runState.monsters[0];
+        const r = Math.random();
+        if (r < 0.1) { ctx.S.seeds[m.id] = (ctx.S.seeds[m.id] || 0) + 1; showFloatDrop(CROPS[m.id].sp || 'seedLight', partyEl); }
+        else if (r < 0.15) { ctx.S.ferts['f1'] = (ctx.S.ferts['f1'] || 0) + 1; showFloatDrop('toolFert', partyEl); }
+      }
+      
+      runState.stage++;
+      if (runState.stage > ctx.S.hero.maxStage) ctx.S.hero.maxStage = runState.stage;
+      runState.pets.forEach(p => { if (p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2); });
+      
+      renderHeroUI();
+      spawnMonster();
+    }, 1500);
+    return;
+  }
+  
+  // Get active targets (in position)
+  const activeMonsters = runState.monsters.filter(m => m.hp > 0 && m.x <= 200 + (m.idx * 45) + 2);
+  
+  if (activeMonsters.length > 0) {
+    // 1. Pets Skills & Attack
+    alivePets.forEach((p) => {
+      const pIdx = runState.pets.indexOf(p);
+      const pEl = All.$id('hpet-' + pIdx);
+      const data = ctx.S.hero.roster[p.id] || {};
+      const pSkill = PET_SKILLS[p.id];
+      const passEq = data.passive_eq;
+      
+      if (passEq && pSkill && pSkill[passEq]) {
+        const ps = pSkill[passEq];
+        if (ps.type === 'hp_regen' && runState.waveTime % ps.cd < (dt/1000) && p.hp < p.maxHp) {
+          p.hp = Math.min(p.maxHp, p.hp + ps.val);
+          setTimeout(() => showFloatDamage('+' + ps.val, pEl, '#a4dc8c'), 0);
+          const hpPet = All.$id('hp-pet-' + pIdx);
+          if (hpPet) hpPet.style.width = ((p.hp / p.maxHp) * 100) + '%';
+        }
+      }
+      
+      if (p.skillMaxCd > 0) {
+        let stSpdMult = 1.0;
+        if (p.spdBuff) stSpdMult *= p.spdBuff;
+        p.skillCd -= (dt / 1000) * stSpdMult;
+        const skBar = All.$id('sk-pet-' + pIdx);
+        if (skBar) skBar.style.width = Math.min(100, Math.max(0, ((p.skillMaxCd - p.skillCd) / p.skillMaxCd) * 100)) + '%';
+        
+        if (p.skillActiveTime > 0) { p.skillActiveTime -= dt / 1000; }
+        
+        if (p.skillCd <= 0) {
+          p.skillCd = p.skillMaxCd;
+          const aSk = pSkill[data.active_eq];
+          
+          let tMob = null;
+          if (runState.focusTarget !== null && runState.monsters[runState.focusTarget] && runState.monsters[runState.focusTarget].hp > 0 && runState.monsters[runState.focusTarget].x <= 200 + (runState.focusTarget * 45) + 2) {
+            tMob = runState.monsters[runState.focusTarget];
+          } else {
+            tMob = activeMonsters[Math.floor(Math.random() * activeMonsters.length)];
+          }
+          
+          const tMobEl = All.$id('hmob-' + tMob.idx);
+          
+          if (aSk.type === 'dmg') {
+             const dmg = Math.floor(p.maxHp * aSk.val);
+             tMob.hp -= dmg;
+             if (tMobEl) setTimeout(() => showFloatDamage('-' + dmg, tMobEl, '#9ed8f2'), 300);
+             spawnAttackEffect(p.id, pEl, tMobEl, true);
+          } else if (aSk.type === 'heal_party') {
+             alivePets.forEach(ap => {
+                const heal = Math.floor(ap.maxHp * aSk.val);
+                ap.hp = Math.min(ap.maxHp, ap.hp + heal);
+                setTimeout(() => showFloatDamage('+' + heal, All.$id('hpet-' + runState.pets.indexOf(ap)), '#a4dc8c'), 300);
+                const ahp = All.$id('hp-pet-' + runState.pets.indexOf(ap));
+                if (ahp) ahp.style.width = ((ap.hp / ap.maxHp) * 100) + '%';
+             });
+             spawnAttackEffect(p.id, pEl, pEl, true);
+          } else if (aSk.type === 'atk_debuff') {
+             tMob.atkDebuff = aSk.val; tMob.atkDebuffTimer = aSk.duration;
+             if (tMobEl) setTimeout(() => showFloatDamage('ATK DOWN', tMobEl, '#b48ae0'), 300);
+             spawnAttackEffect(p.id, pEl, tMobEl, true);
+          } else if (aSk.type === 'spd_debuff') {
+             tMob.spdDebuff = aSk.val; tMob.spdDebuffTimer = aSk.duration;
+             if (tMobEl) setTimeout(() => showFloatDamage('SLOW', tMobEl, '#8a5cc0'), 300);
+             spawnAttackEffect(p.id, pEl, tMobEl, true);
+          } else if (aSk.type === 'dmg_max_hp') {
+             const dmg = Math.floor(tMob.maxHp * aSk.val);
+             tMob.hp -= dmg;
+             if (tMobEl) setTimeout(() => showFloatDamage('-' + dmg, tMobEl, '#f2c231'), 300);
+             spawnAttackEffect(p.id, pEl, tMobEl, true);
+          } else if (aSk.type === 'stun') {
+             const dmg = Math.floor(p.atk * aSk.val);
+             tMob.hp -= dmg;
+             tMob.stunCd = (tMob.stunCd || 0) + aSk.duration;
+             if (tMobEl) setTimeout(() => showFloatDamage('STUN', tMobEl, '#ffe4b5'), 300);
+             spawnAttackEffect(p.id, pEl, tMobEl, true);
+          } else if (aSk.type === 'push_back') {
+             const dmg = Math.floor(p.atk * aSk.val);
+             tMob.hp -= dmg;
+             tMob.x = Math.min(350, tMob.x + 50); // Pushback!
+             if (tMobEl) setTimeout(() => showFloatDamage('PUSH', tMobEl, '#ff9800'), 300);
+             spawnAttackEffect(p.id, pEl, tMobEl, true);
+          } else if (aSk.type === 'aoe_dmg') {
+             activeMonsters.forEach(m => {
+                const dmg = Math.floor(p.atk * aSk.val);
+                m.hp -= dmg;
+                const mEl = All.$id('hmob-' + m.idx);
+                if (mEl) setTimeout(() => showFloatDamage('-' + dmg, mEl, '#ff5252'), 300);
+             });
+             spawnAttackEffect(p.id, pEl, tMobEl, true); // Visual to primary target
+          } else {
+             // Fallback single target dmg
+             const dmg = Math.floor(p.atk * aSk.val);
+             tMob.hp -= dmg;
+             if (tMobEl) setTimeout(() => showFloatDamage('-' + dmg, tMobEl, '#ff5252'), 300);
+             spawnAttackEffect(p.id, pEl, tMobEl, true);
+          }
+          if (tMob.hp <= 0 && tMobEl) setTimeout(() => renderMonstersUI(), 500);
+        }
+      }
+      
+      let rtSpdMult = 1.0;
+      if (p.spdBuff) rtSpdMult *= p.spdBuff;
+      if (p.skillActiveTime > 0 && data.active_eq && pSkill[data.active_eq] && pSkill[data.active_eq].type === 'atk_spd_self') rtSpdMult *= pSkill[data.active_eq].val;
+      
+      p.cd -= (dt / 1000) * rtSpdMult;
+      const cdBar = All.$id('cd-pet-' + pIdx);
+      if (cdBar) cdBar.style.width = Math.min(100, Math.max(0, ((p.maxCd - p.cd) / p.maxCd) * 100)) + '%';
+      
+      if (p.cd <= 0) {
+        p.cd = p.maxCd;
+        const styleMult = ctx.S.hero.style === 'attack' ? 1.5 : (ctx.S.hero.style === 'defense' ? 0.6 : 1.0);
+        let atkMult = styleMult;
+        if (p.atkBuff) atkMult *= p.atkBuff;
+        if (p.atkDebuff) atkMult *= p.atkDebuff;
+        
+        for (let i = 0; i < (p.multiHit || 1); i++) {
+          setTimeout(() => {
+            if (!runState) return;
+            const curActive = runState.monsters.filter(m => m.hp > 0 && m.x <= 200 + (m.idx * 45) + 2);
+            if (curActive.length === 0) return;
+            
+            let tMob = null;
+            if (runState.focusTarget !== null && runState.monsters[runState.focusTarget] && runState.monsters[runState.focusTarget].hp > 0 && runState.monsters[runState.focusTarget].x <= 200 + (runState.focusTarget * 45) + 2) {
+              tMob = runState.monsters[runState.focusTarget];
+            } else {
+              tMob = curActive[Math.floor(Math.random() * curActive.length)];
+            }
+            const mobEl = All.$id('hmob-' + tMob.idx);
+            
+            p.combo = (p.combo || 0) + 1;
+            let isCrit = Math.random() < p.crit;
+            if (passEq && pSkill[passEq] && pSkill[passEq].type === 'combo_master' && p.combo % pSkill[passEq].val === 0) isCrit = true;
+            
+            let dmgBase = Math.max(1, Math.floor(p.atk * atkMult * (0.8 + Math.random() * 0.4)));
+            if (p.armorPen > 0) dmgBase = Math.floor(dmgBase * (1 + p.armorPen));
+            
+            if (passEq && pSkill[passEq]) {
+                const ps = pSkill[passEq];
+                if (ps.type === 'first_strike' && !tMob['fs_' + p.id]) {
+                    dmgBase *= ps.val;
+                    tMob['fs_' + p.id] = true;
+                }
+            }
+            
+            let dmg = isCrit ? Math.floor(dmgBase * p.critDmg) : dmgBase;
+            
+            if (passEq && pSkill[passEq] && pSkill[passEq].type === 'splash_dmg') {
+                dmg = Math.floor(dmg * (1 + pSkill[passEq].val));
+            }
+            
+            if (passEq && pSkill[passEq] && pSkill[passEq].type === 'execute') {
+                if (tMob.hp / tMob.maxHp <= 0.2 && Math.random() < pSkill[passEq].val) {
+                    dmg = tMob.hp;
+                    if (mobEl) setTimeout(() => showFloatDamage('EXECUTE', mobEl, '#ff0000'), 150);
+                }
+            }
+            
+            tMob.hp -= dmg;
+            
+            if (p.lifesteal > 0) {
+              const heal = Math.floor(dmg * p.lifesteal);
+              if (heal > 0) {
+                p.hp = Math.min(p.maxHp, p.hp + heal);
+                setTimeout(() => showFloatDamage('+' + heal, pEl, '#a4dc8c'), 150);
+                const hpPet = All.$id('hp-pet-' + pIdx);
+                if (hpPet) setTimeout(() => { hpPet.style.width = ((p.hp / p.maxHp) * 100) + '%'; }, 150);
+              }
+            }
+            
+            if (pEl) { pEl.classList.remove('idle'); pEl.classList.add('attack'); setTimeout(() => { pEl.classList.remove('attack'); pEl.classList.add('idle'); }, 300); }
+            if (mobEl) { setTimeout(() => { mobEl.classList.remove('idle'); mobEl.classList.add('hurt'); setTimeout(() => { mobEl.classList.remove('hurt'); mobEl.classList.add('idle'); }, 200); }, 150); }
+            
+            spawnAttackEffect(p.id, pEl, mobEl, false, isCrit);
+            if (mobEl) setTimeout(() => showFloatDamage('-' + dmg, mobEl, isCrit ? '#f2c231' : null), 150);
+            if (tMob.hp <= 0 && mobEl) setTimeout(() => renderMonstersUI(), 500);
+          }, i * 200);
+        }
+      }
+    });
+    
+    // 2. Monster Updates & Attacks
+    activeMonsters.forEach(m => {
+      const hpMob = All.$id('hp-mob-' + m.idx);
+      if (hpMob) hpMob.style.width = Math.max(0, (m.hp / m.maxHp) * 100) + '%';
+      const cdMob = All.$id('cd-mob-' + m.idx);
+      if (cdMob) cdMob.style.width = Math.min(100, Math.max(0, ((m.maxCd - m.cd) / m.maxCd) * 100)) + '%';
+      
+      if (m.atkDebuffTimer > 0) { m.atkDebuffTimer -= dt/1000; if(m.atkDebuffTimer<=0) m.atkDebuff = null; }
+      if (m.spdDebuffTimer > 0) { m.spdDebuffTimer -= dt/1000; if(m.spdDebuffTimer<=0) m.spdDebuff = null; }
+      if (m.stunCd && m.stunCd > 0) {
+        m.stunCd -= dt / 1000;
+      } else {
+        let mSpdMult = 1.0;
+        if (m.spdDebuff) mSpdMult *= m.spdDebuff;
+        m.cd -= (dt / 1000) * mSpdMult;
+        if (m.cd <= 0) {
+          m.cd = m.maxCd;
+          
+          let validTargets = alivePets.filter(p => {
+             const data = ctx.S.hero.roster[p.id] || {};
+             const pSkill = PET_SKILLS[p.id];
+             return !(data.passive_eq && pSkill && pSkill[data.passive_eq] && pSkill[data.passive_eq].type === 'stealth');
+          });
+          if (validTargets.length === 0) validTargets = alivePets;
+          const target = validTargets[Math.floor(Math.random() * validTargets.length)];
+          
+          const mult = ctx.S.hero.style === 'attack' ? 1.5 : (ctx.S.hero.style === 'defense' ? 0.6 : 1.0);
+          let isDodge = Math.random() < target.dodge;
+          
+          const pIdx = runState.pets.indexOf(target);
+          const pEl = All.$id('hpet-' + pIdx);
+          const mEl = All.$id('hmob-' + m.idx);
+          
+          if (mEl) { mEl.classList.remove('idle'); mEl.classList.add('attack'); setTimeout(() => { mEl.classList.remove('attack'); mEl.classList.add('idle'); }, 300); }
+          
+          if (!isDodge) {
+            let mAtkMult = mult;
+            if (m.atkDebuff) mAtkMult *= m.atkDebuff;
+            let dmg = Math.max(1, Math.floor(m.atk * mAtkMult * (0.8 + Math.random() * 0.4)));
+            
+            if (target.dmgResist > 0) dmg = Math.floor(dmg * (1 - target.dmgResist));
+            
+            if (target.reflect > 0) {
+               const refDmg = Math.floor(dmg * target.reflect);
+               m.hp -= refDmg;
+               if (mEl) setTimeout(() => showFloatDamage('-' + refDmg, mEl, '#e06578'), 150);
+               if (m.hp <= 0 && mEl) setTimeout(() => renderMonstersUI(), 500);
+            }
+            
+            target.hp -= dmg;
+            if (target.hp <= 0 && target.cheatDeath > 0) {
+               target.hp = Math.floor(target.maxHp * target.cheatDeath);
+               target.cheatDeath = 0;
+               if (pEl) setTimeout(() => showFloatDamage('SURVIVE', pEl, '#ffeb3b'), 150);
+            }
+            
+            if (dmg > 0) { if (pEl) setTimeout(() => showFloatDamage('-' + dmg, pEl), 150); }
+            else { if (pEl) setTimeout(() => showFloatDamage('BLOCK', pEl, '#aaddff'), 150); }
+            
+            if (pEl && target.hp <= 0) setTimeout(() => { pEl.style.opacity = '0.3'; }, 150);
+            
+            const hpPet = All.$id('hp-pet-' + pIdx);
+            if (hpPet) setTimeout(() => { hpPet.style.width = ((target.hp / target.maxHp) * 100) + '%'; }, 150);
+          } else {
+            if (pEl) setTimeout(() => showFloatDamage('MISS', pEl, '#aaddff'), 150);
+          }
+        }
+      }
+    });
+  }
+}
+
+export function closeHeroMode() {
+  const bar = All.$id('hero-bar');
+  if (bar) bar.style.display = 'none';
+  if (heroLoop) {
+    clearInterval(heroLoop);
+    heroLoop = null;
+  }
+  runState = null;
+  const orb = All.$id('orb');
+  if (orb) orb.style.display = 'flex';
+}
+
+let hToastTimer = null;
+export function heroToast(msg) {
+  const t = All.$id('hero-toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  if (hToastTimer) clearTimeout(hToastTimer);
+  hToastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+export function cashOutHero() {
+  if (ctx.S.hero.gold > 0) {
+    const g = ctx.S.hero.gold;
+    ctx.S.coins = (ctx.S.coins || 0) + g;
+    heroToast(`Đã rút ${g.toLocaleString()}G về trang trại!`);
+    ctx.S.hero.gold = 0;
+    save();
+    updateHeroStats();
+  } else {
+    heroToast('Chưa có Vàng để rút!');
+  }
+}
+
+function spawnMonster() {
+  if (!runState) return;
+  const numPets = runState.pets.filter(p => p.hp > 0).length;
+  if (numPets === 0) return;
+  
+  const numMobs = Math.floor(Math.random() * numPets) + 1;
+  const isBoss = runState.stage > 0 && runState.stage % 5 === 0;
+  
+  runState.monsters = [];
+  const cropKeys = Object.keys(CROPS);
+  
+  for (let i = 0; i < numMobs; i++) {
+    const isThisBoss = isBoss && (i === 0);
+    const hpMult = isThisBoss ? 5 : 1;
+    const pressure = ctx.S.hero.pressure || 0;
+    const pressureMult = 1 + (pressure * 0.05);
+
+    const baseMaxHp = (runState.stage * 20 + 80) * hpMult * pressureMult;
+    const baseAtk = (runState.stage * 4 + 5) * (isThisBoss ? 2 : 1) * pressureMult;
+    const baseCd = 2.0;
+
+    let hpScale = 0.8 + Math.random() * 0.4;
+    let atkScale = 0.8 + Math.random() * 0.4;
+    let cdScale = 0.8 + Math.random() * 0.4;
+
+    if (!isThisBoss) {
+      cdScale = hpScale * atkScale; 
+    } else {
+      hpScale = 0.9 + Math.random() * 0.3;
+      atkScale = 0.9 + Math.random() * 0.3;
+      cdScale = 0.7 + Math.random() * 0.4;
+    }
+
+    const maxHp = Math.floor(baseMaxHp * hpScale);
+    const atk = Math.floor(baseAtk * atkScale);
+    const maxCd = Math.max(0.5, baseCd * cdScale);
+    
+    const randomCrop = cropKeys[Math.floor(Math.random() * cropKeys.length)];
+    
+    runState.monsters.push({
+      idx: i,
+      id: randomCrop,
+      hp: maxHp,
+      maxHp: maxHp,
+      atk: atk,
+      cd: maxCd,
+      maxCd: maxCd,
+      isBoss: isThisBoss,
+      isDead: false,
+      x: 350 + (i * 45)
+    });
+  }
+  
+  runState.focusTarget = null;
+  runState.waveTime = 0;
+  renderMonstersUI();
+}
+
+// @ts-ignore
+window.focusMonster = function(idx) {
+  if (!runState || !runState.monsters[idx] || runState.monsters[idx].hp <= 0) return;
+  runState.focusTarget = idx;
+  renderMonstersUI();
+};
+
+function renderMonstersUI() {
+  const em = All.$id('hero-enemy');
+  if (!em || !runState) return;
+  
+  em.innerHTML = runState.monsters.map((m, i) => {
+    if (m.hp <= 0) return '';
+    const scale = m.isBoss ? 'scale(1.5)' : '';
+    const bossStyle = m.isBoss ? 'filter: drop-shadow(0 0 5px #ff0000);' : '';
+    const focusStyle = runState.focusTarget === i ? 'filter: drop-shadow(0 0 8px #ffeb3b);' : bossStyle;
+    return `
+      <div class="hero-mob idle" id="hmob-${i}" onclick="focusMonster(${i})" style="position: absolute; left: ${m.x}px; transform-origin: bottom center; transition: left 0.1s linear, transform 0.1s linear; ${focusStyle}">
+        <div class="hp-bar-mini" style="${m.isBoss ? 'width: 48px;' : ''}"><div class="hp-fill-mini" id="hp-mob-${i}" style="width: ${(m.hp/m.maxHp)*100}%"></div></div>
+        <div class="hp-bar-mini" style="${m.isBoss ? 'width: 48px;' : ''}"><div class="cd-fill-mini" id="cd-mob-${i}" style="width: ${Math.min(100, Math.max(0, ((m.maxCd-m.cd)/m.maxCd)*100))}%"></div></div>
+        <div style="transform: ${scale}">${spriteSVG(CROPS[m.id].sp || 'seedLight', 32)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function heroTick() {
+  const now = Date.now();
+  const dt = now - lastTick;
+  lastTick = now;
+  
   if (!runState || !runState.monster) return;
   runState.waveTime += dt / 1000;
   
