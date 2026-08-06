@@ -5585,6 +5585,8 @@ function initPlacementPhase() {
   team = [];
   enemies = [];
   projectiles = [];
+  currentWave = 1;
+  totalGold = 0;
   const best = ctx.S.dungeonBest || { wave: 0, gold: 0 };
   const bestHtml = best.wave > 0 ? `<div style="color:#b08a5c; font-size:12px; text-align:center; margin-top:4px;">\u{1F3C6} K\u1EF7 l\u1EE5c: Wave ${best.wave} \xB7 ${best.gold} G</div>` : "";
   dungeonView.innerHTML = `
@@ -6292,9 +6294,15 @@ function endDungeon(isWin) {
         <div class="dg-title">Game Over</div>
         ${rewardText}
         ${recordHtml}
-        <div class="buy" id="dg-finish-btn" style="margin-top: 10px;">Tho\xE1t H\u1EA7m Ng\u1EE5c</div>
+        <div style="display:flex; justify-content:center; gap: 10px; margin-top: 15px;">
+            <div class="buy" id="dg-restart-btn">Ch\u01A1i L\u1EA1i</div>
+            <div class="buy plain" id="dg-finish-btn">Tho\xE1t</div>
+        </div>
     `;
   arena.appendChild(overlay);
+  overlay.querySelector("#dg-restart-btn").addEventListener("click", () => {
+    initPlacementPhase();
+  });
   overlay.querySelector("#dg-finish-btn").addEventListener("click", () => {
     closeDungeonView();
   });

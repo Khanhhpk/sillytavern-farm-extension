@@ -105,6 +105,8 @@ function initPlacementPhase() {
     team = [];
     enemies = [];
     projectiles = [];
+    currentWave = 1;
+    totalGold = 0;
     
     const best = ctx.S.dungeonBest || { wave: 0, gold: 0 };
     const bestHtml = best.wave > 0 ? `<div style="color:#b08a5c; font-size:12px; text-align:center; margin-top:4px;">🏆 Kỷ lục: Wave ${best.wave} · ${best.gold} G</div>` : '';
@@ -918,11 +920,17 @@ function endDungeon(isWin) {
         <div class="dg-title">Game Over</div>
         ${rewardText}
         ${recordHtml}
-        <div class="buy" id="dg-finish-btn" style="margin-top: 10px;">Thoát Hầm Ngục</div>
+        <div style="display:flex; justify-content:center; gap: 10px; margin-top: 15px;">
+            <div class="buy" id="dg-restart-btn">Chơi Lại</div>
+            <div class="buy plain" id="dg-finish-btn">Thoát</div>
+        </div>
     `;
     
     arena.appendChild(overlay);
     
+    overlay.querySelector('#dg-restart-btn').addEventListener('click', () => {
+        initPlacementPhase();
+    });
     overlay.querySelector('#dg-finish-btn').addEventListener('click', () => {
         closeDungeonView();
     });
