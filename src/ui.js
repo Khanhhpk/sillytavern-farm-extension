@@ -22,10 +22,21 @@ let swX = null, swY = null;
 export function applyTheme() { ctx.ui.classList.remove('theme-sakura', 'theme-sky'); ctx.ui.classList.add('theme-' + (ctx.S && ctx.S.theme === 'sky' ? 'sky' : 'sakura')); }
 
 export function applyPageSkin() {
-  fieldEl.classList.toggle('pg2', ctx.S.page === 2);
-  fieldEl.classList.toggle('pg3', ctx.S.page === 3);
-  // @ts-ignore
-  fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? 'water' : ctx.S.page === 3 ? 'mine' : 'grass', 4242);
+  const isExplore = ctx.S && ctx.S.view === 'explore';
+  fieldEl.classList.toggle('pg2', !isExplore && ctx.S.page === 2);
+  fieldEl.classList.toggle('pg3', !isExplore && ctx.S.page === 3);
+  
+  if (isExplore) {
+    fieldEl.style.backgroundImage = 'none';
+    fieldEl.style.backgroundColor = '#d3c3a0'; // Map background color
+    document.querySelector('.titlebar h1').innerHTML = `${spriteSVG('strawhat', 16)}Dạo quanh nào...`;
+  } else {
+    // @ts-ignore
+    fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? 'water' : ctx.S.page === 3 ? 'mine' : 'grass', 4242);
+    fieldEl.style.backgroundColor = '';
+    document.querySelector('.titlebar h1').innerHTML = `${spriteSVG('strawhat', 16)}Ai mà thèm làm nông dân chứ!`;
+  }
+  
   // @ts-ignore
   fieldEl.style.backgroundSize = '192px 192px';
 }
@@ -74,7 +85,7 @@ export function initUI() {
   <div id="win">
     <div class="titlebar" id="drag">
       <h1>${spriteSVG('strawhat', 16)}Ai mà thèm làm nông dân chứ!</h1>
-      <div class="view-toggle" id="viewToggle" title="Chuyển chế độ Khám phá/Nông trại">${spriteSVG('dungeonGate', 16)}</div>
+      <div class="view-toggle" id="viewToggle" title="Chuyển chế độ Khám phá/Nông trại">${spriteSVG('mapIcon', 16)} <span>Khám phá</span></div>
       <div class="close-x" id="close">×</div>
     </div>
     <div class="statusbar">
@@ -172,6 +183,7 @@ if (pagerEl) pagerEl.addEventListener('click', e => {
   swX = null; swY = null;
 // @ts-ignore
 fieldEl.addEventListener('touchstart', e => { 
+  if (ctx.S && ctx.S.view === 'explore') { swX = null; return; }
   if (e.touches.length === 1 && (!ctx.S.dragPet || !e.target.closest('.pet'))) { 
     swX = e.touches[0].clientX; 
     swY = e.touches[0].clientY; 
@@ -198,16 +210,20 @@ fieldEl.addEventListener('touchend', e => {
   const viewToggle = $id('viewToggle');
   if (viewToggle) {
     // Initial icon state
-    if (ctx.S && ctx.S.view === 'explore') viewToggle.innerHTML = spriteSVG('sprout', 16);
+    if (ctx.S && ctx.S.view === 'explore') viewToggle.innerHTML = `${spriteSVG('sprout', 16)} <span>Nông trại</span>`;
     viewToggle.addEventListener('click', () => {
       ctx.S.view = ctx.S.view === 'explore' ? 'farm' : 'explore';
       save();
       renderPlots();
       renderToolbar();
+      renderPager();
+      applyPageSkin();
       const ctrlrow = sh.querySelector('.ctrlrow');
       if (ctrlrow) ctrlrow.style.display = ctx.S.view === 'explore' ? 'none' : 'flex';
+      const mascots = sh.querySelector('.mascots');
+      if (mascots) mascots.style.display = ctx.S.view === 'explore' ? 'none' : 'block';
       toast(ctx.S.view === 'explore' ? 'Bản đồ Khám phá' : 'Trở về Nông trại');
-      viewToggle.innerHTML = ctx.S.view === 'explore' ? spriteSVG('sprout', 16) : spriteSVG('dungeonGate', 16);
+      viewToggle.innerHTML = ctx.S.view === 'explore' ? `${spriteSVG('sprout', 16)} <span>Nông trại</span>` : `${spriteSVG('mapIcon', 16)} <span>Khám phá</span>`;
     });
   }
 }

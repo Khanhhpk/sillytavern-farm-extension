@@ -212,6 +212,7 @@ var SPR = {
   toolWater: ["................", "................", "................", "..........uu....", ".........u..u...", "..u..uuuuu...u..", "..uu.ukkbbu..u..", ".B.uuubbbbu.u...", "....ubbbbbbuu...", "....ubbbbbbu....", "....ubbbbbbu....", "....uibbbbiu....", ".....uuuuuu.....", "................", "................", "................"],
   toolFert: ["................", "................", "................", "......qq........", ".....q..q.......", "....qaaaaq......", "...qaaaaaaq.....", "..qaaGGaaaaq....", "..qaaGGaaaaq....", "..qaaaaaeaaq....", "..qaeaaaaaaq....", "...qaaaaaaq.....", "....qqqqqq......", "................", "................", "................"],
   toolHarvest: ["................", "................", "................", "................", "................", "................", "...FF.OO.GG.....", "..qqqqqqqqqq....", "...qacacacaq....", "...qcacacacq....", "....qacacaq.....", "....qcacacq.....", ".....qqqqq......", "................", "................", "................"],
+  mapIcon: ["................", "................", "................", "...SSSSSSSSSS...", "..SWWWWWWWWWWS..", "..SWWRWWWWWwWS..", "..SWRRWWWWWwWS..", "..SWWRWWWWWwWS..", "..SWWWWWWWwwWS..", "..SWWWWWWWWwWS..", "..SWWWWWWWWWWS..", "...SSSSSSSSSS...", "................", "................", "................", "................"],
   toolShovel: ["................", "................", "................", "......SSSS......", ".......SS.......", ".......SS.......", ".......SS.......", ".......SS.......", ".....MLLLLM.....", "....MLLWLLLM....", "....MLLLLLLM....", ".....MLLLLM.....", "......MMMM......", "................", "................", "................"],
   cloud: ["................", "................", "................", "................", "......LLLL......", ".....LWWWWL.....", "...LLWWWWWWL....", "..LWWWWWWWWWL...", "..LWWWWWWWWWL...", "...LLLLLLLLLL...", "................", "................", "................", "................", "................", "................"],
   raincloud: ["................", "................", "................", "......LLLL......", ".....LWWWWL.....", "...LLWWWWWWL....", "..LWWWWWWWWWL...", "..LWWWWWWWWWL...", "...LLLLLLLLLL...", "................", "....B...B...B...", "................", "...B...B...B....", "................", "................", "................"],
@@ -1428,7 +1429,7 @@ var styleCSS = `
       background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 8px; padding: 3px 12px;
       box-shadow: 0 3px 0 var(--tint), inset 0 0 0 2px #fff6e0;
       display: flex; align-items: center; gap: 8px; }
-    .view-toggle { width: 24px; height: 24px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 0 var(--tintSoft); flex-shrink: 0; }
+    .view-toggle { width: auto; height: 24px; padding: 0 8px; gap: 4px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 0 var(--tintSoft); flex-shrink: 0; font-size: 11px; font-weight: bold; color: #7a5c38; }
     .close-x { width: 24px; height: 24px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 6px;
       color: #7a5c38; box-shadow: 0 2px 0 var(--tintSoft); font-weight: bold; text-align: center; line-height: 18px; cursor: pointer; flex-shrink: 0; }
     .statusbar { display: flex; align-items: center; gap: 12px; padding: 7px 14px; background: #f4e6cf;
@@ -1846,9 +1847,18 @@ function applyTheme() {
   ctx.ui.classList.add("theme-" + (ctx.S && ctx.S.theme === "sky" ? "sky" : "sakura"));
 }
 function applyPageSkin() {
-  fieldEl.classList.toggle("pg2", ctx.S.page === 2);
-  fieldEl.classList.toggle("pg3", ctx.S.page === 3);
-  fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? "water" : ctx.S.page === 3 ? "mine" : "grass", 4242);
+  const isExplore = ctx.S && ctx.S.view === "explore";
+  fieldEl.classList.toggle("pg2", !isExplore && ctx.S.page === 2);
+  fieldEl.classList.toggle("pg3", !isExplore && ctx.S.page === 3);
+  if (isExplore) {
+    fieldEl.style.backgroundImage = "none";
+    fieldEl.style.backgroundColor = "#d3c3a0";
+    document.querySelector(".titlebar h1").innerHTML = `${spriteSVG("strawhat", 16)}D\u1EA1o quanh n\xE0o...`;
+  } else {
+    fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? "water" : ctx.S.page === 3 ? "mine" : "grass", 4242);
+    fieldEl.style.backgroundColor = "";
+    document.querySelector(".titlebar h1").innerHTML = `${spriteSVG("strawhat", 16)}Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!`;
+  }
   fieldEl.style.backgroundSize = "192px 192px";
 }
 function renderPager() {
@@ -1891,7 +1901,7 @@ function initUI() {
   <div id="win">
     <div class="titlebar" id="drag">
       <h1>${spriteSVG("strawhat", 16)}Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!</h1>
-      <div class="view-toggle" id="viewToggle" title="Chuy\u1EC3n ch\u1EBF \u0111\u1ED9 Kh\xE1m ph\xE1/N\xF4ng tr\u1EA1i">${spriteSVG("dungeonGate", 16)}</div>
+      <div class="view-toggle" id="viewToggle" title="Chuy\u1EC3n ch\u1EBF \u0111\u1ED9 Kh\xE1m ph\xE1/N\xF4ng tr\u1EA1i">${spriteSVG("mapIcon", 16)} <span>Kh\xE1m ph\xE1</span></div>
       <div class="close-x" id="close">\xD7</div>
     </div>
     <div class="statusbar">
@@ -1991,6 +2001,10 @@ function initUI() {
   swX = null;
   swY = null;
   fieldEl.addEventListener("touchstart", (e) => {
+    if (ctx.S && ctx.S.view === "explore") {
+      swX = null;
+      return;
+    }
     if (e.touches.length === 1 && (!ctx.S.dragPet || !e.target.closest(".pet"))) {
       swX = e.touches[0].clientX;
       swY = e.touches[0].clientY;
@@ -2019,16 +2033,20 @@ function initUI() {
   }, { passive: true });
   const viewToggle = $id("viewToggle");
   if (viewToggle) {
-    if (ctx.S && ctx.S.view === "explore") viewToggle.innerHTML = spriteSVG("sprout", 16);
+    if (ctx.S && ctx.S.view === "explore") viewToggle.innerHTML = `${spriteSVG("sprout", 16)} <span>N\xF4ng tr\u1EA1i</span>`;
     viewToggle.addEventListener("click", () => {
       ctx.S.view = ctx.S.view === "explore" ? "farm" : "explore";
       save();
       renderPlots();
       renderToolbar();
+      renderPager();
+      applyPageSkin();
       const ctrlrow = sh.querySelector(".ctrlrow");
       if (ctrlrow) ctrlrow.style.display = ctx.S.view === "explore" ? "none" : "flex";
+      const mascots = sh.querySelector(".mascots");
+      if (mascots) mascots.style.display = ctx.S.view === "explore" ? "none" : "block";
       toast(ctx.S.view === "explore" ? "B\u1EA3n \u0111\u1ED3 Kh\xE1m ph\xE1" : "Tr\u1EDF v\u1EC1 N\xF4ng tr\u1EA1i");
-      viewToggle.innerHTML = ctx.S.view === "explore" ? spriteSVG("sprout", 16) : spriteSVG("dungeonGate", 16);
+      viewToggle.innerHTML = ctx.S.view === "explore" ? `${spriteSVG("sprout", 16)} <span>N\xF4ng tr\u1EA1i</span>` : `${spriteSVG("mapIcon", 16)} <span>Kh\xE1m ph\xE1</span>`;
     });
   }
 }
