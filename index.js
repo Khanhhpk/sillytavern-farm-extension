@@ -1851,6 +1851,32 @@ var styleCSS = `
     .betresult { font-size: 12px; font-weight: bold; color: #7a5c38; min-height: 16px; margin-bottom: 2px; }
     .betchain { font-size: 11px; color: #9a7a54; min-height: 15px; word-break: break-all; }
     .betpot { font-size: 15px; font-weight: bold; color: #c86a1a; margin: 8px 0 4px; }
+    
+    /* ---------- Hero Taskbar Mode ---------- */
+    .hero-bar { position: fixed; bottom: 20px; right: 20px; width: 320px; height: 60px; background: #221d28; border: 3px solid #6b4d8a; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.1); z-index: 999999; display: flex; align-items: center; padding-right: 4px; overflow: hidden; pointer-events: auto; touch-action: none; font-family: sans-serif; }
+    .hero-drag { width: 24px; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-right: 1px solid #4a3461; cursor: grab; fill: #a58bd3; }
+    .hero-drag:active { cursor: grabbing; background: rgba(0,0,0,0.5); }
+    .hero-scene { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; position: relative; }
+    .hero-scene::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, #191420, #2c2538); z-index: 0; }
+    .hero-scene::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 12px; background: #3b2a52; border-top: 1px solid #6b4d8a; z-index: 0; }
+    #hero-party, #hero-enemy { position: relative; z-index: 1; display: flex; gap: 4px; align-items: flex-end; height: 32px; }
+    .hero-pet, .hero-mob { display: flex; align-items: flex-end; }
+    .hero-pet svg, .hero-mob svg { height: 28px; width: auto; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); transform-origin: bottom center; }
+    .hero-stats { width: 90px; padding: 0 8px; border-left: 1px solid #4a3461; display: flex; flex-direction: column; justify-content: center; font-size: 11px; color: #d0c0e8; font-weight: bold; z-index: 1; background: #1f1a26; height: 100%; }
+    .h-gold { color: #f2c231; display: inline-flex; align-items: center; gap: 2px; margin-left: 4px; }
+    .h-gold svg { fill: #f2c231; }
+    .hero-exp-wrap { width: 100%; height: 10px; background: #110d14; border: 1px solid #4a3461; border-radius: 4px; position: relative; overflow: hidden; margin-top: 4px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.5); }
+    .hero-exp-bar { height: 100%; background: linear-gradient(90deg, #6b4d8a, #a58bd3); width: 0%; transition: width 0.3s; }
+    .hero-exp-txt { position: absolute; inset: 0; font-size: 9px; display: flex; align-items: center; justify-content: center; color: #fff; text-shadow: 0 1px 1px #000; letter-spacing: 0.5px; }
+    .hero-actions { display: flex; flex-direction: column; justify-content: space-around; width: 30px; height: 100%; padding: 4px 0; border-left: 1px solid #4a3461; background: #191420; }
+    .h-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: #3b2a52; border: 1px solid #6b4d8a; border-radius: 4px; cursor: pointer; color: #e0ccff; font-weight: bold; font-size: 16px; margin: 0 auto; fill: #e0ccff; }
+    .h-btn:hover { background: #5a417d; }
+    .h-btn:active { background: #2c2538; transform: translateY(1px); }
+    .dmg-float { position: absolute; font-weight: bold; font-size: 13px; color: #ff5555; text-shadow: 0 1px 2px #000, 0 0 2px #000; animation: dFloat 0.8s forwards; z-index: 10; pointer-events: none; }
+    .dmg-float.heal { color: #55ff55; }
+    .dmg-float.crit { font-size: 16px; color: #ffaa00; font-style: italic; }
+    @keyframes dFloat { 0% { opacity: 1; transform: translateY(0) scale(1); } 50% { transform: translateY(-15px) scale(1.2); } 100% { opacity: 0; transform: translateY(-20px) scale(1); } }
+
     .betsides { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
     .betside { padding: 10px 4px; border-radius: 8px; border: 3px solid; cursor: pointer;
       font-weight: bold; user-select: none; line-height: 1.35; }
@@ -1994,6 +2020,21 @@ function initUI() {
       </div>
     </div>
     <div class="toast" id="toast"></div>
+    <div id="hero-bar" class="hero-bar" style="display:none">
+      <div class="hero-drag" title="K\xE9o th\u1EA3" id="hero-drag">${spriteSVG("mapIcon", 16)}</div>
+      <div class="hero-scene">
+        <div id="hero-party"></div>
+        <div id="hero-enemy"></div>
+      </div>
+      <div class="hero-stats">
+        <div>Lv.<span id="hero-level">1</span> <span class="h-gold">${spriteSVG("coin", 12)}<span id="hero-gold">0</span></span></div>
+        <div class="hero-exp-wrap"><div class="hero-exp-bar" id="hero-exp-bar"></div><div class="hero-exp-txt" id="hero-exp">0/100</div></div>
+      </div>
+      <div class="hero-actions">
+        <div class="h-btn" id="hero-cashout" title="R\xFAt V\xE0ng">${spriteSVG("coin", 16)}</div>
+        <div class="h-btn" id="hero-close" title="\u0110\xF3ng Hero Mode">\xD7</div>
+      </div>
+    </div>
   </div>`;
   sh.appendChild(ctx.ui);
   ctx.orb = $id("orb");
@@ -4433,11 +4474,17 @@ function renderPlots() {
             ${spriteSVG("diceIcon", 48)}
             <div class="feature-name">\u0110\u1ECF \u0110en</div>
           </div>
+          <div class="explore-slot" id="eslot-hero">
+            ${spriteSVG("emBang", 48)}
+            <div class="feature-name">Anh H\xF9ng</div>
+          </div>
         `;
         const dBtn = $id("eslot-dungeon");
         if (dBtn) dBtn.addEventListener("click", () => openPanel("dungeon"));
         const bBtn = $id("eslot-bet");
         if (bBtn) bBtn.addEventListener("click", () => openPanel("bet"));
+        const hBtn = $id("eslot-hero");
+        if (hBtn) hBtn.addEventListener("click", () => openHeroMode());
       }
     }
     return;
@@ -6981,6 +7028,193 @@ function setupSlashCommand() {
   })();
 }
 
+// src/hero.js
+var heroLoop = null;
+var lastTick = 0;
+var currentMonster = null;
+var monsterX = 100;
+function initHeroState() {
+  if (!ctx.S.hero) {
+    ctx.S.hero = {
+      level: 1,
+      exp: 0,
+      gold: 0,
+      fx: 0.5,
+      fy: 0.9,
+      party: []
+      // Danh sách pet ID đang chiến đấu
+    };
+  }
+}
+function openHeroMode() {
+  initHeroState();
+  $id("win").style.display = "none";
+  $id("hero-bar").style.display = "flex";
+  if (ctx.S.hero.party.length === 0) {
+    const availablePets = Object.keys(ctx.S.pets || {}).filter((k) => ctx.S.pets[k] >= 1);
+    ctx.S.hero.party = availablePets.slice(0, 3);
+  }
+  if (!currentMonster) spawnMonster();
+  renderHeroUI();
+  placeHeroBar();
+  if (!heroLoop) {
+    lastTick = Date.now();
+    heroLoop = setInterval(heroTick, 100);
+  }
+}
+function closeHeroMode() {
+  $id("hero-bar").style.display = "none";
+  if (heroLoop) {
+    clearInterval(heroLoop);
+    heroLoop = null;
+  }
+  $id("orb").style.display = "flex";
+}
+function cashOutHero() {
+  if (ctx.S.hero.gold > 0) {
+    ctx.S.coins = (ctx.S.coins || 0) + ctx.S.hero.gold;
+    toast(`\u0110\xE3 r\xFAt ${ctx.S.hero.gold}G v\u1EC1 trang tr\u1EA1i!`);
+    ctx.S.hero.gold = 0;
+    save();
+    updateHeroStats();
+  }
+}
+function spawnMonster() {
+  const cropKeys = Object.keys(CROPS);
+  const randomCrop = cropKeys[Math.floor(Math.random() * cropKeys.length)];
+  const maxHp = ctx.S.hero.level * 10 + Math.floor(Math.random() * 10);
+  currentMonster = {
+    id: randomCrop,
+    hp: maxHp,
+    maxHp
+  };
+  monsterX = 150;
+  const em = $id("hero-enemy");
+  if (em) {
+    em.innerHTML = `<div class="hero-mob" id="hmob">${spriteSVG(CROPS[randomCrop].sp || "seedLight", 32)}</div>`;
+  }
+}
+function heroTick() {
+  const now2 = Date.now();
+  const dt = now2 - lastTick;
+  lastTick = now2;
+  if (!currentMonster) return;
+  const partyEl = $id("hero-party");
+  const mobEl = $id("hmob");
+  if (monsterX > 30) {
+    monsterX -= 30 * (dt / 1e3);
+    if (mobEl) mobEl.style.transform = `translateX(${monsterX}px)`;
+    if (partyEl) partyEl.style.transform = `translateY(${Math.sin(now2 / 100) * 2}px)`;
+  } else {
+    if (partyEl) partyEl.style.transform = `translateY(0) translateX(5px)`;
+    setTimeout(() => {
+      if (partyEl) partyEl.style.transform = "translateY(0) translateX(0)";
+    }, 50);
+    const damage = Math.max(1, Math.floor((ctx.S.hero.level * 2 + ctx.S.hero.party.length * 3) * (dt / 1e3) * 5));
+    currentMonster.hp -= damage;
+    showFloatDamage(damage, mobEl);
+    if (currentMonster.hp <= 0) {
+      const goldDrop = Math.floor(Math.random() * ctx.S.hero.level * 2) + 1;
+      const expDrop = ctx.S.hero.level * 5 + Math.floor(Math.random() * 5);
+      ctx.S.hero.gold += goldDrop;
+      ctx.S.hero.exp += expDrop;
+      checkLevelUp();
+      spawnMonster();
+    }
+  }
+  updateHeroStats();
+}
+function checkLevelUp() {
+  const reqExp = ctx.S.hero.level * 100;
+  if (ctx.S.hero.exp >= reqExp) {
+    ctx.S.hero.exp -= reqExp;
+    ctx.S.hero.level++;
+    toast(`Hero Party \u0111\u1EA1t c\u1EA5p ${ctx.S.hero.level}!`);
+  }
+}
+function showFloatDamage(dmg, target) {
+  if (!target) return;
+  const fl = document.createElement("div");
+  fl.className = "dmg-float" + (Math.random() > 0.8 ? " crit" : "");
+  fl.textContent = "-" + dmg;
+  fl.style.left = Math.random() * 20 - 10 + "px";
+  fl.style.bottom = "30px";
+  target.appendChild(fl);
+  setTimeout(() => fl.remove(), 800);
+}
+function renderHeroUI() {
+  const container = $id("hero-party");
+  if (container) {
+    container.innerHTML = ctx.S.hero.party.map(
+      (pId, i) => `<div class="hero-pet" style="z-index:${10 - i}">${petSVG(pId, 32)}</div>`
+    ).join("");
+  }
+  updateHeroStats();
+}
+function updateHeroStats() {
+  const lvEl = $id("hero-level");
+  const expEl = $id("hero-exp");
+  const expBar = $id("hero-exp-bar");
+  const goldEl = $id("hero-gold");
+  if (lvEl) lvEl.textContent = ctx.S.hero.level;
+  if (expEl) expEl.textContent = `${Math.floor(ctx.S.hero.exp)}/${ctx.S.hero.level * 100}`;
+  if (expBar) expBar.style.width = `${Math.min(100, ctx.S.hero.exp / (ctx.S.hero.level * 100) * 100)}%`;
+  if (goldEl) goldEl.textContent = ctx.S.hero.gold;
+}
+var hGesture = null;
+function onHeroDown(e) {
+  if (!e.isPrimary || e.pointerType === "mouse" && e.button !== 0) return;
+  const bar = $id("hero-bar");
+  if (!e.target.closest(".hero-drag")) return;
+  bar.setPointerCapture(e.pointerId);
+  hGesture = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: bar.offsetLeft, oy: bar.offsetTop };
+}
+function onHeroMove(e) {
+  if (!hGesture || e.pointerId !== hGesture.id) return;
+  const bar = $id("hero-bar");
+  bar.style.left = hGesture.ox + e.clientX - hGesture.sx + "px";
+  bar.style.top = hGesture.oy + e.clientY - hGesture.sy + "px";
+  bar.style.right = "auto";
+  bar.style.bottom = "auto";
+}
+function onHeroUp(e) {
+  if (!hGesture || e.pointerId !== hGesture.id) return;
+  const bar = $id("hero-bar");
+  try {
+    bar.releasePointerCapture(e.pointerId);
+  } catch (er) {
+  }
+  const vw = window.innerWidth, vh = window.innerHeight;
+  ctx.S.hero.fx = Math.min(Math.max(bar.offsetLeft, 0), vw - bar.offsetWidth) / vw;
+  ctx.S.hero.fy = Math.min(Math.max(bar.offsetTop, 0), vh - bar.offsetHeight) / vh;
+  save();
+  hGesture = null;
+}
+function placeHeroBar() {
+  if (!ctx.S.hero) return;
+  const bar = $id("hero-bar");
+  if (!bar) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const x = Math.min(Math.max(ctx.S.hero.fx * vw, 0), vw - 360);
+  const y = Math.min(Math.max(ctx.S.hero.fy * vh, 0), vh - 60);
+  bar.style.left = x + "px";
+  bar.style.top = y + "px";
+  bar.style.right = "auto";
+  bar.style.bottom = "auto";
+}
+function initHero() {
+  const bar = $id("hero-bar");
+  if (bar) {
+    bar.addEventListener("pointerdown", onHeroDown);
+    window.addEventListener("pointermove", onHeroMove);
+    window.addEventListener("pointerup", onHeroUp);
+    const closeBtn = $id("hero-close");
+    if (closeBtn) closeBtn.addEventListener("click", closeHeroMode);
+    const cashOutBtn = $id("hero-cashout");
+    if (cashOutBtn) cashOutBtn.addEventListener("click", cashOutHero);
+  }
+}
+
 // src/main.js
 function initFarm() {
   try {
@@ -7000,6 +7234,7 @@ function initFarm() {
   initPets();
   initWitch();
   initEvents();
+  initHero();
   setupExtButton();
   setupSlashCommand();
   const api = { destroy };

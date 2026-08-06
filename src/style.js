@@ -455,6 +455,32 @@ export const styleCSS = `
     .betresult { font-size: 12px; font-weight: bold; color: #7a5c38; min-height: 16px; margin-bottom: 2px; }
     .betchain { font-size: 11px; color: #9a7a54; min-height: 15px; word-break: break-all; }
     .betpot { font-size: 15px; font-weight: bold; color: #c86a1a; margin: 8px 0 4px; }
+    
+    /* ---------- Hero Taskbar Mode ---------- */
+    .hero-bar { position: fixed; bottom: 20px; right: 20px; width: 320px; height: 60px; background: #221d28; border: 3px solid #6b4d8a; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.1); z-index: 999999; display: flex; align-items: center; padding-right: 4px; overflow: hidden; pointer-events: auto; touch-action: none; font-family: sans-serif; }
+    .hero-drag { width: 24px; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-right: 1px solid #4a3461; cursor: grab; fill: #a58bd3; }
+    .hero-drag:active { cursor: grabbing; background: rgba(0,0,0,0.5); }
+    .hero-scene { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; position: relative; }
+    .hero-scene::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, #191420, #2c2538); z-index: 0; }
+    .hero-scene::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 12px; background: #3b2a52; border-top: 1px solid #6b4d8a; z-index: 0; }
+    #hero-party, #hero-enemy { position: relative; z-index: 1; display: flex; gap: 4px; align-items: flex-end; height: 32px; }
+    .hero-pet, .hero-mob { display: flex; align-items: flex-end; }
+    .hero-pet svg, .hero-mob svg { height: 28px; width: auto; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); transform-origin: bottom center; }
+    .hero-stats { width: 90px; padding: 0 8px; border-left: 1px solid #4a3461; display: flex; flex-direction: column; justify-content: center; font-size: 11px; color: #d0c0e8; font-weight: bold; z-index: 1; background: #1f1a26; height: 100%; }
+    .h-gold { color: #f2c231; display: inline-flex; align-items: center; gap: 2px; margin-left: 4px; }
+    .h-gold svg { fill: #f2c231; }
+    .hero-exp-wrap { width: 100%; height: 10px; background: #110d14; border: 1px solid #4a3461; border-radius: 4px; position: relative; overflow: hidden; margin-top: 4px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.5); }
+    .hero-exp-bar { height: 100%; background: linear-gradient(90deg, #6b4d8a, #a58bd3); width: 0%; transition: width 0.3s; }
+    .hero-exp-txt { position: absolute; inset: 0; font-size: 9px; display: flex; align-items: center; justify-content: center; color: #fff; text-shadow: 0 1px 1px #000; letter-spacing: 0.5px; }
+    .hero-actions { display: flex; flex-direction: column; justify-content: space-around; width: 30px; height: 100%; padding: 4px 0; border-left: 1px solid #4a3461; background: #191420; }
+    .h-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: #3b2a52; border: 1px solid #6b4d8a; border-radius: 4px; cursor: pointer; color: #e0ccff; font-weight: bold; font-size: 16px; margin: 0 auto; fill: #e0ccff; }
+    .h-btn:hover { background: #5a417d; }
+    .h-btn:active { background: #2c2538; transform: translateY(1px); }
+    .dmg-float { position: absolute; font-weight: bold; font-size: 13px; color: #ff5555; text-shadow: 0 1px 2px #000, 0 0 2px #000; animation: dFloat 0.8s forwards; z-index: 10; pointer-events: none; }
+    .dmg-float.heal { color: #55ff55; }
+    .dmg-float.crit { font-size: 16px; color: #ffaa00; font-style: italic; }
+    @keyframes dFloat { 0% { opacity: 1; transform: translateY(0) scale(1); } 50% { transform: translateY(-15px) scale(1.2); } 100% { opacity: 0; transform: translateY(-20px) scale(1); } }
+
     .betsides { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
     .betside { padding: 10px 4px; border-radius: 8px; border: 3px solid; cursor: pointer;
       font-weight: bold; user-select: none; line-height: 1.35; }

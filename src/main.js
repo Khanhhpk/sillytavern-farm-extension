@@ -19,6 +19,7 @@ function initFarm() {
   All.initPets();
   All.initWitch();
   All.initEvents();
+  All.initHero();
 
   All.setupExtButton();
   All.setupSlashCommand();
