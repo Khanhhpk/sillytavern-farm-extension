@@ -208,16 +208,16 @@ function initPlacementPhase() {
             dragEl.innerHTML = petSVG(petId, 32);
             document.body.appendChild(dragEl); // append to body to avoid transform/overflow issues
             
-            dragEl.style.left = (e.clientX - 16) + 'px';
-            dragEl.style.top = (e.clientY - 16) + 'px';
+            dragEl.style.left = e.clientX + 'px';
+            dragEl.style.top = e.clientY + 'px';
             
             slot.setPointerCapture(e.pointerId);
         });
         
         slot.addEventListener('pointermove', (e) => {
             if (!draggingPet || !dragEl) return;
-            dragEl.style.left = (e.clientX - 16) + 'px';
-            dragEl.style.top = (e.clientY - 16) + 'px';
+            dragEl.style.left = e.clientX + 'px';
+            dragEl.style.top = e.clientY + 'px';
         });
         
         slot.addEventListener('pointerup', (e) => {
@@ -245,12 +245,12 @@ function initPlacementPhase() {
                     ${petSVG(pId, 32)}
                 `;
                 
-                let x = e.clientX - rect.left - 16;
-                let y = e.clientY - rect.top - 16;
-                if (x > rect.width - 32) x = rect.width - 32;
-                if (x < 0) x = 0;
-                if (y < 0) y = 0;
-                if (y > rect.height - 32) y = rect.height - 32;
+                let x = e.clientX - rect.left;
+                let y = e.clientY - rect.top;
+                if (x > rect.width - 16) x = rect.width - 16;
+                if (x < 16) x = 16;
+                if (y < 16) y = 16;
+                if (y > rect.height - 16) y = rect.height - 16;
                 
                 el.style.position = 'absolute';
                 el.style.left = x + 'px';
@@ -273,15 +273,15 @@ function initPlacementPhase() {
                     isPlacedDragging = true;
                     el.style.zIndex = '100000';
                     const arect = arena.getBoundingClientRect();
-                    el.style.left = (ev.clientX - arect.left - 16) + 'px';
-                    el.style.top = (ev.clientY - arect.top - 16) + 'px';
+                    el.style.left = (ev.clientX - arect.left) + 'px';
+                    el.style.top = (ev.clientY - arect.top) + 'px';
                     el.setPointerCapture(ev.pointerId);
                 });
                 el.addEventListener('pointermove', (ev) => {
                     if (!isPlacedDragging) return;
                     const arect = arena.getBoundingClientRect();
-                    el.style.left = (ev.clientX - arect.left - 16) + 'px';
-                    el.style.top = (ev.clientY - arect.top - 16) + 'px';
+                    el.style.left = (ev.clientX - arect.left) + 'px';
+                    el.style.top = (ev.clientY - arect.top) + 'px';
                 });
                 el.addEventListener('pointerup', (ev) => {
                     if (!isPlacedDragging) return;
@@ -294,19 +294,15 @@ function initPlacementPhase() {
                         ev.clientY >= arect.top && ev.clientY <= arect.bottom) {
                         
                         el.style.position = 'absolute';
-                        let nx = ev.clientX - arect.left - 16;
-                        let ny = ev.clientY - arect.top - 16;
-                        if (nx > arect.width - 32) nx = arect.width - 32;
-                        if (nx < 0) nx = 0;
-                        if (ny < 0) ny = 0;
-                        if (ny > arect.height - 32) ny = arect.height - 32;
+                        let nx = ev.clientX - arect.left;
+                        let ny = ev.clientY - arect.top;
+                        if (nx > arect.width - 16) nx = arect.width - 16;
+                        if (nx < 16) nx = 16;
+                        if (ny < 16) ny = 16;
+                        if (ny > arect.height - 16) ny = arect.height - 16;
                         
                         el.style.left = nx + 'px';
                         el.style.top = ny + 'px';
-                        
-                        // Force reflow before restoring transition to prevent fly-in animation
-                        el.offsetHeight;
-                        el.style.transition = '';
                         
                         memberObj.x = nx;
                         memberObj.y = ny;
@@ -745,8 +741,12 @@ function updateEntities(groupA, groupB, dt) {
             statusDiv = document.createElement('div');
             statusDiv.className = 'dg-status';
             a.el.appendChild(statusDiv);
+            a._lastStatusHtml = '';
         }
-        statusDiv.innerHTML = statusHtml;
+        if (a._lastStatusHtml !== statusHtml) {
+            statusDiv.innerHTML = statusHtml;
+            a._lastStatusHtml = statusHtml;
+        }
         
         if (isStunned) return; // Can't move or attack
         

@@ -1764,7 +1764,7 @@ var styleCSS = `
     .dg-slot { width: 44px; height: 44px; flex-shrink: 0; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
     .dg-slot:hover { border-color: #d9ba8a; background: rgba(255,255,255,.2); }
     .dg-slot.placed { opacity: 0.4; pointer-events: none; }
-    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; user-select: none; touch-action: none; }
+    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; }
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
     .dg-entity.flip img { transform: scaleX(-1); }
     .dg-hp-bar { position: absolute; top: -8px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
@@ -1791,7 +1791,7 @@ var styleCSS = `
     .dg-info-item-desc { font-size: 11px; line-height: 1.3; color: #ddd; }
     .dg-info-item-desc b { color: #a4dc8c; font-size: 13px; display: block; margin-bottom: 2px; }
     
-    .dg-projectile { position: absolute; width: 16px; height: 16px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; }
+    .dg-projectile { position: absolute; width: 16px; height: 16px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%); }
     .dg-projectile img, .dg-projectile svg { width: 100%; height: 100%; }
     
     .dg-status { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; pointer-events: none; z-index: 3; }
@@ -5685,14 +5685,14 @@ function initPlacementPhase() {
       dragEl.style.zIndex = "100000";
       dragEl.innerHTML = petSVG(petId, 32);
       document.body.appendChild(dragEl);
-      dragEl.style.left = e.clientX - 16 + "px";
-      dragEl.style.top = e.clientY - 16 + "px";
+      dragEl.style.left = e.clientX + "px";
+      dragEl.style.top = e.clientY + "px";
       slot.setPointerCapture(e.pointerId);
     });
     slot.addEventListener("pointermove", (e) => {
       if (!draggingPet || !dragEl) return;
-      dragEl.style.left = e.clientX - 16 + "px";
-      dragEl.style.top = e.clientY - 16 + "px";
+      dragEl.style.left = e.clientX + "px";
+      dragEl.style.top = e.clientY + "px";
     });
     slot.addEventListener("pointerup", (e) => {
       if (!draggingPet || !dragEl) return;
@@ -5712,12 +5712,12 @@ function initPlacementPhase() {
                     <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
                     ${petSVG(pId, 32)}
                 `;
-        let x = e.clientX - rect.left - 16;
-        let y = e.clientY - rect.top - 16;
-        if (x > rect.width - 32) x = rect.width - 32;
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (y > rect.height - 32) y = rect.height - 32;
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
+        if (x > rect.width - 16) x = rect.width - 16;
+        if (x < 16) x = 16;
+        if (y < 16) y = 16;
+        if (y > rect.height - 16) y = rect.height - 16;
         el.style.position = "absolute";
         el.style.left = x + "px";
         el.style.top = y + "px";
@@ -5746,15 +5746,15 @@ function initPlacementPhase() {
           isPlacedDragging = true;
           el.style.zIndex = "100000";
           const arect = arena.getBoundingClientRect();
-          el.style.left = ev.clientX - arect.left - 16 + "px";
-          el.style.top = ev.clientY - arect.top - 16 + "px";
+          el.style.left = ev.clientX - arect.left + "px";
+          el.style.top = ev.clientY - arect.top + "px";
           el.setPointerCapture(ev.pointerId);
         });
         el.addEventListener("pointermove", (ev) => {
           if (!isPlacedDragging) return;
           const arect = arena.getBoundingClientRect();
-          el.style.left = ev.clientX - arect.left - 16 + "px";
-          el.style.top = ev.clientY - arect.top - 16 + "px";
+          el.style.left = ev.clientX - arect.left + "px";
+          el.style.top = ev.clientY - arect.top + "px";
         });
         el.addEventListener("pointerup", (ev) => {
           if (!isPlacedDragging) return;
@@ -5764,16 +5764,14 @@ function initPlacementPhase() {
           const arect = arena.getBoundingClientRect();
           if (ev.clientX >= arect.left && ev.clientX <= arect.right && ev.clientY >= arect.top && ev.clientY <= arect.bottom) {
             el.style.position = "absolute";
-            let nx = ev.clientX - arect.left - 16;
-            let ny = ev.clientY - arect.top - 16;
-            if (nx > arect.width - 32) nx = arect.width - 32;
-            if (nx < 0) nx = 0;
-            if (ny < 0) ny = 0;
-            if (ny > arect.height - 32) ny = arect.height - 32;
+            let nx = ev.clientX - arect.left;
+            let ny = ev.clientY - arect.top;
+            if (nx > arect.width - 16) nx = arect.width - 16;
+            if (nx < 16) nx = 16;
+            if (ny < 16) ny = 16;
+            if (ny > arect.height - 16) ny = arect.height - 16;
             el.style.left = nx + "px";
             el.style.top = ny + "px";
-            el.offsetHeight;
-            el.style.transition = "";
             memberObj.x = nx;
             memberObj.y = ny;
           } else {
@@ -6147,8 +6145,12 @@ function updateEntities(groupA, groupB, dt) {
       statusDiv = document.createElement("div");
       statusDiv.className = "dg-status";
       a.el.appendChild(statusDiv);
+      a._lastStatusHtml = "";
     }
-    statusDiv.innerHTML = statusHtml;
+    if (a._lastStatusHtml !== statusHtml) {
+      statusDiv.innerHTML = statusHtml;
+      a._lastStatusHtml = statusHtml;
+    }
     if (isStunned) return;
     let closest = null;
     let minDist = Infinity;
