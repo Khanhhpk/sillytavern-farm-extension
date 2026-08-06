@@ -51,7 +51,7 @@ export const PET_SKILLS = {
   ghostBlob: {
     a1: { name: 'Rút Hồn', type: 'soul_reap', val: 0.1, cd: 5, duration: 0, desc: 'Gây sát thương 10% HP hiện tại quái' },
     a2: { name: 'Dọa Ma', type: 'fear', val: 2, cd: 7, duration: 2, desc: 'Hoảng sợ (Choáng cứng) quái trong 2s' },
-    p1: { name: 'Ám Khí', type: 'armor_pen', val: 0.5, desc: 'Bỏ qua 50% phòng ngự quái' },
+    p1: { name: 'Ám Khí', type: 'armor_pen', val: 0.5, desc: 'Xuyên Giáp: Tăng 50% sát thương' },
     p2: { name: 'Vô Hình', type: 'stealth', val: 1, desc: 'Quái không nhắm đánh bé trước' }
   },
   mystery_blob: {
@@ -923,6 +923,7 @@ function heroTick() {
             if (passEq && pSkill[passEq] && pSkill[passEq].type === 'combo_master' && p.combo % pSkill[passEq].val === 0) isCrit = true;
 
             let dmgBase = Math.max(1, Math.floor(p.atk * atkMult * (0.8 + Math.random() * 0.4)));
+            if (p.armorPen > 0) dmgBase = Math.floor(dmgBase * (1 + p.armorPen));
             
             if (passEq && pSkill[passEq]) {
                 const ps = pSkill[passEq];
