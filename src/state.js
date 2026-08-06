@@ -88,8 +88,11 @@ export const curPlots = () => pagePlots(ctx.S.page);
 export const curBlocks = () => ctx.S.page === 2 ? ctx.S.unlockedBlocks2 : ctx.S.page === 3 ? ctx.S.unlockedBlocks3 : ctx.S.unlockedBlocks;
 export const addBlock = () => { if (ctx.S.page === 2) ctx.S.unlockedBlocks2++; else if (ctx.S.page === 3) ctx.S.unlockedBlocks3++; else ctx.S.unlockedBlocks++; };
 export const eachPage = fn => [1, 2, 3].forEach(pg => fn(pagePlots(pg), pg));
+export let testMode = false;
+export function setTestMode(v) { testMode = v; }
 ctx.saveTimer = null;
 export function save(immediate) {
+  if (testMode) return;
   if (ctx.saveTimer) { clearTimeout(ctx.saveTimer); ctx.saveTimer = null; }
   const doSave = () => {
     if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};

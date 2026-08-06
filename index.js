@@ -4763,9 +4763,11 @@ function openPanel(kind) {
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:6px">
         <input type="checkbox" id="cfgDragPet" ${ctx.S.dragPet ? "checked" : ""}> B\u1EADt t\xEDnh n\u0103ng nh\xE9o v\xE0 k\xE9o th\xFA c\u01B0ng
       </label>
-      <div class="shead">C\xF4ng c\u1EE5 d\xE0nh cho Gi\xE1m \u0111\u1ED1c \u0110\u1ED3 ho\u1EA1</div>
-      <div style="display:flex;gap:8px;margin-top:6px">
+      <div class="shead">C\xF4ng c\u1EE5 d\xE0nh cho Gi\xE1m \u0111\u1ED1c \u0110\u1ED3 ho\u1EA1 / Dev</div>
+      <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
         <span class="buy plain" id="openSandboxBtn">\u{1F3A8} M\u1EDF X\u01B0\u1EDFng Ch\u1EBF T\xE1c AI</span>
+        <input class="inp" type="password" id="testCode" placeholder="M\xE3 \u1EA9n..." style="width:100px;padding:3px 6px">
+        <span class="buy" id="testBtn">Test Mode</span>
       </div>
       <div class="shead">Th\xF4ng tin & T\xE1c gi\u1EA3</div>
       <div style="display:flex;gap:8px;margin-top:6px">
@@ -4798,6 +4800,34 @@ function openPanel(kind) {
     $id("secTest").addEventListener("click", () => testSecApi());
     $id("secModels").addEventListener("click", () => fetchModelList());
     if ($id("openSandboxBtn")) $id("openSandboxBtn").addEventListener("click", openSandbox);
+    const testBtn = $id("testBtn");
+    if (testBtn) testBtn.addEventListener("click", () => {
+      const code = $id("testCode")?.value;
+      if (code === "0209") {
+        if (!testMode) {
+          setTestMode(true);
+          Object.keys(PETS).forEach((id) => {
+            if (!ctx.S.hero) ctx.S.hero = {};
+            if (!ctx.S.hero.roster) ctx.S.hero.roster = {};
+            const h = ctx.S.hero.roster[id] || { level: 30, exp: 0, enhHp: 0, enhAtk: 0, enhSpd: 0 };
+            h.level = 30;
+            h.a1_unlocked = true;
+            h.a2_unlocked = true;
+            h.p1_unlocked = true;
+            h.p2_unlocked = true;
+            ctx.S.hero.roster[id] = h;
+          });
+          if (ctx.S.hero) ctx.S.hero.gold = 999999;
+          toast("\u2705 TEST MODE B\u1EACT! (S\u1EBD kh\xF4ng l\u01B0u v\xE0o save ch\xEDnh). \u0110\u1EC3 tho\xE1t, vui l\xF2ng F5 l\u1EA1i trang.");
+          closeModal();
+          renderAll();
+        } else {
+          toast("\u26A0\uFE0F TEST MODE \u0110ANG B\u1EACT R\u1ED2I! (F5 \u0111\u1EC3 t\u1EAFt)");
+        }
+      } else {
+        toast("\u274C Sai m\xE3!");
+      }
+    });
     if ($id("openCreditBtn")) {
       $id("openCreditBtn").addEventListener("click", () => {
         openModal("Credit & L\u1EDDi c\u1EA3m \u01A1n", `
@@ -6540,8 +6570,13 @@ var addBlock = () => {
   else ctx.S.unlockedBlocks++;
 };
 var eachPage = (fn) => [1, 2, 3].forEach((pg) => fn(pagePlots(pg), pg));
+var testMode = false;
+function setTestMode(v) {
+  testMode = v;
+}
 ctx.saveTimer = null;
 function save(immediate) {
+  if (testMode) return;
   if (ctx.saveTimer) {
     clearTimeout(ctx.saveTimer);
     ctx.saveTimer = null;

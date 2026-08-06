@@ -6,7 +6,7 @@ import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, L
 import { pendingPick, renderStatus, renderAll, setPendingPick } from './render.js';
 import { fmtDur, mutDescOf, bagName, bagPrice } from './logic.js';
 import { openBuyDlg, toast, openPassDlg, useStarShard, openSellDlg, openSellSeedDlg, openTakeout } from './witch.js';
-import { save, freshState } from './state.js';
+import { save, freshState, testMode, setTestMode } from './state.js';
 import { renderPets } from './pets.js';
 import { esc, SEC, CS, clampN, saveSec, openSandbox, saveCharState, fetchModelList, testSecApi } from './events.js';
 import { applyTheme, sh } from './ui.js';
@@ -433,9 +433,11 @@ export function openPanel(kind) {
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:6px">
         <input type="checkbox" id="cfgDragPet" ${ctx.S.dragPet ? 'checked' : ''}> Bật tính năng nhéo và kéo thú cưng
       </label>
-      <div class="shead">Công cụ dành cho Giám đốc Đồ hoạ</div>
-      <div style="display:flex;gap:8px;margin-top:6px">
+      <div class="shead">Công cụ dành cho Giám đốc Đồ hoạ / Dev</div>
+      <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
         <span class="buy plain" id="openSandboxBtn">🎨 Mở Xưởng Chế Tác AI</span>
+        <input class="inp" type="password" id="testCode" placeholder="Mã ẩn..." style="width:100px;padding:3px 6px">
+        <span class="buy" id="testBtn">Test Mode</span>
       </div>
       <div class="shead">Thông tin & Tác giả</div>
       <div style="display:flex;gap:8px;margin-top:6px">
@@ -464,6 +466,36 @@ export function openPanel(kind) {
     All.$id('secTest').addEventListener('click', () => testSecApi());
     All.$id('secModels').addEventListener('click', () => fetchModelList());
     if (All.$id('openSandboxBtn')) All.$id('openSandboxBtn').addEventListener('click', openSandbox);
+
+    const testBtn = All.$id('testBtn');
+    if (testBtn) testBtn.addEventListener('click', () => {
+      // @ts-ignore
+      const code = All.$id('testCode')?.value;
+      if (code === '0209') {
+        if (!testMode) {
+          setTestMode(true);
+          Object.keys(PETS).forEach(id => {
+            if (!ctx.S.hero) ctx.S.hero = {};
+            if (!ctx.S.hero.roster) ctx.S.hero.roster = {};
+            const h = ctx.S.hero.roster[id] || { level: 30, exp: 0, enhHp: 0, enhAtk: 0, enhSpd: 0 };
+            h.level = 30;
+            h.a1_unlocked = true;
+            h.a2_unlocked = true;
+            h.p1_unlocked = true;
+            h.p2_unlocked = true;
+            ctx.S.hero.roster[id] = h;
+          });
+          if (ctx.S.hero) ctx.S.hero.gold = 999999;
+          toast('✅ TEST MODE BẬT! (Sẽ không lưu vào save chính). Để thoát, vui lòng F5 lại trang.');
+          closeModal();
+          renderAll();
+        } else {
+          toast('⚠️ TEST MODE ĐANG BẬT RỒI! (F5 để tắt)');
+        }
+      } else {
+        toast('❌ Sai mã!');
+      }
+    });
     if (All.$id('openCreditBtn')) {
       All.$id('openCreditBtn').addEventListener('click', () => {
         openModal('Credit & Lời cảm ơn', `
