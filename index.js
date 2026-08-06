@@ -7338,13 +7338,19 @@ function heroTick() {
         if (pEl) {
           pEl.classList.remove("idle");
           pEl.classList.add("attack");
-          setTimeout(() => pEl.classList.add("idle"), 300);
+          setTimeout(() => {
+            pEl.classList.remove("attack");
+            pEl.classList.add("idle");
+          }, 300);
         }
         if (mobEl) {
           setTimeout(() => {
             mobEl.classList.remove("idle");
             mobEl.classList.add("hurt");
-            setTimeout(() => mobEl.classList.add("idle"), 200);
+            setTimeout(() => {
+              mobEl.classList.remove("hurt");
+              mobEl.classList.add("idle");
+            }, 200);
           }, 150);
         }
         spawnProjectile(pEl, mobEl, false);
@@ -7369,7 +7375,10 @@ function heroTick() {
         if (mobEl) {
           mobEl.classList.remove("idle");
           mobEl.classList.add("attack");
-          setTimeout(() => mobEl.classList.add("idle"), 300);
+          setTimeout(() => {
+            mobEl.classList.remove("attack");
+            mobEl.classList.add("idle");
+          }, 300);
         }
         if (pEl && target.hp <= 0) {
           setTimeout(() => {
