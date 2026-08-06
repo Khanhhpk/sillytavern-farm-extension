@@ -472,16 +472,20 @@ export const styleCSS = `
     .s-lv { position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); font-size: 10px; background: #1f1a26; padding: 1px 4px; border: 1px solid #4a3461; border-radius: 4px; font-weight: bold; color: white; }
     
     /* ---------- Hero Taskbar Mode ---------- */
-    .hero-bar { position: fixed; bottom: 20px; right: 20px; width: 340px; height: 110px; background: #221d28; border: 3px solid #6b4d8a; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.1); z-index: 999999; display: flex; align-items: center; padding-right: 4px; overflow: hidden; pointer-events: auto; touch-action: none; font-family: sans-serif; }
+    .hero-bar { position: fixed; bottom: 20px; right: 20px; width: 400px; height: 120px; background: #221d28; border: 3px solid #6b4d8a; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.1); z-index: 999999; display: flex; align-items: center; padding-right: 4px; overflow: hidden; pointer-events: auto; touch-action: none; font-family: sans-serif; }
     .hero-drag { width: 24px; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-right: 1px solid #4a3461; cursor: grab; color: #a58bd3; font-size: 14px; }
     .hero-drag:active { cursor: grabbing; background: rgba(0,0,0,0.5); }
     .hero-content { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; }
-    .hero-scene { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; position: relative; min-height: 0; overflow: hidden; }
-    .hero-bg { position: absolute; inset: 0; background: url('https://i.imgur.com/KzDqM8d.png') repeat-x; background-size: auto 100%; opacity: 0.3; animation: bgScroll 10s linear infinite; }
+    
+    .hero-scene { flex: 1; position: relative; min-height: 0; overflow: hidden; }
+    .hero-bg { position: absolute; inset: 0; background: repeating-linear-gradient(-45deg, #221c2d, #221c2d 20px, #1d1726 20px, #1d1726 40px); opacity: 0.8; animation: bgScroll 10s linear infinite; }
     @keyframes bgScroll { 0% { background-position: 0 0; } 100% { background-position: -200px 0; } }
     .hero-scene::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(44,37,56,0.8)); z-index: 0; pointer-events: none; }
     .hero-scene::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 16px; background: #3b2a52; border-top: 2px solid #6b4d8a; z-index: 0; }
-    #hero-party, #hero-enemy { position: relative; z-index: 1; display: flex; gap: 8px; align-items: flex-end; height: 45px; }
+    
+    #hero-party { position: absolute; left: 10px; bottom: 16px; z-index: 1; display: flex; gap: 8px; align-items: flex-end; height: 45px; }
+    #hero-enemy { position: absolute; left: 0px; bottom: 16px; z-index: 1; display: flex; align-items: flex-end; height: 45px; }
+    
     .hero-pet, .hero-mob { display: flex; flex-direction: column; align-items: center; position: relative; justify-content: flex-end; }
     .hero-pet svg, .hero-mob svg { height: 32px; width: auto; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); transform-origin: bottom center; margin-bottom: 2px; }
     
@@ -494,11 +498,14 @@ export const styleCSS = `
     .hero-pet.idle:nth-child(2) svg { animation-delay: 0.3s; }
     .hero-pet.idle:nth-child(3) svg { animation-delay: 0.6s; }
     .hero-pet.attack svg { animation: petAttack 0.3s ease-in-out; }
+    
     .hero-mob.idle svg { animation: petBreathe 2.5s ease-in-out infinite alternate-reverse; }
     .hero-mob.hurt svg { animation: mobHurt 0.2s ease-in-out; }
+    .hero-mob.attack svg { animation: mobAttack 0.3s ease-out; }
     
     @keyframes petBreathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.9) scaleX(1.05); } }
     @keyframes petAttack { 0% { transform: translateY(0) translateX(0) rotate(0); } 30% { transform: translateY(-8px) translateX(8px) rotate(10deg); } 100% { transform: translateY(0) translateX(0) rotate(0); } }
+    @keyframes mobAttack { 0% { transform: translateX(0); } 50% { transform: translateX(-20px) scale(1.1); } 100% { transform: translateX(0); } }
     @keyframes mobHurt { 0% { transform: translateX(0); filter: brightness(1) drop-shadow(0 2px 2px rgba(0,0,0,0.5)); } 50% { transform: translateX(3px); filter: brightness(2) drop-shadow(0 2px 2px rgba(0,0,0,0.5)); } 100% { transform: translateX(0); filter: brightness(1) drop-shadow(0 2px 2px rgba(0,0,0,0.5)); } }
     
     .hero-stats { height: 24px; border-top: 1px solid #4a3461; background: #1f1a26; padding: 0 8px; display: flex; align-items: center; z-index: 1; font-size: 11px; color: #d0c0e8; font-weight: bold; }

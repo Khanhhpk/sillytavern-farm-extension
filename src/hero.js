@@ -223,7 +223,7 @@ function spawnMonster() {
     cd: 2.0,
     isBoss: isBoss
   };
-  monsterX = 200; // Quái ở xa 200px
+  monsterX = 350; // Quái ở xa 350px (bên phải taskbar)
   
   const em = All.$id('hero-enemy');
   if (em) {
@@ -250,8 +250,8 @@ function heroTick() {
   const partyEl = All.$id('hero-party');
   const mobEl = All.$id('hmob');
   
-  // Di chuyển
-  if (monsterX > 30) {
+  // Di chuyển (Dừng khi monsterX <= 130px, vì Party chiếm từ 10px đến ~120px)
+  if (monsterX > 130) {
     monsterX -= (40 * (dt / 1000)); // tốc độ 40px/s
     if (mobEl) mobEl.style.transform = `translateX(${monsterX}px)`;
   } else {
@@ -299,7 +299,7 @@ function heroTick() {
       runState.monster.cd -= dt / 1000;
       if (runState.monster.cd <= 0) {
         runState.monster.cd = 2.0;
-        const target = alivePets[0]; // Đánh con đầu tiên
+        const target = alivePets[alivePets.length - 1]; // Đánh con đứng bên phải (cuối mảng)
         const mult = ctx.S.hero.style === 'defense' ? 0.6 : 1.0;
         const dmg = Math.max(1, Math.floor(runState.monster.atk * mult * (0.8 + Math.random() * 0.4)));
         target.hp -= dmg;
