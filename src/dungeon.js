@@ -162,9 +162,8 @@ function initPlacementPhase() {
             dragEl.style.pointerEvents = 'none';
             dragEl.style.position = 'fixed';
             dragEl.style.zIndex = '100000';
-            dragEl.style.transition = 'none'; // Disable transition for instant drag
             dragEl.innerHTML = petSVG(petId, 32);
-            arena.appendChild(dragEl); // append to arena to stay on top of UI
+            document.body.appendChild(dragEl); // append to body to avoid transform/overflow issues
             
             dragEl.style.left = (e.clientX - 16) + 'px';
             dragEl.style.top = (e.clientY - 16) + 'px';
@@ -229,17 +228,17 @@ function initPlacementPhase() {
                     ev.preventDefault();
                     if (phase !== 'placement') return;
                     isPlacedDragging = true;
-                    el.style.position = 'fixed';
                     el.style.zIndex = '100000';
-                    el.style.transition = 'none'; // Disable transition when dragging
-                    el.style.left = (ev.clientX - 16) + 'px';
-                    el.style.top = (ev.clientY - 16) + 'px';
+                    const arect = arena.getBoundingClientRect();
+                    el.style.left = (ev.clientX - arect.left - 16) + 'px';
+                    el.style.top = (ev.clientY - arect.top - 16) + 'px';
                     el.setPointerCapture(ev.pointerId);
                 });
                 el.addEventListener('pointermove', (ev) => {
                     if (!isPlacedDragging) return;
-                    el.style.left = (ev.clientX - 16) + 'px';
-                    el.style.top = (ev.clientY - 16) + 'px';
+                    const arect = arena.getBoundingClientRect();
+                    el.style.left = (ev.clientX - arect.left - 16) + 'px';
+                    el.style.top = (ev.clientY - arect.top - 16) + 'px';
                 });
                 el.addEventListener('pointerup', (ev) => {
                     if (!isPlacedDragging) return;

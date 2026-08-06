@@ -366,10 +366,10 @@ export const styleCSS = `
     .dungeon-view.open { display: flex; }
     .dg-arena { flex: 1; position: relative; border: 4px solid #3f3a50; border-radius: 8px; background: rgba(0,0,0,0.1); overflow: hidden; }
     .dg-dock { height: 60px; background: rgba(58,48,30,.7); margin-top: 10px; border-radius: 8px; border: 2px solid #8a6a42; display: flex; align-items: center; padding: 0 10px; gap: 10px; overflow-x: auto; overflow-y: hidden; }
-    .dg-slot { width: 44px; height: 44px; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+    .dg-slot { width: 44px; height: 44px; flex-shrink: 0; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
     .dg-slot:hover { border-color: #d9ba8a; background: rgba(255,255,255,.2); }
     .dg-slot.placed { opacity: 0.4; pointer-events: none; }
-    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; user-select: none; }
+    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; user-select: none; touch-action: none; }
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
     .dg-entity.flip img { transform: scaleX(-1); }
     .dg-hp-bar { position: absolute; top: -8px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
