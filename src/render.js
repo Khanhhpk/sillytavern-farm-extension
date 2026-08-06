@@ -125,7 +125,7 @@ export function renderPlots() {
             <div class="feature-name">Đỏ Đen</div>
           </div>
           <div class="explore-slot" id="eslot-hero">
-            ${spriteSVG('emBang', 48)}
+            ${spriteSVG('swordIcon', 48)}
             <div class="feature-name">Anh Hùng</div>
           </div>
         `;

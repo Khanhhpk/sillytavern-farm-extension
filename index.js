@@ -409,6 +409,24 @@ var SPR = {
     "................",
     "................"
   ],
+  swordIcon: [
+    "..............W.",
+    ".............Wc.",
+    "............WcW.",
+    "...........WcW..",
+    "..........WcW...",
+    ".........WcW....",
+    "........WcW.....",
+    ".......WcW......",
+    "..Y...WcW.......",
+    ".YYY.WcW........",
+    "YYRYYcW.........",
+    ".YCY............",
+    "..C.............",
+    "................",
+    "................",
+    "................"
+  ],
   coldBreath: [
     "................",
     "................",
@@ -5178,7 +5196,7 @@ function renderPlots() {
             <div class="feature-name">\u0110\u1ECF \u0110en</div>
           </div>
           <div class="explore-slot" id="eslot-hero">
-            ${spriteSVG("emBang", 48)}
+            ${spriteSVG("swordIcon", 48)}
             <div class="feature-name">Anh H\xF9ng</div>
           </div>
         `;
