@@ -674,7 +674,13 @@ function spawnMonster() {
 window.focusMonster = function(idx) {
   if (!runState || !runState.monsters[idx] || runState.monsters[idx].hp <= 0) return;
   runState.focusTarget = idx;
-  renderMonstersUI();
+  runState.monsters.forEach((m, i) => {
+    const mEl = All.$id('hmob-' + i);
+    if (!mEl) return;
+    const isFocused = runState.focusTarget === i;
+    const bossStyle = m.isBoss ? 'drop-shadow(0 0 5px #ff0000)' : 'none';
+    mEl.style.filter = isFocused ? 'drop-shadow(0 0 8px #ffeb3b)' : bossStyle;
+  });
 };
 
 function renderMonstersUI() {
@@ -682,7 +688,6 @@ function renderMonstersUI() {
   if (!em || !runState) return;
   
   em.innerHTML = runState.monsters.map((m, i) => {
-    if (m.hp <= 0) return '';
     const scale = m.isBoss ? 'scale(1.5)' : '';
     const bossStyle = m.isBoss ? 'filter: drop-shadow(0 0 5px #ff0000);' : '';
     const focusStyle = runState.focusTarget === i ? 'filter: drop-shadow(0 0 8px #ffeb3b);' : bossStyle;
@@ -725,7 +730,21 @@ function heroTick() {
   let anyMonsterInPosition = false;
   
   runState.monsters.forEach(m => {
-    if (m.hp <= 0) return;
+    if (m.hp <= 0) {
+      if (!m.isDead) {
+        m.isDead = true;
+        const mEl = All.$id('hmob-' + m.idx);
+        if (mEl) {
+          mEl.classList.remove('idle', 'hurt', 'attack');
+          mEl.style.transition = 'all 0.4s ease-out';
+          mEl.style.opacity = '0';
+          mEl.style.transform = 'scale(0.1)';
+          mEl.style.pointerEvents = 'none';
+          setTimeout(() => showFloatDamage('KO', mEl, '#ffaa00'), 0);
+        }
+      }
+      return;
+    }
     allMonstersDead = false;
     
     const targetX = 200 + (m.idx * 45);
@@ -743,19 +762,6 @@ function heroTick() {
   if (allMonstersDead) {
     // 3. Stage Clear
     runState.isTransitioning = true;
-    runState.monsters.forEach(m => {
-      if (!m.isDead) {
-        m.isDead = true;
-        const mEl = All.$id('hmob-' + m.idx);
-        if (mEl) {
-          mEl.classList.remove('idle', 'hurt', 'attack');
-          mEl.style.transition = 'all 0.4s ease-out';
-          mEl.style.opacity = '0';
-          mEl.style.transform = 'scale(0.1)';
-          setTimeout(() => showFloatDamage('KO', mEl, '#ffaa00'), 0);
-        }
-      }
-    });
     
     setTimeout(() => {
       if (!runState || !runState.monsters) return;
@@ -1164,7 +1170,6 @@ function heroTick() {
             
             spawnAttackEffect(p.id, pEl, mobEl, false, isCrit);
             if (mobEl) setTimeout(() => showFloatDamage('-' + dmg, mobEl, isCrit ? '#f2c231' : null), 150);
-            if (tMob.hp <= 0 && mobEl) setTimeout(() => renderMonstersUI(), 500);
           }, i * 200);
         }
       }
@@ -1232,7 +1237,6 @@ function heroTick() {
                const refDmg = Math.floor(dmg * target.reflect);
                m.hp -= refDmg;
                if (mEl) setTimeout(() => showFloatDamage('-' + refDmg, mEl, '#e06578'), 150);
-               if (m.hp <= 0 && mEl) setTimeout(() => renderMonstersUI(), 500);
             }
             
             if (target.shield && target.shield > 0) {
