@@ -558,6 +558,12 @@ export const styleCSS = `
     .hero-deploy-btn { margin-top: 20px; width: 100%; padding: 12px; font-size: 16px; font-weight: bold; background: linear-gradient(to bottom, #6b4d8a, #4a3461); border: 2px solid #a58bd3; border-radius: 8px; color: #fff; cursor: pointer; text-shadow: 0 1px 2px #000; letter-spacing: 2px; }
     .hero-deploy-btn:hover { background: linear-gradient(to bottom, #8a6bc8, #6b4d8a); }
     .hero-deploy-btn:active { transform: translateY(2px); }
+    
+    .p-skill-tier { display: flex; gap: 12px; padding: 10px; border-radius: 8px; border: 2px solid #3b2a52; background: #191420; align-items: center; }
+    .p-skill-tier.locked { opacity: 0.5; filter: grayscale(1); border-style: dashed; }
+    .p-skill-tier.unlocked { border-color: #6b4d8a; }
+    .p-sk-icon { width: 32px; height: 32px; flex-shrink: 0; display:flex; align-items:center; justify-content:center; }
+    .p-sk-desc { flex: 1; text-align: left; }
 
     .betsides { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
     .betside { padding: 10px 4px; border-radius: 8px; border: 3px solid; cursor: pointer;

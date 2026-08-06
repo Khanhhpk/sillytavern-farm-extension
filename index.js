@@ -1954,6 +1954,12 @@ var styleCSS = `
     .hero-deploy-btn { margin-top: 20px; width: 100%; padding: 12px; font-size: 16px; font-weight: bold; background: linear-gradient(to bottom, #6b4d8a, #4a3461); border: 2px solid #a58bd3; border-radius: 8px; color: #fff; cursor: pointer; text-shadow: 0 1px 2px #000; letter-spacing: 2px; }
     .hero-deploy-btn:hover { background: linear-gradient(to bottom, #8a6bc8, #6b4d8a); }
     .hero-deploy-btn:active { transform: translateY(2px); }
+    
+    .p-skill-tier { display: flex; gap: 12px; padding: 10px; border-radius: 8px; border: 2px solid #3b2a52; background: #191420; align-items: center; }
+    .p-skill-tier.locked { opacity: 0.5; filter: grayscale(1); border-style: dashed; }
+    .p-skill-tier.unlocked { border-color: #6b4d8a; }
+    .p-sk-icon { width: 32px; height: 32px; flex-shrink: 0; display:flex; align-items:center; justify-content:center; }
+    .p-sk-desc { flex: 1; text-align: left; }
 
     .betsides { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
     .betside { padding: 10px 4px; border-radius: 8px; border: 3px solid; cursor: pointer;
@@ -7117,6 +7123,17 @@ function setupSlashCommand() {
 var heroLoop = null;
 var lastTick = 0;
 var monsterX = 100;
+var PET_SKILLS = {
+  slime: { s5: { type: "heal_party", val: 10, cd: 4, desc: "H\u1ED3i 10 HP cho c\u1EA3 \u0111\u1ED9i (M\u1ED7i 4s)" }, s15: { type: "max_hp_party", val: 0.3, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 30% Max HP to\xE0n \u0111\u1ED9i" } },
+  octo: { s5: { type: "atk_up", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 20% ATK b\u1EA3n th\xE2n" }, s15: { type: "multi_hit", val: 2, desc: "N\u1ED9i t\u1EA1i: \u0110\xE1nh 2 \u0111\xF2n li\xEAn ti\u1EBFp" } },
+  slimePink: { s5: { type: "lifesteal", val: 0.2, desc: "N\u1ED9i t\u1EA1i: H\xFAt m\xE1u 20%" }, s15: { type: "crit_rate", val: 0.3, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 b\u1EA1o k\xEDch +30%" } },
+  octoCream: { s5: { type: "dodge", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 n\xE9 20%" }, s15: { type: "reflect", val: 0.5, desc: "N\u1ED9i t\u1EA1i: Ph\u1EA3n 50% s\xE1t th\u01B0\u01A1ng" } },
+  ghostBlob: { s5: { type: "dodge", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 n\xE9 20%" }, s15: { type: "lifesteal", val: 0.3, desc: "N\u1ED9i t\u1EA1i: H\xFAt m\xE1u 30%" } },
+  jellyfish: { s5: { type: "stun", val: 0.2, dur: 1, desc: "N\u1ED9i t\u1EA1i: 20% l\xE0m cho\xE1ng 1s" }, s15: { type: "crit_dmg", val: 3, desc: "N\u1ED9i t\u1EA1i: S\xE1t th\u01B0\u01A1ng Crit x3" } },
+  impBlob: { s5: { type: "crit_rate", val: 0.3, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 b\u1EA1o k\xEDch +30%" }, s15: { type: "atk_up", val: 0.5, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 50% ATK b\u1EA3n th\xE2n" } },
+  angelBlob: { s5: { type: "heal_party", val: 15, cd: 5, desc: "H\u1ED3i 15 HP cho c\u1EA3 \u0111\u1ED9i (M\u1ED7i 5s)" }, s15: { type: "resurrect", val: 1, desc: "N\u1ED9i t\u1EA1i: H\u1ED3i sinh 1 l\u1EA7n (50% HP)" } },
+  default: { s5: { type: "atk_up", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 20% ATK" }, s15: { type: "crit_rate", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 b\u1EA1o k\xEDch +20%" } }
+};
 var runState = null;
 function initHeroState() {
   if (!ctx.S.hero) {
@@ -7166,8 +7183,8 @@ function openHeroPanel() {
     const inParty = ctx.S.hero.party.includes(pId);
     const st = getPetStats(pId);
     return `<div class="hero-roster-item${inParty ? " used" : ""}">
-      <div class="h-r-pet" data-add="${pId}">${petSVG(pId, 32)}</div>
-      <div class="h-r-info">
+      <div class="h-r-pet" data-add="${pId}" title="Th\xEAm v\xE0o \u0111\u1ED9i h\xECnh">${petSVG(pId, 32)}</div>
+      <div class="h-r-info" data-info="${pId}" title="Xem K\u1EF9 n\u0103ng" style="cursor:pointer;">
         <div>Lv.${st.level} (ATK: ${st.atk} | HP: ${st.maxHp})</div>
         <div class="h-r-bar"><div class="h-r-fill" style="width:${Math.min(100, st.exp / st.nextExp * 100)}%"></div><span>${st.exp}/${st.nextExp}</span></div>
       </div>
@@ -7212,6 +7229,9 @@ function openHeroPanel() {
     save();
     openHeroPanel();
   }));
+  mbody.querySelectorAll(".h-r-info").forEach((el) => el.addEventListener("click", () => {
+    openPetSkills(el.dataset.info);
+  }));
   mbody.querySelectorAll(".h-r-upg").forEach((el) => el.addEventListener("click", () => {
     const pId = el.dataset.upg;
     const st = getPetStats(pId);
@@ -7221,7 +7241,6 @@ function openHeroPanel() {
       ctx.S.hero.roster[pId].level++;
       save();
       openHeroPanel();
-      toast("N\xE2ng c\u1EA5p th\xE0nh c\xF4ng!");
     } else {
       toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng!");
     }
@@ -7237,6 +7256,62 @@ function openHeroPanel() {
     openHeroMode();
   });
 }
+function openPetSkills(pId) {
+  const st = getPetStats(pId);
+  const data = ctx.S.hero.roster[pId] || { level: 1, exp: 0 };
+  const pSkill = PET_SKILLS[pId] || PET_SKILLS.default;
+  const skillHtml = [{ lvl: 5, sk: pSkill.s5 }, { lvl: 15, sk: pSkill.s15 }].map((tier) => {
+    const unlocked = data.level >= tier.lvl;
+    return `<div class="p-skill-tier ${unlocked ? "unlocked" : "locked"}">
+      <div class="p-sk-icon">${unlocked ? spriteSVG("emStar", 24) : spriteSVG("emLock", 24)}</div>
+      <div class="p-sk-desc">
+        <div style="font-size: 13px; font-weight: bold; color: ${unlocked ? "#a4dc8c" : "#777"};">M\u1EDF kh\xF3a \u1EDF Lv.${tier.lvl}</div>
+        <div style="font-size: 14px; margin-top: 2px;">${tier.sk.desc}</div>
+      </div>
+    </div>`;
+  }).join("");
+  openModal("K\u1EF9 N\u0103ng & N\xE2ng C\u1EA5p", `
+    <div style="display:flex; gap: 16px; margin-bottom: 16px; align-items:center;">
+      <div style="background:#2c2538; border-radius:12px; padding:12px; border: 2px solid #5d4a85;">
+        ${petSVG(pId, 64)}
+      </div>
+      <div style="flex:1;">
+        <div style="font-size: 18px; font-weight:bold; color: #f2c231; margin-bottom: 4px;">Lv.${st.level}</div>
+        <div style="font-size: 14px;">HP C\u01A1 b\u1EA3n: <b>${st.maxHp}</b></div>
+        <div style="font-size: 14px;">ATK C\u01A1 b\u1EA3n: <b>${st.atk}</b></div>
+        <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${Math.min(100, st.exp / st.nextExp * 100)}%"></div><span>EXP: ${st.exp}/${st.nextExp}</span></div>
+      </div>
+    </div>
+    
+    <div class="hero-panel-section">Tech Tree (N\u1ED9i T\u1EA1i & K\u1EF9 N\u0103ng)</div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      ${skillHtml}
+    </div>
+    
+    <div class="hero-deploy-btn" id="pet-upg-btn" style="margin-top: 20px;">
+      N\xE2ng C\u1EA5p (${st.upgradeCost} V\xE0ng)
+    </div>
+    <div class="hero-deploy-btn" id="pet-back-btn" style="margin-top: 8px; background: #2c2538; border-color: #5d4a85;">
+      Quay L\u1EA1i
+    </div>
+  `);
+  const mbody = $id("mbody");
+  mbody.querySelector("#pet-upg-btn").addEventListener("click", () => {
+    const st2 = getPetStats(pId);
+    if (ctx.S.hero.gold >= st2.upgradeCost) {
+      ctx.S.hero.gold -= st2.upgradeCost;
+      if (!ctx.S.hero.roster[pId]) ctx.S.hero.roster[pId] = { level: 1, exp: 0 };
+      ctx.S.hero.roster[pId].level++;
+      save();
+      openPetSkills(pId);
+    } else {
+      toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng!");
+    }
+  });
+  mbody.querySelector("#pet-back-btn").addEventListener("click", () => {
+    openHeroPanel();
+  });
+}
 function openHeroMode() {
   initHeroState();
   closeWin();
@@ -7247,11 +7322,50 @@ function openHeroMode() {
   }
   const bar = $id("hero-bar");
   if (bar) bar.style.display = "flex";
+  let partyHpMult = 1;
+  ctx.S.hero.party.forEach((pId) => {
+    const data = ctx.S.hero.roster[pId] || { level: 1 };
+    const pSkill = PET_SKILLS[pId] || PET_SKILLS.default;
+    if (data.level >= 15 && pSkill.s15.type === "max_hp_party") partyHpMult += pSkill.s15.val;
+  });
   runState = {
     stage: 1,
     pets: ctx.S.hero.party.map((pId) => {
       const st = getPetStats(pId);
-      return { id: pId, maxHp: st.maxHp, hp: st.maxHp, atk: st.atk, cd: 0, maxCd: 1 };
+      const data = ctx.S.hero.roster[pId] || { level: 1 };
+      const pSkill = PET_SKILLS[pId] || PET_SKILLS.default;
+      let atkMult = 1;
+      let critRate = 0.1;
+      let critDmg = 2;
+      let dodge = 0;
+      let lifesteal = 0;
+      let res = 0;
+      [{ req: 5, sk: pSkill.s5 }, { req: 15, sk: pSkill.s15 }].forEach((tier) => {
+        if (data.level >= tier.req) {
+          if (tier.sk.type === "atk_up") atkMult += tier.sk.val;
+          if (tier.sk.type === "crit_rate") critRate += tier.sk.val;
+          if (tier.sk.type === "crit_dmg") critDmg = tier.sk.val;
+          if (tier.sk.type === "dodge") dodge += tier.sk.val;
+          if (tier.sk.type === "lifesteal") lifesteal += tier.sk.val;
+          if (tier.sk.type === "resurrect") res += tier.sk.val;
+        }
+      });
+      const hp = Math.floor(st.maxHp * partyHpMult);
+      return {
+        id: pId,
+        maxHp: hp,
+        hp,
+        atk: Math.floor(st.atk * atkMult),
+        cd: 0,
+        maxCd: 1,
+        crit: critRate,
+        critDmg,
+        dodge,
+        lifesteal,
+        res,
+        skillCd: 0,
+        skillMaxCd: pSkill.s5.cd || pSkill.s15.cd || 0
+      };
     }),
     monster: null
   };
@@ -7342,12 +7456,53 @@ function heroTick() {
       return;
     }
     alivePets.forEach((p) => {
+      if (p.skillMaxCd > 0) {
+        p.skillCd -= dt / 1e3;
+        if (p.skillCd <= 0) {
+          p.skillCd = p.skillMaxCd;
+          const pSkill = PET_SKILLS[p.id] || PET_SKILLS.default;
+          [pSkill.s5, pSkill.s15].forEach((sk) => {
+            if (sk && sk.type === "heal_party") {
+              alivePets.forEach((ap) => {
+                ap.hp = Math.min(ap.maxHp, ap.hp + sk.val);
+                const aIdx = runState.pets.indexOf(ap);
+                const aEl = $id(`hpet-${aIdx}`);
+                setTimeout(() => showFloatDamage(`+${sk.val}`, aEl, "#a4dc8c"), 0);
+                const hpPet = $id(`hp-pet-${aIdx}`);
+                if (hpPet) hpPet.style.width = `${ap.hp / ap.maxHp * 100}%`;
+              });
+            }
+          });
+        }
+      }
       p.cd -= dt / 1e3;
       if (p.cd <= 0) {
         p.cd = p.maxCd;
         const mult = ctx.S.hero.style === "attack" ? 1.5 : 1;
-        const dmg = Math.max(1, Math.floor(p.atk * mult * (0.8 + Math.random() * 0.4)));
+        const isCrit = Math.random() < p.crit;
+        const dmgBase = Math.max(1, Math.floor(p.atk * mult * (0.8 + Math.random() * 0.4)));
+        let dmg = isCrit ? Math.floor(dmgBase * p.critDmg) : dmgBase;
         runState.monster.hp -= dmg;
+        if (p.lifesteal > 0) {
+          const heal = Math.floor(dmg * p.lifesteal);
+          if (heal > 0) {
+            p.hp = Math.min(p.maxHp, p.hp + heal);
+            const pIdx2 = runState.pets.indexOf(p);
+            const pEl2 = $id(`hpet-${pIdx2}`);
+            setTimeout(() => showFloatDamage(`+${heal}`, pEl2, "#a4dc8c"), 150);
+            const hpPet = $id(`hp-pet-${pIdx2}`);
+            if (hpPet) setTimeout(() => {
+              hpPet.style.width = `${p.hp / p.maxHp * 100}%`;
+            }, 150);
+          }
+        }
+        const pSkill = PET_SKILLS[p.id] || PET_SKILLS.default;
+        let isStun = false;
+        if (pSkill.s5 && pSkill.s5.type === "stun" && Math.random() < pSkill.s5.val) isStun = true;
+        if (pSkill.s15 && pSkill.s15.type === "stun" && Math.random() < pSkill.s15.val) isStun = true;
+        if (isStun) {
+          runState.monster.stunCd = (runState.monster.stunCd || 0) + 1;
+        }
         const pIdx = runState.pets.indexOf(p);
         const pEl = $id(`hpet-${pIdx}`);
         if (pEl) {
@@ -7368,25 +7523,25 @@ function heroTick() {
             }, 200);
           }, 150);
         }
-        spawnProjectile(pEl, mobEl, false);
-        setTimeout(() => showFloatDamage(dmg, mobEl), 150);
+        spawnProjectile(pEl, mobEl, false, isCrit ? "#f2c231" : null);
+        setTimeout(() => showFloatDamage(`-${dmg}`, mobEl, isCrit ? "#f2c231" : null), 150);
+        if (isStun) setTimeout(() => showFloatDamage("STUN!", mobEl, "#ccc"), 200);
       }
     });
     const hpMob = $id("hp-mob");
     if (hpMob) hpMob.style.width = `${Math.max(0, runState.monster.hp / runState.monster.maxHp * 100)}%`;
-    if (runState.monster.hp > 0) {
+    if (runState.monster.stunCd && runState.monster.stunCd > 0) {
+      runState.monster.stunCd -= dt / 1e3;
+    } else if (runState.monster.hp > 0) {
       runState.monster.cd -= dt / 1e3;
       if (runState.monster.cd <= 0) {
-        runState.monster.cd = 2;
+        runState.monster.cd = runState.monster.maxCd;
         const target = alivePets[alivePets.length - 1];
         const mult = ctx.S.hero.style === "defense" ? 0.6 : 1;
-        const dmg = Math.max(1, Math.floor(runState.monster.atk * mult * (0.8 + Math.random() * 0.4)));
-        target.hp -= dmg;
-        if (target.hp < 0) target.hp = 0;
+        const isDodge = Math.random() < target.dodge;
         const pIdx = runState.pets.indexOf(target);
         const pEl = $id(`hpet-${pIdx}`);
         spawnProjectile(mobEl, pEl, true);
-        setTimeout(() => showFloatDamage(dmg, pEl), 150);
         if (mobEl) {
           mobEl.classList.remove("idle");
           mobEl.classList.add("attack");
@@ -7395,15 +7550,29 @@ function heroTick() {
             mobEl.classList.add("idle");
           }, 300);
         }
-        if (pEl && target.hp <= 0) {
-          setTimeout(() => {
-            pEl.style.opacity = "0.3";
+        if (isDodge) {
+          setTimeout(() => showFloatDamage("MISS", pEl, "#999"), 150);
+        } else {
+          const dmg = Math.max(1, Math.floor(runState.monster.atk * mult * (0.8 + Math.random() * 0.4)));
+          target.hp -= dmg;
+          if (target.hp <= 0 && target.res > 0) {
+            target.res--;
+            target.hp = Math.floor(target.maxHp * 0.5);
+            setTimeout(() => showFloatDamage("REVIVE", pEl, "#ffd94d"), 150);
+          } else if (target.hp < 0) {
+            target.hp = 0;
+          }
+          setTimeout(() => showFloatDamage(`-${dmg}`, pEl), 150);
+          if (pEl && target.hp <= 0) {
+            setTimeout(() => {
+              pEl.style.opacity = "0.3";
+            }, 150);
+          }
+          const hpPet = $id(`hp-pet-${pIdx}`);
+          if (hpPet) setTimeout(() => {
+            hpPet.style.width = `${target.hp / target.maxHp * 100}%`;
           }, 150);
         }
-        const hpPet = $id(`hp-pet-${pIdx}`);
-        if (hpPet) setTimeout(() => {
-          hpPet.style.width = `${target.hp / target.maxHp * 100}%`;
-        }, 150);
       }
     }
     if (runState.monster.hp <= 0) {
@@ -7446,17 +7615,22 @@ function heroTick() {
   }
   updateHeroStats();
 }
-function showFloatDamage(dmg, target) {
+function showFloatDamage(text, target, color = null) {
   if (!target) return;
   const fl = document.createElement("div");
-  fl.className = "dmg-float" + (Math.random() > 0.8 ? " crit" : "");
-  fl.textContent = "-" + dmg;
+  fl.className = "dmg-float";
+  fl.textContent = text;
+  if (color) {
+    fl.style.color = color;
+  } else if (text.toString().startsWith("-") && Math.random() > 0.8) {
+    fl.classList.add("crit");
+  }
   fl.style.left = Math.random() * 30 - 15 + "px";
   fl.style.bottom = "30px";
   target.appendChild(fl);
   setTimeout(() => fl.remove(), 800);
 }
-function spawnProjectile(startEl, targetEl, isEnemy) {
+function spawnProjectile(startEl, targetEl, isEnemy, color = null) {
   if (!startEl || !targetEl) return;
   const scene2 = document.querySelector(".hero-scene");
   if (!scene2) return;
@@ -7465,7 +7639,9 @@ function spawnProjectile(startEl, targetEl, isEnemy) {
   if (isEnemy) {
     proj.innerHTML = '<div style="width:8px;height:8px;background:#e06578;border-radius:50%;box-shadow:0 0 5px #ff0000;"></div>';
   } else {
-    proj.innerHTML = '<div style="width:10px;height:10px;background:#a4dc8c;border-radius:50%;box-shadow:0 0 8px #a4dc8c;"></div>';
+    const c1 = color || "#aaddff";
+    const c2 = color || "#0088ff";
+    proj.innerHTML = `<div style="width:8px;height:8px;background:${c1};border-radius:50%;box-shadow:0 0 5px ${c2};"></div>`;
   }
   scene2.appendChild(proj);
   const sRect = scene2.getBoundingClientRect();
