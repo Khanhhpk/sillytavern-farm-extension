@@ -120,9 +120,15 @@ export function renderPlots() {
             ${spriteSVG('dungeonGate', 48)}
             <div class="feature-name">Hầm ngục</div>
           </div>
+          <div class="explore-slot" id="eslot-bet">
+            ${spriteSVG('diceIcon', 48)}
+            <div class="feature-name">Đỏ Đen</div>
+          </div>
         `;
         const dBtn = All.$id('eslot-dungeon');
         if (dBtn) dBtn.addEventListener('click', () => All.openPanel('dungeon'));
+        const bBtn = All.$id('eslot-bet');
+        if (bBtn) bBtn.addEventListener('click', () => All.openPanel('bet'));
       }
     }
     return;

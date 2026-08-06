@@ -12,14 +12,17 @@ import { esc, SEC, CS, clampN, saveSec, openSandbox, saveCharState, fetchModelLi
 import { applyTheme, sh } from './ui.js';
 import { pageUnlocked } from './utils.js';
 import { openGachaModal } from './gacha.js';
+import { openBetModal } from './bet.js';
 
 /* ---------- Bảng ---------- */
-export function openModal(title, bodyHTML) {
+export function openModal(title, bodyHTML, keepBetTable) {
+  if (!keepBetTable && All.cashOut) All.cashOut();                     // Mở bảng khác = rời bàn cược, rút tiền về trước đã
   All.$id('mtitle-text').textContent = title;
   All.$id('mbody').innerHTML = bodyHTML;
   All.$id('modal').classList.add('open');
 }
 export function closeModal() { 
+  if (All.cashOut) All.cashOut();                                        // Đóng bảng = tự động rút, không bao giờ mất tiền vì lỡ tay
   All.$id('modal').classList.remove('open'); 
   All.$id('mbody').innerHTML = ''; // Dọn dẹp rác DOM và event listeners bên trong
   setPendingPick(null); 
@@ -35,6 +38,9 @@ export function openPanel(kind) {
   }
   if (kind === 'dungeon') {
     return All.openDungeonView();
+  }
+  if (kind === 'bet') {
+    return openBetModal();
   }
   if (kind === 'shop') {
     const tabs = [['seed', 'Hạt giống'], ['fert', 'Phân bón'], ['pet', 'Thú cưng'], ['pass', 'Vé'], ['ticket', 'Vé Gacha']];

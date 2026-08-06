@@ -435,4 +435,22 @@ export const styleCSS = `
     
     .dg-new-record { color: #ffd700; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #ffd700, 0 0 30px #ff8c00; animation: newRecordPulse 0.8s ease-in-out infinite alternate; margin: 5px 0; }
     @keyframes newRecordPulse { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+    
+    .betwrap { text-align: center; }
+    .betnum { font-size: 40px; font-weight: bold; color: #7a5c38; line-height: 1.1;
+      background: linear-gradient(#fffaf0, #f0dcc0); border: 3px solid #b08a5c; border-radius: 10px;
+      width: 96px; margin: 6px auto; padding: 8px 0; box-shadow: inset 0 0 0 2px #fff6e0; }
+    .betnum.rolling { animation: gachaShake 0.12s infinite alternate; }
+    .betnum.res { border-color: #c86a1a; box-shadow: inset 0 0 0 2px #fff6e0, 0 0 10px rgba(200,106,26,.45); }
+    .betresult { font-size: 12px; font-weight: bold; color: #7a5c38; min-height: 16px; margin-bottom: 2px; }
+    .betchain { font-size: 11px; color: #9a7a54; min-height: 15px; word-break: break-all; }
+    .betpot { font-size: 15px; font-weight: bold; color: #c86a1a; margin: 8px 0 4px; }
+    .betsides { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .betside { padding: 10px 4px; border-radius: 8px; border: 3px solid; cursor: pointer;
+      font-weight: bold; user-select: none; line-height: 1.35; }
+    .betside.hi { background: #e8f3dc; border-color: #4e903a; color: #3c702c; }
+    .betside.lo { background: #f6e0e6; border-color: #a83a52; color: #8a2a40; }
+    .betside .mult { display: block; font-size: 17px; }
+    .betside .chance { display: block; font-size: 11px; opacity: .75; font-weight: normal; }
+    .betside.off { opacity: .4; cursor: not-allowed; filter: grayscale(1); }
 `;

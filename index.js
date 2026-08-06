@@ -1830,6 +1830,24 @@ var styleCSS = `
     
     .dg-new-record { color: #ffd700; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #ffd700, 0 0 30px #ff8c00; animation: newRecordPulse 0.8s ease-in-out infinite alternate; margin: 5px 0; }
     @keyframes newRecordPulse { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+    
+    .betwrap { text-align: center; }
+    .betnum { font-size: 40px; font-weight: bold; color: #7a5c38; line-height: 1.1;
+      background: linear-gradient(#fffaf0, #f0dcc0); border: 3px solid #b08a5c; border-radius: 10px;
+      width: 96px; margin: 6px auto; padding: 8px 0; box-shadow: inset 0 0 0 2px #fff6e0; }
+    .betnum.rolling { animation: gachaShake 0.12s infinite alternate; }
+    .betnum.res { border-color: #c86a1a; box-shadow: inset 0 0 0 2px #fff6e0, 0 0 10px rgba(200,106,26,.45); }
+    .betresult { font-size: 12px; font-weight: bold; color: #7a5c38; min-height: 16px; margin-bottom: 2px; }
+    .betchain { font-size: 11px; color: #9a7a54; min-height: 15px; word-break: break-all; }
+    .betpot { font-size: 15px; font-weight: bold; color: #c86a1a; margin: 8px 0 4px; }
+    .betsides { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .betside { padding: 10px 4px; border-radius: 8px; border: 3px solid; cursor: pointer;
+      font-weight: bold; user-select: none; line-height: 1.35; }
+    .betside.hi { background: #e8f3dc; border-color: #4e903a; color: #3c702c; }
+    .betside.lo { background: #f6e0e6; border-color: #a83a52; color: #8a2a40; }
+    .betside .mult { display: block; font-size: 17px; }
+    .betside .chance { display: block; font-size: 11px; opacity: .75; font-weight: normal; }
+    .betside.off { opacity: .4; cursor: not-allowed; filter: grayscale(1); }
 `;
 
 // src/ui.js
@@ -2306,8 +2324,8 @@ function petSpot(id) {
   const ov = $id("mascots"), W = ov.clientWidth, H = ov.clientHeight;
   if (PETS[id] && PETS[id].job) {
     const workers = ctx.S.petsOut.filter((p) => PETS[p] && PETS[p].job);
-    const anchor = W - 64 - Math.max(0, workers.indexOf(id)) * 62;
-    return { x: Math.max(4, anchor - 10 + Math.random() * 20), y: Math.random() * 4 };
+    const anchor2 = W - 64 - Math.max(0, workers.indexOf(id)) * 62;
+    return { x: Math.max(4, anchor2 - 10 + Math.random() * 20), y: Math.random() * 4 };
   }
   const x = 4 + Math.random() * Math.max(20, W - 64);
   return { x, y: WORK_BAND + 6 + Math.random() * Math.max(20, H - WORK_BAND - 70) };
@@ -3325,13 +3343,270 @@ function openGachaModal() {
   $id("gachaRollSuper1")?.addEventListener("click", () => doRoll("super", 1));
 }
 
+// src/bet-odds.js
+var POT_CAP = 1e8;
+var HOUSE_RETURN = 97;
+var MIN_MULT = 1.01;
+var ANCHOR_MIN = 5;
+var ANCHOR_MAX = 96;
+function rollD100(rnd = Math.random) {
+  const n = 1 + Math.floor(rnd() * 100);
+  return Math.min(100, Math.max(1, n));
+}
+function rollAnchor(rnd = Math.random) {
+  const span = ANCHOR_MAX - ANCHOR_MIN + 1;
+  const n = ANCHOR_MIN + Math.floor(rnd() * span);
+  return Math.min(ANCHOR_MAX, Math.max(ANCHOR_MIN, n));
+}
+function clampAnchor(n) {
+  const v = Math.floor(Number(n));
+  if (!Number.isFinite(v)) return ANCHOR_MIN;
+  return Math.min(ANCHOR_MAX, Math.max(ANCHOR_MIN, v));
+}
+function safeAmount(v) {
+  const n = Math.floor(Number(v));
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+function oddsOf(anchor2, side) {
+  const n = Math.floor(Number(anchor2));
+  const wins = side === "hi" ? 100 - n : n - 1;
+  if (!Number.isFinite(wins) || wins <= 0) {
+    return { wins: 0, chance: 0, mult: 0, locked: true };
+  }
+  const soVanThua = 99 - wins;
+  if (soVanThua <= 0) {
+    return { wins: 0, chance: 0, mult: 0, locked: true };
+  }
+  return {
+    wins,
+    chance: wins / 100,
+    mult: Math.max(MIN_MULT, Math.round(HOUSE_RETURN / wins * 100) / 100),
+    locked: false
+  };
+}
+function resolveRoll(anchor2, side, roll) {
+  if (roll === anchor2) return "push";
+  return side === "hi" === roll > anchor2 ? "win" : "lose";
+}
+function resolveStake(want, coins) {
+  return Math.min(safeAmount(want), safeAmount(coins), POT_CAP);
+}
+function nextPot(pot, mult) {
+  const m = Number.isFinite(Number(mult)) && Number(mult) > 0 ? Number(mult) : 0;
+  return safeAmount(Math.min(POT_CAP, Math.floor(safeAmount(pot) * m)));
+}
+function applyCashOut(state) {
+  const pot = safeAmount(state.betPot);
+  state.betPot = 0;
+  if (pot <= 0) return 0;
+  state.coins = safeAmount(state.coins) + pot;
+  return pot;
+}
+function resultLabel(roll, kq, mult, nextAnchor) {
+  const r = Number.isFinite(Number(roll)) ? Math.floor(Number(roll)) : "?";
+  const m = Number.isFinite(Number(mult)) ? Number(mult).toFixed(2) : "?";
+  const phan = kq === "win" ? "Th\u1EAFng \xD7" + m : kq === "lose" ? "M\u1EA5t tr\u1EAFng" : kq === "push" ? "Ho\xE0, ti\u1EC1n gi\u1EEF nguy\xEAn" : "Xong";
+  const khac = Number.isFinite(Number(nextAnchor)) && Math.floor(Number(nextAnchor)) !== r;
+  return "Ra " + r + " \xB7 " + phan + (khac ? " \xB7 v\xE1n t\u1EDBi t\u1EEB " + Math.floor(Number(nextAnchor)) : "");
+}
+
+// src/bet.js
+function getPot() {
+  return safeAmount(ctx.S.betPot);
+}
+function setPot(v) {
+  ctx.S.betPot = safeAmount(v);
+}
+var anchor = 0;
+var chain = [];
+var busy = false;
+var spinTimer = null;
+var holdTimer = null;
+var shown = null;
+var HOLD_MS = 1e3;
+var HOLD_LOSE_MS = 3e3;
+function stopSpin() {
+  if (spinTimer !== null) {
+    window.clearInterval(spinTimer);
+    spinTimer = null;
+  }
+  clearHold();
+  busy = false;
+}
+function clearHold() {
+  if (holdTimer !== null) {
+    window.clearTimeout(holdTimer);
+    holdTimer = null;
+  }
+  shown = null;
+}
+function cashOut(quiet, immediate) {
+  stopSpin();
+  const pot = applyCashOut(ctx.S);
+  if (pot <= 0) return 0;
+  try {
+    save(immediate);
+  } catch (e) {
+  }
+  try {
+    renderStatus();
+  } catch (e) {
+  }
+  if (!quiet) {
+    try {
+      toast("\u0110\xE3 r\xFAt " + pot.toLocaleString() + " G v\u1EC1 v\xED");
+    } catch (e) {
+    }
+  }
+  return pot;
+}
+function newRound() {
+  anchor = rollAnchor();
+}
+function fmt(n) {
+  return safeAmount(n).toLocaleString();
+}
+function openBetModal() {
+  if (getPot() <= 0) {
+    chain = [];
+    newRound();
+  }
+  openModal("\u0110\u1ECF \u0110en", `
+    <div class="betwrap">
+      <div class="note" id="betCoins"></div>
+      <div class="betnum" id="betNum">${anchor}</div>
+      <div class="betresult" id="betResult"></div>
+      <div class="betchain" id="betChain"></div>
+      <div id="betStake"></div>
+      <div class="betsides">
+        <div class="betside hi" data-side="hi">\u25B2 L\u1EDAN<span class="mult" id="betMultHi"></span><span class="chance" id="betChanceHi"></span></div>
+        <div class="betside lo" data-side="lo">\u25BC NH\u1ECE<span class="mult" id="betMultLo"></span><span class="chance" id="betChanceLo"></span></div>
+      </div>
+    </div>`, true);
+  const render = () => {
+    if (!$id("betCoins")) return;
+    const pot = getPot();
+    $id("betCoins").textContent = "V\xE0ng: " + fmt(ctx.S.coins) + " G";
+    $id("betNum").textContent = String(shown ? shown.roll : anchor);
+    $id("betNum").classList.toggle("res", !!shown);
+    $id("betResult").textContent = shown ? resultLabel(shown.roll, shown.kq, shown.mult, anchor) : "S\u1ED1 g\u1ED1c \u2014 c\u01B0\u1EE3c L\u1EDBn hay Nh\u1ECF cho l\u1EA7n quay t\u1EDBi";
+    $id("betChain").textContent = chain.length ? "Chu\u1ED7i: " + chain.join(" \u2192 ") : "";
+    if (pot > 0) {
+      $id("betStake").innerHTML = `<div class="betpot">Tr\xEAn b\xE0n: ${fmt(pot)} G</div>
+         <span class="buy" id="betCash">R\xFAt ${fmt(pot)} G</span>`;
+      $id("betCash").addEventListener("click", () => {
+        if (busy) return;
+        cashOut();
+        chain = [];
+        newRound();
+        render();
+      });
+    } else if (!$id("betAmt")) {
+      $id("betStake").innerHTML = `<div style="display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;margin:8px 0 2px">
+           <input class="inp" id="betAmt" type="number" min="1" value="${Math.min(100, safeAmount(ctx.S.coins)) || 1}" style="width:110px">
+           <span class="buy plain" data-quick="4">\xBC</span>
+           <span class="buy plain" data-quick="2">\xBD</span>
+           <span class="buy plain" data-quick="1">Max</span>
+         </div>`;
+      $id("betStake").querySelectorAll("[data-quick]").forEach((b) => b.addEventListener("click", () => {
+        const amt = $id("betAmt");
+        if (amt) amt.value = String(Math.max(1, Math.floor(safeAmount(ctx.S.coins) / Number(b.dataset.quick))));
+      }));
+    }
+    ["hi", "lo"].forEach((side) => {
+      const o = oddsOf(anchor, side);
+      const el = $id("betMult" + (side === "hi" ? "Hi" : "Lo"));
+      const ch = $id("betChance" + (side === "hi" ? "Hi" : "Lo"));
+      el.textContent = o.locked ? "\u2014" : "\xD7" + o.mult.toFixed(2);
+      ch.textContent = o.locked ? "kh\xF4ng th\u1EC3 th\u1EAFng" : Math.round(o.chance * 100) + "%";
+      $id("mbody").querySelector(".betside." + side).classList.toggle("off", o.locked);
+    });
+    if (getPot() >= POT_CAP) {
+      $id("mbody").querySelectorAll(".betside").forEach((el) => el.classList.add("off"));
+    }
+  };
+  const play = (side) => {
+    if (busy) return;
+    clearHold();
+    const o = oddsOf(anchor, side);
+    if (o.locked) return toast("C\u1EEDa n\xE0y kh\xF4ng c\xF3 kh\u1EA3 n\u0103ng th\u1EAFng n\xE0o");
+    if (getPot() >= POT_CAP) return toast("\u0110\xE3 ch\u1EA1m tr\u1EA7n, r\xFAt ti\u1EC1n ra \u0111\xE3");
+    if (getPot() <= 0) {
+      const el = $id("betAmt");
+      const want = safeAmount(el && el.value);
+      const coins = safeAmount(ctx.S.coins);
+      if (want <= 0) return toast("Nh\u1EADp s\u1ED1 v\xE0ng mu\u1ED1n c\u01B0\u1EE3c \u0111\xE3");
+      if (want > coins) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng, b\u1EA1n ch\u1EC9 c\xF3 " + fmt(coins) + " G");
+      const stake = resolveStake(want, coins);
+      if (stake < want) toast("V\u01B0\u1EE3t tr\u1EA7n, \u0111\xE3 h\u1EA1 xu\u1ED1ng " + fmt(POT_CAP) + " G");
+      ctx.S.coins = safeAmount(coins - stake);
+      setPot(stake);
+      save();
+    }
+    busy = true;
+    const num = $id("betNum");
+    num.classList.add("rolling");
+    const roll = rollD100();
+    let tick2 = 0;
+    spinTimer = window.setInterval(() => {
+      const numNow = $id("betNum");
+      if (!numNow) {
+        window.clearInterval(spinTimer);
+        spinTimer = null;
+        busy = false;
+        return;
+      }
+      numNow.textContent = String(rollD100());
+      if (++tick2 >= 12) {
+        window.clearInterval(spinTimer);
+        spinTimer = null;
+        numNow.classList.remove("rolling");
+        numNow.textContent = String(roll);
+        finish(roll, side, o);
+      }
+    }, 50);
+  };
+  const finish = (roll, side, o) => {
+    const kq = resolveRoll(anchor, side, roll);
+    chain = chain.concat(roll).slice(-8);
+    if (kq === "push") {
+      toast("Ho\xE0! Ra \u0111\xFAng " + roll + ", ti\u1EC1n gi\u1EEF nguy\xEAn");
+    } else if (kq === "win") {
+      const truoc = getPot();
+      setPot(nextPot(truoc, o.mult));
+      anchor = clampAnchor(roll);
+      toast("Th\u1EAFng! " + fmt(truoc) + " \u2192 " + fmt(getPot()) + " G");
+      if (getPot() >= POT_CAP) toast("Ch\u1EA1m tr\u1EA7n " + fmt(POT_CAP) + " G, r\xFAt th\xF4i!");
+    } else {
+      setPot(0);
+      toast("M\u1EA5t tr\u1EAFng! Ra " + roll);
+      chain = [];
+      newRound();
+    }
+    shown = { roll, kq, mult: o.mult };
+    save();
+    busy = false;
+    renderStatus();
+    render();
+    holdTimer = window.setTimeout(() => {
+      holdTimer = null;
+      shown = null;
+      render();
+    }, kq === "lose" ? HOLD_LOSE_MS : HOLD_MS);
+  };
+  $id("mbody").querySelectorAll("[data-side]").forEach((b) => b.addEventListener("click", () => play(b.dataset.side)));
+  render();
+}
+
 // src/shop.js
-function openModal(title, bodyHTML) {
+function openModal(title, bodyHTML, keepBetTable) {
+  if (!keepBetTable && cashOut) cashOut();
   $id("mtitle-text").textContent = title;
   $id("mbody").innerHTML = bodyHTML;
   $id("modal").classList.add("open");
 }
 function closeModal() {
+  if (cashOut) cashOut();
   $id("modal").classList.remove("open");
   $id("mbody").innerHTML = "";
   setPendingPick(null);
@@ -3347,6 +3622,9 @@ function openPanel(kind) {
   }
   if (kind === "dungeon") {
     return openDungeonView();
+  }
+  if (kind === "bet") {
+    return openBetModal();
   }
   if (kind === "shop") {
     const tabs = [["seed", "H\u1EA1t gi\u1ED1ng"], ["fert", "Ph\xE2n b\xF3n"], ["pet", "Th\xFA c\u01B0ng"], ["pass", "V\xE9"], ["ticket", "V\xE9 Gacha"]];
@@ -4135,9 +4413,15 @@ function renderPlots() {
             ${spriteSVG("dungeonGate", 48)}
             <div class="feature-name">H\u1EA7m ng\u1EE5c</div>
           </div>
+          <div class="explore-slot" id="eslot-bet">
+            ${spriteSVG("diceIcon", 48)}
+            <div class="feature-name">\u0110\u1ECF \u0110en</div>
+          </div>
         `;
         const dBtn = $id("eslot-dungeon");
         if (dBtn) dBtn.addEventListener("click", () => openPanel("dungeon"));
+        const bBtn = $id("eslot-bet");
+        if (bBtn) bBtn.addEventListener("click", () => openPanel("bet"));
       }
     }
     return;
@@ -6690,6 +6974,7 @@ function initFarm() {
   resetDestroyed();
   document.getElementById("star-tavern-farm-root")?.remove();
   loadState();
+  if (cashOut) cashOut(true);
   initUI();
   applyTheme();
   initOrb();
