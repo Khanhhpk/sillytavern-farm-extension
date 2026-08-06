@@ -208,10 +208,12 @@ var SPR = {
   shopIcon: ["................", "................", "................", "....fpf.fpf.....", "....fppffppf....", ".....ffFFff.....", "..qddddFFddddq..", "..qqqqqFFqqqqq..", "...qdddFFdddq...", "...qFFFFFFFFq...", "...qdddFFdddq...", "...qdddFFdddq...", "...qqqqqqqqqq...", "................", "................", "................"],
   bagIcon: ["................", "................", ".....ffff.......", "....f....f......", "...ffffffffff...", "..fddddddddddf..", "..fddddddddddf..", "..fFFFFFFFFFFf..", "..fFFFFCCFFFFf..", "..fFpFFCCFFFFf..", "..fFpFFFFFFFFf..", "..fFFFFFFFFFFf..", "...ffffffffff...", "................", "................", "................"],
   gearIcon: ["................", "................", "................", "................", "......MM........", "....MLLLLM......", "...MLLLLLLM.....", "..MMLLMMLLMM....", "..MMLLMMLLMM....", "...MLLLLLLM.....", "....MLLLLM......", "......MM........", "................", "................", "................", "................"],
+  diceIcon: ["................", "................", "..KKKKKKKKKKKK..", "..KWWWWWWWWWWK..", "..KWWKKWWWWWWK..", "..KWWKKWWWWWWK..", "..KWWWWWWWWWWK..", "..KWWWWKKWWWWK..", "..KWWWWKKWWWWK..", "..KWWWWWWWWWWK..", "..KWWWWWWWKKWK..", "..KWWWWWWWKKWK..", "..KWWWWWWWWWWK..", "..KKKKKKKKKKKK..", "................", "................"],
   toolSeed: ["................", "................", "................", "...qqqqqqqqqq...", "...qccccccccq...", "...qdddGGdddq...", "...qddGGGGddq...", "...qdddDDdddq...", "...qdddDDdddq...", "...qddeeeeddq...", "...qddddddddq...", "...qqqqqqqqqq...", "................", "................", "................", "................"],
   toolWater: ["................", "................", "................", "..........uu....", ".........u..u...", "..u..uuuuu...u..", "..uu.ukkbbu..u..", ".B.uuubbbbu.u...", "....ubbbbbbuu...", "....ubbbbbbu....", "....ubbbbbbu....", "....uibbbbiu....", ".....uuuuuu.....", "................", "................", "................"],
   toolFert: ["................", "................", "................", "......qq........", ".....q..q.......", "....qaaaaq......", "...qaaaaaaq.....", "..qaaGGaaaaq....", "..qaaGGaaaaq....", "..qaaaaaeaaq....", "..qaeaaaaaaq....", "...qaaaaaaq.....", "....qqqqqq......", "................", "................", "................"],
   toolHarvest: ["................", "................", "................", "................", "................", "................", "...FF.OO.GG.....", "..qqqqqqqqqq....", "...qacacacaq....", "...qcacacacq....", "....qacacaq.....", "....qcacacq.....", ".....qqqqq......", "................", "................", "................"],
+  mapIcon: ["................", ".KKKKKKKKKKKKKK.", "KLLLWWLLLLLGGGLK", "KLLLWWKKKLLGGGLK", "KLLLWKRRRKLGGGLK", "KLLLWKRWRKLLLLLK", "KLLLWKRRRKLLLLLK", "KWWWWWKRKWWWWWWK", "KWWWWWWKWWWWWWWK", "KbbLWWLLLLLLLLLK", "KLbbLWWLLLLLLLLK", "KLLbbWWLLLLLGGLK", "KLLLbWWLLLLLGGLK", "KLLLLWWLLLLLLLLK", ".KKKKKKKKKKKKKK.", "................"],
   toolShovel: ["................", "................", "................", "......SSSS......", ".......SS.......", ".......SS.......", ".......SS.......", ".......SS.......", ".....MLLLLM.....", "....MLLWLLLM....", "....MLLLLLLM....", ".....MLLLLM.....", "......MMMM......", "................", "................", "................"],
   cloud: ["................", "................", "................", "................", "......LLLL......", ".....LWWWWL.....", "...LLWWWWWWL....", "..LWWWWWWWWWL...", "..LWWWWWWWWWL...", "...LLLLLLLLLL...", "................", "................", "................", "................", "................", "................"],
   raincloud: ["................", "................", "................", "......LLLL......", ".....LWWWWL.....", "...LLWWWWWWL....", "..LWWWWWWWWWL...", "..LWWWWWWWWWL...", "...LLLLLLLLLL...", "................", "....B...B...B...", "................", "...B...B...B....", "................", "................", "................"],
@@ -1428,8 +1430,9 @@ var styleCSS = `
       background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 8px; padding: 3px 12px;
       box-shadow: 0 3px 0 var(--tint), inset 0 0 0 2px #fff6e0;
       display: flex; align-items: center; gap: 8px; }
+    .view-toggle { margin-left: auto; width: auto; height: 24px; padding: 0 8px; gap: 4px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 0 var(--tintSoft); flex-shrink: 0; font-size: 11px; font-weight: bold; color: #7a5c38; }
     .close-x { width: 24px; height: 24px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 6px;
-      color: #7a5c38; box-shadow: 0 2px 0 var(--tintSoft); font-weight: bold; text-align: center; line-height: 18px; cursor: pointer; }
+      color: #7a5c38; box-shadow: 0 2px 0 var(--tintSoft); font-weight: bold; text-align: center; line-height: 18px; cursor: pointer; flex-shrink: 0; }
     .statusbar { display: flex; align-items: center; gap: 12px; padding: 7px 14px; background: #f4e6cf;
       border-bottom: 3px solid #ddc39a; font-size: 13px; font-weight: bold; color: #7a5c38; flex: none; flex-wrap: wrap; }
     .stat { display: flex; align-items: center; gap: 5px; }
@@ -1437,11 +1440,11 @@ var styleCSS = `
     /* v0.8: thanh l\u1EADt trang ba trang */
     .pager { position: absolute; top: 7px; right: 7px; z-index: 7; display: flex; align-items: center; justify-content: center;
       background: rgba(58,48,30,.4); border: 2px solid rgba(255,246,224,.4); border-radius: 14px; overflow: hidden;
-      width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: rgba(255,246,224,.8); user-select: none; }   /* Ph\u01B0\u01A1ng \xE1n 2 s\u1EEDa: b\xECnh th\u01B0\u1EDDng l\xE0 qu\u1EA3 c\u1EA7u nh\u1ECF m\u1EDD */
+      width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: rgba(255,246,224,.8); user-select: none; }
     .pager.open { width: auto; height: auto; border-radius: 12px; cursor: default;
-      background: rgba(58,48,30,.55); border-color: rgba(255,246,224,.5); font-size: 0; }   /* B\u1EA5m m\u1EDF = bung th\xE0nh thanh vi\xEAn nang */
-    .pager:not(.open) .ptab { display: none; }             /* \u1EDE d\u1EA1ng qu\u1EA3 c\u1EA7u th\xEC \u1EA9n c\xE1c tab trang */
-    .pager:not(.open)::after { content: '\u21C4'; }             /* Icon nh\u1ECF tr\xEAn m\u1EB7t c\u1EA7u */
+      background: rgba(58,48,30,.55); border-color: rgba(255,246,224,.5); font-size: 0; }
+    .pager:not(.open) .ptab { display: none; }
+    .pager:not(.open)::after { content: '\u21C4'; }
     .ptab { flex: none; font-size: 11px; font-weight: bold; padding: 4px 10px; background: transparent;
       color: #f0e6cc; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 3px; }
     .ptab + .ptab { border-left: 1px solid rgba(255,246,224,.35); }
@@ -1449,37 +1452,49 @@ var styleCSS = `
     .ptab.lock { opacity: .6; }
     .field { margin: 10px 12px; background-color: #a9c383; border: 4px solid #b08a5c; border-radius: 8px;
       box-shadow: inset 0 0 0 3px #8aa86a; padding: 14px; position: relative; }
-    /* v0.8: da trang W1 ru\u1ED9ng n\u1ED5i \u0111\u1EA7m sen / M1 m\u1EA1ch qu\u1EB7ng kim c\u01B0\u01A1ng */
     .field.pg2 { background-color: #8ec8d8; border-color: #6a9ab0; box-shadow: inset 0 0 0 3px #79b4c6; }
     .field.pg3 { background-color: #5f5870; border-color: #7a6a94; box-shadow: inset 0 0 0 3px #4e4860; }
-    .field.pg2 span.dside, .field.pg2 span.dbot, .field.pg3 span.dside, .field.pg3 span.dbot { display: none !important; }  /* Trang tr\xED \u0111\u1ED3ng c\u1ECF kh\xF4ng l\u1ED9i n\u01B0\u1EDBc / kh\xF4ng xu\u1ED1ng m\u1ECF */
-    .field.pg2 .plot { border-color: #c9a273;            /* v0.9: khung g\u1ED7 hai l\u1EDBp \u2014\u2014 g\u1ED7 nh\u1EA1t ngo\xE0i + g\u1ED7 \u0111\u1EADm trong, l\u1EA5y l\u1EA1i c\u1EA3m gi\xE1c khung vu\xF4ng c\u1EE7a b\u1EA3n thi\u1EBFt k\u1EBF */
+    .field.pg2 span.dside, .field.pg2 span.dbot, .field.pg3 span.dside, .field.pg3 span.dbot { display: none !important; }
+    .field.pg2 .plot { border-color: #c9a273;
       box-shadow: inset 0 0 0 3px #a8845c, inset 0 -5px 0 rgba(40,70,90,.28); }
     .field.pg2 .plot.watered { border-color: #b08a5c; box-shadow: inset 0 0 0 3px #8a6844, inset 0 -5px 0 rgba(30,55,75,.35); }
-    .field.pg2 .block:not(.locked) .plot::before {       /* v0.9 s\u1EEDa l\u1EA7n 2: \u0111inh g\xF3c m\xE0u \u0111\u1EADm \u1EDF b\u1ED1n g\xF3c (gi\u1ED1ng b\u1EA3n thi\u1EBFt k\u1EBF) */
+    .field.pg2 .block:not(.locked) .plot::before {
       content: ''; position: absolute; inset: -3px; pointer-events: none; border-radius: 6px;
       background: linear-gradient(#6a4a2c,#6a4a2c) left top / 7px 7px no-repeat,
         linear-gradient(#6a4a2c,#6a4a2c) right top / 7px 7px no-repeat,
         linear-gradient(#6a4a2c,#6a4a2c) left bottom / 7px 7px no-repeat,
         linear-gradient(#6a4a2c,#6a4a2c) right bottom / 7px 7px no-repeat; }
-    .field.pg3 .plot { border-color: #3f8a9a; border-radius: 2px;   /* v0.9 s\u1EEDa l\u1EA7n 3: lu\u1ED1ng \u01B0\u01A1m pha l\xEA b\u1EDBt bo g\xF3c, c\u1EA1nh s\u1EAFc r\xF5 */
+    .field.pg3 .plot { border-color: #3f8a9a; border-radius: 2px;
       box-shadow: inset 0 0 0 1px rgba(138,224,234,.5), inset 0 -3px 0 rgba(20,20,40,.35); }
     .field.pg3 .plot.watered { border-color: #5fc8d8; }
-    /* v0.9 s\u1EEDa l\u1EA7n 4: \u0111inh g\xF3c tr\u1EAFng \u1EDF khu m\u1ECF th\u1EED th\u1EA5y ch\xF3i m\u1EAFt, b\u1ECF (lu\u1ED1ng \u01B0\u01A1m v\u1EABn gi\u1EEF g\xF3c vu\xF4ng) */
-    .field.pg2 .block.locked .plot { border-color: #8ab4c2; box-shadow: inset 0 3px 0 rgba(255,255,255,.28), inset 0 -3px 0 rgba(30,60,80,.22); } /* C\u1EA3m gi\xE1c n\u1ED5i kh\u1ED1i gi\u1ED1ng \xF4 kho\xE1 b\xEAn \u0111\u1ED3ng c\u1ECF */
-    .field.pg3 .block.locked .plot { border-color: #6d657c; box-shadow: none; } /* \xD4 kho\xE1 khu m\u1ECF gi\u1EEF khung tr\u01A1n (th\u1EED thanh s\xE1ng n\u1ED5i kh\u1ED1i hai l\u1EA7n \u0111\u1EC1u th\u1EA5y k\u1EF3, wen ch\u1ED1t) */
+    .field.pg2 .block.locked .plot { border-color: #8ab4c2; box-shadow: inset 0 3px 0 rgba(255,255,255,.28), inset 0 -3px 0 rgba(30,60,80,.22); }
+    .field.pg3 .block.locked .plot { border-color: #6d657c; box-shadow: none; }
     .blocks { display: grid; grid-template-columns: repeat(3, max-content); gap: 14px; justify-content: center; }
     @media (max-width: 640px) {
       .blocks { grid-template-columns: repeat(2, max-content); }
-      .field { padding: 12px 12px 70px; }                       /* S\u1EEDa #7: d\u1EA3i c\u1ECF ri\xEAng cho thanh c\xF4ng c\u1EE5 / linh v\u1EADt */
-      .titlebar h1 { font-size: 13px; letter-spacing: 0; }      /* S\u1EEDa #11: b\u1ED1 c\u1EE5c d\u1ECDc g\u1ECDn l\u1EA1i */
+      .field { padding: 12px 12px 70px; }
+      .titlebar h1 { font-size: 13px; letter-spacing: 0; }
       .titlebar h1 .sub { display: none; }
       .statusbar { gap: 6px 10px; font-size: 12px; padding: 6px 10px; }
       .bottombar { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; }
-      .btn { font-size: 13px; padding: 7px 6px; }
-      span.dside { display: none; }      /* S\u1EEDa #13: m\xE0n h\u1EB9p kh\xF4ng \u0111\u1EE7 l\u1EC1 b\xEAn, chuy\u1EC3n trang tr\xED xu\u1ED1ng d\u1EA3i xanh d\u01B0\u1EDBi \u0111\xE1y */
-      span.dbot { display: inline; }     /* N\xE2ng quy\u1EC1n cho span, \u0111\xE8 l\xEAn quy t\u1EAFc \u1EA9n m\u1EB7c \u0111\u1ECBnh ph\xEDa sau */
+      .btn { font-size: 11px; padding: 6px 2px; }
+      span.dside { display: none; }
+      span.dbot { display: inline; }
     }
+    .field.explore-mode { background: radial-gradient(circle at 50% 50%, #2b1b54 0%, #0d0614 100%) !important; border-color: #4b3082 !important; overflow: hidden; }
+    .field.explore-mode::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.8) 1px, transparent 1px), radial-gradient(circle at 70% 60%, rgba(255,255,255,0.8) 1px, transparent 1px), radial-gradient(circle at 40% 80%, rgba(255,255,255,0.8) 1.5px, transparent 1.5px), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.8) 1px, transparent 1px);
+      background-size: 100px 100px; opacity: 0.5; pointer-events: none; z-index: 0;
+    }
+    .explore-blocks { padding: 18px 24px 70px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; min-height: 280px; align-content: flex-start; position: relative; z-index: 1; }
+    .explore-slot { width: 84px; height: 104px; background: rgba(255,255,255,0.7); border: 3px solid #8a6844; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; box-shadow: inset 0 0 0 3px rgba(255,255,255,0.5), 0 4px 0 #8a6844; transition: transform 0.1s; position: relative; z-index: 10; pointer-events: auto; }
+    .explore-slot:active { transform: translateY(4px); box-shadow: inset 0 0 0 3px rgba(255,255,255,0.5), 0 0 0 #8a6844; }
+    .explore-slot .feature-name { font-size: 13px; font-weight: bold; color: #7a5c38; margin-top: 8px; text-align: center; }
+    
+    .field.explore-mode .explore-slot { background: rgba(43,27,84,0.7); border-color: #8a5cc0; box-shadow: inset 0 0 0 3px rgba(138,92,192,0.5), 0 4px 0 #4b3082; }
+    .field.explore-mode .explore-slot:active { transform: translateY(4px); box-shadow: inset 0 0 0 3px rgba(138,92,192,0.5), 0 0 0 #4b3082; }
+    .field.explore-mode .explore-slot .feature-name { color: #e0ccff; text-shadow: 0 1px 2px #000; }
     .block { display: grid; grid-template-columns: repeat(2, var(--plot, 74px)); grid-auto-rows: var(--plot, 74px);
       gap: 6px; position: relative; }
     .plot { background-color: #b99b84; border: 3px solid #937863; border-radius: 6px;
@@ -1502,6 +1517,8 @@ var styleCSS = `
     .sign.confirm { border-color: var(--accLine); color: var(--accFg); }
     /* #26: l\u1EDBp cho b\xE9 tr\xF2n t\u1EF1 do \u0111i l\u1EA1i \u2014\u2014 ph\u1EE7 to\xE0n b\u1ED9 khu ru\u1ED9ng, \u0111i theo khu v\u1EF1c (lo\u1EA1i l\xE0m vi\u1EC7c = h\xE0ng d\u01B0\u1EDBi, lo\u1EA1i \u0111i d\u1EA1o = b\u1EDD ru\u1ED9ng) */
     .mascots { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+    /* C\u1EA3m \u1EE9ng: kh\xF4ng c\xF3 touch-action:none th\xEC tr\xECnh duy\u1EC7t coi c\xFA vu\u1ED1t l\xE0 cu\u1ED9n trang, b\u1EAFn pointercancel v\xE0 c\u1EAFt ngang phi\xEAn k\xE9o */
+    .mascots[data-drag="1"] .pet { touch-action: none; }
     .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute;
       left: 0; bottom: 0; will-change: transform, translate; }
     .pet:active { transform: scale(1.15, .85); }
@@ -1678,11 +1695,11 @@ var styleCSS = `
     .tool.mini { width: 40px; height: 20px; color: #8a6a42; font-weight: bold; font-size: 11px; background: #f0dfc0; }
     .mode-tip { position: absolute; left: 62px; bottom: 14px; background: var(--accBg); border: 2px solid var(--accLine);
       border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: bold; color: var(--accFg); z-index: 7; display: none; }
-    .bottombar { display: flex; align-items: center; gap: 10px; padding: 10px 14px 12px; flex: none; }
-    .btn { flex: 1; padding: 8px 10px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #b08a5c;
+    .bottombar { display: flex; align-items: stretch; gap: 10px; padding: 10px 14px 12px; flex: none; }
+    .btn { flex: 1; padding: 6px 4px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #b08a5c;
       border-radius: 8px; box-shadow: inset 0 0 0 2px #fff6e0, inset 0 3px 0 #fffaf0, inset 0 -4px 0 #d9ba8a, 0 4px 0 #9a7a54;
-      font-size: 14px; font-weight: bold; color: #7a5c38; text-shadow: 1px 1px 0 #fff3dd; text-align: center;
-      display: flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; user-select: none; }
+      font-size: 12px; font-weight: bold; color: #7a5c38; text-shadow: 1px 1px 0 #fff3dd; text-align: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; user-select: none; white-space: nowrap; }
     .modal { position: absolute; inset: 0; background: rgba(60,40,20,.35); display: none; align-items: center;
       justify-content: center; z-index: 20; padding: 14px; }
     .modal.open { display: flex; }
@@ -1755,10 +1772,10 @@ var styleCSS = `
     .dungeon-view.open { display: flex; }
     .dg-arena { flex: 1; position: relative; border: 4px solid #3f3a50; border-radius: 8px; background: rgba(0,0,0,0.1); overflow: hidden; }
     .dg-dock { height: 60px; background: rgba(58,48,30,.7); margin-top: 10px; border-radius: 8px; border: 2px solid #8a6a42; display: flex; align-items: center; padding: 0 10px; gap: 10px; overflow-x: auto; overflow-y: hidden; }
-    .dg-slot { width: 44px; height: 44px; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+    .dg-slot { width: 44px; height: 44px; flex-shrink: 0; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
     .dg-slot:hover { border-color: #d9ba8a; background: rgba(255,255,255,.2); }
     .dg-slot.placed { opacity: 0.4; pointer-events: none; }
-    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; user-select: none; }
+    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; }
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
     .dg-entity.flip img { transform: scaleX(-1); }
     .dg-hp-bar { position: absolute; top: -8px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
@@ -1768,8 +1785,8 @@ var styleCSS = `
     .dg-dmg.heal { color: #a4dc8c; }
     .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
-    .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
-    .dg-title { font-size: 32px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 2px; }
+    .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; overflow-y: auto; padding: 15px; box-sizing: border-box; }
+    .dg-title { font-size: 24px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 1px; text-align: center; margin-top: auto; }
     .dg-dock::-webkit-scrollbar { height: 8px; display: block; }
     .dg-dock::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
     .dg-dock::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 4px; }
@@ -1785,7 +1802,7 @@ var styleCSS = `
     .dg-info-item-desc { font-size: 11px; line-height: 1.3; color: #ddd; }
     .dg-info-item-desc b { color: #a4dc8c; font-size: 13px; display: block; margin-bottom: 2px; }
     
-    .dg-projectile { position: absolute; width: 16px; height: 16px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; }
+    .dg-projectile { position: absolute; width: 16px; height: 16px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%); }
     .dg-projectile img, .dg-projectile svg { width: 100%; height: 100%; }
     
     .dg-status { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; pointer-events: none; z-index: 3; }
@@ -1810,10 +1827,10 @@ var styleCSS = `
     }
     .dg-entity.attack > svg, .dg-entity.attack > img { animation: dgAttack 0.2s ease-out forwards; }
     
-    .dg-reward-card { background: #3c2a20; border: 2px solid #b08a5c; padding: 10px; border-radius: 8px; width: 120px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+    .dg-reward-card { background: #3c2a20; border: 2px solid #b08a5c; padding: 8px; border-radius: 8px; flex: 1 1 90px; min-width: 90px; max-width: 140px; text-align: center; cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; }
     .dg-reward-card:hover { transform: scale(1.05); border-color: #ffda66; background: #4e382d; }
-    .dg-reward-card h4 { margin: 0 0 5px 0; color: #ffda66; }
-    .dg-reward-card p { margin: 0; font-size: 12px; color: #fff; line-height: 1.4; }
+    .dg-reward-card h4 { margin: 0 0 5px 0; color: #ffda66; font-size: 14px; }
+    .dg-reward-card p { margin: 0; font-size: 11px; color: #fff; line-height: 1.3; }
     
     .dg-hud { position: absolute; top: 8px; left: 10px; z-index: 25; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 6px; font-size: 13px; color: white; pointer-events: none; }
     
@@ -1824,6 +1841,24 @@ var styleCSS = `
     
     .dg-new-record { color: #ffd700; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #ffd700, 0 0 30px #ff8c00; animation: newRecordPulse 0.8s ease-in-out infinite alternate; margin: 5px 0; }
     @keyframes newRecordPulse { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+    
+    .betwrap { text-align: center; }
+    .betnum { font-size: 40px; font-weight: bold; color: #7a5c38; line-height: 1.1;
+      background: linear-gradient(#fffaf0, #f0dcc0); border: 3px solid #b08a5c; border-radius: 10px;
+      width: 96px; margin: 6px auto; padding: 8px 0; box-shadow: inset 0 0 0 2px #fff6e0; }
+    .betnum.rolling { animation: gachaShake 0.12s infinite alternate; }
+    .betnum.res { border-color: #c86a1a; box-shadow: inset 0 0 0 2px #fff6e0, 0 0 10px rgba(200,106,26,.45); }
+    .betresult { font-size: 12px; font-weight: bold; color: #7a5c38; min-height: 16px; margin-bottom: 2px; }
+    .betchain { font-size: 11px; color: #9a7a54; min-height: 15px; word-break: break-all; }
+    .betpot { font-size: 15px; font-weight: bold; color: #c86a1a; margin: 8px 0 4px; }
+    .betsides { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .betside { padding: 10px 4px; border-radius: 8px; border: 3px solid; cursor: pointer;
+      font-weight: bold; user-select: none; line-height: 1.35; }
+    .betside.hi { background: #e8f3dc; border-color: #4e903a; color: #3c702c; }
+    .betside.lo { background: #f6e0e6; border-color: #a83a52; color: #8a2a40; }
+    .betside .mult { display: block; font-size: 17px; }
+    .betside .chance { display: block; font-size: 11px; opacity: .75; font-weight: normal; }
+    .betside.off { opacity: .4; cursor: not-allowed; filter: grayscale(1); }
 `;
 
 // src/ui.js
@@ -1841,14 +1876,53 @@ function applyTheme() {
   ctx.ui.classList.add("theme-" + (ctx.S && ctx.S.theme === "sky" ? "sky" : "sakura"));
 }
 function applyPageSkin() {
-  fieldEl.classList.toggle("pg2", ctx.S.page === 2);
-  fieldEl.classList.toggle("pg3", ctx.S.page === 3);
-  fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? "water" : ctx.S.page === 3 ? "mine" : "grass", 4242);
+  const isExplore = ctx.S && ctx.S.view === "explore";
+  fieldEl.classList.toggle("pg2", !isExplore && ctx.S.page === 2);
+  fieldEl.classList.toggle("pg3", !isExplore && ctx.S.page === 3);
+  const titleH1 = sh.querySelector(".titlebar h1");
+  if (isExplore) {
+    fieldEl.style.backgroundImage = "none";
+    fieldEl.style.backgroundColor = "#d3c3a0";
+    if (titleH1) titleH1.innerHTML = `${spriteSVG("mapIcon", 16)}D\u1EA1o quanh n\xE0o...`;
+  } else {
+    fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? "water" : ctx.S.page === 3 ? "mine" : "grass", 4242);
+    fieldEl.style.backgroundColor = "";
+    if (titleH1) titleH1.innerHTML = `${spriteSVG("strawhat", 16)}Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!`;
+  }
   fieldEl.style.backgroundSize = "192px 192px";
 }
+function applyViewState() {
+  const isExplore = ctx.S && ctx.S.view === "explore";
+  const ctrlrow = sh.querySelector(".ctrlrow");
+  const mascots = $id("mascots");
+  const witch = $id("witch");
+  const banner = $id("banner");
+  const viewToggle = $id("viewToggle");
+  const statBlocks = $id("stat-blocks");
+  if (ctrlrow) ctrlrow.style.display = isExplore ? "none" : "flex";
+  if (mascots) mascots.style.display = isExplore ? "none" : "";
+  if (decoLayer) decoLayer.style.display = isExplore ? "none" : "";
+  if (witch) witch.style.display = isExplore ? "none" : "";
+  if (banner) banner.style.display = isExplore ? "none" : "";
+  if (statBlocks) statBlocks.style.display = isExplore ? "none" : "";
+  const field = sh.querySelector(".field");
+  if (field) {
+    if (isExplore) field.classList.add("explore-mode");
+    else field.classList.remove("explore-mode");
+  }
+  if (viewToggle) {
+    viewToggle.innerHTML = isExplore ? `${spriteSVG("strawhat", 16)} <span>V\u1EC1 N\xF4ng Tr\u1EA1i</span>` : `${spriteSVG("mapIcon", 16)} <span>Kh\xE1m ph\xE1</span>`;
+  }
+}
 function renderPager() {
+  const pager = $id("pager");
+  if (ctx.S && ctx.S.view === "explore") {
+    pager.style.display = "none";
+    return;
+  }
+  pager.style.display = "flex";
   const names = { 1: "\u0110\u1ED3ng c\u1ECF", 2: "V\xF9ng n\u01B0\u1EDBc", 3: "Khu m\u1ECF" };
-  $id("pager").innerHTML = [1, 2, 3].map((pg) => {
+  pager.innerHTML = [1, 2, 3].map((pg) => {
     const un = pageUnlocked(pg);
     return `<span class="ptab p${pg}${ctx.S.page === pg ? " active" : ""}${un ? "" : " lock"}" data-pg="${pg}">${names[pg]}${un ? "" : " \u{1F512}"}</span>`;
   }).join("");
@@ -1880,12 +1954,13 @@ function initUI() {
   <div id="win">
     <div class="titlebar" id="drag">
       <h1>${spriteSVG("strawhat", 16)}Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!</h1>
+      <div class="view-toggle" id="viewToggle" title="Chuy\u1EC3n ch\u1EBF \u0111\u1ED9 Kh\xE1m ph\xE1/N\xF4ng tr\u1EA1i">${spriteSVG("mapIcon", 16)} <span>Kh\xE1m ph\xE1</span></div>
       <div class="close-x" id="close">\xD7</div>
     </div>
     <div class="statusbar">
       <span class="stat">${spriteSVG("coin", 22)}<b id="coins">0</b></span>
       <span class="stat"><span id="wicon">${spriteSVG("sun", 22)}</span><span id="daytxt"></span></span>
-      <span class="stat">${spriteSVG("sprout", 18)}Ru\u1ED9ng <span id="blocktxt"></span></span>
+      <span class="stat" id="stat-blocks">${spriteSVG("sprout", 18)}Ru\u1ED9ng <span id="blocktxt"></span></span>
     </div>
     <div class="ctrlrow">
       <span class="chip witchchip" id="chipRegen" style="display:none">\u2726 Gieo l\u1EA1i s\u1EF1 ki\u1EC7n h\xF4m nay</span>
@@ -1898,6 +1973,7 @@ function initUI() {
       <div class="field">
         <div class="pager" id="pager"></div>
         <div class="blocks" id="blocks"></div>
+        <div class="explore-blocks" id="explore-blocks" style="display:none"></div>
         <div class="mascots" id="mascots"></div>
         <div id="witch" title="Ph\xF9 thu\u1EF7 tr\xF2n"></div>
         <div class="mode-tip" id="modetip"></div>
@@ -1909,7 +1985,6 @@ function initUI() {
         <div class="btn" data-open="shop">${spriteSVG("shopIcon", 22)}C\u1EEDa h\xE0ng</div>
         <div class="btn" data-open="bag">${spriteSVG("bagIcon", 22)}Balo</div>
         <div class="btn" data-open="gacha">${spriteSVG("gachapon", 22)}Gachapon</div>
-        <div class="btn" data-open="dungeon">${spriteSVG("dungeonGate", 22)}H\u1EA7m ng\u1EE5c</div>
         <div class="btn" data-open="cfg">${spriteSVG("gearIcon", 22)}C\xE0i \u0111\u1EB7t</div>
     </div>
     <div class="modal" id="modal">
@@ -1979,9 +2054,15 @@ function initUI() {
   swX = null;
   swY = null;
   fieldEl.addEventListener("touchstart", (e) => {
-    if (e.touches.length === 1) {
+    if (ctx.S && ctx.S.view === "explore") {
+      swX = null;
+      return;
+    }
+    if (e.touches.length === 1 && (!ctx.S.dragPet || !e.target.closest(".pet"))) {
       swX = e.touches[0].clientX;
       swY = e.touches[0].clientY;
+    } else {
+      swX = null;
     }
   }, { passive: true });
   fieldEl.addEventListener("touchend", (e) => {
@@ -2003,6 +2084,19 @@ function initUI() {
     renderToolbar();
     toast(pg === 1 ? "V\u1EC1 \u0111\u1ED3ng c\u1ECF~" : pg === 2 ? "T\u1EDBi v\xF9ng n\u01B0\u1EDBc~" : "T\u1EDBi khu m\u1ECF~");
   }, { passive: true });
+  const viewToggle = $id("viewToggle");
+  if (viewToggle) {
+    viewToggle.addEventListener("click", () => {
+      ctx.S.view = ctx.S.view === "explore" ? "farm" : "explore";
+      save();
+      applyPageSkin();
+      applyViewState();
+      renderPlots();
+      renderToolbar();
+      renderPager();
+      toast(ctx.S.view === "explore" ? "B\u1EA3n \u0111\u1ED3 Kh\xE1m ph\xE1" : "Tr\u1EDF v\u1EC1 N\xF4ng tr\u1EA1i");
+    });
+  }
 }
 
 // src/logic.js
@@ -2108,6 +2202,9 @@ function rollMutation(c, pi) {
   }
 }
 function bagName(key) {
+  if (key.startsWith("unique@")) {
+    return ctx.S.uniques?.[key]?.name || "V\u1EADt ph\u1EA9m Gacha";
+  }
   const parts = key.split("@");
   return (parts[1] ? parts[1] + "\xB7" : "") + (CROPS[parts[0]] || { name: "?" }).name;
 }
@@ -2119,6 +2216,9 @@ function bagPrice(key) {
   return Math.round((CROPS[parts[0]] || { sell: 0 }).sell * (parts[1] ? 1.25 : 1));
 }
 function mutDescOf(bagKey) {
+  if (bagKey.startsWith("unique@")) {
+    return ctx.S.uniques?.[bagKey]?.desc || "";
+  }
   const parts = bagKey.split("@");
   if (!parts[1] || !ctx.S.mutDesc) return "";
   const mutCode = parts.slice(1).join("@");
@@ -2240,8 +2340,8 @@ function petSpot(id) {
   const ov = $id("mascots"), W = ov.clientWidth, H = ov.clientHeight;
   if (PETS[id] && PETS[id].job) {
     const workers = ctx.S.petsOut.filter((p) => PETS[p] && PETS[p].job);
-    const anchor = W - 64 - Math.max(0, workers.indexOf(id)) * 62;
-    return { x: Math.max(4, anchor - 10 + Math.random() * 20), y: Math.random() * 4 };
+    const anchor2 = W - 64 - Math.max(0, workers.indexOf(id)) * 62;
+    return { x: Math.max(4, anchor2 - 10 + Math.random() * 20), y: Math.random() * 4 };
   }
   const x = 4 + Math.random() * Math.max(20, W - 64);
   return { x, y: WORK_BAND + 6 + Math.random() * Math.max(20, H - WORK_BAND - 70) };
@@ -2454,6 +2554,7 @@ function renderPets() {
     window.clearTimeout(petSleepT[k]);
     delete petSleepT[k];
   });
+  $id("mascots").dataset.drag = ctx.S.dragPet ? "1" : "0";
   $id("mascots").innerHTML = ctx.S.petsOut.map((id) => PETS[id] ? `<span class="pet" data-pet="${id}" title="Ch\u1ECDc ch\u1ECDc ${PETS[id].name}"><span class="pbody" style="animation-delay:-${(Math.random() * 1.8).toFixed(2)}s">${petSVG(id, 48)}</span></span>` : "").join("");
   sh.querySelectorAll("#mascots .pet").forEach((el) => {
     const id = el.dataset.pet;
@@ -2523,7 +2624,16 @@ function initPets() {
   let activeDrag = null;
   let dragAnimFrame = null;
   const mascots = $id("mascots");
+  let swallowClickUntil = 0;
+  const GHOST_MS = 700;
+  sh.addEventListener("click", (e) => {
+    if (!swallowClickUntil || now() >= swallowClickUntil) return;
+    swallowClickUntil = 0;
+    e.stopPropagation();
+    e.preventDefault();
+  }, true);
   mascots.addEventListener("pointerdown", (e) => {
+    if (e.pointerType && e.pointerType !== "mouse") swallowClickUntil = 0;
     if (!ctx.S.dragPet) return;
     const el = e.target.closest(".pet");
     if (!el) return;
@@ -2678,6 +2788,7 @@ function initPets() {
       el.style.transition = "";
       activeDrag = null;
       delete el.dataset.dragging;
+      if (e.pointerType && e.pointerType !== "mouse") swallowClickUntil = now() + GHOST_MS;
       handlePetClick(el, petId);
     }
   };
@@ -3156,6 +3267,45 @@ function openGachaModal() {
     const machine = $id("gachaMachineSprite");
     const loadOverlay = $id("gachaLoadingOverlay");
     const loadText = $id("gachaLoadingText");
+    initGachaState();
+    const haveTickets = ctx.S.tickets?.[ticketType] || 0;
+    if (haveTickets < count) {
+      const missing = count - haveTickets;
+      const priceMap = { norm: 1e3, spec: 5e3, super: 5e5 };
+      const ticketPrice = priceMap[ticketType] || 0;
+      const cost = missing * ticketPrice;
+      const tName = ticketType === "super" ? "Si\xEAu c\u01B0\u1EDDng" : ticketType === "spec" ? "\u0110\u1EB7c bi\u1EC7t" : "Th\u01B0\u1EDDng";
+      if (ctx.S.coins >= cost) {
+        const confirmHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 18px; font-weight: bold; color: #8a5cc0; margin-bottom: 10px;">Kh\xF4ng \u0111\u1EE7 v\xE9</div>
+            <div style="font-size: 14px; margin-bottom: 15px; color: #3a2c22;">B\u1EA1n c\xF3 mu\u1ED1n d\xF9ng <b>${cost.toLocaleString()} G</b> \u0111\u1EC3 quay ${tName} \xD7${count} kh\xF4ng?</div>
+            <div style="font-size: 12px; color: #7a5c38; margin-bottom: 20px;">Mua b\xF9 ${missing} v\xE9 ${tName} (${ticketPrice.toLocaleString()} G/v\xE9) \xB7 v\xE0ng hi\u1EC7n c\xF3 ${ctx.S.coins.toLocaleString()} G</div>
+            <div style="display: flex; justify-content: center; gap: 10px;">
+              <span class="buy" id="btnCancelRoll" style="background: #e3d5c8; color: #3a2c22; min-width: 80px; text-align: center;">Th\xF4i</span>
+              <span class="buy" id="btnConfirmRoll" style="min-width: 140px; text-align: center;">D\xF9ng v\xE0ng & quay</span>
+            </div>
+          </div>
+        `;
+        openModal("M\xE1y Gachapon", confirmHTML);
+        $id("btnCancelRoll").addEventListener("click", () => {
+          openGachaModal();
+        });
+        $id("btnConfirmRoll").addEventListener("click", () => {
+          if (ctx.S.coins < cost) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng");
+          ctx.S.coins -= cost;
+          ctx.S.tickets[ticketType] = (ctx.S.tickets[ticketType] || 0) + missing;
+          save();
+          renderStatus();
+          openGachaModal();
+          setTimeout(() => doRoll(ticketType, count), 50);
+        });
+        return;
+      } else {
+        toast(`C\u1EA7n ${count} V\xE9 ${tName} (thi\u1EBFu ${missing} v\xE9, mua m\u1EA5t ${cost.toLocaleString()} G nh\u01B0ng b\u1EA1n kh\xF4ng \u0111\u1EE7 ti\u1EC1n)!`);
+        return;
+      }
+    }
     if (machine) machine.style.animation = "gachaShake 0.2s ease infinite";
     if (loadOverlay) loadOverlay.style.display = "flex";
     if (loadText) loadText.textContent = "\u0110ang quay...";
@@ -3209,13 +3359,270 @@ function openGachaModal() {
   $id("gachaRollSuper1")?.addEventListener("click", () => doRoll("super", 1));
 }
 
+// src/bet-odds.js
+var POT_CAP = 1e8;
+var HOUSE_RETURN = 97;
+var MIN_MULT = 1.01;
+var ANCHOR_MIN = 5;
+var ANCHOR_MAX = 96;
+function rollD100(rnd = Math.random) {
+  const n = 1 + Math.floor(rnd() * 100);
+  return Math.min(100, Math.max(1, n));
+}
+function rollAnchor(rnd = Math.random) {
+  const span = ANCHOR_MAX - ANCHOR_MIN + 1;
+  const n = ANCHOR_MIN + Math.floor(rnd() * span);
+  return Math.min(ANCHOR_MAX, Math.max(ANCHOR_MIN, n));
+}
+function clampAnchor(n) {
+  const v = Math.floor(Number(n));
+  if (!Number.isFinite(v)) return ANCHOR_MIN;
+  return Math.min(ANCHOR_MAX, Math.max(ANCHOR_MIN, v));
+}
+function safeAmount(v) {
+  const n = Math.floor(Number(v));
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+function oddsOf(anchor2, side) {
+  const n = Math.floor(Number(anchor2));
+  const wins = side === "hi" ? 100 - n : n - 1;
+  if (!Number.isFinite(wins) || wins <= 0) {
+    return { wins: 0, chance: 0, mult: 0, locked: true };
+  }
+  const soVanThua = 99 - wins;
+  if (soVanThua <= 0) {
+    return { wins: 0, chance: 0, mult: 0, locked: true };
+  }
+  return {
+    wins,
+    chance: wins / 100,
+    mult: Math.max(MIN_MULT, Math.round(HOUSE_RETURN / wins * 100) / 100),
+    locked: false
+  };
+}
+function resolveRoll(anchor2, side, roll) {
+  if (roll === anchor2) return "push";
+  return side === "hi" === roll > anchor2 ? "win" : "lose";
+}
+function resolveStake(want, coins) {
+  return Math.min(safeAmount(want), safeAmount(coins), POT_CAP);
+}
+function nextPot(pot, mult) {
+  const m = Number.isFinite(Number(mult)) && Number(mult) > 0 ? Number(mult) : 0;
+  return safeAmount(Math.min(POT_CAP, Math.floor(safeAmount(pot) * m)));
+}
+function applyCashOut(state) {
+  const pot = safeAmount(state.betPot);
+  state.betPot = 0;
+  if (pot <= 0) return 0;
+  state.coins = safeAmount(state.coins) + pot;
+  return pot;
+}
+function resultLabel(roll, kq, mult, nextAnchor) {
+  const r = Number.isFinite(Number(roll)) ? Math.floor(Number(roll)) : "?";
+  const m = Number.isFinite(Number(mult)) ? Number(mult).toFixed(2) : "?";
+  const phan = kq === "win" ? "Th\u1EAFng \xD7" + m : kq === "lose" ? "M\u1EA5t tr\u1EAFng" : kq === "push" ? "Ho\xE0, ti\u1EC1n gi\u1EEF nguy\xEAn" : "Xong";
+  const khac = Number.isFinite(Number(nextAnchor)) && Math.floor(Number(nextAnchor)) !== r;
+  return "Ra " + r + " \xB7 " + phan + (khac ? " \xB7 v\xE1n t\u1EDBi t\u1EEB " + Math.floor(Number(nextAnchor)) : "");
+}
+
+// src/bet.js
+function getPot() {
+  return safeAmount(ctx.S.betPot);
+}
+function setPot(v) {
+  ctx.S.betPot = safeAmount(v);
+}
+var anchor = 0;
+var chain = [];
+var busy = false;
+var spinTimer = null;
+var holdTimer = null;
+var shown = null;
+var HOLD_MS = 1e3;
+var HOLD_LOSE_MS = 3e3;
+function stopSpin() {
+  if (spinTimer !== null) {
+    window.clearInterval(spinTimer);
+    spinTimer = null;
+  }
+  clearHold();
+  busy = false;
+}
+function clearHold() {
+  if (holdTimer !== null) {
+    window.clearTimeout(holdTimer);
+    holdTimer = null;
+  }
+  shown = null;
+}
+function cashOut(quiet, immediate) {
+  stopSpin();
+  const pot = applyCashOut(ctx.S);
+  if (pot <= 0) return 0;
+  try {
+    save(immediate);
+  } catch (e) {
+  }
+  try {
+    renderStatus();
+  } catch (e) {
+  }
+  if (!quiet) {
+    try {
+      toast("\u0110\xE3 r\xFAt " + pot.toLocaleString() + " G v\u1EC1 v\xED");
+    } catch (e) {
+    }
+  }
+  return pot;
+}
+function newRound() {
+  anchor = rollAnchor();
+}
+function fmt(n) {
+  return safeAmount(n).toLocaleString();
+}
+function openBetModal() {
+  if (getPot() <= 0) {
+    chain = [];
+    newRound();
+  }
+  openModal("\u0110\u1ECF \u0110en", `
+    <div class="betwrap">
+      <div class="note" id="betCoins"></div>
+      <div class="betnum" id="betNum">${anchor}</div>
+      <div class="betresult" id="betResult"></div>
+      <div class="betchain" id="betChain"></div>
+      <div id="betStake"></div>
+      <div class="betsides">
+        <div class="betside hi" data-side="hi">\u25B2 L\u1EDAN<span class="mult" id="betMultHi"></span><span class="chance" id="betChanceHi"></span></div>
+        <div class="betside lo" data-side="lo">\u25BC NH\u1ECE<span class="mult" id="betMultLo"></span><span class="chance" id="betChanceLo"></span></div>
+      </div>
+    </div>`, true);
+  const render = () => {
+    if (!$id("betCoins")) return;
+    const pot = getPot();
+    $id("betCoins").textContent = "V\xE0ng: " + fmt(ctx.S.coins) + " G";
+    $id("betNum").textContent = String(shown ? shown.roll : anchor);
+    $id("betNum").classList.toggle("res", !!shown);
+    $id("betResult").textContent = shown ? resultLabel(shown.roll, shown.kq, shown.mult, anchor) : "S\u1ED1 g\u1ED1c \u2014 c\u01B0\u1EE3c L\u1EDBn hay Nh\u1ECF cho l\u1EA7n quay t\u1EDBi";
+    $id("betChain").textContent = chain.length ? "Chu\u1ED7i: " + chain.join(" \u2192 ") : "";
+    if (pot > 0) {
+      $id("betStake").innerHTML = `<div class="betpot">Tr\xEAn b\xE0n: ${fmt(pot)} G</div>
+         <span class="buy" id="betCash">R\xFAt ${fmt(pot)} G</span>`;
+      $id("betCash").addEventListener("click", () => {
+        if (busy) return;
+        cashOut();
+        chain = [];
+        newRound();
+        render();
+      });
+    } else if (!$id("betAmt")) {
+      $id("betStake").innerHTML = `<div style="display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;margin:8px 0 2px">
+           <input class="inp" id="betAmt" type="number" min="1" value="${Math.min(100, safeAmount(ctx.S.coins)) || 1}" style="width:110px">
+           <span class="buy plain" data-quick="4">\xBC</span>
+           <span class="buy plain" data-quick="2">\xBD</span>
+           <span class="buy plain" data-quick="1">Max</span>
+         </div>`;
+      $id("betStake").querySelectorAll("[data-quick]").forEach((b) => b.addEventListener("click", () => {
+        const amt = $id("betAmt");
+        if (amt) amt.value = String(Math.max(1, Math.floor(safeAmount(ctx.S.coins) / Number(b.dataset.quick))));
+      }));
+    }
+    ["hi", "lo"].forEach((side) => {
+      const o = oddsOf(anchor, side);
+      const el = $id("betMult" + (side === "hi" ? "Hi" : "Lo"));
+      const ch = $id("betChance" + (side === "hi" ? "Hi" : "Lo"));
+      el.textContent = o.locked ? "\u2014" : "\xD7" + o.mult.toFixed(2);
+      ch.textContent = o.locked ? "kh\xF4ng th\u1EC3 th\u1EAFng" : Math.round(o.chance * 100) + "%";
+      $id("mbody").querySelector(".betside." + side).classList.toggle("off", o.locked);
+    });
+    if (getPot() >= POT_CAP) {
+      $id("mbody").querySelectorAll(".betside").forEach((el) => el.classList.add("off"));
+    }
+  };
+  const play = (side) => {
+    if (busy) return;
+    clearHold();
+    const o = oddsOf(anchor, side);
+    if (o.locked) return toast("C\u1EEDa n\xE0y kh\xF4ng c\xF3 kh\u1EA3 n\u0103ng th\u1EAFng n\xE0o");
+    if (getPot() >= POT_CAP) return toast("\u0110\xE3 ch\u1EA1m tr\u1EA7n, r\xFAt ti\u1EC1n ra \u0111\xE3");
+    if (getPot() <= 0) {
+      const el = $id("betAmt");
+      const want = safeAmount(el && el.value);
+      const coins = safeAmount(ctx.S.coins);
+      if (want <= 0) return toast("Nh\u1EADp s\u1ED1 v\xE0ng mu\u1ED1n c\u01B0\u1EE3c \u0111\xE3");
+      if (want > coins) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng, b\u1EA1n ch\u1EC9 c\xF3 " + fmt(coins) + " G");
+      const stake = resolveStake(want, coins);
+      if (stake < want) toast("V\u01B0\u1EE3t tr\u1EA7n, \u0111\xE3 h\u1EA1 xu\u1ED1ng " + fmt(POT_CAP) + " G");
+      ctx.S.coins = safeAmount(coins - stake);
+      setPot(stake);
+      save();
+    }
+    busy = true;
+    const num = $id("betNum");
+    num.classList.add("rolling");
+    const roll = rollD100();
+    let tick2 = 0;
+    spinTimer = window.setInterval(() => {
+      const numNow = $id("betNum");
+      if (!numNow) {
+        window.clearInterval(spinTimer);
+        spinTimer = null;
+        busy = false;
+        return;
+      }
+      numNow.textContent = String(rollD100());
+      if (++tick2 >= 12) {
+        window.clearInterval(spinTimer);
+        spinTimer = null;
+        numNow.classList.remove("rolling");
+        numNow.textContent = String(roll);
+        finish(roll, side, o);
+      }
+    }, 50);
+  };
+  const finish = (roll, side, o) => {
+    const kq = resolveRoll(anchor, side, roll);
+    chain = chain.concat(roll).slice(-8);
+    if (kq === "push") {
+      toast("Ho\xE0! Ra \u0111\xFAng " + roll + ", ti\u1EC1n gi\u1EEF nguy\xEAn");
+    } else if (kq === "win") {
+      const truoc = getPot();
+      setPot(nextPot(truoc, o.mult));
+      anchor = clampAnchor(roll);
+      toast("Th\u1EAFng! " + fmt(truoc) + " \u2192 " + fmt(getPot()) + " G");
+      if (getPot() >= POT_CAP) toast("Ch\u1EA1m tr\u1EA7n " + fmt(POT_CAP) + " G, r\xFAt th\xF4i!");
+    } else {
+      setPot(0);
+      toast("M\u1EA5t tr\u1EAFng! Ra " + roll);
+      chain = [];
+      newRound();
+    }
+    shown = { roll, kq, mult: o.mult };
+    save();
+    busy = false;
+    renderStatus();
+    render();
+    holdTimer = window.setTimeout(() => {
+      holdTimer = null;
+      shown = null;
+      render();
+    }, kq === "lose" ? HOLD_LOSE_MS : HOLD_MS);
+  };
+  $id("mbody").querySelectorAll("[data-side]").forEach((b) => b.addEventListener("click", () => play(b.dataset.side)));
+  render();
+}
+
 // src/shop.js
-function openModal(title, bodyHTML) {
+function openModal(title, bodyHTML, keepBetTable) {
+  if (!keepBetTable && cashOut) cashOut();
   $id("mtitle-text").textContent = title;
   $id("mbody").innerHTML = bodyHTML;
   $id("modal").classList.add("open");
 }
 function closeModal() {
+  if (cashOut) cashOut();
   $id("modal").classList.remove("open");
   $id("mbody").innerHTML = "";
   setPendingPick(null);
@@ -3231,6 +3638,9 @@ function openPanel(kind) {
   }
   if (kind === "dungeon") {
     return openDungeonView();
+  }
+  if (kind === "bet") {
+    return openBetModal();
   }
   if (kind === "shop") {
     const tabs = [["seed", "H\u1EA1t gi\u1ED1ng"], ["fert", "Ph\xE2n b\xF3n"], ["pet", "Th\xFA c\u01B0ng"], ["pass", "V\xE9"], ["ticket", "V\xE9 Gacha"]];
@@ -3421,12 +3831,12 @@ function openPanel(kind) {
           const on = !!bagSel[key];
           return `
         <div class="item selrow${on ? " selon" : ""}" data-selkey="${key}"><span class="icon">${spriteSVG(item.sp, 32)}</span>
-          <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${n} <span style="display:inline-block; font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff; white-space:nowrap;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
           <span class="selmark">${on ? "\u2713" : ""}</span></div>`;
         }
         return `
         <div class="item"><span class="icon">${spriteSVG(item.sp, 32)}</span>
-          <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/c\xE1i \xB7 ${esc(item.desc || "V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t")}</div></span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${n} <span style="display:inline-block; font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff; white-space:nowrap;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/c\xE1i \xB7 ${esc(item.desc || "V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t")}</div></span>
           <span class="acts">
             <span class="ibtn" data-takeout="${key}" title="L\u1EA5y ra (mang v\xE0o c\u1ED1t truy\u1EC7n, kh\xF4ng quy ra ti\u1EC1n)">${spriteSVG("emBang", 16)}</span>
             <span class="ibtn" data-selldlg="${key}" title="B\xE1n (t\u1EF1 ch\u1ECDn s\u1ED1 l\u01B0\u1EE3ng)">${spriteSVG("coin", 16)}</span>
@@ -3726,6 +4136,8 @@ function openPanel(kind) {
     if (cfgDragPet) cfgDragPet.addEventListener("change", () => {
       ctx.S.dragPet = cfgDragPet.checked;
       save();
+      const mas = $id("mascots");
+      if (mas) mas.dataset.drag = ctx.S.dragPet ? "1" : "0";
       toast(ctx.S.dragPet ? "\u0110\xE3 b\u1EADt t\xEDnh n\u0103ng k\xE9o th\u1EA3 th\xFA c\u01B0ng" : "\u0110\xE3 t\u1EAFt t\xEDnh n\u0103ng k\xE9o th\u1EA3 th\xFA c\u01B0ng");
     });
     $id("csPromptSave").addEventListener("click", () => {
@@ -3802,7 +4214,7 @@ function initWindows() {
   $id("close").addEventListener("click", closeWin);
   dragBar = $id("drag");
   dragBar.addEventListener("pointerdown", (e) => {
-    if (e.target.id === "close") return;
+    if (e.target.id === "close" || e.target.closest("#viewToggle")) return;
     dragBar.setPointerCapture(e.pointerId);
     wg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: ctx.win.offsetLeft, oy: ctx.win.offsetTop };
   });
@@ -3929,6 +4341,13 @@ var TOOLS = [
 var toolbarOpen = false;
 function renderToolbar() {
   const tb = $id("toolbar");
+  if (ctx.S && ctx.S.view === "explore") {
+    tb.style.display = "none";
+    const tip2 = $id("modetip");
+    if (tip2) tip2.style.display = "none";
+    return;
+  }
+  tb.style.display = "flex";
   tb.classList.toggle("open", toolbarOpen);
   if (!toolbarOpen) {
     tb.innerHTML = `<div class="tool" data-tool="expand" title="C\xF4ng c\u1EE5" style="width:34px;height:34px">${spriteSVG("toolSeed", 22)}</div>`;
@@ -3999,6 +4418,32 @@ function plotHTML(pi) {
 }
 function renderPlots() {
   const wrap = $id("blocks");
+  const expWrap = $id("explore-blocks");
+  if (ctx.S && ctx.S.view === "explore") {
+    if (wrap) wrap.style.display = "none";
+    if (expWrap) {
+      expWrap.style.display = "flex";
+      if (!expWrap.hasChildNodes()) {
+        expWrap.innerHTML = `
+          <div class="explore-slot" id="eslot-dungeon">
+            ${spriteSVG("dungeonGate", 48)}
+            <div class="feature-name">H\u1EA7m ng\u1EE5c</div>
+          </div>
+          <div class="explore-slot" id="eslot-bet">
+            ${spriteSVG("diceIcon", 48)}
+            <div class="feature-name">\u0110\u1ECF \u0110en</div>
+          </div>
+        `;
+        const dBtn = $id("eslot-dungeon");
+        if (dBtn) dBtn.addEventListener("click", () => openPanel("dungeon"));
+        const bBtn = $id("eslot-bet");
+        if (bBtn) bBtn.addEventListener("click", () => openPanel("bet"));
+      }
+    }
+    return;
+  }
+  if (wrap) wrap.style.display = "";
+  if (expWrap) expWrap.style.display = "none";
   const pg = ctx.S.page, plots = curPlots(), nb = curBlocks();
   if (wrap.children.length !== 6 || wrap.dataset.pg !== String(pg)) {
     wrap.dataset.pg = pg;
@@ -4174,6 +4619,7 @@ function renderDynamic() {
 }
 function renderAll() {
   applyPageSkin();
+  applyViewState();
   renderPager();
   renderStatus();
   renderPlots();
@@ -4440,7 +4886,7 @@ function openTakeout(key) {
     ctx.S.bag[key] = have - n;
     if (ctx.S.bag[key] <= 0) delete ctx.S.bag[key];
     const d = mutDescOf(key);
-    takeoutNote = (takeoutNote || []).filter((t) => now() < t.until).concat({ txt: n + " " + bagName(key) + (d ? " (hi\u1EC7u \u1EE9ng \u0111\xE3 \u0111\u1ECBnh: " + d + ")" : ""), until: now() + 10 * MIN }).slice(-3);
+    takeoutNote = (takeoutNote || []).filter((t) => now() < t.until).concat({ txt: n + " " + bagName(key) + (d ? " (hi\u1EC7u \u1EE9ng \u0111\xE3 \u0111\u1ECBnh: " + d + ")" : ""), until: now() + 10 * MIN });
     save();
     renderStatus();
     toast("\u0110\xE3 l\u1EA5y ra " + n + " " + bagName(key));
@@ -5214,27 +5660,35 @@ function updateInjection() {
     if (now() >= c.matureAt) ripe++;
   }));
   const field = Object.keys(counts).map((id) => CROPS[id].name + "\xD7" + counts[id]).join(", ") || "\u0111ang \u0111\u1EC3 tr\u1ED1ng";
-  const bagTxt = Object.keys(ctx.S.bag).map((k) => {
+  const cropsArr = [];
+  const specialArr = [];
+  Object.keys(ctx.S.bag).forEach((k) => {
     const d = mutDescOf(k);
-    return "  + " + bagName(k) + " \xD7" + ctx.S.bag[k] + (d ? " (" + d + ")" : "");
-  }).join("\n");
+    const line = "  + " + bagName(k) + " \xD7" + ctx.S.bag[k] + (d ? " (" + d + ")" : "");
+    if (k.startsWith("unique@")) specialArr.push(line);
+    else cropsArr.push(line);
+  });
+  const cropsTxt = cropsArr.join("\n");
+  const specialTxt = specialArr.join("\n");
   const ev = todayEvent();
   const takeoutNoteStr = function() {
     setTakeoutNote((takeoutNote || []).filter((t) => now() < t.until));
     if (!takeoutNote.length) return "";
     return `
 
-\u3010QUAN TR\u1ECCNG: H\xC0NH \u0110\u1ED8NG V\u1EEAA X\u1EA2Y RA\u3011
-Ng\u01B0\u1EDDi ch\u01A1i v\u1EEBa l\u1EA5y ${takeoutNote.map((t) => t.txt).join(", ")} ra kh\u1ECFi balo v\u01B0\u1EDDn rau, h\u1EB3n l\xE0 \u0111\u1ECBnh d\xF9ng/t\u1EB7ng trong c\u1ED1t truy\u1EC7n. H\xE3y ti\u1EBFp nh\u1EADn m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn; ph\u1EA7n trong ngo\u1EB7c l\xE0 hi\u1EC7u \u1EE9ng c\u1EE7a v\u1EADt ph\u1EA9m \u0111\xF3, h\xE3y l\u1EA5y \u0111\xF3 l\xE0m chu\u1EA9n v\xE0 c\xF3 th\u1EC3 s\xE1ng t\u1EA1o th\xEAm trong ch\u1EEBng m\u1EF1c.`;
+\u3010H\xC0NH \u0110\u1ED8NG V\u1EEAA X\u1EA2Y RA\u3011
+- V\u1EADt ph\u1EA9m \u0111\u01B0\u1EE3c l\u1EA5y ra d\xF9ng: ${takeoutNote.map((t) => t.txt).join(", ")}
+(Ng\u01B0\u1EDDi ch\u01A1i v\u1EEBa l\u1EA5y c\xE1c v\u1EADt ph\u1EA9m/n\xF4ng s\u1EA3n n\xE0y ra kh\u1ECFi kho \u0111\u1ED3 \u0111\u1EC3 t\u01B0\u01A1ng t\xE1c trong c\u1ED1t truy\u1EC7n. H\xE3y ti\u1EBFp nh\u1EADn t\u1EF1 nhi\xEAn; ph\u1EA7n trong ngo\u1EB7c l\xE0 hi\u1EC7u \u1EE9ng c\u1EE7a v\u1EADt ph\u1EA9m, h\xE3y l\u1EA5y \u0111\xF3 l\xE0m chu\u1EA9n v\xE0 mi\xEAu t\u1EA3 v\xE0o c\u1ED1t truy\u1EC7n)`;
   }();
-  const promptText = `\u3010V\u01B0\u1EDDn rau nh\u1ECF c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i\u3011
-Ng\u01B0\u1EDDi ch\u01A1i \u0111ang tr\u1ED3ng m\u1ED9t m\u1EA3nh v\u01B0\u1EDDn rau th\u01B0 gi\xE3n tr\xEAn giao di\u1EC7n SillyTavern (l\u1ED1i ch\u01A1i ti\u1EC7n \xEDch, t\u1ED3n t\u1EA1i song song v\u1EDBi c\u1ED1t truy\u1EC7n).
+  const promptText = `\u3010H\u1EC7 th\u1ED1ng N\xF4ng tr\u1EA1i & Kho \u0111\u1ED3\u3011
+Ng\u01B0\u1EDDi ch\u01A1i c\xF3 m\u1ED9t h\u1EC7 th\u1ED1ng n\xF4ng tr\u1EA1i v\xE0 t\xFAi \u0111\u1ED3 t\u1ED3n t\u1EA1i song song v\u1EDBi c\u1ED1t truy\u1EC7n.
 T\xECnh tr\u1EA1ng hi\u1EC7n t\u1EA1i:
 - \u0110ang tr\u1ED3ng: ${field || "\u0110\u1EA5t tr\u1ED1ng"}${ripe ? ` (c\xF3 ${ripe} c\xE2y \u0111\xE3 ch\xEDn ch\u1EDD thu)` : ""}
-${bagTxt ? "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF:\n" + bagTxt : "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF: Tr\u1ED1ng"}
+${cropsTxt ? "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF:\n" + cropsTxt : "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF: Tr\u1ED1ng"}
+${specialTxt ? "- V\u1EADt ph\u1EA9m \u0111\u1EB7c bi\u1EC7t t\xEDch tr\u1EEF:\n" + specialTxt : ""}
 ${ev && ev.flavor ? `- S\u1EF1 ki\u1EC7n h\xF4m nay: ${ev.name} \u2014\u2014 ${ev.flavor}` : ""}${takeoutNoteStr}
 
-* H\u01B0\u1EDBng d\u1EABn cho AI: Nh\xE2n v\u1EADt trong c\u1ED1t truy\u1EC7n th\u1EC9nh tho\u1EA3ng c\xF3 th\u1EC3 nh\u1EAFc t\u1EDBi vi\u1EC7c ng\u01B0\u1EDDi ch\u01A1i ch\u0103m v\u01B0\u1EDDn hay thu ho\u1EA1ch th\u1EBF n\xE0o m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn, nh\u01B0ng \u0110\u1EEANG thao t\xE1c v\u01B0\u1EDDn rau thay ng\u01B0\u1EDDi ch\u01A1i, c\u0169ng \u0110\u1EEANG bi\u1EBFn v\u01B0\u1EDDn rau th\xE0nh m\u1EA1ch ch\xEDnh c\u1EE7a c\u1ED1t truy\u1EC7n.`;
+* H\u01B0\u1EDBng d\u1EABn cho AI: B\u1EA1n KH\xD4NG TH\u1EC2 nh\xECn th\u1EA5u t\xFAi \u0111\u1ED3 c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i v\xE0 KH\xD4NG BI\u1EBET h\u1ECD \u0111ang c\xF3 nh\u1EEFng g\xEC. Ch\u1EC9 khi ng\u01B0\u1EDDi ch\u01A1i "l\u1EA5y ra d\xF9ng" (\u1EDF m\u1EE5c H\xC0NH \u0110\u1ED8NG V\u1EEAA X\u1EA2Y RA), nh\xE2n v\u1EADt m\u1EDBi nh\xECn th\u1EA5y v\xE0 ph\u1EA3n \u1EE9ng l\u1EA1i t\u1EF1 nhi\xEAn. \u0110\u1EEANG t\u1EF1 \xFD thao t\xE1c v\u01B0\u1EDDn rau hay thay \u0111\u1ED5i s\u1ED1 l\u01B0\u1EE3ng \u0111\u1ED3 v\u1EADt, v\xE0 \u0110\u1EEANG bi\u1EBFn n\xF3 th\xE0nh m\u1EA1ch ch\xEDnh c\u1EE7a truy\u1EC7n tr\u1EEB phi ng\u01B0\u1EDDi ch\u01A1i ch\u1EE7 \u0111\u1ED9ng nh\u1EAFc t\u1EDBi.`;
   setInjection(promptText);
 }
 var heartbeat;
@@ -5330,6 +5784,7 @@ function loadState() {
   if (!ctx.S.theme) ctx.S.theme = "sakura";
   if (!ctx.S.page) ctx.S.page = 1;
   if (ctx.S.dragPet === void 0) ctx.S.dragPet = false;
+  ctx.S.view = "farm";
   const petRenameMap = { "bunny": "jellyfish", "slimeNight": "peach_soda", "batBlob": "mystery_blob" };
   if (ctx.S.pets) ctx.S.pets = ctx.S.pets.map((p) => petRenameMap[p] || p);
   if (ctx.S.petsOut) ctx.S.petsOut = ctx.S.petsOut.map((p) => petRenameMap[p] || p);
@@ -5451,9 +5906,15 @@ function openDungeonView() {
   const titleH1 = $id("drag").querySelector("h1");
   titleH1.innerHTML = `${spriteSVG("dungeonGate", 16)}Ai m\xE0 th\xE8m \u0111i Dungeon ch\u1EE9!`;
   $id("blocks").style.display = "none";
+  $id("explore-blocks").style.display = "none";
   $id("pager").style.display = "none";
   $id("toolbar").style.display = "none";
   $id("mascots").style.display = "none";
+  $id("viewToggle").style.display = "none";
+  const ctrlrow = sh.querySelector(".ctrlrow");
+  if (ctrlrow) ctrlrow.style.display = "none";
+  const banner = $id("banner");
+  if (banner) banner.style.display = "none";
   dungeonView.style.display = "flex";
   const fieldEl2 = $id("scroll").querySelector(".field");
   if (fieldEl2) fieldEl2.style.minHeight = "420px";
@@ -5463,22 +5924,24 @@ function closeDungeonView() {
   if (!isDungeonOpen) return;
   isDungeonOpen = false;
   stopCombatLoop();
-  const titleH1 = $id("drag").querySelector("h1");
-  titleH1.innerHTML = `${spriteSVG("strawhat", 16)}Ai th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!`;
-  $id("blocks").style.display = "";
-  $id("pager").style.display = "";
-  $id("toolbar").style.display = "";
-  $id("mascots").style.display = "";
   dungeonView.style.display = "none";
   dungeonView.innerHTML = "";
   const fieldEl2 = $id("scroll").querySelector(".field");
   if (fieldEl2) fieldEl2.style.minHeight = "";
+  $id("viewToggle").style.display = "";
+  applyPageSkin();
+  applyViewState();
+  renderPager();
+  renderPlots();
+  renderToolbar();
 }
 function initPlacementPhase() {
   phase = "placement";
   team = [];
   enemies = [];
   projectiles = [];
+  currentWave = 1;
+  totalGold = 0;
   const best = ctx.S.dungeonBest || { wave: 0, gold: 0 };
   const bestHtml = best.wave > 0 ? `<div style="color:#b08a5c; font-size:12px; text-align:center; margin-top:4px;">\u{1F3C6} K\u1EF7 l\u1EE5c: Wave ${best.wave} \xB7 ${best.gold} G</div>` : "";
   dungeonView.innerHTML = `
@@ -5507,6 +5970,51 @@ function initPlacementPhase() {
     `;
   const arena = $id("dg-arena");
   const dock = $id("dg-dock");
+  dock.innerHTML = `
+        <div id="dg-nav-left" style="font-size: 24px; font-weight: bold; color: #d9ba8a; cursor: pointer; user-select: none; padding: 0 5px; touch-action: manipulation; opacity: 0.3;">\u25C0</div>
+        <div style="flex:1; overflow:hidden; height: 100%; display: flex; align-items: center; position: relative;">
+            <div id="dg-slots-container" style="display: flex; gap: 10px; transition: transform 0.3s ease; position: absolute; left: 0;"></div>
+        </div>
+        <div id="dg-nav-right" style="font-size: 24px; font-weight: bold; color: #d9ba8a; cursor: pointer; user-select: none; padding: 0 5px; touch-action: manipulation;">\u25B6</div>
+    `;
+  const slotsContainer = $id("dg-slots-container");
+  const navLeft = $id("dg-nav-left");
+  const navRight = $id("dg-nav-right");
+  const dockWrapper = navLeft.nextElementSibling;
+  let dockPage = 0;
+  function updateDockNav() {
+    if (!dockWrapper) return;
+    const w = dockWrapper.clientWidth || 250;
+    const itemsPerPage = Math.max(1, Math.floor(w / 54));
+    const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
+    if (dockPage > maxPage) dockPage = maxPage;
+    navLeft.style.opacity = dockPage > 0 ? "1" : "0.3";
+    navRight.style.opacity = dockPage < maxPage ? "1" : "0.3";
+    const offset = dockPage * itemsPerPage * 54;
+    slotsContainer.style.transform = `translateX(-${offset}px)`;
+  }
+  navLeft.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (dockPage > 0) {
+      dockPage--;
+      updateDockNav();
+    }
+  });
+  navRight.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    const w = dockWrapper.clientWidth || 250;
+    const itemsPerPage = Math.max(1, Math.floor(w / 54));
+    const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
+    if (dockPage < maxPage) {
+      dockPage++;
+      updateDockNav();
+    }
+  });
+  if (window.ResizeObserver) {
+    new ResizeObserver(() => updateDockNav()).observe(dockWrapper);
+  } else {
+    updateDockNav();
+  }
   let draggingPet = null;
   let dragEl = null;
   ctx.S.pets.forEach((petId) => {
@@ -5528,9 +6036,8 @@ function initPlacementPhase() {
       dragEl.style.pointerEvents = "none";
       dragEl.style.position = "fixed";
       dragEl.style.zIndex = "100000";
-      dragEl.style.transition = "none";
       dragEl.innerHTML = petSVG(petId, 32);
-      arena.appendChild(dragEl);
+      document.body.appendChild(dragEl);
       dragEl.style.left = e.clientX - 16 + "px";
       dragEl.style.top = e.clientY - 16 + "px";
       slot.setPointerCapture(e.pointerId);
@@ -5560,10 +6067,10 @@ function initPlacementPhase() {
                 `;
         let x = e.clientX - rect.left - 16;
         let y = e.clientY - rect.top - 16;
-        if (x > rect.width - 32) x = rect.width - 32;
-        if (x < 0) x = 0;
-        if (y < 0) y = 0;
-        if (y > rect.height - 32) y = rect.height - 32;
+        if (x > rect.width - 16) x = rect.width - 16;
+        if (x < 16) x = 16;
+        if (y < 16) y = 16;
+        if (y > rect.height - 16) y = rect.height - 16;
         el.style.position = "absolute";
         el.style.left = x + "px";
         el.style.top = y + "px";
@@ -5590,17 +6097,17 @@ function initPlacementPhase() {
           ev.preventDefault();
           if (phase !== "placement") return;
           isPlacedDragging = true;
-          el.style.position = "fixed";
           el.style.zIndex = "100000";
-          el.style.transition = "none";
-          el.style.left = ev.clientX - 16 + "px";
-          el.style.top = ev.clientY - 16 + "px";
+          const arect = arena.getBoundingClientRect();
+          el.style.left = ev.clientX - arect.left - 16 + "px";
+          el.style.top = ev.clientY - arect.top - 16 + "px";
           el.setPointerCapture(ev.pointerId);
         });
         el.addEventListener("pointermove", (ev) => {
           if (!isPlacedDragging) return;
-          el.style.left = ev.clientX - 16 + "px";
-          el.style.top = ev.clientY - 16 + "px";
+          const arect = arena.getBoundingClientRect();
+          el.style.left = ev.clientX - arect.left - 16 + "px";
+          el.style.top = ev.clientY - arect.top - 16 + "px";
         });
         el.addEventListener("pointerup", (ev) => {
           if (!isPlacedDragging) return;
@@ -5612,14 +6119,12 @@ function initPlacementPhase() {
             el.style.position = "absolute";
             let nx = ev.clientX - arect.left - 16;
             let ny = ev.clientY - arect.top - 16;
-            if (nx > arect.width - 32) nx = arect.width - 32;
-            if (nx < 0) nx = 0;
-            if (ny < 0) ny = 0;
-            if (ny > arect.height - 32) ny = arect.height - 32;
+            if (nx > arect.width - 16) nx = arect.width - 16;
+            if (nx < 16) nx = 16;
+            if (ny < 16) ny = 16;
+            if (ny > arect.height - 16) ny = arect.height - 16;
             el.style.left = nx + "px";
             el.style.top = ny + "px";
-            el.offsetHeight;
-            el.style.transition = "";
             memberObj.x = nx;
             memberObj.y = ny;
           } else {
@@ -5631,7 +6136,7 @@ function initPlacementPhase() {
         });
       }
     });
-    dock.appendChild(slot);
+    slotsContainer.appendChild(slot);
   });
   const infoBtn = $id("dg-info-btn");
   const infoPanel = $id("dg-info-panel");
@@ -5993,8 +6498,12 @@ function updateEntities(groupA, groupB, dt) {
       statusDiv = document.createElement("div");
       statusDiv.className = "dg-status";
       a.el.appendChild(statusDiv);
+      a._lastStatusHtml = "";
     }
-    statusDiv.innerHTML = statusHtml;
+    if (a._lastStatusHtml !== statusHtml) {
+      statusDiv.innerHTML = statusHtml;
+      a._lastStatusHtml = statusHtml;
+    }
     if (isStunned) return;
     let closest = null;
     let minDist = Infinity;
@@ -6186,9 +6695,15 @@ function endDungeon(isWin) {
         <div class="dg-title">Game Over</div>
         ${rewardText}
         ${recordHtml}
-        <div class="buy" id="dg-finish-btn" style="margin-top: 10px;">Tho\xE1t H\u1EA7m Ng\u1EE5c</div>
+        <div style="display:flex; justify-content:center; gap: 10px; margin-top: 15px; margin-bottom: auto;">
+            <div class="buy" id="dg-restart-btn">Ch\u01A1i L\u1EA1i</div>
+            <div class="buy plain" id="dg-finish-btn">Tho\xE1t</div>
+        </div>
     `;
   arena.appendChild(overlay);
+  overlay.querySelector("#dg-restart-btn").addEventListener("click", () => {
+    initPlacementPhase();
+  });
   overlay.querySelector("#dg-finish-btn").addEventListener("click", () => {
     closeDungeonView();
   });
@@ -6216,7 +6731,6 @@ function showWaveRewards() {
   team = [...fullTeam];
   const overlay = document.createElement("div");
   overlay.className = "dg-overlay";
-  overlay.style.backgroundColor = "rgba(0,0,0,0.85)";
   const allRewards = [
     { id: "heal", name: "H\u1ED3i M\xE1u", desc: "H\u1ED3i 100% HP cho to\xE0n \u0111\u1ED9i", color: "#4caf50" },
     { id: "buff", name: "C\u01B0\u1EDDng H\xF3a", desc: "T\u0103ng ng\u1EABu nhi\xEAn 10-30% HP ho\u1EB7c ATK cho to\xE0n \u0111\u1ED9i", color: "#2196f3" },
@@ -6259,9 +6773,9 @@ function showWaveRewards() {
   }
   overlay.innerHTML = `
         <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Ho\xE0n Th\xE0nh!</div>
-        <div style="color:white; margin-bottom: 10px;">Nh\u1EADn \u0111\u01B0\u1EE3c ${waveGold} G (T\u1ED5ng: ${totalGold} G)</div>
+        <div style="color:white; margin-bottom: 15px;">Nh\u1EADn \u0111\u01B0\u1EE3c ${waveGold} G (T\u1ED5ng: ${totalGold} G)</div>
         ${bossDropHtml}
-        <div style="display:flex; gap: 15px; flex-wrap:wrap; justify-content:center;">
+        <div style="display:flex; gap: 10px; flex-wrap:wrap; justify-content:center; width: 100%; margin-bottom: auto;">
             ${cardsHtml}
         </div>
     `;
@@ -6476,6 +6990,7 @@ function initFarm() {
   resetDestroyed();
   document.getElementById("star-tavern-farm-root")?.remove();
   loadState();
+  if (cashOut) cashOut(true);
   initUI();
   applyTheme();
   initOrb();

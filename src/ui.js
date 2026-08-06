@@ -22,17 +22,67 @@ let swX = null, swY = null;
 export function applyTheme() { ctx.ui.classList.remove('theme-sakura', 'theme-sky'); ctx.ui.classList.add('theme-' + (ctx.S && ctx.S.theme === 'sky' ? 'sky' : 'sakura')); }
 
 export function applyPageSkin() {
-  fieldEl.classList.toggle('pg2', ctx.S.page === 2);
-  fieldEl.classList.toggle('pg3', ctx.S.page === 3);
-  // @ts-ignore
-  fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? 'water' : ctx.S.page === 3 ? 'mine' : 'grass', 4242);
+  const isExplore = ctx.S && ctx.S.view === 'explore';
+  fieldEl.classList.toggle('pg2', !isExplore && ctx.S.page === 2);
+  fieldEl.classList.toggle('pg3', !isExplore && ctx.S.page === 3);
+  
+  const titleH1 = sh.querySelector('.titlebar h1');
+  if (isExplore) {
+    fieldEl.style.backgroundImage = 'none';
+    fieldEl.style.backgroundColor = '#d3c3a0';
+    if (titleH1) titleH1.innerHTML = `${spriteSVG('mapIcon', 16)}Dạo quanh nào...`;
+  } else {
+    // @ts-ignore
+    fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? 'water' : ctx.S.page === 3 ? 'mine' : 'grass', 4242);
+    fieldEl.style.backgroundColor = '';
+    if (titleH1) titleH1.innerHTML = `${spriteSVG('strawhat', 16)}Ai mà thèm làm nông dân chứ!`;
+  }
   // @ts-ignore
   fieldEl.style.backgroundSize = '192px 192px';
 }
 
+/* ---------- Hàm tập trung quản lý trạng thái chuyển tab Nông trại / Khám phá ---------- */
+export function applyViewState() {
+  const isExplore = ctx.S && ctx.S.view === 'explore';
+  const ctrlrow = sh.querySelector('.ctrlrow');
+  const mascots = $id('mascots');
+  const witch = $id('witch');
+  const banner = $id('banner');
+  const viewToggle = $id('viewToggle');
+  const statBlocks = $id('stat-blocks');
+  
+  // Ẩn/hiện các thành phần chỉ thuộc về Nông trại
+  if (ctrlrow) ctrlrow.style.display = isExplore ? 'none' : 'flex';
+  if (mascots) mascots.style.display = isExplore ? 'none' : '';
+  if (decoLayer) decoLayer.style.display = isExplore ? 'none' : '';
+  if (witch) witch.style.display = isExplore ? 'none' : '';
+  if (banner) banner.style.display = isExplore ? 'none' : '';
+  if (statBlocks) statBlocks.style.display = isExplore ? 'none' : '';
+  
+  // Cập nhật class nền cho tab Khám phá
+  const field = sh.querySelector('.field');
+  if (field) {
+    if (isExplore) field.classList.add('explore-mode');
+    else field.classList.remove('explore-mode');
+  }
+
+  // Cập nhật nút chuyển tab
+  if (viewToggle) {
+    viewToggle.innerHTML = isExplore
+      ? `${spriteSVG('strawhat', 16)} <span>Về Nông Trại</span>`
+      : `${spriteSVG('mapIcon', 16)} <span>Khám phá</span>`;
+  }
+}
+
 export function renderPager() {
+  const pager = $id('pager');
+  if (ctx.S && ctx.S.view === 'explore') {
+    pager.style.display = 'none';
+    return;
+  }
+  pager.style.display = 'flex';
   const names = { 1: 'Đồng cỏ', 2: 'Vùng nước', 3: 'Khu mỏ' };
-  $id('pager').innerHTML = [1, 2, 3].map(pg => {
+  pager.innerHTML = [1, 2, 3].map(pg => {
     const un = pageUnlocked(pg);
     return `<span class="ptab p${pg}${ctx.S.page === pg ? ' active' : ''}${un ? '' : ' lock'}" data-pg="${pg}">${names[pg]}${un ? '' : ' 🔒'}</span>`;
   }).join('');
@@ -68,12 +118,13 @@ export function initUI() {
   <div id="win">
     <div class="titlebar" id="drag">
       <h1>${spriteSVG('strawhat', 16)}Ai mà thèm làm nông dân chứ!</h1>
+      <div class="view-toggle" id="viewToggle" title="Chuyển chế độ Khám phá/Nông trại">${spriteSVG('mapIcon', 16)} <span>Khám phá</span></div>
       <div class="close-x" id="close">×</div>
     </div>
     <div class="statusbar">
       <span class="stat">${spriteSVG('coin', 22)}<b id="coins">0</b></span>
       <span class="stat"><span id="wicon">${spriteSVG('sun', 22)}</span><span id="daytxt"></span></span>
-      <span class="stat">${spriteSVG('sprout', 18)}Ruộng <span id="blocktxt"></span></span>
+      <span class="stat" id="stat-blocks">${spriteSVG('sprout', 18)}Ruộng <span id="blocktxt"></span></span>
     </div>
     <div class="ctrlrow">
       <span class="chip witchchip" id="chipRegen" style="display:none">✦ Gieo lại sự kiện hôm nay</span>
@@ -86,6 +137,7 @@ export function initUI() {
       <div class="field">
         <div class="pager" id="pager"></div>
         <div class="blocks" id="blocks"></div>
+        <div class="explore-blocks" id="explore-blocks" style="display:none"></div>
         <div class="mascots" id="mascots"></div>
         <div id="witch" title="Phù thuỷ tròn"></div>
         <div class="mode-tip" id="modetip"></div>
@@ -97,7 +149,6 @@ export function initUI() {
         <div class="btn" data-open="shop">${spriteSVG('shopIcon', 22)}Cửa hàng</div>
         <div class="btn" data-open="bag">${spriteSVG('bagIcon', 22)}Balo</div>
         <div class="btn" data-open="gacha">${spriteSVG('gachapon', 22)}Gachapon</div>
-        <div class="btn" data-open="dungeon">${spriteSVG('dungeonGate', 22)}Hầm ngục</div>
         <div class="btn" data-open="cfg">${spriteSVG('gearIcon', 22)}Cài đặt</div>
     </div>
     <div class="modal" id="modal">
@@ -164,7 +215,15 @@ if (pagerEl) pagerEl.addEventListener('click', e => {
 /* Phương án 3: vuốt trái phải ở khu ruộng để đổi trang (dùng thử song song với thanh viên nang của phương án 2; nếu bỏ thì xoá cả khối này) */
   swX = null; swY = null;
 // @ts-ignore
-fieldEl.addEventListener('touchstart', e => { if (e.touches.length === 1) { swX = e.touches[0].clientX; swY = e.touches[0].clientY; } }, { passive: true });
+fieldEl.addEventListener('touchstart', e => { 
+  if (ctx.S && ctx.S.view === 'explore') { swX = null; return; }
+  if (e.touches.length === 1 && (!ctx.S.dragPet || !e.target.closest('.pet'))) { 
+    swX = e.touches[0].clientX; 
+    swY = e.touches[0].clientY; 
+  } else {
+    swX = null;
+  }
+}, { passive: true });
 fieldEl.addEventListener('touchend', e => {
   if (swX == null) return;
   // @ts-ignore
@@ -181,4 +240,17 @@ fieldEl.addEventListener('touchend', e => {
   toast(pg === 1 ? 'Về đồng cỏ~' : pg === 2 ? 'Tới vùng nước~' : 'Tới khu mỏ~');
 }, { passive: true });
 
+  const viewToggle = $id('viewToggle');
+  if (viewToggle) {
+    viewToggle.addEventListener('click', () => {
+      ctx.S.view = ctx.S.view === 'explore' ? 'farm' : 'explore';
+      save();
+      applyPageSkin();
+      applyViewState();
+      renderPlots();
+      renderToolbar();
+      renderPager();
+      toast(ctx.S.view === 'explore' ? 'Bản đồ Khám phá' : 'Trở về Nông trại');
+    });
+  }
 }

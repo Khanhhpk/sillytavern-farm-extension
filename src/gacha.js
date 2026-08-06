@@ -518,6 +518,50 @@ export function openGachaModal() {
     const loadOverlay = All.$id('gachaLoadingOverlay');
     const loadText = All.$id('gachaLoadingText');
 
+    initGachaState();
+    const haveTickets = ctx.S.tickets?.[ticketType] || 0;
+    
+    if (haveTickets < count) {
+      const missing = count - haveTickets;
+      const priceMap = { norm: 1000, spec: 5000, super: 500000 };
+      const ticketPrice = priceMap[ticketType] || 0;
+      const cost = missing * ticketPrice;
+      const tName = ticketType === 'super' ? 'Siêu cường' : (ticketType === 'spec' ? 'Đặc biệt' : 'Thường');
+      
+      if (ctx.S.coins >= cost) {
+        const confirmHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 18px; font-weight: bold; color: #8a5cc0; margin-bottom: 10px;">Không đủ vé</div>
+            <div style="font-size: 14px; margin-bottom: 15px; color: #3a2c22;">Bạn có muốn dùng <b>${cost.toLocaleString()} G</b> để quay ${tName} ×${count} không?</div>
+            <div style="font-size: 12px; color: #7a5c38; margin-bottom: 20px;">Mua bù ${missing} vé ${tName} (${ticketPrice.toLocaleString()} G/vé) · vàng hiện có ${ctx.S.coins.toLocaleString()} G</div>
+            <div style="display: flex; justify-content: center; gap: 10px;">
+              <span class="buy" id="btnCancelRoll" style="background: #e3d5c8; color: #3a2c22; min-width: 80px; text-align: center;">Thôi</span>
+              <span class="buy" id="btnConfirmRoll" style="min-width: 140px; text-align: center;">Dùng vàng & quay</span>
+            </div>
+          </div>
+        `;
+        openModal('Máy Gachapon', confirmHTML);
+        
+        All.$id('btnCancelRoll').addEventListener('click', () => {
+          openGachaModal();
+        });
+        
+        All.$id('btnConfirmRoll').addEventListener('click', () => {
+          if (ctx.S.coins < cost) return toast('Không đủ vàng');
+          ctx.S.coins -= cost;
+          ctx.S.tickets[ticketType] = (ctx.S.tickets[ticketType] || 0) + missing;
+          save();
+          renderStatus();
+          openGachaModal();
+          setTimeout(() => doRoll(ticketType, count), 50);
+        });
+        return;
+      } else {
+        toast(`Cần ${count} Vé ${tName} (thiếu ${missing} vé, mua mất ${cost.toLocaleString()} G nhưng bạn không đủ tiền)!`);
+        return;
+      }
+    }
+
     if (machine) machine.style.animation = 'gachaShake 0.2s ease infinite';
     if (loadOverlay) loadOverlay.style.display = 'flex';
     if (loadText) loadText.textContent = 'Đang quay...';

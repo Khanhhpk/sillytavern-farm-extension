@@ -13,3 +13,4 @@ export * from './gacha.js';
 export * from './graphics.js';
 export * from './dungeon.js';
 export * from './destroy.js';
+export * from './bet.js';

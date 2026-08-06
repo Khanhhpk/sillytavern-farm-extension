@@ -34,8 +34,9 @@ export const styleCSS = `
       background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 8px; padding: 3px 12px;
       box-shadow: 0 3px 0 var(--tint), inset 0 0 0 2px #fff6e0;
       display: flex; align-items: center; gap: 8px; }
+    .view-toggle { margin-left: auto; width: auto; height: 24px; padding: 0 8px; gap: 4px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 0 var(--tintSoft); flex-shrink: 0; font-size: 11px; font-weight: bold; color: #7a5c38; }
     .close-x { width: 24px; height: 24px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 6px;
-      color: #7a5c38; box-shadow: 0 2px 0 var(--tintSoft); font-weight: bold; text-align: center; line-height: 18px; cursor: pointer; }
+      color: #7a5c38; box-shadow: 0 2px 0 var(--tintSoft); font-weight: bold; text-align: center; line-height: 18px; cursor: pointer; flex-shrink: 0; }
     .statusbar { display: flex; align-items: center; gap: 12px; padding: 7px 14px; background: #f4e6cf;
       border-bottom: 3px solid #ddc39a; font-size: 13px; font-weight: bold; color: #7a5c38; flex: none; flex-wrap: wrap; }
     .stat { display: flex; align-items: center; gap: 5px; }
@@ -43,11 +44,11 @@ export const styleCSS = `
     /* v0.8: thanh lật trang ba trang */
     .pager { position: absolute; top: 7px; right: 7px; z-index: 7; display: flex; align-items: center; justify-content: center;
       background: rgba(58,48,30,.4); border: 2px solid rgba(255,246,224,.4); border-radius: 14px; overflow: hidden;
-      width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: rgba(255,246,224,.8); user-select: none; }   /* Phương án 2 sửa: bình thường là quả cầu nhỏ mờ */
+      width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: rgba(255,246,224,.8); user-select: none; }
     .pager.open { width: auto; height: auto; border-radius: 12px; cursor: default;
-      background: rgba(58,48,30,.55); border-color: rgba(255,246,224,.5); font-size: 0; }   /* Bấm mở = bung thành thanh viên nang */
-    .pager:not(.open) .ptab { display: none; }             /* Ở dạng quả cầu thì ẩn các tab trang */
-    .pager:not(.open)::after { content: '⇄'; }             /* Icon nhỏ trên mặt cầu */
+      background: rgba(58,48,30,.55); border-color: rgba(255,246,224,.5); font-size: 0; }
+    .pager:not(.open) .ptab { display: none; }
+    .pager:not(.open)::after { content: '⇄'; }
     .ptab { flex: none; font-size: 11px; font-weight: bold; padding: 4px 10px; background: transparent;
       color: #f0e6cc; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 3px; }
     .ptab + .ptab { border-left: 1px solid rgba(255,246,224,.35); }
@@ -55,37 +56,49 @@ export const styleCSS = `
     .ptab.lock { opacity: .6; }
     .field { margin: 10px 12px; background-color: #a9c383; border: 4px solid #b08a5c; border-radius: 8px;
       box-shadow: inset 0 0 0 3px #8aa86a; padding: 14px; position: relative; }
-    /* v0.8: da trang W1 ruộng nổi đầm sen / M1 mạch quặng kim cương */
     .field.pg2 { background-color: #8ec8d8; border-color: #6a9ab0; box-shadow: inset 0 0 0 3px #79b4c6; }
     .field.pg3 { background-color: #5f5870; border-color: #7a6a94; box-shadow: inset 0 0 0 3px #4e4860; }
-    .field.pg2 span.dside, .field.pg2 span.dbot, .field.pg3 span.dside, .field.pg3 span.dbot { display: none !important; }  /* Trang trí đồng cỏ không lội nước / không xuống mỏ */
-    .field.pg2 .plot { border-color: #c9a273;            /* v0.9: khung gỗ hai lớp —— gỗ nhạt ngoài + gỗ đậm trong, lấy lại cảm giác khung vuông của bản thiết kế */
+    .field.pg2 span.dside, .field.pg2 span.dbot, .field.pg3 span.dside, .field.pg3 span.dbot { display: none !important; }
+    .field.pg2 .plot { border-color: #c9a273;
       box-shadow: inset 0 0 0 3px #a8845c, inset 0 -5px 0 rgba(40,70,90,.28); }
     .field.pg2 .plot.watered { border-color: #b08a5c; box-shadow: inset 0 0 0 3px #8a6844, inset 0 -5px 0 rgba(30,55,75,.35); }
-    .field.pg2 .block:not(.locked) .plot::before {       /* v0.9 sửa lần 2: đinh góc màu đậm ở bốn góc (giống bản thiết kế) */
+    .field.pg2 .block:not(.locked) .plot::before {
       content: ''; position: absolute; inset: -3px; pointer-events: none; border-radius: 6px;
       background: linear-gradient(#6a4a2c,#6a4a2c) left top / 7px 7px no-repeat,
         linear-gradient(#6a4a2c,#6a4a2c) right top / 7px 7px no-repeat,
         linear-gradient(#6a4a2c,#6a4a2c) left bottom / 7px 7px no-repeat,
         linear-gradient(#6a4a2c,#6a4a2c) right bottom / 7px 7px no-repeat; }
-    .field.pg3 .plot { border-color: #3f8a9a; border-radius: 2px;   /* v0.9 sửa lần 3: luống ươm pha lê bớt bo góc, cạnh sắc rõ */
+    .field.pg3 .plot { border-color: #3f8a9a; border-radius: 2px;
       box-shadow: inset 0 0 0 1px rgba(138,224,234,.5), inset 0 -3px 0 rgba(20,20,40,.35); }
     .field.pg3 .plot.watered { border-color: #5fc8d8; }
-    /* v0.9 sửa lần 4: đinh góc trắng ở khu mỏ thử thấy chói mắt, bỏ (luống ươm vẫn giữ góc vuông) */
-    .field.pg2 .block.locked .plot { border-color: #8ab4c2; box-shadow: inset 0 3px 0 rgba(255,255,255,.28), inset 0 -3px 0 rgba(30,60,80,.22); } /* Cảm giác nổi khối giống ô khoá bên đồng cỏ */
-    .field.pg3 .block.locked .plot { border-color: #6d657c; box-shadow: none; } /* Ô khoá khu mỏ giữ khung trơn (thử thanh sáng nổi khối hai lần đều thấy kỳ, wen chốt) */
+    .field.pg2 .block.locked .plot { border-color: #8ab4c2; box-shadow: inset 0 3px 0 rgba(255,255,255,.28), inset 0 -3px 0 rgba(30,60,80,.22); }
+    .field.pg3 .block.locked .plot { border-color: #6d657c; box-shadow: none; }
     .blocks { display: grid; grid-template-columns: repeat(3, max-content); gap: 14px; justify-content: center; }
     @media (max-width: 640px) {
       .blocks { grid-template-columns: repeat(2, max-content); }
-      .field { padding: 12px 12px 70px; }                       /* Sửa #7: dải cỏ riêng cho thanh công cụ / linh vật */
-      .titlebar h1 { font-size: 13px; letter-spacing: 0; }      /* Sửa #11: bố cục dọc gọn lại */
+      .field { padding: 12px 12px 70px; }
+      .titlebar h1 { font-size: 13px; letter-spacing: 0; }
       .titlebar h1 .sub { display: none; }
       .statusbar { gap: 6px 10px; font-size: 12px; padding: 6px 10px; }
       .bottombar { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; }
-      .btn { font-size: 13px; padding: 7px 6px; }
-      span.dside { display: none; }      /* Sửa #13: màn hẹp không đủ lề bên, chuyển trang trí xuống dải xanh dưới đáy */
-      span.dbot { display: inline; }     /* Nâng quyền cho span, đè lên quy tắc ẩn mặc định phía sau */
+      .btn { font-size: 11px; padding: 6px 2px; }
+      span.dside { display: none; }
+      span.dbot { display: inline; }
     }
+    .field.explore-mode { background: radial-gradient(circle at 50% 50%, #2b1b54 0%, #0d0614 100%) !important; border-color: #4b3082 !important; overflow: hidden; }
+    .field.explore-mode::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.8) 1px, transparent 1px), radial-gradient(circle at 70% 60%, rgba(255,255,255,0.8) 1px, transparent 1px), radial-gradient(circle at 40% 80%, rgba(255,255,255,0.8) 1.5px, transparent 1.5px), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.8) 1px, transparent 1px);
+      background-size: 100px 100px; opacity: 0.5; pointer-events: none; z-index: 0;
+    }
+    .explore-blocks { padding: 18px 24px 70px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; min-height: 280px; align-content: flex-start; position: relative; z-index: 1; }
+    .explore-slot { width: 84px; height: 104px; background: rgba(255,255,255,0.7); border: 3px solid #8a6844; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; box-shadow: inset 0 0 0 3px rgba(255,255,255,0.5), 0 4px 0 #8a6844; transition: transform 0.1s; position: relative; z-index: 10; pointer-events: auto; }
+    .explore-slot:active { transform: translateY(4px); box-shadow: inset 0 0 0 3px rgba(255,255,255,0.5), 0 0 0 #8a6844; }
+    .explore-slot .feature-name { font-size: 13px; font-weight: bold; color: #7a5c38; margin-top: 8px; text-align: center; }
+    
+    .field.explore-mode .explore-slot { background: rgba(43,27,84,0.7); border-color: #8a5cc0; box-shadow: inset 0 0 0 3px rgba(138,92,192,0.5), 0 4px 0 #4b3082; }
+    .field.explore-mode .explore-slot:active { transform: translateY(4px); box-shadow: inset 0 0 0 3px rgba(138,92,192,0.5), 0 0 0 #4b3082; }
+    .field.explore-mode .explore-slot .feature-name { color: #e0ccff; text-shadow: 0 1px 2px #000; }
     .block { display: grid; grid-template-columns: repeat(2, var(--plot, 74px)); grid-auto-rows: var(--plot, 74px);
       gap: 6px; position: relative; }
     .plot { background-color: #b99b84; border: 3px solid #937863; border-radius: 6px;
@@ -108,6 +121,8 @@ export const styleCSS = `
     .sign.confirm { border-color: var(--accLine); color: var(--accFg); }
     /* #26: lớp cho bé tròn tự do đi lại —— phủ toàn bộ khu ruộng, đi theo khu vực (loại làm việc = hàng dưới, loại đi dạo = bờ ruộng) */
     .mascots { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+    /* Cảm ứng: không có touch-action:none thì trình duyệt coi cú vuốt là cuộn trang, bắn pointercancel và cắt ngang phiên kéo */
+    .mascots[data-drag="1"] .pet { touch-action: none; }
     .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute;
       left: 0; bottom: 0; will-change: transform, translate; }
     .pet:active { transform: scale(1.15, .85); }
@@ -284,11 +299,11 @@ export const styleCSS = `
     .tool.mini { width: 40px; height: 20px; color: #8a6a42; font-weight: bold; font-size: 11px; background: #f0dfc0; }
     .mode-tip { position: absolute; left: 62px; bottom: 14px; background: var(--accBg); border: 2px solid var(--accLine);
       border-radius: 6px; padding: 3px 8px; font-size: 11px; font-weight: bold; color: var(--accFg); z-index: 7; display: none; }
-    .bottombar { display: flex; align-items: center; gap: 10px; padding: 10px 14px 12px; flex: none; }
-    .btn { flex: 1; padding: 8px 10px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #b08a5c;
+    .bottombar { display: flex; align-items: stretch; gap: 10px; padding: 10px 14px 12px; flex: none; }
+    .btn { flex: 1; padding: 6px 4px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #b08a5c;
       border-radius: 8px; box-shadow: inset 0 0 0 2px #fff6e0, inset 0 3px 0 #fffaf0, inset 0 -4px 0 #d9ba8a, 0 4px 0 #9a7a54;
-      font-size: 14px; font-weight: bold; color: #7a5c38; text-shadow: 1px 1px 0 #fff3dd; text-align: center;
-      display: flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; user-select: none; }
+      font-size: 12px; font-weight: bold; color: #7a5c38; text-shadow: 1px 1px 0 #fff3dd; text-align: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; user-select: none; white-space: nowrap; }
     .modal { position: absolute; inset: 0; background: rgba(60,40,20,.35); display: none; align-items: center;
       justify-content: center; z-index: 20; padding: 14px; }
     .modal.open { display: flex; }
@@ -361,10 +376,10 @@ export const styleCSS = `
     .dungeon-view.open { display: flex; }
     .dg-arena { flex: 1; position: relative; border: 4px solid #3f3a50; border-radius: 8px; background: rgba(0,0,0,0.1); overflow: hidden; }
     .dg-dock { height: 60px; background: rgba(58,48,30,.7); margin-top: 10px; border-radius: 8px; border: 2px solid #8a6a42; display: flex; align-items: center; padding: 0 10px; gap: 10px; overflow-x: auto; overflow-y: hidden; }
-    .dg-slot { width: 44px; height: 44px; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+    .dg-slot { width: 44px; height: 44px; flex-shrink: 0; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
     .dg-slot:hover { border-color: #d9ba8a; background: rgba(255,255,255,.2); }
     .dg-slot.placed { opacity: 0.4; pointer-events: none; }
-    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; user-select: none; }
+    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; }
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
     .dg-entity.flip img { transform: scaleX(-1); }
     .dg-hp-bar { position: absolute; top: -8px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
@@ -374,8 +389,8 @@ export const styleCSS = `
     .dg-dmg.heal { color: #a4dc8c; }
     .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
-    .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
-    .dg-title { font-size: 32px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 2px; }
+    .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; overflow-y: auto; padding: 15px; box-sizing: border-box; }
+    .dg-title { font-size: 24px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 1px; text-align: center; margin-top: auto; }
     .dg-dock::-webkit-scrollbar { height: 8px; display: block; }
     .dg-dock::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
     .dg-dock::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 4px; }
@@ -391,7 +406,7 @@ export const styleCSS = `
     .dg-info-item-desc { font-size: 11px; line-height: 1.3; color: #ddd; }
     .dg-info-item-desc b { color: #a4dc8c; font-size: 13px; display: block; margin-bottom: 2px; }
     
-    .dg-projectile { position: absolute; width: 16px; height: 16px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%); transition: left 0.1s linear, top 0.1s linear; }
+    .dg-projectile { position: absolute; width: 16px; height: 16px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%); }
     .dg-projectile img, .dg-projectile svg { width: 100%; height: 100%; }
     
     .dg-status { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; pointer-events: none; z-index: 3; }
@@ -416,10 +431,10 @@ export const styleCSS = `
     }
     .dg-entity.attack > svg, .dg-entity.attack > img { animation: dgAttack 0.2s ease-out forwards; }
     
-    .dg-reward-card { background: #3c2a20; border: 2px solid #b08a5c; padding: 10px; border-radius: 8px; width: 120px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+    .dg-reward-card { background: #3c2a20; border: 2px solid #b08a5c; padding: 8px; border-radius: 8px; flex: 1 1 90px; min-width: 90px; max-width: 140px; text-align: center; cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; }
     .dg-reward-card:hover { transform: scale(1.05); border-color: #ffda66; background: #4e382d; }
-    .dg-reward-card h4 { margin: 0 0 5px 0; color: #ffda66; }
-    .dg-reward-card p { margin: 0; font-size: 12px; color: #fff; line-height: 1.4; }
+    .dg-reward-card h4 { margin: 0 0 5px 0; color: #ffda66; font-size: 14px; }
+    .dg-reward-card p { margin: 0; font-size: 11px; color: #fff; line-height: 1.3; }
     
     .dg-hud { position: absolute; top: 8px; left: 10px; z-index: 25; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 6px; font-size: 13px; color: white; pointer-events: none; }
     
@@ -430,4 +445,22 @@ export const styleCSS = `
     
     .dg-new-record { color: #ffd700; font-size: 22px; font-weight: bold; text-shadow: 0 0 15px #ffd700, 0 0 30px #ff8c00; animation: newRecordPulse 0.8s ease-in-out infinite alternate; margin: 5px 0; }
     @keyframes newRecordPulse { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+    
+    .betwrap { text-align: center; }
+    .betnum { font-size: 40px; font-weight: bold; color: #7a5c38; line-height: 1.1;
+      background: linear-gradient(#fffaf0, #f0dcc0); border: 3px solid #b08a5c; border-radius: 10px;
+      width: 96px; margin: 6px auto; padding: 8px 0; box-shadow: inset 0 0 0 2px #fff6e0; }
+    .betnum.rolling { animation: gachaShake 0.12s infinite alternate; }
+    .betnum.res { border-color: #c86a1a; box-shadow: inset 0 0 0 2px #fff6e0, 0 0 10px rgba(200,106,26,.45); }
+    .betresult { font-size: 12px; font-weight: bold; color: #7a5c38; min-height: 16px; margin-bottom: 2px; }
+    .betchain { font-size: 11px; color: #9a7a54; min-height: 15px; word-break: break-all; }
+    .betpot { font-size: 15px; font-weight: bold; color: #c86a1a; margin: 8px 0 4px; }
+    .betsides { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .betside { padding: 10px 4px; border-radius: 8px; border: 3px solid; cursor: pointer;
+      font-weight: bold; user-select: none; line-height: 1.35; }
+    .betside.hi { background: #e8f3dc; border-color: #4e903a; color: #3c702c; }
+    .betside.lo { background: #f6e0e6; border-color: #a83a52; color: #8a2a40; }
+    .betside .mult { display: block; font-size: 17px; }
+    .betside .chance { display: block; font-size: 11px; opacity: .75; font-weight: normal; }
+    .betside.off { opacity: .4; cursor: not-allowed; filter: grayscale(1); }
 `;

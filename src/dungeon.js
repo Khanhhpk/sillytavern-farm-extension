@@ -59,9 +59,15 @@ export function openDungeonView() {
 
     // Hide Farm Elements
     All.$id('blocks').style.display = 'none';
+    All.$id('explore-blocks').style.display = 'none';
     All.$id('pager').style.display = 'none';
     All.$id('toolbar').style.display = 'none';
     All.$id('mascots').style.display = 'none';
+    All.$id('viewToggle').style.display = 'none';
+    const ctrlrow = All.sh.querySelector('.ctrlrow');
+    if (ctrlrow) ctrlrow.style.display = 'none';
+    const banner = All.$id('banner');
+    if (banner) banner.style.display = 'none';
 
     // Show Dungeon View
     All.dungeonView.style.display = 'flex';
@@ -76,22 +82,22 @@ export function closeDungeonView() {
     isDungeonOpen = false;
     stopCombatLoop();
 
-    // Revert Title
-    const titleH1 = All.$id('drag').querySelector('h1');
-    titleH1.innerHTML = `${spriteSVG('strawhat', 16)}Ai thèm làm nông dân chứ!`;
-
-    // Show Farm Elements
-    All.$id('blocks').style.display = '';
-    All.$id('pager').style.display = '';
-    All.$id('toolbar').style.display = '';
-    All.$id('mascots').style.display = '';
-
     // Hide Dungeon View
     All.dungeonView.style.display = 'none';
     All.dungeonView.innerHTML = '';
     
     const fieldEl = All.$id('scroll').querySelector('.field');
     if (fieldEl) fieldEl.style.minHeight = '';
+
+    // Restore view toggle
+    All.$id('viewToggle').style.display = '';
+
+    // Restore all visibility based on current view state
+    All.applyPageSkin();
+    All.applyViewState();
+    All.renderPager();
+    All.renderPlots();
+    All.renderToolbar();
 }
 
 function initPlacementPhase() {
@@ -99,6 +105,8 @@ function initPlacementPhase() {
     team = [];
     enemies = [];
     projectiles = [];
+    currentWave = 1;
+    totalGold = 0;
     
     const best = ctx.S.dungeonBest || { wave: 0, gold: 0 };
     const bestHtml = best.wave > 0 ? `<div style="color:#b08a5c; font-size:12px; text-align:center; margin-top:4px;">🏆 Kỷ lục: Wave ${best.wave} · ${best.gold} G</div>` : '';
@@ -131,6 +139,49 @@ function initPlacementPhase() {
     const arena = All.$id('dg-arena');
     const dock = All.$id('dg-dock');
 
+    dock.innerHTML = `
+        <div id="dg-nav-left" style="font-size: 24px; font-weight: bold; color: #d9ba8a; cursor: pointer; user-select: none; padding: 0 5px; touch-action: manipulation; opacity: 0.3;">◀</div>
+        <div style="flex:1; overflow:hidden; height: 100%; display: flex; align-items: center; position: relative;">
+            <div id="dg-slots-container" style="display: flex; gap: 10px; transition: transform 0.3s ease; position: absolute; left: 0;"></div>
+        </div>
+        <div id="dg-nav-right" style="font-size: 24px; font-weight: bold; color: #d9ba8a; cursor: pointer; user-select: none; padding: 0 5px; touch-action: manipulation;">▶</div>
+    `;
+
+    const slotsContainer = All.$id('dg-slots-container');
+    const navLeft = All.$id('dg-nav-left');
+    const navRight = All.$id('dg-nav-right');
+    const dockWrapper = navLeft.nextElementSibling;
+
+    let dockPage = 0;
+
+    function updateDockNav() {
+        if (!dockWrapper) return;
+        const w = dockWrapper.clientWidth || 250;
+        const itemsPerPage = Math.max(1, Math.floor(w / 54));
+        const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
+        if (dockPage > maxPage) dockPage = maxPage;
+        
+        navLeft.style.opacity = dockPage > 0 ? '1' : '0.3';
+        navRight.style.opacity = dockPage < maxPage ? '1' : '0.3';
+        const offset = dockPage * itemsPerPage * 54; 
+        slotsContainer.style.transform = `translateX(-${offset}px)`;
+    }
+
+    navLeft.addEventListener('pointerdown', (e) => { e.preventDefault(); if (dockPage > 0) { dockPage--; updateDockNav(); } });
+    navRight.addEventListener('pointerdown', (e) => { 
+        e.preventDefault(); 
+        const w = dockWrapper.clientWidth || 250;
+        const itemsPerPage = Math.max(1, Math.floor(w / 54));
+        const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
+        if (dockPage < maxPage) { dockPage++; updateDockNav(); } 
+    });
+    
+    if (window.ResizeObserver) {
+        new ResizeObserver(() => updateDockNav()).observe(dockWrapper);
+    } else {
+        updateDockNav();
+    }
+
     let draggingPet = null;
     let dragEl = null;
 
@@ -154,9 +205,8 @@ function initPlacementPhase() {
             dragEl.style.pointerEvents = 'none';
             dragEl.style.position = 'fixed';
             dragEl.style.zIndex = '100000';
-            dragEl.style.transition = 'none'; // Disable transition for instant drag
             dragEl.innerHTML = petSVG(petId, 32);
-            arena.appendChild(dragEl); // append to arena to stay on top of UI
+            document.body.appendChild(dragEl); // append to body to avoid transform/overflow issues
             
             dragEl.style.left = (e.clientX - 16) + 'px';
             dragEl.style.top = (e.clientY - 16) + 'px';
@@ -197,10 +247,10 @@ function initPlacementPhase() {
                 
                 let x = e.clientX - rect.left - 16;
                 let y = e.clientY - rect.top - 16;
-                if (x > rect.width - 32) x = rect.width - 32;
-                if (x < 0) x = 0;
-                if (y < 0) y = 0;
-                if (y > rect.height - 32) y = rect.height - 32;
+                if (x > rect.width - 16) x = rect.width - 16;
+                if (x < 16) x = 16;
+                if (y < 16) y = 16;
+                if (y > rect.height - 16) y = rect.height - 16;
                 
                 el.style.position = 'absolute';
                 el.style.left = x + 'px';
@@ -221,17 +271,17 @@ function initPlacementPhase() {
                     ev.preventDefault();
                     if (phase !== 'placement') return;
                     isPlacedDragging = true;
-                    el.style.position = 'fixed';
                     el.style.zIndex = '100000';
-                    el.style.transition = 'none'; // Disable transition when dragging
-                    el.style.left = (ev.clientX - 16) + 'px';
-                    el.style.top = (ev.clientY - 16) + 'px';
+                    const arect = arena.getBoundingClientRect();
+                    el.style.left = (ev.clientX - arect.left - 16) + 'px';
+                    el.style.top = (ev.clientY - arect.top - 16) + 'px';
                     el.setPointerCapture(ev.pointerId);
                 });
                 el.addEventListener('pointermove', (ev) => {
                     if (!isPlacedDragging) return;
-                    el.style.left = (ev.clientX - 16) + 'px';
-                    el.style.top = (ev.clientY - 16) + 'px';
+                    const arect = arena.getBoundingClientRect();
+                    el.style.left = (ev.clientX - arect.left - 16) + 'px';
+                    el.style.top = (ev.clientY - arect.top - 16) + 'px';
                 });
                 el.addEventListener('pointerup', (ev) => {
                     if (!isPlacedDragging) return;
@@ -246,17 +296,13 @@ function initPlacementPhase() {
                         el.style.position = 'absolute';
                         let nx = ev.clientX - arect.left - 16;
                         let ny = ev.clientY - arect.top - 16;
-                        if (nx > arect.width - 32) nx = arect.width - 32;
-                        if (nx < 0) nx = 0;
-                        if (ny < 0) ny = 0;
-                        if (ny > arect.height - 32) ny = arect.height - 32;
+                        if (nx > arect.width - 16) nx = arect.width - 16;
+                        if (nx < 16) nx = 16;
+                        if (ny < 16) ny = 16;
+                        if (ny > arect.height - 16) ny = arect.height - 16;
                         
                         el.style.left = nx + 'px';
                         el.style.top = ny + 'px';
-                        
-                        // Force reflow before restoring transition to prevent fly-in animation
-                        el.offsetHeight;
-                        el.style.transition = '';
                         
                         memberObj.x = nx;
                         memberObj.y = ny;
@@ -271,7 +317,7 @@ function initPlacementPhase() {
             }
         });
         
-        dock.appendChild(slot);
+        slotsContainer.appendChild(slot);
     });
     
     // Info & Codex Sidebar logic
@@ -695,8 +741,12 @@ function updateEntities(groupA, groupB, dt) {
             statusDiv = document.createElement('div');
             statusDiv.className = 'dg-status';
             a.el.appendChild(statusDiv);
+            a._lastStatusHtml = '';
         }
-        statusDiv.innerHTML = statusHtml;
+        if (a._lastStatusHtml !== statusHtml) {
+            statusDiv.innerHTML = statusHtml;
+            a._lastStatusHtml = statusHtml;
+        }
         
         if (isStunned) return; // Can't move or attack
         
@@ -912,11 +962,17 @@ function endDungeon(isWin) {
         <div class="dg-title">Game Over</div>
         ${rewardText}
         ${recordHtml}
-        <div class="buy" id="dg-finish-btn" style="margin-top: 10px;">Thoát Hầm Ngục</div>
+        <div style="display:flex; justify-content:center; gap: 10px; margin-top: 15px; margin-bottom: auto;">
+            <div class="buy" id="dg-restart-btn">Chơi Lại</div>
+            <div class="buy plain" id="dg-finish-btn">Thoát</div>
+        </div>
     `;
     
     arena.appendChild(overlay);
     
+    overlay.querySelector('#dg-restart-btn').addEventListener('click', () => {
+        initPlacementPhase();
+    });
     overlay.querySelector('#dg-finish-btn').addEventListener('click', () => {
         closeDungeonView();
     });
@@ -950,7 +1006,6 @@ function showWaveRewards() {
     
     const overlay = document.createElement('div');
     overlay.className = 'dg-overlay';
-    overlay.style.backgroundColor = 'rgba(0,0,0,0.85)';
     
     const allRewards = [
         { id: 'heal', name: 'Hồi Máu', desc: 'Hồi 100% HP cho toàn đội', color: '#4caf50' },
@@ -999,9 +1054,9 @@ function showWaveRewards() {
 
     overlay.innerHTML = `
         <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Hoàn Thành!</div>
-        <div style="color:white; margin-bottom: 10px;">Nhận được ${waveGold} G (Tổng: ${totalGold} G)</div>
+        <div style="color:white; margin-bottom: 15px;">Nhận được ${waveGold} G (Tổng: ${totalGold} G)</div>
         ${bossDropHtml}
-        <div style="display:flex; gap: 15px; flex-wrap:wrap; justify-content:center;">
+        <div style="display:flex; gap: 10px; flex-wrap:wrap; justify-content:center; width: 100%; margin-bottom: auto;">
             ${cardsHtml}
         </div>
     `;

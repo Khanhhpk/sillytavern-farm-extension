@@ -211,6 +211,7 @@ export function renderPets() {
   for (const k in petArrive) delete petArrive[k];
   for (const k in pileWith) delete pileWith[k];
   Object.keys(petSleepT).forEach(k => { window.clearTimeout(petSleepT[k]); delete petSleepT[k]; });
+  All.$id('mascots').dataset.drag = ctx.S.dragPet ? '1' : '0';   // Bật touch-action:none cho .pet khi cho phép kéo (xem style.js)
   All.$id('mascots').innerHTML = ctx.S.petsOut.map(id => PETS[id]
     ? `<span class="pet" data-pet="${id}" title="Chọc chọc ${PETS[id].name}"><span class="pbody" style="animation-delay:-${(Math.random() * 1.8).toFixed(2)}s">${petSVG(id, 48)}</span></span>` : '').join('');
   sh.querySelectorAll('#mascots .pet').forEach(el => {
@@ -284,7 +285,25 @@ export function initPets() {
   let dragAnimFrame = null;
   const mascots = All.$id('mascots');
 
+  /* Cảm ứng: sau pointerup trình duyệt còn bắn thêm một cú click "bóng ma" cho tương thích chuột,
+     và nó hit-test LẠI tại điểm chạm vào lúc bắn. Khi bật kéo thả, cửa sổ chức năng của thú được
+     mở ngay ở pointerup, nên lúc cú click đó bắn thì bảng đã che kín màn hình — nó rơi trúng nền
+     bảng (đóng bảng ngay lập tức) hoặc tệ hơn là trúng một nút bên trong và chọn nhầm.
+     Chuột không dính vì click của chuột lấy target từ mousedown/mouseup, đều là con thú.
+     Cách chặn: đánh dấu rồi nuốt đúng một cú click kế tiếp ở pha bắt, trước khi nó tới bảng. */
+  let swallowClickUntil = 0;
+  const GHOST_MS = 700;
+  sh.addEventListener('click', e => {
+    if (!swallowClickUntil || now() >= swallowClickUntil) return;
+    swallowClickUntil = 0;
+    e.stopPropagation();
+    e.preventDefault();
+  }, true);
+
   mascots.addEventListener('pointerdown', e => {
+    // Chạm mới = ý định mới của người chơi, huỷ mốc nuốt click còn treo từ lượt trước.
+    // Click bóng ma không sinh ra pointerdown nên không tự huỷ mốc của chính nó.
+    if (e.pointerType && e.pointerType !== 'mouse') swallowClickUntil = 0;
     if (!ctx.S.dragPet) return; // Nếu tính năng kéo thả tắt, không làm gì ở đây cả
     const el = e.target.closest('.pet'); if (!el) return;
     if (e.button !== 0) return; // Chỉ chuột trái
@@ -458,6 +477,9 @@ export function initPets() {
       activeDrag = null;
       delete el.dataset.dragging;
 
+      // Đặt mốc TRƯỚC khi mở cửa sổ: mở xong là bảng đã che màn hình, cú click bóng ma
+      // bắn sau đó phải bị nuốt kẻo nó đóng bảng hoặc bấm nhầm nút bên trong.
+      if (e.pointerType && e.pointerType !== 'mouse') swallowClickUntil = now() + GHOST_MS;
       handlePetClick(el, petId);
     }
   };

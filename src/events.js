@@ -561,26 +561,34 @@ export function updateInjection() {
     if (now() >= c.matureAt) ripe++;
   }));
   const field = Object.keys(counts).map(id => CROPS[id].name + '×' + counts[id]).join(', ') || 'đang để trống';
-  const bagTxt = Object.keys(ctx.S.bag).map(k => {
+  const cropsArr = [];
+  const specialArr = [];
+  Object.keys(ctx.S.bag).forEach(k => {
     const d = mutDescOf(k);
-    return '  + ' + bagName(k) + ' ×' + ctx.S.bag[k] + (d ? ' (' + d + ')' : '');
-  }).join('\n');
+    const line = '  + ' + bagName(k) + ' ×' + ctx.S.bag[k] + (d ? ' (' + d + ')' : '');
+    if (k.startsWith('unique@')) specialArr.push(line);
+    else cropsArr.push(line);
+  });
+  const cropsTxt = cropsArr.join('\n');
+  const specialTxt = specialArr.join('\n');
+
   const ev = todayEvent();
   
   const takeoutNoteStr = (function () {
     setTakeoutNote((takeoutNote || []).filter(t => now() < t.until));
     if (!takeoutNote.length) return '';
-    return `\n\n【QUAN TRỌNG: HÀNH ĐỘNG VỪA XẢY RA】\nNgười chơi vừa lấy ${takeoutNote.map(t => t.txt).join(', ')} ra khỏi balo vườn rau, hẳn là định dùng/tặng trong cốt truyện. Hãy tiếp nhận một cách tự nhiên; phần trong ngoặc là hiệu ứng của vật phẩm đó, hãy lấy đó làm chuẩn và có thể sáng tạo thêm trong chừng mực.`;
+    return `\n\n【HÀNH ĐỘNG VỪA XẢY RA】\n- Vật phẩm được lấy ra dùng: ${takeoutNote.map(t => t.txt).join(', ')}\n(Người chơi vừa lấy các vật phẩm/nông sản này ra khỏi kho đồ để tương tác trong cốt truyện. Hãy tiếp nhận tự nhiên; phần trong ngoặc là hiệu ứng của vật phẩm, hãy lấy đó làm chuẩn và miêu tả vào cốt truyện)`;
   })();
 
-  const promptText = `【Vườn rau nhỏ của người chơi】
-Người chơi đang trồng một mảnh vườn rau thư giãn trên giao diện SillyTavern (lối chơi tiện ích, tồn tại song song với cốt truyện).
+  const promptText = `【Hệ thống Nông trại & Kho đồ】
+Người chơi có một hệ thống nông trại và túi đồ tồn tại song song với cốt truyện.
 Tình trạng hiện tại:
 - Đang trồng: ${field || 'Đất trống'}${ripe ? ` (có ${ripe} cây đã chín chờ thu)` : ''}
-${bagTxt ? '- Nông sản tích trữ:\n' + bagTxt : '- Nông sản tích trữ: Trống'}
+${cropsTxt ? '- Nông sản tích trữ:\n' + cropsTxt : '- Nông sản tích trữ: Trống'}
+${specialTxt ? '- Vật phẩm đặc biệt tích trữ:\n' + specialTxt : ''}
 ${ev && ev.flavor ? `- Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}` : ''}${takeoutNoteStr}
 
-* Hướng dẫn cho AI: Nhân vật trong cốt truyện thỉnh thoảng có thể nhắc tới việc người chơi chăm vườn hay thu hoạch thế nào một cách tự nhiên, nhưng ĐỪNG thao tác vườn rau thay người chơi, cũng ĐỪNG biến vườn rau thành mạch chính của cốt truyện.`;
+* Hướng dẫn cho AI: Bạn KHÔNG THỂ nhìn thấu túi đồ của người chơi và KHÔNG BIẾT họ đang có những gì. Chỉ khi người chơi "lấy ra dùng" (ở mục HÀNH ĐỘNG VỪA XẢY RA), nhân vật mới nhìn thấy và phản ứng lại tự nhiên. ĐỪNG tự ý thao tác vườn rau hay thay đổi số lượng đồ vật, và ĐỪNG biến nó thành mạch chính của truyện trừ phi người chơi chủ động nhắc tới.`;
 
   setInjection(promptText);
 }

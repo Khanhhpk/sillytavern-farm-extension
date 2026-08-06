@@ -12,14 +12,17 @@ import { esc, SEC, CS, clampN, saveSec, openSandbox, saveCharState, fetchModelLi
 import { applyTheme, sh } from './ui.js';
 import { pageUnlocked } from './utils.js';
 import { openGachaModal } from './gacha.js';
+import { openBetModal } from './bet.js';
 
 /* ---------- Bảng ---------- */
-export function openModal(title, bodyHTML) {
+export function openModal(title, bodyHTML, keepBetTable) {
+  if (!keepBetTable && All.cashOut) All.cashOut();                     // Mở bảng khác = rời bàn cược, rút tiền về trước đã
   All.$id('mtitle-text').textContent = title;
   All.$id('mbody').innerHTML = bodyHTML;
   All.$id('modal').classList.add('open');
 }
 export function closeModal() { 
+  if (All.cashOut) All.cashOut();                                        // Đóng bảng = tự động rút, không bao giờ mất tiền vì lỡ tay
   All.$id('modal').classList.remove('open'); 
   All.$id('mbody').innerHTML = ''; // Dọn dẹp rác DOM và event listeners bên trong
   setPendingPick(null); 
@@ -35,6 +38,9 @@ export function openPanel(kind) {
   }
   if (kind === 'dungeon') {
     return All.openDungeonView();
+  }
+  if (kind === 'bet') {
+    return openBetModal();
   }
   if (kind === 'shop') {
     const tabs = [['seed', 'Hạt giống'], ['fert', 'Phân bón'], ['pet', 'Thú cưng'], ['pass', 'Vé'], ['ticket', 'Vé Gacha']];
@@ -214,12 +220,12 @@ export function openPanel(kind) {
           const on = !!bagSel[key];
           return `
         <div class="item selrow${on ? ' selon' : ''}" data-selkey="${key}"><span class="icon">${spriteSVG(item.sp, 32)}</span>
-          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/cái${esc(mdesc)}</div></span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${n} <span style="display:inline-block; font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff; white-space:nowrap;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/cái${esc(mdesc)}</div></span>
           <span class="selmark">${on ? '✓' : ''}</span></div>`;
         }
         return `
         <div class="item"><span class="icon">${spriteSVG(item.sp, 32)}</span>
-          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/cái · ${esc(item.desc || 'Vật phẩm độc nhất')}</div></span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${n} <span style="display:inline-block; font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff; white-space:nowrap;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/cái · ${esc(item.desc || 'Vật phẩm độc nhất')}</div></span>
           <span class="acts">
             <span class="ibtn" data-takeout="${key}" title="Lấy ra (mang vào cốt truyện, không quy ra tiền)">${spriteSVG('emBang', 16)}</span>
             <span class="ibtn" data-selldlg="${key}" title="Bán (tự chọn số lượng)">${spriteSVG('coin', 16)}</span>
@@ -491,6 +497,8 @@ export function openPanel(kind) {
     if (cfgDragPet) cfgDragPet.addEventListener('change', () => {
       ctx.S.dragPet = cfgDragPet.checked;
       save();
+      const mas = All.$id('mascots');
+      if (mas) mas.dataset.drag = ctx.S.dragPet ? '1' : '0';
       toast(ctx.S.dragPet ? 'Đã bật tính năng kéo thả thú cưng' : 'Đã tắt tính năng kéo thả thú cưng');
     });
 

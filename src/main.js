@@ -9,6 +9,7 @@ function initFarm() {
   document.getElementById('star-tavern-farm-root')?.remove();
 
   All.loadState();
+  if (All.cashOut) All.cashOut(true);                                    // Pot sót lại do F5 hoặc sập nguồn giữa ván: hoàn về ví ngay, im lặng
   All.initUI();
   All.applyTheme();
   All.initOrb();
