@@ -491,6 +491,8 @@ export function openPanel(kind) {
     if (cfgDragPet) cfgDragPet.addEventListener('change', () => {
       ctx.S.dragPet = cfgDragPet.checked;
       save();
+      const mas = All.$id('mascots');
+      if (mas) mas.dataset.drag = ctx.S.dragPet ? '1' : '0';
       toast(ctx.S.dragPet ? 'Đã bật tính năng kéo thả thú cưng' : 'Đã tắt tính năng kéo thả thú cưng');
     });
 

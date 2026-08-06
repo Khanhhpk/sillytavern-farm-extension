@@ -3739,6 +3739,8 @@ function openPanel(kind) {
     if (cfgDragPet) cfgDragPet.addEventListener("change", () => {
       ctx.S.dragPet = cfgDragPet.checked;
       save();
+      const mas = $id("mascots");
+      if (mas) mas.dataset.drag = ctx.S.dragPet ? "1" : "0";
       toast(ctx.S.dragPet ? "\u0110\xE3 b\u1EADt t\xEDnh n\u0103ng k\xE9o th\u1EA3 th\xFA c\u01B0ng" : "\u0110\xE3 t\u1EAFt t\xEDnh n\u0103ng k\xE9o th\u1EA3 th\xFA c\u01B0ng");
     });
     $id("csPromptSave").addEventListener("click", () => {
