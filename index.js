@@ -3873,7 +3873,7 @@ function initWindows() {
   $id("close").addEventListener("click", closeWin);
   dragBar = $id("drag");
   dragBar.addEventListener("pointerdown", (e) => {
-    if (e.target.id === "close") return;
+    if (e.target.id === "close" || e.target.closest("#viewToggle")) return;
     dragBar.setPointerCapture(e.pointerId);
     wg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: ctx.win.offsetLeft, oy: ctx.win.offsetTop };
   });
