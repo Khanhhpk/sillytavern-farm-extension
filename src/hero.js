@@ -1251,7 +1251,7 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
       slam_dmg: 'smashFx', multi_strike: 'slashFx', thorn_whip: 'leafBolt', lightning_strike: 'lightning',
       push_back: 'biteFx', soul_reap: 'scytheFx', fear: 'skullFx', stun_bolt: 'stunFx',
       hellfire: 'fireball', star_fall: 'starBolt', snowball_roll: 'snowball', coin_toss: 'coin', random_dmg: 'fireball',
-      dispel: 'dispelFx', blind: 'blindFx', sugar_rush: 'sugarFx', slow: 'iceball'
+      dispel: 'dispelFx', blind: 'blindFx', sugar_rush: 'sugarFx', slow: 'coldBreath'
     };
     const fx = document.createElement('div');
     fx.className = 'fx-impact';

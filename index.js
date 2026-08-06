@@ -409,6 +409,24 @@ var SPR = {
     "................",
     "................"
   ],
+  coldBreath: [
+    "................",
+    "................",
+    ".............u..",
+    "...........WuW..",
+    ".........Wu.Wu..",
+    ".......WuuWuu...",
+    ".....WuuuWuuW...",
+    "....Wuu.uuW.....",
+    ".....WuuuWuuW...",
+    ".......WuuWuu...",
+    ".........Wu.Wu..",
+    "...........WuW..",
+    ".............u..",
+    "................",
+    "................",
+    "................"
+  ],
   starBolt: [
     "................",
     ".......W........",
@@ -8837,7 +8855,7 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
   const healSkills = ["heal_party", "heal_self"];
   const shieldSkills = ["shield_party", "shield_self", "shield", "absorb"];
   const buffSkills = ["atk_spd_self", "charm", "cd_reduce", "random_buff", "vampiric_buff", "resurrect", "party_speed_buff", "atk_up"];
-  const damageSkills = ["slam_dmg", "multi_strike", "thorn_whip", "lightning_strike", "push_back", "soul_reap", "fear", "stun_bolt", "dispel", "hellfire", "star_fall", "blind", "sugar_rush", "snowball_roll", "coin_toss", "random_dmg"];
+  const damageSkills = ["slam_dmg", "multi_strike", "thorn_whip", "lightning_strike", "push_back", "soul_reap", "fear", "stun_bolt", "dispel", "hellfire", "star_fall", "blind", "sugar_rush", "snowball_roll", "coin_toss", "random_dmg", "slow"];
   if (healSkills.includes(skillType)) {
     if (!targetEl) return;
     const fx = document.createElement("div");
@@ -8909,7 +8927,8 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
       random_dmg: "fireball",
       dispel: "dispelFx",
       blind: "blindFx",
-      sugar_rush: "sugarFx"
+      sugar_rush: "sugarFx",
+      slow: "coldBreath"
     };
     const fx = document.createElement("div");
     fx.className = "fx-impact";
