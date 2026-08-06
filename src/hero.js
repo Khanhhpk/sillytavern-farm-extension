@@ -12,22 +12,100 @@ let monsterX = 100;
 let floatingDamageContainer = null;
 
 export const PET_SKILLS = {
-  slime: { s5: { type: 'heal_party', val: 10, cd: 4, desc: 'Hồi 10 HP cho cả đội (Mỗi 4s)', price: 200000 }, s15: { type: 'max_hp_party', val: 0.3, desc: 'Nội tại: Tăng 30% Max HP toàn đội', price: 500000 } },
-  octo: { s5: { type: 'atk_up', val: 0.5, desc: 'Nội tại: Tăng 50% ATK bản thân', price: 200000 }, s15: { type: 'multi_hit', val: 2, desc: 'Nội tại: Mỗi đòn đánh x2 sát thương', price: 500000 } },
-  slimePink: { s5: { type: 'lifesteal', val: 0.3, desc: 'Nội tại: Hút máu 30%', price: 200000 }, s15: { type: 'crit_rate', val: 0.3, desc: 'Nội tại: Tỉ lệ bạo kích +30%', price: 500000 } },
-  octoCream: { s5: { type: 'dodge', val: 0.3, desc: 'Nội tại: Tỉ lệ né 30%', price: 200000 }, s15: { type: 'reflect', val: 0.5, desc: 'Nội tại: Phản 50% sát thương', price: 500000 } },
-  dewSprout: { s5: { type: 'heal_self', val: 15, cd: 3, desc: 'Tự hồi 15 HP (Mỗi 3s)', price: 200000 }, s15: { type: 'atk_speed', val: 0.5, desc: 'Nội tại: Tốc đánh x1.5', price: 500000 } },
-  cloudMallow: { s5: { type: 'heal_party', val: 15, cd: 4, desc: 'Hồi 15 HP cho cả đội (Mỗi 4s)', price: 200000 }, s15: { type: 'stun', val: 0.2, desc: 'Nội tại: 20% làm choáng 1s', price: 500000 } },
-  ghostBlob: { s5: { type: 'dodge', val: 0.2, desc: 'Nội tại: Tỉ lệ né 20%', price: 200000 }, s15: { type: 'lifesteal', val: 0.5, desc: 'Nội tại: Hút máu 50%', price: 500000 } },
-  mystery_blob: { s5: { type: 'random_dmg', val: 3, cd: 5, desc: 'Gây 300% ATK ngẫu nhiên (Mỗi 5s)', price: 200000 }, s15: { type: 'random_buff', val: 1, cd: 10, desc: 'Buff ngẫu nhiên toàn đội (Mỗi 10s)', price: 500000 } },
-  jellyfish: { s5: { type: 'stun', val: 0.2, desc: 'Nội tại: 20% làm choáng 1s', price: 200000 }, s15: { type: 'crit_dmg', val: 3.0, desc: 'Nội tại: Sát thương Crit x3', price: 500000 } },
-  impBlob: { s5: { type: 'crit_rate', val: 0.3, desc: 'Nội tại: Tỉ lệ bạo kích +30%', price: 200000 }, s15: { type: 'berserk', val: 2.0, desc: 'Nội tại: Cuồng nộ (ATK x2, HP -50%)', price: 500000 } },
-  angelBlob: { s5: { type: 'heal_party', val: 25, cd: 5, desc: 'Hồi 25 HP cho cả đội (Mỗi 5s)', price: 200000 }, s15: { type: 'resurrect', val: 1, desc: 'Nội tại: Hồi sinh 1 lần (50% HP)', price: 500000 } },
-  prismBlob: { s5: { type: 'shield_party', val: 50, cd: 10, desc: 'Tạo Khiên 50 cho toàn đội (Mỗi 10s)', price: 200000 }, s15: { type: 'laser', val: 5, cd: 8, desc: 'Laser sát thương diện rộng x5 ATK', price: 500000 } },
-  starBell: { s5: { type: 'atk_party', val: 0.3, desc: 'Nội tại: Tăng 30% ATK toàn đội', price: 200000 }, s15: { type: 'crit_party', val: 0.2, desc: 'Nội tại: Tăng 20% Crit toàn đội', price: 500000 } },
-  peach_soda: { s5: { type: 'atk_speed', val: 0.5, desc: 'Nội tại: Tốc đánh x1.5', price: 200000 }, s15: { type: 'heal_party', val: 20, cd: 3, desc: 'Hồi 20 HP toàn đội (Mỗi 3s)', price: 500000 } },
-  penguin: { s5: { type: 'dodge', val: 0.4, desc: 'Nội tại: Tỉ lệ né 40%', price: 200000 }, s15: { type: 'gold_drop', val: 2.0, desc: 'Nội tại: Vàng rớt ra x2', price: 500000 } },
-  default: { s5: { type: 'atk_up', val: 0.2, desc: 'Nội tại: Tăng 20% ATK', price: 200000 }, s15: { type: 'crit_rate', val: 0.2, desc: 'Nội tại: Tỉ lệ bạo kích +20%', price: 500000 } }
+  slime: { 
+    a1: { name: 'Tự Chữa Lành', type: 'heal_self', val: 0.2, cd: 4, duration: 0, desc: 'Hồi 20% Max HP bản thân' },
+    a2: { name: 'Đâm Sầm', type: 'slam_dmg', val: 3.0, cd: 5, duration: 0, desc: 'Gây x3 ATK' },
+    p1: { name: 'Thể Chất Slime', type: 'max_hp_party', val: 0.25, desc: 'Tăng 25% Max HP toàn đội' },
+    p2: { name: 'Tái Sinh', type: 'hp_regen', val: 0.02, desc: 'Tự hồi 2% Max HP mỗi giây' }
+  },
+  octo: { 
+    a1: { name: 'Đòn Roi Xúc Tu', type: 'multi_strike', val: 3, cd: 6, duration: 1, desc: 'Tung 3 đòn liên tiếp ngay lập tức' },
+    a2: { name: 'Bơm Mực', type: 'atk_spd_self', val: 2.0, cd: 8, duration: 3, desc: 'Tự buff x2 Tốc Đánh trong 3s' },
+    p1: { name: 'Sức Mạnh Mềm', type: 'atk_up', val: 0.4, desc: 'Tăng 40% ATK bản thân' },
+    p2: { name: 'Phủ Đầu', type: 'first_strike', val: 5.0, desc: 'Đòn đánh đầu mỗi quái x5 Sát thương' }
+  },
+  slimePink: {
+    a1: { name: 'Mưa Dâu Tây', type: 'heal_party', val: 15, cd: 4, duration: 0, desc: 'Hồi 15 HP cho toàn đội' },
+    a2: { name: 'Mùi Hương', type: 'charm', val: 0.5, cd: 8, duration: 3, desc: 'Giảm 50% ATK của quái trong 3s' },
+    p1: { name: 'Cắn Ngọt', type: 'lifesteal', val: 0.3, desc: 'Hút máu 30% sát thương gây ra' },
+    p2: { name: 'Lớp Kẹo Dẻo', type: 'dmg_reduction', val: 0.2, desc: 'Giảm 20% mọi sát thương nhận vào' }
+  },
+  octoCream: {
+    a1: { name: 'Kem Khiên', type: 'shield_self', val: 100, cd: 8, duration: 0, desc: 'Tạo Khiên 100 HP cho bản thân' },
+    a2: { name: 'Hơi Lạnh', type: 'slow', val: 0.5, cd: 7, duration: 3, desc: 'Giảm 50% Tốc đánh của quái' },
+    p1: { name: 'Đá Bào', type: 'reflect', val: 0.4, desc: 'Phản lại 40% sát thương' },
+    p2: { name: 'Né Tránh', type: 'dodge', val: 0.3, desc: 'Tỉ lệ né 30%' }
+  },
+  dewSprout: {
+    a1: { name: 'Đòn Quất Gai', type: 'thorn_whip', val: 2.0, cd: 5, duration: 0, desc: 'Gây x2 ATK & tự hồi máu' },
+    a2: { name: 'Phấn Hoa', type: 'cd_reduce', val: 1.0, cd: 6, duration: 0, desc: 'Giảm 1s CD chủ động cho toàn đội' },
+    p1: { name: 'Rễ Bám', type: 'atk_speed', val: 0.5, desc: 'Tốc đánh bản thân x1.5' },
+    p2: { name: 'Cơn Gió Mát', type: 'party_speed', val: 0.15, desc: 'Tăng 15% tốc đánh toàn đội' }
+  },
+  cloudMallow: {
+    a1: { name: 'Sét Đánh', type: 'lightning_strike', val: 4.0, cd: 6, duration: 0, desc: 'Gây x4 ATK bỏ qua giáp' },
+    a2: { name: 'Đẩy Lùi', type: 'push_back', val: 0, cd: 5, duration: 0, desc: 'Đẩy lùi quái, ngắt nhịp đánh' },
+    p1: { name: 'Lớp Bồng Bềnh', type: 'party_dodge', val: 0.15, desc: 'Tăng 15% né tránh cho đội' },
+    p2: { name: 'Lơ Lửng', type: 'invincible_start', val: 2, desc: 'Miễn nhiễm sát thương 2s đầu Wave' }
+  },
+  ghostBlob: {
+    a1: { name: 'Rút Hồn', type: 'soul_reap', val: 0.1, cd: 5, duration: 0, desc: 'Gây sát thương 10% HP hiện tại quái' },
+    a2: { name: 'Dọa Ma', type: 'fear', val: 2, cd: 7, duration: 2, desc: 'Hoảng sợ (Choáng cứng) quái trong 2s' },
+    p1: { name: 'Ám Khí', type: 'armor_pen', val: 0.5, desc: 'Bỏ qua 50% phòng ngự quái' },
+    p2: { name: 'Vô Hình', type: 'stealth', val: 1, desc: 'Quái không nhắm đánh bé trước' }
+  },
+  mystery_blob: {
+    a1: { name: 'Sát Thương Ngẫu Nhiên', type: 'random_dmg', val: 5.0, cd: 4, duration: 0, desc: 'Gây ngẫu nhiên từ x1 đến x5 ATK' },
+    a2: { name: 'Phép Bổ Trợ Dị Thường', type: 'random_buff', val: 2.0, cd: 6, duration: 4, desc: 'Buff x2 một chỉ số ngẫu nhiên' },
+    p1: { name: 'Chí Mạng Bất Ngờ', type: 'crit_rate', val: 0.35, desc: 'Tỉ lệ Bạo kích +35%' },
+    p2: { name: 'Aura Lời Nguyền', type: 'curse_aura', val: 0.05, desc: '5% quái tự mất 5% HP mỗi giây' }
+  },
+  jellyfish: {
+    a1: { name: 'Giật Cấp Điện', type: 'stun_bolt', val: 2, cd: 8, duration: 2, desc: 'Gây choáng quái 2s' },
+    a2: { name: 'Sóng Âm Xóa Sổ', type: 'dispel', val: 2.0, cd: 10, duration: 0, desc: 'Gây x2 ATK & Xóa mọi buff của quái' },
+    p1: { name: 'Đòn Chết Chóc', type: 'crit_dmg', val: 3.0, desc: 'Sát thương Crit x3' },
+    p2: { name: 'Biển Cả Chúc Phúc', type: 'party_crit', val: 0.2, desc: 'Tăng 20% Tỉ lệ Crit toàn đội' }
+  },
+  impBlob: {
+    a1: { name: 'Hỏa Ngục', type: 'hellfire', val: 5.0, cd: 8, duration: 0, desc: 'x5 ATK nhưng tự trừ 20% HP hiện tại' },
+    a2: { name: 'Hút Máu Đồng Bọn', type: 'vampiric_buff', val: 2.0, cd: 5, duration: 5, desc: 'Rút 10 HP đồng minh để tự buff x2 ATK' },
+    p1: { name: 'Cuồng Nộ (Berserk)', type: 'berserk', val: 0.5, desc: 'HP < 50% => x2 ATK & Tốc Đánh' },
+    p2: { name: 'Đòn Kết Liễu', type: 'execute', val: 0.2, desc: '5% Tỉ lệ kết liễu ngay quái máu <20%' }
+  },
+  angelBlob: {
+    a1: { name: 'Gọi Hồn', type: 'resurrect', val: 0.3, cd: 15, duration: 0, desc: 'Hồi sinh 1 đồng minh đã chết (30% HP)' },
+    a2: { name: 'Khiên Thánh', type: 'shield_party', val: 50, cd: 10, duration: 0, desc: 'Tạo Khiên 50 HP cho toàn đội' },
+    p1: { name: 'Hào Quang Bảo Hộ', type: 'party_dmg_resist', val: 0.1, desc: 'Giảm 10% sát thương nhận vào toàn đội' },
+    p2: { name: 'Hạt Giống Sinh Mệnh', type: 'cheat_death', val: 1, desc: 'Giữ lại 1 HP khi chết (1 lần/Màn)' }
+  },
+  prismBlob: {
+    a1: { name: 'Cắt Laser', type: 'laser', val: 2.0, cd: 9, duration: 3, desc: 'Laser x2 ATK mỗi giây (kéo dài 3s)' },
+    a2: { name: 'Mái Vòm Lăng Kính', type: 'absorb', val: 1, cd: 6, duration: 0, desc: 'Hấp thụ hoàn toàn 1 đòn đánh của quái' },
+    p1: { name: 'Thể Chất Pha Lê', type: 'hp_to_atk', val: 0.05, desc: 'Chuyển 5% Max HP thành ATK' },
+    p2: { name: 'Kháng Hiệu Ứng', type: 'cc_resist', val: 0.5, desc: 'Giảm 50% thời gian bị choáng' }
+  },
+  starBell: {
+    a1: { name: 'Triệu Hồi Sao Băng', type: 'star_fall', val: 3.0, cd: 7, duration: 1, desc: 'Gây x3 ATK & Làm choáng 1s' },
+    a2: { name: 'Giai Điệu Khởi Vận', type: 'party_speed_buff', val: 1.5, cd: 9, duration: 3, desc: 'Tăng 50% Tốc đánh toàn đội' },
+    p1: { name: 'Bài Ca Sức Mạnh', type: 'atk_party', val: 0.25, desc: 'Tăng 25% ATK toàn đội' },
+    p2: { name: 'Bậc Thầy Combo', type: 'combo_master', val: 3, desc: 'Đòn đánh thứ 4 chắc chắn Chí mạng' }
+  },
+  peach_soda: {
+    a1: { name: 'Bọt Ga Cay Mắt', type: 'blind', val: 1.0, cd: 8, duration: 2, desc: 'Làm mù quái (đánh trượt 100%)' },
+    a2: { name: 'Đường Kích Thích', type: 'sugar_rush', val: 3.0, cd: 6, duration: 4, desc: 'x3 Tốc đánh, nhưng giảm 50% ATK' },
+    p1: { name: 'Nổ Tỏa Tròn', type: 'splash_dmg', val: 0.3, desc: 'Đánh thường lan 30% sát thương' },
+    p2: { name: 'Năng Lượng Đỉnh Cao', type: 'initial_burst', val: 2.0, desc: '3 giây đầu mỗi màn x2 sát thương' }
+  },
+  penguin: {
+    a1: { name: 'Bóng Tuyết Trượt', type: 'snowball_roll', val: 2.0, cd: 5, duration: 0, desc: 'Gây x2 ATK & đẩy lùi quái' },
+    a2: { name: 'Ném Tiền', type: 'coin_toss', val: 500, cd: 10, duration: 0, desc: 'Vứt 500 Vàng gây 999 ST Chuẩn' },
+    p1: { name: 'Mỏ Vàng', type: 'gold_drop', val: 2.0, desc: 'Nhân đôi Vàng rớt ra từ quái' },
+    p2: { name: 'Nhặt Nhạnh', type: 'scavenger', val: 0.05, desc: 'Khi đầy máu, đánh có 5% rơi 1 Vàng' }
+  },
+  default: { 
+    a1: { name: 'Cố Gắng', type: 'atk_up', val: 0.2, cd: 5, duration: 3, desc: 'Tăng 20% ATK' }, 
+    p1: { name: 'Lạc Quan', type: 'crit_rate', val: 0.2, desc: 'Tỉ lệ Bạo kích +20%' } 
+  }
 };
 
 export const PET_STATS = {
@@ -230,33 +308,49 @@ function spendGold(cost) {
 
 function openPetSkills(pId) {
   const st = getPetStats(pId);
-  if (!ctx.S.hero.roster[pId]) ctx.S.hero.roster[pId] = { level: 1, exp: 0, enhHp: 0, enhAtk: 0, s5_unlocked: false, s15_unlocked: false };
+  if (!ctx.S.hero.roster[pId]) ctx.S.hero.roster[pId] = { level: 1, exp: 0, enhHp: 0, enhAtk: 0 };
   const data = ctx.S.hero.roster[pId];
   const pSkill = PET_SKILLS[pId] || PET_SKILLS.default;
   
-  const skillHtml = [ {lvl: 5, sk: pSkill.s5, id: 's5'}, {lvl: 15, sk: pSkill.s15, id: 's15'} ].map(tier => {
-    const levelMet = data.level >= tier.lvl;
-    const isUnlocked = data[`${tier.id}_unlocked`];
+  const renderSkillRow = (typeId, skData, reqLvl, cost, isEquipped, isOtherEquipped) => {
+    if (!skData) return '';
+    const isUnlocked = data[`${typeId}_unlocked`];
+    const levelMet = data.level >= reqLvl;
     let actionBtn = '';
     
     if (isUnlocked) {
-      actionBtn = `<div style="color:#a4dc8c; font-weight:bold; font-size:12px; text-align:center;">Đã mở</div>`;
+      if (isEquipped) {
+        actionBtn = `<div class="hero-deploy-btn" data-action="unequip" data-type="${typeId}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto; background:#4CAF50; color:#fff; border-color:#2E7D32;">Đang Trang Bị</div>`;
+      } else {
+        actionBtn = `<div class="hero-deploy-btn sk-equip-btn" data-action="equip" data-type="${typeId}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto;">Trang bị</div>`;
+      }
     } else if (levelMet) {
-      actionBtn = `<div class="hero-deploy-btn sk-unlock-btn" data-tier="${tier.id}" data-cost="${tier.sk.price}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto;">Mở khóa<br>${tier.sk.price}G</div>`;
+      actionBtn = `<div class="hero-deploy-btn sk-unlock-btn" data-tier="${typeId}" data-cost="${cost}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto;">Mở khóa<br>${cost}G</div>`;
     } else {
-      actionBtn = `<div style="color:#777; font-size:12px; text-align:center;">Cần Lv.${tier.lvl}</div>`;
+      actionBtn = `<div style="color:#777; font-size:12px; text-align:center;">Cần Lv.${reqLvl}</div>`;
     }
     
     return `<div class="p-skill-tier ${isUnlocked ? 'unlocked' : 'locked'}">
       <div class="p-sk-icon">${isUnlocked ? spriteSVG('emStar', 24) : spriteSVG('emLock', 24)}</div>
       <div class="p-sk-desc">
-        <div style="font-size: 13px; font-weight: bold; color: ${isUnlocked ? '#a4dc8c' : '#777'};">Kỹ năng Lv.${tier.lvl}</div>
-        <div style="font-size: 14px; margin-top: 2px;">${tier.sk.desc}</div>
+        <div style="font-size: 13px; font-weight: bold; color: ${isUnlocked ? '#a4dc8c' : '#777'};">${skData.name}</div>
+        <div style="font-size: 12px; color:#aaa;">${typeId.startsWith('a') ? `Chủ động - Hồi ${skData.cd}s` : 'Bị động'}</div>
+        <div style="font-size: 14px; margin-top: 2px;">${skData.desc}</div>
       </div>
       <div>${actionBtn}</div>
     </div>`;
-  }).join('');
+  };
+
+  const activeHtml = `
+    ${renderSkillRow('a1', pSkill.a1, 5, 200000, data.active_eq === 'a1', data.active_eq === 'a2')}
+    ${renderSkillRow('a2', pSkill.a2, 15, 500000, data.active_eq === 'a2', data.active_eq === 'a1')}
+  `;
   
+  const passiveHtml = `
+    ${renderSkillRow('p1', pSkill.p1, 10, 350000, data.passive_eq === 'p1', data.passive_eq === 'p2')}
+    ${renderSkillRow('p2', pSkill.p2, 20, 800000, data.passive_eq === 'p2', data.passive_eq === 'p1')}
+  `;
+
   openModal('Thông Tin Thú Cưng', `
     <div class="hero-modal-wrapper">
       <div style="display:flex; gap: 16px; margin-bottom: 16px; align-items:center;">
@@ -272,9 +366,14 @@ function openPetSkills(pId) {
         </div>
       </div>
       
-      <div class="hero-panel-section">Tech Tree (Nội Tại & Kỹ Năng)</div>
+      <div class="hero-panel-section">Kỹ Năng Chủ Động (Chọn 1)</div>
       <div style="display:flex; flex-direction:column; gap:8px;">
-        ${skillHtml}
+        ${activeHtml}
+      </div>
+      
+      <div class="hero-panel-section" style="margin-top:16px;">Kỹ Năng Bị Động (Chọn 1)</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${passiveHtml}
       </div>
       
       <div class="hero-panel-section" style="margin-top:16px;">Cường Hóa (Enhance)</div>
@@ -305,6 +404,31 @@ function openPetSkills(pId) {
       ctx.S.hero.roster[pId][`${tier}_unlocked`] = true;
       save();
       openPetSkills(pId);
+    }
+  }));
+
+  mbody.querySelectorAll('[data-action="equip"], [data-action="unequip"]').forEach(btn => btn.addEventListener('click', () => {
+    const typeId = btn.dataset.type;
+    const isAct = typeId.startsWith('a');
+    if (btn.dataset.action === 'equip') {
+      if (isAct) ctx.S.hero.roster[pId].active_eq = typeId;
+      else ctx.S.hero.roster[pId].passive_eq = typeId;
+    } else {
+      if (isAct) delete ctx.S.hero.roster[pId].active_eq;
+      else delete ctx.S.hero.roster[pId].passive_eq;
+    }
+    save();
+    openPetSkills(pId);
+    
+    // Nạp lại team nếu đang trong trận
+    if (runState && runState.pets.some(p => p.id === pId)) {
+        // Có thể cần hàm refresh riêng, nhưng tạm thời người chơi phải tự reload đội hình 
+        // hoặc ta tự reload nhẹ
+        const pt = runState.pets.find(p => p.id === pId);
+        if (pt) {
+            pt.skillMaxCd = isAct ? (pSkill[typeId].cd || 0) : pt.skillMaxCd;
+            if (isAct) pt.skillCd = pt.skillMaxCd;
+        }
     }
   }));
   
@@ -354,16 +478,24 @@ export function openHeroMode() {
   let partyHpMult = 1;
   let partyAtkMult = 1;
   let partyCritMult = 0;
+  let partySpdMult = 0;
+  let partyDodge = 0;
+  let partyDmgResist = 0;
   
   ctx.S.hero.party.forEach(pId => {
     const data = ctx.S.hero.roster[pId] || {};
     const pSkill = PET_SKILLS[pId] || PET_SKILLS.default;
-    if (data.s5_unlocked && pSkill.s5.type === 'max_hp_party') partyHpMult += pSkill.s5.val;
-    if (data.s15_unlocked && pSkill.s15.type === 'max_hp_party') partyHpMult += pSkill.s15.val;
-    if (data.s5_unlocked && pSkill.s5.type === 'atk_party') partyAtkMult += pSkill.s5.val;
-    if (data.s15_unlocked && pSkill.s15.type === 'atk_party') partyAtkMult += pSkill.s15.val;
-    if (data.s5_unlocked && pSkill.s5.type === 'crit_party') partyCritMult += pSkill.s5.val;
-    if (data.s15_unlocked && pSkill.s15.type === 'crit_party') partyCritMult += pSkill.s15.val;
+    const pKey = data.passive_eq;
+    if (pKey && pSkill[pKey]) {
+      const type = pSkill[pKey].type;
+      const val = pSkill[pKey].val;
+      if (type === 'max_hp_party') partyHpMult += val;
+      if (type === 'party_speed') partySpdMult += val;
+      if (type === 'party_dodge') partyDodge += val;
+      if (type === 'party_crit') partyCritMult += val;
+      if (type === 'party_dmg_resist') partyDmgResist += val;
+      if (type === 'atk_party') partyAtkMult += val;
+    }
   });
 
   // Khởi tạo Run
@@ -378,41 +510,55 @@ export function openHeroMode() {
       let hpMult = partyHpMult;
       let critRate = 0.1 + partyCritMult; // Base crit
       let critDmg = 2.0;  // Base crit dmg
-      let dodge = 0;
+      let dodge = partyDodge;
       let lifesteal = 0;
-      let res = 0;
-      let multiHit = 1;
-      let atkSpeed = st.spd || 1.0;
+      let cheatDeath = 0;
+      let atkSpeed = st.spd * (1 + partySpdMult);
       let reflect = 0;
+      let armorPen = 0;
+      let dmgResist = partyDmgResist;
       
-      [ {req: 's5', sk: pSkill.s5}, {req: 's15', sk: pSkill.s15} ].forEach(tier => {
-        if (data[`${tier.req}_unlocked`]) {
-          if (tier.sk.type === 'atk_up') atkMult += tier.sk.val;
-          if (tier.sk.type === 'crit_rate') critRate += tier.sk.val;
-          if (tier.sk.type === 'crit_dmg') critDmg = tier.sk.val;
-          if (tier.sk.type === 'dodge') dodge += tier.sk.val;
-          if (tier.sk.type === 'lifesteal') lifesteal += tier.sk.val;
-          if (tier.sk.type === 'resurrect') res += tier.sk.val;
-          if (tier.sk.type === 'multi_hit') multiHit = tier.sk.val;
-          if (tier.sk.type === 'atk_speed') atkSpeed *= (1 + tier.sk.val);
-          if (tier.sk.type === 'reflect') reflect = tier.sk.val;
-          if (tier.sk.type === 'berserk') { atkMult *= tier.sk.val; hpMult *= 0.5; }
-        }
-      });
+      const pKey = data.passive_eq;
+      if (pKey && pSkill[pKey]) {
+        const type = pSkill[pKey].type;
+        const val = pSkill[pKey].val;
+        if (type === 'atk_up') atkMult += val;
+        if (type === 'crit_rate') critRate += val;
+        if (type === 'crit_dmg') critDmg = val;
+        if (type === 'dodge') dodge += val;
+        if (type === 'lifesteal') lifesteal += val;
+        if (type === 'atk_speed') atkSpeed *= val;
+        if (type === 'reflect') reflect += val;
+        if (type === 'armor_pen') armorPen += val;
+        if (type === 'dmg_reduction') dmgResist += val;
+        if (type === 'cheat_death') cheatDeath = val;
+        if (type === 'berserk') { atkMult *= (1 + val); hpMult *= 0.5; }
+      }
       
       atkSpeed = Math.min(5.0, atkSpeed);
       
-      const hp = Math.floor(st.maxHp * hpMult);
+      let finalHp = Math.floor(st.maxHp * hpMult);
+      let finalAtk = Math.floor(st.atk * atkMult);
+      if (pKey && pSkill[pKey] && pSkill[pKey].type === 'hp_to_atk') {
+        finalAtk += Math.floor(finalHp * pSkill[pKey].val);
+      }
+
+      const aKey = data.active_eq;
+      let maxCd = 0;
+      if (aKey && pSkill[aKey]) maxCd = pSkill[aKey].cd || 0;
+      
       return { 
         id: pId, 
-        maxHp: hp, hp: hp, shield: 0,
-        hpMult, atkMult, // Store for level up recalculation
-        atk: Math.floor(st.atk * atkMult), 
+        maxHp: finalHp, hp: finalHp, shield: 0,
+        hpMult, atkMult,
+        atk: finalAtk, 
         cd: 0, maxCd: 1.0 / atkSpeed,
         crit: critRate, critDmg: critDmg,
-        dodge, lifesteal, res, multiHit, reflect,
+        dodge, lifesteal, cheatDeath, reflect, armorPen, dmgResist,
         skillCd: 0, 
-        skillMaxCd: pSkill.s5.cd || pSkill.s15.cd || 0
+        skillMaxCd: maxCd,
+        skillActiveTime: 0,
+        combo: 0 // for starBell
       };
     }),
     monster: null
@@ -497,6 +643,7 @@ function spawnMonster() {
       </div>`;
   }
   
+  runState.waveTime = 0;
   const mobHp = All.$id('hp-mob');
   if (mobHp) mobHp.style.width = '100%';
 }
@@ -507,6 +654,7 @@ function heroTick() {
   lastTick = now;
   
   if (!runState || !runState.monster) return;
+  runState.waveTime += dt / 1000;
   
   const partyEl = All.$id('hero-party');
   const mobEl = All.$id('hmob');
@@ -537,120 +685,292 @@ function heroTick() {
     }
     
     // 1. Pets Skills & Attack
-    alivePets.forEach(p => {
-      // Kỹ năng chủ động (Heal, Shield, Random Dmg, Laser)
-      if (p.skillMaxCd > 0) {
+    alivePets.forEach((p, aIdx) => {
+      const pEl = All.$id(`hpet-${aIdx}`);
+      const data = ctx.S.hero.roster[p.id] || {};
+      const pSkill = PET_SKILLS[p.id];
+      
+      // Passives over time
+      const passEq = data.passive_eq;
+      if (passEq && pSkill && pSkill[passEq]) {
+        const pSk = pSkill[passEq];
+        if (pSk.type === 'hp_regen') {
+          const heal = p.maxHp * pSk.val * (dt / 1000);
+          p.hp = Math.min(p.maxHp, p.hp + heal);
+        }
+        if (pSk.type === 'curse_aura') {
+           const cDmg = runState.monster.maxHp * pSk.val * (dt / 1000);
+           runState.monster.hp -= cDmg;
+        }
+      }
+
+      // Active skills (with CD and Duration logic)
+      if (p.skillActiveTime > 0) {
+        p.skillActiveTime -= dt / 1000;
+        const actEq = data.active_eq;
+        if (actEq && pSkill && pSkill[actEq]) {
+            const aSk = pSkill[actEq];
+            if (aSk.type === 'laser') {
+                const ldmg = (p.atk * aSk.val) * (dt/1000);
+                runState.monster.hp -= ldmg;
+                if (Math.random() < 0.1) spawnSkillEffect(pEl, mobEl, aSk.type);
+            }
+        }
+      } else if (p.skillMaxCd > 0) {
         p.skillCd -= dt / 1000;
         if (p.skillCd <= 0) {
-          p.skillCd = p.skillMaxCd;
-          const pSkill = PET_SKILLS[p.id] || PET_SKILLS.default;
-          [ {req:'s5', sk: pSkill.s5}, {req:'s15', sk: pSkill.s15} ].forEach(tier => {
-            if (ctx.S.hero.roster[p.id] && ctx.S.hero.roster[p.id][`${tier.req}_unlocked`] && tier.sk) {
-              const aIdx = runState.pets.indexOf(p);
-              const pEl = All.$id(`hpet-${aIdx}`);
-              if (tier.sk.type === 'heal_party' || tier.sk.type === 'heal_self') {
-                const targets = tier.sk.type === 'heal_party' ? alivePets : [p];
-                targets.forEach(ap => {
-                  ap.hp = Math.min(ap.maxHp, ap.hp + tier.sk.val);
-                  const tIdx = runState.pets.indexOf(ap);
-                  const tEl = All.$id(`hpet-${tIdx}`);
-                  setTimeout(() => showFloatDamage(`+${tier.sk.val}`, tEl, '#a4dc8c'), 0);
-                  const hpPet = All.$id(`hp-pet-${tIdx}`);
-                  if (hpPet) hpPet.style.width = `${(ap.hp / ap.maxHp) * 100}%`;
-                  spawnSkillEffect(pEl, tEl, tier.sk.type);
-                });
+          const actEq = data.active_eq;
+          if (actEq && pSkill && pSkill[actEq]) {
+            const aSk = pSkill[actEq];
+            p.skillCd = p.skillMaxCd;
+            p.skillActiveTime = aSk.duration || 0;
+            
+            // Execute Active Skill Burst
+            if (aSk.type === 'heal_party' || aSk.type === 'heal_self') {
+              const targets = aSk.type === 'heal_party' ? alivePets : [p];
+              targets.forEach(ap => {
+                const healAmt = (aSk.val < 1) ? ap.maxHp * aSk.val : aSk.val;
+                ap.hp = Math.min(ap.maxHp, ap.hp + healAmt);
+                const tIdx = runState.pets.indexOf(ap);
+                const tEl = All.$id(`hpet-${tIdx}`);
+                setTimeout(() => showFloatDamage(`+${Math.floor(healAmt)}`, tEl, '#a4dc8c'), 0);
+                const hpPet = All.$id(`hp-pet-${tIdx}`);
+                if (hpPet) hpPet.style.width = `${(ap.hp / ap.maxHp) * 100}%`;
+                spawnSkillEffect(pEl, tEl, aSk.type);
+              });
+            } else if (aSk.type === 'slam_dmg') {
+              const dmg = p.atk * aSk.val;
+              runState.monster.hp -= dmg;
+              setTimeout(() => showFloatDamage(`-${dmg}`, mobEl, '#ff5555'), 150);
+              spawnSkillEffect(pEl, mobEl, aSk.type);
+            } else if (aSk.type === 'multi_strike') {
+              for(let i=0; i<aSk.val; i++) {
+                setTimeout(() => {
+                    if (runState.monster.hp > 0) {
+                        runState.monster.hp -= p.atk;
+                        spawnAttackEffect(p.id, pEl, mobEl, false, false);
+                    }
+                }, i * 150);
               }
-              if (tier.sk.type === 'shield_party') {
-                alivePets.forEach(ap => {
-                  ap.shield = tier.sk.val;
-                  const tIdx = runState.pets.indexOf(ap);
-                  const tEl = All.$id(`hpet-${tIdx}`);
-                  setTimeout(() => showFloatDamage(`SHIELD`, tEl, '#aaddff'), 0);
-                  spawnSkillEffect(pEl, tEl, tier.sk.type);
-                });
-              }
-              if (tier.sk.type === 'random_dmg') {
-                const rdmg = Math.floor(p.atk * tier.sk.val);
-                runState.monster.hp -= rdmg;
-                setTimeout(() => showFloatDamage(`-${rdmg}`, mobEl, '#f24d4d'), 150);
-                spawnSkillEffect(pEl, mobEl, tier.sk.type);
-              }
-              if (tier.sk.type === 'laser') {
-                const ldmg = Math.floor(p.atk * tier.sk.val);
-                runState.monster.hp -= ldmg;
-                setTimeout(() => showFloatDamage(`LASER -${ldmg}`, mobEl, '#ff88dd'), 150);
-                spawnSkillEffect(pEl, mobEl, tier.sk.type);
-              }
-              if (tier.sk.type === 'random_buff') {
-                alivePets.forEach(ap => { 
-                  ap.atk += Math.floor(ap.atk * 0.2); 
-                  const tIdx = runState.pets.indexOf(ap);
-                  const tEl = All.$id(`hpet-${tIdx}`);
-                  setTimeout(() => showFloatDamage(`ATK BUFF`, tEl, '#ffd94d'), 0);
-                  spawnSkillEffect(pEl, tEl, tier.sk.type);
-                });
-              }
+            } else if (aSk.type === 'atk_spd_self') {
+               p.spdBuff = aSk.val; 
+               setTimeout(() => showFloatDamage(`SPD UP`, pEl, '#ffff00'), 0);
+            } else if (aSk.type === 'charm') {
+               runState.monster.atkDebuff = aSk.val;
+               runState.monster.atkDebuffTimer = aSk.duration;
+               setTimeout(() => showFloatDamage(`CHARMED`, mobEl, '#ff88dd'), 0);
+            } else if (aSk.type === 'shield_self') {
+               p.shield += aSk.val;
+               setTimeout(() => showFloatDamage(`SHIELD`, pEl, '#aaddff'), 0);
+               spawnSkillEffect(pEl, pEl, 'shield');
+            } else if (aSk.type === 'shield_party') {
+               alivePets.forEach(ap => {
+                   ap.shield += aSk.val;
+                   const tIdx = runState.pets.indexOf(ap);
+                   const tEl = All.$id(`hpet-${tIdx}`);
+                   setTimeout(() => showFloatDamage(`SHIELD`, tEl, '#aaddff'), 0);
+                   spawnSkillEffect(pEl, tEl, 'shield');
+               });
+            } else if (aSk.type === 'slow') {
+               runState.monster.spdDebuff = aSk.val;
+               runState.monster.spdDebuffTimer = aSk.duration;
+               setTimeout(() => showFloatDamage(`SLOWED`, mobEl, '#99ddff'), 0);
+            } else if (aSk.type === 'thorn_whip') {
+               const dmg = p.atk * aSk.val;
+               runState.monster.hp -= dmg;
+               p.hp = Math.min(p.maxHp, p.hp + dmg * 0.5);
+               setTimeout(() => showFloatDamage(`-${dmg}`, mobEl, '#4CAF50'), 0);
+               spawnSkillEffect(pEl, mobEl, aSk.type);
+            } else if (aSk.type === 'cd_reduce') {
+               alivePets.forEach(ap => { ap.skillCd = Math.max(0, ap.skillCd - aSk.val); });
+               setTimeout(() => showFloatDamage(`CD -${aSk.val}s`, pEl, '#00ffff'), 0);
+            } else if (aSk.type === 'lightning_strike') {
+               const dmg = p.atk * aSk.val;
+               runState.monster.hp -= dmg;
+               setTimeout(() => showFloatDamage(`-${dmg}`, mobEl, '#00ffff'), 0);
+               spawnSkillEffect(pEl, mobEl, aSk.type);
+            } else if (aSk.type === 'push_back') {
+               monsterX = Math.min(350, monsterX + 50);
+               runState.monster.cd += 0.5;
+               setTimeout(() => showFloatDamage(`KNOCKBACK`, mobEl, '#fff'), 0);
+            } else if (aSk.type === 'soul_reap') {
+               const dmg = runState.monster.hp * aSk.val;
+               runState.monster.hp -= dmg;
+               setTimeout(() => showFloatDamage(`-${Math.floor(dmg)}`, mobEl, '#9c27b0'), 0);
+               spawnSkillEffect(pEl, mobEl, aSk.type);
+            } else if (aSk.type === 'fear') {
+               runState.monster.stunCd = (runState.monster.stunCd || 0) + aSk.duration;
+               setTimeout(() => showFloatDamage(`FEAR`, mobEl, '#5e35b1'), 0);
+            } else if (aSk.type === 'random_dmg') {
+               const randomVal = 1 + Math.random() * (aSk.val - 1);
+               const dmg = Math.floor(p.atk * randomVal);
+               runState.monster.hp -= dmg;
+               setTimeout(() => showFloatDamage(`-${dmg}`, mobEl, '#f24d4d'), 150);
+               spawnSkillEffect(pEl, mobEl, aSk.type);
+            } else if (aSk.type === 'random_buff') {
+               alivePets.forEach(ap => {
+                  ap.atkBuff = (ap.atkBuff || 0) + aSk.val;
+                  ap.atkBuffTimer = aSk.duration;
+                  setTimeout(() => showFloatDamage(`BUFFED`, All.$id(`hpet-${runState.pets.indexOf(ap)}`), '#ffd94d'), 0);
+               });
+            } else if (aSk.type === 'stun_bolt') {
+               runState.monster.stunCd = (runState.monster.stunCd || 0) + aSk.duration;
+               setTimeout(() => showFloatDamage(`STUN`, mobEl, '#ccc'), 0);
+               spawnSkillEffect(pEl, mobEl, aSk.type);
+            } else if (aSk.type === 'dispel') {
+               const dmg = p.atk * aSk.val;
+               runState.monster.hp -= dmg;
+               runState.monster.atkBuff = 0;
+               setTimeout(() => showFloatDamage(`DISPEL -${dmg}`, mobEl, '#00bcd4'), 0);
+               spawnSkillEffect(pEl, mobEl, aSk.type);
+            } else if (aSk.type === 'hellfire') {
+               p.hp = Math.max(1, p.hp - (p.hp * 0.2));
+               const dmg = p.atk * aSk.val;
+               runState.monster.hp -= dmg;
+               setTimeout(() => showFloatDamage(`-${dmg}`, mobEl, '#ff5722'), 0);
+               spawnSkillEffect(pEl, mobEl, aSk.type);
+            } else if (aSk.type === 'vampiric_buff') {
+               alivePets.forEach(ap => { if (ap !== p) ap.hp = Math.max(1, ap.hp - 10); });
+               p.atkBuff = (p.atkBuff || 1) + aSk.val;
+               p.atkBuffTimer = aSk.duration;
+               setTimeout(() => showFloatDamage(`VAMPIRIC`, pEl, '#d32f2f'), 0);
+            } else if (aSk.type === 'resurrect') {
+               const deadPets = runState.pets.filter(pt => pt.hp <= 0);
+               if (deadPets.length > 0) {
+                   const dp = deadPets[0];
+                   dp.hp = Math.floor(dp.maxHp * aSk.val);
+                   const dpEl = All.$id(`hpet-${runState.pets.indexOf(dp)}`);
+                   if (dpEl) {
+                       dpEl.style.opacity = '1';
+                       setTimeout(() => showFloatDamage(`REVIVE`, dpEl, '#ffff00'), 0);
+                   }
+               }
+            } else if (aSk.type === 'absorb') {
+               p.absorbCharge = aSk.val;
+               setTimeout(() => showFloatDamage(`ABSORB`, pEl, '#e040fb'), 0);
+            } else if (aSk.type === 'star_fall') {
+               const dmg = p.atk * aSk.val;
+               runState.monster.hp -= dmg;
+               runState.monster.stunCd = (runState.monster.stunCd || 0) + 1.0;
+               setTimeout(() => showFloatDamage(`STARFALL -${dmg}`, mobEl, '#ffeb3b'), 0);
+               spawnSkillEffect(pEl, mobEl, aSk.type);
+            } else if (aSk.type === 'party_speed_buff') {
+               alivePets.forEach(ap => { ap.spdBuff = aSk.val; ap.spdBuffTimer = aSk.duration; });
+               setTimeout(() => showFloatDamage(`SPD BUFF`, pEl, '#00e676'), 0);
+            } else if (aSk.type === 'blind') {
+               runState.monster.blindCd = aSk.duration;
+               setTimeout(() => showFloatDamage(`BLIND`, mobEl, '#607d8b'), 0);
+            } else if (aSk.type === 'sugar_rush') {
+               p.spdBuff = aSk.val;
+               p.atkDebuff = 0.5;
+               p.sugarTimer = aSk.duration;
+               setTimeout(() => showFloatDamage(`SUGAR RUSH`, pEl, '#ff80ab'), 0);
+            } else if (aSk.type === 'snowball_roll') {
+               const dmg = p.atk * aSk.val;
+               runState.monster.hp -= dmg;
+               monsterX = Math.min(350, monsterX + 30);
+               setTimeout(() => showFloatDamage(`-${dmg}`, mobEl, '#e0f7fa'), 0);
+               spawnSkillEffect(pEl, mobEl, aSk.type);
+            } else if (aSk.type === 'coin_toss') {
+               const dmg = 999;
+               runState.monster.hp -= dmg;
+               if (ctx.S.hero.gold >= 500) ctx.S.hero.gold -= 500;
+               setTimeout(() => showFloatDamage(`-${dmg} True DMG`, mobEl, '#ffca28'), 0);
+            } else if (aSk.type === 'atk_up') {
+               p.atkBuff = (p.atkBuff || 1) + aSk.val;
+               p.atkBuffTimer = aSk.duration;
+               setTimeout(() => showFloatDamage(`ATK UP`, pEl, '#f44336'), 0);
             }
-          });
+          }
         }
         
-        // Update Skill UI Bar
-        const skBar = All.$id(`sk-pet-${runState.pets.indexOf(p)}`);
+        const skBar = All.$id(`sk-pet-${aIdx}`);
         if (skBar) skBar.style.width = `${Math.min(100, Math.max(0, ((p.skillMaxCd - p.skillCd) / p.skillMaxCd) * 100))}%`;
       }
       
+      // Manage Buff/Debuff Timers
+      if (p.atkBuffTimer > 0) { p.atkBuffTimer -= dt/1000; if(p.atkBuffTimer<=0) p.atkBuff = null; }
+      if (p.spdBuffTimer > 0) { p.spdBuffTimer -= dt/1000; if(p.spdBuffTimer<=0) p.spdBuff = null; }
+      if (p.sugarTimer > 0) { p.sugarTimer -= dt/1000; if(p.sugarTimer<=0) { p.spdBuff = null; p.atkDebuff = null; } }
+
+      let rtSpdMult = 1.0;
+      if (p.spdBuff) rtSpdMult *= p.spdBuff;
+      if (p.skillActiveTime > 0 && data.active_eq && pSkill[data.active_eq] && pSkill[data.active_eq].type === 'atk_spd_self') rtSpdMult *= pSkill[data.active_eq].val;
+
       // Đòn đánh thường
-      p.cd -= dt / 1000;
-      const cdBar = All.$id(`cd-pet-${runState.pets.indexOf(p)}`);
+      p.cd -= (dt / 1000) * rtSpdMult;
+      const cdBar = All.$id(`cd-pet-${aIdx}`);
       if (cdBar) cdBar.style.width = `${Math.min(100, Math.max(0, ((p.maxCd - p.cd) / p.maxCd) * 100))}%`;
 
       if (p.cd <= 0) {
         p.cd = p.maxCd;
-        const mult = ctx.S.hero.style === 'attack' ? 1.5 : 1.0;
+        const styleMult = ctx.S.hero.style === 'attack' ? 1.5 : 1.0;
         
-        for (let i = 0; i < p.multiHit; i++) {
+        let atkMult = styleMult;
+        if (p.atkBuff) atkMult *= p.atkBuff;
+        if (p.atkDebuff) atkMult *= p.atkDebuff;
+
+        for (let i = 0; i < (p.multiHit || 1); i++) {
           setTimeout(() => {
             if (!runState || !runState.monster || runState.monster.hp <= 0 || runState.monster.isDead) return;
             
-            const isCrit = Math.random() < p.crit;
-            const dmgBase = Math.max(1, Math.floor(p.atk * mult * (0.8 + Math.random() * 0.4)));
+            p.combo = (p.combo || 0) + 1;
+            let isCrit = Math.random() < p.crit;
+            if (passEq && pSkill[passEq] && pSkill[passEq].type === 'combo_master' && p.combo % pSkill[passEq].val === 0) isCrit = true;
+
+            let dmgBase = Math.max(1, Math.floor(p.atk * atkMult * (0.8 + Math.random() * 0.4)));
+            
+            if (passEq && pSkill[passEq]) {
+                const ps = pSkill[passEq];
+                if (ps.type === 'first_strike' && !runState.monster[`fs_${p.id}`]) {
+                    dmgBase *= ps.val;
+                    runState.monster[`fs_${p.id}`] = true;
+                }
+            }
+
             let dmg = isCrit ? Math.floor(dmgBase * p.critDmg) : dmgBase;
             
+            if (passEq && pSkill[passEq] && pSkill[passEq].type === 'splash_dmg') {
+                dmg = Math.floor(dmg * (1 + pSkill[passEq].val));
+            }
+
+            if (passEq && pSkill[passEq] && pSkill[passEq].type === 'execute') {
+                if (runState.monster.hp / runState.monster.maxHp <= 0.2 && Math.random() < pSkill[passEq].val) {
+                    dmg = runState.monster.hp;
+                    setTimeout(() => showFloatDamage(`EXECUTE`, mobEl, '#ff0000'), 150);
+                }
+            }
+
+            if (passEq && pSkill[passEq] && pSkill[passEq].type === 'scavenger') {
+                if (p.hp >= p.maxHp && Math.random() < pSkill[passEq].val) {
+                    ctx.S.hero.gold++;
+                    showFloatDamage(`+1G`, pEl, '#ffca28');
+                }
+            }
+            
+            // Initial burst
+            if (passEq && pSkill[passEq] && pSkill[passEq].type === 'initial_burst' && runState.waveTime <= 3.0) {
+                dmg = Math.floor(dmg * pSkill[passEq].val);
+            }
+
             runState.monster.hp -= dmg;
             
-            // Nội tại Hút máu (Lifesteal)
             if (p.lifesteal > 0) {
               const heal = Math.floor(dmg * p.lifesteal);
               if (heal > 0) {
                 p.hp = Math.min(p.maxHp, p.hp + heal);
-                const pIdx = runState.pets.indexOf(p);
-                const pEl = All.$id(`hpet-${pIdx}`);
                 setTimeout(() => showFloatDamage(`+${heal}`, pEl, '#a4dc8c'), 150);
-                const hpPet = All.$id(`hp-pet-${pIdx}`);
+                const hpPet = All.$id(`hp-pet-${aIdx}`);
                 if (hpPet) setTimeout(() => { hpPet.style.width = `${(p.hp / p.maxHp) * 100}%`; }, 150);
               }
             }
             
-            // Nội tại Gây choáng (Stun)
-            const pSkill = PET_SKILLS[p.id] || PET_SKILLS.default;
-            let isStun = false;
-            const data = ctx.S.hero.roster[p.id] || {};
-            if (data.s5_unlocked && pSkill.s5 && pSkill.s5.type === 'stun' && Math.random() < pSkill.s5.val) isStun = true;
-            if (data.s15_unlocked && pSkill.s15 && pSkill.s15.type === 'stun' && Math.random() < pSkill.s15.val) isStun = true;
-            if (isStun) {
-              runState.monster.stunCd = (runState.monster.stunCd || 0) + 1.0; // Stun 1s
-            }
-            
-            // Hoạt ảnh
-            const pIdx = runState.pets.indexOf(p);
-            const pEl = All.$id(`hpet-${pIdx}`);
             if (pEl) { pEl.classList.remove('idle'); pEl.classList.add('attack'); setTimeout(() => { pEl.classList.remove('attack'); pEl.classList.add('idle'); }, 300); }
             if (mobEl) { setTimeout(() => { mobEl.classList.remove('idle'); mobEl.classList.add('hurt'); setTimeout(() => { mobEl.classList.remove('hurt'); mobEl.classList.add('idle'); }, 200); }, 150); }
             
             spawnAttackEffect(p.id, pEl, mobEl, false, isCrit);
             setTimeout(() => showFloatDamage(`-${dmg}`, mobEl, isCrit ? '#f2c231' : null), 150);
-            if (isStun) setTimeout(() => showFloatDamage('STUN!', mobEl, '#ccc'), 200);
-          }, i * 200); // Giãn cách đòn đánh nếu có multiHit
+          }, i * 200);
         }
       }
     });
@@ -659,17 +979,35 @@ function heroTick() {
     const hpMob = All.$id('hp-mob');
     if (hpMob) hpMob.style.width = `${Math.max(0, (runState.monster.hp / runState.monster.maxHp) * 100)}%`;
     
+    // Update monster debuffs
+    if (runState.monster.atkDebuffTimer > 0) { runState.monster.atkDebuffTimer -= dt/1000; if(runState.monster.atkDebuffTimer<=0) runState.monster.atkDebuff = null; }
+    if (runState.monster.spdDebuffTimer > 0) { runState.monster.spdDebuffTimer -= dt/1000; if(runState.monster.spdDebuffTimer<=0) runState.monster.spdDebuff = null; }
+    if (runState.monster.blindCd > 0) { runState.monster.blindCd -= dt/1000; }
+    
     // 2. Monster Attacks
     if (runState.monster.stunCd && runState.monster.stunCd > 0) {
       runState.monster.stunCd -= dt / 1000;
     } else if (runState.monster.hp > 0) {
-      runState.monster.cd -= dt / 1000;
+      let mSpdMult = 1.0;
+      if (runState.monster.spdDebuff) mSpdMult *= runState.monster.spdDebuff;
+      
+      runState.monster.cd -= (dt / 1000) * mSpdMult;
       if (runState.monster.cd <= 0) {
         runState.monster.cd = runState.monster.maxCd;
-        const target = alivePets[alivePets.length - 1]; // Đánh con đứng bên phải (cuối mảng)
+        
+        let validTargets = alivePets.filter(p => {
+           const data = ctx.S.hero.roster[p.id] || {};
+           const pSkill = PET_SKILLS[p.id];
+           return !(data.passive_eq && pSkill && pSkill[data.passive_eq] && pSkill[data.passive_eq].type === 'stealth');
+        });
+        if (validTargets.length === 0) validTargets = alivePets;
+        const target = validTargets[validTargets.length - 1]; // Đánh con đứng bên phải (cuối mảng)
+        
         const mult = ctx.S.hero.style === 'defense' ? 0.6 : 1.0;
         
-        const isDodge = Math.random() < target.dodge;
+        let isDodge = Math.random() < target.dodge;
+        if (runState.monster.blindCd > 0) isDodge = true;
+        
         const pIdx = runState.pets.indexOf(target);
         const pEl = All.$id(`hpet-${pIdx}`);
         
@@ -678,9 +1016,22 @@ function heroTick() {
         
         if (isDodge) {
           setTimeout(() => showFloatDamage('MISS', pEl, '#999'), 150);
+        } else if (target.absorbCharge > 0) {
+          target.absorbCharge--;
+          setTimeout(() => showFloatDamage('ABSORBED', pEl, '#e040fb'), 150);
         } else {
-          let dmg = Math.max(1, Math.floor(runState.monster.atk * mult * (0.8 + Math.random() * 0.4)));
+          let mAtkMult = mult;
+          if (runState.monster.atkDebuff) mAtkMult *= runState.monster.atkDebuff;
+          let dmg = Math.max(1, Math.floor(runState.monster.atk * mAtkMult * (0.8 + Math.random() * 0.4)));
           
+          if (target.dmgResist) dmg = Math.floor(dmg * (1 - target.dmgResist));
+          
+          if (runState.waveTime <= 2.0 && ctx.S.hero.roster[target.id]?.passive_eq) {
+             const pSkill = PET_SKILLS[target.id];
+             const pEq = ctx.S.hero.roster[target.id].passive_eq;
+             if (pSkill && pSkill[pEq] && pSkill[pEq].type === 'invincible_start') dmg = 0;
+          }
+
           if (target.shield > 0) {
             const absorb = Math.min(target.shield, dmg);
             target.shield -= absorb;
@@ -695,10 +1046,10 @@ function heroTick() {
           
           target.hp -= dmg;
           
-          if (target.hp <= 0 && target.res > 0) {
-            target.res--;
-            target.hp = Math.floor(target.maxHp * 0.5);
-            setTimeout(() => showFloatDamage('REVIVE', pEl, '#ffd94d'), 150);
+          if (target.hp <= 0 && target.cheatDeath > 0) {
+            target.cheatDeath--;
+            target.hp = 1;
+            setTimeout(() => showFloatDamage('CHEAT DEATH', pEl, '#ffd94d'), 150);
           } else if (target.hp < 0) {
              target.hp = 0;
           }
@@ -734,13 +1085,16 @@ function heroTick() {
         let pGoldMult = 1.0;
         runState.pets.forEach(p => {
            const data = ctx.S.hero.roster[p.id];
-           if (data && data.s15_unlocked && PET_SKILLS[p.id]?.s15?.type === 'gold_drop') pGoldMult *= PET_SKILLS[p.id].s15.val;
+           if (data && data.passive_eq) {
+             const sk = PET_SKILLS[p.id]?.[data.passive_eq];
+             if (sk && sk.type === 'gold_drop') pGoldMult *= sk.val;
+           }
         });
         ctx.S.hero.gold += Math.floor(goldDrop * pGoldMult);
       
       const expDrop = (runState.stage * 10 + 5) * (m.isBoss ? 5 : 1);
       runState.pets.forEach(p => {
-        if (!ctx.S.hero.roster[p.id]) ctx.S.hero.roster[p.id] = { level: 1, exp: 0, enhHp: 0, enhAtk: 0, s5_unlocked: false, s15_unlocked: false };
+        if (!ctx.S.hero.roster[p.id]) ctx.S.hero.roster[p.id] = { level: 1, exp: 0, enhHp: 0, enhAtk: 0 };
         let petData = ctx.S.hero.roster[p.id];
         if (petData.exp === undefined || isNaN(petData.exp)) petData.exp = 0;
         
@@ -789,8 +1143,8 @@ function heroTick() {
       runState.stage++;
       if (runState.stage > ctx.S.hero.maxStage) ctx.S.hero.maxStage = runState.stage;
       
-      // Hồi máu 1 chút khi qua ải
-      runState.pets.forEach(p => { if (p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.1); });
+      // Hồi máu 20% khi qua ải
+      runState.pets.forEach(p => { if (p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2); });
       
       save();
       renderHeroUI();
@@ -829,35 +1183,35 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
     if (!targetEl) return;
     const fx = document.createElement('div');
     fx.className = 'fx-heal';
-    fx.innerHTML = spriteSVG('healFx', 24);
+    fx.innerHTML = spriteSVG('healFx', 32);
     scene.appendChild(fx);
     const tRect = targetEl.getBoundingClientRect();
-    fx.style.left = (tRect.left - sRect.left + tRect.width/2) + 'px';
-    fx.style.top = (tRect.top - sRect.top + tRect.height/2) + 'px';
+    fx.style.left = (tRect.left - sRect.left + tRect.width/2 - 16) + 'px';
+    fx.style.top = (tRect.top - sRect.top + tRect.height/2 - 16) + 'px';
     setTimeout(() => fx.remove(), 1000);
   }
   else if (skillType === 'shield_party') {
     if (!targetEl) return;
     const fx = document.createElement('div');
     fx.className = 'fx-shield';
-    fx.innerHTML = spriteSVG('shieldFx', 32);
+    fx.innerHTML = spriteSVG('shieldFx', 48);
     fx.style.position = 'absolute';
     fx.style.pointerEvents = 'none';
     scene.appendChild(fx);
     const tRect = targetEl.getBoundingClientRect();
-    fx.style.left = (tRect.left - sRect.left + tRect.width/2 - 16) + 'px';
-    fx.style.top = (tRect.top - sRect.top + tRect.height/2 - 16) + 'px';
+    fx.style.left = (tRect.left - sRect.left + tRect.width/2 - 24) + 'px';
+    fx.style.top = (tRect.top - sRect.top + tRect.height/2 - 24) + 'px';
     setTimeout(() => fx.remove(), 2000);
   }
   else if (skillType === 'random_buff') {
     if (!targetEl) return;
     const fx = document.createElement('div');
     fx.className = 'fx-buff';
-    fx.innerHTML = spriteSVG('holyLight', 32);
+    fx.innerHTML = spriteSVG('holyLight', 48);
     scene.appendChild(fx);
     const tRect = targetEl.getBoundingClientRect();
-    fx.style.left = (tRect.left - sRect.left + tRect.width/2) + 'px';
-    fx.style.top = (tRect.top - sRect.top + tRect.height/2) + 'px';
+    fx.style.left = (tRect.left - sRect.left + tRect.width/2 - 24) + 'px';
+    fx.style.top = (tRect.top - sRect.top + tRect.height/2 - 24) + 'px';
     setTimeout(() => fx.remove(), 800);
   }
   else if (skillType === 'laser') {
@@ -885,11 +1239,11 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
     if (!targetEl) return;
     const fx = document.createElement('div');
     fx.className = 'fx-impact';
-    fx.innerHTML = spriteSVG('fireball', 48);
+    fx.innerHTML = spriteSVG('fireball', 64);
     scene.appendChild(fx);
     const tRect = targetEl.getBoundingClientRect();
-    fx.style.left = (tRect.left - sRect.left + tRect.width/2) + 'px';
-    fx.style.top = (tRect.top - sRect.top + tRect.height/2) + 'px';
+    fx.style.left = (tRect.left - sRect.left + tRect.width/2 - 32) + 'px';
+    fx.style.top = (tRect.top - sRect.top + tRect.height/2 - 32) + 'px';
     setTimeout(() => fx.remove(), 250);
   }
 }
