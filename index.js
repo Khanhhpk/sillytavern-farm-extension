@@ -3492,12 +3492,12 @@ function openPanel(kind) {
           const on = !!bagSel[key];
           return `
         <div class="item selrow${on ? " selon" : ""}" data-selkey="${key}"><span class="icon">${spriteSVG(item.sp, 32)}</span>
-          <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff; white-space:nowrap;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/c\xE1i${esc(mdesc)}</div></span>
           <span class="selmark">${on ? "\u2713" : ""}</span></div>`;
         }
         return `
         <div class="item"><span class="icon">${spriteSVG(item.sp, 32)}</span>
-          <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/c\xE1i \xB7 ${esc(item.desc || "V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t")}</div></span>
+          <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${n} <span style="font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff; white-space:nowrap;">${item.rarity}</span></div><div class="meta">${bagPrice(key)} G/c\xE1i \xB7 ${esc(item.desc || "V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t")}</div></span>
           <span class="acts">
             <span class="ibtn" data-takeout="${key}" title="L\u1EA5y ra (mang v\xE0o c\u1ED1t truy\u1EC7n, kh\xF4ng quy ra ti\u1EC1n)">${spriteSVG("emBang", 16)}</span>
             <span class="ibtn" data-selldlg="${key}" title="B\xE1n (t\u1EF1 ch\u1ECDn s\u1ED1 l\u01B0\u1EE3ng)">${spriteSVG("coin", 16)}</span>
