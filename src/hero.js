@@ -1,6 +1,6 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
-import { spriteSVG, petSVG } from './graphics.js';
+import { spriteSVG, petSVG, PETS } from './graphics.js';
 import { CROPS } from './data.js';
 import { save } from './state.js';
 import { openModal, closeModal } from './shop.js';
@@ -767,7 +767,7 @@ function heroTick() {
           const pIdx = runState.pets.indexOf(p);
           const pEl = All.$id(`hpet-${pIdx}`);
           setTimeout(() => showFloatDamage('LEVEL UP!', pEl, '#f2c231'), 500);
-          heroToast(`${PET_SKILLS[p.id]?.name || 'Pet'} vừa lên cấp ${petData.level}!`);
+          heroToast(`${PETS[p.id]?.name || 'Pet'} vừa lên cấp ${petData.level}!`);
           const st = getPetStats(p.id);
           const oldMax = p.maxHp;
           p.maxHp = Math.floor(st.maxHp * (p.hpMult || 1));

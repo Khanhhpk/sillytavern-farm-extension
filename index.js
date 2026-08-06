@@ -8157,7 +8157,7 @@ function heroTick() {
             const pIdx = runState.pets.indexOf(p);
             const pEl = $id(`hpet-${pIdx}`);
             setTimeout(() => showFloatDamage("LEVEL UP!", pEl, "#f2c231"), 500);
-            heroToast(`${PET_SKILLS[p.id]?.name || "Pet"} v\u1EEBa l\xEAn c\u1EA5p ${petData.level}!`);
+            heroToast(`${PETS[p.id]?.name || "Pet"} v\u1EEBa l\xEAn c\u1EA5p ${petData.level}!`);
             const st = getPetStats(p.id);
             const oldMax = p.maxHp;
             p.maxHp = Math.floor(st.maxHp * (p.hpMult || 1));
