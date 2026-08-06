@@ -588,7 +588,7 @@ ${cropsTxt ? '- Nông sản tích trữ:\n' + cropsTxt : '- Nông sản tích tr
 ${specialTxt ? '- Vật phẩm đặc biệt tích trữ:\n' + specialTxt : ''}
 ${ev && ev.flavor ? `- Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}` : ''}${takeoutNoteStr}
 
-* Hướng dẫn cho AI: Nhân vật có thể phản ứng lại việc người chơi chăm vườn hoặc các món đồ trong túi một cách tự nhiên. ĐỪNG tự ý thao tác vườn rau hay thay đổi số lượng đồ vật thay người chơi, và ĐỪNG biến nó thành mạch chính của truyện trừ phi người chơi chủ động nhắc tới.`;
+* Hướng dẫn cho AI: Bạn KHÔNG THỂ nhìn thấu túi đồ của người chơi và KHÔNG BIẾT họ đang có những gì. Chỉ khi người chơi "lấy ra dùng" (ở mục HÀNH ĐỘNG VỪA XẢY RA), nhân vật mới nhìn thấy và phản ứng lại tự nhiên. ĐỪNG tự ý thao tác vườn rau hay thay đổi số lượng đồ vật, và ĐỪNG biến nó thành mạch chính của truyện trừ phi người chơi chủ động nhắc tới.`;
 
   setInjection(promptText);
 }
