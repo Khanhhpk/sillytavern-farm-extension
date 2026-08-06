@@ -7780,7 +7780,7 @@ var PET_SKILLS = {
   ghostBlob: {
     a1: { name: "R\xFAt H\u1ED3n", type: "soul_reap", val: 0.1, cd: 5, duration: 0, desc: "G\xE2y s\xE1t th\u01B0\u01A1ng 10% HP hi\u1EC7n t\u1EA1i qu\xE1i" },
     a2: { name: "D\u1ECDa Ma", type: "fear", val: 2, cd: 7, duration: 2, desc: "Ho\u1EA3ng s\u1EE3 (Cho\xE1ng c\u1EE9ng) qu\xE1i trong 2s" },
-    p1: { name: "\xC1m Kh\xED", type: "armor_pen", val: 0.5, desc: "B\u1ECF qua 50% ph\xF2ng ng\u1EF1 qu\xE1i" },
+    p1: { name: "\xC1m Kh\xED", type: "armor_pen", val: 0.5, desc: "Xuy\xEAn Gi\xE1p: T\u0103ng 50% s\xE1t th\u01B0\u01A1ng" },
     p2: { name: "V\xF4 H\xECnh", type: "stealth", val: 1, desc: "Qu\xE1i kh\xF4ng nh\u1EAFm \u0111\xE1nh b\xE9 tr\u01B0\u1EDBc" }
   },
   mystery_blob: {
@@ -8368,6 +8368,8 @@ function heroTick() {
         if (pSk.type === "hp_regen") {
           const heal = p.maxHp * pSk.val * (dt / 1e3);
           p.hp = Math.min(p.maxHp, p.hp + heal);
+          const hpPet = $id(`hp-pet-${pIdx}`);
+          if (hpPet) hpPet.style.width = `${p.hp / p.maxHp * 100}%`;
         }
         if (pSk.type === "curse_aura") {
           const cDmg = runState.monster.maxHp * pSk.val * (dt / 1e3);
@@ -8594,6 +8596,7 @@ function heroTick() {
             let isCrit = Math.random() < p.crit;
             if (passEq && pSkill[passEq] && pSkill[passEq].type === "combo_master" && p.combo % pSkill[passEq].val === 0) isCrit = true;
             let dmgBase = Math.max(1, Math.floor(p.atk * atkMult * (0.8 + Math.random() * 0.4)));
+            if (p.armorPen > 0) dmgBase = Math.floor(dmgBase * (1 + p.armorPen));
             if (passEq && pSkill[passEq]) {
               const ps = pSkill[passEq];
               if (ps.type === "first_strike" && !runState.monster[`fs_${p.id}`]) {
