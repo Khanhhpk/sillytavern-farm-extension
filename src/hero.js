@@ -47,6 +47,28 @@ export function initHeroState() {
     delete ctx.S.hero.level;
     delete ctx.S.hero.exp;
   }
+  
+  // Scan and auto-level up old pets with excess EXP
+  if (ctx.S.hero.roster) {
+    Object.keys(ctx.S.hero.roster).forEach(pId => {
+      let petData = ctx.S.hero.roster[pId];
+      if (petData && petData.exp !== undefined && !isNaN(petData.exp)) {
+        while (petData.level < 30) {
+          const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
+          if (petData.exp >= nextExp) {
+            petData.exp -= nextExp;
+            petData.level++;
+          } else {
+            break;
+          }
+        }
+        if (petData.level >= 30) {
+          petData.level = 30;
+          petData.exp = Math.floor(100 * Math.pow(1.5, 29));
+        }
+      }
+    });
+  }
 }
 
 export function getPetStats(pId) {

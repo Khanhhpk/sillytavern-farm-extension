@@ -7155,6 +7155,26 @@ function initHeroState() {
     delete ctx.S.hero.level;
     delete ctx.S.hero.exp;
   }
+  if (ctx.S.hero.roster) {
+    Object.keys(ctx.S.hero.roster).forEach((pId) => {
+      let petData = ctx.S.hero.roster[pId];
+      if (petData && petData.exp !== void 0 && !isNaN(petData.exp)) {
+        while (petData.level < 30) {
+          const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
+          if (petData.exp >= nextExp) {
+            petData.exp -= nextExp;
+            petData.level++;
+          } else {
+            break;
+          }
+        }
+        if (petData.level >= 30) {
+          petData.level = 30;
+          petData.exp = Math.floor(100 * Math.pow(1.5, 29));
+        }
+      }
+    });
+  }
 }
 function getPetStats(pId) {
   const data = ctx.S.hero.roster[pId] || { level: 1, exp: 0, enhHp: 0, enhAtk: 0, s5_unlocked: false, s15_unlocked: false };
