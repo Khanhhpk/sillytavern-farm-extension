@@ -562,7 +562,7 @@ export function openHeroMode() {
         combo: 0 // for starBell
       };
     }),
-    monster: null
+    monsters: [], focusTarget: null, waveTime: 0
   };
   
   spawnMonster();
@@ -613,63 +613,85 @@ export function cashOutHero() {
 
 function spawnMonster() {
   if (!runState) return;
-  const cropKeys = Object.keys(CROPS);
-  const randomCrop = cropKeys[Math.floor(Math.random() * cropKeys.length)];
+  const numPets = runState.pets.filter(p => p.hp > 0).length;
+  if (numPets === 0) return;
   
+  const numMobs = Math.floor(Math.random() * numPets) + 1;
   const isBoss = runState.stage > 0 && runState.stage % 5 === 0;
-  const hpMult = isBoss ? 5 : 1;
-  const pressure = ctx.S.hero.pressure || 0;
-  const pressureMult = 1 + (pressure * 0.05);
-
-  const baseMaxHp = (runState.stage * 20 + 80) * hpMult * pressureMult;
-  const baseAtk = (runState.stage * 4 + 5) * (isBoss ? 2 : 1) * pressureMult;
-  const baseCd = 2.0;
-
-  let hpScale = 0.8 + Math.random() * 0.4;
-  let atkScale = 0.8 + Math.random() * 0.4;
-  let cdScale = 0.8 + Math.random() * 0.4;
-
-  if (!isBoss) {
-    // Cân bằng cho quái thường: Trâu bò (HP, ATK cao) thì đánh chậm (CD cao) và ngược lại
-    cdScale = hpScale * atkScale; 
-  } else {
-    // Boss có thể "full +" (chỉ số độc lập, thiên hướng mạnh hơn)
-    hpScale = 0.9 + Math.random() * 0.3;
-    atkScale = 0.9 + Math.random() * 0.3;
-    cdScale = 0.7 + Math.random() * 0.4; // Có thể đánh rất nhanh
-  }
-
-  const maxHp = Math.floor(baseMaxHp * hpScale);
-  const atk = Math.floor(baseAtk * atkScale);
-  const maxCd = Math.max(0.5, baseCd * cdScale);
   
-  runState.monster = {
-    id: randomCrop,
-    hp: maxHp,
-    maxHp: maxHp,
-    atk: atk,
-    cd: maxCd,
-    maxCd: maxCd,
-    isBoss: isBoss,
-    isDead: false
-  };
-  monsterX = 350; // Quái ở xa 350px (bên phải taskbar)
+  runState.monsters = [];
+  const cropKeys = Object.keys(CROPS);
   
-  const em = All.$id('hero-enemy');
-  if (em) {
-    const scale = isBoss ? 'scale(1.5)' : '';
-    const bossStyle = isBoss ? 'filter: drop-shadow(0 0 5px #ff0000);' : '';
-    em.innerHTML = `
-      <div class="hero-mob idle" id="hmob" style="transform: translateX(${monsterX}px) ${scale}; transform-origin: bottom right; transition: transform 0.1s linear; ${bossStyle}">
-        <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-mob"></div></div>
-        <div class="hp-bar-mini"><div class="cd-fill-mini" id="cd-mob" style="width:0%"></div></div>
-        ${spriteSVG(CROPS[randomCrop].sp || 'seedLight', 32)}
-      </div>`;
+  for (let i = 0; i < numMobs; i++) {
+    const isThisBoss = isBoss && (i === 0);
+    const hpMult = isThisBoss ? 5 : 1;
+    const pressure = ctx.S.hero.pressure || 0;
+    const pressureMult = 1 + (pressure * 0.05);
+
+    const baseMaxHp = (runState.stage * 20 + 80) * hpMult * pressureMult;
+    const baseAtk = (runState.stage * 4 + 5) * (isThisBoss ? 2 : 1) * pressureMult;
+    const baseCd = 2.0;
+
+    let hpScale = 0.8 + Math.random() * 0.4;
+    let atkScale = 0.8 + Math.random() * 0.4;
+    let cdScale = 0.8 + Math.random() * 0.4;
+
+    if (!isThisBoss) {
+      cdScale = hpScale * atkScale; 
+    } else {
+      hpScale = 0.9 + Math.random() * 0.3;
+      atkScale = 0.9 + Math.random() * 0.3;
+      cdScale = 0.7 + Math.random() * 0.4;
+    }
+
+    const maxHp = Math.floor(baseMaxHp * hpScale);
+    const atk = Math.floor(baseAtk * atkScale);
+    const maxCd = Math.max(0.5, baseCd * cdScale);
+    
+    const randomCrop = cropKeys[Math.floor(Math.random() * cropKeys.length)];
+    
+    runState.monsters.push({
+      idx: i,
+      id: randomCrop,
+      hp: maxHp,
+      maxHp: maxHp,
+      atk: atk,
+      cd: maxCd,
+      maxCd: maxCd,
+      isBoss: isThisBoss,
+      isDead: false,
+      x: 350 + (i * 45)
+    });
   }
   
+  runState.focusTarget = null;
   runState.waveTime = 0;
-  const mobHp = All.$id('hp-mob');
-  if (mobHp) mobHp.style.width = '100%';
+  renderMonstersUI();
+}
+
+window.focusMonster = function(idx) {
+  if (!runState || !runState.monsters[idx] || runState.monsters[idx].hp <= 0) return;
+  runState.focusTarget = idx;
+  renderMonstersUI();
+};
+
+function renderMonstersUI() {
+  const em = All.$id('hero-enemy');
+  if (!em || !runState) return;
+  
+  em.innerHTML = runState.monsters.map((m, i) => {
+    if (m.hp <= 0) return '';
+    const scale = m.isBoss ? 'scale(1.5)' : '';
+    const bossStyle = m.isBoss ? 'filter: drop-shadow(0 0 5px #ff0000);' : '';
+    const focusStyle = runState.focusTarget === i ? 'filter: drop-shadow(0 0 8px #ffeb3b);' : bossStyle;
+    return `
+      <div class="hero-mob idle" id="hmob-${i}" onclick="focusMonster(${i})" style="position: absolute; left: ${m.x}px; transform-origin: bottom center; transition: left 0.1s linear, transform 0.1s linear; ${focusStyle}">
+        <div class="hp-bar-mini" style="${m.isBoss ? 'width: 48px;' : ''}"><div class="hp-fill-mini" id="hp-mob-${i}" style="width: ${(m.hp/m.maxHp)*100}%"></div></div>
+        <div class="hp-bar-mini" style="${m.isBoss ? 'width: 48px;' : ''}"><div class="cd-fill-mini" id="cd-mob-${i}" style="width: ${Math.min(100, Math.max(0, ((m.maxCd-m.cd)/m.maxCd)*100))}%"></div></div>
+        <div style="transform: ${scale}">${spriteSVG(CROPS[m.id].sp || 'seedLight', 32)}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 function heroTick() {
