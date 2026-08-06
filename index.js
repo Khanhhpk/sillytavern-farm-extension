@@ -3233,6 +3233,45 @@ function openGachaModal() {
     const machine = $id("gachaMachineSprite");
     const loadOverlay = $id("gachaLoadingOverlay");
     const loadText = $id("gachaLoadingText");
+    initGachaState();
+    const haveTickets = ctx.S.tickets?.[ticketType] || 0;
+    if (haveTickets < count) {
+      const missing = count - haveTickets;
+      const priceMap = { norm: 1e3, spec: 5e3, super: 5e5 };
+      const ticketPrice = priceMap[ticketType] || 0;
+      const cost = missing * ticketPrice;
+      const tName = ticketType === "super" ? "Si\xEAu c\u01B0\u1EDDng" : ticketType === "spec" ? "\u0110\u1EB7c bi\u1EC7t" : "Th\u01B0\u1EDDng";
+      if (ctx.S.coins >= cost) {
+        const confirmHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 18px; font-weight: bold; color: #8a5cc0; margin-bottom: 10px;">Kh\xF4ng \u0111\u1EE7 v\xE9</div>
+            <div style="font-size: 14px; margin-bottom: 15px;">B\u1EA1n c\xF3 mu\u1ED1n d\xF9ng <b>${cost.toLocaleString()} G</b> \u0111\u1EC3 quay ${tName} \xD7${count} kh\xF4ng?</div>
+            <div style="font-size: 12px; color: #7a5c38; margin-bottom: 20px;">Mua b\xF9 ${missing} v\xE9 ${tName} (${ticketPrice.toLocaleString()} G/v\xE9) \xB7 v\xE0ng hi\u1EC7n c\xF3 ${ctx.S.coins.toLocaleString()} G</div>
+            <div style="display: flex; justify-content: center; gap: 10px;">
+              <span class="buy" id="btnCancelRoll" style="background: #e3d5c8; color: #3a2c22; min-width: 80px; text-align: center;">Th\xF4i</span>
+              <span class="buy" id="btnConfirmRoll" style="min-width: 140px; text-align: center;">D\xF9ng v\xE0ng & quay</span>
+            </div>
+          </div>
+        `;
+        openModal("M\xE1y Gachapon", confirmHTML);
+        $id("btnCancelRoll").addEventListener("click", () => {
+          openGachaModal();
+        });
+        $id("btnConfirmRoll").addEventListener("click", () => {
+          if (ctx.S.coins < cost) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng");
+          ctx.S.coins -= cost;
+          ctx.S.tickets[ticketType] = (ctx.S.tickets[ticketType] || 0) + missing;
+          save();
+          renderStatus();
+          openGachaModal();
+          setTimeout(() => doRoll(ticketType, count), 50);
+        });
+        return;
+      } else {
+        toast(`C\u1EA7n ${count} V\xE9 ${tName} (thi\u1EBFu ${missing} v\xE9, mua m\u1EA5t ${cost.toLocaleString()} G nh\u01B0ng b\u1EA1n kh\xF4ng \u0111\u1EE7 ti\u1EC1n)!`);
+        return;
+      }
+    }
     if (machine) machine.style.animation = "gachaShake 0.2s ease infinite";
     if (loadOverlay) loadOverlay.style.display = "flex";
     if (loadText) loadText.textContent = "\u0110ang quay...";
