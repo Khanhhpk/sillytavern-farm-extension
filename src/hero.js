@@ -492,10 +492,10 @@ function heroTick() {
   const partyEl = All.$id('hero-party');
   const mobEl = All.$id('hmob');
   
-  // Di chuyển (Dừng khi monsterX <= 130px, vì Party chiếm từ 10px đến ~120px)
+  // Di chuyển (Dừng khi monsterX <= 200px, vì Party chiếm từ 10px đến ~120px)
   if (runState.monster.isDead) return;
 
-  if (monsterX > 130) {
+  if (monsterX > 200) {
     monsterX -= (40 * (dt / 1000)); // tốc độ 40px/s
     if (mobEl) {
       const scale = runState.monster.isBoss ? 'scale(1.5)' : '';
@@ -800,7 +800,7 @@ function showFloatDamage(text, target, color = null) {
 
 function spawnSkillEffect(startEl, targetEl, skillType) {
   if (!startEl) return;
-  const scene = document.querySelector('.hero-scene');
+  const scene = startEl.closest('.hero-scene') || document.querySelector('.hero-scene');
   if (!scene) return;
   
   const sRect = scene.getBoundingClientRect();
@@ -876,7 +876,7 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
 
 function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
   if (!startEl || !targetEl) return;
-  const scene = document.querySelector('.hero-scene');
+  const scene = startEl.closest('.hero-scene') || document.querySelector('.hero-scene');
   if (!scene) return;
   
   const sRect = scene.getBoundingClientRect();

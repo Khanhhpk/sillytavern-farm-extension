@@ -7840,7 +7840,7 @@ function heroTick() {
   const partyEl = $id("hero-party");
   const mobEl = $id("hmob");
   if (runState.monster.isDead) return;
-  if (monsterX > 130) {
+  if (monsterX > 200) {
     monsterX -= 40 * (dt / 1e3);
     if (mobEl) {
       const scale = runState.monster.isBoss ? "scale(1.5)" : "";
@@ -8137,7 +8137,7 @@ function showFloatDamage(text, target, color = null) {
 }
 function spawnSkillEffect(startEl, targetEl, skillType) {
   if (!startEl) return;
-  const scene2 = document.querySelector(".hero-scene");
+  const scene2 = startEl.closest(".hero-scene") || document.querySelector(".hero-scene");
   if (!scene2) return;
   const sRect = scene2.getBoundingClientRect();
   if (skillType === "heal_party" || skillType === "heal_self") {
@@ -8204,7 +8204,7 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
 }
 function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
   if (!startEl || !targetEl) return;
-  const scene2 = document.querySelector(".hero-scene");
+  const scene2 = startEl.closest(".hero-scene") || document.querySelector(".hero-scene");
   if (!scene2) return;
   const sRect = scene2.getBoundingClientRect();
   const startRect = startEl.getBoundingClientRect();
