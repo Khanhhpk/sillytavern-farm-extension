@@ -122,8 +122,7 @@ export function openTakeout(key) {
     if (ctx.S.bag[key] <= 0) delete ctx.S.bag[key];
     const d = mutDescOf(key);
     takeoutNote = ((takeoutNote || []).filter(t => now() < t.until))
-      .concat({ txt: n + ' ' + bagName(key) + (d ? ' (hiệu ứng đã định: ' + d + ')' : ''), until: now() + 10 * MIN })
-      .slice(-3);
+      .concat({ txt: n + ' ' + bagName(key) + (d ? ' (hiệu ứng đã định: ' + d + ')' : ''), until: now() + 10 * MIN });
     save(); renderStatus();
     toast('Đã lấy ra ' + n + ' ' + bagName(key));
     openPanel('bag');

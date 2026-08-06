@@ -2168,6 +2168,9 @@ function rollMutation(c, pi) {
   }
 }
 function bagName(key) {
+  if (key.startsWith("unique@")) {
+    return ctx.S.uniques?.[key]?.name || "V\u1EADt ph\u1EA9m Gacha";
+  }
   const parts = key.split("@");
   return (parts[1] ? parts[1] + "\xB7" : "") + (CROPS[parts[0]] || { name: "?" }).name;
 }
@@ -2179,6 +2182,9 @@ function bagPrice(key) {
   return Math.round((CROPS[parts[0]] || { sell: 0 }).sell * (parts[1] ? 1.25 : 1));
 }
 function mutDescOf(bagKey) {
+  if (bagKey.startsWith("unique@")) {
+    return ctx.S.uniques?.[bagKey]?.desc || "";
+  }
   const parts = bagKey.split("@");
   if (!parts[1] || !ctx.S.mutDesc) return "";
   const mutCode = parts.slice(1).join("@");
@@ -4541,7 +4547,7 @@ function openTakeout(key) {
     ctx.S.bag[key] = have - n;
     if (ctx.S.bag[key] <= 0) delete ctx.S.bag[key];
     const d = mutDescOf(key);
-    takeoutNote = (takeoutNote || []).filter((t) => now() < t.until).concat({ txt: n + " " + bagName(key) + (d ? " (hi\u1EC7u \u1EE9ng \u0111\xE3 \u0111\u1ECBnh: " + d + ")" : ""), until: now() + 10 * MIN }).slice(-3);
+    takeoutNote = (takeoutNote || []).filter((t) => now() < t.until).concat({ txt: n + " " + bagName(key) + (d ? " (hi\u1EC7u \u1EE9ng \u0111\xE3 \u0111\u1ECBnh: " + d + ")" : ""), until: now() + 10 * MIN });
     save();
     renderStatus();
     toast("\u0110\xE3 l\u1EA5y ra " + n + " " + bagName(key));
@@ -5315,27 +5321,35 @@ function updateInjection() {
     if (now() >= c.matureAt) ripe++;
   }));
   const field = Object.keys(counts).map((id) => CROPS[id].name + "\xD7" + counts[id]).join(", ") || "\u0111ang \u0111\u1EC3 tr\u1ED1ng";
-  const bagTxt = Object.keys(ctx.S.bag).map((k) => {
+  const cropsArr = [];
+  const specialArr = [];
+  Object.keys(ctx.S.bag).forEach((k) => {
     const d = mutDescOf(k);
-    return "  + " + bagName(k) + " \xD7" + ctx.S.bag[k] + (d ? " (" + d + ")" : "");
-  }).join("\n");
+    const line = "  + " + bagName(k) + " \xD7" + ctx.S.bag[k] + (d ? " (" + d + ")" : "");
+    if (k.startsWith("unique@")) specialArr.push(line);
+    else cropsArr.push(line);
+  });
+  const cropsTxt = cropsArr.join("\n");
+  const specialTxt = specialArr.join("\n");
   const ev = todayEvent();
   const takeoutNoteStr = function() {
     setTakeoutNote((takeoutNote || []).filter((t) => now() < t.until));
     if (!takeoutNote.length) return "";
     return `
 
-\u3010QUAN TR\u1ECCNG: H\xC0NH \u0110\u1ED8NG V\u1EEAA X\u1EA2Y RA\u3011
-Ng\u01B0\u1EDDi ch\u01A1i v\u1EEBa l\u1EA5y ${takeoutNote.map((t) => t.txt).join(", ")} ra kh\u1ECFi balo v\u01B0\u1EDDn rau, h\u1EB3n l\xE0 \u0111\u1ECBnh d\xF9ng/t\u1EB7ng trong c\u1ED1t truy\u1EC7n. H\xE3y ti\u1EBFp nh\u1EADn m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn; ph\u1EA7n trong ngo\u1EB7c l\xE0 hi\u1EC7u \u1EE9ng c\u1EE7a v\u1EADt ph\u1EA9m \u0111\xF3, h\xE3y l\u1EA5y \u0111\xF3 l\xE0m chu\u1EA9n v\xE0 c\xF3 th\u1EC3 s\xE1ng t\u1EA1o th\xEAm trong ch\u1EEBng m\u1EF1c.`;
+\u3010H\xC0NH \u0110\u1ED8NG V\u1EEAA X\u1EA2Y RA\u3011
+- V\u1EADt ph\u1EA9m \u0111\u01B0\u1EE3c l\u1EA5y ra d\xF9ng: ${takeoutNote.map((t) => t.txt).join(", ")}
+(Ng\u01B0\u1EDDi ch\u01A1i v\u1EEBa l\u1EA5y c\xE1c v\u1EADt ph\u1EA9m/n\xF4ng s\u1EA3n n\xE0y ra kh\u1ECFi kho \u0111\u1ED3 \u0111\u1EC3 t\u01B0\u01A1ng t\xE1c trong c\u1ED1t truy\u1EC7n. H\xE3y ti\u1EBFp nh\u1EADn t\u1EF1 nhi\xEAn; ph\u1EA7n trong ngo\u1EB7c l\xE0 hi\u1EC7u \u1EE9ng c\u1EE7a v\u1EADt ph\u1EA9m, h\xE3y l\u1EA5y \u0111\xF3 l\xE0m chu\u1EA9n v\xE0 mi\xEAu t\u1EA3 v\xE0o c\u1ED1t truy\u1EC7n)`;
   }();
-  const promptText = `\u3010V\u01B0\u1EDDn rau nh\u1ECF c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i\u3011
-Ng\u01B0\u1EDDi ch\u01A1i \u0111ang tr\u1ED3ng m\u1ED9t m\u1EA3nh v\u01B0\u1EDDn rau th\u01B0 gi\xE3n tr\xEAn giao di\u1EC7n SillyTavern (l\u1ED1i ch\u01A1i ti\u1EC7n \xEDch, t\u1ED3n t\u1EA1i song song v\u1EDBi c\u1ED1t truy\u1EC7n).
+  const promptText = `\u3010H\u1EC7 th\u1ED1ng N\xF4ng tr\u1EA1i & Kho \u0111\u1ED3\u3011
+Ng\u01B0\u1EDDi ch\u01A1i c\xF3 m\u1ED9t h\u1EC7 th\u1ED1ng n\xF4ng tr\u1EA1i v\xE0 t\xFAi \u0111\u1ED3 t\u1ED3n t\u1EA1i song song v\u1EDBi c\u1ED1t truy\u1EC7n.
 T\xECnh tr\u1EA1ng hi\u1EC7n t\u1EA1i:
 - \u0110ang tr\u1ED3ng: ${field || "\u0110\u1EA5t tr\u1ED1ng"}${ripe ? ` (c\xF3 ${ripe} c\xE2y \u0111\xE3 ch\xEDn ch\u1EDD thu)` : ""}
-${bagTxt ? "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF:\n" + bagTxt : "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF: Tr\u1ED1ng"}
+${cropsTxt ? "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF:\n" + cropsTxt : "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF: Tr\u1ED1ng"}
+${specialTxt ? "- V\u1EADt ph\u1EA9m \u0111\u1EB7c bi\u1EC7t t\xEDch tr\u1EEF:\n" + specialTxt : ""}
 ${ev && ev.flavor ? `- S\u1EF1 ki\u1EC7n h\xF4m nay: ${ev.name} \u2014\u2014 ${ev.flavor}` : ""}${takeoutNoteStr}
 
-* H\u01B0\u1EDBng d\u1EABn cho AI: Nh\xE2n v\u1EADt trong c\u1ED1t truy\u1EC7n th\u1EC9nh tho\u1EA3ng c\xF3 th\u1EC3 nh\u1EAFc t\u1EDBi vi\u1EC7c ng\u01B0\u1EDDi ch\u01A1i ch\u0103m v\u01B0\u1EDDn hay thu ho\u1EA1ch th\u1EBF n\xE0o m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn, nh\u01B0ng \u0110\u1EEANG thao t\xE1c v\u01B0\u1EDDn rau thay ng\u01B0\u1EDDi ch\u01A1i, c\u0169ng \u0110\u1EEANG bi\u1EBFn v\u01B0\u1EDDn rau th\xE0nh m\u1EA1ch ch\xEDnh c\u1EE7a c\u1ED1t truy\u1EC7n.`;
+* H\u01B0\u1EDBng d\u1EABn cho AI: Nh\xE2n v\u1EADt c\xF3 th\u1EC3 ph\u1EA3n \u1EE9ng l\u1EA1i vi\u1EC7c ng\u01B0\u1EDDi ch\u01A1i ch\u0103m v\u01B0\u1EDDn ho\u1EB7c c\xE1c m\xF3n \u0111\u1ED3 trong t\xFAi m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn. \u0110\u1EEANG t\u1EF1 \xFD thao t\xE1c v\u01B0\u1EDDn rau hay thay \u0111\u1ED5i s\u1ED1 l\u01B0\u1EE3ng \u0111\u1ED3 v\u1EADt thay ng\u01B0\u1EDDi ch\u01A1i, v\xE0 \u0110\u1EEANG bi\u1EBFn n\xF3 th\xE0nh m\u1EA1ch ch\xEDnh c\u1EE7a truy\u1EC7n tr\u1EEB phi ng\u01B0\u1EDDi ch\u01A1i ch\u1EE7 \u0111\u1ED9ng nh\u1EAFc t\u1EDBi.`;
   setInjection(promptText);
 }
 var heartbeat;

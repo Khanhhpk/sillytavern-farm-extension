@@ -101,6 +101,9 @@ export function rollMutation(c, pi) {                          // Mỗi vụ gie
   }
 }
 export function bagName(key) {
+  if (key.startsWith('unique@')) {
+    return ctx.S.uniques?.[key]?.name || 'Vật phẩm Gacha';
+  }
   const parts = key.split('@');
   return (parts[1] ? parts[1] + '·' : '') + (CROPS[parts[0]] || { name: '?' }).name;   // Dự phòng: id lạ cũng không làm nổ balo
 }
@@ -112,6 +115,9 @@ export function bagPrice(key) {
   return Math.round((CROPS[parts[0]] || { sell: 0 }).sell * (parts[1] ? 1.25 : 1));   // Hàng đột biến bán được ×1.25
 }
 export function mutDescOf(bagKey) {                            // #19: lấy mô tả chức năng (tương thích khoá chỉ có tiền tố của save cũ)
+  if (bagKey.startsWith('unique@')) {
+    return ctx.S.uniques?.[bagKey]?.desc || '';
+  }
   const parts = bagKey.split('@');
   if (!parts[1] || !ctx.S.mutDesc) return '';
   const mutCode = parts.slice(1).join('@');
