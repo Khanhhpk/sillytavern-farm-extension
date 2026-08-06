@@ -158,21 +158,23 @@ export function openHeroPanel() {
   ).join('');
 
   openModal('Phòng Tập Anh Hùng', `
-    <div class="hero-panel-stats" style="justify-content: space-between;">
-      <div>Max Stage: <b>${ctx.S.hero.maxStage}</b></div>
-      <div class="h-gold">${spriteSVG('coin', 16)} <b>${ctx.S.hero.gold}</b></div>
+    <div class="hero-modal-wrapper">
+      <div class="hero-panel-stats" style="justify-content: space-between;">
+        <div>Max Stage: <b>${ctx.S.hero.maxStage}</b></div>
+        <div class="h-gold">${spriteSVG('coin', 16)} <b>${ctx.S.hero.gold}</b></div>
+      </div>
+      
+      <div class="hero-panel-section">Đội hình ra trận (Max 3)</div>
+      <div class="hero-party-slots">${partySlots}</div>
+      
+      <div class="hero-panel-section">Kho Thú Cưng</div>
+      <div class="hero-pet-roster-list">${petRoster || '<i>Bạn chưa có Thú cưng nào! Hãy vào Shop để đón các bé.</i>'}</div>
+      
+      <div class="hero-panel-section">Lối đánh</div>
+      <div class="hero-style-list">${styleBtns}</div>
+      
+      <div class="hero-deploy-btn" id="hero-deploy">XUẤT PHÁT!</div>
     </div>
-    
-    <div class="hero-panel-section">Đội hình ra trận (Max 3)</div>
-    <div class="hero-party-slots">${partySlots}</div>
-    
-    <div class="hero-panel-section">Kho Thú Cưng</div>
-    <div class="hero-pet-roster-list">${petRoster || '<i>Bạn chưa có Thú cưng nào! Hãy vào Shop để đón các bé.</i>'}</div>
-    
-    <div class="hero-panel-section">Lối đánh</div>
-    <div class="hero-style-list">${styleBtns}</div>
-    
-    <div class="hero-deploy-btn" id="hero-deploy">XUẤT PHÁT!</div>
   `);
   
   const mbody = All.$id('mbody');
@@ -256,39 +258,41 @@ function openPetSkills(pId) {
   }).join('');
   
   openModal('Thông Tin Thú Cưng', `
-    <div style="display:flex; gap: 16px; margin-bottom: 16px; align-items:center;">
-      <div style="background:#2c2538; border-radius:12px; padding:12px; border: 2px solid #5d4a85;">
-        ${petSVG(pId, 64)}
+    <div class="hero-modal-wrapper">
+      <div style="display:flex; gap: 16px; margin-bottom: 16px; align-items:center;">
+        <div style="background:#2c2538; border-radius:12px; padding:12px; border: 2px solid #5d4a85;">
+          ${petSVG(pId, 64)}
+        </div>
+        <div style="flex:1;">
+          <div style="font-size: 18px; font-weight:bold; color: #f2c231; margin-bottom: 4px;">Lv.${st.level}</div>
+          <div style="font-size: 14px;">HP Cơ bản: <b>${st.maxHp}</b> (+${st.enhHpLevel} Cường hóa)</div>
+          <div style="font-size: 14px;">ATK Cơ bản: <b>${st.atk}</b> (+${st.enhAtkLevel} Cường hóa)</div>
+          <div style="font-size: 14px;">Tốc đánh: <b>${st.spd}</b> (+${st.enhSpdLevel} Cường hóa)</div>
+          <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp/st.nextExp*100)}%"></div><span>${st.level >= 30 ? 'MAX LEVEL' : `EXP: ${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
+        </div>
       </div>
-      <div style="flex:1;">
-        <div style="font-size: 18px; font-weight:bold; color: #f2c231; margin-bottom: 4px;">Lv.${st.level}</div>
-        <div style="font-size: 14px;">HP Cơ bản: <b>${st.maxHp}</b> (+${st.enhHpLevel} Cường hóa)</div>
-        <div style="font-size: 14px;">ATK Cơ bản: <b>${st.atk}</b> (+${st.enhAtkLevel} Cường hóa)</div>
-        <div style="font-size: 14px;">Tốc đánh: <b>${st.spd}</b> (+${st.enhSpdLevel} Cường hóa)</div>
-        <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp/st.nextExp*100)}%"></div><span>${st.level >= 30 ? 'MAX LEVEL' : `EXP: ${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
+      
+      <div class="hero-panel-section">Tech Tree (Nội Tại & Kỹ Năng)</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${skillHtml}
       </div>
-    </div>
-    
-    <div class="hero-panel-section">Tech Tree (Nội Tại & Kỹ Năng)</div>
-    <div style="display:flex; flex-direction:column; gap:8px;">
-      ${skillHtml}
-    </div>
-    
-    <div class="hero-panel-section" style="margin-top:16px;">Cường Hóa (Enhance)</div>
-    <div class="betsides">
-      <div class="betside hero-deploy-btn" id="pet-enh-hp" style="margin-top:0; padding:10px; font-size:14px;">
-        +50 HP<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} Vàng)</span>
+      
+      <div class="hero-panel-section" style="margin-top:16px;">Cường Hóa (Enhance)</div>
+      <div class="betsides">
+        <div class="betside hero-deploy-btn" id="pet-enh-hp" style="margin-top:0; padding:10px; font-size:14px;">
+          +50 HP<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} Vàng)</span>
+        </div>
+        <div class="betside hero-deploy-btn" id="pet-enh-atk" style="margin-top:0; padding:10px; font-size:14px;">
+          +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} Vàng)</span>
+        </div>
+        <div class="betside hero-deploy-btn" id="pet-enh-spd" style="margin-top:0; padding:10px; font-size:14px;">
+          +0.1 SPD<br><span style="font-size:12px; font-weight:normal;">(${st.enhSpdCost} Vàng)</span>
+        </div>
       </div>
-      <div class="betside hero-deploy-btn" id="pet-enh-atk" style="margin-top:0; padding:10px; font-size:14px;">
-        +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} Vàng)</span>
+      
+      <div class="hero-deploy-btn" id="pet-back-btn" style="margin-top: 16px; background: #2c2538; border-color: #5d4a85;">
+        Quay Lại
       </div>
-      <div class="betside hero-deploy-btn" id="pet-enh-spd" style="margin-top:0; padding:10px; font-size:14px;">
-        +0.1 SPD<br><span style="font-size:12px; font-weight:normal;">(${st.enhSpdCost} Vàng)</span>
-      </div>
-    </div>
-    
-    <div class="hero-deploy-btn" id="pet-back-btn" style="margin-top: 16px; background: #2c2538; border-color: #5d4a85;">
-      Quay Lại
     </div>
   `);
   

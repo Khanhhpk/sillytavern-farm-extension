@@ -2244,6 +2244,7 @@ var styleCSS = `
     @keyframes dFloat { 0% { opacity: 1; transform: translateY(0) scale(1); } 50% { transform: translateY(-15px) scale(1.2); } 100% { opacity: 0; transform: translateY(-20px) scale(1); } }
 
     /* ---------- Hero Panel (Modal) ---------- */
+    .hero-modal-wrapper { background: #1f1a28; color: #d4e3f0; margin: -10px -12px -12px; padding: 12px 14px 14px; border-radius: 0 0 6px 6px; min-height: 100%; font-family: sans-serif; }
     .hero-panel-stats { display: flex; justify-content: space-around; background: #2c2538; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-weight: bold; color: #e0ccff; border: 1px solid #4a3461; }
     .hero-panel-section { font-size: 13px; color: #a58bd3; font-weight: bold; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 1px; }
     .hero-party-slots { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
@@ -7591,21 +7592,23 @@ function openHeroPanel() {
     </div>`
   ).join("");
   openModal("Ph\xF2ng T\u1EADp Anh H\xF9ng", `
-    <div class="hero-panel-stats" style="justify-content: space-between;">
-      <div>Max Stage: <b>${ctx.S.hero.maxStage}</b></div>
-      <div class="h-gold">${spriteSVG("coin", 16)} <b>${ctx.S.hero.gold}</b></div>
+    <div class="hero-modal-wrapper">
+      <div class="hero-panel-stats" style="justify-content: space-between;">
+        <div>Max Stage: <b>${ctx.S.hero.maxStage}</b></div>
+        <div class="h-gold">${spriteSVG("coin", 16)} <b>${ctx.S.hero.gold}</b></div>
+      </div>
+      
+      <div class="hero-panel-section">\u0110\u1ED9i h\xECnh ra tr\u1EADn (Max 3)</div>
+      <div class="hero-party-slots">${partySlots}</div>
+      
+      <div class="hero-panel-section">Kho Th\xFA C\u01B0ng</div>
+      <div class="hero-pet-roster-list">${petRoster || "<i>B\u1EA1n ch\u01B0a c\xF3 Th\xFA c\u01B0ng n\xE0o! H\xE3y v\xE0o Shop \u0111\u1EC3 \u0111\xF3n c\xE1c b\xE9.</i>"}</div>
+      
+      <div class="hero-panel-section">L\u1ED1i \u0111\xE1nh</div>
+      <div class="hero-style-list">${styleBtns}</div>
+      
+      <div class="hero-deploy-btn" id="hero-deploy">XU\u1EA4T PH\xC1T!</div>
     </div>
-    
-    <div class="hero-panel-section">\u0110\u1ED9i h\xECnh ra tr\u1EADn (Max 3)</div>
-    <div class="hero-party-slots">${partySlots}</div>
-    
-    <div class="hero-panel-section">Kho Th\xFA C\u01B0ng</div>
-    <div class="hero-pet-roster-list">${petRoster || "<i>B\u1EA1n ch\u01B0a c\xF3 Th\xFA c\u01B0ng n\xE0o! H\xE3y v\xE0o Shop \u0111\u1EC3 \u0111\xF3n c\xE1c b\xE9.</i>"}</div>
-    
-    <div class="hero-panel-section">L\u1ED1i \u0111\xE1nh</div>
-    <div class="hero-style-list">${styleBtns}</div>
-    
-    <div class="hero-deploy-btn" id="hero-deploy">XU\u1EA4T PH\xC1T!</div>
   `);
   const mbody = $id("mbody");
   mbody.querySelectorAll(".hero-slot.filled").forEach((el) => el.addEventListener("click", () => {
@@ -7678,39 +7681,41 @@ function openPetSkills(pId) {
     </div>`;
   }).join("");
   openModal("Th\xF4ng Tin Th\xFA C\u01B0ng", `
-    <div style="display:flex; gap: 16px; margin-bottom: 16px; align-items:center;">
-      <div style="background:#2c2538; border-radius:12px; padding:12px; border: 2px solid #5d4a85;">
-        ${petSVG(pId, 64)}
+    <div class="hero-modal-wrapper">
+      <div style="display:flex; gap: 16px; margin-bottom: 16px; align-items:center;">
+        <div style="background:#2c2538; border-radius:12px; padding:12px; border: 2px solid #5d4a85;">
+          ${petSVG(pId, 64)}
+        </div>
+        <div style="flex:1;">
+          <div style="font-size: 18px; font-weight:bold; color: #f2c231; margin-bottom: 4px;">Lv.${st.level}</div>
+          <div style="font-size: 14px;">HP C\u01A1 b\u1EA3n: <b>${st.maxHp}</b> (+${st.enhHpLevel} C\u01B0\u1EDDng h\xF3a)</div>
+          <div style="font-size: 14px;">ATK C\u01A1 b\u1EA3n: <b>${st.atk}</b> (+${st.enhAtkLevel} C\u01B0\u1EDDng h\xF3a)</div>
+          <div style="font-size: 14px;">T\u1ED1c \u0111\xE1nh: <b>${st.spd}</b> (+${st.enhSpdLevel} C\u01B0\u1EDDng h\xF3a)</div>
+          <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp / st.nextExp * 100)}%"></div><span>${st.level >= 30 ? "MAX LEVEL" : `EXP: ${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
+        </div>
       </div>
-      <div style="flex:1;">
-        <div style="font-size: 18px; font-weight:bold; color: #f2c231; margin-bottom: 4px;">Lv.${st.level}</div>
-        <div style="font-size: 14px;">HP C\u01A1 b\u1EA3n: <b>${st.maxHp}</b> (+${st.enhHpLevel} C\u01B0\u1EDDng h\xF3a)</div>
-        <div style="font-size: 14px;">ATK C\u01A1 b\u1EA3n: <b>${st.atk}</b> (+${st.enhAtkLevel} C\u01B0\u1EDDng h\xF3a)</div>
-        <div style="font-size: 14px;">T\u1ED1c \u0111\xE1nh: <b>${st.spd}</b> (+${st.enhSpdLevel} C\u01B0\u1EDDng h\xF3a)</div>
-        <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp / st.nextExp * 100)}%"></div><span>${st.level >= 30 ? "MAX LEVEL" : `EXP: ${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
+      
+      <div class="hero-panel-section">Tech Tree (N\u1ED9i T\u1EA1i & K\u1EF9 N\u0103ng)</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${skillHtml}
       </div>
-    </div>
-    
-    <div class="hero-panel-section">Tech Tree (N\u1ED9i T\u1EA1i & K\u1EF9 N\u0103ng)</div>
-    <div style="display:flex; flex-direction:column; gap:8px;">
-      ${skillHtml}
-    </div>
-    
-    <div class="hero-panel-section" style="margin-top:16px;">C\u01B0\u1EDDng H\xF3a (Enhance)</div>
-    <div class="betsides">
-      <div class="betside hero-deploy-btn" id="pet-enh-hp" style="margin-top:0; padding:10px; font-size:14px;">
-        +50 HP<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} V\xE0ng)</span>
+      
+      <div class="hero-panel-section" style="margin-top:16px;">C\u01B0\u1EDDng H\xF3a (Enhance)</div>
+      <div class="betsides">
+        <div class="betside hero-deploy-btn" id="pet-enh-hp" style="margin-top:0; padding:10px; font-size:14px;">
+          +50 HP<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} V\xE0ng)</span>
+        </div>
+        <div class="betside hero-deploy-btn" id="pet-enh-atk" style="margin-top:0; padding:10px; font-size:14px;">
+          +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} V\xE0ng)</span>
+        </div>
+        <div class="betside hero-deploy-btn" id="pet-enh-spd" style="margin-top:0; padding:10px; font-size:14px;">
+          +0.1 SPD<br><span style="font-size:12px; font-weight:normal;">(${st.enhSpdCost} V\xE0ng)</span>
+        </div>
       </div>
-      <div class="betside hero-deploy-btn" id="pet-enh-atk" style="margin-top:0; padding:10px; font-size:14px;">
-        +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} V\xE0ng)</span>
+      
+      <div class="hero-deploy-btn" id="pet-back-btn" style="margin-top: 16px; background: #2c2538; border-color: #5d4a85;">
+        Quay L\u1EA1i
       </div>
-      <div class="betside hero-deploy-btn" id="pet-enh-spd" style="margin-top:0; padding:10px; font-size:14px;">
-        +0.1 SPD<br><span style="font-size:12px; font-weight:normal;">(${st.enhSpdCost} V\xE0ng)</span>
-      </div>
-    </div>
-    
-    <div class="hero-deploy-btn" id="pet-back-btn" style="margin-top: 16px; background: #2c2538; border-color: #5d4a85;">
-      Quay L\u1EA1i
     </div>
   `);
   const mbody = $id("mbody");

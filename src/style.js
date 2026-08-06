@@ -542,6 +542,7 @@ export const styleCSS = `
     @keyframes dFloat { 0% { opacity: 1; transform: translateY(0) scale(1); } 50% { transform: translateY(-15px) scale(1.2); } 100% { opacity: 0; transform: translateY(-20px) scale(1); } }
 
     /* ---------- Hero Panel (Modal) ---------- */
+    .hero-modal-wrapper { background: #1f1a28; color: #d4e3f0; margin: -10px -12px -12px; padding: 12px 14px 14px; border-radius: 0 0 6px 6px; min-height: 100%; font-family: sans-serif; }
     .hero-panel-stats { display: flex; justify-content: space-around; background: #2c2538; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-weight: bold; color: #e0ccff; border: 1px solid #4a3461; }
     .hero-panel-section { font-size: 13px; color: #a58bd3; font-weight: bold; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: 1px; }
     .hero-party-slots { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; }
