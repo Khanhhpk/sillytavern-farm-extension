@@ -1981,9 +1981,11 @@ function initUI() {
   swX = null;
   swY = null;
   fieldEl.addEventListener("touchstart", (e) => {
-    if (e.touches.length === 1) {
+    if (e.touches.length === 1 && (!ctx.S.dragPet || !e.target.closest(".pet"))) {
       swX = e.touches[0].clientX;
       swY = e.touches[0].clientY;
+    } else {
+      swX = null;
     }
   }, { passive: true });
   fieldEl.addEventListener("touchend", (e) => {

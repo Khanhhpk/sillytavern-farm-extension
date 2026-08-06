@@ -164,7 +164,14 @@ if (pagerEl) pagerEl.addEventListener('click', e => {
 /* Phương án 3: vuốt trái phải ở khu ruộng để đổi trang (dùng thử song song với thanh viên nang của phương án 2; nếu bỏ thì xoá cả khối này) */
   swX = null; swY = null;
 // @ts-ignore
-fieldEl.addEventListener('touchstart', e => { if (e.touches.length === 1) { swX = e.touches[0].clientX; swY = e.touches[0].clientY; } }, { passive: true });
+fieldEl.addEventListener('touchstart', e => { 
+  if (e.touches.length === 1 && (!ctx.S.dragPet || !e.target.closest('.pet'))) { 
+    swX = e.touches[0].clientX; 
+    swY = e.touches[0].clientY; 
+  } else {
+    swX = null;
+  }
+}, { passive: true });
 fieldEl.addEventListener('touchend', e => {
   if (swX == null) return;
   // @ts-ignore
