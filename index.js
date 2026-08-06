@@ -8354,8 +8354,10 @@ function spawnMonster() {
   const randomCrop = cropKeys[Math.floor(Math.random() * cropKeys.length)];
   const isBoss = runState.stage > 0 && runState.stage % 5 === 0;
   const hpMult = isBoss ? 5 : 1;
-  const baseMaxHp = (runState.stage * 20 + 80) * hpMult;
-  const baseAtk = (runState.stage * 4 + 5) * (isBoss ? 2 : 1);
+  const pressure = ctx.S.hero.pressure || 0;
+  const pressureMult = 1 + pressure * 0.05;
+  const baseMaxHp = (runState.stage * 20 + 80) * hpMult * pressureMult;
+  const baseAtk = (runState.stage * 4 + 5) * (isBoss ? 2 : 1) * pressureMult;
   const baseCd = 2;
   let hpScale = 0.8 + Math.random() * 0.4;
   let atkScale = 0.8 + Math.random() * 0.4;
@@ -8653,7 +8655,7 @@ function heroTick() {
       if (cdBar) cdBar.style.width = `${Math.min(100, Math.max(0, (p.maxCd - p.cd) / p.maxCd * 100))}%`;
       if (p.cd <= 0) {
         p.cd = p.maxCd;
-        const styleMult = ctx.S.hero.style === "attack" ? 1.5 : 1;
+        const styleMult = ctx.S.hero.style === "attack" ? 1.5 : ctx.S.hero.style === "defense" ? 0.6 : 1;
         let atkMult = styleMult;
         if (p.atkBuff) atkMult *= p.atkBuff;
         if (p.atkDebuff) atkMult *= p.atkDebuff;
@@ -8757,7 +8759,7 @@ function heroTick() {
         });
         if (validTargets.length === 0) validTargets = alivePets;
         const target = validTargets[Math.floor(Math.random() * validTargets.length)];
-        const mult = ctx.S.hero.style === "defense" ? 0.6 : 1;
+        const mult = ctx.S.hero.style === "attack" ? 1.5 : ctx.S.hero.style === "defense" ? 0.6 : 1;
         let isDodge = Math.random() < target.dodge;
         if (runState.monster.blindCd > 0) isDodge = true;
         const pIdx = runState.pets.indexOf(target);
@@ -8830,7 +8832,7 @@ function heroTick() {
       }
       setTimeout(() => {
         if (!runState || !runState.monster) return;
-        const goldDrop = Math.floor((runState.stage * 50 + 150) * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
+        const goldDrop = Math.floor((runState.stage * 30 + 100) * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
         let pGoldMult = 1;
         runState.pets.forEach((p) => {
           const data = ctx.S.hero.roster[p.id];
@@ -8891,6 +8893,9 @@ function heroTick() {
             ctx.S.ferts["f1"] = (ctx.S.ferts["f1"] || 0) + 1;
             showFloatDrop("toolFert", partyEl);
           }
+        }
+        if (m.isBoss) {
+          ctx.S.hero.pressure = (ctx.S.hero.pressure || 0) + 1;
         }
         runState.stage++;
         if (runState.stage > ctx.S.hero.maxStage) ctx.S.hero.maxStage = runState.stage;
