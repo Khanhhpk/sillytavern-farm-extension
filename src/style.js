@@ -108,6 +108,8 @@ export const styleCSS = `
     .sign.confirm { border-color: var(--accLine); color: var(--accFg); }
     /* #26: lớp cho bé tròn tự do đi lại —— phủ toàn bộ khu ruộng, đi theo khu vực (loại làm việc = hàng dưới, loại đi dạo = bờ ruộng) */
     .mascots { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+    /* Cảm ứng: không có touch-action:none thì trình duyệt coi cú vuốt là cuộn trang, bắn pointercancel và cắt ngang phiên kéo */
+    .mascots[data-drag="1"] .pet { touch-action: none; }
     .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute;
       left: 0; bottom: 0; will-change: transform, translate; }
     .pet:active { transform: scale(1.15, .85); }

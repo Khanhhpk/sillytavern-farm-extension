@@ -1502,6 +1502,8 @@ var styleCSS = `
     .sign.confirm { border-color: var(--accLine); color: var(--accFg); }
     /* #26: l\u1EDBp cho b\xE9 tr\xF2n t\u1EF1 do \u0111i l\u1EA1i \u2014\u2014 ph\u1EE7 to\xE0n b\u1ED9 khu ru\u1ED9ng, \u0111i theo khu v\u1EF1c (lo\u1EA1i l\xE0m vi\u1EC7c = h\xE0ng d\u01B0\u1EDBi, lo\u1EA1i \u0111i d\u1EA1o = b\u1EDD ru\u1ED9ng) */
     .mascots { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+    /* C\u1EA3m \u1EE9ng: kh\xF4ng c\xF3 touch-action:none th\xEC tr\xECnh duy\u1EC7t coi c\xFA vu\u1ED1t l\xE0 cu\u1ED9n trang, b\u1EAFn pointercancel v\xE0 c\u1EAFt ngang phi\xEAn k\xE9o */
+    .mascots[data-drag="1"] .pet { touch-action: none; }
     .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute;
       left: 0; bottom: 0; will-change: transform, translate; }
     .pet:active { transform: scale(1.15, .85); }
@@ -2454,6 +2456,7 @@ function renderPets() {
     window.clearTimeout(petSleepT[k]);
     delete petSleepT[k];
   });
+  $id("mascots").dataset.drag = ctx.S.dragPet ? "1" : "0";
   $id("mascots").innerHTML = ctx.S.petsOut.map((id) => PETS[id] ? `<span class="pet" data-pet="${id}" title="Ch\u1ECDc ch\u1ECDc ${PETS[id].name}"><span class="pbody" style="animation-delay:-${(Math.random() * 1.8).toFixed(2)}s">${petSVG(id, 48)}</span></span>` : "").join("");
   sh.querySelectorAll("#mascots .pet").forEach((el) => {
     const id = el.dataset.pet;
@@ -2523,7 +2526,16 @@ function initPets() {
   let activeDrag = null;
   let dragAnimFrame = null;
   const mascots = $id("mascots");
+  let swallowClickUntil = 0;
+  const GHOST_MS = 700;
+  sh.addEventListener("click", (e) => {
+    if (!swallowClickUntil || now() >= swallowClickUntil) return;
+    swallowClickUntil = 0;
+    e.stopPropagation();
+    e.preventDefault();
+  }, true);
   mascots.addEventListener("pointerdown", (e) => {
+    if (e.pointerType && e.pointerType !== "mouse") swallowClickUntil = 0;
     if (!ctx.S.dragPet) return;
     const el = e.target.closest(".pet");
     if (!el) return;
@@ -2678,6 +2690,7 @@ function initPets() {
       el.style.transition = "";
       activeDrag = null;
       delete el.dataset.dragging;
+      if (e.pointerType && e.pointerType !== "mouse") swallowClickUntil = now() + GHOST_MS;
       handlePetClick(el, petId);
     }
   };
