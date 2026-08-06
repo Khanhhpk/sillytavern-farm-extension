@@ -102,8 +102,10 @@ export function openHeroPanel() {
 
 export function openHeroMode() {
   initHeroState();
-  All.$id('win').style.display = 'none';
-  All.$id('hero-bar').style.display = 'flex';
+  All.closeWin(); // Đóng bảng Farm chính thay vì chỉ ẩn display
+  
+  const bar = All.$id('hero-bar');
+  if (bar) bar.style.display = 'flex';
   
   if (!currentMonster) spawnMonster();
   renderHeroUI();
@@ -113,16 +115,18 @@ export function openHeroMode() {
     lastTick = Date.now();
     heroLoop = setInterval(heroTick, 100); // Game loop 10fps
   }
+  All.toast('Taskbar Hero đã xuất phát!');
 }
 
 export function closeHeroMode() {
-  All.$id('hero-bar').style.display = 'none';
+  const bar = All.$id('hero-bar');
+  if (bar) bar.style.display = 'none';
   if (heroLoop) {
     clearInterval(heroLoop);
     heroLoop = null;
   }
-  // Mở lại orb
-  All.$id('orb').style.display = 'flex';
+  const orb = All.$id('orb');
+  if (orb) orb.style.display = 'flex';
 }
 
 export function cashOutHero() {
@@ -268,8 +272,10 @@ export function onHeroUp(e) {
   try { bar.releasePointerCapture(e.pointerId); } catch (er) {}
   
   const vw = window.innerWidth, vh = window.innerHeight;
-  ctx.S.hero.fx = Math.min(Math.max(bar.offsetLeft, 0), vw - bar.offsetWidth) / vw;
-  ctx.S.hero.fy = Math.min(Math.max(bar.offsetTop, 0), vh - bar.offsetHeight) / vh;
+  let newFx = bar.offsetLeft / vw;
+  let newFy = bar.offsetTop / vh;
+  if (!isNaN(newFx)) ctx.S.hero.fx = Math.min(Math.max(newFx, 0), 1);
+  if (!isNaN(newFy)) ctx.S.hero.fy = Math.min(Math.max(newFy, 0), 1);
   save();
   hGesture = null;
 }
@@ -279,8 +285,17 @@ export function placeHeroBar() {
   const bar = All.$id('hero-bar');
   if (!bar) return;
   const vw = window.innerWidth, vh = window.innerHeight;
-  const x = Math.min(Math.max(ctx.S.hero.fx * vw, 0), vw - 360);
-  const y = Math.min(Math.max(ctx.S.hero.fy * vh, 0), vh - 60);
+  
+  let fx = ctx.S.hero.fx;
+  let fy = ctx.S.hero.fy;
+  if (typeof fx !== 'number' || isNaN(fx)) fx = 0.5;
+  if (typeof fy !== 'number' || isNaN(fy)) fy = 0.9;
+  
+  const w = bar.offsetWidth || 320;
+  const h = bar.offsetHeight || 60;
+  const x = Math.min(Math.max(fx * vw, 0), vw - w);
+  const y = Math.min(Math.max(fy * vh, 0), vh - h);
+  
   bar.style.left = x + 'px'; 
   bar.style.top = y + 'px';
   bar.style.right = 'auto';
