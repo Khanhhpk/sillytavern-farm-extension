@@ -422,12 +422,13 @@ function openPetSkills(pId) {
     
     // Nạp lại team nếu đang trong trận
     if (runState && runState.pets.some(p => p.id === pId)) {
-        // Có thể cần hàm refresh riêng, nhưng tạm thời người chơi phải tự reload đội hình 
-        // hoặc ta tự reload nhẹ
         const pt = runState.pets.find(p => p.id === pId);
         if (pt) {
-            pt.skillMaxCd = isAct ? (pSkill[typeId].cd || 0) : pt.skillMaxCd;
-            if (isAct) pt.skillCd = pt.skillMaxCd;
+            if (isAct) {
+                pt.skillMaxCd = (btn.dataset.action === 'equip') ? (pSkill[typeId].cd || 0) : 0;
+                pt.skillCd = pt.skillMaxCd;
+            }
+            renderHeroUI(); // Cập nhật lại giao diện để hiện/ẩn thanh skill
         }
     }
   }));
@@ -685,8 +686,9 @@ function heroTick() {
     }
     
     // 1. Pets Skills & Attack
-    alivePets.forEach((p, aIdx) => {
-      const pEl = All.$id(`hpet-${aIdx}`);
+    alivePets.forEach((p) => {
+      const pIdx = runState.pets.indexOf(p);
+      const pEl = All.$id(`hpet-${pIdx}`);
       const data = ctx.S.hero.roster[p.id] || {};
       const pSkill = PET_SKILLS[p.id];
       
@@ -884,7 +886,7 @@ function heroTick() {
           }
         }
         
-        const skBar = All.$id(`sk-pet-${aIdx}`);
+        const skBar = All.$id(`sk-pet-${pIdx}`);
         if (skBar) skBar.style.width = `${Math.min(100, Math.max(0, ((p.skillMaxCd - p.skillCd) / p.skillMaxCd) * 100))}%`;
       }
       
@@ -899,7 +901,7 @@ function heroTick() {
 
       // Đòn đánh thường
       p.cd -= (dt / 1000) * rtSpdMult;
-      const cdBar = All.$id(`cd-pet-${aIdx}`);
+      const cdBar = All.$id(`cd-pet-${pIdx}`);
       if (cdBar) cdBar.style.width = `${Math.min(100, Math.max(0, ((p.maxCd - p.cd) / p.maxCd) * 100))}%`;
 
       if (p.cd <= 0) {
@@ -960,7 +962,7 @@ function heroTick() {
               if (heal > 0) {
                 p.hp = Math.min(p.maxHp, p.hp + heal);
                 setTimeout(() => showFloatDamage(`+${heal}`, pEl, '#a4dc8c'), 150);
-                const hpPet = All.$id(`hp-pet-${aIdx}`);
+                const hpPet = All.$id(`hp-pet-${pIdx}`);
                 if (hpPet) setTimeout(() => { hpPet.style.width = `${(p.hp / p.maxHp) * 100}%`; }, 150);
               }
             }
