@@ -34,8 +34,9 @@ export const styleCSS = `
       background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 8px; padding: 3px 12px;
       box-shadow: 0 3px 0 var(--tint), inset 0 0 0 2px #fff6e0;
       display: flex; align-items: center; gap: 8px; }
+    .view-toggle { width: 24px; height: 24px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 0 var(--tintSoft); flex-shrink: 0; }
     .close-x { width: 24px; height: 24px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 6px;
-      color: #7a5c38; box-shadow: 0 2px 0 var(--tintSoft); font-weight: bold; text-align: center; line-height: 18px; cursor: pointer; }
+      color: #7a5c38; box-shadow: 0 2px 0 var(--tintSoft); font-weight: bold; text-align: center; line-height: 18px; cursor: pointer; flex-shrink: 0; }
     .statusbar { display: flex; align-items: center; gap: 12px; padding: 7px 14px; background: #f4e6cf;
       border-bottom: 3px solid #ddc39a; font-size: 13px; font-weight: bold; color: #7a5c38; flex: none; flex-wrap: wrap; }
     .stat { display: flex; align-items: center; gap: 5px; }
@@ -43,11 +44,11 @@ export const styleCSS = `
     /* v0.8: thanh lật trang ba trang */
     .pager { position: absolute; top: 7px; right: 7px; z-index: 7; display: flex; align-items: center; justify-content: center;
       background: rgba(58,48,30,.4); border: 2px solid rgba(255,246,224,.4); border-radius: 14px; overflow: hidden;
-      width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: rgba(255,246,224,.8); user-select: none; }   /* Phương án 2 sửa: bình thường là quả cầu nhỏ mờ */
+      width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: rgba(255,246,224,.8); user-select: none; }
     .pager.open { width: auto; height: auto; border-radius: 12px; cursor: default;
-      background: rgba(58,48,30,.55); border-color: rgba(255,246,224,.5); font-size: 0; }   /* Bấm mở = bung thành thanh viên nang */
-    .pager:not(.open) .ptab { display: none; }             /* Ở dạng quả cầu thì ẩn các tab trang */
-    .pager:not(.open)::after { content: '⇄'; }             /* Icon nhỏ trên mặt cầu */
+      background: rgba(58,48,30,.55); border-color: rgba(255,246,224,.5); font-size: 0; }
+    .pager:not(.open) .ptab { display: none; }
+    .pager:not(.open)::after { content: '⇄'; }
     .ptab { flex: none; font-size: 11px; font-weight: bold; padding: 4px 10px; background: transparent;
       color: #f0e6cc; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 3px; }
     .ptab + .ptab { border-left: 1px solid rgba(255,246,224,.35); }
@@ -55,37 +56,39 @@ export const styleCSS = `
     .ptab.lock { opacity: .6; }
     .field { margin: 10px 12px; background-color: #a9c383; border: 4px solid #b08a5c; border-radius: 8px;
       box-shadow: inset 0 0 0 3px #8aa86a; padding: 14px; position: relative; }
-    /* v0.8: da trang W1 ruộng nổi đầm sen / M1 mạch quặng kim cương */
     .field.pg2 { background-color: #8ec8d8; border-color: #6a9ab0; box-shadow: inset 0 0 0 3px #79b4c6; }
     .field.pg3 { background-color: #5f5870; border-color: #7a6a94; box-shadow: inset 0 0 0 3px #4e4860; }
-    .field.pg2 span.dside, .field.pg2 span.dbot, .field.pg3 span.dside, .field.pg3 span.dbot { display: none !important; }  /* Trang trí đồng cỏ không lội nước / không xuống mỏ */
-    .field.pg2 .plot { border-color: #c9a273;            /* v0.9: khung gỗ hai lớp —— gỗ nhạt ngoài + gỗ đậm trong, lấy lại cảm giác khung vuông của bản thiết kế */
+    .field.pg2 span.dside, .field.pg2 span.dbot, .field.pg3 span.dside, .field.pg3 span.dbot { display: none !important; }
+    .field.pg2 .plot { border-color: #c9a273;
       box-shadow: inset 0 0 0 3px #a8845c, inset 0 -5px 0 rgba(40,70,90,.28); }
     .field.pg2 .plot.watered { border-color: #b08a5c; box-shadow: inset 0 0 0 3px #8a6844, inset 0 -5px 0 rgba(30,55,75,.35); }
-    .field.pg2 .block:not(.locked) .plot::before {       /* v0.9 sửa lần 2: đinh góc màu đậm ở bốn góc (giống bản thiết kế) */
+    .field.pg2 .block:not(.locked) .plot::before {
       content: ''; position: absolute; inset: -3px; pointer-events: none; border-radius: 6px;
       background: linear-gradient(#6a4a2c,#6a4a2c) left top / 7px 7px no-repeat,
         linear-gradient(#6a4a2c,#6a4a2c) right top / 7px 7px no-repeat,
         linear-gradient(#6a4a2c,#6a4a2c) left bottom / 7px 7px no-repeat,
         linear-gradient(#6a4a2c,#6a4a2c) right bottom / 7px 7px no-repeat; }
-    .field.pg3 .plot { border-color: #3f8a9a; border-radius: 2px;   /* v0.9 sửa lần 3: luống ươm pha lê bớt bo góc, cạnh sắc rõ */
+    .field.pg3 .plot { border-color: #3f8a9a; border-radius: 2px;
       box-shadow: inset 0 0 0 1px rgba(138,224,234,.5), inset 0 -3px 0 rgba(20,20,40,.35); }
     .field.pg3 .plot.watered { border-color: #5fc8d8; }
-    /* v0.9 sửa lần 4: đinh góc trắng ở khu mỏ thử thấy chói mắt, bỏ (luống ươm vẫn giữ góc vuông) */
-    .field.pg2 .block.locked .plot { border-color: #8ab4c2; box-shadow: inset 0 3px 0 rgba(255,255,255,.28), inset 0 -3px 0 rgba(30,60,80,.22); } /* Cảm giác nổi khối giống ô khoá bên đồng cỏ */
-    .field.pg3 .block.locked .plot { border-color: #6d657c; box-shadow: none; } /* Ô khoá khu mỏ giữ khung trơn (thử thanh sáng nổi khối hai lần đều thấy kỳ, wen chốt) */
+    .field.pg2 .block.locked .plot { border-color: #8ab4c2; box-shadow: inset 0 3px 0 rgba(255,255,255,.28), inset 0 -3px 0 rgba(30,60,80,.22); }
+    .field.pg3 .block.locked .plot { border-color: #6d657c; box-shadow: none; }
     .blocks { display: grid; grid-template-columns: repeat(3, max-content); gap: 14px; justify-content: center; }
     @media (max-width: 640px) {
       .blocks { grid-template-columns: repeat(2, max-content); }
-      .field { padding: 12px 12px 70px; }                       /* Sửa #7: dải cỏ riêng cho thanh công cụ / linh vật */
-      .titlebar h1 { font-size: 13px; letter-spacing: 0; }      /* Sửa #11: bố cục dọc gọn lại */
+      .field { padding: 12px 12px 70px; }
+      .titlebar h1 { font-size: 13px; letter-spacing: 0; }
       .titlebar h1 .sub { display: none; }
       .statusbar { gap: 6px 10px; font-size: 12px; padding: 6px 10px; }
       .bottombar { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; }
       .btn { font-size: 13px; padding: 7px 6px; }
-      span.dside { display: none; }      /* Sửa #13: màn hẹp không đủ lề bên, chuyển trang trí xuống dải xanh dưới đáy */
-      span.dbot { display: inline; }     /* Nâng quyền cho span, đè lên quy tắc ẩn mặc định phía sau */
+      span.dside { display: none; }
+      span.dbot { display: inline; }
     }
+    .explore-blocks { padding: 18px 24px 70px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+    .explore-slot { width: 84px; height: 104px; background: rgba(255,255,255,0.7); border: 3px solid #8a6844; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; box-shadow: inset 0 0 0 3px rgba(255,255,255,0.5), 0 4px 0 #8a6844; transition: transform 0.1s; position: relative; z-index: 10; pointer-events: auto; }
+    .explore-slot:active { transform: translateY(4px); box-shadow: inset 0 0 0 3px rgba(255,255,255,0.5), 0 0 0 #8a6844; }
+    .explore-slot .feature-name { font-size: 13px; font-weight: bold; color: #7a5c38; margin-top: 8px; text-align: center; }
     .block { display: grid; grid-template-columns: repeat(2, var(--plot, 74px)); grid-auto-rows: var(--plot, 74px);
       gap: 6px; position: relative; }
     .plot { background-color: #b99b84; border: 3px solid #937863; border-radius: 6px;

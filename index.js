@@ -1428,8 +1428,9 @@ var styleCSS = `
       background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 8px; padding: 3px 12px;
       box-shadow: 0 3px 0 var(--tint), inset 0 0 0 2px #fff6e0;
       display: flex; align-items: center; gap: 8px; }
+    .view-toggle { width: 24px; height: 24px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 0 var(--tintSoft); flex-shrink: 0; }
     .close-x { width: 24px; height: 24px; background: linear-gradient(#faf0dc,#eed9b8); border: 3px solid #8a6844; border-radius: 6px;
-      color: #7a5c38; box-shadow: 0 2px 0 var(--tintSoft); font-weight: bold; text-align: center; line-height: 18px; cursor: pointer; }
+      color: #7a5c38; box-shadow: 0 2px 0 var(--tintSoft); font-weight: bold; text-align: center; line-height: 18px; cursor: pointer; flex-shrink: 0; }
     .statusbar { display: flex; align-items: center; gap: 12px; padding: 7px 14px; background: #f4e6cf;
       border-bottom: 3px solid #ddc39a; font-size: 13px; font-weight: bold; color: #7a5c38; flex: none; flex-wrap: wrap; }
     .stat { display: flex; align-items: center; gap: 5px; }
@@ -1437,11 +1438,11 @@ var styleCSS = `
     /* v0.8: thanh l\u1EADt trang ba trang */
     .pager { position: absolute; top: 7px; right: 7px; z-index: 7; display: flex; align-items: center; justify-content: center;
       background: rgba(58,48,30,.4); border: 2px solid rgba(255,246,224,.4); border-radius: 14px; overflow: hidden;
-      width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: rgba(255,246,224,.8); user-select: none; }   /* Ph\u01B0\u01A1ng \xE1n 2 s\u1EEDa: b\xECnh th\u01B0\u1EDDng l\xE0 qu\u1EA3 c\u1EA7u nh\u1ECF m\u1EDD */
+      width: 26px; height: 26px; cursor: pointer; font-size: 13px; color: rgba(255,246,224,.8); user-select: none; }
     .pager.open { width: auto; height: auto; border-radius: 12px; cursor: default;
-      background: rgba(58,48,30,.55); border-color: rgba(255,246,224,.5); font-size: 0; }   /* B\u1EA5m m\u1EDF = bung th\xE0nh thanh vi\xEAn nang */
-    .pager:not(.open) .ptab { display: none; }             /* \u1EDE d\u1EA1ng qu\u1EA3 c\u1EA7u th\xEC \u1EA9n c\xE1c tab trang */
-    .pager:not(.open)::after { content: '\u21C4'; }             /* Icon nh\u1ECF tr\xEAn m\u1EB7t c\u1EA7u */
+      background: rgba(58,48,30,.55); border-color: rgba(255,246,224,.5); font-size: 0; }
+    .pager:not(.open) .ptab { display: none; }
+    .pager:not(.open)::after { content: '\u21C4'; }
     .ptab { flex: none; font-size: 11px; font-weight: bold; padding: 4px 10px; background: transparent;
       color: #f0e6cc; cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 3px; }
     .ptab + .ptab { border-left: 1px solid rgba(255,246,224,.35); }
@@ -1449,37 +1450,39 @@ var styleCSS = `
     .ptab.lock { opacity: .6; }
     .field { margin: 10px 12px; background-color: #a9c383; border: 4px solid #b08a5c; border-radius: 8px;
       box-shadow: inset 0 0 0 3px #8aa86a; padding: 14px; position: relative; }
-    /* v0.8: da trang W1 ru\u1ED9ng n\u1ED5i \u0111\u1EA7m sen / M1 m\u1EA1ch qu\u1EB7ng kim c\u01B0\u01A1ng */
     .field.pg2 { background-color: #8ec8d8; border-color: #6a9ab0; box-shadow: inset 0 0 0 3px #79b4c6; }
     .field.pg3 { background-color: #5f5870; border-color: #7a6a94; box-shadow: inset 0 0 0 3px #4e4860; }
-    .field.pg2 span.dside, .field.pg2 span.dbot, .field.pg3 span.dside, .field.pg3 span.dbot { display: none !important; }  /* Trang tr\xED \u0111\u1ED3ng c\u1ECF kh\xF4ng l\u1ED9i n\u01B0\u1EDBc / kh\xF4ng xu\u1ED1ng m\u1ECF */
-    .field.pg2 .plot { border-color: #c9a273;            /* v0.9: khung g\u1ED7 hai l\u1EDBp \u2014\u2014 g\u1ED7 nh\u1EA1t ngo\xE0i + g\u1ED7 \u0111\u1EADm trong, l\u1EA5y l\u1EA1i c\u1EA3m gi\xE1c khung vu\xF4ng c\u1EE7a b\u1EA3n thi\u1EBFt k\u1EBF */
+    .field.pg2 span.dside, .field.pg2 span.dbot, .field.pg3 span.dside, .field.pg3 span.dbot { display: none !important; }
+    .field.pg2 .plot { border-color: #c9a273;
       box-shadow: inset 0 0 0 3px #a8845c, inset 0 -5px 0 rgba(40,70,90,.28); }
     .field.pg2 .plot.watered { border-color: #b08a5c; box-shadow: inset 0 0 0 3px #8a6844, inset 0 -5px 0 rgba(30,55,75,.35); }
-    .field.pg2 .block:not(.locked) .plot::before {       /* v0.9 s\u1EEDa l\u1EA7n 2: \u0111inh g\xF3c m\xE0u \u0111\u1EADm \u1EDF b\u1ED1n g\xF3c (gi\u1ED1ng b\u1EA3n thi\u1EBFt k\u1EBF) */
+    .field.pg2 .block:not(.locked) .plot::before {
       content: ''; position: absolute; inset: -3px; pointer-events: none; border-radius: 6px;
       background: linear-gradient(#6a4a2c,#6a4a2c) left top / 7px 7px no-repeat,
         linear-gradient(#6a4a2c,#6a4a2c) right top / 7px 7px no-repeat,
         linear-gradient(#6a4a2c,#6a4a2c) left bottom / 7px 7px no-repeat,
         linear-gradient(#6a4a2c,#6a4a2c) right bottom / 7px 7px no-repeat; }
-    .field.pg3 .plot { border-color: #3f8a9a; border-radius: 2px;   /* v0.9 s\u1EEDa l\u1EA7n 3: lu\u1ED1ng \u01B0\u01A1m pha l\xEA b\u1EDBt bo g\xF3c, c\u1EA1nh s\u1EAFc r\xF5 */
+    .field.pg3 .plot { border-color: #3f8a9a; border-radius: 2px;
       box-shadow: inset 0 0 0 1px rgba(138,224,234,.5), inset 0 -3px 0 rgba(20,20,40,.35); }
     .field.pg3 .plot.watered { border-color: #5fc8d8; }
-    /* v0.9 s\u1EEDa l\u1EA7n 4: \u0111inh g\xF3c tr\u1EAFng \u1EDF khu m\u1ECF th\u1EED th\u1EA5y ch\xF3i m\u1EAFt, b\u1ECF (lu\u1ED1ng \u01B0\u01A1m v\u1EABn gi\u1EEF g\xF3c vu\xF4ng) */
-    .field.pg2 .block.locked .plot { border-color: #8ab4c2; box-shadow: inset 0 3px 0 rgba(255,255,255,.28), inset 0 -3px 0 rgba(30,60,80,.22); } /* C\u1EA3m gi\xE1c n\u1ED5i kh\u1ED1i gi\u1ED1ng \xF4 kho\xE1 b\xEAn \u0111\u1ED3ng c\u1ECF */
-    .field.pg3 .block.locked .plot { border-color: #6d657c; box-shadow: none; } /* \xD4 kho\xE1 khu m\u1ECF gi\u1EEF khung tr\u01A1n (th\u1EED thanh s\xE1ng n\u1ED5i kh\u1ED1i hai l\u1EA7n \u0111\u1EC1u th\u1EA5y k\u1EF3, wen ch\u1ED1t) */
+    .field.pg2 .block.locked .plot { border-color: #8ab4c2; box-shadow: inset 0 3px 0 rgba(255,255,255,.28), inset 0 -3px 0 rgba(30,60,80,.22); }
+    .field.pg3 .block.locked .plot { border-color: #6d657c; box-shadow: none; }
     .blocks { display: grid; grid-template-columns: repeat(3, max-content); gap: 14px; justify-content: center; }
     @media (max-width: 640px) {
       .blocks { grid-template-columns: repeat(2, max-content); }
-      .field { padding: 12px 12px 70px; }                       /* S\u1EEDa #7: d\u1EA3i c\u1ECF ri\xEAng cho thanh c\xF4ng c\u1EE5 / linh v\u1EADt */
-      .titlebar h1 { font-size: 13px; letter-spacing: 0; }      /* S\u1EEDa #11: b\u1ED1 c\u1EE5c d\u1ECDc g\u1ECDn l\u1EA1i */
+      .field { padding: 12px 12px 70px; }
+      .titlebar h1 { font-size: 13px; letter-spacing: 0; }
       .titlebar h1 .sub { display: none; }
       .statusbar { gap: 6px 10px; font-size: 12px; padding: 6px 10px; }
       .bottombar { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; }
       .btn { font-size: 13px; padding: 7px 6px; }
-      span.dside { display: none; }      /* S\u1EEDa #13: m\xE0n h\u1EB9p kh\xF4ng \u0111\u1EE7 l\u1EC1 b\xEAn, chuy\u1EC3n trang tr\xED xu\u1ED1ng d\u1EA3i xanh d\u01B0\u1EDBi \u0111\xE1y */
-      span.dbot { display: inline; }     /* N\xE2ng quy\u1EC1n cho span, \u0111\xE8 l\xEAn quy t\u1EAFc \u1EA9n m\u1EB7c \u0111\u1ECBnh ph\xEDa sau */
+      span.dside { display: none; }
+      span.dbot { display: inline; }
     }
+    .explore-blocks { padding: 18px 24px 70px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+    .explore-slot { width: 84px; height: 104px; background: rgba(255,255,255,0.7); border: 3px solid #8a6844; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; box-shadow: inset 0 0 0 3px rgba(255,255,255,0.5), 0 4px 0 #8a6844; transition: transform 0.1s; position: relative; z-index: 10; pointer-events: auto; }
+    .explore-slot:active { transform: translateY(4px); box-shadow: inset 0 0 0 3px rgba(255,255,255,0.5), 0 0 0 #8a6844; }
+    .explore-slot .feature-name { font-size: 13px; font-weight: bold; color: #7a5c38; margin-top: 8px; text-align: center; }
     .block { display: grid; grid-template-columns: repeat(2, var(--plot, 74px)); grid-auto-rows: var(--plot, 74px);
       gap: 6px; position: relative; }
     .plot { background-color: #b99b84; border: 3px solid #937863; border-radius: 6px;
@@ -1849,8 +1852,14 @@ function applyPageSkin() {
   fieldEl.style.backgroundSize = "192px 192px";
 }
 function renderPager() {
+  const pager = $id("pager");
+  if (ctx.S && ctx.S.view === "explore") {
+    pager.style.display = "none";
+    return;
+  }
+  pager.style.display = "flex";
   const names = { 1: "\u0110\u1ED3ng c\u1ECF", 2: "V\xF9ng n\u01B0\u1EDBc", 3: "Khu m\u1ECF" };
-  $id("pager").innerHTML = [1, 2, 3].map((pg) => {
+  pager.innerHTML = [1, 2, 3].map((pg) => {
     const un = pageUnlocked(pg);
     return `<span class="ptab p${pg}${ctx.S.page === pg ? " active" : ""}${un ? "" : " lock"}" data-pg="${pg}">${names[pg]}${un ? "" : " \u{1F512}"}</span>`;
   }).join("");
@@ -1882,6 +1891,7 @@ function initUI() {
   <div id="win">
     <div class="titlebar" id="drag">
       <h1>${spriteSVG("strawhat", 16)}Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!</h1>
+      <div class="view-toggle" id="viewToggle" title="Chuy\u1EC3n ch\u1EBF \u0111\u1ED9 Kh\xE1m ph\xE1/N\xF4ng tr\u1EA1i">${spriteSVG("dungeonGate", 16)}</div>
       <div class="close-x" id="close">\xD7</div>
     </div>
     <div class="statusbar">
@@ -1900,6 +1910,7 @@ function initUI() {
       <div class="field">
         <div class="pager" id="pager"></div>
         <div class="blocks" id="blocks"></div>
+        <div class="explore-blocks" id="explore-blocks" style="display:none"></div>
         <div class="mascots" id="mascots"></div>
         <div id="witch" title="Ph\xF9 thu\u1EF7 tr\xF2n"></div>
         <div class="mode-tip" id="modetip"></div>
@@ -1911,7 +1922,6 @@ function initUI() {
         <div class="btn" data-open="shop">${spriteSVG("shopIcon", 22)}C\u1EEDa h\xE0ng</div>
         <div class="btn" data-open="bag">${spriteSVG("bagIcon", 22)}Balo</div>
         <div class="btn" data-open="gacha">${spriteSVG("gachapon", 22)}Gachapon</div>
-        <div class="btn" data-open="dungeon">${spriteSVG("dungeonGate", 22)}H\u1EA7m ng\u1EE5c</div>
         <div class="btn" data-open="cfg">${spriteSVG("gearIcon", 22)}C\xE0i \u0111\u1EB7t</div>
     </div>
     <div class="modal" id="modal">
@@ -2007,6 +2017,20 @@ function initUI() {
     renderToolbar();
     toast(pg === 1 ? "V\u1EC1 \u0111\u1ED3ng c\u1ECF~" : pg === 2 ? "T\u1EDBi v\xF9ng n\u01B0\u1EDBc~" : "T\u1EDBi khu m\u1ECF~");
   }, { passive: true });
+  const viewToggle = $id("viewToggle");
+  if (viewToggle) {
+    if (ctx.S && ctx.S.view === "explore") viewToggle.innerHTML = spriteSVG("sprout", 16);
+    viewToggle.addEventListener("click", () => {
+      ctx.S.view = ctx.S.view === "explore" ? "farm" : "explore";
+      save();
+      renderPlots();
+      renderToolbar();
+      const ctrlrow = sh.querySelector(".ctrlrow");
+      if (ctrlrow) ctrlrow.style.display = ctx.S.view === "explore" ? "none" : "flex";
+      toast(ctx.S.view === "explore" ? "B\u1EA3n \u0111\u1ED3 Kh\xE1m ph\xE1" : "Tr\u1EDF v\u1EC1 N\xF4ng tr\u1EA1i");
+      viewToggle.innerHTML = ctx.S.view === "explore" ? spriteSVG("sprout", 16) : spriteSVG("dungeonGate", 16);
+    });
+  }
 }
 
 // src/logic.js
@@ -3946,6 +3970,13 @@ var TOOLS = [
 var toolbarOpen = false;
 function renderToolbar() {
   const tb = $id("toolbar");
+  if (ctx.S && ctx.S.view === "explore") {
+    tb.style.display = "none";
+    const tip2 = $id("modetip");
+    if (tip2) tip2.style.display = "none";
+    return;
+  }
+  tb.style.display = "flex";
   tb.classList.toggle("open", toolbarOpen);
   if (!toolbarOpen) {
     tb.innerHTML = `<div class="tool" data-tool="expand" title="C\xF4ng c\u1EE5" style="width:34px;height:34px">${spriteSVG("toolSeed", 22)}</div>`;
@@ -4016,6 +4047,24 @@ function plotHTML(pi) {
 }
 function renderPlots() {
   const wrap = $id("blocks");
+  const expWrap = $id("explore-blocks");
+  if (ctx.S && ctx.S.view === "explore") {
+    if (wrap) wrap.style.display = "none";
+    if (expWrap) {
+      expWrap.style.display = "flex";
+      expWrap.innerHTML = `
+        <div class="explore-slot" id="eslot-dungeon">
+          ${spriteSVG("dungeonGate", 48)}
+          <div class="feature-name">H\u1EA7m ng\u1EE5c</div>
+        </div>
+      `;
+      const dBtn = $id("eslot-dungeon");
+      if (dBtn) dBtn.addEventListener("click", () => openPanel("dungeon"));
+    }
+    return;
+  }
+  if (wrap) wrap.style.display = "";
+  if (expWrap) expWrap.style.display = "none";
   const pg = ctx.S.page, plots = curPlots(), nb = curBlocks();
   if (wrap.children.length !== 6 || wrap.dataset.pg !== String(pg)) {
     wrap.dataset.pg = pg;

@@ -31,8 +31,14 @@ export function applyPageSkin() {
 }
 
 export function renderPager() {
+  const pager = $id('pager');
+  if (ctx.S && ctx.S.view === 'explore') {
+    pager.style.display = 'none';
+    return;
+  }
+  pager.style.display = 'flex';
   const names = { 1: 'Đồng cỏ', 2: 'Vùng nước', 3: 'Khu mỏ' };
-  $id('pager').innerHTML = [1, 2, 3].map(pg => {
+  pager.innerHTML = [1, 2, 3].map(pg => {
     const un = pageUnlocked(pg);
     return `<span class="ptab p${pg}${ctx.S.page === pg ? ' active' : ''}${un ? '' : ' lock'}" data-pg="${pg}">${names[pg]}${un ? '' : ' 🔒'}</span>`;
   }).join('');
@@ -68,6 +74,7 @@ export function initUI() {
   <div id="win">
     <div class="titlebar" id="drag">
       <h1>${spriteSVG('strawhat', 16)}Ai mà thèm làm nông dân chứ!</h1>
+      <div class="view-toggle" id="viewToggle" title="Chuyển chế độ Khám phá/Nông trại">${spriteSVG('dungeonGate', 16)}</div>
       <div class="close-x" id="close">×</div>
     </div>
     <div class="statusbar">
@@ -86,6 +93,7 @@ export function initUI() {
       <div class="field">
         <div class="pager" id="pager"></div>
         <div class="blocks" id="blocks"></div>
+        <div class="explore-blocks" id="explore-blocks" style="display:none"></div>
         <div class="mascots" id="mascots"></div>
         <div id="witch" title="Phù thuỷ tròn"></div>
         <div class="mode-tip" id="modetip"></div>
@@ -97,7 +105,6 @@ export function initUI() {
         <div class="btn" data-open="shop">${spriteSVG('shopIcon', 22)}Cửa hàng</div>
         <div class="btn" data-open="bag">${spriteSVG('bagIcon', 22)}Balo</div>
         <div class="btn" data-open="gacha">${spriteSVG('gachapon', 22)}Gachapon</div>
-        <div class="btn" data-open="dungeon">${spriteSVG('dungeonGate', 22)}Hầm ngục</div>
         <div class="btn" data-open="cfg">${spriteSVG('gearIcon', 22)}Cài đặt</div>
     </div>
     <div class="modal" id="modal">
@@ -188,4 +195,19 @@ fieldEl.addEventListener('touchend', e => {
   toast(pg === 1 ? 'Về đồng cỏ~' : pg === 2 ? 'Tới vùng nước~' : 'Tới khu mỏ~');
 }, { passive: true });
 
+  const viewToggle = $id('viewToggle');
+  if (viewToggle) {
+    // Initial icon state
+    if (ctx.S && ctx.S.view === 'explore') viewToggle.innerHTML = spriteSVG('sprout', 16);
+    viewToggle.addEventListener('click', () => {
+      ctx.S.view = ctx.S.view === 'explore' ? 'farm' : 'explore';
+      save();
+      renderPlots();
+      renderToolbar();
+      const ctrlrow = sh.querySelector('.ctrlrow');
+      if (ctrlrow) ctrlrow.style.display = ctx.S.view === 'explore' ? 'none' : 'flex';
+      toast(ctx.S.view === 'explore' ? 'Bản đồ Khám phá' : 'Trở về Nông trại');
+      viewToggle.innerHTML = ctx.S.view === 'explore' ? spriteSVG('sprout', 16) : spriteSVG('dungeonGate', 16);
+    });
+  }
 }

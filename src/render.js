@@ -30,6 +30,14 @@ export const TOOLS = [
 export let toolbarOpen = false;
 export function renderToolbar() {
   const tb = All.$id('toolbar');
+  if (ctx.S && ctx.S.view === 'explore') {
+    tb.style.display = 'none';
+    const tip = All.$id('modetip');
+    if (tip) tip.style.display = 'none';
+    return;
+  }
+  tb.style.display = 'flex';
+  
   tb.classList.toggle('open', toolbarOpen);
   if (!toolbarOpen) {
     tb.innerHTML = `<div class="tool" data-tool="expand" title="Công cụ" style="width:34px;height:34px">${spriteSVG('toolSeed', 22)}</div>`;
@@ -100,6 +108,27 @@ export function plotHTML(pi) {
 /* v1.1 (wen chốt): bỏ hết trang trí ở ô khoá —— 24 ô đầy cỏ dại / hoa sen / pha lê thì rối mắt quá, để hoạ tiết nền đất tự tạo không khí */
 export function renderPlots() {
   const wrap = All.$id('blocks');
+  const expWrap = All.$id('explore-blocks');
+  
+  if (ctx.S && ctx.S.view === 'explore') {
+    if (wrap) wrap.style.display = 'none';
+    if (expWrap) {
+      expWrap.style.display = 'flex';
+      expWrap.innerHTML = `
+        <div class="explore-slot" id="eslot-dungeon">
+          ${spriteSVG('dungeonGate', 48)}
+          <div class="feature-name">Hầm ngục</div>
+        </div>
+      `;
+      const dBtn = All.$id('eslot-dungeon');
+      if (dBtn) dBtn.addEventListener('click', () => All.openPanel('dungeon'));
+    }
+    return;
+  }
+  
+  if (wrap) wrap.style.display = '';
+  if (expWrap) expWrap.style.display = 'none';
+
   const pg = ctx.S.page, plots = curPlots(), nb = curBlocks();
   
   // 1. Dựng khung tĩnh (Skeleton) nếu chưa có hoặc chuyển trang
