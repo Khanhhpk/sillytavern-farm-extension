@@ -199,9 +199,9 @@ export function openHeroPanel() {
   
   // Các lựa chọn lối đánh
   const styles = [
-    { id: 'attack', name: 'Tấn công (DPS x1.5)', icon: 'emBang' },
-    { id: 'defense', name: 'Phòng thủ (Giáp x1.5)', icon: 'emStar' },
-    { id: 'balanced', name: 'Cân bằng', icon: 'emLeaf' }
+    { id: 'attack', name: 'Tấn công (Dame x1.5, Nhận x1.5)', icon: 'emBang' },
+    { id: 'defense', name: 'Phòng thủ (Dame x0.6, Nhận x0.6)', icon: 'emStar' },
+    { id: 'balanced', name: 'Cân bằng (Mặc định)', icon: 'emLeaf' }
   ];
   
   const partySlots = [0, 1, 2].map(i => {
