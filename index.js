@@ -6340,7 +6340,7 @@ function endDungeon(isWin) {
         <div class="dg-title">Game Over</div>
         ${rewardText}
         ${recordHtml}
-        <div style="display:flex; justify-content:center; gap: 10px; margin-top: 15px;">
+        <div style="display:flex; justify-content:center; gap: 10px; margin-top: 15px; margin-bottom: auto;">
             <div class="buy" id="dg-restart-btn">Ch\u01A1i L\u1EA1i</div>
             <div class="buy plain" id="dg-finish-btn">Tho\xE1t</div>
         </div>
