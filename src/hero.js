@@ -924,7 +924,10 @@ function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
     else if (pId === 'starBell') { animType = 'projectile'; spriteId = 'starBolt'; }
     else if (pId === 'angelBlob') { animType = 'projectile'; spriteId = 'holyLight'; }
     else if (pId === 'cloudMallow') { animType = 'projectile'; spriteId = 'arrow'; } // Temp
-    else { animType = 'projectile'; spriteId = 'fireball'; } // default Prism, Mystery, Penguin
+    else if (pId === 'penguin') { animType = 'projectile'; spriteId = 'snowball'; }
+    else if (pId === 'mystery_blob') { animType = 'projectile'; spriteId = 'shadowBolt'; }
+    else if (pId === 'prismBlob') { animType = 'projectile'; spriteId = 'rainbowBolt'; }
+    else { animType = 'projectile'; spriteId = 'fireball'; }
   }
 
   if (animType === 'projectile') {
