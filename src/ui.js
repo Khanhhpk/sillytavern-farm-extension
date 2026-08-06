@@ -59,6 +59,13 @@ export function applyViewState() {
   if (banner) banner.style.display = isExplore ? 'none' : '';
   if (statBlocks) statBlocks.style.display = isExplore ? 'none' : '';
   
+  // Cập nhật class nền cho tab Khám phá
+  const field = sh.querySelector('.field');
+  if (field) {
+    if (isExplore) field.classList.add('explore-mode');
+    else field.classList.remove('explore-mode');
+  }
+
   // Cập nhật nút chuyển tab
   if (viewToggle) {
     viewToggle.innerHTML = isExplore
