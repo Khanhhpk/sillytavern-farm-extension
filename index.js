@@ -8049,7 +8049,7 @@ function heroTick() {
       }
       setTimeout(() => {
         if (!runState || !runState.monster) return;
-        const goldDrop = Math.floor((runState.stage * 15 + 185) * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
+        const goldDrop = Math.floor((runState.stage * 50 + 150) * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
         let pGoldMult = 1;
         runState.pets.forEach((p) => {
           const data = ctx.S.hero.roster[p.id];
