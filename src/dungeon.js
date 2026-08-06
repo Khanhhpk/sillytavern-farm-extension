@@ -208,16 +208,16 @@ function initPlacementPhase() {
             dragEl.innerHTML = petSVG(petId, 32);
             document.body.appendChild(dragEl); // append to body to avoid transform/overflow issues
             
-            dragEl.style.left = e.clientX + 'px';
-            dragEl.style.top = e.clientY + 'px';
+            dragEl.style.left = (e.clientX - 16) + 'px';
+            dragEl.style.top = (e.clientY - 16) + 'px';
             
             slot.setPointerCapture(e.pointerId);
         });
         
         slot.addEventListener('pointermove', (e) => {
             if (!draggingPet || !dragEl) return;
-            dragEl.style.left = e.clientX + 'px';
-            dragEl.style.top = e.clientY + 'px';
+            dragEl.style.left = (e.clientX - 16) + 'px';
+            dragEl.style.top = (e.clientY - 16) + 'px';
         });
         
         slot.addEventListener('pointerup', (e) => {
@@ -245,8 +245,8 @@ function initPlacementPhase() {
                     ${petSVG(pId, 32)}
                 `;
                 
-                let x = e.clientX - rect.left;
-                let y = e.clientY - rect.top;
+                let x = e.clientX - rect.left - 16;
+                let y = e.clientY - rect.top - 16;
                 if (x > rect.width - 16) x = rect.width - 16;
                 if (x < 16) x = 16;
                 if (y < 16) y = 16;
@@ -273,15 +273,15 @@ function initPlacementPhase() {
                     isPlacedDragging = true;
                     el.style.zIndex = '100000';
                     const arect = arena.getBoundingClientRect();
-                    el.style.left = (ev.clientX - arect.left) + 'px';
-                    el.style.top = (ev.clientY - arect.top) + 'px';
+                    el.style.left = (ev.clientX - arect.left - 16) + 'px';
+                    el.style.top = (ev.clientY - arect.top - 16) + 'px';
                     el.setPointerCapture(ev.pointerId);
                 });
                 el.addEventListener('pointermove', (ev) => {
                     if (!isPlacedDragging) return;
                     const arect = arena.getBoundingClientRect();
-                    el.style.left = (ev.clientX - arect.left) + 'px';
-                    el.style.top = (ev.clientY - arect.top) + 'px';
+                    el.style.left = (ev.clientX - arect.left - 16) + 'px';
+                    el.style.top = (ev.clientY - arect.top - 16) + 'px';
                 });
                 el.addEventListener('pointerup', (ev) => {
                     if (!isPlacedDragging) return;
@@ -294,8 +294,8 @@ function initPlacementPhase() {
                         ev.clientY >= arect.top && ev.clientY <= arect.bottom) {
                         
                         el.style.position = 'absolute';
-                        let nx = ev.clientX - arect.left;
-                        let ny = ev.clientY - arect.top;
+                        let nx = ev.clientX - arect.left - 16;
+                        let ny = ev.clientY - arect.top - 16;
                         if (nx > arect.width - 16) nx = arect.width - 16;
                         if (nx < 16) nx = 16;
                         if (ny < 16) ny = 16;
