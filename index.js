@@ -7837,7 +7837,7 @@ function openHeroMode() {
     lastTick = Date.now();
     heroLoop = setInterval(heroTick, 100);
   }
-  toast("Taskbar Hero \u0111\xE3 xu\u1EA5t ph\xE1t!");
+  heroToast("Taskbar Hero \u0111\xE3 xu\u1EA5t ph\xE1t!");
 }
 function closeHeroMode() {
   const bar = $id("hero-bar");
@@ -7921,7 +7921,7 @@ function heroTick() {
     const alivePets = runState.pets.filter((p) => p.hp > 0);
     if (alivePets.length === 0) {
       runState.monster = null;
-      toast("\u0110\u1ED9i h\xECnh \u0111\xE3 g\u1EE5c ng\xE3! V\u1EC1 Stage 1...");
+      heroToast("\u0110\u1ED9i h\xECnh \u0111\xE3 g\u1EE5c ng\xE3! V\u1EC1 Stage 1...");
       setTimeout(() => {
         if (!runState) return;
         runState.stage = 1;

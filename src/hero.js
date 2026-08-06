@@ -422,7 +422,7 @@ export function openHeroMode() {
     lastTick = Date.now();
     heroLoop = setInterval(heroTick, 100); // Game loop 10fps
   }
-  All.toast('Taskbar Hero đã xuất phát!');
+  heroToast('Taskbar Hero đã xuất phát!');
 }
 
 export function closeHeroMode() {
@@ -521,7 +521,7 @@ function heroTick() {
     const alivePets = runState.pets.filter(p => p.hp > 0);
     if (alivePets.length === 0) {
       runState.monster = null;
-      All.toast('Đội hình đã gục ngã! Về Stage 1...');
+      heroToast('Đội hình đã gục ngã! Về Stage 1...');
       setTimeout(() => {
         if (!runState) return;
         runState.stage = 1;
