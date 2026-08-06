@@ -1854,7 +1854,7 @@ function applyPageSkin() {
   if (isExplore) {
     fieldEl.style.backgroundImage = "none";
     fieldEl.style.backgroundColor = "#d3c3a0";
-    if (titleH1) titleH1.innerHTML = `${spriteSVG("strawhat", 16)}D\u1EA1o quanh n\xE0o...`;
+    if (titleH1) titleH1.innerHTML = `${spriteSVG("mapIcon", 16)}D\u1EA1o quanh n\xE0o...`;
   } else {
     fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? "water" : ctx.S.page === 3 ? "mine" : "grass", 4242);
     fieldEl.style.backgroundColor = "";

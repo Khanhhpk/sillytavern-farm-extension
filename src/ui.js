@@ -30,7 +30,7 @@ export function applyPageSkin() {
   if (isExplore) {
     fieldEl.style.backgroundImage = 'none';
     fieldEl.style.backgroundColor = '#d3c3a0';
-    if (titleH1) titleH1.innerHTML = `${spriteSVG('strawhat', 16)}Dạo quanh nào...`;
+    if (titleH1) titleH1.innerHTML = `${spriteSVG('mapIcon', 16)}Dạo quanh nào...`;
   } else {
     // @ts-ignore
     fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? 'water' : ctx.S.page === 3 ? 'mine' : 'grass', 4242);
