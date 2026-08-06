@@ -7162,7 +7162,7 @@ function getPetStats(pId) {
   const enhAtk = data.enhAtk || 0;
   return {
     level: data.level,
-    exp: data.exp,
+    exp: data.exp || 0,
     maxHp: 100 + data.level * 20 + enhHp * 50,
     atk: 10 + data.level * 3 + enhAtk * 10,
     nextExp: Math.floor(100 * Math.pow(1.5, data.level - 1)),
@@ -7200,7 +7200,7 @@ function openHeroPanel() {
       <div class="h-r-pet" data-add="${pId}" title="Th\xEAm v\xE0o \u0111\u1ED9i h\xECnh">${petSVG(pId, 32)}</div>
       <div class="h-r-info" data-info="${pId}" title="C\u01B0\u1EDDng h\xF3a & K\u1EF9 n\u0103ng" style="cursor:pointer;">
         <div>Lv.${st.level} (ATK: ${st.atk} | HP: ${st.maxHp})</div>
-        <div class="h-r-bar"><div class="h-r-fill" style="width:${Math.min(100, st.exp / st.nextExp * 100)}%"></div><span>${st.exp}/${st.nextExp}</span></div>
+        <div class="h-r-bar"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp / st.nextExp * 100)}%"></div><span>${st.level >= 30 ? "MAX" : `${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
       </div>
     </div>`;
   }).join("");
@@ -7303,7 +7303,7 @@ function openPetSkills(pId) {
         <div style="font-size: 18px; font-weight:bold; color: #f2c231; margin-bottom: 4px;">Lv.${st.level}</div>
         <div style="font-size: 14px;">HP C\u01A1 b\u1EA3n: <b>${st.maxHp}</b> (+${st.enhHpLevel} C\u01B0\u1EDDng h\xF3a)</div>
         <div style="font-size: 14px;">ATK C\u01A1 b\u1EA3n: <b>${st.atk}</b> (+${st.enhAtkLevel} C\u01B0\u1EDDng h\xF3a)</div>
-        <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${Math.min(100, st.exp / st.nextExp * 100)}%"></div><span>EXP: ${st.exp}/${st.nextExp}</span></div>
+        <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp / st.nextExp * 100)}%"></div><span>${st.level >= 30 ? "MAX LEVEL" : `EXP: ${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
       </div>
     </div>
     
@@ -7699,9 +7699,10 @@ function heroTick() {
       runState.pets.forEach((p) => {
         if (!ctx.S.hero.roster[p.id]) ctx.S.hero.roster[p.id] = { level: 1, exp: 0, enhHp: 0, enhAtk: 0, s5_unlocked: false, s15_unlocked: false };
         let petData = ctx.S.hero.roster[p.id];
+        if (petData.exp === void 0 || isNaN(petData.exp)) petData.exp = 0;
         petData.exp += Math.floor(expDrop / runState.pets.length);
         let leveledUp = false;
-        while (true) {
+        while (petData.level < 30) {
           const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
           if (petData.exp >= nextExp) {
             petData.exp -= nextExp;
@@ -7710,6 +7711,10 @@ function heroTick() {
           } else {
             break;
           }
+        }
+        if (petData.level >= 30) {
+          petData.level = 30;
+          petData.exp = Math.floor(100 * Math.pow(1.5, 29));
         }
         if (leveledUp) {
           const pIdx = runState.pets.indexOf(p);
