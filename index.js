@@ -2040,20 +2040,21 @@ function initUI() {
       </div>
     </div>
     <div class="toast" id="toast"></div>
-    <div id="hero-bar" class="hero-bar" style="display:none">
-      <div class="hero-drag" title="K\xE9o th\u1EA3" id="hero-drag">${spriteSVG("mapIcon", 16)}</div>
-      <div class="hero-scene">
-        <div id="hero-party"></div>
-        <div id="hero-enemy"></div>
-      </div>
-      <div class="hero-stats">
-        <div>Lv.<span id="hero-level">1</span> <span class="h-gold">${spriteSVG("coin", 12)}<span id="hero-gold">0</span></span></div>
-        <div class="hero-exp-wrap"><div class="hero-exp-bar" id="hero-exp-bar"></div><div class="hero-exp-txt" id="hero-exp">0/100</div></div>
-      </div>
-      <div class="hero-actions">
-        <div class="h-btn" id="hero-cashout" title="R\xFAt V\xE0ng">${spriteSVG("coin", 16)}</div>
-        <div class="h-btn" id="hero-close" title="\u0110\xF3ng Hero Mode">\xD7</div>
-      </div>
+  </div>
+  
+  <div id="hero-bar" class="hero-bar" style="display:none">
+    <div class="hero-drag" title="K\xE9o th\u1EA3" id="hero-drag">${spriteSVG("mapIcon", 16)}</div>
+    <div class="hero-scene">
+      <div id="hero-party"></div>
+      <div id="hero-enemy"></div>
+    </div>
+    <div class="hero-stats">
+      <div>Lv.<span id="hero-level">1</span> <span class="h-gold">${spriteSVG("coin", 12)}<span id="hero-gold">0</span></span></div>
+      <div class="hero-exp-wrap"><div class="hero-exp-bar" id="hero-exp-bar"></div><div class="hero-exp-txt" id="hero-exp">0/100</div></div>
+    </div>
+    <div class="hero-actions">
+      <div class="h-btn" id="hero-cashout" title="R\xFAt V\xE0ng">${spriteSVG("coin", 16)}</div>
+      <div class="h-btn" id="hero-close" title="\u0110\xF3ng Hero Mode">\xD7</div>
     </div>
   </div>`;
   sh.appendChild(ctx.ui);
