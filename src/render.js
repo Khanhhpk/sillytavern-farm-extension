@@ -328,7 +328,7 @@ export function renderDynamic() {
     renderPlots(); 
   }
 }
-export function renderAll() { applyPageSkin(); renderPager(); renderStatus(); renderPlots(); renderToolbar(); renderChips(); renderBanner(); renderPets(); try { renderWitch(); } catch (e) {} }
+export function renderAll() { applyPageSkin(); All.applyViewState(); renderPager(); renderStatus(); renderPlots(); renderToolbar(); renderChips(); renderBanner(); renderPets(); try { renderWitch(); } catch (e) {} }
 
 
 export function initRender() {

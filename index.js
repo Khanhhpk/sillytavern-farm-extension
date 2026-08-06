@@ -1850,16 +1850,33 @@ function applyPageSkin() {
   const isExplore = ctx.S && ctx.S.view === "explore";
   fieldEl.classList.toggle("pg2", !isExplore && ctx.S.page === 2);
   fieldEl.classList.toggle("pg3", !isExplore && ctx.S.page === 3);
+  const titleH1 = sh.querySelector(".titlebar h1");
   if (isExplore) {
     fieldEl.style.backgroundImage = "none";
     fieldEl.style.backgroundColor = "#d3c3a0";
-    document.querySelector(".titlebar h1").innerHTML = `${spriteSVG("strawhat", 16)}D\u1EA1o quanh n\xE0o...`;
+    if (titleH1) titleH1.innerHTML = `${spriteSVG("strawhat", 16)}D\u1EA1o quanh n\xE0o...`;
   } else {
     fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? "water" : ctx.S.page === 3 ? "mine" : "grass", 4242);
     fieldEl.style.backgroundColor = "";
-    document.querySelector(".titlebar h1").innerHTML = `${spriteSVG("strawhat", 16)}Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!`;
+    if (titleH1) titleH1.innerHTML = `${spriteSVG("strawhat", 16)}Ai m\xE0 th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!`;
   }
   fieldEl.style.backgroundSize = "192px 192px";
+}
+function applyViewState() {
+  const isExplore = ctx.S && ctx.S.view === "explore";
+  const ctrlrow = sh.querySelector(".ctrlrow");
+  const mascots = $id("mascots");
+  const witch = $id("witch");
+  const banner = $id("banner");
+  const viewToggle = $id("viewToggle");
+  if (ctrlrow) ctrlrow.style.display = isExplore ? "none" : "flex";
+  if (mascots) mascots.style.display = isExplore ? "none" : "";
+  if (decoLayer) decoLayer.style.display = isExplore ? "none" : "";
+  if (witch) witch.style.display = isExplore ? "none" : "";
+  if (banner) banner.style.display = isExplore ? "none" : "";
+  if (viewToggle) {
+    viewToggle.innerHTML = isExplore ? `${spriteSVG("strawhat", 16)} <span>V\u1EC1 N\xF4ng Tr\u1EA1i</span>` : `${spriteSVG("mapIcon", 16)} <span>Kh\xE1m ph\xE1</span>`;
+  }
 }
 function renderPager() {
   const pager = $id("pager");
@@ -2033,20 +2050,15 @@ function initUI() {
   }, { passive: true });
   const viewToggle = $id("viewToggle");
   if (viewToggle) {
-    if (ctx.S && ctx.S.view === "explore") viewToggle.innerHTML = `${spriteSVG("sprout", 16)} <span>N\xF4ng tr\u1EA1i</span>`;
     viewToggle.addEventListener("click", () => {
       ctx.S.view = ctx.S.view === "explore" ? "farm" : "explore";
       save();
+      applyPageSkin();
+      applyViewState();
       renderPlots();
       renderToolbar();
       renderPager();
-      applyPageSkin();
-      const ctrlrow = sh.querySelector(".ctrlrow");
-      if (ctrlrow) ctrlrow.style.display = ctx.S.view === "explore" ? "none" : "flex";
-      const mascots = sh.querySelector(".mascots");
-      if (mascots) mascots.style.display = ctx.S.view === "explore" ? "none" : "block";
       toast(ctx.S.view === "explore" ? "B\u1EA3n \u0111\u1ED3 Kh\xE1m ph\xE1" : "Tr\u1EDF v\u1EC1 N\xF4ng tr\u1EA1i");
-      viewToggle.innerHTML = ctx.S.view === "explore" ? `${spriteSVG("sprout", 16)} <span>N\xF4ng tr\u1EA1i</span>` : `${spriteSVG("mapIcon", 16)} <span>Kh\xE1m ph\xE1</span>`;
     });
   }
 }
@@ -4258,6 +4270,7 @@ function renderDynamic() {
 }
 function renderAll() {
   applyPageSkin();
+  applyViewState();
   renderPager();
   renderStatus();
   renderPlots();
@@ -5414,6 +5427,7 @@ function loadState() {
   if (!ctx.S.theme) ctx.S.theme = "sakura";
   if (!ctx.S.page) ctx.S.page = 1;
   if (ctx.S.dragPet === void 0) ctx.S.dragPet = false;
+  ctx.S.view = "farm";
   const petRenameMap = { "bunny": "jellyfish", "slimeNight": "peach_soda", "batBlob": "mystery_blob" };
   if (ctx.S.pets) ctx.S.pets = ctx.S.pets.map((p) => petRenameMap[p] || p);
   if (ctx.S.petsOut) ctx.S.petsOut = ctx.S.petsOut.map((p) => petRenameMap[p] || p);
@@ -5535,9 +5549,15 @@ function openDungeonView() {
   const titleH1 = $id("drag").querySelector("h1");
   titleH1.innerHTML = `${spriteSVG("dungeonGate", 16)}Ai m\xE0 th\xE8m \u0111i Dungeon ch\u1EE9!`;
   $id("blocks").style.display = "none";
+  $id("explore-blocks").style.display = "none";
   $id("pager").style.display = "none";
   $id("toolbar").style.display = "none";
   $id("mascots").style.display = "none";
+  $id("viewToggle").style.display = "none";
+  const ctrlrow = sh.querySelector(".ctrlrow");
+  if (ctrlrow) ctrlrow.style.display = "none";
+  const banner = $id("banner");
+  if (banner) banner.style.display = "none";
   dungeonView.style.display = "flex";
   const fieldEl2 = $id("scroll").querySelector(".field");
   if (fieldEl2) fieldEl2.style.minHeight = "420px";
@@ -5547,16 +5567,16 @@ function closeDungeonView() {
   if (!isDungeonOpen) return;
   isDungeonOpen = false;
   stopCombatLoop();
-  const titleH1 = $id("drag").querySelector("h1");
-  titleH1.innerHTML = `${spriteSVG("strawhat", 16)}Ai th\xE8m l\xE0m n\xF4ng d\xE2n ch\u1EE9!`;
-  $id("blocks").style.display = "";
-  $id("pager").style.display = "";
-  $id("toolbar").style.display = "";
-  $id("mascots").style.display = "";
   dungeonView.style.display = "none";
   dungeonView.innerHTML = "";
   const fieldEl2 = $id("scroll").querySelector(".field");
   if (fieldEl2) fieldEl2.style.minHeight = "";
+  $id("viewToggle").style.display = "";
+  applyPageSkin();
+  applyViewState();
+  renderPager();
+  renderPlots();
+  renderToolbar();
 }
 function initPlacementPhase() {
   phase = "placement";

@@ -26,19 +26,43 @@ export function applyPageSkin() {
   fieldEl.classList.toggle('pg2', !isExplore && ctx.S.page === 2);
   fieldEl.classList.toggle('pg3', !isExplore && ctx.S.page === 3);
   
+  const titleH1 = sh.querySelector('.titlebar h1');
   if (isExplore) {
     fieldEl.style.backgroundImage = 'none';
-    fieldEl.style.backgroundColor = '#d3c3a0'; // Map background color
-    document.querySelector('.titlebar h1').innerHTML = `${spriteSVG('strawhat', 16)}Dạo quanh nào...`;
+    fieldEl.style.backgroundColor = '#d3c3a0';
+    if (titleH1) titleH1.innerHTML = `${spriteSVG('strawhat', 16)}Dạo quanh nào...`;
   } else {
     // @ts-ignore
     fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? 'water' : ctx.S.page === 3 ? 'mine' : 'grass', 4242);
     fieldEl.style.backgroundColor = '';
-    document.querySelector('.titlebar h1').innerHTML = `${spriteSVG('strawhat', 16)}Ai mà thèm làm nông dân chứ!`;
+    if (titleH1) titleH1.innerHTML = `${spriteSVG('strawhat', 16)}Ai mà thèm làm nông dân chứ!`;
   }
-  
   // @ts-ignore
   fieldEl.style.backgroundSize = '192px 192px';
+}
+
+/* ---------- Hàm tập trung quản lý trạng thái chuyển tab Nông trại / Khám phá ---------- */
+export function applyViewState() {
+  const isExplore = ctx.S && ctx.S.view === 'explore';
+  const ctrlrow = sh.querySelector('.ctrlrow');
+  const mascots = $id('mascots');
+  const witch = $id('witch');
+  const banner = $id('banner');
+  const viewToggle = $id('viewToggle');
+  
+  // Ẩn/hiện các thành phần chỉ thuộc về Nông trại
+  if (ctrlrow) ctrlrow.style.display = isExplore ? 'none' : 'flex';
+  if (mascots) mascots.style.display = isExplore ? 'none' : '';
+  if (decoLayer) decoLayer.style.display = isExplore ? 'none' : '';
+  if (witch) witch.style.display = isExplore ? 'none' : '';
+  if (banner) banner.style.display = isExplore ? 'none' : '';
+  
+  // Cập nhật nút chuyển tab
+  if (viewToggle) {
+    viewToggle.innerHTML = isExplore
+      ? `${spriteSVG('strawhat', 16)} <span>Về Nông Trại</span>`
+      : `${spriteSVG('mapIcon', 16)} <span>Khám phá</span>`;
+  }
 }
 
 export function renderPager() {
@@ -209,21 +233,15 @@ fieldEl.addEventListener('touchend', e => {
 
   const viewToggle = $id('viewToggle');
   if (viewToggle) {
-    // Initial icon state
-    if (ctx.S && ctx.S.view === 'explore') viewToggle.innerHTML = `${spriteSVG('sprout', 16)} <span>Nông trại</span>`;
     viewToggle.addEventListener('click', () => {
       ctx.S.view = ctx.S.view === 'explore' ? 'farm' : 'explore';
       save();
+      applyPageSkin();
+      applyViewState();
       renderPlots();
       renderToolbar();
       renderPager();
-      applyPageSkin();
-      const ctrlrow = sh.querySelector('.ctrlrow');
-      if (ctrlrow) ctrlrow.style.display = ctx.S.view === 'explore' ? 'none' : 'flex';
-      const mascots = sh.querySelector('.mascots');
-      if (mascots) mascots.style.display = ctx.S.view === 'explore' ? 'none' : 'block';
       toast(ctx.S.view === 'explore' ? 'Bản đồ Khám phá' : 'Trở về Nông trại');
-      viewToggle.innerHTML = ctx.S.view === 'explore' ? `${spriteSVG('sprout', 16)} <span>Nông trại</span>` : `${spriteSVG('mapIcon', 16)} <span>Khám phá</span>`;
     });
   }
 }

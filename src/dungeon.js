@@ -59,9 +59,15 @@ export function openDungeonView() {
 
     // Hide Farm Elements
     All.$id('blocks').style.display = 'none';
+    All.$id('explore-blocks').style.display = 'none';
     All.$id('pager').style.display = 'none';
     All.$id('toolbar').style.display = 'none';
     All.$id('mascots').style.display = 'none';
+    All.$id('viewToggle').style.display = 'none';
+    const ctrlrow = All.sh.querySelector('.ctrlrow');
+    if (ctrlrow) ctrlrow.style.display = 'none';
+    const banner = All.$id('banner');
+    if (banner) banner.style.display = 'none';
 
     // Show Dungeon View
     All.dungeonView.style.display = 'flex';
@@ -76,22 +82,22 @@ export function closeDungeonView() {
     isDungeonOpen = false;
     stopCombatLoop();
 
-    // Revert Title
-    const titleH1 = All.$id('drag').querySelector('h1');
-    titleH1.innerHTML = `${spriteSVG('strawhat', 16)}Ai thèm làm nông dân chứ!`;
-
-    // Show Farm Elements
-    All.$id('blocks').style.display = '';
-    All.$id('pager').style.display = '';
-    All.$id('toolbar').style.display = '';
-    All.$id('mascots').style.display = '';
-
     // Hide Dungeon View
     All.dungeonView.style.display = 'none';
     All.dungeonView.innerHTML = '';
     
     const fieldEl = All.$id('scroll').querySelector('.field');
     if (fieldEl) fieldEl.style.minHeight = '';
+
+    // Restore view toggle
+    All.$id('viewToggle').style.display = '';
+
+    // Restore all visibility based on current view state
+    All.applyPageSkin();
+    All.applyViewState();
+    All.renderPager();
+    All.renderPlots();
+    All.renderToolbar();
 }
 
 function initPlacementPhase() {

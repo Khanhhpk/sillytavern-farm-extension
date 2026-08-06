@@ -33,6 +33,7 @@ export function loadState() {
   if (!ctx.S.theme) ctx.S.theme = 'sakura';
   if (!ctx.S.page) ctx.S.page = 1;
   if (ctx.S.dragPet === undefined) ctx.S.dragPet = false;
+  ctx.S.view = 'farm';   // Luôn mặc định về nông trại khi khởi động
   const petRenameMap = { 'bunny': 'jellyfish', 'slimeNight': 'peach_soda', 'batBlob': 'mystery_blob' };
   if (ctx.S.pets) ctx.S.pets = ctx.S.pets.map(p => petRenameMap[p] || p);
   if (ctx.S.petsOut) ctx.S.petsOut = ctx.S.petsOut.map(p => petRenameMap[p] || p);
