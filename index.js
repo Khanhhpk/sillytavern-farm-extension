@@ -7124,15 +7124,22 @@ var heroLoop = null;
 var lastTick = 0;
 var monsterX = 100;
 var PET_SKILLS = {
-  slime: { s5: { type: "heal_party", val: 10, cd: 4, desc: "H\u1ED3i 10 HP cho c\u1EA3 \u0111\u1ED9i (M\u1ED7i 4s)" }, s15: { type: "max_hp_party", val: 0.3, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 30% Max HP to\xE0n \u0111\u1ED9i" } },
-  octo: { s5: { type: "atk_up", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 20% ATK b\u1EA3n th\xE2n" }, s15: { type: "multi_hit", val: 2, desc: "N\u1ED9i t\u1EA1i: \u0110\xE1nh 2 \u0111\xF2n li\xEAn ti\u1EBFp" } },
-  slimePink: { s5: { type: "lifesteal", val: 0.2, desc: "N\u1ED9i t\u1EA1i: H\xFAt m\xE1u 20%" }, s15: { type: "crit_rate", val: 0.3, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 b\u1EA1o k\xEDch +30%" } },
-  octoCream: { s5: { type: "dodge", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 n\xE9 20%" }, s15: { type: "reflect", val: 0.5, desc: "N\u1ED9i t\u1EA1i: Ph\u1EA3n 50% s\xE1t th\u01B0\u01A1ng" } },
-  ghostBlob: { s5: { type: "dodge", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 n\xE9 20%" }, s15: { type: "lifesteal", val: 0.3, desc: "N\u1ED9i t\u1EA1i: H\xFAt m\xE1u 30%" } },
-  jellyfish: { s5: { type: "stun", val: 0.2, dur: 1, desc: "N\u1ED9i t\u1EA1i: 20% l\xE0m cho\xE1ng 1s" }, s15: { type: "crit_dmg", val: 3, desc: "N\u1ED9i t\u1EA1i: S\xE1t th\u01B0\u01A1ng Crit x3" } },
-  impBlob: { s5: { type: "crit_rate", val: 0.3, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 b\u1EA1o k\xEDch +30%" }, s15: { type: "atk_up", val: 0.5, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 50% ATK b\u1EA3n th\xE2n" } },
-  angelBlob: { s5: { type: "heal_party", val: 15, cd: 5, desc: "H\u1ED3i 15 HP cho c\u1EA3 \u0111\u1ED9i (M\u1ED7i 5s)" }, s15: { type: "resurrect", val: 1, desc: "N\u1ED9i t\u1EA1i: H\u1ED3i sinh 1 l\u1EA7n (50% HP)" } },
-  default: { s5: { type: "atk_up", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 20% ATK" }, s15: { type: "crit_rate", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 b\u1EA1o k\xEDch +20%" } }
+  slime: { s5: { type: "heal_party", val: 10, cd: 4, desc: "H\u1ED3i 10 HP cho c\u1EA3 \u0111\u1ED9i (M\u1ED7i 4s)", price: 2e5 }, s15: { type: "max_hp_party", val: 0.3, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 30% Max HP to\xE0n \u0111\u1ED9i", price: 5e5 } },
+  octo: { s5: { type: "atk_up", val: 0.5, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 50% ATK b\u1EA3n th\xE2n", price: 2e5 }, s15: { type: "multi_hit", val: 2, desc: "N\u1ED9i t\u1EA1i: M\u1ED7i \u0111\xF2n \u0111\xE1nh x2 s\xE1t th\u01B0\u01A1ng", price: 5e5 } },
+  slimePink: { s5: { type: "lifesteal", val: 0.3, desc: "N\u1ED9i t\u1EA1i: H\xFAt m\xE1u 30%", price: 2e5 }, s15: { type: "crit_rate", val: 0.3, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 b\u1EA1o k\xEDch +30%", price: 5e5 } },
+  octoCream: { s5: { type: "dodge", val: 0.3, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 n\xE9 30%", price: 2e5 }, s15: { type: "reflect", val: 0.5, desc: "N\u1ED9i t\u1EA1i: Ph\u1EA3n 50% s\xE1t th\u01B0\u01A1ng", price: 5e5 } },
+  dewSprout: { s5: { type: "heal_self", val: 15, cd: 3, desc: "T\u1EF1 h\u1ED3i 15 HP (M\u1ED7i 3s)", price: 2e5 }, s15: { type: "atk_speed", val: 0.5, desc: "N\u1ED9i t\u1EA1i: T\u1ED1c \u0111\xE1nh x1.5", price: 5e5 } },
+  cloudMallow: { s5: { type: "heal_party", val: 15, cd: 4, desc: "H\u1ED3i 15 HP cho c\u1EA3 \u0111\u1ED9i (M\u1ED7i 4s)", price: 2e5 }, s15: { type: "stun", val: 0.2, desc: "N\u1ED9i t\u1EA1i: 20% l\xE0m cho\xE1ng 1s", price: 5e5 } },
+  ghostBlob: { s5: { type: "dodge", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 n\xE9 20%", price: 2e5 }, s15: { type: "lifesteal", val: 0.5, desc: "N\u1ED9i t\u1EA1i: H\xFAt m\xE1u 50%", price: 5e5 } },
+  mystery_blob: { s5: { type: "random_dmg", val: 3, cd: 5, desc: "G\xE2y 300% ATK ng\u1EABu nhi\xEAn (M\u1ED7i 5s)", price: 2e5 }, s15: { type: "random_buff", val: 1, cd: 10, desc: "Buff ng\u1EABu nhi\xEAn to\xE0n \u0111\u1ED9i (M\u1ED7i 10s)", price: 5e5 } },
+  jellyfish: { s5: { type: "stun", val: 0.2, desc: "N\u1ED9i t\u1EA1i: 20% l\xE0m cho\xE1ng 1s", price: 2e5 }, s15: { type: "crit_dmg", val: 3, desc: "N\u1ED9i t\u1EA1i: S\xE1t th\u01B0\u01A1ng Crit x3", price: 5e5 } },
+  impBlob: { s5: { type: "crit_rate", val: 0.3, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 b\u1EA1o k\xEDch +30%", price: 2e5 }, s15: { type: "berserk", val: 2, desc: "N\u1ED9i t\u1EA1i: Cu\u1ED3ng n\u1ED9 (ATK x2, HP -50%)", price: 5e5 } },
+  angelBlob: { s5: { type: "heal_party", val: 25, cd: 5, desc: "H\u1ED3i 25 HP cho c\u1EA3 \u0111\u1ED9i (M\u1ED7i 5s)", price: 2e5 }, s15: { type: "resurrect", val: 1, desc: "N\u1ED9i t\u1EA1i: H\u1ED3i sinh 1 l\u1EA7n (50% HP)", price: 5e5 } },
+  prismBlob: { s5: { type: "shield_party", val: 50, cd: 10, desc: "T\u1EA1o Khi\xEAn 50 cho to\xE0n \u0111\u1ED9i (M\u1ED7i 10s)", price: 2e5 }, s15: { type: "laser", val: 5, cd: 8, desc: "Laser s\xE1t th\u01B0\u01A1ng di\u1EC7n r\u1ED9ng x5 ATK", price: 5e5 } },
+  starBell: { s5: { type: "atk_party", val: 0.3, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 30% ATK to\xE0n \u0111\u1ED9i", price: 2e5 }, s15: { type: "crit_party", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 20% Crit to\xE0n \u0111\u1ED9i", price: 5e5 } },
+  peach_soda: { s5: { type: "atk_speed", val: 0.5, desc: "N\u1ED9i t\u1EA1i: T\u1ED1c \u0111\xE1nh x1.5", price: 2e5 }, s15: { type: "heal_party", val: 20, cd: 3, desc: "H\u1ED3i 20 HP to\xE0n \u0111\u1ED9i (M\u1ED7i 3s)", price: 5e5 } },
+  penguin: { s5: { type: "dodge", val: 0.4, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 n\xE9 40%", price: 2e5 }, s15: { type: "gold_drop", val: 2, desc: "N\u1ED9i t\u1EA1i: V\xE0ng r\u1EDBt ra x2", price: 5e5 } },
+  default: { s5: { type: "atk_up", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 20% ATK", price: 2e5 }, s15: { type: "crit_rate", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 b\u1EA1o k\xEDch +20%", price: 5e5 } }
 };
 var runState = null;
 function initHeroState() {
@@ -7150,14 +7157,21 @@ function initHeroState() {
   }
 }
 function getPetStats(pId) {
-  const data = ctx.S.hero.roster[pId] || { level: 1, exp: 0 };
+  const data = ctx.S.hero.roster[pId] || { level: 1, exp: 0, enhHp: 0, enhAtk: 0, s5_unlocked: false, s15_unlocked: false };
+  const enhHp = data.enhHp || 0;
+  const enhAtk = data.enhAtk || 0;
   return {
     level: data.level,
     exp: data.exp,
-    maxHp: 100 + data.level * 20,
-    atk: 10 + data.level * 3,
-    nextExp: data.level * 100,
-    upgradeCost: data.level * 50
+    maxHp: 100 + data.level * 20 + enhHp * 50,
+    atk: 10 + data.level * 3 + enhAtk * 10,
+    nextExp: Math.floor(100 * Math.pow(1.5, data.level - 1)),
+    enhHpCost: 5e3 + enhHp * 2e3,
+    enhAtkCost: 5e3 + enhAtk * 2e3,
+    enhHpLevel: enhHp,
+    enhAtkLevel: enhAtk,
+    s5_unlocked: data.s5_unlocked || false,
+    s15_unlocked: data.s15_unlocked || false
   };
 }
 function openHeroPanel() {
@@ -7184,12 +7198,9 @@ function openHeroPanel() {
     const st = getPetStats(pId);
     return `<div class="hero-roster-item${inParty ? " used" : ""}">
       <div class="h-r-pet" data-add="${pId}" title="Th\xEAm v\xE0o \u0111\u1ED9i h\xECnh">${petSVG(pId, 32)}</div>
-      <div class="h-r-info" data-info="${pId}" title="Xem K\u1EF9 n\u0103ng" style="cursor:pointer;">
+      <div class="h-r-info" data-info="${pId}" title="C\u01B0\u1EDDng h\xF3a & K\u1EF9 n\u0103ng" style="cursor:pointer;">
         <div>Lv.${st.level} (ATK: ${st.atk} | HP: ${st.maxHp})</div>
         <div class="h-r-bar"><div class="h-r-fill" style="width:${Math.min(100, st.exp / st.nextExp * 100)}%"></div><span>${st.exp}/${st.nextExp}</span></div>
-      </div>
-      <div class="h-r-upg" data-upg="${pId}" title="N\xE2ng c\u1EA5p Level">
-        ${spriteSVG("coin", 12)} ${st.upgradeCost}
       </div>
     </div>`;
   }).join("");
@@ -7232,27 +7243,6 @@ function openHeroPanel() {
   mbody.querySelectorAll(".h-r-info").forEach((el) => el.addEventListener("click", () => {
     openPetSkills(el.dataset.info);
   }));
-  mbody.querySelectorAll(".h-r-upg").forEach((el) => el.addEventListener("click", () => {
-    const pId = el.dataset.upg;
-    const st = getPetStats(pId);
-    const cost = st.upgradeCost;
-    if (ctx.S.hero.gold + (ctx.S.coins || 0) >= cost) {
-      if (ctx.S.hero.gold >= cost) {
-        ctx.S.hero.gold -= cost;
-      } else {
-        const rem = cost - ctx.S.hero.gold;
-        ctx.S.hero.gold = 0;
-        ctx.S.coins -= rem;
-        toast(`\u0110\xE3 d\xF9ng th\xEAm ${rem} V\xE0ng tr\u1EA1i \u0111\u1EC3 n\xE2ng c\u1EA5p!`);
-      }
-      if (!ctx.S.hero.roster[pId]) ctx.S.hero.roster[pId] = { level: 1, exp: 0 };
-      ctx.S.hero.roster[pId].level++;
-      save();
-      openHeroPanel();
-    } else {
-      toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng (c\u1EA3 V\xE0ng tr\u1EA1i v\xE0 V\xE0ng Anh h\xF9ng)!");
-    }
-  }));
   mbody.querySelectorAll(".hero-style-btn").forEach((el) => el.addEventListener("click", () => {
     ctx.S.hero.style = el.dataset.style;
     save();
@@ -7264,29 +7254,55 @@ function openHeroPanel() {
     openHeroMode();
   });
 }
+function spendGold(cost) {
+  if (ctx.S.hero.gold + (ctx.S.coins || 0) >= cost) {
+    if (ctx.S.hero.gold >= cost) {
+      ctx.S.hero.gold -= cost;
+    } else {
+      const rem = cost - ctx.S.hero.gold;
+      ctx.S.hero.gold = 0;
+      ctx.S.coins -= rem;
+      toast(`\u0110\xE3 d\xF9ng th\xEAm ${rem} V\xE0ng tr\u1EA1i!`);
+    }
+    return true;
+  }
+  toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng (c\u1EA3 V\xE0ng tr\u1EA1i v\xE0 V\xE0ng Anh h\xF9ng)!");
+  return false;
+}
 function openPetSkills(pId) {
   const st = getPetStats(pId);
-  const data = ctx.S.hero.roster[pId] || { level: 1, exp: 0 };
+  if (!ctx.S.hero.roster[pId]) ctx.S.hero.roster[pId] = { level: 1, exp: 0, enhHp: 0, enhAtk: 0, s5_unlocked: false, s15_unlocked: false };
+  const data = ctx.S.hero.roster[pId];
   const pSkill = PET_SKILLS[pId] || PET_SKILLS.default;
-  const skillHtml = [{ lvl: 5, sk: pSkill.s5 }, { lvl: 15, sk: pSkill.s15 }].map((tier) => {
-    const unlocked = data.level >= tier.lvl;
-    return `<div class="p-skill-tier ${unlocked ? "unlocked" : "locked"}">
-      <div class="p-sk-icon">${unlocked ? spriteSVG("emStar", 24) : spriteSVG("emLock", 24)}</div>
+  const skillHtml = [{ lvl: 5, sk: pSkill.s5, id: "s5" }, { lvl: 15, sk: pSkill.s15, id: "s15" }].map((tier) => {
+    const levelMet = data.level >= tier.lvl;
+    const isUnlocked = data[`${tier.id}_unlocked`];
+    let actionBtn = "";
+    if (isUnlocked) {
+      actionBtn = `<div style="color:#a4dc8c; font-weight:bold; font-size:12px; text-align:center;">\u0110\xE3 m\u1EDF</div>`;
+    } else if (levelMet) {
+      actionBtn = `<div class="hero-deploy-btn sk-unlock-btn" data-tier="${tier.id}" data-cost="${tier.sk.price}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto;">M\u1EDF kh\xF3a<br>${tier.sk.price}G</div>`;
+    } else {
+      actionBtn = `<div style="color:#777; font-size:12px; text-align:center;">C\u1EA7n Lv.${tier.lvl}</div>`;
+    }
+    return `<div class="p-skill-tier ${isUnlocked ? "unlocked" : "locked"}">
+      <div class="p-sk-icon">${isUnlocked ? spriteSVG("emStar", 24) : spriteSVG("emLock", 24)}</div>
       <div class="p-sk-desc">
-        <div style="font-size: 13px; font-weight: bold; color: ${unlocked ? "#a4dc8c" : "#777"};">M\u1EDF kh\xF3a \u1EDF Lv.${tier.lvl}</div>
+        <div style="font-size: 13px; font-weight: bold; color: ${isUnlocked ? "#a4dc8c" : "#777"};">K\u1EF9 n\u0103ng Lv.${tier.lvl}</div>
         <div style="font-size: 14px; margin-top: 2px;">${tier.sk.desc}</div>
       </div>
+      <div>${actionBtn}</div>
     </div>`;
   }).join("");
-  openModal("K\u1EF9 N\u0103ng & N\xE2ng C\u1EA5p", `
+  openModal("Th\xF4ng Tin Th\xFA C\u01B0ng", `
     <div style="display:flex; gap: 16px; margin-bottom: 16px; align-items:center;">
       <div style="background:#2c2538; border-radius:12px; padding:12px; border: 2px solid #5d4a85;">
         ${petSVG(pId, 64)}
       </div>
       <div style="flex:1;">
         <div style="font-size: 18px; font-weight:bold; color: #f2c231; margin-bottom: 4px;">Lv.${st.level}</div>
-        <div style="font-size: 14px;">HP C\u01A1 b\u1EA3n: <b>${st.maxHp}</b></div>
-        <div style="font-size: 14px;">ATK C\u01A1 b\u1EA3n: <b>${st.atk}</b></div>
+        <div style="font-size: 14px;">HP C\u01A1 b\u1EA3n: <b>${st.maxHp}</b> (+${st.enhHpLevel} C\u01B0\u1EDDng h\xF3a)</div>
+        <div style="font-size: 14px;">ATK C\u01A1 b\u1EA3n: <b>${st.atk}</b> (+${st.enhAtkLevel} C\u01B0\u1EDDng h\xF3a)</div>
         <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${Math.min(100, st.exp / st.nextExp * 100)}%"></div><span>EXP: ${st.exp}/${st.nextExp}</span></div>
       </div>
     </div>
@@ -7296,32 +7312,42 @@ function openPetSkills(pId) {
       ${skillHtml}
     </div>
     
-    <div class="hero-deploy-btn" id="pet-upg-btn" style="margin-top: 20px;">
-      N\xE2ng C\u1EA5p (${st.upgradeCost} V\xE0ng)
+    <div class="hero-panel-section" style="margin-top:16px;">C\u01B0\u1EDDng H\xF3a (Enhance)</div>
+    <div class="betsides">
+      <div class="betside hero-deploy-btn" id="pet-enh-hp" style="margin-top:0; padding:10px; font-size:14px;">
+        +50 HP<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} V\xE0ng)</span>
+      </div>
+      <div class="betside hero-deploy-btn" id="pet-enh-atk" style="margin-top:0; padding:10px; font-size:14px;">
+        +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} V\xE0ng)</span>
+      </div>
     </div>
-    <div class="hero-deploy-btn" id="pet-back-btn" style="margin-top: 8px; background: #2c2538; border-color: #5d4a85;">
+    
+    <div class="hero-deploy-btn" id="pet-back-btn" style="margin-top: 16px; background: #2c2538; border-color: #5d4a85;">
       Quay L\u1EA1i
     </div>
   `);
   const mbody = $id("mbody");
-  mbody.querySelector("#pet-upg-btn").addEventListener("click", () => {
-    const st2 = getPetStats(pId);
-    const cost = st2.upgradeCost;
-    if (ctx.S.hero.gold + (ctx.S.coins || 0) >= cost) {
-      if (ctx.S.hero.gold >= cost) {
-        ctx.S.hero.gold -= cost;
-      } else {
-        const rem = cost - ctx.S.hero.gold;
-        ctx.S.hero.gold = 0;
-        ctx.S.coins -= rem;
-        toast(`\u0110\xE3 d\xF9ng th\xEAm ${rem} V\xE0ng tr\u1EA1i \u0111\u1EC3 n\xE2ng c\u1EA5p!`);
-      }
-      if (!ctx.S.hero.roster[pId]) ctx.S.hero.roster[pId] = { level: 1, exp: 0 };
-      ctx.S.hero.roster[pId].level++;
+  mbody.querySelectorAll(".sk-unlock-btn").forEach((btn) => btn.addEventListener("click", () => {
+    const cost = parseInt(btn.dataset.cost);
+    const tier = btn.dataset.tier;
+    if (spendGold(cost)) {
+      ctx.S.hero.roster[pId][`${tier}_unlocked`] = true;
       save();
       openPetSkills(pId);
-    } else {
-      toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng (c\u1EA3 V\xE0ng tr\u1EA1i v\xE0 V\xE0ng Anh h\xF9ng)!");
+    }
+  }));
+  mbody.querySelector("#pet-enh-hp").addEventListener("click", () => {
+    if (spendGold(st.enhHpCost)) {
+      ctx.S.hero.roster[pId].enhHp = (ctx.S.hero.roster[pId].enhHp || 0) + 1;
+      save();
+      openPetSkills(pId);
+    }
+  });
+  mbody.querySelector("#pet-enh-atk").addEventListener("click", () => {
+    if (spendGold(st.enhAtkCost)) {
+      ctx.S.hero.roster[pId].enhAtk = (ctx.S.hero.roster[pId].enhAtk || 0) + 1;
+      save();
+      openPetSkills(pId);
     }
   });
   mbody.querySelector("#pet-back-btn").addEventListener("click", () => {
@@ -7339,46 +7365,70 @@ function openHeroMode() {
   const bar = $id("hero-bar");
   if (bar) bar.style.display = "flex";
   let partyHpMult = 1;
+  let partyAtkMult = 1;
+  let partyCritMult = 0;
   ctx.S.hero.party.forEach((pId) => {
-    const data = ctx.S.hero.roster[pId] || { level: 1 };
+    const data = ctx.S.hero.roster[pId] || {};
     const pSkill = PET_SKILLS[pId] || PET_SKILLS.default;
-    if (data.level >= 15 && pSkill.s15.type === "max_hp_party") partyHpMult += pSkill.s15.val;
+    if (data.s5_unlocked && pSkill.s5.type === "max_hp_party") partyHpMult += pSkill.s5.val;
+    if (data.s15_unlocked && pSkill.s15.type === "max_hp_party") partyHpMult += pSkill.s15.val;
+    if (data.s5_unlocked && pSkill.s5.type === "atk_party") partyAtkMult += pSkill.s5.val;
+    if (data.s15_unlocked && pSkill.s15.type === "atk_party") partyAtkMult += pSkill.s15.val;
+    if (data.s5_unlocked && pSkill.s5.type === "crit_party") partyCritMult += pSkill.s5.val;
+    if (data.s15_unlocked && pSkill.s15.type === "crit_party") partyCritMult += pSkill.s15.val;
   });
   runState = {
     stage: 1,
     pets: ctx.S.hero.party.map((pId) => {
       const st = getPetStats(pId);
-      const data = ctx.S.hero.roster[pId] || { level: 1 };
+      const data = ctx.S.hero.roster[pId] || {};
       const pSkill = PET_SKILLS[pId] || PET_SKILLS.default;
-      let atkMult = 1;
-      let critRate = 0.1;
+      let atkMult = partyAtkMult;
+      let hpMult = partyHpMult;
+      let critRate = 0.1 + partyCritMult;
       let critDmg = 2;
       let dodge = 0;
       let lifesteal = 0;
       let res = 0;
-      [{ req: 5, sk: pSkill.s5 }, { req: 15, sk: pSkill.s15 }].forEach((tier) => {
-        if (data.level >= tier.req) {
+      let multiHit = 1;
+      let atkSpeed = 1;
+      let reflect = 0;
+      [{ req: "s5", sk: pSkill.s5 }, { req: "s15", sk: pSkill.s15 }].forEach((tier) => {
+        if (data[`${tier.req}_unlocked`]) {
           if (tier.sk.type === "atk_up") atkMult += tier.sk.val;
           if (tier.sk.type === "crit_rate") critRate += tier.sk.val;
           if (tier.sk.type === "crit_dmg") critDmg = tier.sk.val;
           if (tier.sk.type === "dodge") dodge += tier.sk.val;
           if (tier.sk.type === "lifesteal") lifesteal += tier.sk.val;
           if (tier.sk.type === "resurrect") res += tier.sk.val;
+          if (tier.sk.type === "multi_hit") multiHit = tier.sk.val;
+          if (tier.sk.type === "atk_speed") atkSpeed = tier.sk.val;
+          if (tier.sk.type === "reflect") reflect = tier.sk.val;
+          if (tier.sk.type === "berserk") {
+            atkMult *= tier.sk.val;
+            hpMult *= 0.5;
+          }
         }
       });
-      const hp = Math.floor(st.maxHp * partyHpMult);
+      const hp = Math.floor(st.maxHp * hpMult);
       return {
         id: pId,
         maxHp: hp,
         hp,
+        shield: 0,
+        hpMult,
+        atkMult,
+        // Store for level up recalculation
         atk: Math.floor(st.atk * atkMult),
         cd: 0,
-        maxCd: 1,
+        maxCd: 1 / atkSpeed,
         crit: critRate,
         critDmg,
         dodge,
         lifesteal,
         res,
+        multiHit,
+        reflect,
         skillCd: 0,
         skillMaxCd: pSkill.s5.cd || pSkill.s15.cd || 0
       };
@@ -7477,16 +7527,44 @@ function heroTick() {
         if (p.skillCd <= 0) {
           p.skillCd = p.skillMaxCd;
           const pSkill = PET_SKILLS[p.id] || PET_SKILLS.default;
-          [pSkill.s5, pSkill.s15].forEach((sk) => {
-            if (sk && sk.type === "heal_party") {
-              alivePets.forEach((ap) => {
-                ap.hp = Math.min(ap.maxHp, ap.hp + sk.val);
-                const aIdx = runState.pets.indexOf(ap);
-                const aEl = $id(`hpet-${aIdx}`);
-                setTimeout(() => showFloatDamage(`+${sk.val}`, aEl, "#a4dc8c"), 0);
-                const hpPet = $id(`hp-pet-${aIdx}`);
-                if (hpPet) hpPet.style.width = `${ap.hp / ap.maxHp * 100}%`;
-              });
+          [{ req: "s5", sk: pSkill.s5 }, { req: "s15", sk: pSkill.s15 }].forEach((tier) => {
+            if (ctx.S.hero.roster[p.id] && ctx.S.hero.roster[p.id][`${tier.req}_unlocked`] && tier.sk) {
+              if (tier.sk.type === "heal_party" || tier.sk.type === "heal_self") {
+                const targets = tier.sk.type === "heal_party" ? alivePets : [p];
+                targets.forEach((ap) => {
+                  ap.hp = Math.min(ap.maxHp, ap.hp + tier.sk.val);
+                  const aIdx = runState.pets.indexOf(ap);
+                  const aEl = $id(`hpet-${aIdx}`);
+                  setTimeout(() => showFloatDamage(`+${tier.sk.val}`, aEl, "#a4dc8c"), 0);
+                  const hpPet = $id(`hp-pet-${aIdx}`);
+                  if (hpPet) hpPet.style.width = `${ap.hp / ap.maxHp * 100}%`;
+                });
+              }
+              if (tier.sk.type === "shield_party") {
+                alivePets.forEach((ap) => {
+                  ap.shield = tier.sk.val;
+                  const aIdx = runState.pets.indexOf(ap);
+                  const aEl = $id(`hpet-${aIdx}`);
+                  setTimeout(() => showFloatDamage(`SHIELD`, aEl, "#aaddff"), 0);
+                });
+              }
+              if (tier.sk.type === "random_dmg") {
+                const rdmg = Math.floor(p.atk * tier.sk.val);
+                runState.monster.hp -= rdmg;
+                setTimeout(() => showFloatDamage(`-${rdmg}`, mobEl, "#f24d4d"), 150);
+              }
+              if (tier.sk.type === "laser") {
+                const ldmg = Math.floor(p.atk * tier.sk.val);
+                runState.monster.hp -= ldmg;
+                setTimeout(() => showFloatDamage(`LASER -${ldmg}`, mobEl, "#ff88dd"), 150);
+              }
+              if (tier.sk.type === "random_buff") {
+                alivePets.forEach((ap) => {
+                  ap.atk += Math.floor(ap.atk * 0.2);
+                });
+                const aEl = $id(`hpet-0`);
+                setTimeout(() => showFloatDamage(`ATK BUFF`, aEl, "#ffd94d"), 0);
+              }
             }
           });
         }
@@ -7495,53 +7573,59 @@ function heroTick() {
       if (p.cd <= 0) {
         p.cd = p.maxCd;
         const mult = ctx.S.hero.style === "attack" ? 1.5 : 1;
-        const isCrit = Math.random() < p.crit;
-        const dmgBase = Math.max(1, Math.floor(p.atk * mult * (0.8 + Math.random() * 0.4)));
-        let dmg = isCrit ? Math.floor(dmgBase * p.critDmg) : dmgBase;
-        runState.monster.hp -= dmg;
-        if (p.lifesteal > 0) {
-          const heal = Math.floor(dmg * p.lifesteal);
-          if (heal > 0) {
-            p.hp = Math.min(p.maxHp, p.hp + heal);
-            const pIdx2 = runState.pets.indexOf(p);
-            const pEl2 = $id(`hpet-${pIdx2}`);
-            setTimeout(() => showFloatDamage(`+${heal}`, pEl2, "#a4dc8c"), 150);
-            const hpPet = $id(`hp-pet-${pIdx2}`);
-            if (hpPet) setTimeout(() => {
-              hpPet.style.width = `${p.hp / p.maxHp * 100}%`;
-            }, 150);
-          }
-        }
-        const pSkill = PET_SKILLS[p.id] || PET_SKILLS.default;
-        let isStun = false;
-        if (pSkill.s5 && pSkill.s5.type === "stun" && Math.random() < pSkill.s5.val) isStun = true;
-        if (pSkill.s15 && pSkill.s15.type === "stun" && Math.random() < pSkill.s15.val) isStun = true;
-        if (isStun) {
-          runState.monster.stunCd = (runState.monster.stunCd || 0) + 1;
-        }
-        const pIdx = runState.pets.indexOf(p);
-        const pEl = $id(`hpet-${pIdx}`);
-        if (pEl) {
-          pEl.classList.remove("idle");
-          pEl.classList.add("attack");
+        for (let i = 0; i < p.multiHit; i++) {
           setTimeout(() => {
-            pEl.classList.remove("attack");
-            pEl.classList.add("idle");
-          }, 300);
+            if (!runState || !runState.monster || runState.monster.hp <= 0) return;
+            const isCrit = Math.random() < p.crit;
+            const dmgBase = Math.max(1, Math.floor(p.atk * mult * (0.8 + Math.random() * 0.4)));
+            let dmg = isCrit ? Math.floor(dmgBase * p.critDmg) : dmgBase;
+            runState.monster.hp -= dmg;
+            if (p.lifesteal > 0) {
+              const heal = Math.floor(dmg * p.lifesteal);
+              if (heal > 0) {
+                p.hp = Math.min(p.maxHp, p.hp + heal);
+                const pIdx2 = runState.pets.indexOf(p);
+                const pEl2 = $id(`hpet-${pIdx2}`);
+                setTimeout(() => showFloatDamage(`+${heal}`, pEl2, "#a4dc8c"), 150);
+                const hpPet = $id(`hp-pet-${pIdx2}`);
+                if (hpPet) setTimeout(() => {
+                  hpPet.style.width = `${p.hp / p.maxHp * 100}%`;
+                }, 150);
+              }
+            }
+            const pSkill = PET_SKILLS[p.id] || PET_SKILLS.default;
+            let isStun = false;
+            const data = ctx.S.hero.roster[p.id] || {};
+            if (data.s5_unlocked && pSkill.s5 && pSkill.s5.type === "stun" && Math.random() < pSkill.s5.val) isStun = true;
+            if (data.s15_unlocked && pSkill.s15 && pSkill.s15.type === "stun" && Math.random() < pSkill.s15.val) isStun = true;
+            if (isStun) {
+              runState.monster.stunCd = (runState.monster.stunCd || 0) + 1;
+            }
+            const pIdx = runState.pets.indexOf(p);
+            const pEl = $id(`hpet-${pIdx}`);
+            if (pEl) {
+              pEl.classList.remove("idle");
+              pEl.classList.add("attack");
+              setTimeout(() => {
+                pEl.classList.remove("attack");
+                pEl.classList.add("idle");
+              }, 300);
+            }
+            if (mobEl) {
+              setTimeout(() => {
+                mobEl.classList.remove("idle");
+                mobEl.classList.add("hurt");
+                setTimeout(() => {
+                  mobEl.classList.remove("hurt");
+                  mobEl.classList.add("idle");
+                }, 200);
+              }, 150);
+            }
+            spawnProjectile(pEl, mobEl, false, isCrit ? "#f2c231" : null);
+            setTimeout(() => showFloatDamage(`-${dmg}`, mobEl, isCrit ? "#f2c231" : null), 150);
+            if (isStun) setTimeout(() => showFloatDamage("STUN!", mobEl, "#ccc"), 200);
+          }, i * 200);
         }
-        if (mobEl) {
-          setTimeout(() => {
-            mobEl.classList.remove("idle");
-            mobEl.classList.add("hurt");
-            setTimeout(() => {
-              mobEl.classList.remove("hurt");
-              mobEl.classList.add("idle");
-            }, 200);
-          }, 150);
-        }
-        spawnProjectile(pEl, mobEl, false, isCrit ? "#f2c231" : null);
-        setTimeout(() => showFloatDamage(`-${dmg}`, mobEl, isCrit ? "#f2c231" : null), 150);
-        if (isStun) setTimeout(() => showFloatDamage("STUN!", mobEl, "#ccc"), 200);
       }
     });
     const hpMob = $id("hp-mob");
@@ -7569,7 +7653,17 @@ function heroTick() {
         if (isDodge) {
           setTimeout(() => showFloatDamage("MISS", pEl, "#999"), 150);
         } else {
-          const dmg = Math.max(1, Math.floor(runState.monster.atk * mult * (0.8 + Math.random() * 0.4)));
+          let dmg = Math.max(1, Math.floor(runState.monster.atk * mult * (0.8 + Math.random() * 0.4)));
+          if (target.shield > 0) {
+            const absorb = Math.min(target.shield, dmg);
+            target.shield -= absorb;
+            dmg -= absorb;
+          }
+          if (target.reflect > 0) {
+            const refDmg = Math.floor(dmg * target.reflect);
+            runState.monster.hp -= refDmg;
+            setTimeout(() => showFloatDamage(`REFLECT ${refDmg}`, mobEl, "#ff5555"), 150);
+          }
           target.hp -= dmg;
           if (target.hp <= 0 && target.res > 0) {
             target.res--;
@@ -7578,7 +7672,8 @@ function heroTick() {
           } else if (target.hp < 0) {
             target.hp = 0;
           }
-          setTimeout(() => showFloatDamage(`-${dmg}`, pEl), 150);
+          if (dmg > 0) setTimeout(() => showFloatDamage(`-${dmg}`, pEl), 150);
+          else setTimeout(() => showFloatDamage(`BLOCK`, pEl, "#aaddff"), 150);
           if (pEl && target.hp <= 0) {
             setTimeout(() => {
               pEl.style.opacity = "0.3";
@@ -7594,11 +7689,38 @@ function heroTick() {
     if (runState.monster.hp <= 0) {
       const m = runState.monster;
       const goldDrop = Math.floor(Math.random() * runState.stage * (m.isBoss ? 15 : 3)) + 1;
-      ctx.S.hero.gold += goldDrop;
+      let pGoldMult = 1;
+      runState.pets.forEach((p) => {
+        const data = ctx.S.hero.roster[p.id];
+        if (data && data.s15_unlocked && PET_SKILLS[p.id]?.s15?.type === "gold_drop") pGoldMult *= PET_SKILLS[p.id].s15.val;
+      });
+      ctx.S.hero.gold += Math.floor(goldDrop * pGoldMult);
       const expDrop = (runState.stage * 10 + 5) * (m.isBoss ? 5 : 1);
       runState.pets.forEach((p) => {
-        if (!ctx.S.hero.roster[p.id]) ctx.S.hero.roster[p.id] = { level: 1, exp: 0 };
-        ctx.S.hero.roster[p.id].exp += Math.floor(expDrop / runState.pets.length);
+        if (!ctx.S.hero.roster[p.id]) ctx.S.hero.roster[p.id] = { level: 1, exp: 0, enhHp: 0, enhAtk: 0, s5_unlocked: false, s15_unlocked: false };
+        let petData = ctx.S.hero.roster[p.id];
+        petData.exp += Math.floor(expDrop / runState.pets.length);
+        let leveledUp = false;
+        while (true) {
+          const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
+          if (petData.exp >= nextExp) {
+            petData.exp -= nextExp;
+            petData.level++;
+            leveledUp = true;
+          } else {
+            break;
+          }
+        }
+        if (leveledUp) {
+          const pIdx = runState.pets.indexOf(p);
+          const pEl = $id(`hpet-${pIdx}`);
+          setTimeout(() => showFloatDamage("LEVEL UP!", pEl, "#f2c231"), 500);
+          const st = getPetStats(p.id);
+          const oldMax = p.maxHp;
+          p.maxHp = Math.floor(st.maxHp * (p.hpMult || 1));
+          p.hp += p.maxHp - oldMax;
+          p.atk = Math.floor(st.atk * (p.atkMult || 1));
+        }
       });
       const r = Math.random();
       if (m.isBoss) {
