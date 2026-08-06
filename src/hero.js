@@ -1181,7 +1181,12 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
   
   const sRect = scene.getBoundingClientRect();
   
-  if (skillType === 'heal_party' || skillType === 'heal_self') {
+  const healSkills = ['heal_party', 'heal_self'];
+  const shieldSkills = ['shield_party', 'shield_self', 'shield', 'absorb'];
+  const buffSkills = ['atk_spd_self', 'charm', 'cd_reduce', 'random_buff', 'vampiric_buff', 'resurrect', 'party_speed_buff', 'atk_up'];
+  const damageSkills = ['slam_dmg', 'multi_strike', 'thorn_whip', 'lightning_strike', 'push_back', 'soul_reap', 'fear', 'stun_bolt', 'dispel', 'hellfire', 'star_fall', 'blind', 'sugar_rush', 'snowball_roll', 'coin_toss', 'random_dmg'];
+  
+  if (healSkills.includes(skillType)) {
     if (!targetEl) return;
     const fx = document.createElement('div');
     fx.className = 'fx-heal';
@@ -1192,7 +1197,7 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
     fx.style.top = (tRect.top - sRect.top + tRect.height/2 - 16) + 'px';
     setTimeout(() => fx.remove(), 1000);
   }
-  else if (skillType === 'shield_party') {
+  else if (shieldSkills.includes(skillType)) {
     if (!targetEl) return;
     const fx = document.createElement('div');
     fx.className = 'fx-shield';
@@ -1205,11 +1210,14 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
     fx.style.top = (tRect.top - sRect.top + tRect.height/2 - 24) + 'px';
     setTimeout(() => fx.remove(), 2000);
   }
-  else if (skillType === 'random_buff') {
+  else if (buffSkills.includes(skillType)) {
     if (!targetEl) return;
     const fx = document.createElement('div');
     fx.className = 'fx-buff';
-    fx.innerHTML = spriteSVG('holyLight', 48);
+    let buffSprite = 'holyLight';
+    if (skillType === 'charm') buffSprite = 'heartFx';
+    if (skillType === 'vampiric_buff') buffSprite = 'bloodFx';
+    fx.innerHTML = spriteSVG(buffSprite, 48);
     scene.appendChild(fx);
     const tRect = targetEl.getBoundingClientRect();
     fx.style.left = (tRect.left - sRect.left + tRect.width/2 - 24) + 'px';
@@ -1237,11 +1245,17 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
     scene.appendChild(fx);
     setTimeout(() => fx.remove(), 300);
   }
-  else if (skillType === 'random_dmg') {
+  else if (damageSkills.includes(skillType)) {
     if (!targetEl) return;
+    const dmgSpriteMap = {
+      slam_dmg: 'smashFx', multi_strike: 'slashFx', thorn_whip: 'leafBolt', lightning_strike: 'lightning',
+      push_back: 'biteFx', soul_reap: 'scytheFx', fear: 'skullFx', stun_bolt: 'stunFx',
+      hellfire: 'fireball', star_fall: 'starBolt', snowball_roll: 'snowball', coin_toss: 'coin', random_dmg: 'fireball',
+      dispel: 'dispelFx', blind: 'blindFx', sugar_rush: 'sugarFx'
+    };
     const fx = document.createElement('div');
     fx.className = 'fx-impact';
-    fx.innerHTML = spriteSVG('fireball', 64);
+    fx.innerHTML = spriteSVG(dmgSpriteMap[skillType] || 'fireball', 64);
     scene.appendChild(fx);
     const tRect = targetEl.getBoundingClientRect();
     fx.style.left = (tRect.left - sRect.left + tRect.width/2 - 32) + 'px';
@@ -1283,7 +1297,7 @@ function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
     else if (pId === 'peach_soda') { animType = 'projectile'; spriteId = 'waterball'; }
     else if (pId === 'starBell') { animType = 'projectile'; spriteId = 'starBolt'; }
     else if (pId === 'angelBlob') { animType = 'projectile'; spriteId = 'holyLight'; }
-    else if (pId === 'cloudMallow') { animType = 'projectile'; spriteId = 'arrow'; } // Temp
+    else if (pId === 'cloudMallow') { animType = 'projectile'; spriteId = 'lightning'; }
     else if (pId === 'penguin') { animType = 'projectile'; spriteId = 'snowball'; }
     else if (pId === 'mystery_blob') { animType = 'projectile'; spriteId = 'shadowBolt'; }
     else if (pId === 'prismBlob') { animType = 'projectile'; spriteId = 'rainbowBolt'; }
