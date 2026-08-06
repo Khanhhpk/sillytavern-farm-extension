@@ -4084,14 +4084,16 @@ function renderPlots() {
     if (wrap) wrap.style.display = "none";
     if (expWrap) {
       expWrap.style.display = "flex";
-      expWrap.innerHTML = `
-        <div class="explore-slot" id="eslot-dungeon">
-          ${spriteSVG("dungeonGate", 48)}
-          <div class="feature-name">H\u1EA7m ng\u1EE5c</div>
-        </div>
-      `;
-      const dBtn = $id("eslot-dungeon");
-      if (dBtn) dBtn.addEventListener("click", () => openPanel("dungeon"));
+      if (!expWrap.hasChildNodes()) {
+        expWrap.innerHTML = `
+          <div class="explore-slot" id="eslot-dungeon">
+            ${spriteSVG("dungeonGate", 48)}
+            <div class="feature-name">H\u1EA7m ng\u1EE5c</div>
+          </div>
+        `;
+        const dBtn = $id("eslot-dungeon");
+        if (dBtn) dBtn.addEventListener("click", () => openPanel("dungeon"));
+      }
     }
     return;
   }
