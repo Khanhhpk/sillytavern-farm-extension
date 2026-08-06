@@ -161,14 +161,19 @@ export function initUI() {
   </div>
   
   <div id="hero-bar" class="hero-bar" style="display:none">
-    <div class="hero-drag" title="Kéo thả" id="hero-drag">${spriteSVG('mapIcon', 16)}</div>
-    <div class="hero-scene">
-      <div id="hero-party"></div>
-      <div id="hero-enemy"></div>
-    </div>
-    <div class="hero-stats">
-      <div>Lv.<span id="hero-level">1</span> <span class="h-gold">${spriteSVG('coin', 12)}<span id="hero-gold">0</span></span></div>
-      <div class="hero-exp-wrap"><div class="hero-exp-bar" id="hero-exp-bar"></div><div class="hero-exp-txt" id="hero-exp">0/100</div></div>
+    <div class="hero-drag" title="Kéo thả" id="hero-drag"><i class="fa-solid fa-grip-vertical"></i></div>
+    <div class="hero-content">
+      <div class="hero-scene">
+        <div id="hero-party"></div>
+        <div id="hero-enemy"></div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stats-row">
+          <div class="h-lv">Lv.<span id="hero-level">1</span></div>
+          <div class="hero-exp-wrap"><div class="hero-exp-bar" id="hero-exp-bar"></div><div class="hero-exp-txt" id="hero-exp">0/100</div></div>
+          <div class="h-gold">${spriteSVG('coin', 12)}<span id="hero-gold">0</span></div>
+        </div>
+      </div>
     </div>
     <div class="hero-actions">
       <div class="h-btn" id="hero-cashout" title="Rút Vàng">${spriteSVG('coin', 16)}</div>

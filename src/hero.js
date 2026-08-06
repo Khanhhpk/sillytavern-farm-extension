@@ -21,10 +21,12 @@ export function initHeroState() {
       fx: 0.5,
       fy: 0.9,
       party: [], // Danh sách pet ID đang chiến đấu
-      style: 'balanced' // attack, defense, balanced
+      style: 'balanced', // attack, defense, balanced
+      kills: 0
     };
   }
   if (!ctx.S.hero.style) ctx.S.hero.style = 'balanced';
+  if (typeof ctx.S.hero.kills !== 'number') ctx.S.hero.kills = 0;
 }
 
 export function openHeroPanel() {
@@ -142,17 +144,24 @@ export function cashOutHero() {
 function spawnMonster() {
   const cropKeys = Object.keys(CROPS);
   const randomCrop = cropKeys[Math.floor(Math.random() * cropKeys.length)];
-  const maxHp = ctx.S.hero.level * 10 + Math.floor(Math.random() * 10);
+  
+  const isBoss = ctx.S.hero.kills > 0 && ctx.S.hero.kills % 10 === 0;
+  const hpMult = isBoss ? 5 : 1;
+  const maxHp = (ctx.S.hero.level * 10 + Math.floor(Math.random() * 10)) * hpMult;
+  
   currentMonster = {
     id: randomCrop,
     hp: maxHp,
-    maxHp: maxHp
+    maxHp: maxHp,
+    isBoss: isBoss
   };
   monsterX = 150; // Quái ở xa 150px
   
   const em = All.$id('hero-enemy');
   if (em) {
-    em.innerHTML = `<div class="hero-mob" id="hmob">${spriteSVG(CROPS[randomCrop].sp || 'seedLight', 32)}</div>`;
+    const scale = isBoss ? 'transform: scale(1.5); transform-origin: bottom right;' : '';
+    const bossStyle = isBoss ? 'filter: drop-shadow(0 0 5px #ff0000);' : '';
+    em.innerHTML = `<div class="hero-mob idle" id="hmob" style="${scale} ${bossStyle}">${spriteSVG(CROPS[randomCrop].sp || 'seedLight', 32)}</div>`;
   }
 }
 
@@ -170,12 +179,24 @@ function heroTick() {
   if (monsterX > 30) {
     monsterX -= (30 * (dt / 1000)); // tốc độ 30px/s
     if (mobEl) mobEl.style.transform = `translateX(${monsterX}px)`;
-    // Tạo hiệu ứng chạy lật đật cho pet
-    if (partyEl) partyEl.style.transform = `translateY(${Math.sin(now / 100) * 2}px)`;
   } else {
     // Tấn công (khi khoảng cách <= 30)
-    if (partyEl) partyEl.style.transform = `translateY(0) translateX(5px)`; // Nhào tới
-    setTimeout(() => { if (partyEl) partyEl.style.transform = 'translateY(0) translateX(0)'; }, 50);
+    // Cập nhật hoạt ảnh
+    const pets = partyEl ? partyEl.querySelectorAll('.hero-pet') : [];
+    pets.forEach((p, i) => {
+      // Cho một pet ngẫu nhiên hoặc thay phiên tấn công
+      if (Math.random() < 0.3) {
+        p.classList.remove('idle');
+        p.classList.add('attack');
+        setTimeout(() => { p.classList.remove('attack'); p.classList.add('idle'); }, 300);
+      }
+    });
+    
+    if (mobEl) {
+      mobEl.classList.remove('idle');
+      mobEl.classList.add('hurt');
+      setTimeout(() => { mobEl.classList.remove('hurt'); mobEl.classList.add('idle'); }, 200);
+    }
     
     // DPS dựa vào số lượng party và cấp độ, tính thêm Lối đánh
     let mult = 1;
@@ -188,11 +209,34 @@ function heroTick() {
     
     if (currentMonster.hp <= 0) {
       // Quái chết
-      const goldDrop = Math.floor(Math.random() * ctx.S.hero.level * 2) + 1;
-      const expDrop = ctx.S.hero.level * 5 + Math.floor(Math.random() * 5);
+      ctx.S.hero.kills++;
+      const goldDrop = Math.floor(Math.random() * ctx.S.hero.level * (currentMonster.isBoss ? 10 : 2)) + 1;
+      const expDrop = (ctx.S.hero.level * 5 + Math.floor(Math.random() * 5)) * (currentMonster.isBoss ? 5 : 1);
       
       ctx.S.hero.gold += goldDrop;
       ctx.S.hero.exp += expDrop;
+      
+      // Rớt đồ (Loot)
+      const r = Math.random();
+      if (currentMonster.isBoss) {
+        if (r < 0.5) { // 50% rớt vé norm
+          ctx.S.tickets = ctx.S.tickets || {};
+          ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1;
+          showFloatDrop('ticketNorm', partyEl);
+        } else if (r < 0.8) { // 30% rớt phân bón xịn
+          ctx.S.ferts['f2'] = (ctx.S.ferts['f2'] || 0) + 1;
+          showFloatDrop('toolFert', partyEl);
+        }
+      } else {
+        if (r < 0.1) { // 10% rớt hạt giống
+          ctx.S.seeds[currentMonster.id] = (ctx.S.seeds[currentMonster.id] || 0) + 1;
+          showFloatDrop(CROPS[currentMonster.id].sp || 'seedLight', partyEl);
+        } else if (r < 0.15) { // 5% rớt phân bón thường
+          ctx.S.ferts['f1'] = (ctx.S.ferts['f1'] || 0) + 1;
+          showFloatDrop('toolFert', partyEl);
+        }
+      }
+      save();
       
       checkLevelUp();
       spawnMonster();
@@ -222,13 +266,24 @@ function showFloatDamage(dmg, target) {
   setTimeout(() => fl.remove(), 800);
 }
 
+function showFloatDrop(icon, target) {
+  if (!target) return;
+  const fl = document.createElement('div');
+  fl.className = 'dmg-float drop';
+  fl.innerHTML = '+1 ' + spriteSVG(icon, 16);
+  fl.style.left = (Math.random() * 20) + 'px';
+  fl.style.bottom = '40px';
+  target.appendChild(fl);
+  setTimeout(() => fl.remove(), 1200);
+}
+
 function renderHeroUI() {
   const container = All.$id('hero-party');
   if (container) {
     // Nếu lối đánh phòng thủ thì thêm effect (màu aura xanh)
     const extraStyle = ctx.S.hero.style === 'defense' ? 'filter: drop-shadow(0 0 4px #4da6ff);' : '';
     container.innerHTML = ctx.S.hero.party.map((pId, i) => 
-      `<div class="hero-pet" style="z-index:${10-i}; ${extraStyle}">${petSVG(pId, 32)}</div>`
+      `<div class="hero-pet idle" style="z-index:${10-i}; ${extraStyle}">${petSVG(pId, 32)}</div>`
     ).join('');
   }
   updateHeroStats();
