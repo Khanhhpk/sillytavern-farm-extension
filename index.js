@@ -5231,7 +5231,7 @@ function renderPlots() {
           </div>
           <div class="explore-slot" id="eslot-hero">
             ${spriteSVG("threeSlimesWalking", 64)}
-            <div class="feature-name">Anh H\xF9ng</div>
+            <div class="feature-name">Th\xE1m Hi\u1EC3m</div>
           </div>
         `;
         const dBtn = $id("eslot-dungeon");
