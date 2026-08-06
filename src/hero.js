@@ -140,14 +140,23 @@ export function openHeroPanel() {
   mbody.querySelectorAll('.h-r-upg').forEach(el => el.addEventListener('click', () => {
     const pId = el.dataset.upg;
     const st = getPetStats(pId);
-    if (ctx.S.hero.gold >= st.upgradeCost) {
-      ctx.S.hero.gold -= st.upgradeCost;
+    const cost = st.upgradeCost;
+    if (ctx.S.hero.gold + (ctx.S.coins || 0) >= cost) {
+      if (ctx.S.hero.gold >= cost) {
+        ctx.S.hero.gold -= cost;
+      } else {
+        const rem = cost - ctx.S.hero.gold;
+        ctx.S.hero.gold = 0;
+        ctx.S.coins -= rem;
+        All.toast(`Đã dùng thêm ${rem} Vàng trại để nâng cấp!`);
+      }
+      
       if (!ctx.S.hero.roster[pId]) ctx.S.hero.roster[pId] = { level: 1, exp: 0 };
       ctx.S.hero.roster[pId].level++;
       save();
       openHeroPanel();
     } else {
-      All.toast('Không đủ vàng!');
+      All.toast('Không đủ vàng (cả Vàng trại và Vàng Anh hùng)!');
     }
   }));
   
@@ -209,14 +218,23 @@ function openPetSkills(pId) {
   const mbody = All.$id('mbody');
   mbody.querySelector('#pet-upg-btn').addEventListener('click', () => {
     const st2 = getPetStats(pId);
-    if (ctx.S.hero.gold >= st2.upgradeCost) {
-      ctx.S.hero.gold -= st2.upgradeCost;
+    const cost = st2.upgradeCost;
+    if (ctx.S.hero.gold + (ctx.S.coins || 0) >= cost) {
+      if (ctx.S.hero.gold >= cost) {
+        ctx.S.hero.gold -= cost;
+      } else {
+        const rem = cost - ctx.S.hero.gold;
+        ctx.S.hero.gold = 0;
+        ctx.S.coins -= rem;
+        All.toast(`Đã dùng thêm ${rem} Vàng trại để nâng cấp!`);
+      }
+      
       if (!ctx.S.hero.roster[pId]) ctx.S.hero.roster[pId] = { level: 1, exp: 0 };
       ctx.S.hero.roster[pId].level++;
       save();
       openPetSkills(pId); // Reload current modal
     } else {
-      All.toast('Không đủ vàng!');
+      All.toast('Không đủ vàng (cả Vàng trại và Vàng Anh hùng)!');
     }
   });
   

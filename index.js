@@ -7235,14 +7235,22 @@ function openHeroPanel() {
   mbody.querySelectorAll(".h-r-upg").forEach((el) => el.addEventListener("click", () => {
     const pId = el.dataset.upg;
     const st = getPetStats(pId);
-    if (ctx.S.hero.gold >= st.upgradeCost) {
-      ctx.S.hero.gold -= st.upgradeCost;
+    const cost = st.upgradeCost;
+    if (ctx.S.hero.gold + (ctx.S.coins || 0) >= cost) {
+      if (ctx.S.hero.gold >= cost) {
+        ctx.S.hero.gold -= cost;
+      } else {
+        const rem = cost - ctx.S.hero.gold;
+        ctx.S.hero.gold = 0;
+        ctx.S.coins -= rem;
+        toast(`\u0110\xE3 d\xF9ng th\xEAm ${rem} V\xE0ng tr\u1EA1i \u0111\u1EC3 n\xE2ng c\u1EA5p!`);
+      }
       if (!ctx.S.hero.roster[pId]) ctx.S.hero.roster[pId] = { level: 1, exp: 0 };
       ctx.S.hero.roster[pId].level++;
       save();
       openHeroPanel();
     } else {
-      toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng!");
+      toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng (c\u1EA3 V\xE0ng tr\u1EA1i v\xE0 V\xE0ng Anh h\xF9ng)!");
     }
   }));
   mbody.querySelectorAll(".hero-style-btn").forEach((el) => el.addEventListener("click", () => {
@@ -7298,14 +7306,22 @@ function openPetSkills(pId) {
   const mbody = $id("mbody");
   mbody.querySelector("#pet-upg-btn").addEventListener("click", () => {
     const st2 = getPetStats(pId);
-    if (ctx.S.hero.gold >= st2.upgradeCost) {
-      ctx.S.hero.gold -= st2.upgradeCost;
+    const cost = st2.upgradeCost;
+    if (ctx.S.hero.gold + (ctx.S.coins || 0) >= cost) {
+      if (ctx.S.hero.gold >= cost) {
+        ctx.S.hero.gold -= cost;
+      } else {
+        const rem = cost - ctx.S.hero.gold;
+        ctx.S.hero.gold = 0;
+        ctx.S.coins -= rem;
+        toast(`\u0110\xE3 d\xF9ng th\xEAm ${rem} V\xE0ng tr\u1EA1i \u0111\u1EC3 n\xE2ng c\u1EA5p!`);
+      }
       if (!ctx.S.hero.roster[pId]) ctx.S.hero.roster[pId] = { level: 1, exp: 0 };
       ctx.S.hero.roster[pId].level++;
       save();
       openPetSkills(pId);
     } else {
-      toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng!");
+      toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng (c\u1EA3 V\xE0ng tr\u1EA1i v\xE0 V\xE0ng Anh h\xF9ng)!");
     }
   });
   mbody.querySelector("#pet-back-btn").addEventListener("click", () => {
