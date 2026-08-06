@@ -227,10 +227,10 @@ function spawnMonster() {
   
   const em = All.$id('hero-enemy');
   if (em) {
-    const scale = isBoss ? 'transform: scale(1.5); transform-origin: bottom right;' : '';
+    const scale = isBoss ? 'scale(1.5)' : '';
     const bossStyle = isBoss ? 'filter: drop-shadow(0 0 5px #ff0000);' : '';
     em.innerHTML = `
-      <div class="hero-mob idle" id="hmob" style="${scale} ${bossStyle}">
+      <div class="hero-mob idle" id="hmob" style="transform: translateX(${monsterX}px) ${scale}; transform-origin: bottom right; ${bossStyle}">
         <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-mob"></div></div>
         ${spriteSVG(CROPS[randomCrop].sp || 'seedLight', 32)}
       </div>`;
@@ -253,7 +253,10 @@ function heroTick() {
   // Di chuyển (Dừng khi monsterX <= 130px, vì Party chiếm từ 10px đến ~120px)
   if (monsterX > 130) {
     monsterX -= (40 * (dt / 1000)); // tốc độ 40px/s
-    if (mobEl) mobEl.style.transform = `translateX(${monsterX}px)`;
+    if (mobEl) {
+      const scale = runState.monster.isBoss ? 'scale(1.5)' : '';
+      mobEl.style.transform = `translateX(${monsterX}px) ${scale}`;
+    }
   } else {
     // Combat
     const alivePets = runState.pets.filter(p => p.hp > 0);
