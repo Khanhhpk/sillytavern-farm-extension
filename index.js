@@ -8352,6 +8352,7 @@ function cashOutHero() {
 }
 function spawnMonster() {
   if (!runState) return;
+  runState.isTransitioning = false;
   const numPets = runState.pets.filter((p) => p.hp > 0).length;
   if (numPets === 0) return;
   const numMobs = Math.floor(Math.random() * numPets) + 1;
@@ -8423,12 +8424,13 @@ function heroTick() {
   const now2 = Date.now();
   const dt = now2 - lastTick;
   lastTick = now2;
-  if (!runState || !runState.monsters) return;
+  if (!runState || !runState.monsters || runState.isTransitioning) return;
   runState.waveTime += dt / 1e3;
   const partyEl = $id("hero-party");
   const alivePets = runState.pets.filter((p) => p.hp > 0);
   if (alivePets.length === 0) {
     runState.monsters = [];
+    runState.isTransitioning = true;
     heroToast("\u0110\u1ED9i h\xECnh \u0111\xE3 g\u1EE5c ng\xE3! V\u1EC1 Stage 1...");
     setTimeout(() => {
       if (!runState) return;
@@ -8455,6 +8457,7 @@ function heroTick() {
     }
   });
   if (allMonstersDead) {
+    runState.isTransitioning = true;
     runState.monsters.forEach((m) => {
       if (!m.isDead) {
         m.isDead = true;
