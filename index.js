@@ -7142,22 +7142,22 @@ var PET_SKILLS = {
   default: { s5: { type: "atk_up", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u0103ng 20% ATK", price: 2e5 }, s15: { type: "crit_rate", val: 0.2, desc: "N\u1ED9i t\u1EA1i: T\u1EC9 l\u1EC7 b\u1EA1o k\xEDch +20%", price: 5e5 } }
 };
 var PET_STATS2 = {
-  slime: { baseHp: 150, hpPerLv: 25, baseAtk: 8, atkPerLv: 2 },
-  octo: { baseHp: 80, hpPerLv: 15, baseAtk: 15, atkPerLv: 4 },
-  slimePink: { baseHp: 100, hpPerLv: 18, baseAtk: 12, atkPerLv: 3.5 },
-  octoCream: { baseHp: 110, hpPerLv: 20, baseAtk: 9, atkPerLv: 2.5 },
-  dewSprout: { baseHp: 120, hpPerLv: 22, baseAtk: 11, atkPerLv: 3 },
-  cloudMallow: { baseHp: 130, hpPerLv: 20, baseAtk: 8, atkPerLv: 2 },
-  ghostBlob: { baseHp: 70, hpPerLv: 12, baseAtk: 14, atkPerLv: 4 },
-  mystery_blob: { baseHp: 90, hpPerLv: 15, baseAtk: 16, atkPerLv: 5 },
-  jellyfish: { baseHp: 80, hpPerLv: 14, baseAtk: 13, atkPerLv: 4.5 },
-  impBlob: { baseHp: 150, hpPerLv: 24, baseAtk: 15, atkPerLv: 4 },
-  angelBlob: { baseHp: 120, hpPerLv: 25, baseAtk: 7, atkPerLv: 1.5 },
-  prismBlob: { baseHp: 100, hpPerLv: 18, baseAtk: 14, atkPerLv: 4 },
-  starBell: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3 },
-  peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3 },
-  penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5 },
-  default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3 }
+  slime: { baseHp: 150, hpPerLv: 25, baseAtk: 8, atkPerLv: 2, baseSpd: 1 },
+  octo: { baseHp: 80, hpPerLv: 15, baseAtk: 15, atkPerLv: 4, baseSpd: 1.5 },
+  slimePink: { baseHp: 100, hpPerLv: 18, baseAtk: 12, atkPerLv: 3.5, baseSpd: 1 },
+  octoCream: { baseHp: 110, hpPerLv: 20, baseAtk: 9, atkPerLv: 2.5, baseSpd: 1.2 },
+  dewSprout: { baseHp: 120, hpPerLv: 22, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
+  cloudMallow: { baseHp: 130, hpPerLv: 20, baseAtk: 8, atkPerLv: 2, baseSpd: 0.8 },
+  ghostBlob: { baseHp: 70, hpPerLv: 12, baseAtk: 14, atkPerLv: 4, baseSpd: 1.5 },
+  mystery_blob: { baseHp: 90, hpPerLv: 15, baseAtk: 16, atkPerLv: 5, baseSpd: 0.6 },
+  jellyfish: { baseHp: 80, hpPerLv: 14, baseAtk: 13, atkPerLv: 4.5, baseSpd: 0.8 },
+  impBlob: { baseHp: 150, hpPerLv: 24, baseAtk: 15, atkPerLv: 4, baseSpd: 0.6 },
+  angelBlob: { baseHp: 120, hpPerLv: 25, baseAtk: 7, atkPerLv: 1.5, baseSpd: 1 },
+  prismBlob: { baseHp: 100, hpPerLv: 18, baseAtk: 14, atkPerLv: 4, baseSpd: 0.8 },
+  starBell: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1 },
+  peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
+  penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5, baseSpd: 1 },
+  default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1 }
 };
 var runState = null;
 function initHeroState() {
@@ -7195,20 +7195,24 @@ function initHeroState() {
   }
 }
 function getPetStats(pId) {
-  const data = ctx.S.hero.roster[pId] || { level: 1, exp: 0, enhHp: 0, enhAtk: 0, s5_unlocked: false, s15_unlocked: false };
+  const data = ctx.S.hero.roster[pId] || { level: 1, exp: 0, enhHp: 0, enhAtk: 0, enhSpd: 0, s5_unlocked: false, s15_unlocked: false };
   const enhHp = data.enhHp || 0;
   const enhAtk = data.enhAtk || 0;
+  const enhSpd = data.enhSpd || 0;
   const st = PET_STATS2[pId] || PET_STATS2.default;
   return {
     level: data.level,
     exp: data.exp || 0,
     maxHp: Math.floor(st.baseHp + (data.level - 1) * st.hpPerLv + enhHp * 50),
     atk: Math.floor(st.baseAtk + (data.level - 1) * st.atkPerLv + enhAtk * 10),
+    spd: Number((st.baseSpd + enhSpd * 0.1).toFixed(2)),
     nextExp: Math.floor(100 * Math.pow(1.5, data.level - 1)),
     enhHpCost: 5e3 + enhHp * 2e3,
     enhAtkCost: 5e3 + enhAtk * 2e3,
+    enhSpdCost: 5e3 + enhSpd * 2e3,
     enhHpLevel: enhHp,
     enhAtkLevel: enhAtk,
+    enhSpdLevel: enhSpd,
     s5_unlocked: data.s5_unlocked || false,
     s15_unlocked: data.s15_unlocked || false
   };
@@ -7238,7 +7242,7 @@ function openHeroPanel() {
     return `<div class="hero-roster-item${inParty ? " used" : ""}">
       <div class="h-r-pet" data-add="${pId}" title="Th\xEAm v\xE0o \u0111\u1ED9i h\xECnh">${petSVG(pId, 32)}</div>
       <div class="h-r-info" data-info="${pId}" title="C\u01B0\u1EDDng h\xF3a & K\u1EF9 n\u0103ng" style="cursor:pointer;">
-        <div>Lv.${st.level} (ATK: ${st.atk} | HP: ${st.maxHp})</div>
+        <div>Lv.${st.level} (ATK: ${st.atk} | HP: ${st.maxHp} | SPD: ${st.spd})</div>
         <div class="h-r-bar"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp / st.nextExp * 100)}%"></div><span>${st.level >= 30 ? "MAX" : `${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
       </div>
     </div>`;
@@ -7342,6 +7346,7 @@ function openPetSkills(pId) {
         <div style="font-size: 18px; font-weight:bold; color: #f2c231; margin-bottom: 4px;">Lv.${st.level}</div>
         <div style="font-size: 14px;">HP C\u01A1 b\u1EA3n: <b>${st.maxHp}</b> (+${st.enhHpLevel} C\u01B0\u1EDDng h\xF3a)</div>
         <div style="font-size: 14px;">ATK C\u01A1 b\u1EA3n: <b>${st.atk}</b> (+${st.enhAtkLevel} C\u01B0\u1EDDng h\xF3a)</div>
+        <div style="font-size: 14px;">T\u1ED1c \u0111\xE1nh: <b>${st.spd}</b> (+${st.enhSpdLevel} C\u01B0\u1EDDng h\xF3a)</div>
         <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp / st.nextExp * 100)}%"></div><span>${st.level >= 30 ? "MAX LEVEL" : `EXP: ${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
       </div>
     </div>
@@ -7358,6 +7363,9 @@ function openPetSkills(pId) {
       </div>
       <div class="betside hero-deploy-btn" id="pet-enh-atk" style="margin-top:0; padding:10px; font-size:14px;">
         +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} V\xE0ng)</span>
+      </div>
+      <div class="betside hero-deploy-btn" id="pet-enh-spd" style="margin-top:0; padding:10px; font-size:14px;">
+        +0.1 SPD<br><span style="font-size:12px; font-weight:normal;">(${st.enhSpdCost} V\xE0ng)</span>
       </div>
     </div>
     
@@ -7385,6 +7393,13 @@ function openPetSkills(pId) {
   mbody.querySelector("#pet-enh-atk").addEventListener("click", () => {
     if (spendGold(st.enhAtkCost)) {
       ctx.S.hero.roster[pId].enhAtk = (ctx.S.hero.roster[pId].enhAtk || 0) + 1;
+      save();
+      openPetSkills(pId);
+    }
+  });
+  mbody.querySelector("#pet-enh-spd").addEventListener("click", () => {
+    if (spendGold(st.enhSpdCost)) {
+      ctx.S.hero.roster[pId].enhSpd = (ctx.S.hero.roster[pId].enhSpd || 0) + 1;
       save();
       openPetSkills(pId);
     }
@@ -7430,7 +7445,7 @@ function openHeroMode() {
       let lifesteal = 0;
       let res = 0;
       let multiHit = 1;
-      let atkSpeed = 1;
+      let atkSpeed = st.spd || 1;
       let reflect = 0;
       [{ req: "s5", sk: pSkill.s5 }, { req: "s15", sk: pSkill.s15 }].forEach((tier) => {
         if (data[`${tier.req}_unlocked`]) {
@@ -7441,7 +7456,7 @@ function openHeroMode() {
           if (tier.sk.type === "lifesteal") lifesteal += tier.sk.val;
           if (tier.sk.type === "resurrect") res += tier.sk.val;
           if (tier.sk.type === "multi_hit") multiHit = tier.sk.val;
-          if (tier.sk.type === "atk_speed") atkSpeed = tier.sk.val;
+          if (tier.sk.type === "atk_speed") atkSpeed *= 1 + tier.sk.val;
           if (tier.sk.type === "reflect") reflect = tier.sk.val;
           if (tier.sk.type === "berserk") {
             atkMult *= tier.sk.val;
@@ -7449,6 +7464,7 @@ function openHeroMode() {
           }
         }
       });
+      atkSpeed = Math.min(5, atkSpeed);
       const hp = Math.floor(st.maxHp * hpMult);
       return {
         id: pId,

@@ -31,22 +31,22 @@ export const PET_SKILLS = {
 };
 
 export const PET_STATS = {
-  slime: { baseHp: 150, hpPerLv: 25, baseAtk: 8, atkPerLv: 2 },
-  octo: { baseHp: 80, hpPerLv: 15, baseAtk: 15, atkPerLv: 4 },
-  slimePink: { baseHp: 100, hpPerLv: 18, baseAtk: 12, atkPerLv: 3.5 },
-  octoCream: { baseHp: 110, hpPerLv: 20, baseAtk: 9, atkPerLv: 2.5 },
-  dewSprout: { baseHp: 120, hpPerLv: 22, baseAtk: 11, atkPerLv: 3 },
-  cloudMallow: { baseHp: 130, hpPerLv: 20, baseAtk: 8, atkPerLv: 2 },
-  ghostBlob: { baseHp: 70, hpPerLv: 12, baseAtk: 14, atkPerLv: 4 },
-  mystery_blob: { baseHp: 90, hpPerLv: 15, baseAtk: 16, atkPerLv: 5 },
-  jellyfish: { baseHp: 80, hpPerLv: 14, baseAtk: 13, atkPerLv: 4.5 },
-  impBlob: { baseHp: 150, hpPerLv: 24, baseAtk: 15, atkPerLv: 4 },
-  angelBlob: { baseHp: 120, hpPerLv: 25, baseAtk: 7, atkPerLv: 1.5 },
-  prismBlob: { baseHp: 100, hpPerLv: 18, baseAtk: 14, atkPerLv: 4 },
-  starBell: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3 },
-  peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3 },
-  penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5 },
-  default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3 }
+  slime: { baseHp: 150, hpPerLv: 25, baseAtk: 8, atkPerLv: 2, baseSpd: 1.0 },
+  octo: { baseHp: 80, hpPerLv: 15, baseAtk: 15, atkPerLv: 4, baseSpd: 1.5 },
+  slimePink: { baseHp: 100, hpPerLv: 18, baseAtk: 12, atkPerLv: 3.5, baseSpd: 1.0 },
+  octoCream: { baseHp: 110, hpPerLv: 20, baseAtk: 9, atkPerLv: 2.5, baseSpd: 1.2 },
+  dewSprout: { baseHp: 120, hpPerLv: 22, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
+  cloudMallow: { baseHp: 130, hpPerLv: 20, baseAtk: 8, atkPerLv: 2, baseSpd: 0.8 },
+  ghostBlob: { baseHp: 70, hpPerLv: 12, baseAtk: 14, atkPerLv: 4, baseSpd: 1.5 },
+  mystery_blob: { baseHp: 90, hpPerLv: 15, baseAtk: 16, atkPerLv: 5, baseSpd: 0.6 },
+  jellyfish: { baseHp: 80, hpPerLv: 14, baseAtk: 13, atkPerLv: 4.5, baseSpd: 0.8 },
+  impBlob: { baseHp: 150, hpPerLv: 24, baseAtk: 15, atkPerLv: 4, baseSpd: 0.6 },
+  angelBlob: { baseHp: 120, hpPerLv: 25, baseAtk: 7, atkPerLv: 1.5, baseSpd: 1.0 },
+  prismBlob: { baseHp: 100, hpPerLv: 18, baseAtk: 14, atkPerLv: 4, baseSpd: 0.8 },
+  starBell: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1.0 },
+  peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
+  penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5, baseSpd: 1.0 },
+  default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1.0 }
 };
 
 export let runState = null;
@@ -91,9 +91,10 @@ export function initHeroState() {
 }
 
 export function getPetStats(pId) {
-  const data = ctx.S.hero.roster[pId] || { level: 1, exp: 0, enhHp: 0, enhAtk: 0, s5_unlocked: false, s15_unlocked: false };
+  const data = ctx.S.hero.roster[pId] || { level: 1, exp: 0, enhHp: 0, enhAtk: 0, enhSpd: 0, s5_unlocked: false, s15_unlocked: false };
   const enhHp = data.enhHp || 0;
   const enhAtk = data.enhAtk || 0;
+  const enhSpd = data.enhSpd || 0;
   
   const st = PET_STATS[pId] || PET_STATS.default;
   
@@ -102,11 +103,14 @@ export function getPetStats(pId) {
     exp: data.exp || 0,
     maxHp: Math.floor(st.baseHp + (data.level - 1) * st.hpPerLv + enhHp * 50),
     atk: Math.floor(st.baseAtk + (data.level - 1) * st.atkPerLv + enhAtk * 10),
+    spd: Number((st.baseSpd + enhSpd * 0.1).toFixed(2)),
     nextExp: Math.floor(100 * Math.pow(1.5, data.level - 1)),
     enhHpCost: 5000 + enhHp * 2000,
     enhAtkCost: 5000 + enhAtk * 2000,
+    enhSpdCost: 5000 + enhSpd * 2000,
     enhHpLevel: enhHp,
     enhAtkLevel: enhAtk,
+    enhSpdLevel: enhSpd,
     s5_unlocked: data.s5_unlocked || false,
     s15_unlocked: data.s15_unlocked || false
   };
@@ -141,7 +145,7 @@ export function openHeroPanel() {
     return `<div class="hero-roster-item${inParty ? ' used' : ''}">
       <div class="h-r-pet" data-add="${pId}" title="Thêm vào đội hình">${petSVG(pId, 32)}</div>
       <div class="h-r-info" data-info="${pId}" title="Cường hóa & Kỹ năng" style="cursor:pointer;">
-        <div>Lv.${st.level} (ATK: ${st.atk} | HP: ${st.maxHp})</div>
+        <div>Lv.${st.level} (ATK: ${st.atk} | HP: ${st.maxHp} | SPD: ${st.spd})</div>
         <div class="h-r-bar"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp/st.nextExp*100)}%"></div><span>${st.level >= 30 ? 'MAX' : `${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
       </div>
     </div>`;
@@ -258,6 +262,7 @@ function openPetSkills(pId) {
         <div style="font-size: 18px; font-weight:bold; color: #f2c231; margin-bottom: 4px;">Lv.${st.level}</div>
         <div style="font-size: 14px;">HP Cơ bản: <b>${st.maxHp}</b> (+${st.enhHpLevel} Cường hóa)</div>
         <div style="font-size: 14px;">ATK Cơ bản: <b>${st.atk}</b> (+${st.enhAtkLevel} Cường hóa)</div>
+        <div style="font-size: 14px;">Tốc đánh: <b>${st.spd}</b> (+${st.enhSpdLevel} Cường hóa)</div>
         <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp/st.nextExp*100)}%"></div><span>${st.level >= 30 ? 'MAX LEVEL' : `EXP: ${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
       </div>
     </div>
@@ -274,6 +279,9 @@ function openPetSkills(pId) {
       </div>
       <div class="betside hero-deploy-btn" id="pet-enh-atk" style="margin-top:0; padding:10px; font-size:14px;">
         +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} Vàng)</span>
+      </div>
+      <div class="betside hero-deploy-btn" id="pet-enh-spd" style="margin-top:0; padding:10px; font-size:14px;">
+        +0.1 SPD<br><span style="font-size:12px; font-weight:normal;">(${st.enhSpdCost} Vàng)</span>
       </div>
     </div>
     
@@ -305,6 +313,14 @@ function openPetSkills(pId) {
   mbody.querySelector('#pet-enh-atk').addEventListener('click', () => {
     if (spendGold(st.enhAtkCost)) {
       ctx.S.hero.roster[pId].enhAtk = (ctx.S.hero.roster[pId].enhAtk || 0) + 1;
+      save();
+      openPetSkills(pId);
+    }
+  });
+  
+  mbody.querySelector('#pet-enh-spd').addEventListener('click', () => {
+    if (spendGold(st.enhSpdCost)) {
+      ctx.S.hero.roster[pId].enhSpd = (ctx.S.hero.roster[pId].enhSpd || 0) + 1;
       save();
       openPetSkills(pId);
     }
@@ -360,7 +376,7 @@ export function openHeroMode() {
       let lifesteal = 0;
       let res = 0;
       let multiHit = 1;
-      let atkSpeed = 1.0;
+      let atkSpeed = st.spd || 1.0;
       let reflect = 0;
       
       [ {req: 's5', sk: pSkill.s5}, {req: 's15', sk: pSkill.s15} ].forEach(tier => {
@@ -372,11 +388,13 @@ export function openHeroMode() {
           if (tier.sk.type === 'lifesteal') lifesteal += tier.sk.val;
           if (tier.sk.type === 'resurrect') res += tier.sk.val;
           if (tier.sk.type === 'multi_hit') multiHit = tier.sk.val;
-          if (tier.sk.type === 'atk_speed') atkSpeed = tier.sk.val;
+          if (tier.sk.type === 'atk_speed') atkSpeed *= (1 + tier.sk.val);
           if (tier.sk.type === 'reflect') reflect = tier.sk.val;
           if (tier.sk.type === 'berserk') { atkMult *= tier.sk.val; hpMult *= 0.5; }
         }
       });
+      
+      atkSpeed = Math.min(5.0, atkSpeed);
       
       const hp = Math.floor(st.maxHp * hpMult);
       return { 
