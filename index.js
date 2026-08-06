@@ -5617,6 +5617,51 @@ function initPlacementPhase() {
     `;
   const arena = $id("dg-arena");
   const dock = $id("dg-dock");
+  dock.innerHTML = `
+        <div id="dg-nav-left" style="font-size: 24px; font-weight: bold; color: #d9ba8a; cursor: pointer; user-select: none; padding: 0 5px; touch-action: manipulation; opacity: 0.3;">\u25C0</div>
+        <div style="flex:1; overflow:hidden; height: 100%; display: flex; align-items: center; position: relative;">
+            <div id="dg-slots-container" style="display: flex; gap: 10px; transition: transform 0.3s ease; position: absolute; left: 0;"></div>
+        </div>
+        <div id="dg-nav-right" style="font-size: 24px; font-weight: bold; color: #d9ba8a; cursor: pointer; user-select: none; padding: 0 5px; touch-action: manipulation;">\u25B6</div>
+    `;
+  const slotsContainer = $id("dg-slots-container");
+  const navLeft = $id("dg-nav-left");
+  const navRight = $id("dg-nav-right");
+  const dockWrapper = navLeft.nextElementSibling;
+  let dockPage = 0;
+  function updateDockNav() {
+    if (!dockWrapper) return;
+    const w = dockWrapper.clientWidth || 250;
+    const itemsPerPage = Math.max(1, Math.floor(w / 54));
+    const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
+    if (dockPage > maxPage) dockPage = maxPage;
+    navLeft.style.opacity = dockPage > 0 ? "1" : "0.3";
+    navRight.style.opacity = dockPage < maxPage ? "1" : "0.3";
+    const offset = dockPage * itemsPerPage * 54;
+    slotsContainer.style.transform = `translateX(-${offset}px)`;
+  }
+  navLeft.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (dockPage > 0) {
+      dockPage--;
+      updateDockNav();
+    }
+  });
+  navRight.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    const w = dockWrapper.clientWidth || 250;
+    const itemsPerPage = Math.max(1, Math.floor(w / 54));
+    const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
+    if (dockPage < maxPage) {
+      dockPage++;
+      updateDockNav();
+    }
+  });
+  if (window.ResizeObserver) {
+    new ResizeObserver(() => updateDockNav()).observe(dockWrapper);
+  } else {
+    updateDockNav();
+  }
   let draggingPet = null;
   let dragEl = null;
   ctx.S.pets.forEach((petId) => {
@@ -5740,7 +5785,7 @@ function initPlacementPhase() {
         });
       }
     });
-    dock.appendChild(slot);
+    slotsContainer.appendChild(slot);
   });
   const infoBtn = $id("dg-info-btn");
   const infoPanel = $id("dg-info-panel");
