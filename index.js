@@ -7089,8 +7089,6 @@ function closeDungeonView() {
   dungeonView.style.display = "none";
   dungeonView.innerHTML = "";
   $id("win").classList.add("open");
-  const fieldEl2 = $id("scroll").querySelector(".field");
-  if (fieldEl2) fieldEl2.style.minHeight = "";
   $id("viewToggle").style.display = "";
   applyPageSkin();
   applyViewState();

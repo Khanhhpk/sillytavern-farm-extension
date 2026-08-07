@@ -96,9 +96,6 @@ export function closeDungeonView() {
     
     // Reopen farm window
     All.$id('win').classList.add('open');
-    
-    const fieldEl = All.$id('scroll').querySelector('.field');
-    if (fieldEl) fieldEl.style.minHeight = '';
 
     // Restore view toggle
     All.$id('viewToggle').style.display = '';
