@@ -242,6 +242,8 @@ function initPlacementPhase() {
                 el.className = 'dg-entity pet';
                 el.innerHTML = `
                     <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                    <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+                    <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
                     ${petSVG(pId, 32)}
                 `;
                 
@@ -468,6 +470,8 @@ function _doStartWave() {
         el.className = 'dg-entity enemy flip';
         el.innerHTML = `
             <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+            <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+            <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
             ${spriteSVG(type.sp || type.id, 32)}
         `;
         
@@ -479,13 +483,13 @@ function _doStartWave() {
         
         arena.appendChild(el);
         
-        // Scale hp and atk based on wave (exponential after wave 10)
-        let hpMultiplier = 1 + (currentWave - 1) * 0.15;
-        let atkMultiplier = 1 + (currentWave - 1) * 0.1;
-        if (currentWave > 10) {
-            const extra = currentWave - 10;
-            hpMultiplier *= Math.pow(1.05, extra);
-            atkMultiplier *= Math.pow(1.02, extra);
+        // Scale hp and atk based on wave (exponential after wave 5 for shop economy)
+        let hpMultiplier = 1 + (currentWave - 1) * 0.2;
+        let atkMultiplier = 1 + (currentWave - 1) * 0.15;
+        if (currentWave > 5) {
+            const extra = currentWave - 5;
+            hpMultiplier *= Math.pow(1.08, extra);
+            atkMultiplier *= Math.pow(1.05, extra);
         }
         if (isBossWave) {
             hpMultiplier *= 2;
@@ -631,10 +635,10 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     let finalDmg = atk;
     let isCrit = false;
     
-    if (attacker && attacker.type === 'pet') {
-        const critChance = attacker.critRate || 0.15;
+    if (attacker) {
+        const critChance = attacker.critRate || (attacker.type === 'pet' ? 0.05 : 0);
         if (Math.random() < critChance) {
-            finalDmg = Math.round(finalDmg * 1.5);
+            finalDmg = Math.round(finalDmg * (attacker.critDmg || 1.5));
             isCrit = true;
         }
     }
@@ -698,7 +702,12 @@ function updateEntities(groupA, groupB, dt) {
         if (a.hp <= 0) return;
         
         // Cooldown tick
-        if (a.cd > 0) a.cd -= dt;
+        if (a.cd > 0) {
+            a.cd -= dt;
+        }
+        const cdPct = Math.max(0, Math.min(100, (1 - Math.max(0, a.cd) / a.maxCd) * 100));
+        const cdFill = a.el.querySelector('.dg-cd-fill');
+        if (cdFill) cdFill.style.width = cdPct + '%';
         
         // Status Effects
         if (!a.status) a.status = {};
@@ -990,140 +999,127 @@ function showWaveRewards() {
         }
         const pct = Math.max(0, p.hp / p.maxHp) * 100;
         p.el.querySelector('.dg-hp-fill').style.width = pct + '%';
-        // clear status
         p.status = {};
+        if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0 };
+        if (p.critRate === undefined) p.critRate = 0.05;
+        if (p.critDmg === undefined) p.critDmg = 1.5;
     });
-    team = [...fullTeam]; // Restore full team active status
+    team = [...fullTeam];
     
-    const overlay = document.createElement('div');
-    overlay.className = 'dg-overlay';
-    
-    const allRewards = [
-        { id: 'heal', name: 'Hồi Máu', desc: 'Hồi 100% HP cho toàn đội', color: '#4caf50' },
-        { id: 'buff', name: 'Cường Hóa', desc: 'Tăng ngẫu nhiên 10-30% HP hoặc ATK cho toàn đội', color: '#2196f3' },
-        { id: 'ascend', name: 'Thăng Hoa', desc: 'Chọn 1 Pet để x1.5 Chỉ Số', color: '#9c27b0' },
-        { id: 'gold', name: 'Kho Báu', desc: `Nhận thêm ${waveGold * 2} G ngay lập tức`, color: '#ffeb3b' },
-        { id: 'blood', name: 'Huyết Chiến', desc: 'Giảm 20% HP tối đa của toàn đội nhưng tăng 50% ATK', color: '#f44336' },
-        { id: 'steel', name: 'Bức Tường Thép', desc: 'Tăng 50% HP tối đa nhưng giảm 10% ATK', color: '#607d8b' },
-        { id: 'speed', name: 'Tốc Chiến', desc: 'Tăng 30% tốc đánh cho toàn đội', color: '#00bcd4' },
-        { id: 'armor', name: 'Hộ Giáp', desc: 'Giảm 20% sát thương nhận vào cho toàn đội', color: '#78909c' },
-        { id: 'ambush', name: 'Phục Kích', desc: 'Tăng tỷ lệ chí mạng lên 30% cho toàn đội', color: '#ff5722' }
-    ];
-    
-    // Pick 3 random
-    const shuffled = allRewards.sort(() => 0.5 - Math.random());
-    const choices = shuffled.slice(0, 3);
-    
-    let cardsHtml = '';
-    choices.forEach(c => {
-        cardsHtml += `
-            <div class="dg-reward-card" id="rew-${c.id}" style="border-top: 4px solid ${c.color}">
-                <h4>${c.name}</h4>
-                <p>${c.desc}</p>
-            </div>
-        `;
-    });
-
     let bossDropHtml = '';
     if (isBoss) {
         if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
         const r = Math.random();
         let dropText = '';
-        if (r < 0.01) {
-            ctx.S.tickets.super = (ctx.S.tickets.super || 0) + 1;
-            dropText = '1 Vé Siêu Cường';
-        } else if (r < 0.40) {
-            ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 2;
-            dropText = '2 Vé Đặc Biệt';
-        } else {
-            ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 3;
-            dropText = '3 Vé Thường';
-        }
+        if (r < 0.01) { ctx.S.tickets.super = (ctx.S.tickets.super || 0) + 1; dropText = '1 Vé Siêu Cường'; }
+        else if (r < 0.40) { ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 2; dropText = '2 Vé Đặc Biệt'; }
+        else { ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 3; dropText = '3 Vé Thường'; }
         bossDropHtml = `<div style="color:#4caf50; margin-bottom:15px; font-weight:bold; font-size:16px;">✨ Rơi ra từ Boss: ${dropText}! ✨</div>`;
         All.save();
     }
 
-    overlay.innerHTML = `
-        <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Hoàn Thành!</div>
-        <div style="color:white; margin-bottom: 15px;">Nhận được ${waveGold} G (Tổng: ${totalGold} G)</div>
-        ${bossDropHtml}
-        <div style="display:flex; gap: 10px; flex-wrap:wrap; justify-content:center; width: 100%; margin-bottom: auto;">
-            ${cardsHtml}
-        </div>
-    `;
-    arena.appendChild(overlay);
-    choices.forEach(c => {
-        overlay.querySelector('#rew-' + c.id).onclick = () => {
-            if (c.id === 'heal') {
-                fullTeam.forEach(p => p.hp = p.maxHp);
-                nextWaveSequence(overlay);
-            }
-            else if (c.id === 'buff') {
-                const isAtk = Math.random() > 0.5;
-                const amt = 1.1 + Math.random() * 0.2; // 10-30%
-                fullTeam.forEach(p => {
-                    if (isAtk) p.atk = Math.round(p.atk * amt);
-                    else { p.maxHp = Math.round(p.maxHp * amt); p.hp = Math.round(p.hp * amt); }
-                });
-                nextWaveSequence(overlay);
-            }
-            else if (c.id === 'ascend') {
-                overlay.innerHTML = '<div class="dg-title">Chọn 1 Pet Thăng Hoa</div><div id="dg-pet-select" style="display:flex; gap: 10px; margin-top:20px; flex-wrap:wrap; justify-content:center;"></div>';
-                const selectContainer = overlay.querySelector('#dg-pet-select');
-                fullTeam.forEach((p) => {
-                    const btn = document.createElement('div');
-                    btn.className = 'dg-reward-card';
-                    btn.style.width = '80px';
-                    btn.innerHTML = petSVG(p.id, 48);
-                    btn.onclick = () => {
-                        p.maxHp = Math.round(p.maxHp * 1.5); 
-                        p.hp = p.maxHp; 
-                        p.atk = Math.round(p.atk * 1.5);
-                        nextWaveSequence(overlay);
-                    };
-                    selectContainer.appendChild(btn);
-                });
-            }
-            else if (c.id === 'gold') {
-                totalGold += waveGold * 2;
-                nextWaveSequence(overlay);
-            }
-            else if (c.id === 'blood') {
-                fullTeam.forEach(p => {
-                    p.maxHp = Math.round(p.maxHp * 0.8);
-                    p.hp = Math.min(p.hp, p.maxHp);
-                    p.atk = Math.round(p.atk * 1.5);
-                });
-                nextWaveSequence(overlay);
-            }
-            else if (c.id === 'steel') {
-                fullTeam.forEach(p => {
-                    p.maxHp = Math.round(p.maxHp * 1.5);
-                    p.hp = Math.round(p.hp * 1.5);
-                    p.atk = Math.round(p.atk * 0.9);
-                });
-                nextWaveSequence(overlay);
-            }
-            else if (c.id === 'speed') {
-                fullTeam.forEach(p => {
-                    p.maxCd = Math.round(p.maxCd * 70) / 100; // reduce by 30%
-                });
-                nextWaveSequence(overlay);
-            }
-            else if (c.id === 'armor') {
-                fullTeam.forEach(p => {
-                    p.armor = Math.min(0.6, (p.armor || 0) + 0.2); // cap at 60%
-                });
-                nextWaveSequence(overlay);
-            }
-            else if (c.id === 'ambush') {
-                fullTeam.forEach(p => {
-                    p.critRate = Math.min(0.6, (p.critRate || 0.15) + 0.15); // +15%, cap 60%
-                });
-                nextWaveSequence(overlay);
-            }
+    const overlay = document.createElement('div');
+    overlay.className = 'dg-overlay';
+    overlay.style.alignItems = 'stretch';
+    overlay.style.padding = '20px';
+    overlay.style.boxSizing = 'border-box';
+    overlay.style.background = 'rgba(0,0,0,0.9)';
+    
+    const getCost = (lv) => Math.floor(50 * Math.pow(1.5, lv));
+
+    const renderShop = (selectedIdx) => {
+        const selectedPet = fullTeam[selectedIdx];
+        
+        let petsHtml = '<div style="display:flex; flex-direction:column; gap:10px; width: 100px; overflow-y:auto; border-right: 2px solid #444; padding-right:10px;">';
+        fullTeam.forEach((p, idx) => {
+            const isSel = idx === selectedIdx;
+            const totalLv = Object.values(p.upgrades).reduce((a,b)=>a+b,0);
+            petsHtml += `<div class="dg-shop-pet ${isSel?'selected':''}" data-idx="${idx}" style="padding:5px; background:${isSel?'#555':'#222'}; border-radius:5px; cursor:pointer; text-align:center; border: 2px solid ${isSel?'#ffeb3b':'transparent'}; transition: 0.2s;">
+                ${petSVG(p.id, 40)}
+                <div style="font-size:12px; color:${isSel?'#ffda66':'white'}; margin-top:5px; font-weight:bold;">LV ${totalLv}</div>
+            </div>`;
+        });
+        petsHtml += '</div>';
+
+        let shopHtml = `<div style="flex: 1; display:flex; flex-direction:column; padding-left: 20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #444; padding-bottom:10px; margin-bottom:15px;">
+                <h3 style="color:#ffda66; margin:0; text-shadow: 1px 1px 2px #000;">Chợ Đen - Wave ${currentWave}</h3>
+                <div style="color:#a4dc8c; font-size: 20px; font-weight:bold; background:#111; padding: 4px 12px; border-radius: 12px; border: 1px solid #333;">${spriteSVG('coin', 18).replace('display:block','display:inline-block;vertical-align:middle')} ${totalGold} G</div>
+            </div>
+            ${bossDropHtml}
+        `;
+
+        if (selectedPet) {
+            const u = selectedPet.upgrades;
+            const stats = [
+                { id: 'hp', name: 'Max HP (+20%)', val: selectedPet.maxHp, lv: u.hp },
+                { id: 'atk', name: 'ATK (+20%)', val: selectedPet.atk, lv: u.atk },
+                { id: 'aspd', name: 'ATK SPD (+10%)', val: selectedPet.maxCd.toFixed(2)+'s', lv: u.aspd },
+                { id: 'spd', name: 'Move Speed (+10%)', val: selectedPet.speed, lv: u.spd },
+                { id: 'critR', name: 'Crit Rate (+5%)', val: (selectedPet.critRate*100).toFixed(0)+'%', lv: u.critR },
+                { id: 'critD', name: 'Crit Dmg (+20%)', val: (selectedPet.critDmg*100).toFixed(0)+'%', lv: u.critD }
+            ];
+
+            shopHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; flex: 1;">`;
+            stats.forEach(s => {
+                const cost = getCost(s.lv);
+                const canAfford = totalGold >= cost;
+                shopHtml += `
+                <div style="background: linear-gradient(145deg, #2a2a2a, #1a1a1a); padding:12px; border-radius:8px; border:1px solid #333; display:flex; justify-content:space-between; align-items:center; box-shadow: 2px 2px 5px rgba(0,0,0,0.3);">
+                    <div>
+                        <div style="color:#bbb; font-size:12px; font-weight:bold; margin-bottom:4px;">${s.name} <span style="color:#888;">(Lv ${s.lv})</span></div>
+                        <div style="color:white; font-size:18px; font-weight:bold; text-shadow: 1px 1px 0 #000;">${s.val}</div>
+                    </div>
+                    <button class="dg-btn-buy" data-stat="${s.id}" data-cost="${cost}" ${!canAfford?'disabled':''} style="background:${canAfford?'linear-gradient(to bottom, #4caf50, #2e7d32)':'#444'}; color:${canAfford?'white':'#888'}; border:none; padding:8px 12px; border-radius:6px; cursor:${canAfford?'pointer':'not-allowed'}; font-weight:bold; font-size:14px; box-shadow: ${canAfford?'0 2px 4px rgba(0,0,0,0.4)':'none'};">
+                        ${cost} G
+                    </button>
+                </div>`;
+            });
+            shopHtml += `</div>`;
+        } else {
+            shopHtml += `<div style="color:#aaa; text-align:center; flex:1; display:flex; align-items:center; justify-content:center;">Chọn một Pet bên trái để nâng cấp.</div>`;
+        }
+
+        shopHtml += `
+            <div style="margin-top:auto; display:flex; justify-content:flex-end;">
+                <button id="dg-shop-next" style="background:linear-gradient(to bottom, #2196f3, #1565c0); color:white; padding:12px 24px; font-size:16px; font-weight:bold; border:none; border-radius:8px; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Tới Wave Tiếp Theo ➔</button>
+            </div>
+        </div>`;
+
+        overlay.innerHTML = `<div style="display:flex; width: 100%; height: 100%; background:#222; border: 2px solid #555; border-radius:10px; padding:15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">${petsHtml}${shopHtml}</div>`;
+
+        overlay.querySelectorAll('.dg-shop-pet').forEach(el => {
+            el.onclick = () => renderShop(parseInt(el.dataset.idx));
+        });
+
+        overlay.querySelectorAll('.dg-btn-buy').forEach(el => {
+            el.onclick = () => {
+                const statId = el.dataset.stat;
+                const cost = parseInt(el.dataset.cost);
+                if (totalGold >= cost) {
+                    totalGold -= cost;
+                    const p = selectedPet;
+                    if (statId === 'hp') { p.maxHp = Math.round(p.maxHp * 1.2); p.hp = Math.round(p.hp * 1.2); p.upgrades.hp++; }
+                    if (statId === 'atk') { p.atk = Math.round(p.atk * 1.2); p.upgrades.atk++; }
+                    if (statId === 'aspd') { p.maxCd = Math.max(0.1, p.maxCd * 0.9); p.upgrades.aspd++; }
+                    if (statId === 'spd') { p.speed = Math.round(p.speed * 1.1); p.upgrades.spd++; }
+                    if (statId === 'critR') { p.critRate = Math.min(1, p.critRate + 0.05); p.upgrades.critR++; }
+                    if (statId === 'critD') { p.critDmg = Math.round((p.critDmg + 0.2)*10)/10; p.upgrades.critD++; }
+                    renderShop(selectedIdx);
+                }
+            };
+        });
+
+        overlay.querySelector('#dg-shop-next').onclick = () => {
+            nextWaveSequence(overlay);
         };
-    });
+        
+        overlay.querySelector('#dg-shop-next').onmouseover = function() { this.style.transform = 'scale(1.05)'; };
+        overlay.querySelector('#dg-shop-next').onmouseout = function() { this.style.transform = 'scale(1)'; };
+    };
+
+    arena.appendChild(overlay);
+    renderShop(0); // Select first pet by default
 }
 
 function nextWaveSequence(overlay) {
