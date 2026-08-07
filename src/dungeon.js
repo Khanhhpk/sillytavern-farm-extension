@@ -1049,11 +1049,17 @@ function showWaveRewards() {
         });
         petsHtml += '</div>';
 
-        let shopHtml = `<div class="dg-shop-right">
+        let headerHtml = `
             <div class="dg-shop-header">
-                <div class="dg-shop-title">Chợ Đen - Wave ${currentWave}</div>
-                <div class="dg-shop-gold">${spriteSVG('coin', 18).replace('display:block','display:inline-block;vertical-align:middle')} ${totalGold} G</div>
+                <div class="dg-shop-header-left">
+                    <div class="dg-shop-title">Chợ Đen - Wave ${currentWave}</div>
+                    <div class="dg-shop-gold">${spriteSVG('coin', 18).replace('display:block','display:inline-block;vertical-align:middle')} ${totalGold} G</div>
+                </div>
+                <button id="dg-shop-next" class="dg-shop-next-btn">Tiếp Theo ➔</button>
             </div>
+        `;
+
+        let shopHtml = `<div class="dg-shop-right">
             ${bossDropHtml}
         `;
 
@@ -1088,11 +1094,9 @@ function showWaveRewards() {
             shopHtml += `<div style="color:#aaa; text-align:center; flex:1; display:flex; align-items:center; justify-content:center;">Chọn một Pet bên trái để nâng cấp.</div>`;
         }
 
-        shopHtml += `
-            <button id="dg-shop-next" class="dg-shop-next-btn">Tới Wave Tiếp Theo ➔</button>
-        </div>`;
+        shopHtml += `</div>`;
 
-        overlay.innerHTML = `<div class="dg-shop-box">${petsHtml}${shopHtml}</div>`;
+        overlay.innerHTML = `<div class="dg-shop-box">${headerHtml}<div class="dg-shop-content">${petsHtml}${shopHtml}</div></div>`;
 
         overlay.querySelectorAll('.dg-shop-pet').forEach(el => {
             el.onclick = () => renderShop(parseInt(el.dataset.idx));
