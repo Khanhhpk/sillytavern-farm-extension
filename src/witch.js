@@ -253,9 +253,16 @@ export function openBuyDlg(kind, id, returnTo = 'shop') {
 export let toastTimer = null;
 export function toast(msg) {
   const t = All.$id('toast');
-  t.textContent = msg; t.style.display = 'block';
+  if (!t) return;
+  t.textContent = msg; 
+  t.style.display = 'block';
+  // Use a small timeout to allow the browser to process display:block before applying opacity transition
+  window.setTimeout(() => t.classList.add('show'), 10);
   if (toastTimer) window.clearTimeout(toastTimer);
-  toastTimer = window.setTimeout(() => { t.style.display = 'none'; }, 1800);
+  toastTimer = window.setTimeout(() => { 
+    t.classList.remove('show'); 
+    window.setTimeout(() => { t.style.display = 'none'; }, 300);
+  }, 1800);
 }
 
 

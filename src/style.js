@@ -464,7 +464,7 @@ export const styleCSS = `
     
     .hero-pet-roster-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding: 4px; border: 1px solid #4a3461; border-radius: 4px; background: rgba(0,0,0,0.2); }
     .hero-roster-item { display: flex; align-items: center; justify-content: space-between; padding: 6px; background: #2c2538; border: 1px solid #4a3461; border-radius: 4px; }
-    .hero-roster-item.used { opacity: 0.5; filter: grayscale(0.5); pointer-events: none; }
+    .hero-roster-item.used { opacity: 0.5; filter: grayscale(0.5); }
     .h-r-pet { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 4px; cursor: pointer; }
     .h-r-pet:hover { background: rgba(255,255,255,0.1); }
     .h-r-info { flex: 1; margin: 0 10px; font-size: 11px; color: #d0c0e8; }
@@ -484,6 +484,9 @@ export const styleCSS = `
     .hero-drag { width: 24px; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-right: 1px solid #4a3461; cursor: grab; color: #a58bd3; font-size: 14px; }
     .hero-drag:active { cursor: grabbing; background: rgba(0,0,0,0.5); }
     .hero-content { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; }
+    .hero-bar.minimized { width: auto; height: 32px; border-radius: 16px; padding: 0; background: transparent; border: none; box-shadow: none; pointer-events: none; }
+    .hero-bar.minimized .hero-drag { height: 32px; width: 32px; border-radius: 16px; border: 2px solid #6b4d8a; background: #221d28; box-shadow: 0 4px 15px rgba(0,0,0,0.8); pointer-events: auto; }
+    .hero-bar.minimized .hero-toast, .hero-bar.minimized .hero-content, .hero-bar.minimized .hero-actions { display: none !important; }
     
     .hero-scene { flex: 1; position: relative; min-height: 0; overflow: hidden; }
     .hero-bg { position: absolute; inset: 0; background: repeating-linear-gradient(-45deg, #221c2d, #221c2d 20px, #1d1726 20px, #1d1726 40px); opacity: 0.8; animation: bgScroll 10s linear infinite; }
@@ -495,6 +498,7 @@ export const styleCSS = `
     #hero-enemy { position: absolute; left: 0px; bottom: 16px; z-index: 1; display: flex; align-items: flex-end; height: 45px; }
     
     .hero-pet, .hero-mob { display: flex; flex-direction: column; align-items: center; position: relative; justify-content: flex-end; }
+    .hero-mob { cursor: pointer; }
     .hero-pet svg, .hero-mob svg, .hero-pet img, .hero-mob img { display: block; height: 32px; width: auto; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); transform-origin: bottom center; margin-bottom: 2px; }
     
     .hp-bar-mini { width: 32px; height: 4px; background: #111; border-radius: 2px; overflow: hidden; margin-bottom: 2px; border: 1px solid #000; }

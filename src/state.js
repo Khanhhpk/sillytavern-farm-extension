@@ -58,6 +58,10 @@ export function loadState() {
     if (p.crop && (p.crop.id === 'mysbG' || p.crop.id === 'mysbW' || p.crop.id === 'mysbM' || p.crop.id === 'moonberry')) p.crop.id = 'strawberry';
   }));
   
+  if (ctx.S.ferts) {
+    if (ctx.S.ferts['f1']) { ctx.S.ferts['compost'] = (ctx.S.ferts['compost'] || 0) + ctx.S.ferts['f1']; delete ctx.S.ferts['f1']; }
+    if (ctx.S.ferts['f2']) { ctx.S.ferts['shiny'] = (ctx.S.ferts['shiny'] || 0) + ctx.S.ferts['f2']; delete ctx.S.ferts['f2']; }
+  }
   if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
   if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
