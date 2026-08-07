@@ -199,7 +199,7 @@ export function openHeroPanel() {
   
   // Các lựa chọn lối đánh
   const styles = [
-    { id: 'attack', name: 'Tấn công (Dame x1.5, Nhận x1.5)', icon: 'emBang' },
+    { id: 'attack', name: 'Tấn công (Dame x1.5, Nhận x1.5)', icon: 'swordIcon' },
     { id: 'defense', name: 'Phòng thủ (Dame x0.6, Nhận x0.6)', icon: 'emStar' },
     { id: 'balanced', name: 'Cân bằng (Mặc định)', icon: 'emLeaf' }
   ];
@@ -1421,6 +1421,7 @@ function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
     else if (pId === 'penguin') { animType = 'projectile'; spriteId = 'snowball'; }
     else if (pId === 'mystery_blob') { animType = 'projectile'; spriteId = 'shadowBolt'; }
     else if (pId === 'prismBlob') { animType = 'projectile'; spriteId = 'rainbowBolt'; }
+    else if (pId === 'hero') { animType = 'projectile'; spriteId = 'arrow'; }
     else { animType = 'projectile'; spriteId = 'fireball'; }
   }
 
