@@ -16,6 +16,16 @@ export function placeWin() {
   ctx.win.style.left = Math.min(Math.max(x, 0), Math.max(vw - w, 0)) + 'px';
   ctx.win.style.top = Math.min(Math.max(y, 0), vh - 60) + 'px';
 }
+export function placeDungeonWin() {
+  const dungeonWin = All.$id('dungeon-win');
+  if (!dungeonWin) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const w = Math.min(760, vw * 0.96);
+  let x = ctx.S.dungeonWin ? ctx.S.dungeonWin.fx * vw : (vw - w) / 2;
+  let y = ctx.S.dungeonWin ? ctx.S.dungeonWin.fy * vh : vh * 0.04;
+  dungeonWin.style.left = Math.min(Math.max(x, 0), Math.max(vw - w, 0)) + 'px';
+  dungeonWin.style.top = Math.min(Math.max(y, 0), vh - 60) + 'px';
+}
 export function toggleWin() {
   if (ctx.win.classList.contains('open')) { closeWin(); return; }
   ctx.win.classList.add('open');
@@ -54,4 +64,29 @@ export function initWindows() {
     ctx.S.win = { fx: ctx.win.offsetLeft / window.innerWidth, fy: ctx.win.offsetTop / window.innerHeight };
     All.save();
   });
+
+  const dungeonDragBar = All.$id('dungeon-drag');
+  let dungeonWg = null;
+  if (dungeonDragBar) {
+    dungeonDragBar.addEventListener('pointerdown', e => {
+      if (e.target.id === 'dungeon-close') return;
+      dungeonDragBar.setPointerCapture(e.pointerId);
+      const dungeonWin = All.$id('dungeon-win');
+      dungeonWg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: dungeonWin.offsetLeft, oy: dungeonWin.offsetTop };
+    });
+    dungeonDragBar.addEventListener('pointermove', e => {
+      if (!dungeonWg || e.pointerId !== dungeonWg.id) return;
+      const dungeonWin = All.$id('dungeon-win');
+      dungeonWin.style.left = dungeonWg.ox + e.clientX - dungeonWg.sx + 'px';
+      dungeonWin.style.top = dungeonWg.oy + e.clientY - dungeonWg.sy + 'px';
+    });
+    dungeonDragBar.addEventListener('pointerup', e => {
+      if (!dungeonWg || e.pointerId !== dungeonWg.id) return;
+      try { dungeonDragBar.releasePointerCapture(e.pointerId); } catch (er) {}
+      dungeonWg = null;
+      const dungeonWin = All.$id('dungeon-win');
+      ctx.S.dungeonWin = { fx: dungeonWin.offsetLeft / window.innerWidth, fy: dungeonWin.offsetTop / window.innerHeight };
+      All.save();
+    });
+  }
 }

@@ -2059,7 +2059,7 @@ var init_style = __esm({
       box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }
     #win.open { display: flex; }
     
-    .dungeon-win { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 99997; width: min(760px, 96vw); height: 92vh; height: 92dvh; display: none;
+    .dungeon-win { position: fixed; z-index: 99997; width: min(760px, 96vw); height: 92vh; height: 92dvh; display: none;
       flex-direction: column; background: #f8efe0;
       background-image: repeating-linear-gradient(0deg, transparent 0 30px, rgba(170,130,80,.14) 30px 33px);
       border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
@@ -2421,6 +2421,12 @@ var init_style = __esm({
     .dg-entity { position: absolute; left: 0; top: 0; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; will-change: transform; }
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
     .dg-entity.flip img { transform: scaleX(-1); }
+    @media (max-width: 640px) {
+      .dungeon-win { width: 100vw; height: 100vh; height: 100dvh; border: none; border-radius: 0; outline: none; }
+      .dungeon-view { padding: 4px; }
+      .dg-dock { height: 50px; padding: 0 5px; gap: 6px; }
+      .dg-slot { width: 36px; height: 36px; }
+    }
     .dg-hp-bar { position: absolute; top: -12px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
     .dg-hp-fill { height: 100%; background: #a4dc8c; transition: width 0.1s; }
     .dg-cd-bar { position: absolute; top: -7px; left: -4px; width: 40px; height: 3px; background: #333; border: 1px solid #111; border-radius: 1.5px; overflow: hidden; z-index: 2; }
@@ -5211,6 +5217,16 @@ function placeWin() {
   ctx.win.style.left = Math.min(Math.max(x, 0), Math.max(vw - w, 0)) + "px";
   ctx.win.style.top = Math.min(Math.max(y, 0), vh - 60) + "px";
 }
+function placeDungeonWin() {
+  const dungeonWin = $id("dungeon-win");
+  if (!dungeonWin) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const w = Math.min(760, vw * 0.96);
+  let x = ctx.S.dungeonWin ? ctx.S.dungeonWin.fx * vw : (vw - w) / 2;
+  let y = ctx.S.dungeonWin ? ctx.S.dungeonWin.fy * vh : vh * 0.04;
+  dungeonWin.style.left = Math.min(Math.max(x, 0), Math.max(vw - w, 0)) + "px";
+  dungeonWin.style.top = Math.min(Math.max(y, 0), vh - 60) + "px";
+}
 function toggleWin() {
   if (ctx.win.classList.contains("open")) {
     closeWin();
@@ -5256,6 +5272,33 @@ function initWindows() {
     ctx.S.win = { fx: ctx.win.offsetLeft / window.innerWidth, fy: ctx.win.offsetTop / window.innerHeight };
     save();
   });
+  const dungeonDragBar = $id("dungeon-drag");
+  let dungeonWg = null;
+  if (dungeonDragBar) {
+    dungeonDragBar.addEventListener("pointerdown", (e) => {
+      if (e.target.id === "dungeon-close") return;
+      dungeonDragBar.setPointerCapture(e.pointerId);
+      const dungeonWin = $id("dungeon-win");
+      dungeonWg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: dungeonWin.offsetLeft, oy: dungeonWin.offsetTop };
+    });
+    dungeonDragBar.addEventListener("pointermove", (e) => {
+      if (!dungeonWg || e.pointerId !== dungeonWg.id) return;
+      const dungeonWin = $id("dungeon-win");
+      dungeonWin.style.left = dungeonWg.ox + e.clientX - dungeonWg.sx + "px";
+      dungeonWin.style.top = dungeonWg.oy + e.clientY - dungeonWg.sy + "px";
+    });
+    dungeonDragBar.addEventListener("pointerup", (e) => {
+      if (!dungeonWg || e.pointerId !== dungeonWg.id) return;
+      try {
+        dungeonDragBar.releasePointerCapture(e.pointerId);
+      } catch (er) {
+      }
+      dungeonWg = null;
+      const dungeonWin = $id("dungeon-win");
+      ctx.S.dungeonWin = { fx: dungeonWin.offsetLeft / window.innerWidth, fy: dungeonWin.offsetTop / window.innerHeight };
+      save();
+    });
+  }
 }
 var tick, wg, dragBar;
 var init_windows = __esm({
@@ -7018,6 +7061,7 @@ function openDungeonView() {
   const dungeonWin = $id("dungeon-win");
   if (dungeonWin) {
     dungeonWin.style.display = "flex";
+    placeDungeonWin();
     dungeonWin.classList.remove("open-anim");
     void dungeonWin.offsetWidth;
     dungeonWin.classList.add("open-anim");
@@ -7034,10 +7078,15 @@ function openDungeonView() {
 function closeDungeonView() {
   if (!isDungeonOpen) return;
   isDungeonOpen = false;
-  $id("win").classList.remove("dungeon-mode");
   stopCombatLoop();
+  const dungeonWin = $id("dungeon-win");
+  if (dungeonWin) {
+    dungeonWin.style.display = "none";
+    dungeonWin.classList.remove("open-anim");
+  }
   dungeonView.style.display = "none";
   dungeonView.innerHTML = "";
+  $id("win").classList.add("open");
   const fieldEl2 = $id("scroll").querySelector(".field");
   if (fieldEl2) fieldEl2.style.minHeight = "";
   $id("viewToggle").style.display = "";

@@ -58,6 +58,7 @@ export function openDungeonView() {
     const dungeonWin = All.$id('dungeon-win');
     if (dungeonWin) {
         dungeonWin.style.display = 'flex';
+        All.placeDungeonWin();
         // Xóa class animate để tránh nhấp nháy, sau đó thêm lại để tạo hiệu ứng popup
         dungeonWin.classList.remove('open-anim');
         void dungeonWin.offsetWidth; // trigger reflow
@@ -80,12 +81,21 @@ export function openDungeonView() {
 export function closeDungeonView() {
     if (!isDungeonOpen) return;
     isDungeonOpen = false;
-    All.$id('win').classList.remove('dungeon-mode');
     stopCombatLoop();
 
-    // Hide Dungeon View
+    // Hide Dungeon Modal
+    const dungeonWin = All.$id('dungeon-win');
+    if (dungeonWin) {
+        dungeonWin.style.display = 'none';
+        dungeonWin.classList.remove('open-anim');
+    }
+
+    // Hide Dungeon View content
     All.dungeonView.style.display = 'none';
     All.dungeonView.innerHTML = '';
+    
+    // Reopen farm window
+    All.$id('win').classList.add('open');
     
     const fieldEl = All.$id('scroll').querySelector('.field');
     if (fieldEl) fieldEl.style.minHeight = '';
