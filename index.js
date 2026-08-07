@@ -2483,7 +2483,7 @@ var styleCSS = `
     .hero-content { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; }
     .hero-bar.minimized { width: auto; height: 32px; border-radius: 16px; padding: 0; background: transparent; border: none; box-shadow: none; pointer-events: none; }
     .hero-bar.minimized .hero-drag { height: 32px; width: 32px; border-radius: 16px; border: 2px solid #6b4d8a; background: #221d28; box-shadow: 0 4px 15px rgba(0,0,0,0.8); pointer-events: auto; }
-    .hero-bar.minimized .hero-toast, .hero-bar.minimized .hero-content { display: none !important; }
+    .hero-bar.minimized .hero-toast, .hero-bar.minimized .hero-content, .hero-bar.minimized .hero-actions { display: none !important; }
     
     .hero-scene { flex: 1; position: relative; min-height: 0; overflow: hidden; }
     .hero-bg { position: absolute; inset: 0; background: repeating-linear-gradient(-45deg, #221c2d, #221c2d 20px, #1d1726 20px, #1d1726 40px); opacity: 0.8; animation: bgScroll 10s linear infinite; }
