@@ -589,8 +589,8 @@ function spawnDmg(target, amount, type) {
     const dmg = document.createElement('div');
     dmg.className = 'dg-dmg' + (type ? ' ' + type : '');
     dmg.textContent = type === 'miss' ? 'MISS!' : (amount > 0 ? '+' : '') + amount;
-    dmg.style.left = (target.x - 16) + 'px';
-    dmg.style.top = (target.y - 16) + 'px';
+    dmg.style.left = target.x + 'px';
+    dmg.style.top = (target.y - 8) + 'px';
     arena.appendChild(dmg);
     setTimeout(() => dmg.remove(), 800);
     
