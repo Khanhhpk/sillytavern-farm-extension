@@ -415,22 +415,22 @@ export const styleCSS = `
     .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; overflow-y: auto; padding: 15px; box-sizing: border-box; }
 
     /* Shop UI */
-    .dg-shop-box { display: flex; width: 100%; height: 100%; max-width: 800px; max-height: 480px; background: #1a1a1e; border: 2px solid #3a3a40; border-radius: 12px; padding: 20px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
-    .dg-shop-left { width: 100px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 12px; border-right: 2px solid #333; }
-    .dg-shop-left::-webkit-scrollbar { width: 6px; }
-    .dg-shop-left::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
-    .dg-shop-left::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
-    .dg-shop-pet { background: #25252b; border: 2px solid transparent; border-radius: 8px; cursor: pointer; padding: 8px; text-align: center; transition: 0.2s; }
+    .dg-overlay *::-webkit-scrollbar { width: 6px; height: 6px; }
+    .dg-overlay *::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 3px; }
+    .dg-overlay *::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+    .dg-shop-box { display: flex; width: 100%; height: 100%; max-width: 800px; max-height: 85vh; background: #1a1a1e; border: 2px solid #3a3a40; border-radius: 16px; padding: 20px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+    .dg-shop-left { width: 100px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 12px; border-right: 2px solid #333; flex-shrink: 0; }
+    .dg-shop-pet { background: #25252b; border: 2px solid transparent; border-radius: 12px; cursor: pointer; padding: 8px; text-align: center; transition: 0.2s; flex-shrink: 0; }
     .dg-shop-pet:hover { background: #303038; }
     .dg-shop-pet.selected { border-color: #ffd94d; background: #353540; }
     .dg-shop-pet .lv { font-size: 11px; font-weight: bold; color: #888; margin-top: 4px; }
     .dg-shop-pet.selected .lv { color: #ffd94d; }
-    .dg-shop-right { flex: 1; padding-left: 20px; display: flex; flex-direction: column; }
-    .dg-shop-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
+    .dg-shop-right { flex: 1; padding-left: 20px; display: flex; flex-direction: column; min-width: 0; }
+    .dg-shop-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; flex-shrink: 0; }
     .dg-shop-title { color: #ffd94d; margin: 0; font-size: 20px; font-weight: bold; }
     .dg-shop-gold { background: #25252b; color: #a4dc8c; font-size: 18px; font-weight: bold; padding: 6px 16px; border-radius: 20px; border: 1px solid #3a3a40; display: flex; align-items: center; gap: 6px; }
-    .dg-shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1; margin-bottom: 20px; align-content: start; }
-    .dg-shop-card { background: linear-gradient(145deg, #25252b, #1e1e24); border: 1px solid #3a3a40; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s; }
+    .dg-shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1; margin-bottom: 20px; align-content: start; overflow-y: auto; min-height: 0; padding-right: 8px; }
+    .dg-shop-card { background: linear-gradient(145deg, #25252b, #1e1e24); border: 1px solid #3a3a40; border-radius: 12px; padding: 15px; display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s; }
     .dg-shop-card:hover { border-color: #555; transform: translateY(-2px); }
     .dg-shop-stat-name { color: #999; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
     .dg-shop-stat-val { color: white; font-size: 18px; font-weight: bold; }
@@ -438,9 +438,21 @@ export const styleCSS = `
     .dg-btn-buy:disabled { background: #444; color: #888; cursor: not-allowed; box-shadow: none; }
     .dg-btn-buy:not(:disabled):hover { filter: brightness(1.1); transform: scale(1.05); }
     .dg-btn-buy:not(:disabled):active { transform: scale(0.95); }
-    .dg-shop-next-btn { background: linear-gradient(to bottom, #2196f3, #1976d2); color: white; padding: 12px 24px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s; align-self: flex-end; }
+    .dg-shop-next-btn { background: linear-gradient(to bottom, #2196f3, #1976d2); color: white; padding: 12px 24px; font-size: 16px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s; align-self: flex-end; flex-shrink: 0; }
     .dg-shop-next-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
     .dg-shop-next-btn:active { transform: scale(0.95); }
+    @media (max-width: 640px) {
+      .dg-shop-box { max-height: 95vh; flex-direction: column; padding: 15px; }
+      .dg-shop-left { width: 100%; flex-direction: row; border-right: none; border-bottom: 2px solid #333; padding-right: 0; padding-bottom: 12px; overflow-x: auto; overflow-y: hidden; }
+      .dg-shop-pet { padding: 6px; }
+      .dg-shop-right { padding-left: 0; padding-top: 15px; }
+      .dg-shop-header { margin-bottom: 15px; }
+      .dg-shop-title { font-size: 16px; }
+      .dg-shop-gold { font-size: 16px; padding: 4px 12px; }
+      .dg-shop-grid { grid-template-columns: 1fr; gap: 10px; }
+      .dg-shop-card { padding: 12px; }
+      .dg-shop-next-btn { width: 100%; text-align: center; }
+    }
     .dg-title { font-size: 24px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 1px; text-align: center; margin-top: auto; }
     .dg-dock::-webkit-scrollbar { height: 8px; display: block; }
     .dg-dock::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
