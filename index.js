@@ -2466,6 +2466,9 @@ var init_style = __esm({
     
     .dg-shop-right { flex: 1; display: flex; flex-direction: column; min-width: 0; }
     .dg-shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1; margin-bottom: 10px; align-content: start; overflow-y: auto; min-height: 0; padding-right: 8px; }
+    .dg-shop-grid::-webkit-scrollbar { width: 6px; }
+    .dg-shop-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
+    .dg-shop-grid::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 3px; }
     .dg-shop-card { background: linear-gradient(145deg, #25252b, #1e1e24); border: 1px solid #3a3a40; border-radius: 12px; padding: 15px; display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s; }
     .dg-shop-card:hover { border-color: #555; transform: translateY(-2px); }
     .dg-shop-stat-name { color: #999; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
@@ -7921,7 +7924,7 @@ function showWaveRewards() {
     const pct = Math.max(0, p.hp / p.maxHp) * 100;
     p.el.querySelector(".dg-hp-fill").style.width = pct + "%";
     p.status = {};
-    if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0 };
+    if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0 };
     if (p.critRate === void 0) p.critRate = 0.05;
     if (p.critDmg === void 0) p.critDmg = 1.5;
   });
@@ -7978,14 +7981,15 @@ function showWaveRewards() {
     if (selectedPet) {
       const u = selectedPet.upgrades;
       const stats = [
-        { id: "hp", name: "Max HP (+20%)", val: selectedPet.maxHp, lv: u.hp },
-        { id: "atk", name: "ATK (+20%)", val: selectedPet.atk, lv: u.atk },
-        { id: "aspd", name: "ATK SPD (+10%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u.aspd },
-        { id: "spd", name: "Move Speed (+10%)", val: selectedPet.speed, lv: u.spd },
-        { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u.critR },
-        { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u.critD },
-        { id: "heal_pet", name: "H\u1ED3i M\xE1u (+50%)", val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: "", cost: 50, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
-        { id: "heal_team", name: "H\u1ED3i M\xE1u Team (+50%)", val: "T\u1EA5t c\u1EA3", lv: "", cost: 150, forceCanBuy: fullTeam.some((member) => member.hp < member.maxHp) }
+        { id: "hp", name: "Max HP (+20%)", val: selectedPet.maxHp, lv: u.hp, cost: Math.floor(40 * Math.pow(1.3, u.hp)) },
+        { id: "atk", name: "ATK (+20%)", val: selectedPet.atk, lv: u.atk, cost: Math.floor(40 * Math.pow(1.3, u.atk)) },
+        { id: "aspd", name: "ATK SPD (+10%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u.aspd, cost: Math.floor(60 * Math.pow(1.4, u.aspd)) },
+        { id: "spd", name: "Move Speed (+10%)", val: selectedPet.speed, lv: u.spd, cost: Math.floor(30 * Math.pow(1.2, u.spd)) },
+        { id: "range", name: "Range (+10%)", val: Math.round(selectedPet.range), lv: u.range || 0, cost: Math.floor(40 * Math.pow(1.2, u.range || 0)) },
+        { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u.critR, cost: Math.floor(50 * Math.pow(1.5, u.critR)) },
+        { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u.critD, cost: Math.floor(50 * Math.pow(1.4, u.critD)) },
+        { id: "heal_pet", name: "H\u1ED3i M\xE1u (+50%)", val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: "", cost: 50 + currentWave * 5, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
+        { id: "heal_team", name: "H\u1ED3i M\xE1u Team (+50%)", val: "T\u1EA5t c\u1EA3", lv: "", cost: 150 + currentWave * 15, forceCanBuy: fullTeam.some((member) => member.hp < member.maxHp) }
       ];
       shopHtml += `<div class="dg-shop-grid">`;
       stats.forEach((s) => {
@@ -8043,6 +8047,10 @@ function showWaveRewards() {
           if (statId === "critD") {
             p.critDmg = Math.round((p.critDmg + 0.2) * 10) / 10;
             p.upgrades.critD++;
+          }
+          if (statId === "range") {
+            p.range = Math.round(p.range * 1.1);
+            p.upgrades.range = (p.upgrades.range || 0) + 1;
           }
           if (statId === "heal_pet") {
             p.hp = Math.min(p.maxHp, p.hp + Math.round(p.maxHp * 0.5));

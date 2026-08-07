@@ -1024,7 +1024,7 @@ function showWaveRewards() {
         const pct = Math.max(0, p.hp / p.maxHp) * 100;
         p.el.querySelector('.dg-hp-fill').style.width = pct + '%';
         p.status = {};
-        if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0 };
+        if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0 };
         if (p.critRate === undefined) p.critRate = 0.05;
         if (p.critDmg === undefined) p.critDmg = 1.5;
     });
@@ -1082,14 +1082,15 @@ function showWaveRewards() {
         if (selectedPet) {
             const u = selectedPet.upgrades;
             const stats = [
-                { id: 'hp', name: 'Max HP (+20%)', val: selectedPet.maxHp, lv: u.hp },
-                { id: 'atk', name: 'ATK (+20%)', val: selectedPet.atk, lv: u.atk },
-                { id: 'aspd', name: 'ATK SPD (+10%)', val: selectedPet.maxCd.toFixed(2)+'s', lv: u.aspd },
-                { id: 'spd', name: 'Move Speed (+10%)', val: selectedPet.speed, lv: u.spd },
-                { id: 'critR', name: 'Crit Rate (+5%)', val: (selectedPet.critRate*100).toFixed(0)+'%', lv: u.critR },
-                { id: 'critD', name: 'Crit Dmg (+20%)', val: (selectedPet.critDmg*100).toFixed(0)+'%', lv: u.critD },
-                { id: 'heal_pet', name: 'Hồi Máu (+50%)', val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: '', cost: 50, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
-                { id: 'heal_team', name: 'Hồi Máu Team (+50%)', val: 'Tất cả', lv: '', cost: 150, forceCanBuy: fullTeam.some(member => member.hp < member.maxHp) }
+                { id: 'hp', name: 'Max HP (+20%)', val: selectedPet.maxHp, lv: u.hp, cost: Math.floor(40 * Math.pow(1.3, u.hp)) },
+                { id: 'atk', name: 'ATK (+20%)', val: selectedPet.atk, lv: u.atk, cost: Math.floor(40 * Math.pow(1.3, u.atk)) },
+                { id: 'aspd', name: 'ATK SPD (+10%)', val: selectedPet.maxCd.toFixed(2)+'s', lv: u.aspd, cost: Math.floor(60 * Math.pow(1.4, u.aspd)) },
+                { id: 'spd', name: 'Move Speed (+10%)', val: selectedPet.speed, lv: u.spd, cost: Math.floor(30 * Math.pow(1.2, u.spd)) },
+                { id: 'range', name: 'Range (+10%)', val: Math.round(selectedPet.range), lv: u.range || 0, cost: Math.floor(40 * Math.pow(1.2, u.range || 0)) },
+                { id: 'critR', name: 'Crit Rate (+5%)', val: (selectedPet.critRate*100).toFixed(0)+'%', lv: u.critR, cost: Math.floor(50 * Math.pow(1.5, u.critR)) },
+                { id: 'critD', name: 'Crit Dmg (+20%)', val: (selectedPet.critDmg*100).toFixed(0)+'%', lv: u.critD, cost: Math.floor(50 * Math.pow(1.4, u.critD)) },
+                { id: 'heal_pet', name: 'Hồi Máu (+50%)', val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: '', cost: 50 + currentWave * 5, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
+                { id: 'heal_team', name: 'Hồi Máu Team (+50%)', val: 'Tất cả', lv: '', cost: 150 + currentWave * 15, forceCanBuy: fullTeam.some(member => member.hp < member.maxHp) }
             ];
 
             shopHtml += `<div class="dg-shop-grid">`;
@@ -1134,6 +1135,7 @@ function showWaveRewards() {
                     if (statId === 'spd') { p.speed = Math.round(p.speed * 1.1); p.upgrades.spd++; }
                     if (statId === 'critR') { p.critRate = Math.min(1, p.critRate + 0.05); p.upgrades.critR++; }
                     if (statId === 'critD') { p.critDmg = Math.round((p.critDmg + 0.2)*10)/10; p.upgrades.critD++; }
+                    if (statId === 'range') { p.range = Math.round(p.range * 1.1); p.upgrades.range = (p.upgrades.range || 0) + 1; }
                     if (statId === 'heal_pet') { p.hp = Math.min(p.maxHp, p.hp + Math.round(p.maxHp * 0.5)); }
                     if (statId === 'heal_team') {
                         fullTeam.forEach(member => {
