@@ -29,7 +29,9 @@ export const GAITS = {                                          // Dáng đi: le
 export const gaitOf = id => GAITS[id] || GAITS._;
 export const stopHop = id => { if (petHopT[id]) { window.clearTimeout(petHopT[id]); delete petHopT[id]; } };
 export function petSpot(id) {
-  const ov = All.$id('mascots'), W = ov.clientWidth, H = ov.clientHeight;
+  const ov = All.$id('mascots');
+  const W = ov.clientWidth || 380;
+  const H = ov.clientHeight || 320;
   if (PETS[id] && PETS[id].job) {                        // Loại làm việc (sửa lần 3): đứng cố định thành hàng ở góc dưới phải, nhún nhảy tại chỗ chứ không đi
     const workers = ctx.S.petsOut.filter(p => PETS[p] && PETS[p].job);
     const anchor = W - 64 - Math.max(0, workers.indexOf(id)) * 62;

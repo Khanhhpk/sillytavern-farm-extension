@@ -3108,7 +3108,9 @@ var stopHop = (id) => {
   }
 };
 function petSpot(id) {
-  const ov = $id("mascots"), W = ov.clientWidth, H = ov.clientHeight;
+  const ov = $id("mascots");
+  const W = ov.clientWidth || 380;
+  const H = ov.clientHeight || 320;
   if (PETS[id] && PETS[id].job) {
     const workers = ctx.S.petsOut.filter((p) => PETS[p] && PETS[p].job);
     const anchor2 = W - 64 - Math.max(0, workers.indexOf(id)) * 62;
