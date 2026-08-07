@@ -2464,7 +2464,7 @@ var init_style = __esm({
     .dg-shop-pet .lv { font-size: 11px; font-weight: bold; color: #888; margin-top: 4px; }
     .dg-shop-pet.selected .lv { color: #ffd94d; }
     
-    .dg-shop-right { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .dg-shop-right { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
     .dg-shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1; margin-bottom: 10px; align-content: start; overflow-y: auto; min-height: 0; padding-right: 8px; }
     .dg-shop-grid::-webkit-scrollbar { width: 6px; }
     .dg-shop-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
