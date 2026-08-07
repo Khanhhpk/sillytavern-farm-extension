@@ -433,6 +433,10 @@ export function openPanel(kind) {
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:6px">
         <input type="checkbox" id="cfgDragPet" ${ctx.S.dragPet ? 'checked' : ''}> Bật tính năng nhéo và kéo thú cưng
       </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:6px">
+        Tần suất tiểu phẩm ngẫu nhiên (giây):
+        <input class="inp" id="cfgSkitFreq" type="number" min="5" max="7200" value="${ctx.S.skitFreq !== undefined ? ctx.S.skitFreq : 300}" style="width:60px;padding:3px 6px"> (Mặc định 300s = 5 phút)
+      </label>
       <div class="shead">Công cụ dành cho Giám đốc Đồ hoạ / Dev</div>
       <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
         <span class="buy plain" id="openSandboxBtn">🎨 Mở Xưởng Chế Tác AI</span>
@@ -532,6 +536,20 @@ export function openPanel(kind) {
       const mas = All.$id('mascots');
       if (mas) mas.dataset.drag = ctx.S.dragPet ? '1' : '0';
       toast(ctx.S.dragPet ? 'Đã bật tính năng kéo thả thú cưng' : 'Đã tắt tính năng kéo thả thú cưng');
+    });
+
+    const cfgSkitFreq = All.$id('cfgSkitFreq');
+    if (cfgSkitFreq) cfgSkitFreq.addEventListener('change', () => {
+      let v = parseInt(cfgSkitFreq.value);
+      if (isNaN(v) || v < 5) v = 5;
+      ctx.S.skitFreq = v;
+      save();
+      toast('Đã cập nhật tần suất: ' + v + ' giây');
+      // Update the current timer slightly so it takes effect quickly
+      const nowMs = Date.now();
+      import('./pets.js').then(m => {
+        if (m.nextSceneAt > nowMs + v * 1000) m.updateNextScene(nowMs + v * 1000);
+      });
     });
 
     All.$id('csPromptSave').addEventListener('click', () => {

@@ -1,187 +1,101 @@
+var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
 // src/store.js
-var NS = "star_tavern_farm";
-var extensionName = "sillytavern-farm-extension";
-var RUNTIME_KEY = "__STAR_TAVERN_FARM__";
-var ctx = {
-  extension_settings: {},
-  eventSource: null,
-  event_types: null,
-  saveSettingsDebounced: null,
-  S: null,
-  ui: null,
-  orb: null,
-  win: null,
-  saveTimer: null
-};
-var setExtensionContext = (params) => {
-  Object.assign(ctx, params);
-};
+var NS, extensionName, RUNTIME_KEY, ctx, setExtensionContext;
+var init_store = __esm({
+  "src/store.js"() {
+    NS = "star_tavern_farm";
+    extensionName = "sillytavern-farm-extension";
+    RUNTIME_KEY = "__STAR_TAVERN_FARM__";
+    ctx = {
+      extension_settings: {},
+      eventSource: null,
+      event_types: null,
+      saveSettingsDebounced: null,
+      S: null,
+      ui: null,
+      orb: null,
+      win: null,
+      saveTimer: null
+    };
+    setExtensionContext = (params) => {
+      Object.assign(ctx, params);
+    };
+  }
+});
 
 // src/data.js
-var TEST_MODE = false;
-var MIN = 60 * 1e3;
-var GROW = TEST_MODE ? 5 * MIN : null;
-var REGROW = TEST_MODE ? 2 * MIN : null;
-var DAY_MS = 4 * 60 * 60 * 1e3;
-var WATER_CD = TEST_MODE ? 10 * MIN : 2 * 60 * 60 * 1e3;
-var REGROW_MAX = 3;
-var POKE_CD = 10 * MIN;
-var TREASURE_CD = TEST_MODE ? 10 * MIN : 2 * 60 * 60 * 1e3;
-var PETS_OUT_MAX = 8;
-var WITCH_STAY = TEST_MODE ? 10 * MIN : 20 * MIN;
-var witchGap = () => TEST_MODE ? 15 * MIN + Math.random() * 20 * MIN : 100 * MIN + Math.random() * 80 * MIN;
-var SNAP_EDGE = 48;
-var CROPS = {
-  /* Số liệu chính thức v1.0 (chốt theo "Bảng số liệu chính thức - chờ duyệt.md"): grow/regrowM tính bằng phút thực */
-  douya: { name: "Gi\xE1 \u0111\u1ED7", grow: 5, seed: 5, sell: 12, sp: "sprout" },
-  radish: { name: "C\u1EE7 c\u1EA3i cherry", grow: 10, seed: 25, sell: 45, sp: "radish" },
-  tomato: { name: "C\xE0 chua", grow: 20, regrowM: 15, seed: 100, sell: 90, sp: "tomato", regrow: true },
-  strawberry: { name: "D\xE2u t\xE2y", grow: 90, seed: 350, sell: 800, sp: "strawberry" },
-  pumpkin: { name: "B\xED ng\xF4", grow: 120, seed: 500, sell: 1300, sp: "pumpkin" },
-  /* —— Vùng nước (trang 2) —— */
-  chuncai: { name: "Rau thu\u1EA7n", grow: 10, seed: 40, sell: 60, sp: "chuncai", zone: 2 },
-  biqi: { name: "C\u1EE7 n\u0103ng", grow: 30, seed: 120, sell: 220, sp: "biqi", zone: 2 },
-  lingjiao: { name: "C\u1EE7 \u1EA5u", grow: 60, seed: 220, sell: 520, sp: "lingjiao", zone: 2 },
-  jiaobai: { name: "C\u1EE7 ni\u1EC5ng", grow: 60, seed: 450, sell: 1150, sp: "jiaobai", zone: 2 },
-  lianou: { name: "C\u1EE7 sen", grow: 180, seed: 900, sell: 3200, sp: "lianou", zone: 2 },
-  /* —— Khu mỏ (trang 3) —— */
-  wujing: { name: "C\u1ECF \xF4 tinh", grow: 30, seed: 150, sell: 340, sp: "wujing", zone: 3 },
-  starbush: { name: "B\u1EE5i sao", grow: 60, seed: 400, sell: 1150, sp: "starbush", zone: 3 },
-  gemflower: { name: "Hoa b\u1EA3o th\u1EA1ch", grow: 120, seed: 700, sell: 2300, sp: "gemflower", zone: 3 },
-  opalvine: { name: "D\xE2y leo opal", grow: 180, regrowM: 120, seed: 1200, sell: 2300, sp: "opalvine", zone: 3, regrow: true },
-  dragoncry: { name: "Qu\u1EA3 long tinh", grow: 360, seed: 2500, sell: 8e3, sp: "dragoncry", zone: 3 },
-  /* —— Họ bí ẩn (#29/#34/#49): hạt giống duy nhất, hộp mù hai lớp; không bán; đồng loạt 30 phút —— */
-  mystery: { name: "H\u1EA1t gi\u1ED1ng b\xED \u1EA9n", grow: 30, seed: 0, sell: 0, sp: "seedLight", hidden: true, zone: 0, seedOnly: true },
-  dreamG: { name: "K\xE9n m\u1ED9ng", grow: 30, seed: 0, sell: 300, sp: "dreamG", hidden: true, zone: 1 },
-  dreamW: { name: "K\xE9n tr\u1EA7m m\u1ED9ng", grow: 30, seed: 0, sell: 600, sp: "dreamW", hidden: true, zone: 2 },
-  dreamM: { name: "K\xE9n th\u1EA1ch m\u1ED9ng", grow: 30, seed: 0, sell: 900, sp: "dreamM", hidden: true, zone: 3 },
-  keyG: { name: "C\u1ECF ch\xECa \u0111\u1ED3ng", grow: 30, seed: 0, sell: 350, sp: "keyG", hidden: true, zone: 1 },
-  keyW: { name: "C\u1ECF ch\xECa g\u1EC9", grow: 30, seed: 0, sell: 700, sp: "keyW", hidden: true, zone: 2 },
-  keyM: { name: "C\u1ECF ch\xECa b\xED \u1EA9n", grow: 30, seed: 0, sell: 1050, sp: "keyM", hidden: true, zone: 3 },
-  fangG: { name: "C\xE2y b\u1EAFt ru\u1ED3i", grow: 30, seed: 0, sell: 400, sp: "fangG", hidden: true, zone: 1 },
-  fangW: { name: "Hoa b\xE1 v\u01B0\u01A1ng", grow: 30, seed: 0, sell: 800, sp: "fangW", hidden: true, zone: 2 },
-  fangM: { name: "Hoa nanh r\u1ED3ng", grow: 30, seed: 0, sell: 1200, sp: "fangM", hidden: true, zone: 3 }
-};
-var ZONE_NAME = { 1: "\u0110\u1ED3ng c\u1ECF", 2: "V\xF9ng n\u01B0\u1EDBc", 3: "Khu m\u1ECF" };
-var FERTS = {
-  compost: { name: "Ph\xE2n \u1EE7", price: 50, desc: "Th\u1EDDi gian c\xF2n l\u1EA1i c\u1EE7a v\u1EE5 n\xE0y \xD70.75" },
-  shiny: { name: "Ph\xE2n l\u1EA5p l\xE1nh", price: 100, desc: "Khi thu ho\u1EA1ch v\u1EE5 n\xE0y r\u01A1i th\xEAm s\u1ED1 v\xE0ng b\u1EB1ng 25% gi\xE1 b\xE1n" }
-};
-var BLOCK_PRICE_PG = {
-  // v1.0: giá khai hoang riêng cho từng trang (chốt theo bảng B)
-  1: [0, 0, 800, 3e3, 12e3, 3e4],
-  2: [0, 2e3, 6e3, 18e3, 45e3, 9e4],
-  3: [0, 5e3, 15e3, 4e4, 9e4, 18e4]
-};
-var WEATHERS = ["N\u1EAFng", "N\u1EAFng", "N\u1EAFng", "Nhi\u1EC1u m\xE2y", "M\u01B0a nh\u1ECF"];
+var TEST_MODE, MIN, GROW, REGROW, DAY_MS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, CROPS, ZONE_NAME, FERTS, BLOCK_PRICE_PG, WEATHERS;
+var init_data = __esm({
+  "src/data.js"() {
+    TEST_MODE = false;
+    MIN = 60 * 1e3;
+    GROW = TEST_MODE ? 5 * MIN : null;
+    REGROW = TEST_MODE ? 2 * MIN : null;
+    DAY_MS = 4 * 60 * 60 * 1e3;
+    WATER_CD = TEST_MODE ? 10 * MIN : 2 * 60 * 60 * 1e3;
+    REGROW_MAX = 3;
+    POKE_CD = 10 * MIN;
+    TREASURE_CD = TEST_MODE ? 10 * MIN : 2 * 60 * 60 * 1e3;
+    PETS_OUT_MAX = 8;
+    WITCH_STAY = TEST_MODE ? 10 * MIN : 20 * MIN;
+    witchGap = () => TEST_MODE ? 15 * MIN + Math.random() * 20 * MIN : 100 * MIN + Math.random() * 80 * MIN;
+    SNAP_EDGE = 48;
+    CROPS = {
+      /* Số liệu chính thức v1.0 (chốt theo "Bảng số liệu chính thức - chờ duyệt.md"): grow/regrowM tính bằng phút thực */
+      douya: { name: "Gi\xE1 \u0111\u1ED7", grow: 5, seed: 5, sell: 12, sp: "sprout" },
+      radish: { name: "C\u1EE7 c\u1EA3i cherry", grow: 10, seed: 25, sell: 45, sp: "radish" },
+      tomato: { name: "C\xE0 chua", grow: 20, regrowM: 15, seed: 100, sell: 90, sp: "tomato", regrow: true },
+      strawberry: { name: "D\xE2u t\xE2y", grow: 90, seed: 350, sell: 800, sp: "strawberry" },
+      pumpkin: { name: "B\xED ng\xF4", grow: 120, seed: 500, sell: 1300, sp: "pumpkin" },
+      /* —— Vùng nước (trang 2) —— */
+      chuncai: { name: "Rau thu\u1EA7n", grow: 10, seed: 40, sell: 60, sp: "chuncai", zone: 2 },
+      biqi: { name: "C\u1EE7 n\u0103ng", grow: 30, seed: 120, sell: 220, sp: "biqi", zone: 2 },
+      lingjiao: { name: "C\u1EE7 \u1EA5u", grow: 60, seed: 220, sell: 520, sp: "lingjiao", zone: 2 },
+      jiaobai: { name: "C\u1EE7 ni\u1EC5ng", grow: 60, seed: 450, sell: 1150, sp: "jiaobai", zone: 2 },
+      lianou: { name: "C\u1EE7 sen", grow: 180, seed: 900, sell: 3200, sp: "lianou", zone: 2 },
+      /* —— Khu mỏ (trang 3) —— */
+      wujing: { name: "C\u1ECF \xF4 tinh", grow: 30, seed: 150, sell: 340, sp: "wujing", zone: 3 },
+      starbush: { name: "B\u1EE5i sao", grow: 60, seed: 400, sell: 1150, sp: "starbush", zone: 3 },
+      gemflower: { name: "Hoa b\u1EA3o th\u1EA1ch", grow: 120, seed: 700, sell: 2300, sp: "gemflower", zone: 3 },
+      opalvine: { name: "D\xE2y leo opal", grow: 180, regrowM: 120, seed: 1200, sell: 2300, sp: "opalvine", zone: 3, regrow: true },
+      dragoncry: { name: "Qu\u1EA3 long tinh", grow: 360, seed: 2500, sell: 8e3, sp: "dragoncry", zone: 3 },
+      /* —— Họ bí ẩn (#29/#34/#49): hạt giống duy nhất, hộp mù hai lớp; không bán; đồng loạt 30 phút —— */
+      mystery: { name: "H\u1EA1t gi\u1ED1ng b\xED \u1EA9n", grow: 30, seed: 0, sell: 0, sp: "seedLight", hidden: true, zone: 0, seedOnly: true },
+      dreamG: { name: "K\xE9n m\u1ED9ng", grow: 30, seed: 0, sell: 300, sp: "dreamG", hidden: true, zone: 1 },
+      dreamW: { name: "K\xE9n tr\u1EA7m m\u1ED9ng", grow: 30, seed: 0, sell: 600, sp: "dreamW", hidden: true, zone: 2 },
+      dreamM: { name: "K\xE9n th\u1EA1ch m\u1ED9ng", grow: 30, seed: 0, sell: 900, sp: "dreamM", hidden: true, zone: 3 },
+      keyG: { name: "C\u1ECF ch\xECa \u0111\u1ED3ng", grow: 30, seed: 0, sell: 350, sp: "keyG", hidden: true, zone: 1 },
+      keyW: { name: "C\u1ECF ch\xECa g\u1EC9", grow: 30, seed: 0, sell: 700, sp: "keyW", hidden: true, zone: 2 },
+      keyM: { name: "C\u1ECF ch\xECa b\xED \u1EA9n", grow: 30, seed: 0, sell: 1050, sp: "keyM", hidden: true, zone: 3 },
+      fangG: { name: "C\xE2y b\u1EAFt ru\u1ED3i", grow: 30, seed: 0, sell: 400, sp: "fangG", hidden: true, zone: 1 },
+      fangW: { name: "Hoa b\xE1 v\u01B0\u01A1ng", grow: 30, seed: 0, sell: 800, sp: "fangW", hidden: true, zone: 2 },
+      fangM: { name: "Hoa nanh r\u1ED3ng", grow: 30, seed: 0, sell: 1200, sp: "fangM", hidden: true, zone: 3 }
+    };
+    ZONE_NAME = { 1: "\u0110\u1ED3ng c\u1ECF", 2: "V\xF9ng n\u01B0\u1EDBc", 3: "Khu m\u1ECF" };
+    FERTS = {
+      compost: { name: "Ph\xE2n \u1EE7", price: 50, desc: "Th\u1EDDi gian c\xF2n l\u1EA1i c\u1EE7a v\u1EE5 n\xE0y \xD70.75" },
+      shiny: { name: "Ph\xE2n l\u1EA5p l\xE1nh", price: 100, desc: "Khi thu ho\u1EA1ch v\u1EE5 n\xE0y r\u01A1i th\xEAm s\u1ED1 v\xE0ng b\u1EB1ng 25% gi\xE1 b\xE1n" }
+    };
+    BLOCK_PRICE_PG = {
+      // v1.0: giá khai hoang riêng cho từng trang (chốt theo bảng B)
+      1: [0, 0, 800, 3e3, 12e3, 3e4],
+      2: [0, 2e3, 6e3, 18e3, 45e3, 9e4],
+      3: [0, 5e3, 15e3, 4e4, 9e4, 18e4]
+    };
+    WEATHERS = ["N\u1EAFng", "N\u1EAFng", "N\u1EAFng", "Nhi\u1EC1u m\xE2y", "M\u01B0a nh\u1ECF"];
+  }
+});
 
 // src/graphics.js
-var P = {
-  G: "#6cb457",
-  D: "#3e7d3a",
-  E: "#a4dc8c",
-  R: "#dd5548",
-  x: "#a33528",
-  F: "#e06578",
-  f: "#a83a52",
-  p: "#ffb8c4",
-  O: "#e89a4e",
-  Q: "#c9772e",
-  q: "#96551f",
-  S: "#8a6844",
-  h: "#f7c07a",
-  B: "#9ed8f2",
-  b: "#5fa8cc",
-  u: "#3f7ea6",
-  T: "#8a6a52",
-  Y: "#c2b878",
-  y: "#9a915c",
-  L: "#b8b0a2",
-  M: "#8a8274",
-  C: "#f2c231",
-  U: "#bf8a1a",
-  W: "#fffdf4",
-  K: "#3a2c22",
-  n: "#ffb0bc",
-  V: "#b48ae0",
-  v: "#8a5cc0",
-  "1": "#aecb87",
-  "2": "#a0bd77",
-  "3": "#c6dfa0",
-  "4": "#8dab68",
-  a: "#b99b84",
-  c: "#9c7d66",
-  d: "#cbb096",
-  e: "#8a6a52",
-  w: "#9d7458",
-  g: "#b08a6d",
-  m: "#7d5a42",
-  s: "#684a36"
-};
-var GACHA_P = {
-  "0": "#ffffff",
-  "1": "#e0e0e0",
-  "2": "#c0c0c0",
-  "3": "#a0a0a0",
-  "4": "#808080",
-  "5": "#606060",
-  "6": "#404040",
-  "7": "#202020",
-  "8": "#101010",
-  "9": "#000000",
-  "a": "#ff0000",
-  "b": "#cc0000",
-  "c": "#990000",
-  "d": "#ff6666",
-  "e": "#ff9999",
-  "f": "#ff6600",
-  "g": "#cc5200",
-  "h": "#ff9933",
-  "i": "#8b4513",
-  "j": "#a0522d",
-  "k": "#cd853f",
-  "l": "#deb887",
-  "m": "#ffff00",
-  "n": "#ffd700",
-  "o": "#ffcc00",
-  "p": "#ffdab9",
-  "q": "#eee8aa",
-  "r": "#bdb76b",
-  "s": "#00ff00",
-  "t": "#32cd32",
-  "u": "#008000",
-  "v": "#006400",
-  "w": "#98fb98",
-  "x": "#90ee90",
-  "y": "#adff2f",
-  "z": "#556b2f",
-  "A": "#0000ff",
-  "B": "#0000cc",
-  "C": "#00008b",
-  "D": "#4169e1",
-  "E": "#6495ed",
-  "F": "#87ceeb",
-  "G": "#00ffff",
-  "H": "#00ced1",
-  "I": "#20b2aa",
-  "J": "#008080",
-  "K": "#7fffd4",
-  "L": "#ff00ff",
-  "M": "#c71585",
-  "N": "#800080",
-  "O": "#4b0082",
-  "P": "#9370db",
-  "Q": "#da70d6",
-  "R": "#ffc0cb",
-  "S": "#ffb6c1",
-  "T": "#ff69b4",
-  "U": "#db7093",
-  "V": "#ffe4c4",
-  "W": "#ffe4e1",
-  "X": "#faf0e6",
-  "Y": "#ffefd5",
-  "Z": "#ffebcd"
-};
 function mulberry32(a) {
   return function() {
     a |= 0;
@@ -191,993 +105,6 @@ function mulberry32(a) {
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
   };
 }
-var SPR = {
-  sprout: ["................", "................", "................", "................", "...DD......DD...", "..DEED....DEED..", ".DEGGGD..DGGGED.", ".DGGGGD..DGGGGD.", "..DGGGGDDGGGGD..", "...DGGGDDGGGD...", "....DGGGGGGD....", "......DGGD......", "...TTTDGGDTTT...", "..TTTTTTTTTTTT..", "................", "................"],
-  seedling: ["................", "................", "................", "................", "................", "................", "................", "......EE........", ".....DGE........", "......DG........", "......GD........", "......GG........", "....TTGGTT......", "...TTTTTTTT.....", "................", "................"],
-  radish: ["....DD...DD.....", "...DGED.DEGD....", "...DGGEDEGGD....", "....DGGDGGD.....", ".....DGGGD......", "......DGD.......", "....fDDGDDf.....", "...fFppFFFFf....", "..fFpppFFFFFf...", "..fFppFFFFFFf...", "..fFpFFFFFFFf...", ".TfFFFFFFFFFfT..", ".TTfFFFFFFFfTT..", "..TTfFFFFFfTT...", "...TTTfffTTT....", "................"],
-  tomato: ["................", "......DDDD......", "....DDGEEGDD....", "...DGEGGGGEGD...", "..DGEGGGGGGEGD..", "..DGpRRGGRRpGD..", "..DGRRxGGxRRGD..", "..DGGGGGGGGGGD..", "...DGGGpRGGGD...", "...DGGGRxGGGD...", "....DGGGGGGD....", ".....DGGGGD.....", "....TTDGGDTT....", "...TTTTTTTTTT...", "................", "................"],
-  pumpkin: ["................", "................", ".......SS.S.....", "......DSSDS.....", "...qqq.SS.qqq...", "..qOOOqqqqOOOq..", ".qOhhOQOOQOOOOq.", ".qOhOOQOOQOOOOq.", ".qOOOOQOOQOOOOq.", ".qOOOOQOOQOOOOq.", ".qOOOOQOOQOOOOq.", "..qOOOQOOQOOOq..", "...qqOOOOOOqq...", "..TTqqqqqqqqTT..", "...TTTTTTTTTT...", "................"],
-  moonberry: ["....W......W....", "................", "......DDDD......", "....DDGEEGDD....", "...DGEGGGGEGD...", "..DGWBBGGBBWGD..", "..DGBBuGGuBBGD..", "..DGGGGGGGGGGD..", "...DGGGWBGGGD...", "...DGGGBuGGGD...", "....DGGGGGGD....", ".....DGGGGD.....", "....TTDGGDTT....", "...TTTTTTTTTT...", ".......W........", "................"],
-  weed: ["................", "................", "................", "................", "................", "................", "....Y....Y......", "....Y..Y.Y..Y...", ".....y.Y.y.Y....", "..Y...yYYy......", "...y..YY...Y....", "....yYYY..y.....", ".....YY.Yy......", ".....yYYY.......", "................", "................"],
-  stone: ["................", "................", "................", "................", "................", "................", "......LLL.......", "....LLLLLLL.....", "...LLWLLLLLL....", "...LLLLLLLMLL...", "..LLLLLLLLLML...", "..MLLLLLLLLLL...", "..MMLLLLLLLLM...", "...MMMMMMMMM....", "................", "................"],
-  slime: ["................", "................", "................", "................", ".....BBBBBB.....", "....BBBBBBBB....", "...BBWWBBBBBB...", "..BBWWBBBBBBBB..", "..BBBBBBBBBBBB..", "..BB33BBBB33BB..", ".BBBBBBBBBBBBBB.", ".BnBBBB33BBBBnB.", ".BBBBBBBBBBBBBB.", ".bBBBBBBBBBBBBb.", "..bbbbbbbbbbbb..", "................"],
-  octo: ["................", "................", "................", ".....VVVVVV.....", "....VVVVVVVV....", "...VVWWVVVVVV...", "...VWWVVVVVVV...", "..VVVVVVVVVVVV..", "..VVKKVVVVKKVV..", "..VVVVVVVVVVVV..", "..VnVVVKKVVVnV..", "..VVVVVVVVVVVV..", "..VVVVVVVVVVVV..", "..VV.VV..VV.VV..", "..vv.vv..vv.vv..", "................"],
-  coin: ["................", "................", "................", ".....UUUUU......", "....UCCCCCU.....", "...UCCWWCCCU....", "...UCWCCCCCU....", "...UCWCCCCCU....", "...UCCCCCCCU....", "...UCCCCCCCU....", "....UCCCCCU.....", ".....UUUUU......", "................", "................", "................", "................"],
-  sun: ["................", ".......C........", "...C...C...C....", "....C.....C.....", "......CCC.......", ".....CCCCC......", "..CC.CCWCC.CC...", ".....CCCCC......", "......CCC.......", "....C.....C.....", "...C...C...C....", ".......C........", "................", "................", "................", "................"],
-  flower: ["................", "................", "................", "....nnn.nnn.....", "...npppnpppn....", "...nppnCnppn....", "....nnCCCnn.....", "...nppnCnppn....", "...npppnpppn....", "....nnn.nnn.....", "................", "................", "................", "................", "................", "................"],
-  shopIcon: ["................", "................", "................", "....fpf.fpf.....", "....fppffppf....", ".....ffFFff.....", "..qddddFFddddq..", "..qqqqqFFqqqqq..", "...qdddFFdddq...", "...qFFFFFFFFq...", "...qdddFFdddq...", "...qdddFFdddq...", "...qqqqqqqqqq...", "................", "................", "................"],
-  bagIcon: ["................", "................", ".....ffff.......", "....f....f......", "...ffffffffff...", "..fddddddddddf..", "..fddddddddddf..", "..fFFFFFFFFFFf..", "..fFFFFCCFFFFf..", "..fFpFFCCFFFFf..", "..fFpFFFFFFFFf..", "..fFFFFFFFFFFf..", "...ffffffffff...", "................", "................", "................"],
-  gearIcon: ["................", "................", "................", "................", "......MM........", "....MLLLLM......", "...MLLLLLLM.....", "..MMLLMMLLMM....", "..MMLLMMLLMM....", "...MLLLLLLM.....", "....MLLLLM......", "......MM........", "................", "................", "................", "................"],
-  diceIcon: ["................", "................", "..KKKKKKKKKKKK..", "..KWWWWWWWWWWK..", "..KWWKKWWWWWWK..", "..KWWKKWWWWWWK..", "..KWWWWWWWWWWK..", "..KWWWWKKWWWWK..", "..KWWWWKKWWWWK..", "..KWWWWWWWWWWK..", "..KWWWWWWWKKWK..", "..KWWWWWWWKKWK..", "..KWWWWWWWWWWK..", "..KKKKKKKKKKKK..", "................", "................"],
-  toolSeed: ["................", "................", "................", "...qqqqqqqqqq...", "...qccccccccq...", "...qdddGGdddq...", "...qddGGGGddq...", "...qdddDDdddq...", "...qdddDDdddq...", "...qddeeeeddq...", "...qddddddddq...", "...qqqqqqqqqq...", "................", "................", "................", "................"],
-  toolWater: ["................", "................", "................", "..........uu....", ".........u..u...", "..u..uuuuu...u..", "..uu.ukkbbu..u..", ".B.uuubbbbu.u...", "....ubbbbbbuu...", "....ubbbbbbu....", "....ubbbbbbu....", "....uibbbbiu....", ".....uuuuuu.....", "................", "................", "................"],
-  toolFert: ["................", "................", "................", "......qq........", ".....q..q.......", "....qaaaaq......", "...qaaaaaaq.....", "..qaaGGaaaaq....", "..qaaGGaaaaq....", "..qaaaaaeaaq....", "..qaeaaaaaaq....", "...qaaaaaaq.....", "....qqqqqq......", "................", "................", "................"],
-  toolHarvest: ["................", "................", "................", "................", "................", "................", "...FF.OO.GG.....", "..qqqqqqqqqq....", "...qacacacaq....", "...qcacacacq....", "....qacacaq.....", "....qcacacq.....", ".....qqqqq......", "................", "................", "................"],
-  mapIcon: ["................", ".KKKKKKKKKKKKKK.", "KLLLWWLLLLLGGGLK", "KLLLWWKKKLLGGGLK", "KLLLWKRRRKLGGGLK", "KLLLWKRWRKLLLLLK", "KLLLWKRRRKLLLLLK", "KWWWWWKRKWWWWWWK", "KWWWWWWKWWWWWWWK", "KbbLWWLLLLLLLLLK", "KLbbLWWLLLLLLLLK", "KLLbbWWLLLLLGGLK", "KLLLbWWLLLLLGGLK", "KLLLLWWLLLLLLLLK", ".KKKKKKKKKKKKKK.", "................"],
-  toolShovel: ["................", "................", "................", "......SSSS......", ".......SS.......", ".......SS.......", ".......SS.......", ".......SS.......", ".....MLLLLM.....", "....MLLWLLLM....", "....MLLLLLLM....", ".....MLLLLM.....", "......MMMM......", "................", "................", "................"],
-  cloud: ["................", "................", "................", "................", "......LLLL......", ".....LWWWWL.....", "...LLWWWWWWL....", "..LWWWWWWWWWL...", "..LWWWWWWWWWL...", "...LLLLLLLLLL...", "................", "................", "................", "................", "................", "................"],
-  raincloud: ["................", "................", "................", "......LLLL......", ".....LWWWWL.....", "...LLWWWWWWL....", "..LWWWWWWWWWL...", "..LWWWWWWWWWL...", "...LLLLLLLLLL...", "................", "....B...B...B...", "................", "...B...B...B....", "................", "................", "................"],
-  bush: ["................", "................", ".....DDDD.......", "...DDGEEGDD.....", "..DGEEGGWEGD....", ".DGEGGEEGGGED...", ".DGGEEGGGEGGD...", ".DGGWGGEEGGGD...", ".DGEGGGGGGEGD...", ".DGGGEGGGWGGD...", "..DGGGGGGGGD....", "...DDGGGGDD.....", ".....DDDD.......", "................", "................", "................"],
-  pinkgrass: ["................", "................", "....W......W....", ".....pp...pp....", "....pnfp.pfnp...", ".....pp...pp....", "......f....f....", ".....pp...pp....", "....pfnp.pnfp...", ".....pp...pp....", "..W...f....f....", "...BBbfBBBfbBB..", "..BbBBbBbBBbBb..", "...bbBBbbBBbb...", "................", "................"],
-  emHeart: ["................", "................", "................", "................", "....ff...ff.....", "...fFpf.fFFf....", "...fFFFfFFFf....", "...fFFFFFFFf....", "....fFFFFFf.....", ".....fFFFf......", "......fFf.......", ".......f........", "................", "................", "................", "................"],
-  emStar: ["................", "................", "................", ".......U........", "......UCU.......", "......UCU.......", "...UUUCCCUUU....", "....UCCCCCU.....", ".....UCCCU......", "....UCU.UCU.....", "....U.....U.....", "................", "................", "................", "................", "................"],
-  emLeaf: ["................", "................", "................", "................", "......DD........", ".....DGGD.......", "....DGEGGD......", "....DGGGGD......", ".....DGGD.......", "......DD........", ".......D........", ".......D........", "................", "................", "................", "................"],
-  emNote: ["................", "................", "................", ".....KKKKK......", ".....K...K......", ".....K...K......", ".....K...K......", "...KKK..KKK.....", "...KKK..KKK.....", "................", "................", "................", "................", "................", "................", "................"],
-  lotus: ["................", "................", "......Ff........", ".....pFfp.......", "....pFppFp......", "....fpFFpf......", ".....fppf.......", "...DGGGGGGD.....", "..DGGGGGGGGD....", "...DDGGGGDD.....", "................", "..b..bbb...b....", ".bBbbBBBbbBb....", "..bb..b..bb.....", "................", "................"],
-  gem: ["................", "................", ".......v........", "......vVv.......", ".....vVWVv......", ".....vVVVv......", "....vVVWVVv.....", "....vVVVVVv.....", "...vVVWVVVVv....", "..BbvVVVVVvBb...", ".bBBvVVVVVvBBb..", ".bbbvvvvvvvbbb..", "..MMMMMMMMMMM...", "...MMMMMMMMM....", "................", "................"],
-  emBang: ["................", "................", ".....ffff.......", ".....fpFf.......", ".....fFFf.......", ".....fFFf.......", ".....fFFf.......", ".....fFFf.......", "......ff........", "................", ".....ffff.......", ".....fFFf.......", ".....ffff.......", "................", "................", "................"],
-  ticketNorm: ["................", "....ffffffff....", "...fFFFFFFFFf...", "...fFCCCCCCFf...", "..fFCCCCCCCCFf..", "..fFCCCCCCWCFf..", "..fFCCCCWWCCFf..", "..fFCCCCCCWCFf..", "..fFCCCCCCCCFf..", "..fFCCCCCCCCFf..", "...fFCCCCCCFf...", "...fFFFFFFFFf...", "....ffffffff....", "................", "................", "................"],
-  ticketSpec: ["................", "....ffffffff....", "...ffffffffff...", "...fvVVVVVVvf...", "..fvVVVVVVVVvf..", "..fvVVVWWVVVvf..", "..fvVVWWWWVVvf..", "..fvVVVWWVVVvf..", "..fvVVVVVVVVvf..", "..fvVVVVVVVVvf..", "...fvVVVVVVvf...", "...ffffffffff...", "....ffffffff....", "................", "................", "................"],
-  ticketSuper: ["................", "....ffffffff....", "...ffffffffff...", "...fxOOOOOOxf...", "..fxOOOOOOOOxf..", "..fxOOOWWOOOxf..", "..fxOOWWWWOOxf..", "..fxOOOWWOOOxf..", "..fxOOOOOOOOxf..", "..fxOOOOOOOOxf..", "...fxOOOOOOxf...", "...ffffffffff...", "....ffffffff....", "................", "................", "................"],
-  gachaCapsuleNorm: ["................", ".....ffff.......", "...fCCCCCCf.....", "..fCCCCWCCCf....", "..fCCCCCCCCf....", "..ffffffffff....", "..fvvvvvvvvf....", "..fvvvvWvvvf....", "...fvvvvvvf.....", ".....ffff.......", "................", "................", "................", "................", "................", "................"],
-  gachaCapsuleSpec: ["................", ".....ffff.......", "...fYYYYYYf.....", "..fYYYYWYYYf....", "..fYYYYYYYYf....", "..ffffffffff....", "..fvvvvvvvvf....", "..fvvvvWvvvf....", "...fvvvvvvf.....", ".....ffff.......", "................", "................", "................", "................", "................", "................"],
-  gachapon: [
-    ".............ffffff.............",
-    "...........ffFFFFFFff...........",
-    "..........fFFFFFFFFFFf..........",
-    ".........fFFFFFFFFFFFFf.........",
-    "........fFFFFFFFFFFFFFFf........",
-    ".......fBBBBBBBBBBBBBBBBf.......",
-    "......fBiiiBBBBBBBBBBBBBBf......",
-    "......fBiiWiBBBBBBBBBBBBBf......",
-    ".....fBBiiiiBBBBBBBBBBBBBBf.....",
-    ".....fBBBBDGGDBBBBUCCUBBBBf.....",
-    ".....fBBBBGWWGFnnFCWWCBBBBf.....",
-    ".....fBBBBGGGGnWWnCCCCBBBBf.....",
-    ".....fBBBBDGGDnnnnUCCUBBBBf.....",
-    ".....fBBfFFfDEFnnFOQdvvdBBf.....",
-    ".....fBBFWWFEWWEOWWOvWWvBBf.....",
-    "......fBFFFFEEEEOOOOvvvvBf......",
-    "......fBfFFfDEEDQOOQdvvdBf......",
-    ".......fbbbbbbbbbbbbbbbbf.......",
-    "......ffffffffffffffffffff......",
-    "......fFFFFFFFFFFFFFFFFFFf......",
-    "......fFFFFFFFFFFFFFFFFFFf......",
-    "......fFFFFFFFFFFFFFFFFFFf......",
-    ".....fFFFFFFFMMMMMMFFFFFFFf.....",
-    ".....fFFFFFFMMLLLLMMFFFFFFf.....",
-    ".....fFFFFFFMLLWWLLMFFFFFFf.....",
-    ".....fFFFFFFMLLWWLLMFFFFFFf.....",
-    ".....fFFFFFFMMLLLLMMFFFFFFf.....",
-    ".....fFFFFFFFMMMMMMFFFFFFFf.....",
-    ".....fFFFFFFMMMMMMMMFFFFFFf.....",
-    ".....fFFFFFFMKKKKKKMFFFFFFf.....",
-    ".....fFFFFFFMKKKKKKMFFFFFFf.....",
-    ".....ffffffffffffffffffffff....."
-  ],
-  dungeonGate: [
-    "................",
-    "....MMMMMMMM....",
-    "...MLLLLLLLLM...",
-    "..MLLMCMMCMLLM..",
-    "..MLMvvvvvvMLM..",
-    "..MLvVuuuuVvLM..",
-    "..MLvVuBKuVvLM..",
-    "..MLvVKuuKVvLM..",
-    "..MLvVuuWKVvLM..",
-    "..MLvVKuuuVvLM..",
-    "..MLvVKKuBVvLM..",
-    "..MLvVuKKuVvLM..",
-    "..MLvVuuuuVvLM..",
-    "..MLMvvvvvvMLM..",
-    ".MMLMvvvvvvMLMM.",
-    ".MMMMvvvvvvMMMM."
-  ],
-  fireball: [
-    "................",
-    ".......qq.......",
-    "......qQQq......",
-    ".....qQOOQq.....",
-    "....qQOhhOQq....",
-    "....qQOhhOQq....",
-    ".....qQOOQq.....",
-    "......qQQq......",
-    ".......qq.......",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................"
-  ],
-  iceball: [
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "uu..............",
-    "ubuu............",
-    "ubWBbuuu........",
-    "uBWWWWBBbuu.....",
-    "uBWWWWWWWBBBbuuu",
-    "uBWWWWBBbuuu....",
-    "ubWBbuu.........",
-    "ubu.............",
-    "uu.............."
-  ],
-  lightning: [
-    "........C.......",
-    ".......WC.......",
-    "......WWC.......",
-    ".....WWCC.......",
-    "....WWCC........",
-    "...WWCC.........",
-    "..WWWWWWWWC.....",
-    "...CCCCCWWC.....",
-    ".......WWC......",
-    "......WWC.......",
-    ".....WWC........",
-    "....WWC.........",
-    "...WC...........",
-    "..C.............",
-    "................",
-    "................"
-  ],
-  arrow: [
-    "................",
-    ".......W........",
-    "......LWL.......",
-    "......LWL.......",
-    "......LWL.......",
-    "......LWL.......",
-    ".....LLWLL......",
-    ".....MMWMM......",
-    ".....MMWMM......",
-    "......MWM.......",
-    "......MWM.......",
-    ".......M........",
-    "................",
-    "................",
-    "................",
-    "................"
-  ],
-  leafBolt: [
-    "................",
-    "..............E.",
-    ".............EGE",
-    "...........EGGDE",
-    ".........EGGGDE.",
-    ".......EGGGGDE..",
-    ".....EGGGGGDE...",
-    "...EGGGGGGDE....",
-    "..EGGGGGGDE.....",
-    ".EGGGGGGDE......",
-    "EGGGGGGDE.......",
-    "EGGGGGDE........",
-    ".EDGGDE.........",
-    "..EDDE..........",
-    "...EE...........",
-    "................"
-  ],
-  holyLight: [
-    ".......C........",
-    ".......W........",
-    "......CWC.......",
-    "...C..CWC..C....",
-    "...WCCWWWCCW....",
-    "...C..CWC..C....",
-    "......CWC.......",
-    ".......W........",
-    ".......C........",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................"
-  ],
-  waterball: [
-    "................",
-    ".......uu.......",
-    "......uWWu......",
-    ".....uWbbu......",
-    "....uWbbbbWu....",
-    "...uWbbbbbbWu...",
-    "...uWbbbbbbWu...",
-    "....uWbbbbWu....",
-    ".....uuuuuu.....",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................"
-  ],
-  threeSlimesWalking: [
-    "................................",
-    "...........WW...................",
-    ".........WWWWWW.................",
-    "........WWWWWWWW.........W......",
-    ".........WWWWWW........WWWWW....",
-    "........................WWW.....",
-    "................................",
-    "..................FFFFFF........",
-    "................FFppppFFFF......",
-    "...............FppppppppppF.....",
-    "..............FppppWppWppppF....",
-    "..............FppppKppKppppF....",
-    "..............FppppppppppppF....",
-    ".....EEEEEE....FppppppppppF.....",
-    "...EEEEEEEEEE...FFFFFFFFFF......",
-    ".EEEEEEEEEEEEE..................",
-    "EEEEEbbbbbbEEEEEEEEEEEGGGGGGEEE.",
-    "EEEbbBBBBbbbbEEEEEEGGGEEEEGGGGEE",
-    "EEbBBBBBBBBBbbEEEEEGEEEEEEEEEEGE",
-    "EabBBBBWBBWBBBbbeeGEEEEWEEWEEEEG",
-    "aabBBBBKBBKBBBbbaaeGEEEEKEEKEEEG",
-    "aabBBBBBBBBBBBbbaaeGEEEEEEEEEEEG",
-    "eeabBBBBBBBBBbbcceaeGEEEEEEEEEEG",
-    "cceeebbbbbbbbbbcceeaaeGGGGGGGGGG",
-    "cccceeeeeeeeeeccMMMMMcaaaeeeeeaa",
-    "SccccceeTTeccSSMMMMMMMeeccaceeec",
-    "SSScceeeTTeeSSSSMMMMMceccceeeccc",
-    "TSSScceeeeeSSSSSTTSScccccccccccS",
-    "TTTSSccceecSSTTTTTSSSccSccccSSSS",
-    "aTTTSSSSSSSSSTTaTTTTSSSSSSSSSSST",
-    "aaTTTTTTTTTTTTaaaaTTTTTTTTTTTTTa",
-    "aaaaaTTTTTTTaaaaaaaaaTTTTTTTaaaa"
-  ],
-  swordIcon: [
-    ".............KK.",
-    "............KWKK",
-    "...........KWLMK",
-    "..........KWLMK.",
-    ".........KWLMK..",
-    "........KWLMK...",
-    ".......KWLMK....",
-    "......KWLMK.....",
-    "...KKKWLMK......",
-    "...KCCKMK.......",
-    "...KCCCK........",
-    "...KsCCK........",
-    "..KsKKKK........",
-    ".KRK............",
-    "..K.............",
-    "................"
-  ],
-  coldBreath: [
-    "................",
-    "................",
-    ".............u..",
-    "...........WuW..",
-    ".........Wu.Wu..",
-    ".......WuuWuu...",
-    ".....WuuuWuuW...",
-    "....Wuu.uuW.....",
-    ".....WuuuWuuW...",
-    ".......WuuWuu...",
-    ".........Wu.Wu..",
-    "...........WuW..",
-    ".............u..",
-    "................",
-    "................",
-    "................"
-  ],
-  starBolt: [
-    "................",
-    ".......W........",
-    "......WCW.......",
-    ".....WCCCW......",
-    "....WCOCOCW.....",
-    "...WCOCOOOCW....",
-    "..WCOCOOOCOCW...",
-    ".WCCCOOCOOOCCW..",
-    "..WCOCOOOCOCW...",
-    "...WCOCOOOCW....",
-    "....WCOCOCW.....",
-    ".....WCCCW......",
-    "......WCW.......",
-    ".......W........",
-    "................",
-    "................"
-  ],
-  slashFx: [
-    "................",
-    "............W...",
-    "..........WW....",
-    "........WWW.....",
-    "......WWW.......",
-    "....WWW.........",
-    "..WWW...........",
-    "W.............W.",
-    ".W..........WW..",
-    "..W.......WW....",
-    "...W....WW......",
-    "....W.WW........",
-    ".....W..........",
-    "................",
-    "................",
-    "................"
-  ],
-  biteFx: [
-    "................",
-    "....L......L....",
-    "...LWL....LWL...",
-    "..LWWL....LWWL..",
-    "..LWLL....LLWL..",
-    "...LL......LL...",
-    "................",
-    "................",
-    "...LL......LL...",
-    "..LWLL....LLWL..",
-    "..LWWL....LWWL..",
-    "...LWL....LWL...",
-    "....L......L....",
-    "................",
-    "................",
-    "................"
-  ],
-  smashFx: [
-    "................",
-    "...Q........Q...",
-    "....Q......Q....",
-    ".....Q....Q.....",
-    "......QQQQ......",
-    "..Q...QOOQ...Q..",
-    "...Q.QOOOOQ.Q...",
-    "....QQOOOOQQ....",
-    "....QQOOOOQQ....",
-    "...Q.QOOOOQ.Q...",
-    "..Q...QOOQ...Q..",
-    "......QQQQ......",
-    ".....Q....Q.....",
-    "....Q......Q....",
-    "...Q........Q...",
-    "................"
-  ],
-  healFx: [
-    "................",
-    "................",
-    ".......F........",
-    "......FpF.......",
-    ".....FpWpF......",
-    "....FpWWWpF.....",
-    ".....FpWpF......",
-    "......FpF.......",
-    ".......F........",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................"
-  ],
-  shieldFx: [
-    "................",
-    "...CCCCCCCCCC...",
-    "..CWBBBBBBBBWC..",
-    ".CWBbbbbbbbbBWC.",
-    ".CWBbbbWWbbbBWC.",
-    ".CWBbbWWWWbbBWC.",
-    ".CWBbbbWWbbbBWC.",
-    ".CWBbbbbbbbbBWC.",
-    "..CWBbbbbbbBWC..",
-    "...CWBbbbbBWC...",
-    "....CWBbbBWC....",
-    ".....CWBBWC.....",
-    "......CWWC......",
-    ".......CC.......",
-    "................",
-    "................"
-  ],
-  stunFx: [
-    ".......C........",
-    "......CWC.......",
-    "...CCWWWWWCC....",
-    "....CCWWWCC.....",
-    "......CWC.......",
-    ".......C........",
-    "................",
-    "................",
-    ".......C........",
-    "......CWC.......",
-    "...CCWWWWWCC....",
-    "....CCWWWCC.....",
-    "......CWC.......",
-    ".......C........",
-    "................",
-    "................"
-  ],
-  snowball: [
-    "................",
-    ".......WW.......",
-    "......WbbW......",
-    ".....WbBBbW.....",
-    "....WbBWWbBW....",
-    "....WbBWWbBW....",
-    ".....WbBBbW.....",
-    "......WbbW......",
-    ".......WW.......",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................"
-  ],
-  shadowBolt: [
-    "................",
-    ".......v........",
-    "......vVv.......",
-    "....vvVVVvv.....",
-    "...vVVVVVVVv....",
-    "....vvVVVvv.....",
-    "......vVv.......",
-    ".......v........",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................"
-  ],
-  rainbowBolt: [
-    "................",
-    "..........R.....",
-    "........ROR.....",
-    "......ROCOR.....",
-    "....ROCECOR.....",
-    "..ROCEbECOR.....",
-    "ROCEbVbECOR.....",
-    "ROCEbVbECOR.....",
-    "..ROCEbECOR.....",
-    "....ROCECOR.....",
-    "......ROCOR.....",
-    "........ROR.....",
-    "..........R.....",
-    "................",
-    "................",
-    "................"
-  ],
-  emLock: [
-    "......LLLL......",
-    ".....L....L.....",
-    "....L......L....",
-    "....L......L....",
-    "....L......L....",
-    "...CCCCCCCCCC...",
-    "...CCCCCCCCCC...",
-    "...CCCKKKKCCC...",
-    "...CCCKKKKCCC...",
-    "...CCCCKKCCCC...",
-    "...CCCCKKCCCC...",
-    "...CCCCCCCCCC...",
-    "................",
-    "................",
-    "................",
-    "................"
-  ],
-  heartFx: [
-    "................",
-    "................",
-    "...FFF....FFF...",
-    "..FFFFF..FFFFF..",
-    ".FFFFFFFFFFFFFF.",
-    ".FFFFFFFFFFFFFF.",
-    ".FFFFFFFFFFFFFF.",
-    "..FFFFFFFFFFFF..",
-    "...FFFFFFFFFF...",
-    "....FFFFFFFF....",
-    ".....FFFFFF.....",
-    "......FFFF......",
-    ".......FF.......",
-    "................",
-    "................",
-    "................"
-  ],
-  scytheFx: [
-    ".........WWWWW..",
-    ".......WWLLLLq..",
-    "......WLLL...q..",
-    ".....WLL....q...",
-    "....WLL....q....",
-    "...WL.....q.....",
-    "...W.....q......",
-    "..W.....q.......",
-    ".......q........",
-    "......q.........",
-    ".....q..........",
-    "....q...........",
-    "...q............",
-    "..q.............",
-    ".q..............",
-    "q..............."
-  ],
-  skullFx: [
-    "................",
-    "................",
-    ".....WWWWWW.....",
-    "...WWWWWWWWWW...",
-    "..WWWWWWWWWWWW..",
-    "..WWWKKWWWWKKW..",
-    "..WWKKKKWWKKKK..",
-    "..WWKKKKWWKKKK..",
-    "..WWWKKWWWWKKW..",
-    "...WWWWWWWWWW...",
-    "....WWWWWWWW....",
-    "....WW.WW.WW....",
-    "....W..WW..W....",
-    "................",
-    "................",
-    "................"
-  ],
-  sugarFx: [
-    "................",
-    "................",
-    "................",
-    ".......WW.......",
-    "....W.WFFW.W....",
-    "...WpWWFFWWpW...",
-    "..WppWFFFFWppW..",
-    "...WpWWFFWWpW...",
-    "....W.WFFW.W....",
-    ".......WW.......",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................"
-  ],
-  bloodFx: [
-    "................",
-    ".......f........",
-    "......fff.......",
-    ".....fffff......",
-    "....fffffff.....",
-    "...fffffffff....",
-    "...fffffffff....",
-    "...fffffffff....",
-    "....fffffff.....",
-    ".....fffff......",
-    "......fff.......",
-    "................",
-    "................",
-    "................",
-    "................",
-    "................"
-  ],
-  dispelFx: [
-    "................",
-    "....B......B....",
-    "........B.......",
-    "..B...B...B...B.",
-    ".......W........",
-    "....B.WWW.B.....",
-    ".....WWWW.......",
-    "..B...WWW...B...",
-    ".......W........",
-    "....B.....B.....",
-    "........B.......",
-    "..B...B...B...B.",
-    "................",
-    "................",
-    "................",
-    "................"
-  ],
-  blindFx: [
-    "................",
-    "................",
-    "......MMM.......",
-    "....MMMMMMM.....",
-    "...MMMMMMMMM....",
-    "..MMKKMMMKKMM...",
-    ".MMKKKKMKKKKMM..",
-    ".MMKKKKMKKKKMM..",
-    "..MMKKMMMKKMM...",
-    "...MMMMMMMMM....",
-    "....MMMMMMM.....",
-    "......MMM.......",
-    "................",
-    "................",
-    "................",
-    "................"
-  ]
-};
-P.k = P.k || "#c4e3f0";
-P.i = P.i || "#a9cede";
-var PET_P = {
-  B: "#9ed8f2",
-  b: "#5fa8cc",
-  W: "#fffdf4",
-  K: "#3a2c22",
-  n: "#ffb0bc",
-  "3": "#4a7ba6",
-  // '3' = ngũ quan của slime xanh (xanh xám, thay cho K nâu đen gốc)
-  V: "#b48ae0",
-  v: "#8a5cc0",
-  p: "#ffb8c4",
-  F: "#e06578",
-  f: "#a83a52",
-  o: "#e8963a",
-  t: "#b0641e",
-  A: "#f4e8d8",
-  z: "#d9c5aa",
-  N: "#5c5c6a",
-  L: "#b8b0a2",
-  M: "#8a8274",
-  C: "#f2c231",
-  U: "#bf8a1a",
-  E: "#fff5dc",
-  e: "#d9cfe5",
-  I: "#cbeaf2",
-  G: "#f6cf62",
-  g: "#bd822d",
-  D: "#49315f",
-  d: "#6f4a89",
-  J: "#9b70ad",
-  R: "#9569a6",
-  r: "#c198ca",
-  X: "#fff2bd",
-  T: "#8b5936",
-  S: "#d99a43",
-  Q: "#76545f",
-  H: "#56649d",
-  h: "#8492c7",
-  Y: "#f5d76d",
-  y: "#bd923b",
-  O: "#fffaf0",
-  q: "#cfc5df",
-  Z: "#72d4c7",
-  c: "#3fa6a5",
-  a: "#bff3df",
-  k: "#688f57",
-  l: "#a6cb7d",
-  i: "#c8d8f0",
-  j: "#8296c9",
-  x: "#8e6bad",
-  m: "#d9bd6f",
-  u: "#dcf3e7",
-  s: "#92c4b0"
-};
-var PET_SPR = {
-  slime: [
-    "................",
-    "................",
-    "................",
-    "................",
-    ".....BBBBBB.....",
-    "....BBBBBBBB....",
-    "...BBWWBBBBBB...",
-    "..BBWWBBBBBBBB..",
-    "..BBBBBBBBBBBB..",
-    "..BB33BBBB33BB..",
-    ".BBBBBBBBBBBBBB.",
-    ".BnBBBB33BBBBnB.",
-    ".BBBBBBBBBBBBBB.",
-    ".bBBBBBBBBBBBBb.",
-    "..bbbbbbbbbbbb..",
-    "................"
-  ],
-  slimePink: [
-    "................",
-    "................",
-    "................",
-    "................",
-    ".....pppppp.....",
-    "....pppppppp....",
-    "...ppWWpppppp...",
-    "..ppWWpppppppp..",
-    "..pppppppppppp..",
-    "..ppffppppffpp..",
-    ".pppppppppppppp.",
-    ".pFppppffppppFp.",
-    ".pppppppppppppp.",
-    ".FppppppppppppF.",
-    "..FFFFFFFFFFFF..",
-    "................"
-  ],
-  peach_soda: [
-    ".......O........",
-    "......OOO.......",
-    ".......t........",
-    ".....TTTTTT.....",
-    "....TTTTTTTT....",
-    "...TCTTTTTTTT...",
-    "..TCTTTTTTTTTT..",
-    ".TTTTDTTTTDTTTT.",
-    ".TTPPTTDDTTPPTT.",
-    ".TTTTTTTTTTTTTT.",
-    "..tTTTTTTTTTTt..",
-    ".tTT.tTTTT.tTTt.",
-    "tTt..tTTt..tTTt.",
-    ".t...tT.tT...tT.",
-    ".....t...t......",
-    "................"
-  ],
-  octo: [
-    "................",
-    "................",
-    "................",
-    ".....VVVVVV.....",
-    "....VVVVVVVV....",
-    "...VVWWVVVVVV...",
-    "...VWWVVVVVVV...",
-    "..VVVVVVVVVVVV..",
-    "..VVKKVVVVKKVV..",
-    "..VVVVVVVVVVVV..",
-    "..VnVVVKKVVVnV..",
-    "..VVVVVVVVVVVV..",
-    "..VVVVVVVVVVVV..",
-    "..VV.VV..VV.VV..",
-    "..vv.vv..vv.vv..",
-    "................"
-  ],
-  octoCream: [
-    "................",
-    "................",
-    "................",
-    ".....AAAAAA.....",
-    "....AAAAAAAA....",
-    "...AAWWAAAAAA...",
-    "...AWWAAAAAAA...",
-    "..AAAAAAAAAAAA..",
-    "..AAAAAAAAAAAA..",
-    "..AAKKAAAAKKAA..",
-    "..AnAAAAAAAAnA..",
-    "..AAAAAAAAAAAA..",
-    "..AAAAAAAAAAAA..",
-    "..AA.AA..AA.AA..",
-    "..zz.zz..zz.zz..",
-    "................"
-  ],
-  jellyfish: [
-    "......S.........",
-    ".....SSS........",
-    "......S.........",
-    ".....IIIIII.....",
-    "....IIIIIIII....",
-    "...IIBIIIIIII...",
-    "..IIBIIIIIIIII..",
-    ".IIIIYIIIIYIIII.",
-    ".IIPPIISSIIPPII.",
-    ".IIIIIIIIIIIIII.",
-    "..iIIIIIIIIIIi..",
-    "...iiiiiiiiii...",
-    "...LL..LL..LL...",
-    "..LL...LL...LL..",
-    "..L....L....L...",
-    ".LL...LL...LL..."
-  ],
-  mystery_blob: [
-    "................",
-    "...oo......oo...",
-    "...ooo....ooo...",
-    "...oooo..oooo...",
-    "....oooooooo....",
-    "...oooooooooo...",
-    "..oooooooooooo..",
-    "..ooKKooooKKoo..",
-    "ttooooonnooooott",
-    ".toooooooooooot.",
-    ".onoooooooooono.",
-    ".oooooooooooooo.",
-    ".oooooooooooooo.",
-    ".toooooooooooot.",
-    "..tttttttttttt..",
-    "................"
-  ],
-  ghostBlob: [
-    "................",
-    ".......uu.......",
-    "......uuuu......",
-    ".....uuuuuu.....",
-    "....uuWuuuuu....",
-    "...uuWuuuuuuu...",
-    "..uuuuuuuuuuuu..",
-    ".uuuuQuuuuQuuuu.",
-    ".unnuuuQQuuunnu.",
-    ".uuuuuuuuuuuuuu.",
-    "uuuuuuuuuuuuuuuu",
-    "suuuuuuuuuuuuuus",
-    ".suuuuuuuuuuuus.",
-    "..suuuuuuuuuus..",
-    "...suus..suus...",
-    "................"
-  ],
-  impBlob: [
-    "................",
-    "................",
-    "....f......f....",
-    "....ff....ff....",
-    ".....FFFFFF.....",
-    "....FFFFFFFF....",
-    "...FFWWFFFFFF...",
-    ".KFFWWFFFFFFFFK.",
-    "KKFFFFFFFFFFFFKK",
-    "..FFKKFFFFKKFF..",
-    ".FFFFFFFFFFFFFF.",
-    ".FnFFFFKKFFFFnF.",
-    ".FFFFFFFFFFFFFF.",
-    ".fFFFFFFFFFFFFf.",
-    "..ffffffffffff..",
-    "................"
-  ],
-  angelBlob: [
-    ".....gggggg.....",
-    "...gGG....GGg...",
-    ".....gggggg.....",
-    "................",
-    ".....EEEEEE.....",
-    "....EEEEEEEE....",
-    "...EEWEEEEEEE...",
-    ".WEEWEEEEEEEEEW.",
-    "WIEEEEEEEEEEEEEW",
-    "IEEEQQEEEEQQEEEI",
-    ".EnnEEEQQEEEnnE.",
-    ".EEEEEEEEEEEEEE.",
-    ".eEEEEEEEEEEEEe.",
-    "..eEEEEEEEEEEe..",
-    "...eeeeeeeeee...",
-    "................"
-  ],
-  witchBlob: [
-    "...DDD..........",
-    "..DDDJ..........",
-    "...DDJDD........",
-    "...DDdDDDD......",
-    "..DDdddDDDDD....",
-    ".DDDddGGdddDDD..",
-    "DDDDDDDDDDDDDDDD",
-    "...RRRRRRRRRR..T",
-    "..RrRRRRRRRRRR.T",
-    ".RrRRRRRRRRRRRR.",
-    ".RRRXKRRRRDDRRR.",
-    ".RnRRRRRGDRRRnR.",
-    ".RRRRRRRRRRRRR.T",
-    "..dRRRRRRRRRd.T.",
-    "...ddddddddd.SSS",
-    "...........SSSSS"
-  ],
-  starBell: [
-    "..Y....Y........",
-    ".......Y....Y...",
-    ".....YYYYY......",
-    ".Y....YYY.......",
-    "......Y.Y.......",
-    ".....HHHHHH.....",
-    "....HHHHHHHH....",
-    "...HHhHHHHHHH...",
-    "..HHhHHHHHHHHH..",
-    "..HHHHHHHHHHHH..",
-    ".HHHmmHHHHmmHHH.",
-    ".HYHHHHHHHHHHYH.",
-    ".HHHHHHHHHHHHHH.",
-    ".hHHHHHHHHHHHHh.",
-    "..hHHHHHHHHHHh..",
-    "...hhhhhhhhhh..."
-  ],
-  cloudMallow: [
-    "................",
-    "................",
-    "......OOOO......",
-    "....OOOOOOOO....",
-    "..OOOOOOOOOOOO..",
-    ".OOOWOOOOOOOOOO.",
-    "OOOOOOOOOOOOOOOO",
-    "OOOOQOOOOOOQOOOO",
-    "OOnOOOOQQOOOOnOO",
-    "OOOOOOOOOOOOOOOO",
-    ".qOOOOOOOOOOOOq.",
-    "..qqOOqqqqOOqq..",
-    "....I......I....",
-    "....II....II....",
-    ".....I....I.....",
-    "................"
-  ],
-  dewSprout: [
-    ".....kk..kk.....",
-    "....kllkkllk....",
-    "......kk........",
-    ".......ZZ.......",
-    "......ZZZZ......",
-    ".....ZZZZZZ.....",
-    "....ZZaZZZZZ....",
-    "...ZZaZZZZZZZ...",
-    "..ZZZZZZZZZZZZ..",
-    ".ZZZZQZZZZQZZZZ.",
-    ".ZnZZZZQZZZZZnZ.",
-    ".ZZZZZZZZZZZZZZ.",
-    ".cZZZZZZZZZZZZc.",
-    "..cZZZZZZZZZZc..",
-    "...cccccccccc...",
-    "................"
-  ],
-  prismBlob: [
-    "..j..........j..",
-    ".jij........jij.",
-    "..j..........j..",
-    "......xxxx.....y",
-    "y...xxiiiixx..yY",
-    "Yy.xiiiiiiiix..y",
-    "y.xiiiiiiiiiix..",
-    ".xiiiiiiiiiiiix.",
-    ".xiiQQiiiiQQiix.",
-    ".xiriiiiQiiiirx.",
-    ".xiiiiiiiiiiiix.",
-    "..xiiiiiiiiix...",
-    "...xiiiiiiix....",
-    "....xxxxxxxx....",
-    "......jjjj......",
-    "................"
-  ],
-  penguin: [
-    "................",
-    "................",
-    ".....333333.....",
-    "....33WWWW33....",
-    "...33WWWWWW33...",
-    "...3WKKWWKKW3...",
-    "..33WnWooWnW33..",
-    "..33WWWWWWWW33..",
-    "..33WWWWWWWW33..",
-    "...33WWWWWW33...",
-    "....33333333....",
-    ".....oo..oo.....",
-    "................",
-    "................",
-    "................",
-    "................"
-  ]
-};
-var petLinear = (x1, y1, x2, y2, stops) => ({ type: "linear", x1, y1, x2, y2, stops });
-var PET_FX = {
-  mystery_blob: {
-    // Bé bí ẩn: bản cam dịu thứ hai (wen chốt: pha sữa giảm độ tinh khiết nhưng giữ dòng máu cam; bản oải hương để dành cho kho da DLC)
-    o: petLinear(1, 2, 15, 14, [["0%", "#ffe0a6"], ["46%", "#f7b374"], ["100%", "#ea9060"]]),
-    t: petLinear(0, 7, 16, 15, [["0%", "#d18a58"], ["100%", "#b06a44"]]),
-    K: "#6b4548",
-    n: "#ffcdd8"
-  },
-  peach_soda: {
-    T: petLinear(1, 2, 15, 14, [["0%", "#ffe8a6"], ["35%", "#ffbdc9"], ["64%", "#ff94bf"], ["100%", "#c99bf5"]]),
-    t: petLinear(0, 4, 16, 15, [["0%", "#f28bc2"], ["100%", "#9b78de"]]),
-    C: "#effffb",
-    D: "#5b4568",
-    P: "#65e0cf",
-    O: petLinear(0, 0, 15, 3, [["0%", "#b9fff3"], ["100%", "#9ba7ff"]])
-  },
-  jellyfish: {
-    I: petLinear(1, 2, 15, 14, [["0%", "#c8f4ff"], ["28%", "#8cddff"], ["62%", "#58b7f2"], ["100%", "#6576dc"]]),
-    i: petLinear(0, 7, 16, 15, [["0%", "#579dd1"], ["100%", "#5459aa"]]),
-    B: "#effcff",
-    Y: "#fff0a6",
-    P: "#ff8fca",
-    S: petLinear(0, 0, 16, 4, [["0%", "#fff6aa"], ["100%", "#a8dbff"]]),
-    L: petLinear(0, 11, 16, 16, [["0%", "#bdeaff"], ["100%", "#8d90ee"]])
-  }
-};
-var petCache = /* @__PURE__ */ new Map();
 function petSVG(name, px) {
   const key = name + "@" + px;
   if (petCache.has(key)) return petCache.get(key);
@@ -1211,607 +138,9 @@ function petSVG(name, px) {
   petCache.set(key, out);
   return out;
 }
-var PETS = {
-  /* —— Trang 1 —— */
-  slime: { name: "Slime xanh", page: 1, price: 0, starter: true, cry: ["B\u1EE5p b\u1EE5p~", "B\u1EF1ppp!", "Gr\xF9 gr\xF9\u2026", "B\u1EE5p?", "Nh\u1EA3y nh\u1EA3y!"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 b\xE9 tr\xF2n t\u1ED5 ti\xEAn, b\u1EA1n \u0111\u1ED3ng h\xE0nh t\u1EEB \u0111\u1EA7u" },
-  octo: { name: "B\u1EA1ch tu\u1ED9c t\xEDm", page: 1, price: 500, cry: ["\u1EE4c b\u1ED1p?", "\u1EE4c \u1EF1c!", "Ch\xEDu mi!", "B\xF3p b\xF3p\u2026", "\u1EE4c b\u1ED1p b\u1ED1p!"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 th\xEDch ch\u1ED3ng l\xEAn \u0111\u1EA7u ng\u01B0\u1EDDi kh\xE1c" },
-  slimePink: { name: "Slime h\u1ED3ng", page: 1, price: 600, cry: ["B\u1EE5p h\xEC~", "B\u1EE5p b\u1EE5p!", "H\xEC h\xEC\u2026", "B\u1EE5p ch\xEDu~"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 v\u1ECB d\xE2u (nh\u01B0ng kh\xF4ng \u0103n \u0111\u01B0\u1EE3c)" },
-  octoCream: { name: "B\u1EA1ch tu\u1ED9c kem", page: 1, price: 700, cry: ["B\u1ED1p\u2026", "\u1EE4c\u2026", "(ch\u1EADm r\xEC r\xEC) b\xF3p~"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 b\u1EADc th\u1EA7y ngu\u1EF5 trang, tr\xF9ng m\xE0u v\u1EDBi b\u1EA3ng \u0111i\u1EC1u khi\u1EC3n" },
-  dewSprout: { job: "plant", name: "B\xE9 m\u1EA7m s\u01B0\u01A1ng", page: 1, price: 1200, cry: ["T\xED t\xE1ch~", "M\u1EA7m!", "(\u0111\u1ED9i l\xE1 l\xEAn)"], desc: "Lo\u1EA1i l\xE0m vi\u1EC7c \xB7 ch\u1ECDc m\u1ED9t c\xE1i l\xE0 gieo kh\u1EAFp ru\u1ED9ng, h\u1EA1t xu\u1ED1ng \u0111\u1EA5t l\xE0 n\u1EA3y m\u1EA7m" },
-  cloudMallow: { job: "water", name: "B\xE9 b\xF4ng m\xE2y", page: 1, price: 1500, cry: ["B\xF4ng b\xF4ng~", "V\xF9\u2014\u2014", "(bay l\u01A1 l\u1EEDng)"], desc: "Lo\u1EA1i l\xE0m vi\u1EC7c \xB7 ra s\xE2n l\xE0 m\xE2y m\u01B0a nh\u1ECF t\u1EF1 \u0111\u1ED9ng t\u01B0\u1EDBi" },
-  /* —— Trang 2 (vé vùng nước) —— */
-  ghostBlob: { name: "B\xE9 ma nh\u1ECF", page: 2, price: 1500, cry: ["Uuu~", "Bay bay\u2026", "(xuy\xEAn qua tay b\u1EA1n)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 bay \u0111\u01B0\u1EE3c v\xE0o nh\u1EEFng ch\u1ED7 ng\u01B0\u1EDDi kh\xE1c kh\xF4ng v\xE0o n\u1ED5i" },
-  mystery_blob: { job: "fert", name: "B\xE9 b\xED \u1EA9n", page: 2, price: 1800, cry: ["\u2026\u2026?", "(nghi\xEAng \u0111\u1EA7u)", "?!"], desc: "Lo\u1EA1i l\xE0m vi\u1EC7c \xB7 ch\u1ECDc m\u1ED9t c\xE1i l\xE0 b\xF3n ph\xE2n h\xE0ng lo\u1EA1t \xB7 ph\xE2n c\u1EE7a n\xF3 b\xF3n ra c\xE1i g\xEC th\xEC kh\xF4ng ai \u0111o\xE1n n\u1ED5i" },
-  jellyfish: { job: "harvest", name: "B\xE9 s\u1EE9a xo\u0103n", page: 2, price: 2200, cry: ["\u1EE4c gr\xF9~", "(cu\u1ED9n cu\u1ED9n x\xFAc tu)", "B\u1ED1p \u1EE5c!"], desc: "Lo\u1EA1i l\xE0m vi\u1EC7c \xB7 ch\u1ECDc m\u1ED9t c\xE1i l\xE0 x\xFAc tu nh\u1EB9 nh\xE0ng cu\u1ED9n rau ch\xEDn v\xE0o balo" },
-  impBlob: { name: "B\xE9 qu\u1EF7 nh\u1ECF", page: 2, price: 3e3, cry: ["H\xEC h\xEC.", "H\u01B0!", "(gi\u1EA5u c\xE1i g\xEC \u0111\xF3 \u0111i)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 khi t\xECm kho b\xE1u s\u1EBD tha v\u1EC1 h\u1EA1t gi\u1ED1ng b\xED \u1EA9n \u0111en s\xEC" },
-  angelBlob: { name: "B\xE9 thi\xEAn th\u1EA7n", page: 2, price: 3e3, cry: ["Ting~", "(ph\xE1t s\xE1ng d\u1ECBu d\xE0ng)", "Ch\xFAc ph\xFAc cho b\u1EA1n."], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 khi t\xECm kho b\xE1u s\u1EBD ng\u1EADm v\u1EC1 h\u1EA1t gi\u1ED1ng b\xED \u1EA9n \xE1nh l\u1EA5p l\xE1nh" },
-  /* —— Trang 3 (vé khu mỏ) —— */
-  prismBlob: { name: "B\xE9 l\u0103ng quang", page: 3, price: 8e3, cry: ["Keng~", "(kh\xFAc x\u1EA1 ra m\u1ED9t d\u1EA3i c\u1EA7u v\u1ED3ng)", "Kengg!"], desc: "Lo\u1EA1i s\u1EA3n xu\u1EA5t \xB7 t\xECm kho b\xE1u mang v\u1EC1 m\u1EA3nh l\u0103ng quang (\u0111\u1ED5i \u0111\u01B0\u1EE3c m\u1ED9t \u0111\u01A1n \u1EDF trang \u0111\u01A1n h\xE0ng ph\xF9 thu\u1EF7)" },
-  starBell: { name: "B\xE9 chu\xF4ng sao", page: 3, price: 8e3, cry: ["Leng keng~", "\u2606!", "(l\u1EAFc l\u1EAFc nh\u1EB9)"], desc: "Lo\u1EA1i s\u1EA3n xu\u1EA5t \xB7 t\xECm kho b\xE1u rung r\u01A1i m\u1EA3nh ng\xF4i sao (tri\u1EC7u h\u1ED3i \u0111\u01B0\u1EE3c ph\xF9 thu\u1EF7 tr\xF2n)" },
-  /* —— Át chủ bài (page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
-  peach_soda: { name: "B\xE9 soda \u0111\xE0o", page: 1, price: 9999, cry: ["B\u1ED1p\u2014\u2014!", "(n\u1ED5i m\u1ED9t bong b\xF3ng nh\u1ECF)", "X\xEC~", "(v\u1ECB ng\xF2n ng\u1ECDt)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 tinh linh soda v\u1ECB \u0111\xE0o \xB7 d\u1EC5 th\u01B0\u01A1ng qu\xE1 m\u1EE9c n\xEAn \u0111\u1EAFt nh\u1EA5t" },
-  penguin: { name: "Chim c\xE1nh c\u1EE5t", page: 1, price: 1e5, cry: ["Pingu!", "N\xFAp n\xFAp~", "Tr\u01B0\u1EE3t tuy\u1EBFt n\xE0o!", "C\xE1nh c\u1EE5t!"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 AFK m\u1ED7i 1 ti\u1EBFng mang v\u1EC1 1 v\xE9 gacha ng\u1EABu nhi\xEAn (70% v\xE9 th\u01B0\u1EDDng, 30% v\xE9 \u0111\u1EB7c bi\u1EC7t)" }
-};
-var PASSES = {
-  water: { name: "V\xE9 v\xF9ng n\u01B0\u1EDBc", price: 6e3, desc: "M\u1EDF kho\xE1 ru\u1ED9ng v\xF9ng n\u01B0\u1EDBc (trang 2) + quy\u1EC1n mua b\xE9 tr\xF2n trang 2 v\xE0 h\u1EA1t gi\u1ED1ng thu\u1EF7 sinh, t\u1EB7ng k\xE8m \xF4 ru\u1ED9ng n\u1ED5i \u0111\u1EA7u ti\xEAn" },
-  mine: { name: "V\xE9 khu m\u1ECF", price: 35e3, desc: "M\u1EDF kho\xE1 ru\u1ED9ng khu m\u1ECF (trang 3) + quy\u1EC1n mua b\xE9 tr\xF2n trang 3 v\xE0 h\u1EA1t gi\u1ED1ng khu m\u1ECF, t\u1EB7ng k\xE8m lu\u1ED1ng \u01B0\u01A1m \u0111\u1EA7u ti\xEAn" }
-};
-var C2 = {
-  chuncai: {
-    p: { g: "#2e6a50", G: "#4d9a6e", W: "#a8d8bc", o: "#8a5540" },
-    m: [
-      "................",
-      "................",
-      "....gg....gg....",
-      "...gGGg..gGGWg..",
-      "...gGGGg.gGGg...",
-      "....gg....gg....",
-      ".......o........",
-      "..gg...o...gg...",
-      ".gGGWg.o.gGGg...",
-      ".gGGg..o.gGWGg..",
-      "..gg...o..gg....",
-      "................",
-      "................",
-      "................",
-      "................",
-      "................"
-    ]
-  },
-  biqi: {
-    p: { t: "#4d7a26", T: "#79b544", m: "#3f2a20", M: "#6a4534", W: "#f2e8d8" },
-    m: [
-      "....t..T..t.....",
-      "....t.T..t......",
-      ".....tT.tT......",
-      "....T.t.t.......",
-      ".....t.tT.......",
-      "......ttt.......",
-      ".......t........",
-      ".......t........",
-      ".......t........",
-      "......mmm.......",
-      "..mmmmMMMm.mmm..",
-      ".mMMWmMMMMmMMm..",
-      ".mMMMmMMMMmMWm..",
-      "..mmm.mmmm.mm...",
-      "................",
-      "................"
-    ]
-  },
-  lingjiao: {
-    p: { g: "#2e6a50", G: "#4d9a6e", K: "#241b2e", P: "#5a3f66", W: "#b79ae0" },
-    m: [
-      "................",
-      ".......gg.......",
-      "....ggGGGGgg....",
-      "...gGGgGGgGGg...",
-      "....ggGGGGgg....",
-      ".......gg.......",
-      "................",
-      "................",
-      "...KK......KK...",
-      "....KK....KK....",
-      ".....KKKKKK.....",
-      "....KPPKKPPK....",
-      "....KPPWPPPK....",
-      ".....KKKKKK.....",
-      "................",
-      "................"
-    ]
-  },
-  jiaobai: {
-    p: { g: "#3f7a30", G: "#6aab44", W: "#f6f2e2", s: "#d9d0b8" },
-    m: [
-      "....g....g......",
-      "...gG...gG.g....",
-      "...gG..gGG.Gg...",
-      "..gGG..gGG.Gg...",
-      "..gGG.gGGg.GG...",
-      "..gGGggGGggGG...",
-      "..gGGgGGGgGGG...",
-      "..gGGgGGGgGGg...",
-      "..sWWsWWWsWWs...",
-      "..sWWsWWWsWWs...",
-      "..sWWsWWWsWWs...",
-      "..sWWsWWWsWWs...",
-      "................",
-      "................",
-      "................",
-      "................"
-    ]
-  },
-  lianou: {
-    p: { f: "#c25a78", P: "#f5aec2", W: "#fff0f5", g: "#2e6a50", G: "#4d9a6e", B: "#245a40", o: "#e8dcc2", O: "#c2b090" },
-    m: [
-      "......ff........",
-      ".....fPPf.......",
-      "....fPWWPf......",
-      "..ffPPPPPPff....",
-      ".fPPfPWWPfPPf...",
-      "..fPPPPPPPPf....",
-      "...ffPPPPff.....",
-      ".....gGGg.......",
-      "...gGGGGGGg.....",
-      "..gGGGBGGGGg....",
-      "...gGGGGGGg.....",
-      "................",
-      "...OooOooO......",
-      "...OooOooO......",
-      "....OOOOO.......",
-      "................"
-    ]
-  },
-  wujing: {
-    p: { K: "#3f2a58", V: "#8a64c0", W: "#dcc8f5" },
-    m: [
-      ".......K........",
-      "......KVK.......",
-      "..K...KVK...K...",
-      ".KVK..KVK..KVK..",
-      ".KVK.KKVKK.KVK..",
-      ".KVWKKVWVKKVVK..",
-      "..KVKKVVVKKVK...",
-      "..KVVKVVVKVVK...",
-      "...KKKVVVKKK....",
-      ".....KVVVK......",
-      "......KKK.......",
-      "................",
-      "................",
-      "................",
-      "................",
-      "................"
-    ]
-  },
-  starbush: {
-    p: { b: "#2e5a34", B: "#4f8a55", s: "#ffd94d", S: "#fff2b0", t: "#8a6244", y: "#ffd94d" },
-    m: [
-      "..y..........y..",
-      ".....bbbbbb.....",
-      "...bbBBBBBBbb...",
-      "..bBBsBBBBBBBb..",
-      "..bBsSsBBBBBBb..",
-      ".bBBBsBBBBsBBBb.",
-      ".bBBBBBBBsSsBBb.",
-      ".bBBBBBsBBsBBBb.",
-      "..bBBBsSsBBBBb..",
-      "...bbBBsBBBbb...",
-      ".....bbbbbb.....",
-      ".y.....tt.....y.",
-      ".......tt.......",
-      "......t..t......",
-      "................",
-      "................"
-    ]
-  },
-  gemflower: {
-    p: { K: "#5a4268", r: "#d95a6a", R: "#f090a0", b: "#4a7ac2", B: "#8fb8ec", g: "#38a06a", G: "#7cd4a4", p: "#8a5cc0", P: "#c0a0e8", y: "#c89a38", Y: "#ffd94d", W: "#fff2b0", t: "#4d7a26", T: "#79b544" },
-    m: [
-      "................",
-      "......KrrK......",
-      ".....KrRRrK.....",
-      ".....KrRRrK.....",
-      "..KKK.KrrK.KKK..",
-      ".KbBBK.yy.KgGGK.",
-      ".KbBBKyYWYKgGGK.",
-      "..KKK.yYYy.KKK..",
-      ".......yy.......",
-      ".....KpPK.......",
-      "....KpPPpK......",
-      "....KpPPpK..T...",
-      ".....KppK..T....",
-      "......tt..T.....",
-      "......ttT.......",
-      "................"
-    ]
-  },
-  opalvine: {
-    p: { t: "#3f5a5a", T: "#5c8080", K: "#8a7a9a", o: "#f2ecf5", P: "#f5b8d0", C: "#8adbe0" },
-    m: [
-      "......t.........",
-      "...t..tt........",
-      "...tt..t...t....",
-      "....t..tt.tt....",
-      ".KK..t..tt......",
-      "KooK..t....KK...",
-      "KoPCK.tt..KooK..",
-      ".KK....t..KoCK..",
-      ".......t...KK...",
-      "....KK.t........",
-      "...KooKt........",
-      "...KoCPK........",
-      "....KK.t........",
-      ".......t........",
-      "................",
-      "................"
-    ]
-  },
-  dragoncry: {
-    p: { K: "#8a2a26", T: "#e8604a", t: "#c23c34", W: "#ffe0a0", g: "#3f7a30", G: "#6aab44" },
-    m: [
-      ".......gg.......",
-      "......gGGg......",
-      ".......KK.......",
-      ".....KKTTKK.....",
-      "....KTtTTtTK....",
-      "...KTTTTTTTTK...",
-      "...KTtTWWtTTK...",
-      "..KTTTWWWWTTTK..",
-      "..KTtTTWWTTtTK..",
-      "...KTTTTTTTTK...",
-      "...KTtTTTTtTK...",
-      "....KTTTTTTK....",
-      ".....KKTTKK.....",
-      ".......KK.......",
-      "................",
-      "................"
-    ]
-  },
-  seedDark: {
-    p: { K: "#1c1420", k: "#33263d", v: "#8a2a4a", a: "#5a3f78" },
-    m: [
-      "................",
-      "................",
-      ".....K...K......",
-      ".....KK.KK......",
-      "......KkK.......",
-      ".....KkkkK......",
-      "....KkKkkkK.....",
-      "....KkkkvkK.....",
-      "....KkkkkkK.....",
-      ".....KkkkK......",
-      "......KKK.......",
-      "................",
-      "...a...a...a....",
-      "................",
-      "................",
-      "................"
-    ]
-  },
-  seedLight: {
-    p: { h: "#ffe89a", y: "#c8a94a", Y: "#f5dfa0", W: "#fff8e0", s: "#ffd94d" },
-    m: [
-      "................",
-      ".....hh.hh......",
-      "....h.....h.....",
-      "................",
-      "......yy........",
-      ".....yYYy.......",
-      "....yYWYYy......",
-      "....yYYYYy......",
-      "....yYYYYy......",
-      ".....yYYy.......",
-      "......yy........",
-      "................",
-      "...s....s...s...",
-      "................",
-      "................",
-      "................"
-    ]
-  },
-  /* —— v0.9b (#49): ba họ bí ẩn · kén mộng / cỏ chìa khoá / cây ăn thịt (bản thiết kế chốt) —— */
-  dreamG: {
-    p: { K: "#b8a890", W: "#f8f4ea", w: "#e4dcc8", s: "#d9cfc0", p: "#f5b8d0", t: "#8a6844", g: "#4d7a26" },
-    m: [
-      "........t.......",
-      ".......ts.......",
-      "......s.s.......",
-      ".....sKKs.......",
-      "....KWWWWK......",
-      "...KWwWWWWK.....",
-      "..KWWWWWWWWK....",
-      "..KWwWWWWwWK....",
-      "..KWWWWWWWWK....",
-      "..KWWwWWWWWK....",
-      "...KWWWWwWK.....",
-      "....KWWWWK......",
-      ".....KKKK.......",
-      "......p.........",
-      ".......p........",
-      "...g.......g...."
-    ]
-  },
-  dreamW: {
-    p: { K: "#4a7a94", B: "#bcdde8", b: "#94c2d4", W: "#eef8fa", d: "#7a94b8", o: "#d8ecf2" },
-    m: [
-      "................",
-      "......KKK.......",
-      "....KKBBBK......",
-      "...KBBWBBBK.....",
-      "..KBBBBBBBBK....",
-      "..KBBdddBBBK....",
-      ".KBBddBddBBBK...",
-      ".KBBdBBBdBBBK...",
-      ".KBBddBddBBbK...",
-      "..KBBdddBBbK....",
-      "..KBBBBBBbbK....",
-      "...KBBBBbbK.....",
-      "....KKbbbK......",
-      "......KKK.......",
-      "..o.........o...",
-      "......o........."
-    ]
-  },
-  dreamM: {
-    p: { K: "#3f3a50", S: "#8d8398", s: "#6d657c", c: "#241f2c", O: "#ffd94d", o: "#ffb060", d: "#575070" },
-    m: [
-      "................",
-      "......KKK.......",
-      "....KKSSSK......",
-      "...KSSSSSSK.....",
-      "..KSSsSSSSSK....",
-      "..KSScSSSsSK....",
-      ".KSSScOcSSSSK...",
-      ".KSsScOOcSSSK...",
-      ".KSSSScOcSsSK...",
-      "..KSSSScSSSK....",
-      "..KsSSSSSsSK....",
-      "...KSSSSSSK.....",
-      "....KKSSSK......",
-      "......KKK.......",
-      "...d.......d....",
-      "................"
-    ]
-  },
-  keyG: {
-    p: { t: "#4d7a26", T: "#79b544", c: "#a8681f", C: "#d99a43", W: "#ffe9b8", g: "#79b544" },
-    m: [
-      "...tt...........",
-      "..t..tt.........",
-      "..t....tt.......",
-      ".tT......tt.....",
-      ".tT........t....",
-      "..t.......CCC...",
-      "..t.......CWC...",
-      "..t.......CCC...",
-      ".tTt.......c....",
-      "..t........c....",
-      "..t........cC...",
-      "..t........c....",
-      "..t........cC...",
-      ".gtg............",
-      "g.t..g..........",
-      "................"
-    ]
-  },
-  keyW: {
-    p: { t: "#2e6a50", T: "#4d9a6e", c: "#3f7a5c", C: "#7cc4a4", W: "#c8ecd8", v: "#245a40", o: "#d8ecf2" },
-    m: [
-      "...tt...........",
-      "..t..tt.........",
-      "..t....tt.......",
-      ".tT......tt.....",
-      ".tT........t....",
-      "..t.......CCC...",
-      "..t.......CWC...",
-      "..t.......CCC...",
-      ".tTt.......c....",
-      "..t....o...cv...",
-      "..t........cC...",
-      "..t........cv...",
-      "..t........cC...",
-      "..t.............",
-      ".o..............",
-      "................"
-    ]
-  },
-  keyM: {
-    p: { t: "#b8862a", T: "#ffd94d", P: "#9a6ce0", p: "#c4a2e8", z: "#f0e4ff", s: "#ffd94d" },
-    m: [
-      "...tt...........",
-      "..t..tt.........",
-      "..t....tt.......",
-      ".tT......tt.....",
-      ".tT........t....",
-      "..t.......PpP...",
-      "..t.......PzP...",
-      "..t.......PPP...",
-      ".tTt.......P....",
-      "..t........P....",
-      "..t........Pp...",
-      "..t........P....",
-      "..t........Pp...",
-      ".sts....z.......",
-      "..t.............",
-      "................"
-    ]
-  },
-  fangG: {
-    p: { K: "#2e5a1e", G: "#6cb457", E: "#a4dc8c", R: "#c24a5a", W: "#fffdf4", t: "#4d7a26", g: "#79b544" },
-    m: [
-      "....KKKK........",
-      "..KKGGGGKK......",
-      ".KGGEGGGGGK.....",
-      ".KGGGGGGGGK.....",
-      "..KGGGGGGK......",
-      "...KRRRRK.......",
-      "..W.W..W.W......",
-      "...KRRRRK.......",
-      "..KGGGGGGK......",
-      ".KGGGGGGGGK.....",
-      ".KGGEGGGGGK.....",
-      "..KKGGGGKK..g...",
-      "....KKKK.t.g....",
-      "......t.t.......",
-      ".......t........",
-      "....g..t...g...."
-    ]
-  },
-  fangW: {
-    p: { K: "#6a2420", R: "#a83a35", r: "#c25a50", C: "#f2dfc0", D: "#2e1210", g: "#2e6a50", G: "#4d9a6e" },
-    m: [
-      ".....KKKKK......",
-      "...KKRRRRRKK....",
-      "..KRRCRRRCRRK...",
-      ".KRRRRrRrRRRK...",
-      ".KRCRRKKKRRCK...",
-      ".KRRRKDDDKRRK...",
-      ".KRrKDDDDDKrK...",
-      ".KRRRKDDDKRRK...",
-      ".KRCRRKKKRRCK...",
-      ".KRRRRrRrRRRK...",
-      "..KRRCRRRCRRK...",
-      "...KKRRRRRKK....",
-      ".....KKKKK......",
-      "..Gg.......gG...",
-      ".GggG.....GggG..",
-      "................"
-    ]
-  },
-  fangM: {
-    p: { K: "#1c1428", P: "#3a2a52", p: "#5a4278", F: "#8ae0ea", f: "#d8f8fc", O: "#ffb060", o: "#ffe0a0", t: "#2e2440" },
-    m: [
-      "....KKKK........",
-      "..KKPPPPKK......",
-      ".KPPpPPPPPK.....",
-      ".KPPPPPPPPK.....",
-      "..KPPPPPPK......",
-      "...KOOOOK.......",
-      "..F.FoOF.F......",
-      "..f.KOOK.f......",
-      "..KPPPPPPK......",
-      ".KPPPPPPPPK.....",
-      ".KPPpPPPPPK.....",
-      "..KKPPPPKK......",
-      "....KKKK.t......",
-      "......t.t.......",
-      ".......t........",
-      "....F..t...F...."
-    ]
-  },
-  shardPrism: {
-    p: { K: "#8ab8c8", k: "#4a8098", W: "#e8f8ff", w: "#c0e8f4", R: "#ff6060", G: "#60cc60", B: "#6090ff", Y: "#ffd940", P: "#c060e0", C: "#40d0d0" },
-    m: [
-      "................",
-      "..........R.....",
-      ".....K..........",
-      "....KWK..G......",
-      "...KWwWK........",
-      "..KWwwwWK...B...",
-      "..KWwwwWK.......",
-      "...KwwWK....Y...",
-      "....KWK..P......",
-      ".....K..........",
-      "......C.........",
-      "...R............",
-      "........G.......",
-      "................",
-      "................",
-      "................"
-    ]
-  },
-  shardStar: {
-    p: { K: "#6a4ab8", P: "#b094e0", p: "#d8c4ff", W: "#ffffff", o: "#ffd94d", y: "#fff4b0" },
-    m: [
-      "................",
-      "........o.......",
-      ".......oyo......",
-      "......oyyo......",
-      "...ooooWooo.....",
-      "..oPPPpWpKK.....",
-      "..oKKKKK........",
-      "...oooo.........",
-      "................",
-      "..........oo....",
-      ".........oyo....",
-      "........oWyo....",
-      ".......oWpyo....",
-      "........oooo....",
-      "................",
-      "................"
-    ]
-  },
-  strawhat: {
-    p: { K: "#a83a52", P: "#f7a6bd", p: "#ffd0dc", k: "#e07b96", Y: "#f5e0a8", y: "#e0be7a" },
-    m: [
-      "................",
-      "................",
-      "................",
-      "......KKKK......",
-      ".....KYyYYK.....",
-      "....KYYYYYYK....",
-      "....KYYYYYYK....",
-      "..KKKPPPPPPKKK..",
-      ".KYYKPpPPPKYYYK.",
-      "KYyYYYYYYYYYYyYK",
-      ".KKKKKKKKKKKKKK.",
-      ".........kPk....",
-      "..........kPk...",
-      "................",
-      "................",
-      "................"
-    ]
-  },
-  // Huy hiệu mặt tiền: nón rơm ruy băng hồng (wen chốt, chỗ ký tên tác giả)
-  strawberry: {
-    p: { g: "#4d7a26", G: "#79b544", K: "#8a2a35", r: "#d94f5c", R: "#e8808e", y: "#ffe0a8" },
-    m: [
-      "................",
-      "................",
-      "................",
-      "................",
-      "......G..g......",
-      ".....gGGGGg.....",
-      ".......GG.......",
-      ".....KrrrrK.....",
-      "....KrryrryK....",
-      "....KrrrrrrK....",
-      "....KryrrryK....",
-      ".....KrrrrK.....",
-      "......KrrK......",
-      ".......KK.......",
-      "................",
-      "................"
-    ]
-  },
-  strawberryW: {
-    p: { g: "#2e6a50", G: "#4d9a6e", K: "#2e6a80", r: "#7fd4dd", R: "#b8ecf0", W: "#f0fcff" },
-    m: [
-      ".....G..g.......",
-      "....gGGGGg......",
-      "......GG........",
-      "....KrrrrK......",
-      "...KrrWrrrK.....",
-      "...KrRRrrrK.....",
-      "...KrrrrRrK.....",
-      "....KrrrrK......",
-      ".....KrrK.......",
-      "......KK........",
-      ".......W........",
-      "................",
-      "................",
-      "................",
-      "................",
-      "................"
-    ]
-  },
-  strawberryM: {
-    p: { g: "#5a3f78", G: "#8a5cc0", K: "#3a2258", r: "#9a6ac8", R: "#c4a2e8", W: "#e8d8f8" },
-    m: [
-      ".....G..g.......",
-      "....gGGGGg......",
-      "......GG........",
-      "....KrrrrK......",
-      "...KrRrWrrK.....",
-      "...KrrRrrrK.....",
-      "...KRrrrRrK.....",
-      "....KrrRrK......",
-      ".....KrrK.......",
-      "......KK........",
-      "................",
-      "................",
-      "................",
-      "................",
-      "................",
-      "................"
-    ]
-  }
-};
-var DYNAMIC_SPR = {};
 function registerDynamicSprite(name, mapArray) {
   DYNAMIC_SPR[name] = mapArray;
 }
-var spriteCache = /* @__PURE__ */ new Map();
 function spriteSVG(name, px) {
   const key = name + "@" + px;
   if (spriteCache.has(key)) return spriteCache.get(key);
@@ -1835,7 +164,6 @@ function spriteSVG(name, px) {
   spriteCache.set(key, out);
   return out;
 }
-var tileCache = /* @__PURE__ */ new Map();
 function tileURI(kind, seedNum) {
   const tkey = kind + "@" + seedNum;
   if (tileCache.has(tkey)) return tileCache.get(tkey);
@@ -1843,27 +171,6 @@ function tileURI(kind, seedNum) {
   tileCache.set(tkey, out);
   return out;
 }
-var LP = {
-  "8": "#8ec8d8",
-  "~": "#b8e0ea",
-  "-": "#79b4c6",
-  "_": "#6faabf",
-  "9": "#3f7290",
-  "!": "#35617d",
-  "6": "#5f5870",
-  "^": "#6d657c",
-  "&": "#4e4860",
-  "7": "#433c54",
-  "5": "#8ae0ea",
-  "*": "#e8fcff",
-  "%": "#5fc8d8",
-  "#": "#3a3450",
-  "l": "#5aa06a",
-  "L": "#7cc48a",
-  "=": "#b9d194",
-  "0": "#ffe9b8",
-  "+": "#fff2b0"
-};
 function buildTile(kind, seedNum) {
   const rnd = mulberry32(seedNum);
   const base = { grass: "1", wet: "w", soil: "a", water: "8", wplot: "9", wplotwet: "!", mine: "6", mplot: "7", mplotwet: "#" }[kind] || "a";
@@ -1993,9 +300,1732 @@ function warmUpCache(CROPS2) {
   }
   setTimeout(next, 1e3);
 }
+var P, GACHA_P, SPR, PET_P, PET_SPR, petLinear, PET_FX, petCache, PETS, PASSES, C2, DYNAMIC_SPR, spriteCache, tileCache, LP;
+var init_graphics = __esm({
+  "src/graphics.js"() {
+    init_state();
+    init_data();
+    P = {
+      G: "#6cb457",
+      D: "#3e7d3a",
+      E: "#a4dc8c",
+      R: "#dd5548",
+      x: "#a33528",
+      F: "#e06578",
+      f: "#a83a52",
+      p: "#ffb8c4",
+      O: "#e89a4e",
+      Q: "#c9772e",
+      q: "#96551f",
+      S: "#8a6844",
+      h: "#f7c07a",
+      B: "#9ed8f2",
+      b: "#5fa8cc",
+      u: "#3f7ea6",
+      T: "#8a6a52",
+      Y: "#c2b878",
+      y: "#9a915c",
+      L: "#b8b0a2",
+      M: "#8a8274",
+      C: "#f2c231",
+      U: "#bf8a1a",
+      W: "#fffdf4",
+      K: "#3a2c22",
+      n: "#ffb0bc",
+      V: "#b48ae0",
+      v: "#8a5cc0",
+      "1": "#aecb87",
+      "2": "#a0bd77",
+      "3": "#c6dfa0",
+      "4": "#8dab68",
+      a: "#b99b84",
+      c: "#9c7d66",
+      d: "#cbb096",
+      e: "#8a6a52",
+      w: "#9d7458",
+      g: "#b08a6d",
+      m: "#7d5a42",
+      s: "#684a36"
+    };
+    GACHA_P = {
+      "0": "#ffffff",
+      "1": "#e0e0e0",
+      "2": "#c0c0c0",
+      "3": "#a0a0a0",
+      "4": "#808080",
+      "5": "#606060",
+      "6": "#404040",
+      "7": "#202020",
+      "8": "#101010",
+      "9": "#000000",
+      "a": "#ff0000",
+      "b": "#cc0000",
+      "c": "#990000",
+      "d": "#ff6666",
+      "e": "#ff9999",
+      "f": "#ff6600",
+      "g": "#cc5200",
+      "h": "#ff9933",
+      "i": "#8b4513",
+      "j": "#a0522d",
+      "k": "#cd853f",
+      "l": "#deb887",
+      "m": "#ffff00",
+      "n": "#ffd700",
+      "o": "#ffcc00",
+      "p": "#ffdab9",
+      "q": "#eee8aa",
+      "r": "#bdb76b",
+      "s": "#00ff00",
+      "t": "#32cd32",
+      "u": "#008000",
+      "v": "#006400",
+      "w": "#98fb98",
+      "x": "#90ee90",
+      "y": "#adff2f",
+      "z": "#556b2f",
+      "A": "#0000ff",
+      "B": "#0000cc",
+      "C": "#00008b",
+      "D": "#4169e1",
+      "E": "#6495ed",
+      "F": "#87ceeb",
+      "G": "#00ffff",
+      "H": "#00ced1",
+      "I": "#20b2aa",
+      "J": "#008080",
+      "K": "#7fffd4",
+      "L": "#ff00ff",
+      "M": "#c71585",
+      "N": "#800080",
+      "O": "#4b0082",
+      "P": "#9370db",
+      "Q": "#da70d6",
+      "R": "#ffc0cb",
+      "S": "#ffb6c1",
+      "T": "#ff69b4",
+      "U": "#db7093",
+      "V": "#ffe4c4",
+      "W": "#ffe4e1",
+      "X": "#faf0e6",
+      "Y": "#ffefd5",
+      "Z": "#ffebcd"
+    };
+    SPR = {
+      sprout: ["................", "................", "................", "................", "...DD......DD...", "..DEED....DEED..", ".DEGGGD..DGGGED.", ".DGGGGD..DGGGGD.", "..DGGGGDDGGGGD..", "...DGGGDDGGGD...", "....DGGGGGGD....", "......DGGD......", "...TTTDGGDTTT...", "..TTTTTTTTTTTT..", "................", "................"],
+      seedling: ["................", "................", "................", "................", "................", "................", "................", "......EE........", ".....DGE........", "......DG........", "......GD........", "......GG........", "....TTGGTT......", "...TTTTTTTT.....", "................", "................"],
+      radish: ["....DD...DD.....", "...DGED.DEGD....", "...DGGEDEGGD....", "....DGGDGGD.....", ".....DGGGD......", "......DGD.......", "....fDDGDDf.....", "...fFppFFFFf....", "..fFpppFFFFFf...", "..fFppFFFFFFf...", "..fFpFFFFFFFf...", ".TfFFFFFFFFFfT..", ".TTfFFFFFFFfTT..", "..TTfFFFFFfTT...", "...TTTfffTTT....", "................"],
+      tomato: ["................", "......DDDD......", "....DDGEEGDD....", "...DGEGGGGEGD...", "..DGEGGGGGGEGD..", "..DGpRRGGRRpGD..", "..DGRRxGGxRRGD..", "..DGGGGGGGGGGD..", "...DGGGpRGGGD...", "...DGGGRxGGGD...", "....DGGGGGGD....", ".....DGGGGD.....", "....TTDGGDTT....", "...TTTTTTTTTT...", "................", "................"],
+      pumpkin: ["................", "................", ".......SS.S.....", "......DSSDS.....", "...qqq.SS.qqq...", "..qOOOqqqqOOOq..", ".qOhhOQOOQOOOOq.", ".qOhOOQOOQOOOOq.", ".qOOOOQOOQOOOOq.", ".qOOOOQOOQOOOOq.", ".qOOOOQOOQOOOOq.", "..qOOOQOOQOOOq..", "...qqOOOOOOqq...", "..TTqqqqqqqqTT..", "...TTTTTTTTTT...", "................"],
+      moonberry: ["....W......W....", "................", "......DDDD......", "....DDGEEGDD....", "...DGEGGGGEGD...", "..DGWBBGGBBWGD..", "..DGBBuGGuBBGD..", "..DGGGGGGGGGGD..", "...DGGGWBGGGD...", "...DGGGBuGGGD...", "....DGGGGGGD....", ".....DGGGGD.....", "....TTDGGDTT....", "...TTTTTTTTTT...", ".......W........", "................"],
+      weed: ["................", "................", "................", "................", "................", "................", "....Y....Y......", "....Y..Y.Y..Y...", ".....y.Y.y.Y....", "..Y...yYYy......", "...y..YY...Y....", "....yYYY..y.....", ".....YY.Yy......", ".....yYYY.......", "................", "................"],
+      stone: ["................", "................", "................", "................", "................", "................", "......LLL.......", "....LLLLLLL.....", "...LLWLLLLLL....", "...LLLLLLLMLL...", "..LLLLLLLLLML...", "..MLLLLLLLLLL...", "..MMLLLLLLLLM...", "...MMMMMMMMM....", "................", "................"],
+      slime: ["................", "................", "................", "................", ".....BBBBBB.....", "....BBBBBBBB....", "...BBWWBBBBBB...", "..BBWWBBBBBBBB..", "..BBBBBBBBBBBB..", "..BB33BBBB33BB..", ".BBBBBBBBBBBBBB.", ".BnBBBB33BBBBnB.", ".BBBBBBBBBBBBBB.", ".bBBBBBBBBBBBBb.", "..bbbbbbbbbbbb..", "................"],
+      octo: ["................", "................", "................", ".....VVVVVV.....", "....VVVVVVVV....", "...VVWWVVVVVV...", "...VWWVVVVVVV...", "..VVVVVVVVVVVV..", "..VVKKVVVVKKVV..", "..VVVVVVVVVVVV..", "..VnVVVKKVVVnV..", "..VVVVVVVVVVVV..", "..VVVVVVVVVVVV..", "..VV.VV..VV.VV..", "..vv.vv..vv.vv..", "................"],
+      coin: ["................", "................", "................", ".....UUUUU......", "....UCCCCCU.....", "...UCCWWCCCU....", "...UCWCCCCCU....", "...UCWCCCCCU....", "...UCCCCCCCU....", "...UCCCCCCCU....", "....UCCCCCU.....", ".....UUUUU......", "................", "................", "................", "................"],
+      sun: ["................", ".......C........", "...C...C...C....", "....C.....C.....", "......CCC.......", ".....CCCCC......", "..CC.CCWCC.CC...", ".....CCCCC......", "......CCC.......", "....C.....C.....", "...C...C...C....", ".......C........", "................", "................", "................", "................"],
+      flower: ["................", "................", "................", "....nnn.nnn.....", "...npppnpppn....", "...nppnCnppn....", "....nnCCCnn.....", "...nppnCnppn....", "...npppnpppn....", "....nnn.nnn.....", "................", "................", "................", "................", "................", "................"],
+      shopIcon: ["................", "................", "................", "....fpf.fpf.....", "....fppffppf....", ".....ffFFff.....", "..qddddFFddddq..", "..qqqqqFFqqqqq..", "...qdddFFdddq...", "...qFFFFFFFFq...", "...qdddFFdddq...", "...qdddFFdddq...", "...qqqqqqqqqq...", "................", "................", "................"],
+      bagIcon: ["................", "................", ".....ffff.......", "....f....f......", "...ffffffffff...", "..fddddddddddf..", "..fddddddddddf..", "..fFFFFFFFFFFf..", "..fFFFFCCFFFFf..", "..fFpFFCCFFFFf..", "..fFpFFFFFFFFf..", "..fFFFFFFFFFFf..", "...ffffffffff...", "................", "................", "................"],
+      gearIcon: ["................", "................", "................", "................", "......MM........", "....MLLLLM......", "...MLLLLLLM.....", "..MMLLMMLLMM....", "..MMLLMMLLMM....", "...MLLLLLLM.....", "....MLLLLM......", "......MM........", "................", "................", "................", "................"],
+      diceIcon: ["................", "................", "..KKKKKKKKKKKK..", "..KWWWWWWWWWWK..", "..KWWKKWWWWWWK..", "..KWWKKWWWWWWK..", "..KWWWWWWWWWWK..", "..KWWWWKKWWWWK..", "..KWWWWKKWWWWK..", "..KWWWWWWWWWWK..", "..KWWWWWWWKKWK..", "..KWWWWWWWKKWK..", "..KWWWWWWWWWWK..", "..KKKKKKKKKKKK..", "................", "................"],
+      toolSeed: ["................", "................", "................", "...qqqqqqqqqq...", "...qccccccccq...", "...qdddGGdddq...", "...qddGGGGddq...", "...qdddDDdddq...", "...qdddDDdddq...", "...qddeeeeddq...", "...qddddddddq...", "...qqqqqqqqqq...", "................", "................", "................", "................"],
+      toolWater: ["................", "................", "................", "..........uu....", ".........u..u...", "..u..uuuuu...u..", "..uu.ukkbbu..u..", ".B.uuubbbbu.u...", "....ubbbbbbuu...", "....ubbbbbbu....", "....ubbbbbbu....", "....uibbbbiu....", ".....uuuuuu.....", "................", "................", "................"],
+      toolFert: ["................", "................", "................", "......qq........", ".....q..q.......", "....qaaaaq......", "...qaaaaaaq.....", "..qaaGGaaaaq....", "..qaaGGaaaaq....", "..qaaaaaeaaq....", "..qaeaaaaaaq....", "...qaaaaaaq.....", "....qqqqqq......", "................", "................", "................"],
+      toolHarvest: ["................", "................", "................", "................", "................", "................", "...FF.OO.GG.....", "..qqqqqqqqqq....", "...qacacacaq....", "...qcacacacq....", "....qacacaq.....", "....qcacacq.....", ".....qqqqq......", "................", "................", "................"],
+      mapIcon: ["................", ".KKKKKKKKKKKKKK.", "KLLLWWLLLLLGGGLK", "KLLLWWKKKLLGGGLK", "KLLLWKRRRKLGGGLK", "KLLLWKRWRKLLLLLK", "KLLLWKRRRKLLLLLK", "KWWWWWKRKWWWWWWK", "KWWWWWWKWWWWWWWK", "KbbLWWLLLLLLLLLK", "KLbbLWWLLLLLLLLK", "KLLbbWWLLLLLGGLK", "KLLLbWWLLLLLGGLK", "KLLLLWWLLLLLLLLK", ".KKKKKKKKKKKKKK.", "................"],
+      toolShovel: ["................", "................", "................", "......SSSS......", ".......SS.......", ".......SS.......", ".......SS.......", ".......SS.......", ".....MLLLLM.....", "....MLLWLLLM....", "....MLLLLLLM....", ".....MLLLLM.....", "......MMMM......", "................", "................", "................"],
+      cloud: ["................", "................", "................", "................", "......LLLL......", ".....LWWWWL.....", "...LLWWWWWWL....", "..LWWWWWWWWWL...", "..LWWWWWWWWWL...", "...LLLLLLLLLL...", "................", "................", "................", "................", "................", "................"],
+      raincloud: ["................", "................", "................", "......LLLL......", ".....LWWWWL.....", "...LLWWWWWWL....", "..LWWWWWWWWWL...", "..LWWWWWWWWWL...", "...LLLLLLLLLL...", "................", "....B...B...B...", "................", "...B...B...B....", "................", "................", "................"],
+      bush: ["................", "................", ".....DDDD.......", "...DDGEEGDD.....", "..DGEEGGWEGD....", ".DGEGGEEGGGED...", ".DGGEEGGGEGGD...", ".DGGWGGEEGGGD...", ".DGEGGGGGGEGD...", ".DGGGEGGGWGGD...", "..DGGGGGGGGD....", "...DDGGGGDD.....", ".....DDDD.......", "................", "................", "................"],
+      pinkgrass: ["................", "................", "....W......W....", ".....pp...pp....", "....pnfp.pfnp...", ".....pp...pp....", "......f....f....", ".....pp...pp....", "....pfnp.pnfp...", ".....pp...pp....", "..W...f....f....", "...BBbfBBBfbBB..", "..BbBBbBbBBbBb..", "...bbBBbbBBbb...", "................", "................"],
+      emHeart: ["................", "................", "................", "................", "....ff...ff.....", "...fFpf.fFFf....", "...fFFFfFFFf....", "...fFFFFFFFf....", "....fFFFFFf.....", ".....fFFFf......", "......fFf.......", ".......f........", "................", "................", "................", "................"],
+      emStar: ["................", "................", "................", ".......U........", "......UCU.......", "......UCU.......", "...UUUCCCUUU....", "....UCCCCCU.....", ".....UCCCU......", "....UCU.UCU.....", "....U.....U.....", "................", "................", "................", "................", "................"],
+      emLeaf: ["................", "................", "................", "................", "......DD........", ".....DGGD.......", "....DGEGGD......", "....DGGGGD......", ".....DGGD.......", "......DD........", ".......D........", ".......D........", "................", "................", "................", "................"],
+      emNote: ["................", "................", "................", ".....KKKKK......", ".....K...K......", ".....K...K......", ".....K...K......", "...KKK..KKK.....", "...KKK..KKK.....", "................", "................", "................", "................", "................", "................", "................"],
+      lotus: ["................", "................", "......Ff........", ".....pFfp.......", "....pFppFp......", "....fpFFpf......", ".....fppf.......", "...DGGGGGGD.....", "..DGGGGGGGGD....", "...DDGGGGDD.....", "................", "..b..bbb...b....", ".bBbbBBBbbBb....", "..bb..b..bb.....", "................", "................"],
+      gem: ["................", "................", ".......v........", "......vVv.......", ".....vVWVv......", ".....vVVVv......", "....vVVWVVv.....", "....vVVVVVv.....", "...vVVWVVVVv....", "..BbvVVVVVvBb...", ".bBBvVVVVVvBBb..", ".bbbvvvvvvvbbb..", "..MMMMMMMMMMM...", "...MMMMMMMMM....", "................", "................"],
+      emBang: ["................", "................", ".....ffff.......", ".....fpFf.......", ".....fFFf.......", ".....fFFf.......", ".....fFFf.......", ".....fFFf.......", "......ff........", "................", ".....ffff.......", ".....fFFf.......", ".....ffff.......", "................", "................", "................"],
+      ticketNorm: ["................", "....ffffffff....", "...fFFFFFFFFf...", "...fFCCCCCCFf...", "..fFCCCCCCCCFf..", "..fFCCCCCCWCFf..", "..fFCCCCWWCCFf..", "..fFCCCCCCWCFf..", "..fFCCCCCCCCFf..", "..fFCCCCCCCCFf..", "...fFCCCCCCFf...", "...fFFFFFFFFf...", "....ffffffff....", "................", "................", "................"],
+      ticketSpec: ["................", "....ffffffff....", "...ffffffffff...", "...fvVVVVVVvf...", "..fvVVVVVVVVvf..", "..fvVVVWWVVVvf..", "..fvVVWWWWVVvf..", "..fvVVVWWVVVvf..", "..fvVVVVVVVVvf..", "..fvVVVVVVVVvf..", "...fvVVVVVVvf...", "...ffffffffff...", "....ffffffff....", "................", "................", "................"],
+      ticketSuper: ["................", "....ffffffff....", "...ffffffffff...", "...fxOOOOOOxf...", "..fxOOOOOOOOxf..", "..fxOOOWWOOOxf..", "..fxOOWWWWOOxf..", "..fxOOOWWOOOxf..", "..fxOOOOOOOOxf..", "..fxOOOOOOOOxf..", "...fxOOOOOOxf...", "...ffffffffff...", "....ffffffff....", "................", "................", "................"],
+      gachaCapsuleNorm: ["................", ".....ffff.......", "...fCCCCCCf.....", "..fCCCCWCCCf....", "..fCCCCCCCCf....", "..ffffffffff....", "..fvvvvvvvvf....", "..fvvvvWvvvf....", "...fvvvvvvf.....", ".....ffff.......", "................", "................", "................", "................", "................", "................"],
+      gachaCapsuleSpec: ["................", ".....ffff.......", "...fYYYYYYf.....", "..fYYYYWYYYf....", "..fYYYYYYYYf....", "..ffffffffff....", "..fvvvvvvvvf....", "..fvvvvWvvvf....", "...fvvvvvvf.....", ".....ffff.......", "................", "................", "................", "................", "................", "................"],
+      gachapon: [
+        ".............ffffff.............",
+        "...........ffFFFFFFff...........",
+        "..........fFFFFFFFFFFf..........",
+        ".........fFFFFFFFFFFFFf.........",
+        "........fFFFFFFFFFFFFFFf........",
+        ".......fBBBBBBBBBBBBBBBBf.......",
+        "......fBiiiBBBBBBBBBBBBBBf......",
+        "......fBiiWiBBBBBBBBBBBBBf......",
+        ".....fBBiiiiBBBBBBBBBBBBBBf.....",
+        ".....fBBBBDGGDBBBBUCCUBBBBf.....",
+        ".....fBBBBGWWGFnnFCWWCBBBBf.....",
+        ".....fBBBBGGGGnWWnCCCCBBBBf.....",
+        ".....fBBBBDGGDnnnnUCCUBBBBf.....",
+        ".....fBBfFFfDEFnnFOQdvvdBBf.....",
+        ".....fBBFWWFEWWEOWWOvWWvBBf.....",
+        "......fBFFFFEEEEOOOOvvvvBf......",
+        "......fBfFFfDEEDQOOQdvvdBf......",
+        ".......fbbbbbbbbbbbbbbbbf.......",
+        "......ffffffffffffffffffff......",
+        "......fFFFFFFFFFFFFFFFFFFf......",
+        "......fFFFFFFFFFFFFFFFFFFf......",
+        "......fFFFFFFFFFFFFFFFFFFf......",
+        ".....fFFFFFFFMMMMMMFFFFFFFf.....",
+        ".....fFFFFFFMMLLLLMMFFFFFFf.....",
+        ".....fFFFFFFMLLWWLLMFFFFFFf.....",
+        ".....fFFFFFFMLLWWLLMFFFFFFf.....",
+        ".....fFFFFFFMMLLLLMMFFFFFFf.....",
+        ".....fFFFFFFFMMMMMMFFFFFFFf.....",
+        ".....fFFFFFFMMMMMMMMFFFFFFf.....",
+        ".....fFFFFFFMKKKKKKMFFFFFFf.....",
+        ".....fFFFFFFMKKKKKKMFFFFFFf.....",
+        ".....ffffffffffffffffffffff....."
+      ],
+      dungeonGate: [
+        "................",
+        "....MMMMMMMM....",
+        "...MLLLLLLLLM...",
+        "..MLLMCMMCMLLM..",
+        "..MLMvvvvvvMLM..",
+        "..MLvVuuuuVvLM..",
+        "..MLvVuBKuVvLM..",
+        "..MLvVKuuKVvLM..",
+        "..MLvVuuWKVvLM..",
+        "..MLvVKuuuVvLM..",
+        "..MLvVKKuBVvLM..",
+        "..MLvVuKKuVvLM..",
+        "..MLvVuuuuVvLM..",
+        "..MLMvvvvvvMLM..",
+        ".MMLMvvvvvvMLMM.",
+        ".MMMMvvvvvvMMMM."
+      ],
+      fireball: [
+        "................",
+        ".......qq.......",
+        "......qQQq......",
+        ".....qQOOQq.....",
+        "....qQOhhOQq....",
+        "....qQOhhOQq....",
+        ".....qQOOQq.....",
+        "......qQQq......",
+        ".......qq.......",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      iceball: [
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "uu..............",
+        "ubuu............",
+        "ubWBbuuu........",
+        "uBWWWWBBbuu.....",
+        "uBWWWWWWWBBBbuuu",
+        "uBWWWWBBbuuu....",
+        "ubWBbuu.........",
+        "ubu.............",
+        "uu.............."
+      ],
+      lightning: [
+        "........C.......",
+        ".......WC.......",
+        "......WWC.......",
+        ".....WWCC.......",
+        "....WWCC........",
+        "...WWCC.........",
+        "..WWWWWWWWC.....",
+        "...CCCCCWWC.....",
+        ".......WWC......",
+        "......WWC.......",
+        ".....WWC........",
+        "....WWC.........",
+        "...WC...........",
+        "..C.............",
+        "................",
+        "................"
+      ],
+      arrow: [
+        "................",
+        ".......W........",
+        "......LWL.......",
+        "......LWL.......",
+        "......LWL.......",
+        "......LWL.......",
+        ".....LLWLL......",
+        ".....MMWMM......",
+        ".....MMWMM......",
+        "......MWM.......",
+        "......MWM.......",
+        ".......M........",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      leafBolt: [
+        "................",
+        "..............E.",
+        ".............EGE",
+        "...........EGGDE",
+        ".........EGGGDE.",
+        ".......EGGGGDE..",
+        ".....EGGGGGDE...",
+        "...EGGGGGGDE....",
+        "..EGGGGGGDE.....",
+        ".EGGGGGGDE......",
+        "EGGGGGGDE.......",
+        "EGGGGGDE........",
+        ".EDGGDE.........",
+        "..EDDE..........",
+        "...EE...........",
+        "................"
+      ],
+      holyLight: [
+        ".......C........",
+        ".......W........",
+        "......CWC.......",
+        "...C..CWC..C....",
+        "...WCCWWWCCW....",
+        "...C..CWC..C....",
+        "......CWC.......",
+        ".......W........",
+        ".......C........",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      waterball: [
+        "................",
+        ".......uu.......",
+        "......uWWu......",
+        ".....uWbbu......",
+        "....uWbbbbWu....",
+        "...uWbbbbbbWu...",
+        "...uWbbbbbbWu...",
+        "....uWbbbbWu....",
+        ".....uuuuuu.....",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      threeSlimesWalking: [
+        "................................",
+        "...........WW...................",
+        ".........WWWWWW.................",
+        "........WWWWWWWW.........W......",
+        ".........WWWWWW........WWWWW....",
+        "........................WWW.....",
+        "................................",
+        "..................FFFFFF........",
+        "................FFppppFFFF......",
+        "...............FppppppppppF.....",
+        "..............FppppWppWppppF....",
+        "..............FppppKppKppppF....",
+        "..............FppppppppppppF....",
+        ".....EEEEEE....FppppppppppF.....",
+        "...EEEEEEEEEE...FFFFFFFFFF......",
+        ".EEEEEEEEEEEEE..................",
+        "EEEEEbbbbbbEEEEEEEEEEEGGGGGGEEE.",
+        "EEEbbBBBBbbbbEEEEEEGGGEEEEGGGGEE",
+        "EEbBBBBBBBBBbbEEEEEGEEEEEEEEEEGE",
+        "EabBBBBWBBWBBBbbeeGEEEEWEEWEEEEG",
+        "aabBBBBKBBKBBBbbaaeGEEEEKEEKEEEG",
+        "aabBBBBBBBBBBBbbaaeGEEEEEEEEEEEG",
+        "eeabBBBBBBBBBbbcceaeGEEEEEEEEEEG",
+        "cceeebbbbbbbbbbcceeaaeGGGGGGGGGG",
+        "cccceeeeeeeeeeccMMMMMcaaaeeeeeaa",
+        "SccccceeTTeccSSMMMMMMMeeccaceeec",
+        "SSScceeeTTeeSSSSMMMMMceccceeeccc",
+        "TSSScceeeeeSSSSSTTSScccccccccccS",
+        "TTTSSccceecSSTTTTTSSSccSccccSSSS",
+        "aTTTSSSSSSSSSTTaTTTTSSSSSSSSSSST",
+        "aaTTTTTTTTTTTTaaaaTTTTTTTTTTTTTa",
+        "aaaaaTTTTTTTaaaaaaaaaTTTTTTTaaaa"
+      ],
+      swordIcon: [
+        ".............KK.",
+        "............KWKK",
+        "...........KWLMK",
+        "..........KWLMK.",
+        ".........KWLMK..",
+        "........KWLMK...",
+        ".......KWLMK....",
+        "......KWLMK.....",
+        "...KKKWLMK......",
+        "...KCCKMK.......",
+        "...KCCCK........",
+        "...KsCCK........",
+        "..KsKKKK........",
+        ".KRK............",
+        "..K.............",
+        "................"
+      ],
+      coldBreath: [
+        "................",
+        "................",
+        ".............u..",
+        "...........WuW..",
+        ".........Wu.Wu..",
+        ".......WuuWuu...",
+        ".....WuuuWuuW...",
+        "....Wuu.uuW.....",
+        ".....WuuuWuuW...",
+        ".......WuuWuu...",
+        ".........Wu.Wu..",
+        "...........WuW..",
+        ".............u..",
+        "................",
+        "................",
+        "................"
+      ],
+      starBolt: [
+        "................",
+        ".......W........",
+        "......WCW.......",
+        ".....WCCCW......",
+        "....WCOCOCW.....",
+        "...WCOCOOOCW....",
+        "..WCOCOOOCOCW...",
+        ".WCCCOOCOOOCCW..",
+        "..WCOCOOOCOCW...",
+        "...WCOCOOOCW....",
+        "....WCOCOCW.....",
+        ".....WCCCW......",
+        "......WCW.......",
+        ".......W........",
+        "................",
+        "................"
+      ],
+      slashFx: [
+        "................",
+        "............W...",
+        "..........WW....",
+        "........WWW.....",
+        "......WWW.......",
+        "....WWW.........",
+        "..WWW...........",
+        "W.............W.",
+        ".W..........WW..",
+        "..W.......WW....",
+        "...W....WW......",
+        "....W.WW........",
+        ".....W..........",
+        "................",
+        "................",
+        "................"
+      ],
+      biteFx: [
+        "................",
+        "....L......L....",
+        "...LWL....LWL...",
+        "..LWWL....LWWL..",
+        "..LWLL....LLWL..",
+        "...LL......LL...",
+        "................",
+        "................",
+        "...LL......LL...",
+        "..LWLL....LLWL..",
+        "..LWWL....LWWL..",
+        "...LWL....LWL...",
+        "....L......L....",
+        "................",
+        "................",
+        "................"
+      ],
+      smashFx: [
+        "................",
+        "...Q........Q...",
+        "....Q......Q....",
+        ".....Q....Q.....",
+        "......QQQQ......",
+        "..Q...QOOQ...Q..",
+        "...Q.QOOOOQ.Q...",
+        "....QQOOOOQQ....",
+        "....QQOOOOQQ....",
+        "...Q.QOOOOQ.Q...",
+        "..Q...QOOQ...Q..",
+        "......QQQQ......",
+        ".....Q....Q.....",
+        "....Q......Q....",
+        "...Q........Q...",
+        "................"
+      ],
+      healFx: [
+        "................",
+        "................",
+        ".......F........",
+        "......FpF.......",
+        ".....FpWpF......",
+        "....FpWWWpF.....",
+        ".....FpWpF......",
+        "......FpF.......",
+        ".......F........",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      shieldFx: [
+        "................",
+        "...CCCCCCCCCC...",
+        "..CWBBBBBBBBWC..",
+        ".CWBbbbbbbbbBWC.",
+        ".CWBbbbWWbbbBWC.",
+        ".CWBbbWWWWbbBWC.",
+        ".CWBbbbWWbbbBWC.",
+        ".CWBbbbbbbbbBWC.",
+        "..CWBbbbbbbBWC..",
+        "...CWBbbbbBWC...",
+        "....CWBbbBWC....",
+        ".....CWBBWC.....",
+        "......CWWC......",
+        ".......CC.......",
+        "................",
+        "................"
+      ],
+      stunFx: [
+        ".......C........",
+        "......CWC.......",
+        "...CCWWWWWCC....",
+        "....CCWWWCC.....",
+        "......CWC.......",
+        ".......C........",
+        "................",
+        "................",
+        ".......C........",
+        "......CWC.......",
+        "...CCWWWWWCC....",
+        "....CCWWWCC.....",
+        "......CWC.......",
+        ".......C........",
+        "................",
+        "................"
+      ],
+      snowball: [
+        "................",
+        ".......WW.......",
+        "......WbbW......",
+        ".....WbBBbW.....",
+        "....WbBWWbBW....",
+        "....WbBWWbBW....",
+        ".....WbBBbW.....",
+        "......WbbW......",
+        ".......WW.......",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      shadowBolt: [
+        "................",
+        ".......v........",
+        "......vVv.......",
+        "....vvVVVvv.....",
+        "...vVVVVVVVv....",
+        "....vvVVVvv.....",
+        "......vVv.......",
+        ".......v........",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      rainbowBolt: [
+        "................",
+        "..........R.....",
+        "........ROR.....",
+        "......ROCOR.....",
+        "....ROCECOR.....",
+        "..ROCEbECOR.....",
+        "ROCEbVbECOR.....",
+        "ROCEbVbECOR.....",
+        "..ROCEbECOR.....",
+        "....ROCECOR.....",
+        "......ROCOR.....",
+        "........ROR.....",
+        "..........R.....",
+        "................",
+        "................",
+        "................"
+      ],
+      emLock: [
+        "......LLLL......",
+        ".....L....L.....",
+        "....L......L....",
+        "....L......L....",
+        "....L......L....",
+        "...CCCCCCCCCC...",
+        "...CCCCCCCCCC...",
+        "...CCCKKKKCCC...",
+        "...CCCKKKKCCC...",
+        "...CCCCKKCCCC...",
+        "...CCCCKKCCCC...",
+        "...CCCCCCCCCC...",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      heartFx: [
+        "................",
+        "................",
+        "...FFF....FFF...",
+        "..FFFFF..FFFFF..",
+        ".FFFFFFFFFFFFFF.",
+        ".FFFFFFFFFFFFFF.",
+        ".FFFFFFFFFFFFFF.",
+        "..FFFFFFFFFFFF..",
+        "...FFFFFFFFFF...",
+        "....FFFFFFFF....",
+        ".....FFFFFF.....",
+        "......FFFF......",
+        ".......FF.......",
+        "................",
+        "................",
+        "................"
+      ],
+      scytheFx: [
+        ".........WWWWW..",
+        ".......WWLLLLq..",
+        "......WLLL...q..",
+        ".....WLL....q...",
+        "....WLL....q....",
+        "...WL.....q.....",
+        "...W.....q......",
+        "..W.....q.......",
+        ".......q........",
+        "......q.........",
+        ".....q..........",
+        "....q...........",
+        "...q............",
+        "..q.............",
+        ".q..............",
+        "q..............."
+      ],
+      skullFx: [
+        "................",
+        "................",
+        ".....WWWWWW.....",
+        "...WWWWWWWWWW...",
+        "..WWWWWWWWWWWW..",
+        "..WWWKKWWWWKKW..",
+        "..WWKKKKWWKKKK..",
+        "..WWKKKKWWKKKK..",
+        "..WWWKKWWWWKKW..",
+        "...WWWWWWWWWW...",
+        "....WWWWWWWW....",
+        "....WW.WW.WW....",
+        "....W..WW..W....",
+        "................",
+        "................",
+        "................"
+      ],
+      sugarFx: [
+        "................",
+        "................",
+        "................",
+        ".......WW.......",
+        "....W.WFFW.W....",
+        "...WpWWFFWWpW...",
+        "..WppWFFFFWppW..",
+        "...WpWWFFWWpW...",
+        "....W.WFFW.W....",
+        ".......WW.......",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      bloodFx: [
+        "................",
+        ".......f........",
+        "......fff.......",
+        ".....fffff......",
+        "....fffffff.....",
+        "...fffffffff....",
+        "...fffffffff....",
+        "...fffffffff....",
+        "....fffffff.....",
+        ".....fffff......",
+        "......fff.......",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      dispelFx: [
+        "................",
+        "....B......B....",
+        "........B.......",
+        "..B...B...B...B.",
+        ".......W........",
+        "....B.WWW.B.....",
+        ".....WWWW.......",
+        "..B...WWW...B...",
+        ".......W........",
+        "....B.....B.....",
+        "........B.......",
+        "..B...B...B...B.",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      blindFx: [
+        "................",
+        "................",
+        "......MMM.......",
+        "....MMMMMMM.....",
+        "...MMMMMMMMM....",
+        "..MMKKMMMKKMM...",
+        ".MMKKKKMKKKKMM..",
+        ".MMKKKKMKKKKMM..",
+        "..MMKKMMMKKMM...",
+        "...MMMMMMMMM....",
+        "....MMMMMMM.....",
+        "......MMM.......",
+        "................",
+        "................",
+        "................",
+        "................"
+      ]
+    };
+    P.k = P.k || "#c4e3f0";
+    P.i = P.i || "#a9cede";
+    PET_P = {
+      B: "#9ed8f2",
+      b: "#5fa8cc",
+      W: "#fffdf4",
+      K: "#3a2c22",
+      n: "#ffb0bc",
+      "3": "#4a7ba6",
+      // '3' = ngũ quan của slime xanh (xanh xám, thay cho K nâu đen gốc)
+      V: "#b48ae0",
+      v: "#8a5cc0",
+      p: "#ffb8c4",
+      F: "#e06578",
+      f: "#a83a52",
+      o: "#e8963a",
+      t: "#b0641e",
+      A: "#f4e8d8",
+      z: "#d9c5aa",
+      N: "#5c5c6a",
+      L: "#b8b0a2",
+      M: "#8a8274",
+      C: "#f2c231",
+      U: "#bf8a1a",
+      E: "#fff5dc",
+      e: "#d9cfe5",
+      I: "#cbeaf2",
+      G: "#f6cf62",
+      g: "#bd822d",
+      D: "#49315f",
+      d: "#6f4a89",
+      J: "#9b70ad",
+      R: "#9569a6",
+      r: "#c198ca",
+      X: "#fff2bd",
+      T: "#8b5936",
+      S: "#d99a43",
+      Q: "#76545f",
+      H: "#56649d",
+      h: "#8492c7",
+      Y: "#f5d76d",
+      y: "#bd923b",
+      O: "#fffaf0",
+      q: "#cfc5df",
+      Z: "#72d4c7",
+      c: "#3fa6a5",
+      a: "#bff3df",
+      k: "#688f57",
+      l: "#a6cb7d",
+      i: "#c8d8f0",
+      j: "#8296c9",
+      x: "#8e6bad",
+      m: "#d9bd6f",
+      u: "#dcf3e7",
+      s: "#92c4b0"
+    };
+    PET_SPR = {
+      slime: [
+        "................",
+        "................",
+        "................",
+        "................",
+        ".....BBBBBB.....",
+        "....BBBBBBBB....",
+        "...BBWWBBBBBB...",
+        "..BBWWBBBBBBBB..",
+        "..BBBBBBBBBBBB..",
+        "..BB33BBBB33BB..",
+        ".BBBBBBBBBBBBBB.",
+        ".BnBBBB33BBBBnB.",
+        ".BBBBBBBBBBBBBB.",
+        ".bBBBBBBBBBBBBb.",
+        "..bbbbbbbbbbbb..",
+        "................"
+      ],
+      slimePink: [
+        "................",
+        "................",
+        "................",
+        "................",
+        ".....pppppp.....",
+        "....pppppppp....",
+        "...ppWWpppppp...",
+        "..ppWWpppppppp..",
+        "..pppppppppppp..",
+        "..ppffppppffpp..",
+        ".pppppppppppppp.",
+        ".pFppppffppppFp.",
+        ".pppppppppppppp.",
+        ".FppppppppppppF.",
+        "..FFFFFFFFFFFF..",
+        "................"
+      ],
+      peach_soda: [
+        ".......O........",
+        "......OOO.......",
+        ".......t........",
+        ".....TTTTTT.....",
+        "....TTTTTTTT....",
+        "...TCTTTTTTTT...",
+        "..TCTTTTTTTTTT..",
+        ".TTTTDTTTTDTTTT.",
+        ".TTPPTTDDTTPPTT.",
+        ".TTTTTTTTTTTTTT.",
+        "..tTTTTTTTTTTt..",
+        ".tTT.tTTTT.tTTt.",
+        "tTt..tTTt..tTTt.",
+        ".t...tT.tT...tT.",
+        ".....t...t......",
+        "................"
+      ],
+      octo: [
+        "................",
+        "................",
+        "................",
+        ".....VVVVVV.....",
+        "....VVVVVVVV....",
+        "...VVWWVVVVVV...",
+        "...VWWVVVVVVV...",
+        "..VVVVVVVVVVVV..",
+        "..VVKKVVVVKKVV..",
+        "..VVVVVVVVVVVV..",
+        "..VnVVVKKVVVnV..",
+        "..VVVVVVVVVVVV..",
+        "..VVVVVVVVVVVV..",
+        "..VV.VV..VV.VV..",
+        "..vv.vv..vv.vv..",
+        "................"
+      ],
+      octoCream: [
+        "................",
+        "................",
+        "................",
+        ".....AAAAAA.....",
+        "....AAAAAAAA....",
+        "...AAWWAAAAAA...",
+        "...AWWAAAAAAA...",
+        "..AAAAAAAAAAAA..",
+        "..AAAAAAAAAAAA..",
+        "..AAKKAAAAKKAA..",
+        "..AnAAAAAAAAnA..",
+        "..AAAAAAAAAAAA..",
+        "..AAAAAAAAAAAA..",
+        "..AA.AA..AA.AA..",
+        "..zz.zz..zz.zz..",
+        "................"
+      ],
+      jellyfish: [
+        "......S.........",
+        ".....SSS........",
+        "......S.........",
+        ".....IIIIII.....",
+        "....IIIIIIII....",
+        "...IIBIIIIIII...",
+        "..IIBIIIIIIIII..",
+        ".IIIIYIIIIYIIII.",
+        ".IIPPIISSIIPPII.",
+        ".IIIIIIIIIIIIII.",
+        "..iIIIIIIIIIIi..",
+        "...iiiiiiiiii...",
+        "...LL..LL..LL...",
+        "..LL...LL...LL..",
+        "..L....L....L...",
+        ".LL...LL...LL..."
+      ],
+      mystery_blob: [
+        "................",
+        "...oo......oo...",
+        "...ooo....ooo...",
+        "...oooo..oooo...",
+        "....oooooooo....",
+        "...oooooooooo...",
+        "..oooooooooooo..",
+        "..ooKKooooKKoo..",
+        "ttooooonnooooott",
+        ".toooooooooooot.",
+        ".onoooooooooono.",
+        ".oooooooooooooo.",
+        ".oooooooooooooo.",
+        ".toooooooooooot.",
+        "..tttttttttttt..",
+        "................"
+      ],
+      ghostBlob: [
+        "................",
+        ".......uu.......",
+        "......uuuu......",
+        ".....uuuuuu.....",
+        "....uuWuuuuu....",
+        "...uuWuuuuuuu...",
+        "..uuuuuuuuuuuu..",
+        ".uuuuQuuuuQuuuu.",
+        ".unnuuuQQuuunnu.",
+        ".uuuuuuuuuuuuuu.",
+        "uuuuuuuuuuuuuuuu",
+        "suuuuuuuuuuuuuus",
+        ".suuuuuuuuuuuus.",
+        "..suuuuuuuuuus..",
+        "...suus..suus...",
+        "................"
+      ],
+      impBlob: [
+        "................",
+        "................",
+        "....f......f....",
+        "....ff....ff....",
+        ".....FFFFFF.....",
+        "....FFFFFFFF....",
+        "...FFWWFFFFFF...",
+        ".KFFWWFFFFFFFFK.",
+        "KKFFFFFFFFFFFFKK",
+        "..FFKKFFFFKKFF..",
+        ".FFFFFFFFFFFFFF.",
+        ".FnFFFFKKFFFFnF.",
+        ".FFFFFFFFFFFFFF.",
+        ".fFFFFFFFFFFFFf.",
+        "..ffffffffffff..",
+        "................"
+      ],
+      angelBlob: [
+        ".....gggggg.....",
+        "...gGG....GGg...",
+        ".....gggggg.....",
+        "................",
+        ".....EEEEEE.....",
+        "....EEEEEEEE....",
+        "...EEWEEEEEEE...",
+        ".WEEWEEEEEEEEEW.",
+        "WIEEEEEEEEEEEEEW",
+        "IEEEQQEEEEQQEEEI",
+        ".EnnEEEQQEEEnnE.",
+        ".EEEEEEEEEEEEEE.",
+        ".eEEEEEEEEEEEEe.",
+        "..eEEEEEEEEEEe..",
+        "...eeeeeeeeee...",
+        "................"
+      ],
+      witchBlob: [
+        "...DDD..........",
+        "..DDDJ..........",
+        "...DDJDD........",
+        "...DDdDDDD......",
+        "..DDdddDDDDD....",
+        ".DDDddGGdddDDD..",
+        "DDDDDDDDDDDDDDDD",
+        "...RRRRRRRRRR..T",
+        "..RrRRRRRRRRRR.T",
+        ".RrRRRRRRRRRRRR.",
+        ".RRRXKRRRRDDRRR.",
+        ".RnRRRRRGDRRRnR.",
+        ".RRRRRRRRRRRRR.T",
+        "..dRRRRRRRRRd.T.",
+        "...ddddddddd.SSS",
+        "...........SSSSS"
+      ],
+      starBell: [
+        "..Y....Y........",
+        ".......Y....Y...",
+        ".....YYYYY......",
+        ".Y....YYY.......",
+        "......Y.Y.......",
+        ".....HHHHHH.....",
+        "....HHHHHHHH....",
+        "...HHhHHHHHHH...",
+        "..HHhHHHHHHHHH..",
+        "..HHHHHHHHHHHH..",
+        ".HHHmmHHHHmmHHH.",
+        ".HYHHHHHHHHHHYH.",
+        ".HHHHHHHHHHHHHH.",
+        ".hHHHHHHHHHHHHh.",
+        "..hHHHHHHHHHHh..",
+        "...hhhhhhhhhh..."
+      ],
+      cloudMallow: [
+        "................",
+        "................",
+        "......OOOO......",
+        "....OOOOOOOO....",
+        "..OOOOOOOOOOOO..",
+        ".OOOWOOOOOOOOOO.",
+        "OOOOOOOOOOOOOOOO",
+        "OOOOQOOOOOOQOOOO",
+        "OOnOOOOQQOOOOnOO",
+        "OOOOOOOOOOOOOOOO",
+        ".qOOOOOOOOOOOOq.",
+        "..qqOOqqqqOOqq..",
+        "....I......I....",
+        "....II....II....",
+        ".....I....I.....",
+        "................"
+      ],
+      dewSprout: [
+        ".....kk..kk.....",
+        "....kllkkllk....",
+        "......kk........",
+        ".......ZZ.......",
+        "......ZZZZ......",
+        ".....ZZZZZZ.....",
+        "....ZZaZZZZZ....",
+        "...ZZaZZZZZZZ...",
+        "..ZZZZZZZZZZZZ..",
+        ".ZZZZQZZZZQZZZZ.",
+        ".ZnZZZZQZZZZZnZ.",
+        ".ZZZZZZZZZZZZZZ.",
+        ".cZZZZZZZZZZZZc.",
+        "..cZZZZZZZZZZc..",
+        "...cccccccccc...",
+        "................"
+      ],
+      prismBlob: [
+        "..j..........j..",
+        ".jij........jij.",
+        "..j..........j..",
+        "......xxxx.....y",
+        "y...xxiiiixx..yY",
+        "Yy.xiiiiiiiix..y",
+        "y.xiiiiiiiiiix..",
+        ".xiiiiiiiiiiiix.",
+        ".xiiQQiiiiQQiix.",
+        ".xiriiiiQiiiirx.",
+        ".xiiiiiiiiiiiix.",
+        "..xiiiiiiiiix...",
+        "...xiiiiiiix....",
+        "....xxxxxxxx....",
+        "......jjjj......",
+        "................"
+      ],
+      penguin: [
+        "................",
+        "................",
+        ".....333333.....",
+        "....33WWWW33....",
+        "...33WWWWWW33...",
+        "...3WKKWWKKW3...",
+        "..33WnWooWnW33..",
+        "..33WWWWWWWW33..",
+        "..33WWWWWWWW33..",
+        "...33WWWWWW33...",
+        "....33333333....",
+        ".....oo..oo.....",
+        "................",
+        "................",
+        "................",
+        "................"
+      ]
+    };
+    petLinear = (x1, y1, x2, y2, stops) => ({ type: "linear", x1, y1, x2, y2, stops });
+    PET_FX = {
+      mystery_blob: {
+        // Bé bí ẩn: bản cam dịu thứ hai (wen chốt: pha sữa giảm độ tinh khiết nhưng giữ dòng máu cam; bản oải hương để dành cho kho da DLC)
+        o: petLinear(1, 2, 15, 14, [["0%", "#ffe0a6"], ["46%", "#f7b374"], ["100%", "#ea9060"]]),
+        t: petLinear(0, 7, 16, 15, [["0%", "#d18a58"], ["100%", "#b06a44"]]),
+        K: "#6b4548",
+        n: "#ffcdd8"
+      },
+      peach_soda: {
+        T: petLinear(1, 2, 15, 14, [["0%", "#ffe8a6"], ["35%", "#ffbdc9"], ["64%", "#ff94bf"], ["100%", "#c99bf5"]]),
+        t: petLinear(0, 4, 16, 15, [["0%", "#f28bc2"], ["100%", "#9b78de"]]),
+        C: "#effffb",
+        D: "#5b4568",
+        P: "#65e0cf",
+        O: petLinear(0, 0, 15, 3, [["0%", "#b9fff3"], ["100%", "#9ba7ff"]])
+      },
+      jellyfish: {
+        I: petLinear(1, 2, 15, 14, [["0%", "#c8f4ff"], ["28%", "#8cddff"], ["62%", "#58b7f2"], ["100%", "#6576dc"]]),
+        i: petLinear(0, 7, 16, 15, [["0%", "#579dd1"], ["100%", "#5459aa"]]),
+        B: "#effcff",
+        Y: "#fff0a6",
+        P: "#ff8fca",
+        S: petLinear(0, 0, 16, 4, [["0%", "#fff6aa"], ["100%", "#a8dbff"]]),
+        L: petLinear(0, 11, 16, 16, [["0%", "#bdeaff"], ["100%", "#8d90ee"]])
+      }
+    };
+    petCache = /* @__PURE__ */ new Map();
+    PETS = {
+      /* —— Trang 1 —— */
+      slime: { name: "Slime xanh", page: 1, price: 0, starter: true, cry: ["B\u1EE5p b\u1EE5p~", "B\u1EF1ppp!", "Gr\xF9 gr\xF9\u2026", "B\u1EE5p?", "Nh\u1EA3y nh\u1EA3y!"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 b\xE9 tr\xF2n t\u1ED5 ti\xEAn, b\u1EA1n \u0111\u1ED3ng h\xE0nh t\u1EEB \u0111\u1EA7u" },
+      octo: { name: "B\u1EA1ch tu\u1ED9c t\xEDm", page: 1, price: 500, cry: ["\u1EE4c b\u1ED1p?", "\u1EE4c \u1EF1c!", "Ch\xEDu mi!", "B\xF3p b\xF3p\u2026", "\u1EE4c b\u1ED1p b\u1ED1p!"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 th\xEDch ch\u1ED3ng l\xEAn \u0111\u1EA7u ng\u01B0\u1EDDi kh\xE1c" },
+      slimePink: { name: "Slime h\u1ED3ng", page: 1, price: 600, cry: ["B\u1EE5p h\xEC~", "B\u1EE5p b\u1EE5p!", "H\xEC h\xEC\u2026", "B\u1EE5p ch\xEDu~"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 v\u1ECB d\xE2u (nh\u01B0ng kh\xF4ng \u0103n \u0111\u01B0\u1EE3c)" },
+      octoCream: { name: "B\u1EA1ch tu\u1ED9c kem", page: 1, price: 700, cry: ["B\u1ED1p\u2026", "\u1EE4c\u2026", "(ch\u1EADm r\xEC r\xEC) b\xF3p~"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 b\u1EADc th\u1EA7y ngu\u1EF5 trang, tr\xF9ng m\xE0u v\u1EDBi b\u1EA3ng \u0111i\u1EC1u khi\u1EC3n" },
+      dewSprout: { job: "plant", name: "B\xE9 m\u1EA7m s\u01B0\u01A1ng", page: 1, price: 1200, cry: ["T\xED t\xE1ch~", "M\u1EA7m!", "(\u0111\u1ED9i l\xE1 l\xEAn)"], desc: "Lo\u1EA1i l\xE0m vi\u1EC7c \xB7 ch\u1ECDc m\u1ED9t c\xE1i l\xE0 gieo kh\u1EAFp ru\u1ED9ng, h\u1EA1t xu\u1ED1ng \u0111\u1EA5t l\xE0 n\u1EA3y m\u1EA7m" },
+      cloudMallow: { job: "water", name: "B\xE9 b\xF4ng m\xE2y", page: 1, price: 1500, cry: ["B\xF4ng b\xF4ng~", "V\xF9\u2014\u2014", "(bay l\u01A1 l\u1EEDng)"], desc: "Lo\u1EA1i l\xE0m vi\u1EC7c \xB7 ra s\xE2n l\xE0 m\xE2y m\u01B0a nh\u1ECF t\u1EF1 \u0111\u1ED9ng t\u01B0\u1EDBi" },
+      /* —— Trang 2 (vé vùng nước) —— */
+      ghostBlob: { name: "B\xE9 ma nh\u1ECF", page: 2, price: 1500, cry: ["Uuu~", "Bay bay\u2026", "(xuy\xEAn qua tay b\u1EA1n)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 bay \u0111\u01B0\u1EE3c v\xE0o nh\u1EEFng ch\u1ED7 ng\u01B0\u1EDDi kh\xE1c kh\xF4ng v\xE0o n\u1ED5i" },
+      mystery_blob: { job: "fert", name: "B\xE9 b\xED \u1EA9n", page: 2, price: 1800, cry: ["\u2026\u2026?", "(nghi\xEAng \u0111\u1EA7u)", "?!"], desc: "Lo\u1EA1i l\xE0m vi\u1EC7c \xB7 ch\u1ECDc m\u1ED9t c\xE1i l\xE0 b\xF3n ph\xE2n h\xE0ng lo\u1EA1t \xB7 ph\xE2n c\u1EE7a n\xF3 b\xF3n ra c\xE1i g\xEC th\xEC kh\xF4ng ai \u0111o\xE1n n\u1ED5i" },
+      jellyfish: { job: "harvest", name: "B\xE9 s\u1EE9a xo\u0103n", page: 2, price: 2200, cry: ["\u1EE4c gr\xF9~", "(cu\u1ED9n cu\u1ED9n x\xFAc tu)", "B\u1ED1p \u1EE5c!"], desc: "Lo\u1EA1i l\xE0m vi\u1EC7c \xB7 ch\u1ECDc m\u1ED9t c\xE1i l\xE0 x\xFAc tu nh\u1EB9 nh\xE0ng cu\u1ED9n rau ch\xEDn v\xE0o balo" },
+      impBlob: { name: "B\xE9 qu\u1EF7 nh\u1ECF", page: 2, price: 3e3, cry: ["H\xEC h\xEC.", "H\u01B0!", "(gi\u1EA5u c\xE1i g\xEC \u0111\xF3 \u0111i)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 khi t\xECm kho b\xE1u s\u1EBD tha v\u1EC1 h\u1EA1t gi\u1ED1ng b\xED \u1EA9n \u0111en s\xEC" },
+      angelBlob: { name: "B\xE9 thi\xEAn th\u1EA7n", page: 2, price: 3e3, cry: ["Ting~", "(ph\xE1t s\xE1ng d\u1ECBu d\xE0ng)", "Ch\xFAc ph\xFAc cho b\u1EA1n."], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 khi t\xECm kho b\xE1u s\u1EBD ng\u1EADm v\u1EC1 h\u1EA1t gi\u1ED1ng b\xED \u1EA9n \xE1nh l\u1EA5p l\xE1nh" },
+      /* —— Trang 3 (vé khu mỏ) —— */
+      prismBlob: { name: "B\xE9 l\u0103ng quang", page: 3, price: 8e3, cry: ["Keng~", "(kh\xFAc x\u1EA1 ra m\u1ED9t d\u1EA3i c\u1EA7u v\u1ED3ng)", "Kengg!"], desc: "Lo\u1EA1i s\u1EA3n xu\u1EA5t \xB7 t\xECm kho b\xE1u mang v\u1EC1 m\u1EA3nh l\u0103ng quang (\u0111\u1ED5i \u0111\u01B0\u1EE3c m\u1ED9t \u0111\u01A1n \u1EDF trang \u0111\u01A1n h\xE0ng ph\xF9 thu\u1EF7)" },
+      starBell: { name: "B\xE9 chu\xF4ng sao", page: 3, price: 8e3, cry: ["Leng keng~", "\u2606!", "(l\u1EAFc l\u1EAFc nh\u1EB9)"], desc: "Lo\u1EA1i s\u1EA3n xu\u1EA5t \xB7 t\xECm kho b\xE1u rung r\u01A1i m\u1EA3nh ng\xF4i sao (tri\u1EC7u h\u1ED3i \u0111\u01B0\u1EE3c ph\xF9 thu\u1EF7 tr\xF2n)" },
+      /* —— Át chủ bài (page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
+      peach_soda: { name: "B\xE9 soda \u0111\xE0o", page: 1, price: 9999, cry: ["B\u1ED1p\u2014\u2014!", "(n\u1ED5i m\u1ED9t bong b\xF3ng nh\u1ECF)", "X\xEC~", "(v\u1ECB ng\xF2n ng\u1ECDt)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 tinh linh soda v\u1ECB \u0111\xE0o \xB7 d\u1EC5 th\u01B0\u01A1ng qu\xE1 m\u1EE9c n\xEAn \u0111\u1EAFt nh\u1EA5t" },
+      penguin: { name: "Chim c\xE1nh c\u1EE5t", page: 1, price: 1e5, cry: ["Pingu!", "N\xFAp n\xFAp~", "Tr\u01B0\u1EE3t tuy\u1EBFt n\xE0o!", "C\xE1nh c\u1EE5t!"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 AFK m\u1ED7i 1 ti\u1EBFng mang v\u1EC1 1 v\xE9 gacha ng\u1EABu nhi\xEAn (70% v\xE9 th\u01B0\u1EDDng, 30% v\xE9 \u0111\u1EB7c bi\u1EC7t)" }
+    };
+    PASSES = {
+      water: { name: "V\xE9 v\xF9ng n\u01B0\u1EDBc", price: 6e3, desc: "M\u1EDF kho\xE1 ru\u1ED9ng v\xF9ng n\u01B0\u1EDBc (trang 2) + quy\u1EC1n mua b\xE9 tr\xF2n trang 2 v\xE0 h\u1EA1t gi\u1ED1ng thu\u1EF7 sinh, t\u1EB7ng k\xE8m \xF4 ru\u1ED9ng n\u1ED5i \u0111\u1EA7u ti\xEAn" },
+      mine: { name: "V\xE9 khu m\u1ECF", price: 35e3, desc: "M\u1EDF kho\xE1 ru\u1ED9ng khu m\u1ECF (trang 3) + quy\u1EC1n mua b\xE9 tr\xF2n trang 3 v\xE0 h\u1EA1t gi\u1ED1ng khu m\u1ECF, t\u1EB7ng k\xE8m lu\u1ED1ng \u01B0\u01A1m \u0111\u1EA7u ti\xEAn" }
+    };
+    C2 = {
+      chuncai: {
+        p: { g: "#2e6a50", G: "#4d9a6e", W: "#a8d8bc", o: "#8a5540" },
+        m: [
+          "................",
+          "................",
+          "....gg....gg....",
+          "...gGGg..gGGWg..",
+          "...gGGGg.gGGg...",
+          "....gg....gg....",
+          ".......o........",
+          "..gg...o...gg...",
+          ".gGGWg.o.gGGg...",
+          ".gGGg..o.gGWGg..",
+          "..gg...o..gg....",
+          "................",
+          "................",
+          "................",
+          "................",
+          "................"
+        ]
+      },
+      biqi: {
+        p: { t: "#4d7a26", T: "#79b544", m: "#3f2a20", M: "#6a4534", W: "#f2e8d8" },
+        m: [
+          "....t..T..t.....",
+          "....t.T..t......",
+          ".....tT.tT......",
+          "....T.t.t.......",
+          ".....t.tT.......",
+          "......ttt.......",
+          ".......t........",
+          ".......t........",
+          ".......t........",
+          "......mmm.......",
+          "..mmmmMMMm.mmm..",
+          ".mMMWmMMMMmMMm..",
+          ".mMMMmMMMMmMWm..",
+          "..mmm.mmmm.mm...",
+          "................",
+          "................"
+        ]
+      },
+      lingjiao: {
+        p: { g: "#2e6a50", G: "#4d9a6e", K: "#241b2e", P: "#5a3f66", W: "#b79ae0" },
+        m: [
+          "................",
+          ".......gg.......",
+          "....ggGGGGgg....",
+          "...gGGgGGgGGg...",
+          "....ggGGGGgg....",
+          ".......gg.......",
+          "................",
+          "................",
+          "...KK......KK...",
+          "....KK....KK....",
+          ".....KKKKKK.....",
+          "....KPPKKPPK....",
+          "....KPPWPPPK....",
+          ".....KKKKKK.....",
+          "................",
+          "................"
+        ]
+      },
+      jiaobai: {
+        p: { g: "#3f7a30", G: "#6aab44", W: "#f6f2e2", s: "#d9d0b8" },
+        m: [
+          "....g....g......",
+          "...gG...gG.g....",
+          "...gG..gGG.Gg...",
+          "..gGG..gGG.Gg...",
+          "..gGG.gGGg.GG...",
+          "..gGGggGGggGG...",
+          "..gGGgGGGgGGG...",
+          "..gGGgGGGgGGg...",
+          "..sWWsWWWsWWs...",
+          "..sWWsWWWsWWs...",
+          "..sWWsWWWsWWs...",
+          "..sWWsWWWsWWs...",
+          "................",
+          "................",
+          "................",
+          "................"
+        ]
+      },
+      lianou: {
+        p: { f: "#c25a78", P: "#f5aec2", W: "#fff0f5", g: "#2e6a50", G: "#4d9a6e", B: "#245a40", o: "#e8dcc2", O: "#c2b090" },
+        m: [
+          "......ff........",
+          ".....fPPf.......",
+          "....fPWWPf......",
+          "..ffPPPPPPff....",
+          ".fPPfPWWPfPPf...",
+          "..fPPPPPPPPf....",
+          "...ffPPPPff.....",
+          ".....gGGg.......",
+          "...gGGGGGGg.....",
+          "..gGGGBGGGGg....",
+          "...gGGGGGGg.....",
+          "................",
+          "...OooOooO......",
+          "...OooOooO......",
+          "....OOOOO.......",
+          "................"
+        ]
+      },
+      wujing: {
+        p: { K: "#3f2a58", V: "#8a64c0", W: "#dcc8f5" },
+        m: [
+          ".......K........",
+          "......KVK.......",
+          "..K...KVK...K...",
+          ".KVK..KVK..KVK..",
+          ".KVK.KKVKK.KVK..",
+          ".KVWKKVWVKKVVK..",
+          "..KVKKVVVKKVK...",
+          "..KVVKVVVKVVK...",
+          "...KKKVVVKKK....",
+          ".....KVVVK......",
+          "......KKK.......",
+          "................",
+          "................",
+          "................",
+          "................",
+          "................"
+        ]
+      },
+      starbush: {
+        p: { b: "#2e5a34", B: "#4f8a55", s: "#ffd94d", S: "#fff2b0", t: "#8a6244", y: "#ffd94d" },
+        m: [
+          "..y..........y..",
+          ".....bbbbbb.....",
+          "...bbBBBBBBbb...",
+          "..bBBsBBBBBBBb..",
+          "..bBsSsBBBBBBb..",
+          ".bBBBsBBBBsBBBb.",
+          ".bBBBBBBBsSsBBb.",
+          ".bBBBBBsBBsBBBb.",
+          "..bBBBsSsBBBBb..",
+          "...bbBBsBBBbb...",
+          ".....bbbbbb.....",
+          ".y.....tt.....y.",
+          ".......tt.......",
+          "......t..t......",
+          "................",
+          "................"
+        ]
+      },
+      gemflower: {
+        p: { K: "#5a4268", r: "#d95a6a", R: "#f090a0", b: "#4a7ac2", B: "#8fb8ec", g: "#38a06a", G: "#7cd4a4", p: "#8a5cc0", P: "#c0a0e8", y: "#c89a38", Y: "#ffd94d", W: "#fff2b0", t: "#4d7a26", T: "#79b544" },
+        m: [
+          "................",
+          "......KrrK......",
+          ".....KrRRrK.....",
+          ".....KrRRrK.....",
+          "..KKK.KrrK.KKK..",
+          ".KbBBK.yy.KgGGK.",
+          ".KbBBKyYWYKgGGK.",
+          "..KKK.yYYy.KKK..",
+          ".......yy.......",
+          ".....KpPK.......",
+          "....KpPPpK......",
+          "....KpPPpK..T...",
+          ".....KppK..T....",
+          "......tt..T.....",
+          "......ttT.......",
+          "................"
+        ]
+      },
+      opalvine: {
+        p: { t: "#3f5a5a", T: "#5c8080", K: "#8a7a9a", o: "#f2ecf5", P: "#f5b8d0", C: "#8adbe0" },
+        m: [
+          "......t.........",
+          "...t..tt........",
+          "...tt..t...t....",
+          "....t..tt.tt....",
+          ".KK..t..tt......",
+          "KooK..t....KK...",
+          "KoPCK.tt..KooK..",
+          ".KK....t..KoCK..",
+          ".......t...KK...",
+          "....KK.t........",
+          "...KooKt........",
+          "...KoCPK........",
+          "....KK.t........",
+          ".......t........",
+          "................",
+          "................"
+        ]
+      },
+      dragoncry: {
+        p: { K: "#8a2a26", T: "#e8604a", t: "#c23c34", W: "#ffe0a0", g: "#3f7a30", G: "#6aab44" },
+        m: [
+          ".......gg.......",
+          "......gGGg......",
+          ".......KK.......",
+          ".....KKTTKK.....",
+          "....KTtTTtTK....",
+          "...KTTTTTTTTK...",
+          "...KTtTWWtTTK...",
+          "..KTTTWWWWTTTK..",
+          "..KTtTTWWTTtTK..",
+          "...KTTTTTTTTK...",
+          "...KTtTTTTtTK...",
+          "....KTTTTTTK....",
+          ".....KKTTKK.....",
+          ".......KK.......",
+          "................",
+          "................"
+        ]
+      },
+      seedDark: {
+        p: { K: "#1c1420", k: "#33263d", v: "#8a2a4a", a: "#5a3f78" },
+        m: [
+          "................",
+          "................",
+          ".....K...K......",
+          ".....KK.KK......",
+          "......KkK.......",
+          ".....KkkkK......",
+          "....KkKkkkK.....",
+          "....KkkkvkK.....",
+          "....KkkkkkK.....",
+          ".....KkkkK......",
+          "......KKK.......",
+          "................",
+          "...a...a...a....",
+          "................",
+          "................",
+          "................"
+        ]
+      },
+      seedLight: {
+        p: { h: "#ffe89a", y: "#c8a94a", Y: "#f5dfa0", W: "#fff8e0", s: "#ffd94d" },
+        m: [
+          "................",
+          ".....hh.hh......",
+          "....h.....h.....",
+          "................",
+          "......yy........",
+          ".....yYYy.......",
+          "....yYWYYy......",
+          "....yYYYYy......",
+          "....yYYYYy......",
+          ".....yYYy.......",
+          "......yy........",
+          "................",
+          "...s....s...s...",
+          "................",
+          "................",
+          "................"
+        ]
+      },
+      /* —— v0.9b (#49): ba họ bí ẩn · kén mộng / cỏ chìa khoá / cây ăn thịt (bản thiết kế chốt) —— */
+      dreamG: {
+        p: { K: "#b8a890", W: "#f8f4ea", w: "#e4dcc8", s: "#d9cfc0", p: "#f5b8d0", t: "#8a6844", g: "#4d7a26" },
+        m: [
+          "........t.......",
+          ".......ts.......",
+          "......s.s.......",
+          ".....sKKs.......",
+          "....KWWWWK......",
+          "...KWwWWWWK.....",
+          "..KWWWWWWWWK....",
+          "..KWwWWWWwWK....",
+          "..KWWWWWWWWK....",
+          "..KWWwWWWWWK....",
+          "...KWWWWwWK.....",
+          "....KWWWWK......",
+          ".....KKKK.......",
+          "......p.........",
+          ".......p........",
+          "...g.......g...."
+        ]
+      },
+      dreamW: {
+        p: { K: "#4a7a94", B: "#bcdde8", b: "#94c2d4", W: "#eef8fa", d: "#7a94b8", o: "#d8ecf2" },
+        m: [
+          "................",
+          "......KKK.......",
+          "....KKBBBK......",
+          "...KBBWBBBK.....",
+          "..KBBBBBBBBK....",
+          "..KBBdddBBBK....",
+          ".KBBddBddBBBK...",
+          ".KBBdBBBdBBBK...",
+          ".KBBddBddBBbK...",
+          "..KBBdddBBbK....",
+          "..KBBBBBBbbK....",
+          "...KBBBBbbK.....",
+          "....KKbbbK......",
+          "......KKK.......",
+          "..o.........o...",
+          "......o........."
+        ]
+      },
+      dreamM: {
+        p: { K: "#3f3a50", S: "#8d8398", s: "#6d657c", c: "#241f2c", O: "#ffd94d", o: "#ffb060", d: "#575070" },
+        m: [
+          "................",
+          "......KKK.......",
+          "....KKSSSK......",
+          "...KSSSSSSK.....",
+          "..KSSsSSSSSK....",
+          "..KSScSSSsSK....",
+          ".KSSScOcSSSSK...",
+          ".KSsScOOcSSSK...",
+          ".KSSSScOcSsSK...",
+          "..KSSSScSSSK....",
+          "..KsSSSSSsSK....",
+          "...KSSSSSSK.....",
+          "....KKSSSK......",
+          "......KKK.......",
+          "...d.......d....",
+          "................"
+        ]
+      },
+      keyG: {
+        p: { t: "#4d7a26", T: "#79b544", c: "#a8681f", C: "#d99a43", W: "#ffe9b8", g: "#79b544" },
+        m: [
+          "...tt...........",
+          "..t..tt.........",
+          "..t....tt.......",
+          ".tT......tt.....",
+          ".tT........t....",
+          "..t.......CCC...",
+          "..t.......CWC...",
+          "..t.......CCC...",
+          ".tTt.......c....",
+          "..t........c....",
+          "..t........cC...",
+          "..t........c....",
+          "..t........cC...",
+          ".gtg............",
+          "g.t..g..........",
+          "................"
+        ]
+      },
+      keyW: {
+        p: { t: "#2e6a50", T: "#4d9a6e", c: "#3f7a5c", C: "#7cc4a4", W: "#c8ecd8", v: "#245a40", o: "#d8ecf2" },
+        m: [
+          "...tt...........",
+          "..t..tt.........",
+          "..t....tt.......",
+          ".tT......tt.....",
+          ".tT........t....",
+          "..t.......CCC...",
+          "..t.......CWC...",
+          "..t.......CCC...",
+          ".tTt.......c....",
+          "..t....o...cv...",
+          "..t........cC...",
+          "..t........cv...",
+          "..t........cC...",
+          "..t.............",
+          ".o..............",
+          "................"
+        ]
+      },
+      keyM: {
+        p: { t: "#b8862a", T: "#ffd94d", P: "#9a6ce0", p: "#c4a2e8", z: "#f0e4ff", s: "#ffd94d" },
+        m: [
+          "...tt...........",
+          "..t..tt.........",
+          "..t....tt.......",
+          ".tT......tt.....",
+          ".tT........t....",
+          "..t.......PpP...",
+          "..t.......PzP...",
+          "..t.......PPP...",
+          ".tTt.......P....",
+          "..t........P....",
+          "..t........Pp...",
+          "..t........P....",
+          "..t........Pp...",
+          ".sts....z.......",
+          "..t.............",
+          "................"
+        ]
+      },
+      fangG: {
+        p: { K: "#2e5a1e", G: "#6cb457", E: "#a4dc8c", R: "#c24a5a", W: "#fffdf4", t: "#4d7a26", g: "#79b544" },
+        m: [
+          "....KKKK........",
+          "..KKGGGGKK......",
+          ".KGGEGGGGGK.....",
+          ".KGGGGGGGGK.....",
+          "..KGGGGGGK......",
+          "...KRRRRK.......",
+          "..W.W..W.W......",
+          "...KRRRRK.......",
+          "..KGGGGGGK......",
+          ".KGGGGGGGGK.....",
+          ".KGGEGGGGGK.....",
+          "..KKGGGGKK..g...",
+          "....KKKK.t.g....",
+          "......t.t.......",
+          ".......t........",
+          "....g..t...g...."
+        ]
+      },
+      fangW: {
+        p: { K: "#6a2420", R: "#a83a35", r: "#c25a50", C: "#f2dfc0", D: "#2e1210", g: "#2e6a50", G: "#4d9a6e" },
+        m: [
+          ".....KKKKK......",
+          "...KKRRRRRKK....",
+          "..KRRCRRRCRRK...",
+          ".KRRRRrRrRRRK...",
+          ".KRCRRKKKRRCK...",
+          ".KRRRKDDDKRRK...",
+          ".KRrKDDDDDKrK...",
+          ".KRRRKDDDKRRK...",
+          ".KRCRRKKKRRCK...",
+          ".KRRRRrRrRRRK...",
+          "..KRRCRRRCRRK...",
+          "...KKRRRRRKK....",
+          ".....KKKKK......",
+          "..Gg.......gG...",
+          ".GggG.....GggG..",
+          "................"
+        ]
+      },
+      fangM: {
+        p: { K: "#1c1428", P: "#3a2a52", p: "#5a4278", F: "#8ae0ea", f: "#d8f8fc", O: "#ffb060", o: "#ffe0a0", t: "#2e2440" },
+        m: [
+          "....KKKK........",
+          "..KKPPPPKK......",
+          ".KPPpPPPPPK.....",
+          ".KPPPPPPPPK.....",
+          "..KPPPPPPK......",
+          "...KOOOOK.......",
+          "..F.FoOF.F......",
+          "..f.KOOK.f......",
+          "..KPPPPPPK......",
+          ".KPPPPPPPPK.....",
+          ".KPPpPPPPPK.....",
+          "..KKPPPPKK......",
+          "....KKKK.t......",
+          "......t.t.......",
+          ".......t........",
+          "....F..t...F...."
+        ]
+      },
+      shardPrism: {
+        p: { K: "#8ab8c8", k: "#4a8098", W: "#e8f8ff", w: "#c0e8f4", R: "#ff6060", G: "#60cc60", B: "#6090ff", Y: "#ffd940", P: "#c060e0", C: "#40d0d0" },
+        m: [
+          "................",
+          "..........R.....",
+          ".....K..........",
+          "....KWK..G......",
+          "...KWwWK........",
+          "..KWwwwWK...B...",
+          "..KWwwwWK.......",
+          "...KwwWK....Y...",
+          "....KWK..P......",
+          ".....K..........",
+          "......C.........",
+          "...R............",
+          "........G.......",
+          "................",
+          "................",
+          "................"
+        ]
+      },
+      shardStar: {
+        p: { K: "#6a4ab8", P: "#b094e0", p: "#d8c4ff", W: "#ffffff", o: "#ffd94d", y: "#fff4b0" },
+        m: [
+          "................",
+          "........o.......",
+          ".......oyo......",
+          "......oyyo......",
+          "...ooooWooo.....",
+          "..oPPPpWpKK.....",
+          "..oKKKKK........",
+          "...oooo.........",
+          "................",
+          "..........oo....",
+          ".........oyo....",
+          "........oWyo....",
+          ".......oWpyo....",
+          "........oooo....",
+          "................",
+          "................"
+        ]
+      },
+      strawhat: {
+        p: { K: "#a83a52", P: "#f7a6bd", p: "#ffd0dc", k: "#e07b96", Y: "#f5e0a8", y: "#e0be7a" },
+        m: [
+          "................",
+          "................",
+          "................",
+          "......KKKK......",
+          ".....KYyYYK.....",
+          "....KYYYYYYK....",
+          "....KYYYYYYK....",
+          "..KKKPPPPPPKKK..",
+          ".KYYKPpPPPKYYYK.",
+          "KYyYYYYYYYYYYyYK",
+          ".KKKKKKKKKKKKKK.",
+          ".........kPk....",
+          "..........kPk...",
+          "................",
+          "................",
+          "................"
+        ]
+      },
+      // Huy hiệu mặt tiền: nón rơm ruy băng hồng (wen chốt, chỗ ký tên tác giả)
+      strawberry: {
+        p: { g: "#4d7a26", G: "#79b544", K: "#8a2a35", r: "#d94f5c", R: "#e8808e", y: "#ffe0a8" },
+        m: [
+          "................",
+          "................",
+          "................",
+          "................",
+          "......G..g......",
+          ".....gGGGGg.....",
+          ".......GG.......",
+          ".....KrrrrK.....",
+          "....KrryrryK....",
+          "....KrrrrrrK....",
+          "....KryrrryK....",
+          ".....KrrrrK.....",
+          "......KrrK......",
+          ".......KK.......",
+          "................",
+          "................"
+        ]
+      },
+      strawberryW: {
+        p: { g: "#2e6a50", G: "#4d9a6e", K: "#2e6a80", r: "#7fd4dd", R: "#b8ecf0", W: "#f0fcff" },
+        m: [
+          ".....G..g.......",
+          "....gGGGGg......",
+          "......GG........",
+          "....KrrrrK......",
+          "...KrrWrrrK.....",
+          "...KrRRrrrK.....",
+          "...KrrrrRrK.....",
+          "....KrrrrK......",
+          ".....KrrK.......",
+          "......KK........",
+          ".......W........",
+          "................",
+          "................",
+          "................",
+          "................",
+          "................"
+        ]
+      },
+      strawberryM: {
+        p: { g: "#5a3f78", G: "#8a5cc0", K: "#3a2258", r: "#9a6ac8", R: "#c4a2e8", W: "#e8d8f8" },
+        m: [
+          ".....G..g.......",
+          "....gGGGGg......",
+          "......GG........",
+          "....KrrrrK......",
+          "...KrRrWrrK.....",
+          "...KrrRrrrK.....",
+          "...KRrrrRrK.....",
+          "....KrrRrK......",
+          ".....KrrK.......",
+          "......KK........",
+          "................",
+          "................",
+          "................",
+          "................",
+          "................",
+          "................"
+        ]
+      }
+    };
+    DYNAMIC_SPR = {};
+    spriteCache = /* @__PURE__ */ new Map();
+    tileCache = /* @__PURE__ */ new Map();
+    LP = {
+      "8": "#8ec8d8",
+      "~": "#b8e0ea",
+      "-": "#79b4c6",
+      "_": "#6faabf",
+      "9": "#3f7290",
+      "!": "#35617d",
+      "6": "#5f5870",
+      "^": "#6d657c",
+      "&": "#4e4860",
+      "7": "#433c54",
+      "5": "#8ae0ea",
+      "*": "#e8fcff",
+      "%": "#5fc8d8",
+      "#": "#3a3450",
+      "l": "#5aa06a",
+      "L": "#7cc48a",
+      "=": "#b9d194",
+      "0": "#ffe9b8",
+      "+": "#fff2b0"
+    };
+  }
+});
 
 // src/style.js
-var styleCSS = `
+var styleCSS;
+var init_style = __esm({
+  "src/style.js"() {
+    styleCSS = `
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
     img { -webkit-user-drag: none; user-select: none; }
     /* ===== v1.0: ch\u1EE7 \u0111\u1EC1 giao di\u1EC7n (h\u1ED3ng anh \u0111\xE0o / tr\u1EDDi quang), \u0111\u1ED5i \u1EDF trang c\xE0i \u0111\u1EB7t, S.theme l\u01B0u to\xE0n c\u1EE5c ===== */
@@ -2608,17 +2638,10 @@ var styleCSS = `
     .pet-bump { animation: petBump 0.2s ease-out; }
     @keyframes petBump { 0% { transform: translateX(0); } 50% { transform: translateX(12px) scale(1.1); } 100% { transform: translateX(0); } }
 `;
+  }
+});
 
 // src/ui.js
-var root;
-var sh;
-var $id;
-var fieldEl;
-var decoLayer;
-var fxLayer;
-var dungeonView;
-var swX = null;
-var swY = null;
 function applyTheme() {
   ctx.ui.classList.remove("theme-sakura", "theme-sky");
   ctx.ui.classList.add("theme-" + (ctx.S && ctx.S.theme === "sky" ? "sky" : "sakura"));
@@ -2869,9 +2892,24 @@ function initUI() {
     });
   }
 }
+var root, sh, $id, fieldEl, decoLayer, fxLayer, dungeonView, swX, swY;
+var init_ui = __esm({
+  "src/ui.js"() {
+    init_store();
+    init_style();
+    init_all();
+    init_data();
+    init_graphics();
+    init_witch();
+    init_state();
+    init_render();
+    init_utils();
+    swX = null;
+    swY = null;
+  }
+});
 
 // src/logic.js
-var fmtDur = (m) => m < 60 ? m + " ph\xFAt" : m % 60 === 0 ? m / 60 + " gi\u1EDD" : (m / 60).toFixed(1) + " gi\u1EDD";
 function growMs(cropId) {
   return TEST_MODE ? GROW : (CROPS[cropId]?.grow || 30) * MIN;
 }
@@ -3076,8 +3114,65 @@ function sellSeed(id, n) {
   openPanel("bag");
   toast("B\xE1n h\u1EA1t gi\u1ED1ng thu \u0111\u01B0\u1EE3c " + gain + " G");
 }
+var fmtDur;
+var init_logic = __esm({
+  "src/logic.js"() {
+    init_state();
+    init_store();
+    init_all();
+    init_data();
+    init_graphics();
+    init_witch();
+    init_utils();
+    init_events();
+    init_state();
+    init_render();
+    init_ui();
+    init_shop();
+    fmtDur = (m) => m < 60 ? m + " ph\xFAt" : m % 60 === 0 ? m / 60 + " gi\u1EDD" : (m / 60).toFixed(1) + " gi\u1EDD";
+  }
+});
 
 // src/pets.js
+var pets_exports = {};
+__export(pets_exports, {
+  FLOATY: () => FLOATY,
+  GAITS: () => GAITS,
+  WORK_BAND: () => WORK_BAND,
+  endScene: () => endScene,
+  gaitOf: () => gaitOf,
+  hopStep: () => hopStep,
+  initPets: () => initPets,
+  lastScene: () => lastScene,
+  moveTo: () => moveTo,
+  nextSceneAt: () => nextSceneAt,
+  petArrive: () => petArrive,
+  petBubble: () => petBubble,
+  petEl: () => petEl,
+  petFert: () => petFert,
+  petHarvest: () => petHarvest,
+  petHopT: () => petHopT,
+  petPlant: () => petPlant,
+  petPos: () => petPos,
+  petSleepT: () => petSleepT,
+  petSpot: () => petSpot,
+  petTgt: () => petTgt,
+  petTouch: () => petTouch,
+  pileWith: () => pileWith,
+  placePet: () => placePet,
+  renderPets: () => renderPets,
+  scene: () => scene,
+  sceneBusy: () => sceneBusy,
+  sceneTimer: () => sceneTimer,
+  sleepPet: () => sleepPet,
+  stopHop: () => stopHop,
+  touchBase: () => touchBase,
+  tryScene: () => tryScene,
+  updateNextScene: () => updateNextScene,
+  wakePet: () => wakePet,
+  walkTo: () => walkTo,
+  wander: () => wander
+});
 function petBubble(el, txt) {
   el.querySelector(".pbubble")?.remove();
   const b = document.createElement("span");
@@ -3086,27 +3181,6 @@ function petBubble(el, txt) {
   el.appendChild(b);
   window.setTimeout(() => b.remove(), 1700);
 }
-var petPos = {};
-var petTgt = {};
-var petHopT = {};
-var WORK_BAND = 74;
-var FLOATY = { cloudMallow: 1, ghostBlob: 1, jellyfish: 1 };
-var GAITS = {
-  // Dáng đi: len = độ dài một bước nhảy, dur = chu kỳ một cú nhảy (ms), hy = độ cao nhảy
-  octo: { len: 8, dur: 260, hy: -4 },
-  // Bạch tuộc: bước lắt nhắt bò sát đất
-  octoCream: { len: 8, dur: 290, hy: -4 },
-  // Bạch tuộc kem: bò còn chậm rì hơn nữa
-  _: { len: 14, dur: 330, hy: -9 }
-  // Mặc định: kiểu nảy chuẩn của dòng slime
-};
-var gaitOf = (id) => GAITS[id] || GAITS._;
-var stopHop = (id) => {
-  if (petHopT[id]) {
-    window.clearTimeout(petHopT[id]);
-    delete petHopT[id];
-  }
-};
 function petSpot(id) {
   const ov = $id("mascots");
   const W = ov.clientWidth || 380;
@@ -3171,7 +3245,6 @@ function moveTo(el, p) {
   petTgt[id] = p;
   if (!petHopT[id]) hopStep(el);
 }
-var petSleepT = {};
 function sleepPet(el) {
   const id = el.dataset.pet;
   el.classList.add("sleep");
@@ -3195,17 +3268,6 @@ function wakePet(el, startled) {
   }
   if (startled) petBubble(el, "?!");
 }
-var petArrive = {};
-var pileWith = {};
-var petTouch = {};
-var touchBase = Date.now();
-var scene = null;
-var lastScene = "";
-var nextSceneAt = Date.now() + (TEST_MODE ? 30 * 1e3 : 5 * MIN);
-var sceneBusy = (id) => !!(scene && scene.ids.indexOf(id) >= 0);
-var sceneTimer = (fn, ms) => {
-  if (scene) scene.timers.push(window.setTimeout(fn, ms));
-};
 function endScene() {
   if (!scene) return;
   scene.timers.forEach((t) => window.clearTimeout(t));
@@ -3247,7 +3309,8 @@ function tryScene() {
   if (!picks.length) return;
   const act = picks[Math.floor(Math.random() * picks.length)];
   lastScene = act;
-  nextSceneAt = now() + (TEST_MODE ? 45 * 1e3 + Math.random() * 90 * 1e3 : 3 * MIN + Math.random() * 12 * MIN);
+  const freq = (ctx.S.skitFreq !== void 0 ? ctx.S.skitFreq : 300) * 1e3;
+  nextSceneAt = now() + (TEST_MODE ? 45 * 1e3 + Math.random() * 90 * 1e3 : Math.floor(freq * 0.6) + Math.random() * Math.floor(freq * 0.8));
   const shuffle = (a) => a.sort(() => Math.random() - 0.5);
   const ov = $id("mascots"), W = ov.clientWidth, H = ov.clientHeight;
   const clampX = (x) => Math.max(4, Math.min(W - 60, x));
@@ -3334,7 +3397,6 @@ function renderPets() {
     placePet(el, petPos[id] || petSpot(id), true);
   });
 }
-var wander;
 function petPlant(el, cry) {
   const empty = [];
   for (let pi = 0; pi < curBlocks() * 4; pi++) if (!curPlots()[pi].crop) empty.push(pi);
@@ -3574,10 +3636,58 @@ function initPets() {
     handlePetClick(el, el.dataset.pet);
   });
 }
+var petPos, petTgt, petHopT, WORK_BAND, FLOATY, GAITS, gaitOf, stopHop, petSleepT, petArrive, pileWith, petTouch, touchBase, scene, lastScene, nextSceneAt, updateNextScene, sceneBusy, sceneTimer, wander;
+var init_pets = __esm({
+  "src/pets.js"() {
+    init_state();
+    init_store();
+    init_all();
+    init_data();
+    init_graphics();
+    init_ui();
+    init_state();
+    init_render();
+    init_logic();
+    petPos = {};
+    petTgt = {};
+    petHopT = {};
+    WORK_BAND = 74;
+    FLOATY = { cloudMallow: 1, ghostBlob: 1, jellyfish: 1 };
+    GAITS = {
+      // Dáng đi: len = độ dài một bước nhảy, dur = chu kỳ một cú nhảy (ms), hy = độ cao nhảy
+      octo: { len: 8, dur: 260, hy: -4 },
+      // Bạch tuộc: bước lắt nhắt bò sát đất
+      octoCream: { len: 8, dur: 290, hy: -4 },
+      // Bạch tuộc kem: bò còn chậm rì hơn nữa
+      _: { len: 14, dur: 330, hy: -9 }
+      // Mặc định: kiểu nảy chuẩn của dòng slime
+    };
+    gaitOf = (id) => GAITS[id] || GAITS._;
+    stopHop = (id) => {
+      if (petHopT[id]) {
+        window.clearTimeout(petHopT[id]);
+        delete petHopT[id];
+      }
+    };
+    petSleepT = {};
+    petArrive = {};
+    pileWith = {};
+    petTouch = {};
+    touchBase = Date.now();
+    scene = null;
+    lastScene = "";
+    nextSceneAt = Date.now() + (TEST_MODE ? 30 * 1e3 : 5 * 60 * 1e3);
+    updateNextScene = (timeMs) => {
+      nextSceneAt = timeMs;
+    };
+    sceneBusy = (id) => !!(scene && scene.ids.indexOf(id) >= 0);
+    sceneTimer = (fn, ms) => {
+      if (scene) scene.timers.push(window.setTimeout(fn, ms));
+    };
+  }
+});
 
 // src/gacha.js
-var GACHA_NORM_PITY = 100;
-var GACHA_SPEC_PITY = 50;
 function initGachaState() {
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
@@ -4131,13 +4241,24 @@ function openGachaModal() {
   $id("gachaRollSpec10")?.addEventListener("click", () => doRoll("spec", 10));
   $id("gachaRollSuper1")?.addEventListener("click", () => doRoll("super", 1));
 }
+var GACHA_NORM_PITY, GACHA_SPEC_PITY;
+var init_gacha = __esm({
+  "src/gacha.js"() {
+    init_state();
+    init_store();
+    init_all();
+    init_data();
+    init_graphics();
+    init_witch();
+    init_render();
+    init_shop();
+    init_events();
+    GACHA_NORM_PITY = 100;
+    GACHA_SPEC_PITY = 50;
+  }
+});
 
 // src/bet-odds.js
-var POT_CAP = 1e8;
-var HOUSE_RETURN = 97;
-var MIN_MULT = 1.01;
-var ANCHOR_MIN = 5;
-var ANCHOR_MAX = 96;
 function rollD100(rnd = Math.random) {
   const n = 1 + Math.floor(rnd() * 100);
   return Math.min(100, Math.max(1, n));
@@ -4198,6 +4319,16 @@ function resultLabel(roll, kq, mult, nextAnchor) {
   const khac = Number.isFinite(Number(nextAnchor)) && Math.floor(Number(nextAnchor)) !== r;
   return "Ra " + r + " \xB7 " + phan + (khac ? " \xB7 v\xE1n t\u1EDBi t\u1EEB " + Math.floor(Number(nextAnchor)) : "");
 }
+var POT_CAP, HOUSE_RETURN, MIN_MULT, ANCHOR_MIN, ANCHOR_MAX;
+var init_bet_odds = __esm({
+  "src/bet-odds.js"() {
+    POT_CAP = 1e8;
+    HOUSE_RETURN = 97;
+    MIN_MULT = 1.01;
+    ANCHOR_MIN = 5;
+    ANCHOR_MAX = 96;
+  }
+});
 
 // src/bet.js
 function getPot() {
@@ -4206,14 +4337,6 @@ function getPot() {
 function setPot(v) {
   ctx.S.betPot = safeAmount(v);
 }
-var anchor = 0;
-var chain = [];
-var busy = false;
-var spinTimer = null;
-var holdTimer = null;
-var shown = null;
-var HOLD_MS = 1e3;
-var HOLD_LOSE_MS = 3e3;
 function stopSpin() {
   if (spinTimer !== null) {
     window.clearInterval(spinTimer);
@@ -4386,6 +4509,26 @@ function openBetModal() {
   $id("mbody").querySelectorAll("[data-side]").forEach((b) => b.addEventListener("click", () => play(b.dataset.side)));
   render();
 }
+var anchor, chain, busy, spinTimer, holdTimer, shown, HOLD_MS, HOLD_LOSE_MS;
+var init_bet = __esm({
+  "src/bet.js"() {
+    init_shop();
+    init_store();
+    init_state();
+    init_witch();
+    init_render();
+    init_bet_odds();
+    init_all();
+    anchor = 0;
+    chain = [];
+    busy = false;
+    spinTimer = null;
+    holdTimer = null;
+    shown = null;
+    HOLD_MS = 1e3;
+    HOLD_LOSE_MS = 3e3;
+  }
+});
 
 // src/shop.js
 function openModal(title, bodyHTML, keepBetTable) {
@@ -4401,10 +4544,6 @@ function closeModal() {
   setPendingPick(null);
   bagSellMode = false;
 }
-var shopTab = "seed";
-var bagTab = "crop";
-var bagSellMode = false;
-var bagSel = {};
 function openPanel(kind) {
   if (kind === "gacha") {
     return openGachaModal();
@@ -4840,6 +4979,10 @@ function openPanel(kind) {
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:6px">
         <input type="checkbox" id="cfgDragPet" ${ctx.S.dragPet ? "checked" : ""}> B\u1EADt t\xEDnh n\u0103ng nh\xE9o v\xE0 k\xE9o th\xFA c\u01B0ng
       </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#7a5c38;font-weight:bold;cursor:pointer;margin-top:6px">
+        T\u1EA7n su\u1EA5t ti\u1EC3u ph\u1EA9m ng\u1EABu nhi\xEAn (gi\xE2y):
+        <input class="inp" id="cfgSkitFreq" type="number" min="5" max="7200" value="${ctx.S.skitFreq !== void 0 ? ctx.S.skitFreq : 300}" style="width:60px;padding:3px 6px"> (M\u1EB7c \u0111\u1ECBnh 300s = 5 ph\xFAt)
+      </label>
       <div class="shead">C\xF4ng c\u1EE5 d\xE0nh cho Gi\xE1m \u0111\u1ED1c \u0110\u1ED3 ho\u1EA1 / Dev</div>
       <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
         <span class="buy plain" id="openSandboxBtn">\u{1F3A8} M\u1EDF X\u01B0\u1EDFng Ch\u1EBF T\xE1c AI</span>
@@ -4943,6 +5086,18 @@ function openPanel(kind) {
       if (mas) mas.dataset.drag = ctx.S.dragPet ? "1" : "0";
       toast(ctx.S.dragPet ? "\u0110\xE3 b\u1EADt t\xEDnh n\u0103ng k\xE9o th\u1EA3 th\xFA c\u01B0ng" : "\u0110\xE3 t\u1EAFt t\xEDnh n\u0103ng k\xE9o th\u1EA3 th\xFA c\u01B0ng");
     });
+    const cfgSkitFreq = $id("cfgSkitFreq");
+    if (cfgSkitFreq) cfgSkitFreq.addEventListener("change", () => {
+      let v = parseInt(cfgSkitFreq.value);
+      if (isNaN(v) || v < 5) v = 5;
+      ctx.S.skitFreq = v;
+      save();
+      toast("\u0110\xE3 c\u1EADp nh\u1EADt t\u1EA7n su\u1EA5t: " + v + " gi\xE2y");
+      const nowMs = Date.now();
+      Promise.resolve().then(() => (init_pets(), pets_exports)).then((m) => {
+        if (m.nextSceneAt > nowMs + v * 1e3) m.updateNextScene(nowMs + v * 1e3);
+      });
+    });
     $id("csPromptSave").addEventListener("click", () => {
       CS.userPrompt = $id("csPrompt").value.slice(0, 3e3);
       saveCharState();
@@ -4978,9 +5133,31 @@ function initShop() {
   });
   sh.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => openPanel(b.dataset.open)));
 }
+var shopTab, bagTab, bagSellMode, bagSel;
+var init_shop = __esm({
+  "src/shop.js"() {
+    init_store();
+    init_all();
+    init_data();
+    init_graphics();
+    init_render();
+    init_logic();
+    init_witch();
+    init_state();
+    init_pets();
+    init_events();
+    init_ui();
+    init_utils();
+    init_gacha();
+    init_bet();
+    shopTab = "seed";
+    bagTab = "crop";
+    bagSellMode = false;
+    bagSel = {};
+  }
+});
 
 // src/windows.js
-var tick = null;
 function placeWin() {
   const vw = window.innerWidth, vh = window.innerHeight;
   const w = Math.min(760, vw * 0.96);
@@ -5011,8 +5188,6 @@ function closeWin() {
   }
   save(true);
 }
-var wg = null;
-var dragBar = null;
 function initWindows() {
   $id("close").addEventListener("click", closeWin);
   dragBar = $id("drag");
@@ -5037,10 +5212,22 @@ function initWindows() {
     save();
   });
 }
+var tick, wg, dragBar;
+var init_windows = __esm({
+  "src/windows.js"() {
+    init_store();
+    init_all();
+    init_orb();
+    init_utils();
+    init_render();
+    init_state();
+    tick = null;
+    wg = null;
+    dragBar = null;
+  }
+});
 
 // src/orb.js
-var disposers = [];
-var gesture = null;
 function placeOrb() {
   const vw = window.innerWidth, vh = window.innerHeight;
   const x = Math.min(Math.max(ctx.S.orb.fx * vw, 4), vw - 56);
@@ -5094,20 +5281,6 @@ function onOrbUp(e, cancelled) {
     save();
   } else toggleWin();
 }
-var resizeTimer = null;
-var onResize = () => {
-  if (resizeTimer) window.clearTimeout(resizeTimer);
-  resizeTimer = window.setTimeout(() => {
-    placeOrb();
-    if (ctx.win.classList.contains("open")) {
-      layout();
-      placeWin();
-      renderPlots();
-    }
-  }, 150);
-};
-var SPRITE_PX = 64;
-var DECO_PX = 56;
 function layout() {
   const vw = window.innerWidth;
   let plot = 74;
@@ -5127,21 +5300,39 @@ function initOrb() {
   disposers.push(() => window.removeEventListener("resize", onResize));
   placeOrb();
 }
+var disposers, gesture, resizeTimer, onResize, SPRITE_PX, DECO_PX;
+var init_orb = __esm({
+  "src/orb.js"() {
+    init_store();
+    init_all();
+    init_data();
+    init_graphics();
+    init_state();
+    init_windows();
+    init_render();
+    disposers = [];
+    gesture = null;
+    resizeTimer = null;
+    onResize = () => {
+      if (resizeTimer) window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        placeOrb();
+        if (ctx.win.classList.contains("open")) {
+          layout();
+          placeWin();
+          renderPlots();
+        }
+      }, 150);
+    };
+    SPRITE_PX = 64;
+    DECO_PX = 56;
+  }
+});
 
 // src/render.js
-var mode = null;
 function setMode(val) {
   mode = val;
 }
-var buyConfirm = { b: -1, until: 0 };
-var TOOLS = [
-  { key: "seed", sp: "toolSeed", tip: "Gieo h\u1EA1t" },
-  { key: "water", sp: "toolWater", tip: "T\u01B0\u1EDBi n\u01B0\u1EDBc" },
-  { key: "fert", sp: "toolFert", tip: "B\xF3n ph\xE2n" },
-  { key: "harvest", sp: "toolHarvest", tip: "Thu ho\u1EA1ch" },
-  { key: "shovel", sp: "toolShovel", tip: "X\u1EDBi b\u1ECF" }
-];
-var toolbarOpen = false;
 function renderToolbar() {
   const tb = $id("toolbar");
   if (ctx.S && ctx.S.view === "explore") {
@@ -5170,7 +5361,6 @@ function renderToolbar() {
     tip.style.display = "block";
   } else tip.style.display = "none";
 }
-var pendingPick = null;
 function setPendingPick(val) {
   pendingPick = val;
 }
@@ -5180,10 +5370,6 @@ function pickFrom(title, obj, nameFn, cb) {
   openModal(title, `<div class="picker">${ids.map((id) => `<span class="pick" data-pick="${id}">${nameFn(id)} \xD7${obj[id]}</span>`).join("")}</div>`);
   pendingPick = cb;
 }
-var cacheWicon = "";
-var cacheCoins = -1;
-var cacheDayTxt = "";
-var cacheBlockTxt = "";
 function renderStatus() {
   if (ctx.S.coins !== cacheCoins) {
     $id("coins").textContent = ctx.S.coins.toLocaleString();
@@ -5576,9 +5762,45 @@ function initRender() {
     }
   });
 }
+var mode, buyConfirm, TOOLS, toolbarOpen, pendingPick, cacheWicon, cacheCoins, cacheDayTxt, cacheBlockTxt;
+var init_render = __esm({
+  "src/render.js"() {
+    init_state();
+    init_store();
+    init_all();
+    init_data();
+    init_graphics();
+    init_witch();
+    init_shop();
+    init_utils();
+    init_state();
+    init_orb();
+    init_events();
+    init_ui();
+    init_logic();
+    init_utils();
+    init_logic();
+    init_events();
+    init_pets();
+    mode = null;
+    buyConfirm = { b: -1, until: 0 };
+    TOOLS = [
+      { key: "seed", sp: "toolSeed", tip: "Gieo h\u1EA1t" },
+      { key: "water", sp: "toolWater", tip: "T\u01B0\u1EDBi n\u01B0\u1EDBc" },
+      { key: "fert", sp: "toolFert", tip: "B\xF3n ph\xE2n" },
+      { key: "harvest", sp: "toolHarvest", tip: "Thu ho\u1EA1ch" },
+      { key: "shovel", sp: "toolShovel", tip: "X\u1EDBi b\u1ECF" }
+    ];
+    toolbarOpen = false;
+    pendingPick = null;
+    cacheWicon = "";
+    cacheCoins = -1;
+    cacheDayTxt = "";
+    cacheBlockTxt = "";
+  }
+});
 
 // src/witch.js
-var WITCH_CRY = ["C\xFAc cu, c\xF3 ai kh\xF4ng?", "\u25C6\u2726\u2234\u2026?", "(d\u01B0\u1EDBi v\xE0nh m\u0169 v\u1ECDng ra ti\u1EBFng l\u1EADt s\xE1ch)", "\u263D\u2042\u25C7!", "\u2736\u25C7\u2234\u2726\u2026", "Tinh t\u01B0\u1EE3ng h\xF4m nay \u0111\u1EB9p \u0111\u1EA5y."];
 function witchArrive() {
   const wz = ctx.S.witch;
   wz.leaveAt = now() + WITCH_STAY;
@@ -5676,7 +5898,6 @@ function renderWitch() {
   if (active && !el.innerHTML) el.innerHTML = `<span class="wtag">\u2726 \u0110\u01A1n h\xE0ng</span><span class="wbody">${petSVG("witchBlob", 48)}</span>`;
   if (!active) el.innerHTML = "";
 }
-var takeoutNote = null;
 function setTakeoutNote(val) {
   takeoutNote = val;
 }
@@ -5819,7 +6040,6 @@ function openBuyDlg(kind, id, returnTo = "shop") {
     openPanel(returnTo);
   });
 }
-var toastTimer = null;
 function toast(msg) {
   const t = $id("toast");
   t.textContent = msg;
@@ -5841,11 +6061,29 @@ function initWitch() {
     window.setTimeout(() => b.remove(), 1900);
   });
 }
+var WITCH_CRY, takeoutNote, toastTimer;
+var init_witch = __esm({
+  "src/witch.js"() {
+    init_state();
+    init_store();
+    init_all();
+    init_data();
+    init_graphics();
+    init_state();
+    init_events();
+    init_render();
+    init_shop();
+    init_utils();
+    init_logic();
+    init_ui();
+    init_utils();
+    WITCH_CRY = ["C\xFAc cu, c\xF3 ai kh\xF4ng?", "\u25C6\u2726\u2234\u2026?", "(d\u01B0\u1EDBi v\xE0nh m\u0169 v\u1ECDng ra ti\u1EBFng l\u1EADt s\xE1ch)", "\u263D\u2042\u25C7!", "\u2736\u25C7\u2234\u2726\u2026", "Tinh t\u01B0\u1EE3ng h\xF4m nay \u0111\u1EB9p \u0111\u1EA5y."];
+    takeoutNote = null;
+    toastTimer = null;
+  }
+});
 
 // src/utils.js
-var gameDay = () => Math.floor((now() - ctx.S.day0) / DAY_MS) + 1;
-var weatherOf = (d) => WEATHERS[Math.floor(mulberry32(d * 7919)() * WEATHERS.length)];
-var isRain = () => weatherOf(gameDay()) === "M\u01B0a nh\u1ECF";
 function settle() {
   if (CS.link && !eventFresh() && !eventPending) requestDayEvent();
   if (ctx.S.passes.water && ctx.S.witch) {
@@ -5961,44 +6199,39 @@ function settle() {
   }));
   if (rChanged) save();
 }
-var pageUnlocked = (p) => p === 1 || p === 2 && ctx.S.passes.water || p === 3 && ctx.S.passes.mine;
-var fmtLeft = (ms) => {
-  if (ms <= 0) return "Thu ho\u1EA1ch \u0111\u01B0\u1EE3c";
-  const m = Math.ceil(ms / MIN);
-  return m >= 60 ? Math.floor(m / 60) + "g" + m % 60 + "p" : m + "p";
-};
-
-// src/events.js
-var esc = (s) => String(s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[m]);
-var clampN = (x, lo, hi, dflt) => {
-  x = Number(x);
-  return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt;
-};
-var SEC_LS_KEY = "star_tavern_farm_sec";
-var SEC = { url: "", key: "", model: "", autoReset: true, resetHours: 4, wbLimit: 2e4, chatDepth: 15 };
-try {
-  const raw = window.localStorage.getItem(SEC_LS_KEY);
-  if (raw) {
-    const o = JSON.parse(raw);
-    SEC = {
-      url: o.url || "",
-      key: o.key ? atob(o.key) : "",
-      model: o.model || "",
-      autoReset: o.autoReset !== false,
-      resetHours: clampN(o.resetHours, 1, 24, 4),
-      wbLimit: typeof o.wbLimit === "number" ? o.wbLimit : 2e4,
-      chatDepth: typeof o.chatDepth === "number" ? o.chatDepth : 15
+var gameDay, weatherOf, isRain, pageUnlocked, fmtLeft;
+var init_utils = __esm({
+  "src/utils.js"() {
+    init_state();
+    init_store();
+    init_all();
+    init_data();
+    init_graphics();
+    init_events();
+    init_state();
+    init_witch();
+    init_ui();
+    init_logic();
+    init_render();
+    gameDay = () => Math.floor((now() - ctx.S.day0) / DAY_MS) + 1;
+    weatherOf = (d) => WEATHERS[Math.floor(mulberry32(d * 7919)() * WEATHERS.length)];
+    isRain = () => weatherOf(gameDay()) === "M\u01B0a nh\u1ECF";
+    pageUnlocked = (p) => p === 1 || p === 2 && ctx.S.passes.water || p === 3 && ctx.S.passes.mine;
+    fmtLeft = (ms) => {
+      if (ms <= 0) return "Thu ho\u1EA1ch \u0111\u01B0\u1EE3c";
+      const m = Math.ceil(ms / MIN);
+      return m >= 60 ? Math.floor(m / 60) + "g" + m % 60 + "p" : m + "p";
     };
   }
-} catch (e) {
-}
+});
+
+// src/events.js
 function saveSec() {
   try {
     window.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit, chatDepth: SEC.chatDepth }));
   } catch (e) {
   }
 }
-var CS = { link: false, story: false, userPrompt: "" };
 function loadCharState() {
   try {
     const cn = charName();
@@ -6019,7 +6252,6 @@ function saveCharState() {
   } catch (e) {
   }
 }
-loadCharState();
 function charName() {
   try {
     const ctx2 = window.SillyTavern && window.SillyTavern.getContext ? window.SillyTavern.getContext() : {};
@@ -6028,8 +6260,6 @@ function charName() {
     return "";
   }
 }
-var eventFresh = () => ctx.S.dayEvent && ctx.S.dayEvent.who === charName() && (!SEC.autoReset || now() - (ctx.S.dayEvent.at || 0) < SEC.resetHours * 60 * 60 * 1e3);
-var todayEvent = () => CS.link && eventFresh() ? ctx.S.dayEvent.ev : null;
 async function collectWorldbook() {
   try {
     let blue = "", green = "";
@@ -6179,7 +6409,6 @@ function fallbackEvent() {
   const w = weatherOf(gameDay());
   return sanitizeEvent(w === "M\u01B0a nh\u1ECF" ? { name: "M\u01B0a nh\u1ECF", type: "buff", time_mult: 0.9, flavor: "M\u01B0a nh\u1ECF r\u1ED3i, m\u1EA5y c\xE2y rau u\u1ED1ng n\u01B0\u1EDBc vui l\u1EAFm." } : w === "Nhi\u1EC1u m\xE2y" ? { name: "Nhi\u1EC1u m\xE2y", type: "neutral", flavor: "M\xE2y che b\u1EDBt n\u1EAFng, rau v\xE0 b\u1EA1n \u0111\u1EC1u thong th\u1EA3." } : { name: "N\u1EAFng", type: "neutral", flavor: "N\u1EAFng \u0111\u1EB9p l\u1EAFm, h\u1EE3p \u0111\u1EC3 tr\u1ED3ng g\xEC \u0111\xF3." });
 }
-var eventPending = false;
 async function requestDayEvent(force) {
   if (eventPending || !CS.link) return;
   if (!force && todayEvent()) return;
@@ -6226,7 +6455,6 @@ async function requestDayEvent(force) {
     renderBanner();
   }
 }
-var renderTimeout;
 function openSandbox() {
   const html = `
     <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -6447,7 +6675,6 @@ async function fetchModelList() {
     toast("L\u1EA5y danh s\xE1ch th\u1EA5t b\u1EA1i: " + (e && e.message || e));
   }
 }
-var INJECT_ID = "star_tavern_farm_summary";
 function setInjection(text) {
   try {
     const ctx2 = window.SillyTavern?.getContext?.() || {};
@@ -6500,7 +6727,6 @@ ${ev && ev.flavor ? `- S\u1EF1 ki\u1EC7n h\xF4m nay: ${ev.name} \u2014\u2014 ${e
 * H\u01B0\u1EDBng d\u1EABn cho AI: B\u1EA1n KH\xD4NG TH\u1EC2 nh\xECn th\u1EA5u t\xFAi \u0111\u1ED3 c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i v\xE0 KH\xD4NG BI\u1EBET h\u1ECD \u0111ang c\xF3 nh\u1EEFng g\xEC. Ch\u1EC9 khi ng\u01B0\u1EDDi ch\u01A1i "l\u1EA5y ra d\xF9ng" (\u1EDF m\u1EE5c H\xC0NH \u0110\u1ED8NG V\u1EEAA X\u1EA2Y RA), nh\xE2n v\u1EADt m\u1EDBi nh\xECn th\u1EA5y v\xE0 ph\u1EA3n \u1EE9ng l\u1EA1i t\u1EF1 nhi\xEAn. \u0110\u1EEANG t\u1EF1 \xFD thao t\xE1c v\u01B0\u1EDDn rau hay thay \u0111\u1ED5i s\u1ED1 l\u01B0\u1EE3ng \u0111\u1ED3 v\u1EADt, v\xE0 \u0110\u1EEANG bi\u1EBFn n\xF3 th\xE0nh m\u1EA1ch ch\xEDnh c\u1EE7a truy\u1EC7n tr\u1EEB phi ng\u01B0\u1EDDi ch\u01A1i ch\u1EE7 \u0111\u1ED9ng nh\u1EAFc t\u1EDBi.`;
   setInjection(promptText);
 }
-var heartbeat;
 function initEvents() {
   heartbeat = window.setInterval(() => {
     try {
@@ -6538,14 +6764,53 @@ function initEvents() {
     console.warn("[Farm] L\u1ED7i khi \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n CHAT_CHANGED:", e);
   }
 }
+var esc, clampN, SEC_LS_KEY, SEC, CS, eventFresh, todayEvent, eventPending, renderTimeout, INJECT_ID, heartbeat;
+var init_events = __esm({
+  "src/events.js"() {
+    init_state();
+    init_store();
+    init_all();
+    init_data();
+    init_graphics();
+    init_utils();
+    init_render();
+    init_witch();
+    init_shop();
+    init_state();
+    init_logic();
+    esc = (s) => String(s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[m]);
+    clampN = (x, lo, hi, dflt) => {
+      x = Number(x);
+      return isFinite(x) ? Math.min(hi, Math.max(lo, x)) : dflt;
+    };
+    SEC_LS_KEY = "star_tavern_farm_sec";
+    SEC = { url: "", key: "", model: "", autoReset: true, resetHours: 4, wbLimit: 2e4, chatDepth: 15 };
+    try {
+      const raw = window.localStorage.getItem(SEC_LS_KEY);
+      if (raw) {
+        const o = JSON.parse(raw);
+        SEC = {
+          url: o.url || "",
+          key: o.key ? atob(o.key) : "",
+          model: o.model || "",
+          autoReset: o.autoReset !== false,
+          resetHours: clampN(o.resetHours, 1, 24, 4),
+          wbLimit: typeof o.wbLimit === "number" ? o.wbLimit : 2e4,
+          chatDepth: typeof o.chatDepth === "number" ? o.chatDepth : 15
+        };
+      }
+    } catch (e) {
+    }
+    CS = { link: false, story: false, userPrompt: "" };
+    loadCharState();
+    eventFresh = () => ctx.S.dayEvent && ctx.S.dayEvent.who === charName() && (!SEC.autoReset || now() - (ctx.S.dayEvent.at || 0) < SEC.resetHours * 60 * 60 * 1e3);
+    todayEvent = () => CS.link && eventFresh() ? ctx.S.dayEvent.ev : null;
+    eventPending = false;
+    INJECT_ID = "star_tavern_farm_summary";
+  }
+});
 
 // src/state.js
-var now = () => Date.now();
-var emptyPlots = () => {
-  const a = [];
-  for (let i = 0; i < 24; i++) a.push({ crop: null });
-  return a;
-};
 function freshState() {
   return {
     version: 1,
@@ -6575,8 +6840,6 @@ function freshState() {
     win: null
   };
 }
-ctx.S = null;
-var blockPrice = (bi) => BLOCK_PRICE_PG[ctx.S.page][bi];
 function loadState() {
   if (!ctx.extension_settings[extensionName]) {
     ctx.extension_settings[extensionName] = {};
@@ -6638,20 +6901,9 @@ function loadState() {
     if (CROPS[c.id]?.regrow && c.left == null) c.left = REGROW_MAX;
   }));
 }
-var pagePlots = (pg) => pg === 2 ? ctx.S.plots2 : pg === 3 ? ctx.S.plots3 : ctx.S.plots;
-var curPlots = () => pagePlots(ctx.S.page);
-var curBlocks = () => ctx.S.page === 2 ? ctx.S.unlockedBlocks2 : ctx.S.page === 3 ? ctx.S.unlockedBlocks3 : ctx.S.unlockedBlocks;
-var addBlock = () => {
-  if (ctx.S.page === 2) ctx.S.unlockedBlocks2++;
-  else if (ctx.S.page === 3) ctx.S.unlockedBlocks3++;
-  else ctx.S.unlockedBlocks++;
-};
-var eachPage = (fn) => [1, 2, 3].forEach((pg) => fn(pagePlots(pg), pg));
-var testMode = false;
 function setTestMode(v) {
   testMode = v;
 }
-ctx.saveTimer = null;
 function save(immediate) {
   if (testMode) return;
   if (ctx.saveTimer) {
@@ -6670,51 +6922,36 @@ function save(immediate) {
   if (immediate) doSave();
   else ctx.saveTimer = setTimeout(doSave, 500);
 }
+var now, emptyPlots, blockPrice, pagePlots, curPlots, curBlocks, addBlock, eachPage, testMode;
+var init_state = __esm({
+  "src/state.js"() {
+    init_store();
+    init_all();
+    init_data();
+    init_events();
+    now = () => Date.now();
+    emptyPlots = () => {
+      const a = [];
+      for (let i = 0; i < 24; i++) a.push({ crop: null });
+      return a;
+    };
+    ctx.S = null;
+    blockPrice = (bi) => BLOCK_PRICE_PG[ctx.S.page][bi];
+    pagePlots = (pg) => pg === 2 ? ctx.S.plots2 : pg === 3 ? ctx.S.plots3 : ctx.S.plots;
+    curPlots = () => pagePlots(ctx.S.page);
+    curBlocks = () => ctx.S.page === 2 ? ctx.S.unlockedBlocks2 : ctx.S.page === 3 ? ctx.S.unlockedBlocks3 : ctx.S.unlockedBlocks;
+    addBlock = () => {
+      if (ctx.S.page === 2) ctx.S.unlockedBlocks2++;
+      else if (ctx.S.page === 3) ctx.S.unlockedBlocks3++;
+      else ctx.S.unlockedBlocks++;
+    };
+    eachPage = (fn) => [1, 2, 3].forEach((pg) => fn(pagePlots(pg), pg));
+    testMode = false;
+    ctx.saveTimer = null;
+  }
+});
 
 // src/dungeon.js
-var isDungeonOpen = false;
-var phase = "placement";
-var gameLoopId = null;
-var lastTime = 0;
-var team = [];
-var enemies = [];
-var projectiles = [];
-var currentWave = 1;
-var totalGold = 0;
-var PET_STATS = {
-  slime: { name: "Slime Xanh", desc: "Chi\u1EBFn binh c\xE2n b\u1EB1ng, kh\xF4ng c\xF3 g\xEC n\u1ED5i b\u1EADt.", hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
-  octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "\u0110\xE1nh nhanh th\u1EAFng nhanh. \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao.", hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
-  slimePink: { name: "Slime H\u1ED3ng", desc: "H\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu cho \u0111\u1ED3ng minh y\u1EBFu nh\u1EA5t.", hp: 120, atk: 15, range: 80, speed: 35, cd: 1.5, skill: "heal" },
-  peach_soda: { name: "Soda \u0110\xE0o", desc: "\u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.", hp: 90, atk: 18, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
-  octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "20% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.", hp: 150, atk: 12, range: 60, speed: 45, cd: 1.5, skill: "stun" },
-  jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "X\u1EA1 th\u1EE7: B\u1EAFn c\xE0ng xa s\xE1t th\u01B0\u01A1ng c\xE0ng l\u1EDBn.", hp: 70, atk: 25, range: 150, speed: 60, cd: 1.5, skill: "sniper" },
-  mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "H\u1ED3i m\xE1u cho b\u1EA3n th\xE2n b\u1EB1ng 50% s\xE1t th\u01B0\u01A1ng g\xE2y ra.", hp: 85, atk: 14, range: 50, speed: 55, cd: 1.1, skill: "lifesteal" },
-  ghostBlob: { name: "Ma Tr\u1EAFng", desc: "S\xE1t th\u1EE7: Lu\xF4n nh\u1EAFm v\xE0o k\u1EBB th\xF9 xa nh\u1EA5t.", hp: 60, atk: 35, range: 40, speed: 100, cd: 1.2, skill: "assassin" },
-  impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "\u0110\xE1nh lan: G\xE2y s\xE1t th\u01B0\u01A1ng AoE xung quanh m\u1EE5c ti\xEAu.", hp: 50, atk: 40, range: 40, speed: 60, cd: 1, skill: "cleave" },
-  angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "H\u1ED3i m\xE1u di\u1EC7n r\u1ED9ng cho c\xE1c \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 110, atk: 10, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal" },
-  starBell: { name: "Chu\xF4ng Sao", desc: "T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 95, atk: 12, range: 90, speed: 40, cd: 1, skill: "buff_atk" },
-  cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "Khi\xEAu kh\xEDch: Bu\u1ED9c k\u1EBB \u0111\u1ECBch t\u1EA5n c\xF4ng m\xECnh.", hp: 200, atk: 8, range: 40, speed: 30, cd: 2, skill: "taunt" },
-  dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "25% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.", hp: 105, atk: 14, range: 50, speed: 45, cd: 1.2, skill: "root" },
-  prismBlob: { name: "L\u0103ng K\xEDnh", desc: "B\u1EAFn 3 tia s\xE1ng c\xF9ng l\xFAc (s\xE1t th\u01B0\u01A1ng chia n\u1EEDa).", hp: 80, atk: 20, range: 140, speed: 40, cd: 1.4, skill: "multishot" },
-  penguin: { name: "C\xE1nh C\u1EE5t", desc: "\u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh.", hp: 120, atk: 16, range: 45, speed: 50, cd: 1, skill: "freeze" },
-  default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 100, atk: 10, range: 40, speed: 40, cd: 1 }
-};
-var ENEMY_TYPES = [
-  { id: "douya", name: "Gi\xE1 \u0110\u1ED7", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout" },
-  { id: "tomato", name: "C\xE0 Chua Tr\xF2n", desc: "C\u1EADn chi\u1EBFn c\u01A1 b\u1EA3n.", hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: "melee" },
-  { id: "radish", name: "C\u1EE7 C\u1EA3i T\u1ED1c \u0110\u1ED9", desc: "Ch\u1EA1y c\u1EF1c nhanh.", hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: "melee" },
-  { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: "assassin", sp: "moonberry" },
-  { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: "melee" },
-  { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: "melee" },
-  { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: "tank" },
-  { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: "ranged" },
-  { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot" },
-  { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root" },
-  { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: "ranged" },
-  { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true },
-  { id: "pumpkin", name: "Vua B\xED Ng\xF4", desc: "Boss: Tank AoE slam.", hp: 800, atk: 35, range: 50, speed: 15, cd: 2.5, ai: "tank", skill: "cleave", elite: true, sp: "pumpkin" },
-  { id: "fangW", name: "Ph\xF9 Th\u1EE7y Hoa", desc: "Boss: Ph\xE1o \u0111\xE0i b\u1EAFn xa.", hp: 400, atk: 45, range: 160, speed: 18, cd: 1.8, ai: "ranged", skill: "multishot", elite: true, sp: "fangW" }
-];
 function openDungeonView() {
   isDungeonOpen = true;
   const titleH1 = $id("drag").querySelector("h1");
@@ -7022,7 +7259,6 @@ function initPlacementPhase() {
     endDungeon(false);
   });
 }
-var fullTeam = [];
 function startCombat() {
   phase = "combat";
   $id("dg-dock").style.display = "none";
@@ -7671,9 +7907,60 @@ function nextWaveSequence(overlay) {
   });
   startWave();
 }
+var isDungeonOpen, phase, gameLoopId, lastTime, team, enemies, projectiles, currentWave, totalGold, PET_STATS, ENEMY_TYPES, fullTeam;
+var init_dungeon = __esm({
+  "src/dungeon.js"() {
+    init_store();
+    init_all();
+    init_graphics();
+    isDungeonOpen = false;
+    phase = "placement";
+    gameLoopId = null;
+    lastTime = 0;
+    team = [];
+    enemies = [];
+    projectiles = [];
+    currentWave = 1;
+    totalGold = 0;
+    PET_STATS = {
+      slime: { name: "Slime Xanh", desc: "Chi\u1EBFn binh c\xE2n b\u1EB1ng, kh\xF4ng c\xF3 g\xEC n\u1ED5i b\u1EADt.", hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
+      octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "\u0110\xE1nh nhanh th\u1EAFng nhanh. \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao.", hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
+      slimePink: { name: "Slime H\u1ED3ng", desc: "H\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu cho \u0111\u1ED3ng minh y\u1EBFu nh\u1EA5t.", hp: 120, atk: 15, range: 80, speed: 35, cd: 1.5, skill: "heal" },
+      peach_soda: { name: "Soda \u0110\xE0o", desc: "\u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.", hp: 90, atk: 18, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
+      octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "20% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.", hp: 150, atk: 12, range: 60, speed: 45, cd: 1.5, skill: "stun" },
+      jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "X\u1EA1 th\u1EE7: B\u1EAFn c\xE0ng xa s\xE1t th\u01B0\u01A1ng c\xE0ng l\u1EDBn.", hp: 70, atk: 25, range: 150, speed: 60, cd: 1.5, skill: "sniper" },
+      mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "H\u1ED3i m\xE1u cho b\u1EA3n th\xE2n b\u1EB1ng 50% s\xE1t th\u01B0\u01A1ng g\xE2y ra.", hp: 85, atk: 14, range: 50, speed: 55, cd: 1.1, skill: "lifesteal" },
+      ghostBlob: { name: "Ma Tr\u1EAFng", desc: "S\xE1t th\u1EE7: Lu\xF4n nh\u1EAFm v\xE0o k\u1EBB th\xF9 xa nh\u1EA5t.", hp: 60, atk: 35, range: 40, speed: 100, cd: 1.2, skill: "assassin" },
+      impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "\u0110\xE1nh lan: G\xE2y s\xE1t th\u01B0\u01A1ng AoE xung quanh m\u1EE5c ti\xEAu.", hp: 50, atk: 40, range: 40, speed: 60, cd: 1, skill: "cleave" },
+      angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "H\u1ED3i m\xE1u di\u1EC7n r\u1ED9ng cho c\xE1c \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 110, atk: 10, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal" },
+      starBell: { name: "Chu\xF4ng Sao", desc: "T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 95, atk: 12, range: 90, speed: 40, cd: 1, skill: "buff_atk" },
+      cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "Khi\xEAu kh\xEDch: Bu\u1ED9c k\u1EBB \u0111\u1ECBch t\u1EA5n c\xF4ng m\xECnh.", hp: 200, atk: 8, range: 40, speed: 30, cd: 2, skill: "taunt" },
+      dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "25% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.", hp: 105, atk: 14, range: 50, speed: 45, cd: 1.2, skill: "root" },
+      prismBlob: { name: "L\u0103ng K\xEDnh", desc: "B\u1EAFn 3 tia s\xE1ng c\xF9ng l\xFAc (s\xE1t th\u01B0\u01A1ng chia n\u1EEDa).", hp: 80, atk: 20, range: 140, speed: 40, cd: 1.4, skill: "multishot" },
+      penguin: { name: "C\xE1nh C\u1EE5t", desc: "\u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh.", hp: 120, atk: 16, range: 45, speed: 50, cd: 1, skill: "freeze" },
+      default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 100, atk: 10, range: 40, speed: 40, cd: 1 }
+    };
+    ENEMY_TYPES = [
+      { id: "douya", name: "Gi\xE1 \u0110\u1ED7", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout" },
+      { id: "tomato", name: "C\xE0 Chua Tr\xF2n", desc: "C\u1EADn chi\u1EBFn c\u01A1 b\u1EA3n.", hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: "melee" },
+      { id: "radish", name: "C\u1EE7 C\u1EA3i T\u1ED1c \u0110\u1ED9", desc: "Ch\u1EA1y c\u1EF1c nhanh.", hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: "melee" },
+      { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: "assassin", sp: "moonberry" },
+      { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: "melee" },
+      { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: "melee" },
+      { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: "tank" },
+      { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: "ranged" },
+      { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot" },
+      { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root" },
+      { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: "ranged" },
+      { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true },
+      { id: "pumpkin", name: "Vua B\xED Ng\xF4", desc: "Boss: Tank AoE slam.", hp: 800, atk: 35, range: 50, speed: 15, cd: 2.5, ai: "tank", skill: "cleave", elite: true, sp: "pumpkin" },
+      { id: "fangW", name: "Ph\xF9 Th\u1EE7y Hoa", desc: "Boss: Ph\xE1o \u0111\xE0i b\u1EAFn xa.", hp: 400, atk: 45, range: 160, speed: 18, cd: 1.8, ai: "ranged", skill: "multishot", elite: true, sp: "fangW" }
+    ];
+    fullTeam = [];
+  }
+});
 
 // src/destroy.js
-var destroyed = false;
 function resetDestroyed() {
   destroyed = false;
 }
@@ -7746,7 +8033,6 @@ function destroy() {
   } catch (e) {
   }
 }
-var extMenuBtn = null;
 function setupExtButton() {
   if (extMenuBtn) {
     try {
@@ -7794,125 +8080,25 @@ function setupSlashCommand() {
     }
   })();
 }
+var destroyed, extMenuBtn;
+var init_destroy = __esm({
+  "src/destroy.js"() {
+    init_store();
+    init_all();
+    init_windows();
+    init_events();
+    init_pets();
+    init_state();
+    init_witch();
+    init_orb();
+    init_ui();
+    init_store();
+    destroyed = false;
+    extMenuBtn = null;
+  }
+});
 
 // src/hero.js
-var heroLoop = null;
-var lastTick = 0;
-var PET_SKILLS = {
-  slime: {
-    a1: { name: "T\u1EF1 Ch\u1EEFa L\xE0nh", type: "heal_self", val: 0.2, cd: 4, duration: 0, desc: "H\u1ED3i 20% Max HP b\u1EA3n th\xE2n" },
-    a2: { name: "\u0110\xE2m S\u1EA7m", type: "slam_dmg", val: 3, cd: 5, duration: 0, desc: "G\xE2y x3 ATK" },
-    p1: { name: "Th\u1EC3 Ch\u1EA5t Slime", type: "max_hp_party", val: 0.25, desc: "T\u0103ng 25% Max HP to\xE0n \u0111\u1ED9i" },
-    p2: { name: "T\xE1i Sinh", type: "hp_regen", val: 0.02, desc: "T\u1EF1 h\u1ED3i 2% Max HP m\u1ED7i gi\xE2y" }
-  },
-  octo: {
-    a1: { name: "\u0110\xF2n Roi X\xFAc Tu", type: "multi_strike", val: 3, cd: 6, duration: 1, desc: "Tung 3 \u0111\xF2n li\xEAn ti\u1EBFp ngay l\u1EADp t\u1EE9c" },
-    a2: { name: "B\u01A1m M\u1EF1c", type: "atk_spd_self", val: 2, cd: 8, duration: 3, desc: "T\u1EF1 buff x2 T\u1ED1c \u0110\xE1nh trong 3s" },
-    p1: { name: "S\u1EE9c M\u1EA1nh M\u1EC1m", type: "atk_up", val: 0.4, desc: "T\u0103ng 40% ATK b\u1EA3n th\xE2n" },
-    p2: { name: "Ph\u1EE7 \u0110\u1EA7u", type: "first_strike", val: 5, desc: "\u0110\xF2n \u0111\xE1nh \u0111\u1EA7u m\u1ED7i qu\xE1i x5 S\xE1t th\u01B0\u01A1ng" }
-  },
-  slimePink: {
-    a1: { name: "M\u01B0a D\xE2u T\xE2y", type: "heal_party", val: 15, cd: 4, duration: 0, desc: "H\u1ED3i 15 HP cho to\xE0n \u0111\u1ED9i" },
-    a2: { name: "M\xF9i H\u01B0\u01A1ng", type: "charm", val: 0.5, cd: 8, duration: 3, desc: "Gi\u1EA3m 50% ATK c\u1EE7a qu\xE1i trong 3s" },
-    p1: { name: "C\u1EAFn Ng\u1ECDt", type: "lifesteal", val: 0.3, desc: "H\xFAt m\xE1u 30% s\xE1t th\u01B0\u01A1ng g\xE2y ra" },
-    p2: { name: "L\u1EDBp K\u1EB9o D\u1EBBo", type: "dmg_reduction", val: 0.2, desc: "Gi\u1EA3m 20% m\u1ECDi s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o" }
-  },
-  octoCream: {
-    a1: { name: "Kem Khi\xEAn", type: "shield_self", val: 100, cd: 8, duration: 0, desc: "T\u1EA1o Khi\xEAn 100 HP cho b\u1EA3n th\xE2n" },
-    a2: { name: "H\u01A1i L\u1EA1nh", type: "slow", val: 0.5, cd: 7, duration: 3, desc: "Gi\u1EA3m 50% T\u1ED1c \u0111\xE1nh c\u1EE7a qu\xE1i" },
-    p1: { name: "\u0110\xE1 B\xE0o", type: "reflect", val: 0.4, desc: "Ph\u1EA3n l\u1EA1i 40% s\xE1t th\u01B0\u01A1ng" },
-    p2: { name: "N\xE9 Tr\xE1nh", type: "dodge", val: 0.3, desc: "T\u1EC9 l\u1EC7 n\xE9 30%" }
-  },
-  dewSprout: {
-    a1: { name: "\u0110\xF2n Qu\u1EA5t Gai", type: "thorn_whip", val: 2, cd: 5, duration: 0, desc: "G\xE2y x2 ATK & t\u1EF1 h\u1ED3i m\xE1u" },
-    a2: { name: "Ph\u1EA5n Hoa", type: "cd_reduce", val: 1, cd: 6, duration: 0, desc: "Gi\u1EA3m 1s CD ch\u1EE7 \u0111\u1ED9ng cho to\xE0n \u0111\u1ED9i" },
-    p1: { name: "R\u1EC5 B\xE1m", type: "atk_speed", val: 0.5, desc: "T\u1ED1c \u0111\xE1nh b\u1EA3n th\xE2n x1.5" },
-    p2: { name: "C\u01A1n Gi\xF3 M\xE1t", type: "party_speed", val: 0.15, desc: "T\u0103ng 15% t\u1ED1c \u0111\xE1nh to\xE0n \u0111\u1ED9i" }
-  },
-  cloudMallow: {
-    a1: { name: "S\xE9t \u0110\xE1nh", type: "lightning_strike", val: 4, cd: 6, duration: 0, desc: "G\xE2y x4 ATK b\u1ECF qua gi\xE1p" },
-    a2: { name: "\u0110\u1EA9y L\xF9i", type: "push_back", val: 0, cd: 5, duration: 0, desc: "\u0110\u1EA9y l\xF9i qu\xE1i, ng\u1EAFt nh\u1ECBp \u0111\xE1nh" },
-    p1: { name: "L\u1EDBp B\u1ED3ng B\u1EC1nh", type: "party_dodge", val: 0.15, desc: "T\u0103ng 15% n\xE9 tr\xE1nh cho \u0111\u1ED9i" },
-    p2: { name: "L\u01A1 L\u1EEDng", type: "invincible_start", val: 2, desc: "Mi\u1EC5n nhi\u1EC5m s\xE1t th\u01B0\u01A1ng 2s \u0111\u1EA7u Wave" }
-  },
-  ghostBlob: {
-    a1: { name: "R\xFAt H\u1ED3n", type: "soul_reap", val: 0.1, cd: 5, duration: 0, desc: "G\xE2y s\xE1t th\u01B0\u01A1ng 10% HP hi\u1EC7n t\u1EA1i qu\xE1i" },
-    a2: { name: "D\u1ECDa Ma", type: "fear", val: 2, cd: 7, duration: 2, desc: "Ho\u1EA3ng s\u1EE3 (Cho\xE1ng c\u1EE9ng) qu\xE1i trong 2s" },
-    p1: { name: "\xC1m Kh\xED", type: "armor_pen", val: 0.5, desc: "Xuy\xEAn Gi\xE1p: T\u0103ng 50% s\xE1t th\u01B0\u01A1ng" },
-    p2: { name: "V\xF4 H\xECnh", type: "stealth", val: 1, desc: "Qu\xE1i kh\xF4ng nh\u1EAFm \u0111\xE1nh b\xE9 tr\u01B0\u1EDBc" }
-  },
-  mystery_blob: {
-    a1: { name: "S\xE1t Th\u01B0\u01A1ng Ng\u1EABu Nhi\xEAn", type: "random_dmg", val: 5, cd: 4, duration: 0, desc: "G\xE2y ng\u1EABu nhi\xEAn t\u1EEB x1 \u0111\u1EBFn x5 ATK" },
-    a2: { name: "Ph\xE9p B\u1ED5 Tr\u1EE3 D\u1ECB Th\u01B0\u1EDDng", type: "random_buff", val: 2, cd: 6, duration: 4, desc: "Buff x2 m\u1ED9t ch\u1EC9 s\u1ED1 ng\u1EABu nhi\xEAn" },
-    p1: { name: "Ch\xED M\u1EA1ng B\u1EA5t Ng\u1EDD", type: "crit_rate", val: 0.35, desc: "T\u1EC9 l\u1EC7 B\u1EA1o k\xEDch +35%" },
-    p2: { name: "Aura L\u1EDDi Nguy\u1EC1n", type: "curse_aura", val: 0.05, desc: "5% qu\xE1i t\u1EF1 m\u1EA5t 5% HP m\u1ED7i gi\xE2y" }
-  },
-  jellyfish: {
-    a1: { name: "Gi\u1EADt C\u1EA5p \u0110i\u1EC7n", type: "stun_bolt", val: 2, cd: 8, duration: 2, desc: "G\xE2y cho\xE1ng qu\xE1i 2s" },
-    a2: { name: "S\xF3ng \xC2m X\xF3a S\u1ED5", type: "dispel", val: 2, cd: 10, duration: 0, desc: "G\xE2y x2 ATK & X\xF3a m\u1ECDi buff c\u1EE7a qu\xE1i" },
-    p1: { name: "\u0110\xF2n Ch\u1EBFt Ch\xF3c", type: "crit_dmg", val: 3, desc: "S\xE1t th\u01B0\u01A1ng Crit x3" },
-    p2: { name: "Bi\u1EC3n C\u1EA3 Ch\xFAc Ph\xFAc", type: "party_crit", val: 0.2, desc: "T\u0103ng 20% T\u1EC9 l\u1EC7 Crit to\xE0n \u0111\u1ED9i" }
-  },
-  impBlob: {
-    a1: { name: "H\u1ECFa Ng\u1EE5c", type: "hellfire", val: 5, cd: 8, duration: 0, desc: "x5 ATK nh\u01B0ng t\u1EF1 tr\u1EEB 20% HP hi\u1EC7n t\u1EA1i" },
-    a2: { name: "H\xFAt M\xE1u \u0110\u1ED3ng B\u1ECDn", type: "vampiric_buff", val: 2, cd: 5, duration: 5, desc: "R\xFAt 10 HP \u0111\u1ED3ng minh \u0111\u1EC3 t\u1EF1 buff x2 ATK" },
-    p1: { name: "Cu\u1ED3ng N\u1ED9 (Berserk)", type: "berserk", val: 0.5, desc: "HP < 50% => x2 ATK & T\u1ED1c \u0110\xE1nh" },
-    p2: { name: "\u0110\xF2n K\u1EBFt Li\u1EC5u", type: "execute", val: 0.2, desc: "5% T\u1EC9 l\u1EC7 k\u1EBFt li\u1EC5u ngay qu\xE1i m\xE1u <20%" }
-  },
-  angelBlob: {
-    a1: { name: "G\u1ECDi H\u1ED3n", type: "resurrect", val: 0.3, cd: 15, duration: 0, desc: "H\u1ED3i sinh 1 \u0111\u1ED3ng minh \u0111\xE3 ch\u1EBFt (30% HP)" },
-    a2: { name: "Khi\xEAn Th\xE1nh", type: "shield_party", val: 50, cd: 10, duration: 0, desc: "T\u1EA1o Khi\xEAn 50 HP cho to\xE0n \u0111\u1ED9i" },
-    p1: { name: "H\xE0o Quang B\u1EA3o H\u1ED9", type: "party_dmg_resist", val: 0.1, desc: "Gi\u1EA3m 10% s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o to\xE0n \u0111\u1ED9i" },
-    p2: { name: "H\u1EA1t Gi\u1ED1ng Sinh M\u1EC7nh", type: "cheat_death", val: 1, desc: "Gi\u1EEF l\u1EA1i 1 HP khi ch\u1EBFt (1 l\u1EA7n/M\xE0n)" }
-  },
-  prismBlob: {
-    a1: { name: "C\u1EAFt Laser", type: "laser", val: 2, cd: 9, duration: 3, desc: "Laser x2 ATK m\u1ED7i gi\xE2y (k\xE9o d\xE0i 3s)" },
-    a2: { name: "M\xE1i V\xF2m L\u0103ng K\xEDnh", type: "absorb", val: 1, cd: 6, duration: 0, desc: "H\u1EA5p th\u1EE5 ho\xE0n to\xE0n 1 \u0111\xF2n \u0111\xE1nh c\u1EE7a qu\xE1i" },
-    p1: { name: "Th\u1EC3 Ch\u1EA5t Pha L\xEA", type: "hp_to_atk", val: 0.05, desc: "Chuy\u1EC3n 5% Max HP th\xE0nh ATK" },
-    p2: { name: "Kh\xE1ng Hi\u1EC7u \u1EE8ng", type: "cc_resist", val: 0.5, desc: "Gi\u1EA3m 50% th\u1EDDi gian b\u1ECB cho\xE1ng" }
-  },
-  starBell: {
-    a1: { name: "Tri\u1EC7u H\u1ED3i Sao B\u0103ng", type: "star_fall", val: 3, cd: 7, duration: 1, desc: "G\xE2y x3 ATK & L\xE0m cho\xE1ng 1s" },
-    a2: { name: "Giai \u0110i\u1EC7u Kh\u1EDFi V\u1EADn", type: "party_speed_buff", val: 1.5, cd: 9, duration: 3, desc: "T\u0103ng 50% T\u1ED1c \u0111\xE1nh to\xE0n \u0111\u1ED9i" },
-    p1: { name: "B\xE0i Ca S\u1EE9c M\u1EA1nh", type: "atk_party", val: 0.25, desc: "T\u0103ng 25% ATK to\xE0n \u0111\u1ED9i" },
-    p2: { name: "B\u1EADc Th\u1EA7y Combo", type: "combo_master", val: 3, desc: "\u0110\xF2n \u0111\xE1nh th\u1EE9 4 ch\u1EAFc ch\u1EAFn Ch\xED m\u1EA1ng" }
-  },
-  peach_soda: {
-    a1: { name: "B\u1ECDt Ga Cay M\u1EAFt", type: "blind", val: 1, cd: 8, duration: 2, desc: "L\xE0m m\xF9 qu\xE1i (\u0111\xE1nh tr\u01B0\u1EE3t 100%)" },
-    a2: { name: "\u0110\u01B0\u1EDDng K\xEDch Th\xEDch", type: "sugar_rush", val: 3, cd: 6, duration: 4, desc: "x3 T\u1ED1c \u0111\xE1nh, nh\u01B0ng gi\u1EA3m 50% ATK" },
-    p1: { name: "N\u1ED5 T\u1ECFa Tr\xF2n", type: "splash_dmg", val: 0.3, desc: "\u0110\xE1nh th\u01B0\u1EDDng lan 30% s\xE1t th\u01B0\u01A1ng" },
-    p2: { name: "N\u0103ng L\u01B0\u1EE3ng \u0110\u1EC9nh Cao", type: "initial_burst", val: 2, desc: "3 gi\xE2y \u0111\u1EA7u m\u1ED7i m\xE0n x2 s\xE1t th\u01B0\u01A1ng" }
-  },
-  penguin: {
-    a1: { name: "B\xF3ng Tuy\u1EBFt Tr\u01B0\u1EE3t", type: "snowball_roll", val: 2, cd: 5, duration: 0, desc: "G\xE2y x2 ATK & \u0111\u1EA9y l\xF9i qu\xE1i" },
-    a2: { name: "N\xE9m Ti\u1EC1n", type: "coin_toss", val: 500, cd: 10, duration: 0, desc: "V\u1EE9t 500 V\xE0ng g\xE2y 999 ST Chu\u1EA9n" },
-    p1: { name: "M\u1ECF V\xE0ng", type: "gold_drop", val: 2, desc: "Nh\xE2n \u0111\xF4i V\xE0ng r\u1EDBt ra t\u1EEB qu\xE1i" },
-    p2: { name: "Nh\u1EB7t Nh\u1EA1nh", type: "scavenger", val: 0.05, desc: "Khi \u0111\u1EA7y m\xE1u, \u0111\xE1nh c\xF3 5% r\u01A1i 1 V\xE0ng" }
-  },
-  default: {
-    a1: { name: "C\u1ED1 G\u1EAFng", type: "atk_up", val: 0.2, cd: 5, duration: 3, desc: "T\u0103ng 20% ATK" },
-    p1: { name: "L\u1EA1c Quan", type: "crit_rate", val: 0.2, desc: "T\u1EC9 l\u1EC7 B\u1EA1o k\xEDch +20%" }
-  }
-};
-var PET_STATS2 = {
-  slime: { baseHp: 150, hpPerLv: 25, baseAtk: 8, atkPerLv: 2, baseSpd: 1 },
-  octo: { baseHp: 80, hpPerLv: 15, baseAtk: 15, atkPerLv: 4, baseSpd: 1.5 },
-  slimePink: { baseHp: 100, hpPerLv: 18, baseAtk: 12, atkPerLv: 3.5, baseSpd: 1 },
-  octoCream: { baseHp: 110, hpPerLv: 20, baseAtk: 9, atkPerLv: 2.5, baseSpd: 1.2 },
-  dewSprout: { baseHp: 120, hpPerLv: 22, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
-  cloudMallow: { baseHp: 130, hpPerLv: 20, baseAtk: 8, atkPerLv: 2, baseSpd: 0.8 },
-  ghostBlob: { baseHp: 70, hpPerLv: 12, baseAtk: 14, atkPerLv: 4, baseSpd: 1.5 },
-  mystery_blob: { baseHp: 90, hpPerLv: 15, baseAtk: 16, atkPerLv: 5, baseSpd: 0.6 },
-  jellyfish: { baseHp: 80, hpPerLv: 14, baseAtk: 13, atkPerLv: 4.5, baseSpd: 0.8 },
-  impBlob: { baseHp: 150, hpPerLv: 24, baseAtk: 15, atkPerLv: 4, baseSpd: 0.6 },
-  angelBlob: { baseHp: 120, hpPerLv: 25, baseAtk: 7, atkPerLv: 1.5, baseSpd: 1 },
-  prismBlob: { baseHp: 100, hpPerLv: 18, baseAtk: 14, atkPerLv: 4, baseSpd: 0.8 },
-  starBell: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1 },
-  peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
-  penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5, baseSpd: 1 },
-  default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1 }
-};
-var runState = null;
 function initHeroState() {
   if (!ctx.S.hero) {
     ctx.S.hero = {};
@@ -8334,7 +8520,6 @@ function closeHeroMode() {
   const orb = $id("orb");
   if (orb) orb.style.display = "flex";
 }
-var hToastTimer = null;
 function heroToast(msg) {
   const t = $id("hero-toast");
   if (!t) return;
@@ -8403,17 +8588,6 @@ function spawnMonster() {
   runState.waveTime = 0;
   renderMonstersUI();
 }
-window.focusMonster = function(idx) {
-  if (!runState || !runState.monsters[idx] || runState.monsters[idx].hp <= 0) return;
-  runState.focusTarget = idx;
-  runState.monsters.forEach((m, i) => {
-    const mEl = $id("hmob-" + i);
-    if (!mEl) return;
-    const isFocused = runState.focusTarget === i;
-    const bossStyle = m.isBoss ? "drop-shadow(0 0 5px #ff0000)" : "none";
-    mEl.style.filter = isFocused ? "drop-shadow(0 0 8px #ffeb3b)" : bossStyle;
-  });
-};
 function renderMonstersUI() {
   const em = $id("hero-enemy");
   if (!em || !runState) return;
@@ -9233,7 +9407,6 @@ function updateHeroStats() {
   if (lvEl && runState) lvEl.textContent = runState.stage;
   if (goldEl) goldEl.textContent = ctx.S.hero.gold;
 }
-var hGesture = null;
 function onHeroDown(e) {
   if (!e.isPrimary || e.pointerType === "mouse" && e.button !== 0) return;
   const bar = $id("hero-bar");
@@ -9312,8 +9485,176 @@ function initHero() {
     if (cashOutBtn) cashOutBtn.addEventListener("click", cashOutHero);
   }
 }
+var heroLoop, lastTick, PET_SKILLS, PET_STATS2, runState, hToastTimer, hGesture;
+var init_hero = __esm({
+  "src/hero.js"() {
+    init_store();
+    init_all();
+    init_graphics();
+    init_data();
+    init_state();
+    init_shop();
+    heroLoop = null;
+    lastTick = 0;
+    PET_SKILLS = {
+      slime: {
+        a1: { name: "T\u1EF1 Ch\u1EEFa L\xE0nh", type: "heal_self", val: 0.2, cd: 4, duration: 0, desc: "H\u1ED3i 20% Max HP b\u1EA3n th\xE2n" },
+        a2: { name: "\u0110\xE2m S\u1EA7m", type: "slam_dmg", val: 3, cd: 5, duration: 0, desc: "G\xE2y x3 ATK" },
+        p1: { name: "Th\u1EC3 Ch\u1EA5t Slime", type: "max_hp_party", val: 0.25, desc: "T\u0103ng 25% Max HP to\xE0n \u0111\u1ED9i" },
+        p2: { name: "T\xE1i Sinh", type: "hp_regen", val: 0.02, desc: "T\u1EF1 h\u1ED3i 2% Max HP m\u1ED7i gi\xE2y" }
+      },
+      octo: {
+        a1: { name: "\u0110\xF2n Roi X\xFAc Tu", type: "multi_strike", val: 3, cd: 6, duration: 1, desc: "Tung 3 \u0111\xF2n li\xEAn ti\u1EBFp ngay l\u1EADp t\u1EE9c" },
+        a2: { name: "B\u01A1m M\u1EF1c", type: "atk_spd_self", val: 2, cd: 8, duration: 3, desc: "T\u1EF1 buff x2 T\u1ED1c \u0110\xE1nh trong 3s" },
+        p1: { name: "S\u1EE9c M\u1EA1nh M\u1EC1m", type: "atk_up", val: 0.4, desc: "T\u0103ng 40% ATK b\u1EA3n th\xE2n" },
+        p2: { name: "Ph\u1EE7 \u0110\u1EA7u", type: "first_strike", val: 5, desc: "\u0110\xF2n \u0111\xE1nh \u0111\u1EA7u m\u1ED7i qu\xE1i x5 S\xE1t th\u01B0\u01A1ng" }
+      },
+      slimePink: {
+        a1: { name: "M\u01B0a D\xE2u T\xE2y", type: "heal_party", val: 15, cd: 4, duration: 0, desc: "H\u1ED3i 15 HP cho to\xE0n \u0111\u1ED9i" },
+        a2: { name: "M\xF9i H\u01B0\u01A1ng", type: "charm", val: 0.5, cd: 8, duration: 3, desc: "Gi\u1EA3m 50% ATK c\u1EE7a qu\xE1i trong 3s" },
+        p1: { name: "C\u1EAFn Ng\u1ECDt", type: "lifesteal", val: 0.3, desc: "H\xFAt m\xE1u 30% s\xE1t th\u01B0\u01A1ng g\xE2y ra" },
+        p2: { name: "L\u1EDBp K\u1EB9o D\u1EBBo", type: "dmg_reduction", val: 0.2, desc: "Gi\u1EA3m 20% m\u1ECDi s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o" }
+      },
+      octoCream: {
+        a1: { name: "Kem Khi\xEAn", type: "shield_self", val: 100, cd: 8, duration: 0, desc: "T\u1EA1o Khi\xEAn 100 HP cho b\u1EA3n th\xE2n" },
+        a2: { name: "H\u01A1i L\u1EA1nh", type: "slow", val: 0.5, cd: 7, duration: 3, desc: "Gi\u1EA3m 50% T\u1ED1c \u0111\xE1nh c\u1EE7a qu\xE1i" },
+        p1: { name: "\u0110\xE1 B\xE0o", type: "reflect", val: 0.4, desc: "Ph\u1EA3n l\u1EA1i 40% s\xE1t th\u01B0\u01A1ng" },
+        p2: { name: "N\xE9 Tr\xE1nh", type: "dodge", val: 0.3, desc: "T\u1EC9 l\u1EC7 n\xE9 30%" }
+      },
+      dewSprout: {
+        a1: { name: "\u0110\xF2n Qu\u1EA5t Gai", type: "thorn_whip", val: 2, cd: 5, duration: 0, desc: "G\xE2y x2 ATK & t\u1EF1 h\u1ED3i m\xE1u" },
+        a2: { name: "Ph\u1EA5n Hoa", type: "cd_reduce", val: 1, cd: 6, duration: 0, desc: "Gi\u1EA3m 1s CD ch\u1EE7 \u0111\u1ED9ng cho to\xE0n \u0111\u1ED9i" },
+        p1: { name: "R\u1EC5 B\xE1m", type: "atk_speed", val: 0.5, desc: "T\u1ED1c \u0111\xE1nh b\u1EA3n th\xE2n x1.5" },
+        p2: { name: "C\u01A1n Gi\xF3 M\xE1t", type: "party_speed", val: 0.15, desc: "T\u0103ng 15% t\u1ED1c \u0111\xE1nh to\xE0n \u0111\u1ED9i" }
+      },
+      cloudMallow: {
+        a1: { name: "S\xE9t \u0110\xE1nh", type: "lightning_strike", val: 4, cd: 6, duration: 0, desc: "G\xE2y x4 ATK b\u1ECF qua gi\xE1p" },
+        a2: { name: "\u0110\u1EA9y L\xF9i", type: "push_back", val: 0, cd: 5, duration: 0, desc: "\u0110\u1EA9y l\xF9i qu\xE1i, ng\u1EAFt nh\u1ECBp \u0111\xE1nh" },
+        p1: { name: "L\u1EDBp B\u1ED3ng B\u1EC1nh", type: "party_dodge", val: 0.15, desc: "T\u0103ng 15% n\xE9 tr\xE1nh cho \u0111\u1ED9i" },
+        p2: { name: "L\u01A1 L\u1EEDng", type: "invincible_start", val: 2, desc: "Mi\u1EC5n nhi\u1EC5m s\xE1t th\u01B0\u01A1ng 2s \u0111\u1EA7u Wave" }
+      },
+      ghostBlob: {
+        a1: { name: "R\xFAt H\u1ED3n", type: "soul_reap", val: 0.1, cd: 5, duration: 0, desc: "G\xE2y s\xE1t th\u01B0\u01A1ng 10% HP hi\u1EC7n t\u1EA1i qu\xE1i" },
+        a2: { name: "D\u1ECDa Ma", type: "fear", val: 2, cd: 7, duration: 2, desc: "Ho\u1EA3ng s\u1EE3 (Cho\xE1ng c\u1EE9ng) qu\xE1i trong 2s" },
+        p1: { name: "\xC1m Kh\xED", type: "armor_pen", val: 0.5, desc: "Xuy\xEAn Gi\xE1p: T\u0103ng 50% s\xE1t th\u01B0\u01A1ng" },
+        p2: { name: "V\xF4 H\xECnh", type: "stealth", val: 1, desc: "Qu\xE1i kh\xF4ng nh\u1EAFm \u0111\xE1nh b\xE9 tr\u01B0\u1EDBc" }
+      },
+      mystery_blob: {
+        a1: { name: "S\xE1t Th\u01B0\u01A1ng Ng\u1EABu Nhi\xEAn", type: "random_dmg", val: 5, cd: 4, duration: 0, desc: "G\xE2y ng\u1EABu nhi\xEAn t\u1EEB x1 \u0111\u1EBFn x5 ATK" },
+        a2: { name: "Ph\xE9p B\u1ED5 Tr\u1EE3 D\u1ECB Th\u01B0\u1EDDng", type: "random_buff", val: 2, cd: 6, duration: 4, desc: "Buff x2 m\u1ED9t ch\u1EC9 s\u1ED1 ng\u1EABu nhi\xEAn" },
+        p1: { name: "Ch\xED M\u1EA1ng B\u1EA5t Ng\u1EDD", type: "crit_rate", val: 0.35, desc: "T\u1EC9 l\u1EC7 B\u1EA1o k\xEDch +35%" },
+        p2: { name: "Aura L\u1EDDi Nguy\u1EC1n", type: "curse_aura", val: 0.05, desc: "5% qu\xE1i t\u1EF1 m\u1EA5t 5% HP m\u1ED7i gi\xE2y" }
+      },
+      jellyfish: {
+        a1: { name: "Gi\u1EADt C\u1EA5p \u0110i\u1EC7n", type: "stun_bolt", val: 2, cd: 8, duration: 2, desc: "G\xE2y cho\xE1ng qu\xE1i 2s" },
+        a2: { name: "S\xF3ng \xC2m X\xF3a S\u1ED5", type: "dispel", val: 2, cd: 10, duration: 0, desc: "G\xE2y x2 ATK & X\xF3a m\u1ECDi buff c\u1EE7a qu\xE1i" },
+        p1: { name: "\u0110\xF2n Ch\u1EBFt Ch\xF3c", type: "crit_dmg", val: 3, desc: "S\xE1t th\u01B0\u01A1ng Crit x3" },
+        p2: { name: "Bi\u1EC3n C\u1EA3 Ch\xFAc Ph\xFAc", type: "party_crit", val: 0.2, desc: "T\u0103ng 20% T\u1EC9 l\u1EC7 Crit to\xE0n \u0111\u1ED9i" }
+      },
+      impBlob: {
+        a1: { name: "H\u1ECFa Ng\u1EE5c", type: "hellfire", val: 5, cd: 8, duration: 0, desc: "x5 ATK nh\u01B0ng t\u1EF1 tr\u1EEB 20% HP hi\u1EC7n t\u1EA1i" },
+        a2: { name: "H\xFAt M\xE1u \u0110\u1ED3ng B\u1ECDn", type: "vampiric_buff", val: 2, cd: 5, duration: 5, desc: "R\xFAt 10 HP \u0111\u1ED3ng minh \u0111\u1EC3 t\u1EF1 buff x2 ATK" },
+        p1: { name: "Cu\u1ED3ng N\u1ED9 (Berserk)", type: "berserk", val: 0.5, desc: "HP < 50% => x2 ATK & T\u1ED1c \u0110\xE1nh" },
+        p2: { name: "\u0110\xF2n K\u1EBFt Li\u1EC5u", type: "execute", val: 0.2, desc: "5% T\u1EC9 l\u1EC7 k\u1EBFt li\u1EC5u ngay qu\xE1i m\xE1u <20%" }
+      },
+      angelBlob: {
+        a1: { name: "G\u1ECDi H\u1ED3n", type: "resurrect", val: 0.3, cd: 15, duration: 0, desc: "H\u1ED3i sinh 1 \u0111\u1ED3ng minh \u0111\xE3 ch\u1EBFt (30% HP)" },
+        a2: { name: "Khi\xEAn Th\xE1nh", type: "shield_party", val: 50, cd: 10, duration: 0, desc: "T\u1EA1o Khi\xEAn 50 HP cho to\xE0n \u0111\u1ED9i" },
+        p1: { name: "H\xE0o Quang B\u1EA3o H\u1ED9", type: "party_dmg_resist", val: 0.1, desc: "Gi\u1EA3m 10% s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o to\xE0n \u0111\u1ED9i" },
+        p2: { name: "H\u1EA1t Gi\u1ED1ng Sinh M\u1EC7nh", type: "cheat_death", val: 1, desc: "Gi\u1EEF l\u1EA1i 1 HP khi ch\u1EBFt (1 l\u1EA7n/M\xE0n)" }
+      },
+      prismBlob: {
+        a1: { name: "C\u1EAFt Laser", type: "laser", val: 2, cd: 9, duration: 3, desc: "Laser x2 ATK m\u1ED7i gi\xE2y (k\xE9o d\xE0i 3s)" },
+        a2: { name: "M\xE1i V\xF2m L\u0103ng K\xEDnh", type: "absorb", val: 1, cd: 6, duration: 0, desc: "H\u1EA5p th\u1EE5 ho\xE0n to\xE0n 1 \u0111\xF2n \u0111\xE1nh c\u1EE7a qu\xE1i" },
+        p1: { name: "Th\u1EC3 Ch\u1EA5t Pha L\xEA", type: "hp_to_atk", val: 0.05, desc: "Chuy\u1EC3n 5% Max HP th\xE0nh ATK" },
+        p2: { name: "Kh\xE1ng Hi\u1EC7u \u1EE8ng", type: "cc_resist", val: 0.5, desc: "Gi\u1EA3m 50% th\u1EDDi gian b\u1ECB cho\xE1ng" }
+      },
+      starBell: {
+        a1: { name: "Tri\u1EC7u H\u1ED3i Sao B\u0103ng", type: "star_fall", val: 3, cd: 7, duration: 1, desc: "G\xE2y x3 ATK & L\xE0m cho\xE1ng 1s" },
+        a2: { name: "Giai \u0110i\u1EC7u Kh\u1EDFi V\u1EADn", type: "party_speed_buff", val: 1.5, cd: 9, duration: 3, desc: "T\u0103ng 50% T\u1ED1c \u0111\xE1nh to\xE0n \u0111\u1ED9i" },
+        p1: { name: "B\xE0i Ca S\u1EE9c M\u1EA1nh", type: "atk_party", val: 0.25, desc: "T\u0103ng 25% ATK to\xE0n \u0111\u1ED9i" },
+        p2: { name: "B\u1EADc Th\u1EA7y Combo", type: "combo_master", val: 3, desc: "\u0110\xF2n \u0111\xE1nh th\u1EE9 4 ch\u1EAFc ch\u1EAFn Ch\xED m\u1EA1ng" }
+      },
+      peach_soda: {
+        a1: { name: "B\u1ECDt Ga Cay M\u1EAFt", type: "blind", val: 1, cd: 8, duration: 2, desc: "L\xE0m m\xF9 qu\xE1i (\u0111\xE1nh tr\u01B0\u1EE3t 100%)" },
+        a2: { name: "\u0110\u01B0\u1EDDng K\xEDch Th\xEDch", type: "sugar_rush", val: 3, cd: 6, duration: 4, desc: "x3 T\u1ED1c \u0111\xE1nh, nh\u01B0ng gi\u1EA3m 50% ATK" },
+        p1: { name: "N\u1ED5 T\u1ECFa Tr\xF2n", type: "splash_dmg", val: 0.3, desc: "\u0110\xE1nh th\u01B0\u1EDDng lan 30% s\xE1t th\u01B0\u01A1ng" },
+        p2: { name: "N\u0103ng L\u01B0\u1EE3ng \u0110\u1EC9nh Cao", type: "initial_burst", val: 2, desc: "3 gi\xE2y \u0111\u1EA7u m\u1ED7i m\xE0n x2 s\xE1t th\u01B0\u01A1ng" }
+      },
+      penguin: {
+        a1: { name: "B\xF3ng Tuy\u1EBFt Tr\u01B0\u1EE3t", type: "snowball_roll", val: 2, cd: 5, duration: 0, desc: "G\xE2y x2 ATK & \u0111\u1EA9y l\xF9i qu\xE1i" },
+        a2: { name: "N\xE9m Ti\u1EC1n", type: "coin_toss", val: 500, cd: 10, duration: 0, desc: "V\u1EE9t 500 V\xE0ng g\xE2y 999 ST Chu\u1EA9n" },
+        p1: { name: "M\u1ECF V\xE0ng", type: "gold_drop", val: 2, desc: "Nh\xE2n \u0111\xF4i V\xE0ng r\u1EDBt ra t\u1EEB qu\xE1i" },
+        p2: { name: "Nh\u1EB7t Nh\u1EA1nh", type: "scavenger", val: 0.05, desc: "Khi \u0111\u1EA7y m\xE1u, \u0111\xE1nh c\xF3 5% r\u01A1i 1 V\xE0ng" }
+      },
+      default: {
+        a1: { name: "C\u1ED1 G\u1EAFng", type: "atk_up", val: 0.2, cd: 5, duration: 3, desc: "T\u0103ng 20% ATK" },
+        p1: { name: "L\u1EA1c Quan", type: "crit_rate", val: 0.2, desc: "T\u1EC9 l\u1EC7 B\u1EA1o k\xEDch +20%" }
+      }
+    };
+    PET_STATS2 = {
+      slime: { baseHp: 150, hpPerLv: 25, baseAtk: 8, atkPerLv: 2, baseSpd: 1 },
+      octo: { baseHp: 80, hpPerLv: 15, baseAtk: 15, atkPerLv: 4, baseSpd: 1.5 },
+      slimePink: { baseHp: 100, hpPerLv: 18, baseAtk: 12, atkPerLv: 3.5, baseSpd: 1 },
+      octoCream: { baseHp: 110, hpPerLv: 20, baseAtk: 9, atkPerLv: 2.5, baseSpd: 1.2 },
+      dewSprout: { baseHp: 120, hpPerLv: 22, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
+      cloudMallow: { baseHp: 130, hpPerLv: 20, baseAtk: 8, atkPerLv: 2, baseSpd: 0.8 },
+      ghostBlob: { baseHp: 70, hpPerLv: 12, baseAtk: 14, atkPerLv: 4, baseSpd: 1.5 },
+      mystery_blob: { baseHp: 90, hpPerLv: 15, baseAtk: 16, atkPerLv: 5, baseSpd: 0.6 },
+      jellyfish: { baseHp: 80, hpPerLv: 14, baseAtk: 13, atkPerLv: 4.5, baseSpd: 0.8 },
+      impBlob: { baseHp: 150, hpPerLv: 24, baseAtk: 15, atkPerLv: 4, baseSpd: 0.6 },
+      angelBlob: { baseHp: 120, hpPerLv: 25, baseAtk: 7, atkPerLv: 1.5, baseSpd: 1 },
+      prismBlob: { baseHp: 100, hpPerLv: 18, baseAtk: 14, atkPerLv: 4, baseSpd: 0.8 },
+      starBell: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1 },
+      peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
+      penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5, baseSpd: 1 },
+      default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1 }
+    };
+    runState = null;
+    hToastTimer = null;
+    window.focusMonster = function(idx) {
+      if (!runState || !runState.monsters[idx] || runState.monsters[idx].hp <= 0) return;
+      runState.focusTarget = idx;
+      runState.monsters.forEach((m, i) => {
+        const mEl = $id("hmob-" + i);
+        if (!mEl) return;
+        const isFocused = runState.focusTarget === i;
+        const bossStyle = m.isBoss ? "drop-shadow(0 0 5px #ff0000)" : "none";
+        mEl.style.filter = isFocused ? "drop-shadow(0 0 8px #ffeb3b)" : bossStyle;
+      });
+    };
+    hGesture = null;
+  }
+});
+
+// src/all.js
+var init_all = __esm({
+  "src/all.js"() {
+    init_state();
+    init_utils();
+    init_ui();
+    init_events();
+    init_orb();
+    init_windows();
+    init_logic();
+    init_render();
+    init_shop();
+    init_pets();
+    init_witch();
+    init_gacha();
+    init_graphics();
+    init_dungeon();
+    init_destroy();
+    init_bet();
+    init_hero();
+  }
+});
 
 // src/main.js
+init_store();
+init_all();
+init_graphics();
+init_data();
 function initFarm() {
   try {
     window[RUNTIME_KEY]?.destroy?.();
