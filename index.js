@@ -2058,7 +2058,13 @@ var init_style = __esm({
       border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
       box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }
     #win.open { display: flex; }
-    #win.dungeon-mode { height: 92vh; height: 92dvh; }
+    
+    .dungeon-win { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 99997; width: min(760px, 96vw); height: 92vh; height: 92dvh; display: none;
+      flex-direction: column; background: #f8efe0;
+      background-image: repeating-linear-gradient(0deg, transparent 0 30px, rgba(170,130,80,.14) 30px 33px);
+      border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
+      box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }
+    .dungeon-win.open-anim { display: flex; animation: winPop 0.2s cubic-bezier(0.18,0.89,0.32,1.28) forwards; }
     .titlebar { background: var(--sky); border-bottom: 4px solid var(--skyLine); padding: 9px 14px;
       display: flex; align-items: center; gap: 8px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.5);
       cursor: move; touch-action: none; user-select: none; flex: none; }
@@ -2406,8 +2412,7 @@ var init_style = __esm({
     .gacha-item-card.rarity-S\u1EED-thi { border-color: #a335ee !important; background: #faf0ff !important; }
     .gacha-item-card.rarity-Huy\u1EC1n-tho\u1EA1i { border-color: #ff8000 !important; background: #fff8f0 !important; box-shadow: 0 0 10px rgba(255,128,0,0.6) !important; }
     /* Dungeon View */
-    .dungeon-view { display: none; flex: 1; width: 100%; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; box-sizing: border-box; }
-    .dungeon-view.open { display: flex; }
+    .dungeon-view { display: flex; flex: 1; width: 100%; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; box-sizing: border-box; }
     .dg-arena { flex: 1; position: relative; border: 4px solid #3f3a50; border-radius: 8px; background: rgba(0,0,0,0.1); overflow: hidden; }
     .dg-dock { height: 60px; background: rgba(58,48,30,.7); margin-top: 10px; border-radius: 8px; border: 2px solid #8a6a42; display: flex; align-items: center; padding: 0 10px; gap: 10px; overflow-x: auto; overflow-y: hidden; }
     .dg-slot { width: 44px; height: 44px; flex-shrink: 0; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
@@ -2782,7 +2787,6 @@ function initUI() {
         <div id="witch" title="Ph\xF9 thu\u1EF7 tr\xF2n"></div>
         <div class="mode-tip" id="modetip"></div>
         <div class="toolbar" id="toolbar"></div>
-        <div class="dungeon-view" id="dungeon-view" style="display:none"></div>
       </div>
     </div>
     <div class="bottombar">
@@ -2821,6 +2825,14 @@ function initUI() {
       <div class="h-btn" id="hero-cashout" title="R\xFAt V\xE0ng">${spriteSVG("coin", 16)}</div>
       <div class="h-btn" id="hero-close" title="\u0110\xF3ng Hero Mode">\xD7</div>
     </div>
+  </div>
+  
+  <div id="dungeon-win" class="dungeon-win" style="display:none">
+    <div class="titlebar" id="dungeon-drag">
+      <h1>${spriteSVG("dungeonGate", 16)}Ai m\xE0 th\xE8m \u0111i Dungeon ch\u1EE9!</h1>
+      <div class="close-x" id="dungeon-close">\xD7</div>
+    </div>
+    <div class="dungeon-view" id="dungeon-view"></div>
   </div>`;
   sh.appendChild(ctx.ui);
   ctx.orb = $id("orb");
@@ -7002,22 +7014,21 @@ var init_state = __esm({
 // src/dungeon.js
 function openDungeonView() {
   isDungeonOpen = true;
-  $id("win").classList.add("dungeon-mode");
-  const titleH1 = $id("drag").querySelector("h1");
-  titleH1.innerHTML = `${spriteSVG("dungeonGate", 16)}Ai m\xE0 th\xE8m \u0111i Dungeon ch\u1EE9!`;
-  $id("blocks").style.display = "none";
-  $id("explore-blocks").style.display = "none";
-  $id("pager").style.display = "none";
-  $id("toolbar").style.display = "none";
-  $id("mascots").style.display = "none";
-  $id("viewToggle").style.display = "none";
-  const ctrlrow = sh.querySelector(".ctrlrow");
-  if (ctrlrow) ctrlrow.style.display = "none";
-  const banner = $id("banner");
-  if (banner) banner.style.display = "none";
+  closeWin();
+  const dungeonWin = $id("dungeon-win");
+  if (dungeonWin) {
+    dungeonWin.style.display = "flex";
+    dungeonWin.classList.remove("open-anim");
+    void dungeonWin.offsetWidth;
+    dungeonWin.classList.add("open-anim");
+  }
   dungeonView.style.display = "flex";
-  const fieldEl2 = $id("scroll").querySelector(".field");
-  if (fieldEl2) fieldEl2.style.minHeight = "420px";
+  const closeBtn = $id("dungeon-close");
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      closeDungeonView();
+    };
+  }
   initPlacementPhase();
 }
 function closeDungeonView() {

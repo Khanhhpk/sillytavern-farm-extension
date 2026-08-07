@@ -52,28 +52,27 @@ const ENEMY_TYPES = [
 
 export function openDungeonView() {
     isDungeonOpen = true;
-    All.$id('win').classList.add('dungeon-mode');
+    All.closeWin(); // Đóng bảng Farm chính
     
-    // Change Title
-    const titleH1 = All.$id('drag').querySelector('h1');
-    titleH1.innerHTML = `${spriteSVG('dungeonGate', 16)}Ai mà thèm đi Dungeon chứ!`;
-
-    // Hide Farm Elements
-    All.$id('blocks').style.display = 'none';
-    All.$id('explore-blocks').style.display = 'none';
-    All.$id('pager').style.display = 'none';
-    All.$id('toolbar').style.display = 'none';
-    All.$id('mascots').style.display = 'none';
-    All.$id('viewToggle').style.display = 'none';
-    const ctrlrow = All.sh.querySelector('.ctrlrow');
-    if (ctrlrow) ctrlrow.style.display = 'none';
-    const banner = All.$id('banner');
-    if (banner) banner.style.display = 'none';
-
-    // Show Dungeon View
+    // Show Dungeon Modal
+    const dungeonWin = All.$id('dungeon-win');
+    if (dungeonWin) {
+        dungeonWin.style.display = 'flex';
+        // Xóa class animate để tránh nhấp nháy, sau đó thêm lại để tạo hiệu ứng popup
+        dungeonWin.classList.remove('open-anim');
+        void dungeonWin.offsetWidth; // trigger reflow
+        dungeonWin.classList.add('open-anim');
+    }
+    
+    // Show Dungeon View content
     All.dungeonView.style.display = 'flex';
-    const fieldEl = All.$id('scroll').querySelector('.field');
-    if (fieldEl) fieldEl.style.minHeight = '420px';
+    
+    const closeBtn = All.$id('dungeon-close');
+    if (closeBtn) {
+        closeBtn.onclick = () => {
+            closeDungeonView();
+        };
+    }
     
     initPlacementPhase();
 }
