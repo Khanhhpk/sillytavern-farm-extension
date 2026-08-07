@@ -6042,11 +6042,16 @@ function openBuyDlg(kind, id, returnTo = "shop") {
 }
 function toast(msg) {
   const t = $id("toast");
+  if (!t) return;
   t.textContent = msg;
   t.style.display = "block";
+  window.setTimeout(() => t.classList.add("show"), 10);
   if (toastTimer) window.clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => {
-    t.style.display = "none";
+    t.classList.remove("show");
+    window.setTimeout(() => {
+      t.style.display = "none";
+    }, 300);
   }, 1800);
 }
 function initWitch() {
