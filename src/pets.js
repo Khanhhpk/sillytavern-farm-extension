@@ -113,7 +113,7 @@ export const petArrive = {};                                    // Callback khi 
 export const pileWith = {};                                     // Bảng ghép cặp bạn ngủ chung
 export const petTouch = {}, touchBase = Date.now();                  // Thời điểm bị chọc gần nhất (bé làm việc 5 phút không ai đoái hoài → cho phép ngủ gật)
 export let scene = null, lastScene = '';
-export let nextSceneAt = Date.now() + (TEST_MODE ? 30 * 1000 : 45 * MIN);
+export let nextSceneAt = Date.now() + (TEST_MODE ? 30 * 1000 : 5 * MIN);
 export const sceneBusy = id => !!(scene && scene.ids.indexOf(id) >= 0);
 export const sceneTimer = (fn, ms) => { if (scene) scene.timers.push(window.setTimeout(fn, ms)); };
 export function endScene() { if (!scene) return; scene.timers.forEach(t => window.clearTimeout(t)); scene = null; }
@@ -149,7 +149,7 @@ export function tryScene() {
   if (!picks.length) return;                             // Không gom đủ diễn viên, nhịp sau thử lại (không tốn hồi chiêu)
   const act = picks[Math.floor(Math.random() * picks.length)];
   lastScene = act;
-  nextSceneAt = now() + (TEST_MODE ? 45 * 1000 + Math.random() * 90 * 1000 : 60 * MIN + Math.random() * 120 * MIN);
+  nextSceneAt = now() + (TEST_MODE ? 45 * 1000 + Math.random() * 90 * 1000 : 3 * MIN + Math.random() * 12 * MIN);
   const shuffle = a => a.sort(() => Math.random() - .5);
   const ov = All.$id('mascots'), W = ov.clientWidth, H = ov.clientHeight;
   const clampX = x => Math.max(4, Math.min(W - 60, x));

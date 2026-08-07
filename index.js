@@ -3201,7 +3201,7 @@ var petTouch = {};
 var touchBase = Date.now();
 var scene = null;
 var lastScene = "";
-var nextSceneAt = Date.now() + (TEST_MODE ? 30 * 1e3 : 45 * MIN);
+var nextSceneAt = Date.now() + (TEST_MODE ? 30 * 1e3 : 5 * MIN);
 var sceneBusy = (id) => !!(scene && scene.ids.indexOf(id) >= 0);
 var sceneTimer = (fn, ms) => {
   if (scene) scene.timers.push(window.setTimeout(fn, ms));
@@ -3247,7 +3247,7 @@ function tryScene() {
   if (!picks.length) return;
   const act = picks[Math.floor(Math.random() * picks.length)];
   lastScene = act;
-  nextSceneAt = now() + (TEST_MODE ? 45 * 1e3 + Math.random() * 90 * 1e3 : 60 * MIN + Math.random() * 120 * MIN);
+  nextSceneAt = now() + (TEST_MODE ? 45 * 1e3 + Math.random() * 90 * 1e3 : 3 * MIN + Math.random() * 12 * MIN);
   const shuffle = (a) => a.sort(() => Math.random() - 0.5);
   const ov = $id("mascots"), W = ov.clientWidth, H = ov.clientHeight;
   const clampX = (x) => Math.max(4, Math.min(W - 60, x));
