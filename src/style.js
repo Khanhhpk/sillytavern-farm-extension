@@ -129,7 +129,7 @@ export const styleCSS = `
     .mascots { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
     /* Cảm ứng: không có touch-action:none thì trình duyệt coi cú vuốt là cuộn trang, bắn pointercancel và cắt ngang phiên kéo */
     .mascots[data-drag="1"] .pet { touch-action: none; }
-    .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute;
+    .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute; will-change: transform;
       left: 0; bottom: 0; will-change: transform, translate; }
     .pet:active { transform: scale(1.15, .85); }
     .pbody { display: block; animation: petbob 1.8s ease-in-out infinite; }
@@ -385,7 +385,7 @@ export const styleCSS = `
     .dg-slot { width: 44px; height: 44px; flex-shrink: 0; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
     .dg-slot:hover { border-color: #d9ba8a; background: rgba(255,255,255,.2); }
     .dg-slot.placed { opacity: 0.4; pointer-events: none; }
-    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; }
+    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; will-change: transform; }
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
     .dg-entity.flip img { transform: scaleX(-1); }
     .dg-hp-bar { position: absolute; top: -8px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
@@ -497,7 +497,7 @@ export const styleCSS = `
     #hero-party { position: absolute; left: 10px; bottom: 16px; z-index: 1; display: flex; gap: 8px; align-items: flex-end; height: 45px; }
     #hero-enemy { position: absolute; left: 0px; bottom: 16px; z-index: 1; display: flex; align-items: flex-end; height: 45px; }
     
-    .hero-pet, .hero-mob { display: flex; flex-direction: column; align-items: center; position: relative; justify-content: flex-end; }
+    .hero-pet, .hero-mob { display: flex; flex-direction: column; align-items: center; position: relative; justify-content: flex-end; will-change: transform; }
     .hero-mob { cursor: pointer; }
     .hero-pet svg, .hero-mob svg, .hero-pet img, .hero-mob img { display: block; height: 32px; width: auto; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); transform-origin: bottom center; margin-bottom: 2px; }
     

@@ -2156,7 +2156,7 @@ var init_style = __esm({
     .mascots { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
     /* C\u1EA3m \u1EE9ng: kh\xF4ng c\xF3 touch-action:none th\xEC tr\xECnh duy\u1EC7t coi c\xFA vu\u1ED1t l\xE0 cu\u1ED9n trang, b\u1EAFn pointercancel v\xE0 c\u1EAFt ngang phi\xEAn k\xE9o */
     .mascots[data-drag="1"] .pet { touch-action: none; }
-    .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute;
+    .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute; will-change: transform;
       left: 0; bottom: 0; will-change: transform, translate; }
     .pet:active { transform: scale(1.15, .85); }
     .pbody { display: block; animation: petbob 1.8s ease-in-out infinite; }
@@ -2412,7 +2412,7 @@ var init_style = __esm({
     .dg-slot { width: 44px; height: 44px; flex-shrink: 0; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
     .dg-slot:hover { border-color: #d9ba8a; background: rgba(255,255,255,.2); }
     .dg-slot.placed { opacity: 0.4; pointer-events: none; }
-    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; }
+    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; will-change: transform; }
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
     .dg-entity.flip img { transform: scaleX(-1); }
     .dg-hp-bar { position: absolute; top: -8px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
@@ -2524,7 +2524,7 @@ var init_style = __esm({
     #hero-party { position: absolute; left: 10px; bottom: 16px; z-index: 1; display: flex; gap: 8px; align-items: flex-end; height: 45px; }
     #hero-enemy { position: absolute; left: 0px; bottom: 16px; z-index: 1; display: flex; align-items: flex-end; height: 45px; }
     
-    .hero-pet, .hero-mob { display: flex; flex-direction: column; align-items: center; position: relative; justify-content: flex-end; }
+    .hero-pet, .hero-mob { display: flex; flex-direction: column; align-items: center; position: relative; justify-content: flex-end; will-change: transform; }
     .hero-mob { cursor: pointer; }
     .hero-pet svg, .hero-mob svg, .hero-pet img, .hero-mob img { display: block; height: 32px; width: auto; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); transform-origin: bottom center; margin-bottom: 2px; }
     
@@ -7104,14 +7104,12 @@ function initPlacementPhase() {
       dragEl.style.zIndex = "100000";
       dragEl.innerHTML = petSVG(petId, 32);
       document.body.appendChild(dragEl);
-      dragEl.style.left = e.clientX - 16 + "px";
-      dragEl.style.top = e.clientY - 16 + "px";
+      dragEl.style.transform = `translate3d(${e.clientX - 16}px, ${e.clientY - 16}px, 0)`;
       slot.setPointerCapture(e.pointerId);
     });
     slot.addEventListener("pointermove", (e) => {
       if (!draggingPet || !dragEl) return;
-      dragEl.style.left = e.clientX - 16 + "px";
-      dragEl.style.top = e.clientY - 16 + "px";
+      dragEl.style.transform = `translate3d(${e.clientX - 16}px, ${e.clientY - 16}px, 0)`;
     });
     slot.addEventListener("pointerup", (e) => {
       if (!draggingPet || !dragEl) return;
@@ -7138,8 +7136,7 @@ function initPlacementPhase() {
         if (y < 16) y = 16;
         if (y > rect.height - 16) y = rect.height - 16;
         el.style.position = "absolute";
-        el.style.left = x + "px";
-        el.style.top = y + "px";
+        el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
         arena.appendChild(el);
         const memberObj = {
           id: pId,
@@ -7165,15 +7162,13 @@ function initPlacementPhase() {
           isPlacedDragging = true;
           el.style.zIndex = "100000";
           const arect = arena.getBoundingClientRect();
-          el.style.left = ev.clientX - arect.left - 16 + "px";
-          el.style.top = ev.clientY - arect.top - 16 + "px";
+          el.style.transform = `translate3d(${ev.clientX - arect.left - 32}px, ${ev.clientY - arect.top - 32}px, 0)`;
           el.setPointerCapture(ev.pointerId);
         });
         el.addEventListener("pointermove", (ev) => {
           if (!isPlacedDragging) return;
           const arect = arena.getBoundingClientRect();
-          el.style.left = ev.clientX - arect.left - 16 + "px";
-          el.style.top = ev.clientY - arect.top - 16 + "px";
+          el.style.transform = `translate3d(${ev.clientX - arect.left - 32}px, ${ev.clientY - arect.top - 32}px, 0)`;
         });
         el.addEventListener("pointerup", (ev) => {
           if (!isPlacedDragging) return;
@@ -7189,8 +7184,7 @@ function initPlacementPhase() {
             if (nx < 16) nx = 16;
             if (ny < 16) ny = 16;
             if (ny > arect.height - 16) ny = arect.height - 16;
-            el.style.left = nx + "px";
-            el.style.top = ny + "px";
+            el.style.transform = `translate3d(${nx - 16}px, ${ny - 16}px, 0)`;
             memberObj.x = nx;
             memberObj.y = ny;
           } else {
@@ -7340,8 +7334,7 @@ function _doStartWave() {
         `;
     const x = 20 + Math.random() * (w - 60);
     const y = 40 + Math.random() * (h - 80);
-    el.style.left = x + "px";
-    el.style.top = y + "px";
+    el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
     arena.appendChild(el);
     let hpMultiplier = 1 + (currentWave - 1) * 0.15;
     let atkMultiplier = 1 + (currentWave - 1) * 0.1;
@@ -7405,8 +7398,7 @@ function combatLoop(time) {
       p.y += dy / dist * move;
       p.tx = p.target.x;
       p.ty = p.target.y - 16;
-      p.el.style.left = p.x + "px";
-      p.el.style.top = p.y + "px";
+      p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0)`;
       return true;
     }
   });
@@ -7440,8 +7432,7 @@ function spawnDmg(target, amount, type) {
   const dmg = document.createElement("div");
   dmg.className = "dg-dmg" + (type ? " " + type : "");
   dmg.textContent = type === "miss" ? "MISS!" : (amount > 0 ? "+" : "") + amount;
-  dmg.style.left = target.x + "px";
-  dmg.style.top = target.y + "px";
+  dmg.style.transform = `translate3d(${target.x - 16}px, ${target.y - 16}px, 0)`;
   arena.appendChild(dmg);
   setTimeout(() => dmg.remove(), 800);
   const pct = Math.max(0, target.hp / target.maxHp) * 100;
@@ -7641,8 +7632,7 @@ function updateEntities(groupA, groupB, dt) {
         const arenaRect = arena.getBoundingClientRect();
         a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
         a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
-        a.el.style.left = a.x + "px";
-        a.el.style.top = a.y + "px";
+        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
       } else if (!inRange && !isRooted) {
         a.el.classList.add("walk");
         const speed = a.speed * speedMult * dt;
@@ -7656,8 +7646,7 @@ function updateEntities(groupA, groupB, dt) {
         const arenaRect = arena.getBoundingClientRect();
         a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
         a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
-        a.el.style.left = a.x + "px";
-        a.el.style.top = a.y + "px";
+        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
       }
       if (inRange) {
         if (a.cd <= 0) {
@@ -7700,8 +7689,7 @@ function updateEntities(groupA, groupB, dt) {
             };
             p.el.className = "dg-projectile";
             p.el.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#f0d" /></svg>';
-            p.el.style.left = p.x + "px";
-            p.el.style.top = p.y + "px";
+            p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0)`;
             arena.appendChild(p.el);
             if (a.skill === "multishot") {
               projectiles.push(p);
@@ -8611,7 +8599,7 @@ function renderMonstersUI() {
     const bossStyle = m.isBoss ? "filter: drop-shadow(0 0 5px #ff0000);" : "";
     const focusStyle = runState.focusTarget === i ? "filter: drop-shadow(0 0 8px #ffeb3b);" : bossStyle;
     return `
-      <div class="hero-mob idle" id="hmob-${i}" onclick="focusMonster(${i})" style="position: absolute; left: ${m.x}px; transform-origin: bottom center; transition: left 0.1s linear, transform 0.1s linear; ${focusStyle}">
+      <div class="hero-mob idle" id="hmob-${i}" onclick="focusMonster(${i})" style="position: absolute; transform: translate3d(${m.x}px, 0, 0); transform-origin: bottom center; transition: transform 0.1s linear; ${focusStyle}">
         <div class="hp-bar-mini" style="${m.isBoss ? "width: 48px;" : ""}"><div class="hp-fill-mini" id="hp-mob-${i}" style="width: ${m.hp / m.maxHp * 100}%"></div></div>
         <div class="hp-bar-mini" style="${m.isBoss ? "width: 48px;" : ""}"><div class="cd-fill-mini" id="cd-mob-${i}" style="width: ${Math.min(100, Math.max(0, (m.maxCd - m.cd) / m.maxCd * 100))}%"></div></div>
         <div style="transform: ${scale}">${spriteSVG(CROPS[m.id].sp || "seedLight", 32)}</div>
@@ -8664,7 +8652,7 @@ function heroTick() {
     if (m.x > targetX) {
       m.x -= 40 * (dt / 1e3);
       m.x = Math.max(targetX, m.x);
-      if (mEl) mEl.style.left = m.x + "px";
+      if (mEl) mEl.style.transform = `translate3d(${m.x}px, 0, 0)`;
     } else {
       anyMonsterInPosition = true;
     }
@@ -9369,13 +9357,11 @@ function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
     proj.className = "dg-projectile";
     proj.innerHTML = isEnemy ? '<div style="width:8px;height:8px;background:#e06578;border-radius:50%;box-shadow:0 0 5px #ff0000;"></div>' : spriteSVG(spriteId, 16);
     scene2.appendChild(proj);
-    proj.style.left = sx + "px";
-    proj.style.top = sy + "px";
+    proj.style.transform = `translate3d(${sx}px, ${sy}px, 0)`;
     const duration = 150;
-    proj.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+    proj.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
     setTimeout(() => {
-      proj.style.left = ex + "px";
-      proj.style.top = ey + "px";
+      proj.style.transform = `translate3d(${ex}px, ${ey}px, 0)`;
     }, 10);
     setTimeout(() => proj.remove(), duration + 10);
   } else {

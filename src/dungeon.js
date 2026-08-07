@@ -208,16 +208,14 @@ function initPlacementPhase() {
             dragEl.innerHTML = petSVG(petId, 32);
             document.body.appendChild(dragEl); // append to body to avoid transform/overflow issues
             
-            dragEl.style.left = (e.clientX - 16) + 'px';
-            dragEl.style.top = (e.clientY - 16) + 'px';
+            dragEl.style.transform = `translate3d(${e.clientX - 16}px, ${e.clientY - 16}px, 0)`;
             
             slot.setPointerCapture(e.pointerId);
         });
         
         slot.addEventListener('pointermove', (e) => {
             if (!draggingPet || !dragEl) return;
-            dragEl.style.left = (e.clientX - 16) + 'px';
-            dragEl.style.top = (e.clientY - 16) + 'px';
+            dragEl.style.transform = `translate3d(${e.clientX - 16}px, ${e.clientY - 16}px, 0)`;
         });
         
         slot.addEventListener('pointerup', (e) => {
@@ -253,8 +251,7 @@ function initPlacementPhase() {
                 if (y > rect.height - 16) y = rect.height - 16;
                 
                 el.style.position = 'absolute';
-                el.style.left = x + 'px';
-                el.style.top = y + 'px';
+                el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
                 
                 arena.appendChild(el);
                 
@@ -273,15 +270,13 @@ function initPlacementPhase() {
                     isPlacedDragging = true;
                     el.style.zIndex = '100000';
                     const arect = arena.getBoundingClientRect();
-                    el.style.left = (ev.clientX - arect.left - 16) + 'px';
-                    el.style.top = (ev.clientY - arect.top - 16) + 'px';
+                    el.style.transform = `translate3d(${ev.clientX - arect.left - 32}px, ${ev.clientY - arect.top - 32}px, 0)`;
                     el.setPointerCapture(ev.pointerId);
                 });
                 el.addEventListener('pointermove', (ev) => {
                     if (!isPlacedDragging) return;
                     const arect = arena.getBoundingClientRect();
-                    el.style.left = (ev.clientX - arect.left - 16) + 'px';
-                    el.style.top = (ev.clientY - arect.top - 16) + 'px';
+                    el.style.transform = `translate3d(${ev.clientX - arect.left - 32}px, ${ev.clientY - arect.top - 32}px, 0)`;
                 });
                 el.addEventListener('pointerup', (ev) => {
                     if (!isPlacedDragging) return;
@@ -301,8 +296,7 @@ function initPlacementPhase() {
                         if (ny < 16) ny = 16;
                         if (ny > arect.height - 16) ny = arect.height - 16;
                         
-                        el.style.left = nx + 'px';
-                        el.style.top = ny + 'px';
+                        el.style.transform = `translate3d(${nx - 16}px, ${ny - 16}px, 0)`;
                         
                         memberObj.x = nx;
                         memberObj.y = ny;
@@ -479,8 +473,7 @@ function _doStartWave() {
         const x = 20 + Math.random() * (w - 60);
         const y = 40 + Math.random() * (h - 80);
         
-        el.style.left = x + 'px';
-        el.style.top = y + 'px';
+        el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
         
         arena.appendChild(el);
         
@@ -553,8 +546,7 @@ function combatLoop(time) {
             p.tx = p.target.x;
             p.ty = p.target.y - 16;
             
-            p.el.style.left = p.x + 'px';
-            p.el.style.top = p.y + 'px';
+            p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0)`;
             return true;
         }
     });
@@ -595,8 +587,7 @@ function spawnDmg(target, amount, type) {
     const dmg = document.createElement('div');
     dmg.className = 'dg-dmg' + (type ? ' ' + type : '');
     dmg.textContent = type === 'miss' ? 'MISS!' : (amount > 0 ? '+' : '') + amount;
-    dmg.style.left = target.x + 'px';
-    dmg.style.top = target.y + 'px';
+    dmg.style.transform = `translate3d(${target.x - 16}px, ${target.y - 16}px, 0)`;
     arena.appendChild(dmg);
     setTimeout(() => dmg.remove(), 800);
     
@@ -834,8 +825,7 @@ function updateEntities(groupA, groupB, dt) {
                 a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
                 a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
                 
-                a.el.style.left = a.x + 'px';
-                a.el.style.top = a.y + 'px';
+                a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
             } 
             else if (!inRange && !isRooted) {
                 // Chase
@@ -853,8 +843,7 @@ function updateEntities(groupA, groupB, dt) {
                 a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
                 a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
                 
-                a.el.style.left = a.x + 'px';
-                a.el.style.top = a.y + 'px';
+                a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
             } 
             
             if (inRange) {
@@ -894,8 +883,7 @@ function updateEntities(groupA, groupB, dt) {
                         };
                         p.el.className = 'dg-projectile';
                         p.el.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#f0d" /></svg>'; 
-                        p.el.style.left = p.x + 'px';
-                        p.el.style.top = p.y + 'px';
+                        p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0)`;
                         arena.appendChild(p.el);
                         
                         if (a.skill === 'multishot') {

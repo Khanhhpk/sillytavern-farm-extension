@@ -692,7 +692,7 @@ function renderMonstersUI() {
     const bossStyle = m.isBoss ? 'filter: drop-shadow(0 0 5px #ff0000);' : '';
     const focusStyle = runState.focusTarget === i ? 'filter: drop-shadow(0 0 8px #ffeb3b);' : bossStyle;
     return `
-      <div class="hero-mob idle" id="hmob-${i}" onclick="focusMonster(${i})" style="position: absolute; left: ${m.x}px; transform-origin: bottom center; transition: left 0.1s linear, transform 0.1s linear; ${focusStyle}">
+      <div class="hero-mob idle" id="hmob-${i}" onclick="focusMonster(${i})" style="position: absolute; transform: translate3d(${m.x}px, 0, 0); transform-origin: bottom center; transition: transform 0.1s linear; ${focusStyle}">
         <div class="hp-bar-mini" style="${m.isBoss ? 'width: 48px;' : ''}"><div class="hp-fill-mini" id="hp-mob-${i}" style="width: ${(m.hp/m.maxHp)*100}%"></div></div>
         <div class="hp-bar-mini" style="${m.isBoss ? 'width: 48px;' : ''}"><div class="cd-fill-mini" id="cd-mob-${i}" style="width: ${Math.min(100, Math.max(0, ((m.maxCd-m.cd)/m.maxCd)*100))}%"></div></div>
         <div style="transform: ${scale}">${spriteSVG(CROPS[m.id].sp || 'seedLight', 32)}</div>
@@ -753,7 +753,7 @@ function heroTick() {
     if (m.x > targetX) {
       m.x -= (40 * (dt / 1000));
       m.x = Math.max(targetX, m.x);
-      if (mEl) mEl.style.left = m.x + 'px';
+      if (mEl) mEl.style.transform = `translate3d(${m.x}px, 0, 0)`;
     } else {
       anyMonsterInPosition = true;
     }
@@ -1430,11 +1430,10 @@ function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
     proj.className = 'dg-projectile';
     proj.innerHTML = isEnemy ? '<div style="width:8px;height:8px;background:#e06578;border-radius:50%;box-shadow:0 0 5px #ff0000;"></div>' : spriteSVG(spriteId, 16);
     scene.appendChild(proj);
-    proj.style.left = sx + 'px';
-    proj.style.top = sy + 'px';
+    proj.style.transform = `translate3d(${sx}px, ${sy}px, 0)`;
     const duration = 150;
-    proj.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
-    setTimeout(() => { proj.style.left = ex + 'px'; proj.style.top = ey + 'px'; }, 10);
+    proj.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+    setTimeout(() => { proj.style.transform = `translate3d(${ex}px, ${ey}px, 0)`; }, 10);
     setTimeout(() => proj.remove(), duration + 10);
   } else {
     // Melee Effect directly on target
