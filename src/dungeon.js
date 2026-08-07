@@ -1030,21 +1030,21 @@ function showWaveRewards() {
     const renderShop = (selectedIdx) => {
         const selectedPet = fullTeam[selectedIdx];
         
-        let petsHtml = '<div style="display:flex; flex-direction:column; gap:10px; width: 100px; overflow-y:auto; border-right: 2px solid #444; padding-right:10px;">';
+        let petsHtml = '<div class="dg-shop-left">';
         fullTeam.forEach((p, idx) => {
             const isSel = idx === selectedIdx;
             const totalLv = Object.values(p.upgrades).reduce((a,b)=>a+b,0);
-            petsHtml += `<div class="dg-shop-pet ${isSel?'selected':''}" data-idx="${idx}" style="padding:5px; background:${isSel?'#555':'#222'}; border-radius:5px; cursor:pointer; text-align:center; border: 2px solid ${isSel?'#ffeb3b':'transparent'}; transition: 0.2s;">
+            petsHtml += `<div class="dg-shop-pet ${isSel?'selected':''}" data-idx="${idx}">
                 ${petSVG(p.id, 40)}
-                <div style="font-size:12px; color:${isSel?'#ffda66':'white'}; margin-top:5px; font-weight:bold;">LV ${totalLv}</div>
+                <div class="lv">LV ${totalLv}</div>
             </div>`;
         });
         petsHtml += '</div>';
 
-        let shopHtml = `<div style="flex: 1; display:flex; flex-direction:column; padding-left: 20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #444; padding-bottom:10px; margin-bottom:15px;">
-                <h3 style="color:#ffda66; margin:0; text-shadow: 1px 1px 2px #000;">Chợ Đen - Wave ${currentWave}</h3>
-                <div style="color:#a4dc8c; font-size: 20px; font-weight:bold; background:#111; padding: 4px 12px; border-radius: 12px; border: 1px solid #333;">${spriteSVG('coin', 18).replace('display:block','display:inline-block;vertical-align:middle')} ${totalGold} G</div>
+        let shopHtml = `<div class="dg-shop-right">
+            <div class="dg-shop-header">
+                <div class="dg-shop-title">Chợ Đen - Wave ${currentWave}</div>
+                <div class="dg-shop-gold">${spriteSVG('coin', 18).replace('display:block','display:inline-block;vertical-align:middle')} ${totalGold} G</div>
             </div>
             ${bossDropHtml}
         `;
@@ -1060,17 +1060,17 @@ function showWaveRewards() {
                 { id: 'critD', name: 'Crit Dmg (+20%)', val: (selectedPet.critDmg*100).toFixed(0)+'%', lv: u.critD }
             ];
 
-            shopHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; flex: 1;">`;
+            shopHtml += `<div class="dg-shop-grid">`;
             stats.forEach(s => {
                 const cost = getCost(s.lv);
                 const canAfford = totalGold >= cost;
                 shopHtml += `
-                <div style="background: linear-gradient(145deg, #2a2a2a, #1a1a1a); padding:12px; border-radius:8px; border:1px solid #333; display:flex; justify-content:space-between; align-items:center; box-shadow: 2px 2px 5px rgba(0,0,0,0.3);">
+                <div class="dg-shop-card">
                     <div>
-                        <div style="color:#bbb; font-size:12px; font-weight:bold; margin-bottom:4px;">${s.name} <span style="color:#888;">(Lv ${s.lv})</span></div>
-                        <div style="color:white; font-size:18px; font-weight:bold; text-shadow: 1px 1px 0 #000;">${s.val}</div>
+                        <div class="dg-shop-stat-name">${s.name} <span style="color:#888;">(Lv ${s.lv})</span></div>
+                        <div class="dg-shop-stat-val">${s.val}</div>
                     </div>
-                    <button class="dg-btn-buy" data-stat="${s.id}" data-cost="${cost}" ${!canAfford?'disabled':''} style="background:${canAfford?'linear-gradient(to bottom, #4caf50, #2e7d32)':'#444'}; color:${canAfford?'white':'#888'}; border:none; padding:8px 12px; border-radius:6px; cursor:${canAfford?'pointer':'not-allowed'}; font-weight:bold; font-size:14px; box-shadow: ${canAfford?'0 2px 4px rgba(0,0,0,0.4)':'none'};">
+                    <button class="dg-btn-buy" data-stat="${s.id}" data-cost="${cost}" ${!canAfford?'disabled':''}>
                         ${cost} G
                     </button>
                 </div>`;
@@ -1081,12 +1081,10 @@ function showWaveRewards() {
         }
 
         shopHtml += `
-            <div style="margin-top:auto; display:flex; justify-content:flex-end;">
-                <button id="dg-shop-next" style="background:linear-gradient(to bottom, #2196f3, #1565c0); color:white; padding:12px 24px; font-size:16px; font-weight:bold; border:none; border-radius:8px; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Tới Wave Tiếp Theo ➔</button>
-            </div>
+            <button id="dg-shop-next" class="dg-shop-next-btn">Tới Wave Tiếp Theo ➔</button>
         </div>`;
 
-        overlay.innerHTML = `<div style="display:flex; width: 100%; height: 100%; background:#222; border: 2px solid #555; border-radius:10px; padding:15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">${petsHtml}${shopHtml}</div>`;
+        overlay.innerHTML = `<div class="dg-shop-box">${petsHtml}${shopHtml}</div>`;
 
         overlay.querySelectorAll('.dg-shop-pet').forEach(el => {
             el.onclick = () => renderShop(parseInt(el.dataset.idx));
@@ -1114,9 +1112,6 @@ function showWaveRewards() {
         nextBtn.onclick = () => {
             nextWaveSequence(overlay);
         };
-        
-        nextBtn.onmouseover = () => { nextBtn.style.transform = 'scale(1.05)'; };
-        nextBtn.onmouseout = () => { nextBtn.style.transform = 'scale(1)'; };
     };
 
     arena.appendChild(overlay);

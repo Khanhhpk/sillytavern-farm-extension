@@ -2427,6 +2427,34 @@ var init_style = __esm({
     .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
     .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; overflow-y: auto; padding: 15px; box-sizing: border-box; }
+
+    /* Shop UI */
+    .dg-shop-box { display: flex; width: 100%; height: 100%; max-width: 800px; max-height: 480px; background: #1a1a1e; border: 2px solid #3a3a40; border-radius: 12px; padding: 20px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+    .dg-shop-left { width: 100px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 12px; border-right: 2px solid #333; }
+    .dg-shop-left::-webkit-scrollbar { width: 6px; }
+    .dg-shop-left::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
+    .dg-shop-left::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+    .dg-shop-pet { background: #25252b; border: 2px solid transparent; border-radius: 8px; cursor: pointer; padding: 8px; text-align: center; transition: 0.2s; }
+    .dg-shop-pet:hover { background: #303038; }
+    .dg-shop-pet.selected { border-color: #ffd94d; background: #353540; }
+    .dg-shop-pet .lv { font-size: 11px; font-weight: bold; color: #888; margin-top: 4px; }
+    .dg-shop-pet.selected .lv { color: #ffd94d; }
+    .dg-shop-right { flex: 1; padding-left: 20px; display: flex; flex-direction: column; }
+    .dg-shop-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
+    .dg-shop-title { color: #ffd94d; margin: 0; font-size: 20px; font-weight: bold; }
+    .dg-shop-gold { background: #25252b; color: #a4dc8c; font-size: 18px; font-weight: bold; padding: 6px 16px; border-radius: 20px; border: 1px solid #3a3a40; display: flex; align-items: center; gap: 6px; }
+    .dg-shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1; margin-bottom: 20px; align-content: start; }
+    .dg-shop-card { background: linear-gradient(145deg, #25252b, #1e1e24); border: 1px solid #3a3a40; border-radius: 10px; padding: 15px; display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s; }
+    .dg-shop-card:hover { border-color: #555; transform: translateY(-2px); }
+    .dg-shop-stat-name { color: #999; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+    .dg-shop-stat-val { color: white; font-size: 18px; font-weight: bold; }
+    .dg-btn-buy { background: linear-gradient(to bottom, #4caf50, #388e3c); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .dg-btn-buy:disabled { background: #444; color: #888; cursor: not-allowed; box-shadow: none; }
+    .dg-btn-buy:not(:disabled):hover { filter: brightness(1.1); transform: scale(1.05); }
+    .dg-btn-buy:not(:disabled):active { transform: scale(0.95); }
+    .dg-shop-next-btn { background: linear-gradient(to bottom, #2196f3, #1976d2); color: white; padding: 12px 24px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s; align-self: flex-end; }
+    .dg-shop-next-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
+    .dg-shop-next-btn:active { transform: scale(0.95); }
     .dg-title { font-size: 24px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 1px; text-align: center; margin-top: auto; }
     .dg-dock::-webkit-scrollbar { height: 8px; display: block; }
     .dg-dock::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
@@ -7828,20 +7856,20 @@ function showWaveRewards() {
   const getCost = (lv) => Math.floor(50 * Math.pow(1.5, lv));
   const renderShop = (selectedIdx) => {
     const selectedPet = fullTeam[selectedIdx];
-    let petsHtml = '<div style="display:flex; flex-direction:column; gap:10px; width: 100px; overflow-y:auto; border-right: 2px solid #444; padding-right:10px;">';
+    let petsHtml = '<div class="dg-shop-left">';
     fullTeam.forEach((p, idx) => {
       const isSel = idx === selectedIdx;
       const totalLv = Object.values(p.upgrades).reduce((a, b) => a + b, 0);
-      petsHtml += `<div class="dg-shop-pet ${isSel ? "selected" : ""}" data-idx="${idx}" style="padding:5px; background:${isSel ? "#555" : "#222"}; border-radius:5px; cursor:pointer; text-align:center; border: 2px solid ${isSel ? "#ffeb3b" : "transparent"}; transition: 0.2s;">
+      petsHtml += `<div class="dg-shop-pet ${isSel ? "selected" : ""}" data-idx="${idx}">
                 ${petSVG(p.id, 40)}
-                <div style="font-size:12px; color:${isSel ? "#ffda66" : "white"}; margin-top:5px; font-weight:bold;">LV ${totalLv}</div>
+                <div class="lv">LV ${totalLv}</div>
             </div>`;
     });
     petsHtml += "</div>";
-    let shopHtml = `<div style="flex: 1; display:flex; flex-direction:column; padding-left: 20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #444; padding-bottom:10px; margin-bottom:15px;">
-                <h3 style="color:#ffda66; margin:0; text-shadow: 1px 1px 2px #000;">Ch\u1EE3 \u0110en - Wave ${currentWave}</h3>
-                <div style="color:#a4dc8c; font-size: 20px; font-weight:bold; background:#111; padding: 4px 12px; border-radius: 12px; border: 1px solid #333;">${spriteSVG("coin", 18).replace("display:block", "display:inline-block;vertical-align:middle")} ${totalGold} G</div>
+    let shopHtml = `<div class="dg-shop-right">
+            <div class="dg-shop-header">
+                <div class="dg-shop-title">Ch\u1EE3 \u0110en - Wave ${currentWave}</div>
+                <div class="dg-shop-gold">${spriteSVG("coin", 18).replace("display:block", "display:inline-block;vertical-align:middle")} ${totalGold} G</div>
             </div>
             ${bossDropHtml}
         `;
@@ -7855,17 +7883,17 @@ function showWaveRewards() {
         { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u.critR },
         { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u.critD }
       ];
-      shopHtml += `<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; flex: 1;">`;
+      shopHtml += `<div class="dg-shop-grid">`;
       stats.forEach((s) => {
         const cost = getCost(s.lv);
         const canAfford = totalGold >= cost;
         shopHtml += `
-                <div style="background: linear-gradient(145deg, #2a2a2a, #1a1a1a); padding:12px; border-radius:8px; border:1px solid #333; display:flex; justify-content:space-between; align-items:center; box-shadow: 2px 2px 5px rgba(0,0,0,0.3);">
+                <div class="dg-shop-card">
                     <div>
-                        <div style="color:#bbb; font-size:12px; font-weight:bold; margin-bottom:4px;">${s.name} <span style="color:#888;">(Lv ${s.lv})</span></div>
-                        <div style="color:white; font-size:18px; font-weight:bold; text-shadow: 1px 1px 0 #000;">${s.val}</div>
+                        <div class="dg-shop-stat-name">${s.name} <span style="color:#888;">(Lv ${s.lv})</span></div>
+                        <div class="dg-shop-stat-val">${s.val}</div>
                     </div>
-                    <button class="dg-btn-buy" data-stat="${s.id}" data-cost="${cost}" ${!canAfford ? "disabled" : ""} style="background:${canAfford ? "linear-gradient(to bottom, #4caf50, #2e7d32)" : "#444"}; color:${canAfford ? "white" : "#888"}; border:none; padding:8px 12px; border-radius:6px; cursor:${canAfford ? "pointer" : "not-allowed"}; font-weight:bold; font-size:14px; box-shadow: ${canAfford ? "0 2px 4px rgba(0,0,0,0.4)" : "none"};">
+                    <button class="dg-btn-buy" data-stat="${s.id}" data-cost="${cost}" ${!canAfford ? "disabled" : ""}>
                         ${cost} G
                     </button>
                 </div>`;
@@ -7875,11 +7903,9 @@ function showWaveRewards() {
       shopHtml += `<div style="color:#aaa; text-align:center; flex:1; display:flex; align-items:center; justify-content:center;">Ch\u1ECDn m\u1ED9t Pet b\xEAn tr\xE1i \u0111\u1EC3 n\xE2ng c\u1EA5p.</div>`;
     }
     shopHtml += `
-            <div style="margin-top:auto; display:flex; justify-content:flex-end;">
-                <button id="dg-shop-next" style="background:linear-gradient(to bottom, #2196f3, #1565c0); color:white; padding:12px 24px; font-size:16px; font-weight:bold; border:none; border-radius:8px; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">T\u1EDBi Wave Ti\u1EBFp Theo \u2794</button>
-            </div>
+            <button id="dg-shop-next" class="dg-shop-next-btn">T\u1EDBi Wave Ti\u1EBFp Theo \u2794</button>
         </div>`;
-    overlay.innerHTML = `<div style="display:flex; width: 100%; height: 100%; background:#222; border: 2px solid #555; border-radius:10px; padding:15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">${petsHtml}${shopHtml}</div>`;
+    overlay.innerHTML = `<div class="dg-shop-box">${petsHtml}${shopHtml}</div>`;
     overlay.querySelectorAll(".dg-shop-pet").forEach((el) => {
       el.onclick = () => renderShop(parseInt(el.dataset.idx));
     });
@@ -7922,12 +7948,6 @@ function showWaveRewards() {
     const nextBtn = overlay.querySelector("#dg-shop-next");
     nextBtn.onclick = () => {
       nextWaveSequence(overlay);
-    };
-    nextBtn.onmouseover = () => {
-      nextBtn.style.transform = "scale(1.05)";
-    };
-    nextBtn.onmouseout = () => {
-      nextBtn.style.transform = "scale(1)";
     };
   };
   arena.appendChild(overlay);
