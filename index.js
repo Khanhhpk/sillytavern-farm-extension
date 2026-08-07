@@ -2058,6 +2058,13 @@ var init_style = __esm({
       border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
       box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }
     #win.open { display: flex; }
+    
+    .dungeon-win { position: fixed; z-index: 99997; width: min(760px, 96vw); height: 92vh; height: 92dvh; display: none;
+      flex-direction: column; background: #f8efe0;
+      background-image: repeating-linear-gradient(0deg, transparent 0 30px, rgba(170,130,80,.14) 30px 33px);
+      border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
+      box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }
+    .dungeon-win.open-anim { display: flex; animation: winPop 0.2s cubic-bezier(0.18,0.89,0.32,1.28) forwards; }
     .titlebar { background: var(--sky); border-bottom: 4px solid var(--skyLine); padding: 9px 14px;
       display: flex; align-items: center; gap: 8px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.5);
       cursor: move; touch-action: none; user-select: none; flex: none; }
@@ -2073,7 +2080,7 @@ var init_style = __esm({
     .statusbar { display: flex; align-items: center; gap: 12px; padding: 7px 14px; background: #f4e6cf;
       border-bottom: 3px solid #ddc39a; font-size: 13px; font-weight: bold; color: #7a5c38; flex: none; flex-wrap: wrap; }
     .stat { display: flex; align-items: center; gap: 5px; }
-    #scroll { overflow: auto; flex: 1; min-height: 0; }
+    #scroll { overflow: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; }
     /* v0.8: thanh l\u1EADt trang ba trang */
     .pager { position: absolute; top: 7px; right: 7px; z-index: 7; display: flex; align-items: center; justify-content: center;
       background: rgba(58,48,30,.4); border: 2px solid rgba(255,246,224,.4); border-radius: 14px; overflow: hidden;
@@ -2156,7 +2163,7 @@ var init_style = __esm({
     .mascots { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
     /* C\u1EA3m \u1EE9ng: kh\xF4ng c\xF3 touch-action:none th\xEC tr\xECnh duy\u1EC7t coi c\xFA vu\u1ED1t l\xE0 cu\u1ED9n trang, b\u1EAFn pointercancel v\xE0 c\u1EAFt ngang phi\xEAn k\xE9o */
     .mascots[data-drag="1"] .pet { touch-action: none; }
-    .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute;
+    .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute; will-change: transform;
       left: 0; bottom: 0; will-change: transform, translate; }
     .pet:active { transform: scale(1.15, .85); }
     .pbody { display: block; animation: petbob 1.8s ease-in-out infinite; }
@@ -2405,24 +2412,83 @@ var init_style = __esm({
     .gacha-item-card.rarity-S\u1EED-thi { border-color: #a335ee !important; background: #faf0ff !important; }
     .gacha-item-card.rarity-Huy\u1EC1n-tho\u1EA1i { border-color: #ff8000 !important; background: #fff8f0 !important; box-shadow: 0 0 10px rgba(255,128,0,0.6) !important; }
     /* Dungeon View */
-    .dungeon-view { display: none; position: absolute; inset: 0; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; }
-    .dungeon-view.open { display: flex; }
+    .dungeon-view { display: flex; flex: 1; width: 100%; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; box-sizing: border-box; }
     .dg-arena { flex: 1; position: relative; border: 4px solid #3f3a50; border-radius: 8px; background: rgba(0,0,0,0.1); overflow: hidden; }
-    .dg-dock { height: 60px; background: rgba(58,48,30,.7); margin-top: 10px; border-radius: 8px; border: 2px solid #8a6a42; display: flex; align-items: center; padding: 0 10px; gap: 10px; overflow-x: auto; overflow-y: hidden; }
-    .dg-slot { width: 44px; height: 44px; flex-shrink: 0; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
+    .dg-dock { height: 84px; background: rgba(58,48,30,.7); margin-top: 10px; border-radius: 8px; border: 2px solid #8a6a42; display: flex; align-items: center; padding: 0 10px; gap: 12px; overflow-x: auto; overflow-y: hidden; }
+    .dg-slot { width: 64px; height: 64px; flex-shrink: 0; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
+    .dg-slot img { width: 80% !important; height: 80% !important; object-fit: contain; pointer-events: none; }
     .dg-slot:hover { border-color: #d9ba8a; background: rgba(255,255,255,.2); }
     .dg-slot.placed { opacity: 0.4; pointer-events: none; }
-    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; }
+    .dg-entity { position: absolute; left: 0; top: 0; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; will-change: transform; }
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
     .dg-entity.flip img { transform: scaleX(-1); }
-    .dg-hp-bar { position: absolute; top: -8px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
-    .dg-hp-fill { height: 100%; background: #a4dc8c; }
+    @media (max-width: 640px) {
+      #win, .dungeon-win { left: 0 !important; top: 0 !important; width: 100vw; height: 100vh; height: 100dvh; max-height: none; border: none; border-radius: 0; outline: none; }
+      .dungeon-view { padding: 4px; }
+      .dg-dock { height: 68px; padding: 0 8px; gap: 8px; }
+      .dg-slot { width: 52px; height: 52px; }
+    }
+    .dg-hp-bar { position: absolute; top: -12px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
+    .dg-hp-fill { height: 100%; background: #a4dc8c; transition: width 0.1s; }
+    .dg-cd-bar { position: absolute; top: -7px; left: -4px; width: 40px; height: 3px; background: #333; border: 1px solid #111; border-radius: 1.5px; overflow: hidden; z-index: 2; }
+    .dg-cd-fill { height: 100%; background: #ffeb3b; }
+    .dg-skill-cd-bar { position: absolute; top: -3px; left: 0px; width: 32px; height: 2px; background: #333; border: 1px solid #111; border-radius: 1px; overflow: hidden; z-index: 2; }
+    .dg-skill-cd-fill { height: 100%; background: #00bcd4; }
     .dg-entity.enemy .dg-hp-fill { background: #e06578; }
-    .dg-dmg { position: absolute; font-size: 14px; font-weight: bold; color: #ff4444; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; pointer-events: none; z-index: 10; animation: dmgFloat 0.8s ease-out forwards; }
+    .dg-dmg { position: absolute; left: 0; top: 0; font-size: 14px; font-weight: bold; color: #ff4444; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; pointer-events: none; z-index: 10; animation: dmgFloat 0.8s ease-out forwards; }
     .dg-dmg.heal { color: #a4dc8c; }
     .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
     .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; overflow-y: auto; padding: 15px; box-sizing: border-box; }
+
+    /* Shop UI */
+    .dg-overlay *::-webkit-scrollbar { width: 6px; height: 6px; }
+    .dg-overlay *::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 3px; }
+    .dg-overlay *::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+    .dg-shop-box { display: flex; flex-direction: column; width: 100%; height: 100%; max-width: 800px; max-height: 85vh; background: #1a1a1e; border: 2px solid #3a3a40; border-radius: 16px; padding: 20px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+    
+    .dg-shop-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 15px; flex-shrink: 0; }
+    .dg-shop-header-left { display: flex; gap: 15px; align-items: center; }
+    .dg-shop-title { color: #ffd94d; margin: 0; font-size: 20px; font-weight: bold; }
+    .dg-shop-gold { background: #25252b; color: #a4dc8c; font-size: 18px; font-weight: bold; padding: 6px 16px; border-radius: 20px; border: 1px solid #3a3a40; display: flex; align-items: center; gap: 6px; }
+    .dg-shop-next-btn { background: linear-gradient(to bottom, #2196f3, #1976d2); color: white; padding: 10px 20px; font-size: 15px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s; flex-shrink: 0; }
+    .dg-shop-next-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
+    .dg-shop-next-btn:active { transform: scale(0.95); }
+
+    .dg-shop-content { display: flex; flex: 1; min-height: 0; gap: 20px; }
+    
+    .dg-shop-left { width: 100px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 10px; border-right: 2px solid #333; flex-shrink: 0; }
+    .dg-shop-pet { background: #25252b; border: 2px solid transparent; border-radius: 12px; cursor: pointer; padding: 8px; text-align: center; transition: 0.2s; flex-shrink: 0; }
+    .dg-shop-pet:hover { background: #303038; }
+    .dg-shop-pet.selected { border-color: #ffd94d; background: #353540; }
+    .dg-shop-pet .lv { font-size: 11px; font-weight: bold; color: #888; margin-top: 4px; }
+    .dg-shop-pet.selected .lv { color: #ffd94d; }
+    
+    .dg-shop-right { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+    .dg-shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1; margin-bottom: 10px; align-content: start; overflow-y: auto; min-height: 0; padding-right: 8px; }
+    .dg-shop-grid::-webkit-scrollbar { width: 6px; }
+    .dg-shop-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
+    .dg-shop-grid::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 3px; }
+    .dg-shop-card { background: linear-gradient(145deg, #25252b, #1e1e24); border: 1px solid #3a3a40; border-radius: 12px; padding: 15px; display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s; }
+    .dg-shop-card:hover { border-color: #555; transform: translateY(-2px); }
+    .dg-shop-stat-name { color: #999; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+    .dg-shop-stat-val { color: white; font-size: 18px; font-weight: bold; }
+    .dg-btn-buy { background: linear-gradient(to bottom, #4caf50, #388e3c); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .dg-btn-buy:disabled { background: #444; color: #888; cursor: not-allowed; box-shadow: none; }
+    .dg-btn-buy:not(:disabled):hover { filter: brightness(1.1); transform: scale(1.05); }
+    .dg-btn-buy:not(:disabled):active { transform: scale(0.95); }
+    @media (max-width: 640px) {
+      .dg-shop-box { max-height: 95vh; padding: 15px; }
+      .dg-shop-content { flex-direction: column; gap: 15px; }
+      .dg-shop-left { width: 100%; flex-direction: row; border-right: none; border-bottom: 2px solid #333; padding-right: 0; padding-bottom: 12px; overflow-x: auto; overflow-y: hidden; }
+      .dg-shop-pet { padding: 6px; }
+      .dg-shop-header-left { flex-direction: column; align-items: flex-start; gap: 5px; }
+      .dg-shop-title { font-size: 16px; }
+      .dg-shop-gold { font-size: 16px; padding: 4px 12px; }
+      .dg-shop-next-btn { padding: 8px 12px; font-size: 14px; }
+      .dg-shop-grid { grid-template-columns: 1fr; gap: 10px; }
+      .dg-shop-card { padding: 12px; }
+    }
     .dg-title { font-size: 24px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 1px; text-align: center; margin-top: auto; }
     .dg-dock::-webkit-scrollbar { height: 8px; display: block; }
     .dg-dock::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
@@ -2439,7 +2505,7 @@ var init_style = __esm({
     .dg-info-item-desc { font-size: 11px; line-height: 1.3; color: #ddd; }
     .dg-info-item-desc b { color: #a4dc8c; font-size: 13px; display: block; margin-bottom: 2px; }
     
-    .dg-projectile { position: absolute; width: 16px; height: 16px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%); }
+    .dg-projectile { position: absolute; left: 0; top: 0; width: 16px; height: 16px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%); }
     .dg-projectile img, .dg-projectile svg { width: 100%; height: 100%; }
     
     .dg-status { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; pointer-events: none; z-index: 3; }
@@ -2524,7 +2590,7 @@ var init_style = __esm({
     #hero-party { position: absolute; left: 10px; bottom: 16px; z-index: 1; display: flex; gap: 8px; align-items: flex-end; height: 45px; }
     #hero-enemy { position: absolute; left: 0px; bottom: 16px; z-index: 1; display: flex; align-items: flex-end; height: 45px; }
     
-    .hero-pet, .hero-mob { display: flex; flex-direction: column; align-items: center; position: relative; justify-content: flex-end; }
+    .hero-pet, .hero-mob { display: flex; flex-direction: column; align-items: center; position: relative; left: 0; bottom: 0; justify-content: flex-end; will-change: transform; }
     .hero-mob { cursor: pointer; }
     .hero-pet svg, .hero-mob svg, .hero-pet img, .hero-mob img { display: block; height: 32px; width: auto; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); transform-origin: bottom center; margin-bottom: 2px; }
     
@@ -2536,7 +2602,7 @@ var init_style = __esm({
     .dmg-float { position: absolute; font-weight: bold; color: #ff5252; text-shadow: 0 0 2px #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; font-size: 14px; pointer-events: none; animation: dmgFloat 0.8s ease-out forwards; z-index: 10; transform: translate(-50%, 0); display: flex; align-items: center; justify-content: center; gap: 2px; }
     .dmg-float.crit { font-size: 18px; color: #ffeb3b; }
     .dmg-float.drop { color: #4caf50; animation: dmgFloat 1.2s ease-out forwards; font-size: 13px; }
-    .dg-projectile { position: absolute; pointer-events: none; z-index: 9; }
+    .dg-projectile { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 9; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(1); } 50% { opacity: 1; transform: translate(-50%, -20px) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
     
     /* Animations */
@@ -2749,7 +2815,6 @@ function initUI() {
         <div id="witch" title="Ph\xF9 thu\u1EF7 tr\xF2n"></div>
         <div class="mode-tip" id="modetip"></div>
         <div class="toolbar" id="toolbar"></div>
-        <div class="dungeon-view" id="dungeon-view" style="display:none"></div>
       </div>
     </div>
     <div class="bottombar">
@@ -2788,6 +2853,14 @@ function initUI() {
       <div class="h-btn" id="hero-cashout" title="R\xFAt V\xE0ng">${spriteSVG("coin", 16)}</div>
       <div class="h-btn" id="hero-close" title="\u0110\xF3ng Hero Mode">\xD7</div>
     </div>
+  </div>
+  
+  <div id="dungeon-win" class="dungeon-win" style="display:none">
+    <div class="titlebar" id="dungeon-drag">
+      <h1>${spriteSVG("dungeonGate", 16)}Ai m\xE0 th\xE8m \u0111i Dungeon ch\u1EE9!</h1>
+      <div class="close-x" id="dungeon-close">\xD7</div>
+    </div>
+    <div class="dungeon-view" id="dungeon-view"></div>
   </div>`;
   sh.appendChild(ctx.ui);
   ctx.orb = $id("orb");
@@ -5166,6 +5239,16 @@ function placeWin() {
   ctx.win.style.left = Math.min(Math.max(x, 0), Math.max(vw - w, 0)) + "px";
   ctx.win.style.top = Math.min(Math.max(y, 0), vh - 60) + "px";
 }
+function placeDungeonWin() {
+  const dungeonWin = $id("dungeon-win");
+  if (!dungeonWin) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const w = Math.min(760, vw * 0.96);
+  let x = ctx.S.dungeonWin ? ctx.S.dungeonWin.fx * vw : (vw - w) / 2;
+  let y = ctx.S.dungeonWin ? ctx.S.dungeonWin.fy * vh : vh * 0.04;
+  dungeonWin.style.left = Math.min(Math.max(x, 0), Math.max(vw - w, 0)) + "px";
+  dungeonWin.style.top = Math.min(Math.max(y, 0), vh - 60) + "px";
+}
 function toggleWin() {
   if (ctx.win.classList.contains("open")) {
     closeWin();
@@ -5193,6 +5276,7 @@ function initWindows() {
   dragBar = $id("drag");
   dragBar.addEventListener("pointerdown", (e) => {
     if (e.target.id === "close" || e.target.closest("#viewToggle")) return;
+    if (window.innerWidth <= 640) return;
     dragBar.setPointerCapture(e.pointerId);
     wg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: ctx.win.offsetLeft, oy: ctx.win.offsetTop };
   });
@@ -5211,6 +5295,34 @@ function initWindows() {
     ctx.S.win = { fx: ctx.win.offsetLeft / window.innerWidth, fy: ctx.win.offsetTop / window.innerHeight };
     save();
   });
+  const dungeonDragBar = $id("dungeon-drag");
+  let dungeonWg = null;
+  if (dungeonDragBar) {
+    dungeonDragBar.addEventListener("pointerdown", (e) => {
+      if (e.target.id === "dungeon-close") return;
+      if (window.innerWidth <= 640) return;
+      dungeonDragBar.setPointerCapture(e.pointerId);
+      const dungeonWin = $id("dungeon-win");
+      dungeonWg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: dungeonWin.offsetLeft, oy: dungeonWin.offsetTop };
+    });
+    dungeonDragBar.addEventListener("pointermove", (e) => {
+      if (!dungeonWg || e.pointerId !== dungeonWg.id) return;
+      const dungeonWin = $id("dungeon-win");
+      dungeonWin.style.left = dungeonWg.ox + e.clientX - dungeonWg.sx + "px";
+      dungeonWin.style.top = dungeonWg.oy + e.clientY - dungeonWg.sy + "px";
+    });
+    dungeonDragBar.addEventListener("pointerup", (e) => {
+      if (!dungeonWg || e.pointerId !== dungeonWg.id) return;
+      try {
+        dungeonDragBar.releasePointerCapture(e.pointerId);
+      } catch (er) {
+      }
+      dungeonWg = null;
+      const dungeonWin = $id("dungeon-win");
+      ctx.S.dungeonWin = { fx: dungeonWin.offsetLeft / window.innerWidth, fy: dungeonWin.offsetTop / window.innerHeight };
+      save();
+    });
+  }
 }
 var tick, wg, dragBar;
 var init_windows = __esm({
@@ -5410,7 +5522,7 @@ function renderPlots() {
   const expWrap = $id("explore-blocks");
   if (ctx.S && ctx.S.view === "explore") {
     if (wrap) wrap.style.display = "none";
-    if (expWrap) {
+    if (expWrap && !isDungeonOpen) {
       expWrap.style.display = "flex";
       if (!expWrap.hasChildNodes()) {
         expWrap.innerHTML = `
@@ -6969,31 +7081,36 @@ var init_state = __esm({
 // src/dungeon.js
 function openDungeonView() {
   isDungeonOpen = true;
-  const titleH1 = $id("drag").querySelector("h1");
-  titleH1.innerHTML = `${spriteSVG("dungeonGate", 16)}Ai m\xE0 th\xE8m \u0111i Dungeon ch\u1EE9!`;
-  $id("blocks").style.display = "none";
-  $id("explore-blocks").style.display = "none";
-  $id("pager").style.display = "none";
-  $id("toolbar").style.display = "none";
-  $id("mascots").style.display = "none";
-  $id("viewToggle").style.display = "none";
-  const ctrlrow = sh.querySelector(".ctrlrow");
-  if (ctrlrow) ctrlrow.style.display = "none";
-  const banner = $id("banner");
-  if (banner) banner.style.display = "none";
+  closeWin();
+  const dungeonWin = $id("dungeon-win");
+  if (dungeonWin) {
+    dungeonWin.style.display = "flex";
+    placeDungeonWin();
+    dungeonWin.classList.remove("open-anim");
+    void dungeonWin.offsetWidth;
+    dungeonWin.classList.add("open-anim");
+  }
   dungeonView.style.display = "flex";
-  const fieldEl2 = $id("scroll").querySelector(".field");
-  if (fieldEl2) fieldEl2.style.minHeight = "420px";
+  const closeBtn = $id("dungeon-close");
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      closeDungeonView();
+    };
+  }
   initPlacementPhase();
 }
 function closeDungeonView() {
   if (!isDungeonOpen) return;
   isDungeonOpen = false;
   stopCombatLoop();
+  const dungeonWin = $id("dungeon-win");
+  if (dungeonWin) {
+    dungeonWin.style.display = "none";
+    dungeonWin.classList.remove("open-anim");
+  }
   dungeonView.style.display = "none";
   dungeonView.innerHTML = "";
-  const fieldEl2 = $id("scroll").querySelector(".field");
-  if (fieldEl2) fieldEl2.style.minHeight = "";
+  $id("win").classList.add("open");
   $id("viewToggle").style.display = "";
   applyPageSkin();
   applyViewState();
@@ -7101,17 +7218,17 @@ function initPlacementPhase() {
       dragEl.className = "dg-entity pet";
       dragEl.style.pointerEvents = "none";
       dragEl.style.position = "fixed";
+      dragEl.style.left = "0";
+      dragEl.style.top = "0";
       dragEl.style.zIndex = "100000";
       dragEl.innerHTML = petSVG(petId, 32);
       document.body.appendChild(dragEl);
-      dragEl.style.left = e.clientX - 16 + "px";
-      dragEl.style.top = e.clientY - 16 + "px";
+      dragEl.style.transform = `translate3d(${e.clientX - 16}px, ${e.clientY - 16}px, 0)`;
       slot.setPointerCapture(e.pointerId);
     });
     slot.addEventListener("pointermove", (e) => {
       if (!draggingPet || !dragEl) return;
-      dragEl.style.left = e.clientX - 16 + "px";
-      dragEl.style.top = e.clientY - 16 + "px";
+      dragEl.style.transform = `translate3d(${e.clientX - 16}px, ${e.clientY - 16}px, 0)`;
     });
     slot.addEventListener("pointerup", (e) => {
       if (!draggingPet || !dragEl) return;
@@ -7129,6 +7246,8 @@ function initPlacementPhase() {
         el.className = "dg-entity pet";
         el.innerHTML = `
                     <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                    <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+                    <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
                     ${petSVG(pId, 32)}
                 `;
         let x = e.clientX - rect.left - 16;
@@ -7138,8 +7257,7 @@ function initPlacementPhase() {
         if (y < 16) y = 16;
         if (y > rect.height - 16) y = rect.height - 16;
         el.style.position = "absolute";
-        el.style.left = x + "px";
-        el.style.top = y + "px";
+        el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
         arena.appendChild(el);
         const memberObj = {
           id: pId,
@@ -7165,15 +7283,13 @@ function initPlacementPhase() {
           isPlacedDragging = true;
           el.style.zIndex = "100000";
           const arect = arena.getBoundingClientRect();
-          el.style.left = ev.clientX - arect.left - 16 + "px";
-          el.style.top = ev.clientY - arect.top - 16 + "px";
+          el.style.transform = `translate3d(${ev.clientX - arect.left - 32}px, ${ev.clientY - arect.top - 32}px, 0)`;
           el.setPointerCapture(ev.pointerId);
         });
         el.addEventListener("pointermove", (ev) => {
           if (!isPlacedDragging) return;
           const arect = arena.getBoundingClientRect();
-          el.style.left = ev.clientX - arect.left - 16 + "px";
-          el.style.top = ev.clientY - arect.top - 16 + "px";
+          el.style.transform = `translate3d(${ev.clientX - arect.left - 32}px, ${ev.clientY - arect.top - 32}px, 0)`;
         });
         el.addEventListener("pointerup", (ev) => {
           if (!isPlacedDragging) return;
@@ -7189,8 +7305,7 @@ function initPlacementPhase() {
             if (nx < 16) nx = 16;
             if (ny < 16) ny = 16;
             if (ny > arect.height - 16) ny = arect.height - 16;
-            el.style.left = nx + "px";
-            el.style.top = ny + "px";
+            el.style.transform = `translate3d(${nx - 16}px, ${ny - 16}px, 0)`;
             memberObj.x = nx;
             memberObj.y = ny;
           } else {
@@ -7317,12 +7432,13 @@ function _doStartWave() {
   const w = arena.clientWidth;
   const h = arena.clientHeight;
   updateHUD();
-  let count = Math.min(10, 2 + Math.floor(currentWave * 0.6));
+  let count = Math.min(40, 5 + Math.floor(currentWave * 2));
   let spawnElite = currentWave % 3 === 0;
   let isBossWave = currentWave % 10 === 0;
   if (isBossWave) {
     count = Math.max(3, Math.floor(count / 2));
   }
+  let stressed = Math.floor(currentWave / 5) * 0.5;
   for (let i = 0; i < count; i++) {
     let type;
     if (spawnElite && i === 0 || isBossWave && i === 0) {
@@ -7336,23 +7452,24 @@ function _doStartWave() {
     el.className = "dg-entity enemy flip";
     el.innerHTML = `
             <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+            <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+            <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
             ${spriteSVG(type.sp || type.id, 32)}
         `;
     const x = 20 + Math.random() * (w - 60);
     const y = 40 + Math.random() * (h - 80);
-    el.style.left = x + "px";
-    el.style.top = y + "px";
+    el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
     arena.appendChild(el);
-    let hpMultiplier = 1 + (currentWave - 1) * 0.15;
-    let atkMultiplier = 1 + (currentWave - 1) * 0.1;
-    if (currentWave > 10) {
-      const extra = currentWave - 10;
-      hpMultiplier *= Math.pow(1.05, extra);
-      atkMultiplier *= Math.pow(1.02, extra);
+    let hpMultiplier = 1 + (currentWave - 1) * 0.06 + stressed * 0.12;
+    let atkMultiplier = 1 + (currentWave - 1) * 0.03 + stressed * 0.08;
+    if (currentWave > 5) {
+      const extra = currentWave - 5;
+      hpMultiplier *= Math.pow(1.03, extra);
+      atkMultiplier *= Math.pow(1.01, extra);
     }
     if (isBossWave) {
-      hpMultiplier *= 2;
-      atkMultiplier *= 1.5;
+      hpMultiplier *= 1.5;
+      atkMultiplier *= 1.2;
     }
     enemies.push({
       id: type.id,
@@ -7368,7 +7485,8 @@ function _doStartWave() {
       el,
       type: "enemy",
       skill: type.skill,
-      ai: type.ai
+      ai: type.ai,
+      gold: Math.round((type.gold || 5) * (1 + currentWave * 0.15))
     });
   }
   lastTime = performance.now();
@@ -7405,8 +7523,7 @@ function combatLoop(time) {
       p.y += dy / dist * move;
       p.tx = p.target.x;
       p.ty = p.target.y - 16;
-      p.el.style.left = p.x + "px";
-      p.el.style.top = p.y + "px";
+      p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0)`;
       return true;
     }
   });
@@ -7420,6 +7537,11 @@ function combatLoop(time) {
   enemies = enemies.filter((e) => {
     if (e.hp <= 0) {
       e.el.remove();
+      if (e.gold) {
+        totalGold += e.gold;
+        spawnDmg({ x: e.x, y: e.y - 10 }, `+${e.gold} G`, "gold");
+        updateHUD();
+      }
       return false;
     }
     return true;
@@ -7435,17 +7557,25 @@ function combatLoop(time) {
   gameLoopId = requestAnimationFrame(combatLoop);
 }
 function spawnDmg(target, amount, type) {
-  amount = Math.round(amount);
+  const isStr = typeof amount === "string";
+  if (!isStr) amount = Math.round(amount);
   const arena = $id("dg-arena");
   const dmg = document.createElement("div");
   dmg.className = "dg-dmg" + (type ? " " + type : "");
-  dmg.textContent = type === "miss" ? "MISS!" : (amount > 0 ? "+" : "") + amount;
+  dmg.textContent = type === "miss" ? "MISS!" : isStr ? amount : (amount > 0 ? "+" : "") + amount;
+  if (type === "gold") {
+    dmg.style.color = "#ffd94d";
+    dmg.style.fontWeight = "bold";
+  }
   dmg.style.left = target.x + "px";
-  dmg.style.top = target.y + "px";
+  dmg.style.top = target.y - 8 + "px";
   arena.appendChild(dmg);
   setTimeout(() => dmg.remove(), 800);
-  const pct = Math.max(0, target.hp / target.maxHp) * 100;
-  target.el.querySelector(".dg-hp-fill").style.width = pct + "%";
+  if (target.el && target.maxHp) {
+    const pct = Math.max(0, target.hp / target.maxHp) * 100;
+    const fill = target.el.querySelector(".dg-hp-fill");
+    if (fill) fill.style.width = pct + "%";
+  }
 }
 function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOverride) {
   const atk = Math.round(overrideAtk || attacker.atk);
@@ -7465,7 +7595,7 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     return;
   }
   if (target.type === "pet") {
-    const dodgeChance = target.id === "ghostBlob" ? 0.15 : 0.05;
+    const dodgeChance = target.dodge !== void 0 ? target.dodge : target.id === "ghostBlob" ? 0.15 : 0.05;
     if (Math.random() < dodgeChance) {
       spawnDmg(target, 0, "miss");
       target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - atk);
@@ -7474,10 +7604,13 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
   }
   let finalDmg = atk;
   let isCrit = false;
-  if (attacker && attacker.type === "pet") {
-    const critChance = attacker.critRate || 0.15;
+  if (attacker) {
+    if (attacker.status && attacker.status.buff_atk > 0) {
+      finalDmg = Math.round(finalDmg * 1.2);
+    }
+    const critChance = attacker.critRate || (attacker.type === "pet" ? 0.05 : 0);
     if (Math.random() < critChance) {
-      finalDmg = Math.round(finalDmg * 1.5);
+      finalDmg = Math.round(finalDmg * (attacker.critDmg || 1.5));
       isCrit = true;
     }
   }
@@ -7513,13 +7646,12 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     enemyGroup.forEach((e) => {
       if (e !== target && e.hp > 0) {
         const distToTarget = Math.hypot(target.x - attacker.x, target.y - attacker.y);
-        const distToE = Math.hypot(e.x - attacker.x, e.y - attacker.y);
-        if (distToE < distToTarget + 50 && distToE > distToTarget - 50) {
-          const dot = ((e.x - attacker.x) * (target.x - attacker.x) + (e.y - attacker.y) * (target.y - attacker.y)) / (distToTarget * distToTarget);
-          if (dot > 0.8 && dot < 1.5) {
-            e.hp -= finalDmg;
-            spawnDmg(e, -finalDmg);
-          }
+        const dot = ((e.x - attacker.x) * (target.x - attacker.x) + (e.y - attacker.y) * (target.y - attacker.y)) / (distToTarget * distToTarget);
+        const cross = Math.abs((target.x - attacker.x) * (attacker.y - e.y) - (attacker.x - e.x) * (target.y - attacker.y));
+        const distToLine = cross / distToTarget;
+        if (dot > 0.1 && dot < 2 && distToLine < 30) {
+          e.hp -= finalDmg;
+          spawnDmg(e, -finalDmg);
         }
       }
     });
@@ -7529,7 +7661,12 @@ function updateEntities(groupA, groupB, dt) {
   const arena = $id("dg-arena");
   groupA.forEach((a) => {
     if (a.hp <= 0) return;
-    if (a.cd > 0) a.cd -= dt;
+    if (a.cd > 0) {
+      a.cd -= dt;
+    }
+    const cdPct = Math.max(0, Math.min(100, (1 - Math.max(0, a.cd) / a.maxCd) * 100));
+    const cdFill = a.el.querySelector(".dg-cd-fill");
+    if (cdFill) cdFill.style.width = cdPct + "%";
     if (!a.status) a.status = {};
     let isStunned = false;
     let isRooted = false;
@@ -7548,7 +7685,6 @@ function updateEntities(groupA, groupB, dt) {
           a.hp -= 2;
           spawnDmg(a, -2);
         }
-        if (eff === "buff_atk") atkSpdMult *= 1.2;
       }
     }
     let statusHtml = "";
@@ -7641,8 +7777,7 @@ function updateEntities(groupA, groupB, dt) {
         const arenaRect = arena.getBoundingClientRect();
         a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
         a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
-        a.el.style.left = a.x + "px";
-        a.el.style.top = a.y + "px";
+        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
       } else if (!inRange && !isRooted) {
         a.el.classList.add("walk");
         const speed = a.speed * speedMult * dt;
@@ -7656,8 +7791,7 @@ function updateEntities(groupA, groupB, dt) {
         const arenaRect = arena.getBoundingClientRect();
         a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
         a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
-        a.el.style.left = a.x + "px";
-        a.el.style.top = a.y + "px";
+        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
       }
       if (inRange) {
         if (a.cd <= 0) {
@@ -7669,7 +7803,7 @@ function updateEntities(groupA, groupB, dt) {
           if (a.skill === "frenzy") {
             if (!a.frenzyStacks) a.frenzyStacks = 0;
             a.frenzyStacks = Math.min(10, a.frenzyStacks + 1);
-            a.cd = a.maxCd / (1 + a.frenzyStacks * 0.05);
+            a.cd = a.maxCd / (atkSpdMult * (1 + a.frenzyStacks * 0.05));
           }
           if (a.skill === "taunt") {
             a.status.taunt = 3;
@@ -7700,8 +7834,7 @@ function updateEntities(groupA, groupB, dt) {
             };
             p.el.className = "dg-projectile";
             p.el.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#f0d" /></svg>';
-            p.el.style.left = p.x + "px";
-            p.el.style.top = p.y + "px";
+            p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0)`;
             arena.appendChild(p.el);
             if (a.skill === "multishot") {
               projectiles.push(p);
@@ -7779,7 +7912,7 @@ function showWaveRewards() {
   projectiles.forEach((p) => p.el.remove());
   projectiles = [];
   const isBoss = currentWave % 10 === 0;
-  const waveGold = (100 + currentWave * 50) * (isBoss ? 3 : 1);
+  const waveGold = (120 + currentWave * 60) * (isBoss ? 3 : 1);
   totalGold += waveGold;
   const arena = $id("dg-arena");
   fullTeam.forEach((p) => {
@@ -7792,32 +7925,12 @@ function showWaveRewards() {
     const pct = Math.max(0, p.hp / p.maxHp) * 100;
     p.el.querySelector(".dg-hp-fill").style.width = pct + "%";
     p.status = {};
+    if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0, dodge: 0 };
+    if (p.critRate === void 0) p.critRate = 0.05;
+    if (p.critDmg === void 0) p.critDmg = 1.5;
+    if (p.dodge === void 0) p.dodge = p.id === "ghostBlob" ? 0.15 : 0.05;
   });
   team = [...fullTeam];
-  const overlay = document.createElement("div");
-  overlay.className = "dg-overlay";
-  const allRewards = [
-    { id: "heal", name: "H\u1ED3i M\xE1u", desc: "H\u1ED3i 100% HP cho to\xE0n \u0111\u1ED9i", color: "#4caf50" },
-    { id: "buff", name: "C\u01B0\u1EDDng H\xF3a", desc: "T\u0103ng ng\u1EABu nhi\xEAn 10-30% HP ho\u1EB7c ATK cho to\xE0n \u0111\u1ED9i", color: "#2196f3" },
-    { id: "ascend", name: "Th\u0103ng Hoa", desc: "Ch\u1ECDn 1 Pet \u0111\u1EC3 x1.5 Ch\u1EC9 S\u1ED1", color: "#9c27b0" },
-    { id: "gold", name: "Kho B\xE1u", desc: `Nh\u1EADn th\xEAm ${waveGold * 2} G ngay l\u1EADp t\u1EE9c`, color: "#ffeb3b" },
-    { id: "blood", name: "Huy\u1EBFt Chi\u1EBFn", desc: "Gi\u1EA3m 20% HP t\u1ED1i \u0111a c\u1EE7a to\xE0n \u0111\u1ED9i nh\u01B0ng t\u0103ng 50% ATK", color: "#f44336" },
-    { id: "steel", name: "B\u1EE9c T\u01B0\u1EDDng Th\xE9p", desc: "T\u0103ng 50% HP t\u1ED1i \u0111a nh\u01B0ng gi\u1EA3m 10% ATK", color: "#607d8b" },
-    { id: "speed", name: "T\u1ED1c Chi\u1EBFn", desc: "T\u0103ng 30% t\u1ED1c \u0111\xE1nh cho to\xE0n \u0111\u1ED9i", color: "#00bcd4" },
-    { id: "armor", name: "H\u1ED9 Gi\xE1p", desc: "Gi\u1EA3m 20% s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o cho to\xE0n \u0111\u1ED9i", color: "#78909c" },
-    { id: "ambush", name: "Ph\u1EE5c K\xEDch", desc: "T\u0103ng t\u1EF7 l\u1EC7 ch\xED m\u1EA1ng l\xEAn 30% cho to\xE0n \u0111\u1ED9i", color: "#ff5722" }
-  ];
-  const shuffled = allRewards.sort(() => 0.5 - Math.random());
-  const choices = shuffled.slice(0, 3);
-  let cardsHtml = "";
-  choices.forEach((c) => {
-    cardsHtml += `
-            <div class="dg-reward-card" id="rew-${c.id}" style="border-top: 4px solid ${c.color}">
-                <h4>${c.name}</h4>
-                <p>${c.desc}</p>
-            </div>
-        `;
-  });
   let bossDropHtml = "";
   if (isBoss) {
     if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
@@ -7836,82 +7949,143 @@ function showWaveRewards() {
     bossDropHtml = `<div style="color:#4caf50; margin-bottom:15px; font-weight:bold; font-size:16px;">\u2728 R\u01A1i ra t\u1EEB Boss: ${dropText}! \u2728</div>`;
     save();
   }
-  overlay.innerHTML = `
-        <div class="dg-title" style="color: #ffda66;">Wave ${currentWave} Ho\xE0n Th\xE0nh!</div>
-        <div style="color:white; margin-bottom: 15px;">Nh\u1EADn \u0111\u01B0\u1EE3c ${waveGold} G (T\u1ED5ng: ${totalGold} G)</div>
-        ${bossDropHtml}
-        <div style="display:flex; gap: 10px; flex-wrap:wrap; justify-content:center; width: 100%; margin-bottom: auto;">
-            ${cardsHtml}
-        </div>
-    `;
-  arena.appendChild(overlay);
-  choices.forEach((c) => {
-    overlay.querySelector("#rew-" + c.id).onclick = () => {
-      if (c.id === "heal") {
-        fullTeam.forEach((p) => p.hp = p.maxHp);
-        nextWaveSequence(overlay);
-      } else if (c.id === "buff") {
-        const isAtk = Math.random() > 0.5;
-        const amt = 1.1 + Math.random() * 0.2;
-        fullTeam.forEach((p) => {
-          if (isAtk) p.atk = Math.round(p.atk * amt);
-          else {
-            p.maxHp = Math.round(p.maxHp * amt);
-            p.hp = Math.round(p.hp * amt);
-          }
-        });
-        nextWaveSequence(overlay);
-      } else if (c.id === "ascend") {
-        overlay.innerHTML = '<div class="dg-title">Ch\u1ECDn 1 Pet Th\u0103ng Hoa</div><div id="dg-pet-select" style="display:flex; gap: 10px; margin-top:20px; flex-wrap:wrap; justify-content:center;"></div>';
-        const selectContainer = overlay.querySelector("#dg-pet-select");
-        fullTeam.forEach((p) => {
-          const btn = document.createElement("div");
-          btn.className = "dg-reward-card";
-          btn.style.width = "80px";
-          btn.innerHTML = petSVG(p.id, 48);
-          btn.onclick = () => {
-            p.maxHp = Math.round(p.maxHp * 1.5);
-            p.hp = p.maxHp;
-            p.atk = Math.round(p.atk * 1.5);
-            nextWaveSequence(overlay);
-          };
-          selectContainer.appendChild(btn);
-        });
-      } else if (c.id === "gold") {
-        totalGold += waveGold * 2;
-        nextWaveSequence(overlay);
-      } else if (c.id === "blood") {
-        fullTeam.forEach((p) => {
-          p.maxHp = Math.round(p.maxHp * 0.8);
-          p.hp = Math.min(p.hp, p.maxHp);
-          p.atk = Math.round(p.atk * 1.5);
-        });
-        nextWaveSequence(overlay);
-      } else if (c.id === "steel") {
-        fullTeam.forEach((p) => {
-          p.maxHp = Math.round(p.maxHp * 1.5);
-          p.hp = Math.round(p.hp * 1.5);
-          p.atk = Math.round(p.atk * 0.9);
-        });
-        nextWaveSequence(overlay);
-      } else if (c.id === "speed") {
-        fullTeam.forEach((p) => {
-          p.maxCd = Math.round(p.maxCd * 70) / 100;
-        });
-        nextWaveSequence(overlay);
-      } else if (c.id === "armor") {
-        fullTeam.forEach((p) => {
-          p.armor = Math.min(0.6, (p.armor || 0) + 0.2);
-        });
-        nextWaveSequence(overlay);
-      } else if (c.id === "ambush") {
-        fullTeam.forEach((p) => {
-          p.critRate = Math.min(0.6, (p.critRate || 0.15) + 0.15);
-        });
-        nextWaveSequence(overlay);
+  const overlay = document.createElement("div");
+  overlay.className = "dg-overlay";
+  overlay.style.alignItems = "stretch";
+  overlay.style.padding = "20px";
+  overlay.style.boxSizing = "border-box";
+  overlay.style.background = "rgba(0,0,0,0.9)";
+  const getCost = (lv) => Math.floor(50 * Math.pow(1.5, lv));
+  const renderShop = (selectedIdx) => {
+    const selectedPet = fullTeam[selectedIdx];
+    let petsHtml = '<div class="dg-shop-left">';
+    fullTeam.forEach((p, idx) => {
+      const isSel = idx === selectedIdx;
+      const totalLv = Object.values(p.upgrades).reduce((a, b) => a + b, 0);
+      petsHtml += `<div class="dg-shop-pet ${isSel ? "selected" : ""}" data-idx="${idx}">
+                ${petSVG(p.id, 40)}
+                <div class="lv">LV ${totalLv}</div>
+            </div>`;
+    });
+    petsHtml += "</div>";
+    let headerHtml = `
+            <div class="dg-shop-header">
+                <div class="dg-shop-header-left">
+                    <div class="dg-shop-title">Ch\u1EE3 \u0110en - Wave ${currentWave}</div>
+                    <div class="dg-shop-gold">${spriteSVG("coin", 18).replace("display:block", "display:inline-block;vertical-align:middle")} ${totalGold} G</div>
+                </div>
+                <button id="dg-shop-next" class="dg-shop-next-btn">Ti\u1EBFp Theo \u2794</button>
+            </div>
+        `;
+    let shopHtml = `<div class="dg-shop-right">
+            ${bossDropHtml}
+        `;
+    if (selectedPet) {
+      const u = selectedPet.upgrades;
+      const hpMissingPet = selectedPet.maxHp - selectedPet.hp;
+      const healPetCost = Math.max(10, Math.floor(hpMissingPet * 0.5));
+      const hpMissingTeam = fullTeam.reduce((acc, member) => acc + (member.maxHp - member.hp), 0);
+      const healTeamCost = Math.max(30, Math.floor(hpMissingTeam * 0.4));
+      const stats = [
+        { id: "hp", name: "Max HP (+20%)", val: selectedPet.maxHp, lv: u.hp, cost: Math.floor(40 * Math.pow(1.3, u.hp)) },
+        { id: "atk", name: "ATK (+20%)", val: selectedPet.atk, lv: u.atk, cost: Math.floor(40 * Math.pow(1.3, u.atk)) },
+        { id: "aspd", name: "ATK SPD (+10%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u.aspd, cost: Math.floor(60 * Math.pow(1.4, u.aspd)) },
+        { id: "spd", name: "Move Speed (+10%)", val: selectedPet.speed, lv: u.spd, cost: Math.floor(30 * Math.pow(1.2, u.spd)) },
+        { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u.critR, cost: Math.floor(50 * Math.pow(1.5, u.critR)) },
+        { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u.critD, cost: Math.floor(50 * Math.pow(1.4, u.critD)) },
+        { id: "dodge", name: "N\xE9 Tr\xE1nh (+5%)", val: (selectedPet.dodge * 100).toFixed(0) + "%", lv: u.dodge || 0, cost: Math.floor(60 * Math.pow(1.5, u.dodge || 0)) }
+      ];
+      if (PET_STATS[selectedPet.id] && PET_STATS[selectedPet.id].range > 60) {
+        stats.push({ id: "range", name: "T\u1EA7m \u0110\xE1nh (+10%)", val: Math.round(selectedPet.range), lv: u.range || 0, cost: Math.floor(40 * Math.pow(1.2, u.range || 0)) });
       }
+      stats.push(
+        { id: "heal_pet", name: "H\u1ED3i M\xE1u (Full)", val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: "", cost: healPetCost, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
+        { id: "heal_team", name: "H\u1ED3i M\xE1u Team (Full)", val: "T\u1EA5t c\u1EA3", lv: "", cost: healTeamCost, forceCanBuy: hpMissingTeam > 0 }
+      );
+      shopHtml += `<div class="dg-shop-grid">`;
+      stats.forEach((s) => {
+        const cost = s.cost !== void 0 ? s.cost : getCost(s.lv);
+        const canAfford = totalGold >= cost && (s.forceCanBuy !== void 0 ? s.forceCanBuy : true);
+        const lvText = s.lv !== "" ? ` <span style="color:#888;">(Lv ${s.lv})</span>` : "";
+        shopHtml += `
+                <div class="dg-shop-card">
+                    <div>
+                        <div class="dg-shop-stat-name">${s.name}${lvText}</div>
+                        <div class="dg-shop-stat-val">${s.val}</div>
+                    </div>
+                    <button class="dg-btn-buy" data-stat="${s.id}" data-cost="${cost}" ${!canAfford ? "disabled" : ""}>
+                        ${cost} G
+                    </button>
+                </div>`;
+      });
+      shopHtml += `</div>`;
+    } else {
+      shopHtml += `<div style="color:#aaa; text-align:center; flex:1; display:flex; align-items:center; justify-content:center;">Ch\u1ECDn m\u1ED9t Pet b\xEAn tr\xE1i \u0111\u1EC3 n\xE2ng c\u1EA5p.</div>`;
+    }
+    shopHtml += `</div>`;
+    overlay.innerHTML = `<div class="dg-shop-box">${headerHtml}<div class="dg-shop-content">${petsHtml}${shopHtml}</div></div>`;
+    overlay.querySelectorAll(".dg-shop-pet").forEach((el) => {
+      el.onclick = () => renderShop(parseInt(el.dataset.idx));
+    });
+    overlay.querySelectorAll(".dg-btn-buy").forEach((el) => {
+      el.onclick = () => {
+        const statId = el.dataset.stat;
+        const cost = parseInt(el.dataset.cost);
+        if (totalGold >= cost) {
+          totalGold -= cost;
+          const p = selectedPet;
+          if (statId === "hp") {
+            p.maxHp = Math.round(p.maxHp * 1.2);
+            p.hp = Math.round(p.hp * 1.2);
+            p.upgrades.hp++;
+          }
+          if (statId === "atk") {
+            p.atk = Math.round(p.atk * 1.2);
+            p.upgrades.atk++;
+          }
+          if (statId === "aspd") {
+            p.maxCd = Math.max(0.1, p.maxCd * 0.9);
+            p.upgrades.aspd++;
+          }
+          if (statId === "spd") {
+            p.speed = Math.round(p.speed * 1.1);
+            p.upgrades.spd++;
+          }
+          if (statId === "critR") {
+            p.critRate = Math.min(1, p.critRate + 0.05);
+            p.upgrades.critR++;
+          }
+          if (statId === "critD") {
+            p.critDmg = Math.round((p.critDmg + 0.2) * 10) / 10;
+            p.upgrades.critD++;
+          }
+          if (statId === "dodge") {
+            p.dodge = Math.min(0.8, p.dodge + 0.05);
+            p.upgrades.dodge = (p.upgrades.dodge || 0) + 1;
+          }
+          if (statId === "range") {
+            p.range = Math.round(p.range * 1.1);
+            p.upgrades.range = (p.upgrades.range || 0) + 1;
+          }
+          if (statId === "heal_pet") {
+            p.hp = p.maxHp;
+          }
+          if (statId === "heal_team") {
+            fullTeam.forEach((member) => {
+              member.hp = member.maxHp;
+            });
+          }
+          renderShop(selectedIdx);
+        }
+      };
+    });
+    const nextBtn = overlay.querySelector("#dg-shop-next");
+    nextBtn.onclick = () => {
+      nextWaveSequence(overlay);
     };
-  });
+  };
+  arena.appendChild(overlay);
+  renderShop(0);
 }
 function nextWaveSequence(overlay) {
   overlay.remove();
@@ -7938,38 +8112,38 @@ var init_dungeon = __esm({
     currentWave = 1;
     totalGold = 0;
     PET_STATS = {
-      slime: { name: "Slime Xanh", desc: "Chi\u1EBFn binh c\xE2n b\u1EB1ng, kh\xF4ng c\xF3 g\xEC n\u1ED5i b\u1EADt.", hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
-      octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "\u0110\xE1nh nhanh th\u1EAFng nhanh. \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao.", hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
-      slimePink: { name: "Slime H\u1ED3ng", desc: "H\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu cho \u0111\u1ED3ng minh y\u1EBFu nh\u1EA5t.", hp: 120, atk: 15, range: 80, speed: 35, cd: 1.5, skill: "heal" },
-      peach_soda: { name: "Soda \u0110\xE0o", desc: "\u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.", hp: 90, atk: 18, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
-      octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "20% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.", hp: 150, atk: 12, range: 60, speed: 45, cd: 1.5, skill: "stun" },
-      jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "X\u1EA1 th\u1EE7: B\u1EAFn c\xE0ng xa s\xE1t th\u01B0\u01A1ng c\xE0ng l\u1EDBn.", hp: 70, atk: 25, range: 150, speed: 60, cd: 1.5, skill: "sniper" },
-      mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "H\u1ED3i m\xE1u cho b\u1EA3n th\xE2n b\u1EB1ng 50% s\xE1t th\u01B0\u01A1ng g\xE2y ra.", hp: 85, atk: 14, range: 50, speed: 55, cd: 1.1, skill: "lifesteal" },
-      ghostBlob: { name: "Ma Tr\u1EAFng", desc: "S\xE1t th\u1EE7: Lu\xF4n nh\u1EAFm v\xE0o k\u1EBB th\xF9 xa nh\u1EA5t.", hp: 60, atk: 35, range: 40, speed: 100, cd: 1.2, skill: "assassin" },
-      impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "\u0110\xE1nh lan: G\xE2y s\xE1t th\u01B0\u01A1ng AoE xung quanh m\u1EE5c ti\xEAu.", hp: 50, atk: 40, range: 40, speed: 60, cd: 1, skill: "cleave" },
-      angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "H\u1ED3i m\xE1u di\u1EC7n r\u1ED9ng cho c\xE1c \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 110, atk: 10, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal" },
-      starBell: { name: "Chu\xF4ng Sao", desc: "T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 95, atk: 12, range: 90, speed: 40, cd: 1, skill: "buff_atk" },
-      cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "Khi\xEAu kh\xEDch: Bu\u1ED9c k\u1EBB \u0111\u1ECBch t\u1EA5n c\xF4ng m\xECnh.", hp: 200, atk: 8, range: 40, speed: 30, cd: 2, skill: "taunt" },
-      dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "25% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.", hp: 105, atk: 14, range: 50, speed: 45, cd: 1.2, skill: "root" },
-      prismBlob: { name: "L\u0103ng K\xEDnh", desc: "B\u1EAFn 3 tia s\xE1ng c\xF9ng l\xFAc (s\xE1t th\u01B0\u01A1ng chia n\u1EEDa).", hp: 80, atk: 20, range: 140, speed: 40, cd: 1.4, skill: "multishot" },
-      penguin: { name: "C\xE1nh C\u1EE5t", desc: "\u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh.", hp: 120, atk: 16, range: 45, speed: 50, cd: 1, skill: "freeze" },
-      default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 100, atk: 10, range: 40, speed: 40, cd: 1 }
+      slime: { name: "Slime Xanh", desc: "Chi\u1EBFn binh c\xE2n b\u1EB1ng, kh\xF4ng c\xF3 g\xEC n\u1ED5i b\u1EADt.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 },
+      octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "\u0110\xE1nh nhanh th\u1EAFng nhanh. \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao.", hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
+      slimePink: { name: "Slime H\u1ED3ng", desc: "H\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu cho \u0111\u1ED3ng minh y\u1EBFu nh\u1EA5t.", hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: "heal" },
+      peach_soda: { name: "Soda \u0110\xE0o", desc: "\u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.", hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
+      octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "20% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.", hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: "stun" },
+      jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "X\u1EA1 th\u1EE7: B\u1EAFn c\xE0ng xa s\xE1t th\u01B0\u01A1ng c\xE0ng l\u1EDBn.", hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: "sniper" },
+      mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "H\u1ED3i m\xE1u cho b\u1EA3n th\xE2n b\u1EB1ng 50% s\xE1t th\u01B0\u01A1ng g\xE2y ra.", hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: "lifesteal" },
+      ghostBlob: { name: "Ma Tr\u1EAFng", desc: "S\xE1t th\u1EE7: Lu\xF4n nh\u1EAFm v\xE0o k\u1EBB th\xF9 xa nh\u1EA5t.", hp: 80, atk: 45, range: 40, speed: 100, cd: 1.2, skill: "assassin" },
+      impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "\u0110\xE1nh lan: G\xE2y s\xE1t th\u01B0\u01A1ng AoE xung quanh m\u1EE5c ti\xEAu.", hp: 70, atk: 50, range: 40, speed: 60, cd: 1, skill: "cleave" },
+      angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "H\u1ED3i m\xE1u di\u1EC7n r\u1ED9ng cho c\xE1c \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 140, atk: 12, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal" },
+      starBell: { name: "Chu\xF4ng Sao", desc: "T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: "buff_atk" },
+      cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "Khi\xEAu kh\xEDch: Bu\u1ED9c k\u1EBB \u0111\u1ECBch t\u1EA5n c\xF4ng m\xECnh.", hp: 250, atk: 10, range: 40, speed: 30, cd: 2, skill: "taunt" },
+      dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "25% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.", hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: "root" },
+      prismBlob: { name: "L\u0103ng K\xEDnh", desc: "B\u1EAFn 3 tia s\xE1ng c\xF9ng l\xFAc (s\xE1t th\u01B0\u01A1ng chia n\u1EEDa).", hp: 100, atk: 25, range: 140, speed: 40, cd: 1.4, skill: "multishot" },
+      penguin: { name: "C\xE1nh C\u1EE5t", desc: "\u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze" },
+      default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
     };
     ENEMY_TYPES = [
-      { id: "douya", name: "Gi\xE1 \u0110\u1ED7", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout" },
-      { id: "tomato", name: "C\xE0 Chua Tr\xF2n", desc: "C\u1EADn chi\u1EBFn c\u01A1 b\u1EA3n.", hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: "melee" },
-      { id: "radish", name: "C\u1EE7 C\u1EA3i T\u1ED1c \u0110\u1ED9", desc: "Ch\u1EA1y c\u1EF1c nhanh.", hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: "melee" },
-      { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: "assassin", sp: "moonberry" },
-      { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: "melee" },
-      { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: "melee" },
-      { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: "tank" },
-      { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: "ranged" },
-      { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot" },
-      { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root" },
-      { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: "ranged" },
-      { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true },
-      { id: "pumpkin", name: "Vua B\xED Ng\xF4", desc: "Boss: Tank AoE slam.", hp: 800, atk: 35, range: 50, speed: 15, cd: 2.5, ai: "tank", skill: "cleave", elite: true, sp: "pumpkin" },
-      { id: "fangW", name: "Ph\xF9 Th\u1EE7y Hoa", desc: "Boss: Ph\xE1o \u0111\xE0i b\u1EAFn xa.", hp: 400, atk: 45, range: 160, speed: 18, cd: 1.8, ai: "ranged", skill: "multishot", elite: true, sp: "fangW" }
+      { id: "douya", name: "Gi\xE1 \u0110\u1ED7", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout", gold: 2 },
+      { id: "tomato", name: "C\xE0 Chua Tr\xF2n", desc: "C\u1EADn chi\u1EBFn c\u01A1 b\u1EA3n.", hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: "melee", gold: 4 },
+      { id: "radish", name: "C\u1EE7 C\u1EA3i T\u1ED1c \u0110\u1ED9", desc: "Ch\u1EA1y c\u1EF1c nhanh.", hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: "melee", gold: 3 },
+      { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: "assassin", sp: "moonberry", gold: 5 },
+      { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: "melee", gold: 6 },
+      { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: "melee", gold: 8 },
+      { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: "tank", gold: 15 },
+      { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: "ranged", gold: 8 },
+      { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot", gold: 10 },
+      { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root", gold: 12 },
+      { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: "ranged", gold: 20 },
+      { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true, gold: 100 },
+      { id: "pumpkin", name: "Vua B\xED Ng\xF4", desc: "Boss: Tank AoE slam.", hp: 800, atk: 35, range: 50, speed: 15, cd: 2.5, ai: "tank", skill: "cleave", elite: true, sp: "pumpkin", gold: 150 },
+      { id: "fangW", name: "Ph\xF9 Th\u1EE7y Hoa", desc: "Boss: Ph\xE1o \u0111\xE0i b\u1EAFn xa.", hp: 400, atk: 45, range: 160, speed: 18, cd: 1.8, ai: "ranged", skill: "multishot", elite: true, sp: "fangW", gold: 120 }
     ];
     fullTeam = [];
   }
@@ -8611,7 +8785,7 @@ function renderMonstersUI() {
     const bossStyle = m.isBoss ? "filter: drop-shadow(0 0 5px #ff0000);" : "";
     const focusStyle = runState.focusTarget === i ? "filter: drop-shadow(0 0 8px #ffeb3b);" : bossStyle;
     return `
-      <div class="hero-mob idle" id="hmob-${i}" onclick="focusMonster(${i})" style="position: absolute; left: ${m.x}px; transform-origin: bottom center; transition: left 0.1s linear, transform 0.1s linear; ${focusStyle}">
+      <div class="hero-mob idle" id="hmob-${i}" onclick="focusMonster(${i})" style="position: absolute; transform: translate3d(${m.x}px, 0, 0); transform-origin: bottom center; transition: transform 0.1s linear; ${focusStyle}">
         <div class="hp-bar-mini" style="${m.isBoss ? "width: 48px;" : ""}"><div class="hp-fill-mini" id="hp-mob-${i}" style="width: ${m.hp / m.maxHp * 100}%"></div></div>
         <div class="hp-bar-mini" style="${m.isBoss ? "width: 48px;" : ""}"><div class="cd-fill-mini" id="cd-mob-${i}" style="width: ${Math.min(100, Math.max(0, (m.maxCd - m.cd) / m.maxCd * 100))}%"></div></div>
         <div style="transform: ${scale}">${spriteSVG(CROPS[m.id].sp || "seedLight", 32)}</div>
@@ -8651,7 +8825,7 @@ function heroTick() {
           mEl2.classList.remove("idle", "hurt", "attack");
           mEl2.style.transition = "all 0.4s ease-out";
           mEl2.style.opacity = "0";
-          mEl2.style.transform = "scale(0.1)";
+          mEl2.style.transform = `translate3d(${m.x}px, 0, 0) scale(0.1)`;
           mEl2.style.pointerEvents = "none";
           setTimeout(() => showFloatDamage("KO", mEl2, "#ffaa00"), 0);
         }
@@ -8664,7 +8838,7 @@ function heroTick() {
     if (m.x > targetX) {
       m.x -= 40 * (dt / 1e3);
       m.x = Math.max(targetX, m.x);
-      if (mEl) mEl.style.left = m.x + "px";
+      if (mEl) mEl.style.transform = `translate3d(${m.x}px, 0, 0)`;
     } else {
       anyMonsterInPosition = true;
     }
@@ -9369,13 +9543,11 @@ function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
     proj.className = "dg-projectile";
     proj.innerHTML = isEnemy ? '<div style="width:8px;height:8px;background:#e06578;border-radius:50%;box-shadow:0 0 5px #ff0000;"></div>' : spriteSVG(spriteId, 16);
     scene2.appendChild(proj);
-    proj.style.left = sx + "px";
-    proj.style.top = sy + "px";
+    proj.style.transform = `translate3d(${sx}px, ${sy}px, 0)`;
     const duration = 150;
-    proj.style.transition = `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+    proj.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
     setTimeout(() => {
-      proj.style.left = ex + "px";
-      proj.style.top = ey + "px";
+      proj.style.transform = `translate3d(${ex}px, ${ey}px, 0)`;
     }, 10);
     setTimeout(() => proj.remove(), duration + 10);
   } else {

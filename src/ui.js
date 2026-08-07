@@ -142,7 +142,6 @@ export function initUI() {
         <div id="witch" title="Phù thuỷ tròn"></div>
         <div class="mode-tip" id="modetip"></div>
         <div class="toolbar" id="toolbar"></div>
-        <div class="dungeon-view" id="dungeon-view" style="display:none"></div>
       </div>
     </div>
     <div class="bottombar">
@@ -181,6 +180,14 @@ export function initUI() {
       <div class="h-btn" id="hero-cashout" title="Rút Vàng">${spriteSVG('coin', 16)}</div>
       <div class="h-btn" id="hero-close" title="Đóng Hero Mode">×</div>
     </div>
+  </div>
+  
+  <div id="dungeon-win" class="dungeon-win" style="display:none">
+    <div class="titlebar" id="dungeon-drag">
+      <h1>${spriteSVG('dungeonGate', 16)}Ai mà thèm đi Dungeon chứ!</h1>
+      <div class="close-x" id="dungeon-close">×</div>
+    </div>
+    <div class="dungeon-view" id="dungeon-view"></div>
   </div>`;
   sh.appendChild(ctx.ui);
   ctx.orb = $id('orb');

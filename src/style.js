@@ -31,6 +31,13 @@ export const styleCSS = `
       border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
       box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }
     #win.open { display: flex; }
+    
+    .dungeon-win { position: fixed; z-index: 99997; width: min(760px, 96vw); height: 92vh; height: 92dvh; display: none;
+      flex-direction: column; background: #f8efe0;
+      background-image: repeating-linear-gradient(0deg, transparent 0 30px, rgba(170,130,80,.14) 30px 33px);
+      border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
+      box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }
+    .dungeon-win.open-anim { display: flex; animation: winPop 0.2s cubic-bezier(0.18,0.89,0.32,1.28) forwards; }
     .titlebar { background: var(--sky); border-bottom: 4px solid var(--skyLine); padding: 9px 14px;
       display: flex; align-items: center; gap: 8px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.5);
       cursor: move; touch-action: none; user-select: none; flex: none; }
@@ -46,7 +53,7 @@ export const styleCSS = `
     .statusbar { display: flex; align-items: center; gap: 12px; padding: 7px 14px; background: #f4e6cf;
       border-bottom: 3px solid #ddc39a; font-size: 13px; font-weight: bold; color: #7a5c38; flex: none; flex-wrap: wrap; }
     .stat { display: flex; align-items: center; gap: 5px; }
-    #scroll { overflow: auto; flex: 1; min-height: 0; }
+    #scroll { overflow: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; }
     /* v0.8: thanh lật trang ba trang */
     .pager { position: absolute; top: 7px; right: 7px; z-index: 7; display: flex; align-items: center; justify-content: center;
       background: rgba(58,48,30,.4); border: 2px solid rgba(255,246,224,.4); border-radius: 14px; overflow: hidden;
@@ -129,7 +136,7 @@ export const styleCSS = `
     .mascots { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
     /* Cảm ứng: không có touch-action:none thì trình duyệt coi cú vuốt là cuộn trang, bắn pointercancel và cắt ngang phiên kéo */
     .mascots[data-drag="1"] .pet { touch-action: none; }
-    .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute;
+    .pet { pointer-events: auto; cursor: pointer; transition: transform .12s; position: absolute; will-change: transform;
       left: 0; bottom: 0; will-change: transform, translate; }
     .pet:active { transform: scale(1.15, .85); }
     .pbody { display: block; animation: petbob 1.8s ease-in-out infinite; }
@@ -378,24 +385,83 @@ export const styleCSS = `
     .gacha-item-card.rarity-Sử-thi { border-color: #a335ee !important; background: #faf0ff !important; }
     .gacha-item-card.rarity-Huyền-thoại { border-color: #ff8000 !important; background: #fff8f0 !important; box-shadow: 0 0 10px rgba(255,128,0,0.6) !important; }
     /* Dungeon View */
-    .dungeon-view { display: none; position: absolute; inset: 0; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; }
-    .dungeon-view.open { display: flex; }
+    .dungeon-view { display: flex; flex: 1; width: 100%; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; box-sizing: border-box; }
     .dg-arena { flex: 1; position: relative; border: 4px solid #3f3a50; border-radius: 8px; background: rgba(0,0,0,0.1); overflow: hidden; }
-    .dg-dock { height: 60px; background: rgba(58,48,30,.7); margin-top: 10px; border-radius: 8px; border: 2px solid #8a6a42; display: flex; align-items: center; padding: 0 10px; gap: 10px; overflow-x: auto; overflow-y: hidden; }
-    .dg-slot { width: 44px; height: 44px; flex-shrink: 0; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
+    .dg-dock { height: 84px; background: rgba(58,48,30,.7); margin-top: 10px; border-radius: 8px; border: 2px solid #8a6a42; display: flex; align-items: center; padding: 0 10px; gap: 12px; overflow-x: auto; overflow-y: hidden; }
+    .dg-slot { width: 64px; height: 64px; flex-shrink: 0; background: rgba(255,255,255,.1); border: 2px dashed #b08a5c; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
+    .dg-slot img { width: 80% !important; height: 80% !important; object-fit: contain; pointer-events: none; }
     .dg-slot:hover { border-color: #d9ba8a; background: rgba(255,255,255,.2); }
     .dg-slot.placed { opacity: 0.4; pointer-events: none; }
-    .dg-entity { position: absolute; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; }
+    .dg-entity { position: absolute; left: 0; top: 0; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; will-change: transform; }
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
     .dg-entity.flip img { transform: scaleX(-1); }
-    .dg-hp-bar { position: absolute; top: -8px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
-    .dg-hp-fill { height: 100%; background: #a4dc8c; }
+    @media (max-width: 640px) {
+      #win, .dungeon-win { left: 0 !important; top: 0 !important; width: 100vw; height: 100vh; height: 100dvh; max-height: none; border: none; border-radius: 0; outline: none; }
+      .dungeon-view { padding: 4px; }
+      .dg-dock { height: 68px; padding: 0 8px; gap: 8px; }
+      .dg-slot { width: 52px; height: 52px; }
+    }
+    .dg-hp-bar { position: absolute; top: -12px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
+    .dg-hp-fill { height: 100%; background: #a4dc8c; transition: width 0.1s; }
+    .dg-cd-bar { position: absolute; top: -7px; left: -4px; width: 40px; height: 3px; background: #333; border: 1px solid #111; border-radius: 1.5px; overflow: hidden; z-index: 2; }
+    .dg-cd-fill { height: 100%; background: #ffeb3b; }
+    .dg-skill-cd-bar { position: absolute; top: -3px; left: 0px; width: 32px; height: 2px; background: #333; border: 1px solid #111; border-radius: 1px; overflow: hidden; z-index: 2; }
+    .dg-skill-cd-fill { height: 100%; background: #00bcd4; }
     .dg-entity.enemy .dg-hp-fill { background: #e06578; }
-    .dg-dmg { position: absolute; font-size: 14px; font-weight: bold; color: #ff4444; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; pointer-events: none; z-index: 10; animation: dmgFloat 0.8s ease-out forwards; }
+    .dg-dmg { position: absolute; left: 0; top: 0; font-size: 14px; font-weight: bold; color: #ff4444; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; pointer-events: none; z-index: 10; animation: dmgFloat 0.8s ease-out forwards; }
     .dg-dmg.heal { color: #a4dc8c; }
     .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
     .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; overflow-y: auto; padding: 15px; box-sizing: border-box; }
+
+    /* Shop UI */
+    .dg-overlay *::-webkit-scrollbar { width: 6px; height: 6px; }
+    .dg-overlay *::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 3px; }
+    .dg-overlay *::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+    .dg-shop-box { display: flex; flex-direction: column; width: 100%; height: 100%; max-width: 800px; max-height: 85vh; background: #1a1a1e; border: 2px solid #3a3a40; border-radius: 16px; padding: 20px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+    
+    .dg-shop-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 15px; flex-shrink: 0; }
+    .dg-shop-header-left { display: flex; gap: 15px; align-items: center; }
+    .dg-shop-title { color: #ffd94d; margin: 0; font-size: 20px; font-weight: bold; }
+    .dg-shop-gold { background: #25252b; color: #a4dc8c; font-size: 18px; font-weight: bold; padding: 6px 16px; border-radius: 20px; border: 1px solid #3a3a40; display: flex; align-items: center; gap: 6px; }
+    .dg-shop-next-btn { background: linear-gradient(to bottom, #2196f3, #1976d2); color: white; padding: 10px 20px; font-size: 15px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s; flex-shrink: 0; }
+    .dg-shop-next-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
+    .dg-shop-next-btn:active { transform: scale(0.95); }
+
+    .dg-shop-content { display: flex; flex: 1; min-height: 0; gap: 20px; }
+    
+    .dg-shop-left { width: 100px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 10px; border-right: 2px solid #333; flex-shrink: 0; }
+    .dg-shop-pet { background: #25252b; border: 2px solid transparent; border-radius: 12px; cursor: pointer; padding: 8px; text-align: center; transition: 0.2s; flex-shrink: 0; }
+    .dg-shop-pet:hover { background: #303038; }
+    .dg-shop-pet.selected { border-color: #ffd94d; background: #353540; }
+    .dg-shop-pet .lv { font-size: 11px; font-weight: bold; color: #888; margin-top: 4px; }
+    .dg-shop-pet.selected .lv { color: #ffd94d; }
+    
+    .dg-shop-right { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+    .dg-shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1; margin-bottom: 10px; align-content: start; overflow-y: auto; min-height: 0; padding-right: 8px; }
+    .dg-shop-grid::-webkit-scrollbar { width: 6px; }
+    .dg-shop-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
+    .dg-shop-grid::-webkit-scrollbar-thumb { background: #b08a5c; border-radius: 3px; }
+    .dg-shop-card { background: linear-gradient(145deg, #25252b, #1e1e24); border: 1px solid #3a3a40; border-radius: 12px; padding: 15px; display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s; }
+    .dg-shop-card:hover { border-color: #555; transform: translateY(-2px); }
+    .dg-shop-stat-name { color: #999; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
+    .dg-shop-stat-val { color: white; font-size: 18px; font-weight: bold; }
+    .dg-btn-buy { background: linear-gradient(to bottom, #4caf50, #388e3c); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .dg-btn-buy:disabled { background: #444; color: #888; cursor: not-allowed; box-shadow: none; }
+    .dg-btn-buy:not(:disabled):hover { filter: brightness(1.1); transform: scale(1.05); }
+    .dg-btn-buy:not(:disabled):active { transform: scale(0.95); }
+    @media (max-width: 640px) {
+      .dg-shop-box { max-height: 95vh; padding: 15px; }
+      .dg-shop-content { flex-direction: column; gap: 15px; }
+      .dg-shop-left { width: 100%; flex-direction: row; border-right: none; border-bottom: 2px solid #333; padding-right: 0; padding-bottom: 12px; overflow-x: auto; overflow-y: hidden; }
+      .dg-shop-pet { padding: 6px; }
+      .dg-shop-header-left { flex-direction: column; align-items: flex-start; gap: 5px; }
+      .dg-shop-title { font-size: 16px; }
+      .dg-shop-gold { font-size: 16px; padding: 4px 12px; }
+      .dg-shop-next-btn { padding: 8px 12px; font-size: 14px; }
+      .dg-shop-grid { grid-template-columns: 1fr; gap: 10px; }
+      .dg-shop-card { padding: 12px; }
+    }
     .dg-title { font-size: 24px; font-weight: bold; color: #ffd94d; text-shadow: 0 4px 10px rgba(0,0,0,0.8); letter-spacing: 1px; text-align: center; margin-top: auto; }
     .dg-dock::-webkit-scrollbar { height: 8px; display: block; }
     .dg-dock::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
@@ -412,7 +478,7 @@ export const styleCSS = `
     .dg-info-item-desc { font-size: 11px; line-height: 1.3; color: #ddd; }
     .dg-info-item-desc b { color: #a4dc8c; font-size: 13px; display: block; margin-bottom: 2px; }
     
-    .dg-projectile { position: absolute; width: 16px; height: 16px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%); }
+    .dg-projectile { position: absolute; left: 0; top: 0; width: 16px; height: 16px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%); }
     .dg-projectile img, .dg-projectile svg { width: 100%; height: 100%; }
     
     .dg-status { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; pointer-events: none; z-index: 3; }
@@ -497,7 +563,7 @@ export const styleCSS = `
     #hero-party { position: absolute; left: 10px; bottom: 16px; z-index: 1; display: flex; gap: 8px; align-items: flex-end; height: 45px; }
     #hero-enemy { position: absolute; left: 0px; bottom: 16px; z-index: 1; display: flex; align-items: flex-end; height: 45px; }
     
-    .hero-pet, .hero-mob { display: flex; flex-direction: column; align-items: center; position: relative; justify-content: flex-end; }
+    .hero-pet, .hero-mob { display: flex; flex-direction: column; align-items: center; position: relative; left: 0; bottom: 0; justify-content: flex-end; will-change: transform; }
     .hero-mob { cursor: pointer; }
     .hero-pet svg, .hero-mob svg, .hero-pet img, .hero-mob img { display: block; height: 32px; width: auto; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); transform-origin: bottom center; margin-bottom: 2px; }
     
@@ -509,7 +575,7 @@ export const styleCSS = `
     .dmg-float { position: absolute; font-weight: bold; color: #ff5252; text-shadow: 0 0 2px #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; font-size: 14px; pointer-events: none; animation: dmgFloat 0.8s ease-out forwards; z-index: 10; transform: translate(-50%, 0); display: flex; align-items: center; justify-content: center; gap: 2px; }
     .dmg-float.crit { font-size: 18px; color: #ffeb3b; }
     .dmg-float.drop { color: #4caf50; animation: dmgFloat 1.2s ease-out forwards; font-size: 13px; }
-    .dg-projectile { position: absolute; pointer-events: none; z-index: 9; }
+    .dg-projectile { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 9; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(1); } 50% { opacity: 1; transform: translate(-50%, -20px) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
     
     /* Animations */
