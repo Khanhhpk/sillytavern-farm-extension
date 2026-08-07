@@ -7434,7 +7434,8 @@ function spawnDmg(target, amount, type) {
   const dmg = document.createElement("div");
   dmg.className = "dg-dmg" + (type ? " " + type : "");
   dmg.textContent = type === "miss" ? "MISS!" : (amount > 0 ? "+" : "") + amount;
-  dmg.style.transform = `translate3d(${target.x - 16}px, ${target.y - 16}px, 0)`;
+  dmg.style.left = target.x - 16 + "px";
+  dmg.style.top = target.y - 16 + "px";
   arena.appendChild(dmg);
   setTimeout(() => dmg.remove(), 800);
   const pct = Math.max(0, target.hp / target.maxHp) * 100;
