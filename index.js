@@ -2422,7 +2422,7 @@ var init_style = __esm({
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
     .dg-entity.flip img { transform: scaleX(-1); }
     @media (max-width: 640px) {
-      .dungeon-win { width: 100vw; height: 100vh; height: 100dvh; border: none; border-radius: 0; outline: none; }
+      .dungeon-win { left: 0 !important; top: 0 !important; width: 100vw; height: 100vh; height: 100dvh; border: none; border-radius: 0; outline: none; }
       .dungeon-view { padding: 4px; }
       .dg-dock { height: 50px; padding: 0 5px; gap: 6px; }
       .dg-slot { width: 36px; height: 36px; }
@@ -5254,6 +5254,7 @@ function initWindows() {
   dragBar = $id("drag");
   dragBar.addEventListener("pointerdown", (e) => {
     if (e.target.id === "close" || e.target.closest("#viewToggle")) return;
+    if (window.innerWidth <= 640) return;
     dragBar.setPointerCapture(e.pointerId);
     wg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: ctx.win.offsetLeft, oy: ctx.win.offsetTop };
   });
@@ -5277,6 +5278,7 @@ function initWindows() {
   if (dungeonDragBar) {
     dungeonDragBar.addEventListener("pointerdown", (e) => {
       if (e.target.id === "dungeon-close") return;
+      if (window.innerWidth <= 640) return;
       dungeonDragBar.setPointerCapture(e.pointerId);
       const dungeonWin = $id("dungeon-win");
       dungeonWg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: dungeonWin.offsetLeft, oy: dungeonWin.offsetTop };

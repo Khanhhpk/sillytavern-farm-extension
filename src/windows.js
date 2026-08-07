@@ -49,6 +49,7 @@ export function initWindows() {
   dragBar = All.$id('drag');
   dragBar.addEventListener('pointerdown', e => {
     if (e.target.id === 'close' || e.target.closest('#viewToggle')) return;
+    if (window.innerWidth <= 640) return;
     dragBar.setPointerCapture(e.pointerId);
     wg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: ctx.win.offsetLeft, oy: ctx.win.offsetTop };
   });
@@ -70,6 +71,7 @@ export function initWindows() {
   if (dungeonDragBar) {
     dungeonDragBar.addEventListener('pointerdown', e => {
       if (e.target.id === 'dungeon-close') return;
+      if (window.innerWidth <= 640) return;
       dungeonDragBar.setPointerCapture(e.pointerId);
       const dungeonWin = All.$id('dungeon-win');
       dungeonWg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: dungeonWin.offsetLeft, oy: dungeonWin.offsetTop };

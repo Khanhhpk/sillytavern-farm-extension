@@ -395,7 +395,7 @@ export const styleCSS = `
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
     .dg-entity.flip img { transform: scaleX(-1); }
     @media (max-width: 640px) {
-      .dungeon-win { width: 100vw; height: 100vh; height: 100dvh; border: none; border-radius: 0; outline: none; }
+      .dungeon-win { left: 0 !important; top: 0 !important; width: 100vw; height: 100vh; height: 100dvh; border: none; border-radius: 0; outline: none; }
       .dungeon-view { padding: 4px; }
       .dg-dock { height: 50px; padding: 0 5px; gap: 6px; }
       .dg-slot { width: 36px; height: 36px; }
