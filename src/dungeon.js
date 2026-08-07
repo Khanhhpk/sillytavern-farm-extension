@@ -660,6 +660,9 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     let isCrit = false;
     
     if (attacker) {
+        if (attacker.status && attacker.status.buff_atk > 0) {
+            finalDmg = Math.round(finalDmg * 1.2);
+        }
         const critChance = attacker.critRate || (attacker.type === 'pet' ? 0.05 : 0);
         if (Math.random() < critChance) {
             finalDmg = Math.round(finalDmg * (attacker.critDmg || 1.5));
@@ -704,15 +707,14 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     if (skill === 'pierce' && attacker) {
         enemyGroup.forEach(e => {
             if (e !== target && e.hp > 0) {
-                // simple line check
+                // line check with cross product for width
                 const distToTarget = Math.hypot(target.x - attacker.x, target.y - attacker.y);
-                const distToE = Math.hypot(e.x - attacker.x, e.y - attacker.y);
-                if (distToE < distToTarget + 50 && distToE > distToTarget - 50) {
-                    const dot = ((e.x - attacker.x) * (target.x - attacker.x) + (e.y - attacker.y) * (target.y - attacker.y)) / (distToTarget * distToTarget);
-                    if (dot > 0.8 && dot < 1.5) { 
-                        e.hp -= finalDmg;
-                        spawnDmg(e, -finalDmg);
-                    }
+                const dot = ((e.x - attacker.x) * (target.x - attacker.x) + (e.y - attacker.y) * (target.y - attacker.y)) / (distToTarget * distToTarget);
+                const cross = Math.abs((target.x - attacker.x) * (attacker.y - e.y) - (attacker.x - e.x) * (target.y - attacker.y));
+                const distToLine = cross / distToTarget;
+                if (dot > 0.1 && dot < 2.0 && distToLine < 30) { 
+                    e.hp -= finalDmg;
+                    spawnDmg(e, -finalDmg);
                 }
             }
         });
@@ -750,7 +752,6 @@ function updateEntities(groupA, groupB, dt) {
                     a.hp -= 2;
                     spawnDmg(a, -2);
                 }
-                if (eff === 'buff_atk') atkSpdMult *= 1.2;
             }
         }
         
@@ -892,7 +893,7 @@ function updateEntities(groupA, groupB, dt) {
                     if (a.skill === 'frenzy') {
                         if (!a.frenzyStacks) a.frenzyStacks = 0;
                         a.frenzyStacks = Math.min(10, a.frenzyStacks + 1);
-                        a.cd = a.maxCd / (1 + a.frenzyStacks * 0.05);
+                        a.cd = a.maxCd / (atkSpdMult * (1 + a.frenzyStacks * 0.05));
                     }
                     if (a.skill === 'taunt') {
                         a.status.taunt = 3;
