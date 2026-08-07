@@ -738,7 +738,7 @@ function heroTick() {
           mEl.classList.remove('idle', 'hurt', 'attack');
           mEl.style.transition = 'all 0.4s ease-out';
           mEl.style.opacity = '0';
-          mEl.style.transform = 'scale(0.1)';
+          mEl.style.transform = `translate3d(${m.x}px, 0, 0) scale(0.1)`;
           mEl.style.pointerEvents = 'none';
           setTimeout(() => showFloatDamage('KO', mEl, '#ffaa00'), 0);
         }

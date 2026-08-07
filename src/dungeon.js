@@ -204,6 +204,8 @@ function initPlacementPhase() {
             dragEl.className = 'dg-entity pet';
             dragEl.style.pointerEvents = 'none';
             dragEl.style.position = 'fixed';
+            dragEl.style.left = '0';
+            dragEl.style.top = '0';
             dragEl.style.zIndex = '100000';
             dragEl.innerHTML = petSVG(petId, 32);
             document.body.appendChild(dragEl); // append to body to avoid transform/overflow issues
