@@ -15,39 +15,39 @@ let currentWave = 1;
 let totalGold = 0;
 
 const PET_STATS = {
-    slime: { name: 'Slime Xanh', desc: 'Chiến binh cân bằng, không có gì nổi bật.', hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
-    octo: { name: 'Bạch Tuộc', desc: 'Đánh nhanh thắng nhanh. Đánh càng lâu tốc đánh càng cao.', hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8, skill: 'frenzy' },
-    slimePink: { name: 'Slime Hồng', desc: 'Hồi máu đơn mục tiêu cho đồng minh yếu nhất.', hp: 120, atk: 15, range: 80, speed: 35, cd: 1.5, skill: 'heal' },
-    peach_soda: { name: 'Soda Đào', desc: 'Đánh xa xuyên thấu mọi kẻ địch trên đường bay.', hp: 90, atk: 18, range: 100, speed: 45, cd: 1.2, skill: 'pierce' },
-    octoCream: { name: 'Bạch Tuộc Kem', desc: '20% tỷ lệ làm choáng kẻ địch 1 giây.', hp: 150, atk: 12, range: 60, speed: 45, cd: 1.5, skill: 'stun' },
-    jellyfish: { name: 'Sứa Xoăn', desc: 'Xạ thủ: Bắn càng xa sát thương càng lớn.', hp: 70, atk: 25, range: 150, speed: 60, cd: 1.5, skill: 'sniper' },
-    mystery_blob: { name: 'Bé Bí Ẩn', desc: 'Hồi máu cho bản thân bằng 50% sát thương gây ra.', hp: 85, atk: 14, range: 50, speed: 55, cd: 1.1, skill: 'lifesteal' },
-    ghostBlob: { name: 'Ma Trắng', desc: 'Sát thủ: Luôn nhắm vào kẻ thù xa nhất.', hp: 60, atk: 35, range: 40, speed: 100, cd: 1.2, skill: 'assassin' },
-    impBlob: { name: 'Quỷ Nhỏ', desc: 'Đánh lan: Gây sát thương AoE xung quanh mục tiêu.', hp: 50, atk: 40, range: 40, speed: 60, cd: 1, skill: 'cleave' },
-    angelBlob: { name: 'Thiên Thần', desc: 'Hồi máu diện rộng cho các đồng minh lân cận.', hp: 110, atk: 10, range: 80, speed: 40, cd: 1.2, skill: 'aoe_heal' },
-    starBell: { name: 'Chuông Sao', desc: 'Tăng 20% sát thương cho đồng minh lân cận.', hp: 95, atk: 12, range: 90, speed: 40, cd: 1, skill: 'buff_atk' },
-    cloudMallow: { name: 'Kẹo Dẻo Mây', desc: 'Khiêu khích: Buộc kẻ địch tấn công mình.', hp: 200, atk: 8, range: 40, speed: 30, cd: 2, skill: 'taunt' },
-    dewSprout: { name: 'Mầm Sương', desc: '25% tỷ lệ trói chân kẻ địch trong 2 giây.', hp: 105, atk: 14, range: 50, speed: 45, cd: 1.2, skill: 'root' },
-    prismBlob: { name: 'Lăng Kính', desc: 'Bắn 3 tia sáng cùng lúc (sát thương chia nửa).', hp: 80, atk: 20, range: 140, speed: 40, cd: 1.4, skill: 'multishot' },
-    penguin: { name: 'Cánh Cụt', desc: 'Đòn đánh làm giảm tốc độ di chuyển và tốc đánh.', hp: 120, atk: 16, range: 45, speed: 50, cd: 1, skill: 'freeze' },
-    default: { name: 'Pet Vô Danh', desc: 'Không có kỹ năng đặc biệt.', hp: 100, atk: 10, range: 40, speed: 40, cd: 1 }
+    slime: { name: 'Slime Xanh', desc: 'Chiến binh cân bằng, không có gì nổi bật.', hp: 130, atk: 12, range: 40, speed: 40, cd: 1 },
+    octo: { name: 'Bạch Tuộc', desc: 'Đánh nhanh thắng nhanh. Đánh càng lâu tốc đánh càng cao.', hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: 'frenzy' },
+    slimePink: { name: 'Slime Hồng', desc: 'Hồi máu đơn mục tiêu cho đồng minh yếu nhất.', hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: 'heal' },
+    peach_soda: { name: 'Soda Đào', desc: 'Đánh xa xuyên thấu mọi kẻ địch trên đường bay.', hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: 'pierce' },
+    octoCream: { name: 'Bạch Tuộc Kem', desc: '20% tỷ lệ làm choáng kẻ địch 1 giây.', hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: 'stun' },
+    jellyfish: { name: 'Sứa Xoăn', desc: 'Xạ thủ: Bắn càng xa sát thương càng lớn.', hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: 'sniper' },
+    mystery_blob: { name: 'Bé Bí Ẩn', desc: 'Hồi máu cho bản thân bằng 50% sát thương gây ra.', hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: 'lifesteal' },
+    ghostBlob: { name: 'Ma Trắng', desc: 'Sát thủ: Luôn nhắm vào kẻ thù xa nhất.', hp: 80, atk: 45, range: 40, speed: 100, cd: 1.2, skill: 'assassin' },
+    impBlob: { name: 'Quỷ Nhỏ', desc: 'Đánh lan: Gây sát thương AoE xung quanh mục tiêu.', hp: 70, atk: 50, range: 40, speed: 60, cd: 1, skill: 'cleave' },
+    angelBlob: { name: 'Thiên Thần', desc: 'Hồi máu diện rộng cho các đồng minh lân cận.', hp: 140, atk: 12, range: 80, speed: 40, cd: 1.2, skill: 'aoe_heal' },
+    starBell: { name: 'Chuông Sao', desc: 'Tăng 20% sát thương cho đồng minh lân cận.', hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: 'buff_atk' },
+    cloudMallow: { name: 'Kẹo Dẻo Mây', desc: 'Khiêu khích: Buộc kẻ địch tấn công mình.', hp: 250, atk: 10, range: 40, speed: 30, cd: 2, skill: 'taunt' },
+    dewSprout: { name: 'Mầm Sương', desc: '25% tỷ lệ trói chân kẻ địch trong 2 giây.', hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: 'root' },
+    prismBlob: { name: 'Lăng Kính', desc: 'Bắn 3 tia sáng cùng lúc (sát thương chia nửa).', hp: 100, atk: 25, range: 140, speed: 40, cd: 1.4, skill: 'multishot' },
+    penguin: { name: 'Cánh Cụt', desc: 'Đòn đánh làm giảm tốc độ di chuyển và tốc đánh.', hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: 'freeze' },
+    default: { name: 'Pet Vô Danh', desc: 'Không có kỹ năng đặc biệt.', hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
 };
 
 const ENEMY_TYPES = [
-    { id: 'douya', name: 'Giá Đỗ', desc: 'Lính bầy đàn.', hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: 'melee', sp: 'sprout' },
-    { id: 'tomato', name: 'Cà Chua Tròn', desc: 'Cận chiến cơ bản.', hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: 'melee' },
-    { id: 'radish', name: 'Củ Cải Tốc Độ', desc: 'Chạy cực nhanh.', hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: 'melee' },
-    { id: 'moonberry', name: 'Dâu Tây Gai', desc: 'Thích khách tập kích.', hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: 'assassin', sp: 'moonberry' },
-    { id: 'chuncai', name: 'Rau Thuần', desc: 'Đeo bám dai dẳng.', hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: 'melee' },
-    { id: 'lingjiao', name: 'Củ Ấu Giáp', desc: 'Cận chiến có giáp.', hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: 'melee' },
-    { id: 'pumpkin', name: 'Bí Ngô Khổng Lồ', desc: 'Tanker chậm chạp.', hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: 'tank' },
-    { id: 'fangW', name: 'Hoa Bá Vương', desc: 'Pháp sư bắn từ xa.', hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: 'ranged' },
-    { id: 'starbush', name: 'Bụi Sao', desc: 'Xạ thủ 3 tia.', hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: 'ranged', skill: 'multishot' },
-    { id: 'opalvine', name: 'Dây Leo Opal', desc: 'Trói chân đối thủ.', hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: 'ranged', skill: 'root' },
-    { id: 'lianou', name: 'Củ Sen Khổng Lồ', desc: 'Ném bùn từ xa.', hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: 'ranged' },
-    { id: 'dragoncry', name: 'Long Tinh', desc: 'Boss: Cực khỏe.', hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: 'tank', skill: 'cleave', elite: true },
-    { id: 'pumpkin', name: 'Vua Bí Ngô', desc: 'Boss: Tank AoE slam.', hp: 800, atk: 35, range: 50, speed: 15, cd: 2.5, ai: 'tank', skill: 'cleave', elite: true, sp: 'pumpkin' },
-    { id: 'fangW', name: 'Phù Thủy Hoa', desc: 'Boss: Pháo đài bắn xa.', hp: 400, atk: 45, range: 160, speed: 18, cd: 1.8, ai: 'ranged', skill: 'multishot', elite: true, sp: 'fangW' }
+    { id: 'douya', name: 'Giá Đỗ', desc: 'Lính bầy đàn.', hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: 'melee', sp: 'sprout', gold: 2 },
+    { id: 'tomato', name: 'Cà Chua Tròn', desc: 'Cận chiến cơ bản.', hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: 'melee', gold: 4 },
+    { id: 'radish', name: 'Củ Cải Tốc Độ', desc: 'Chạy cực nhanh.', hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: 'melee', gold: 3 },
+    { id: 'moonberry', name: 'Dâu Tây Gai', desc: 'Thích khách tập kích.', hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: 'assassin', sp: 'moonberry', gold: 5 },
+    { id: 'chuncai', name: 'Rau Thuần', desc: 'Đeo bám dai dẳng.', hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: 'melee', gold: 6 },
+    { id: 'lingjiao', name: 'Củ Ấu Giáp', desc: 'Cận chiến có giáp.', hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: 'melee', gold: 8 },
+    { id: 'pumpkin', name: 'Bí Ngô Khổng Lồ', desc: 'Tanker chậm chạp.', hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: 'tank', gold: 15 },
+    { id: 'fangW', name: 'Hoa Bá Vương', desc: 'Pháp sư bắn từ xa.', hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: 'ranged', gold: 8 },
+    { id: 'starbush', name: 'Bụi Sao', desc: 'Xạ thủ 3 tia.', hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: 'ranged', skill: 'multishot', gold: 10 },
+    { id: 'opalvine', name: 'Dây Leo Opal', desc: 'Trói chân đối thủ.', hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: 'ranged', skill: 'root', gold: 12 },
+    { id: 'lianou', name: 'Củ Sen Khổng Lồ', desc: 'Ném bùn từ xa.', hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: 'ranged', gold: 20 },
+    { id: 'dragoncry', name: 'Long Tinh', desc: 'Boss: Cực khỏe.', hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: 'tank', skill: 'cleave', elite: true, gold: 100 },
+    { id: 'pumpkin', name: 'Vua Bí Ngô', desc: 'Boss: Tank AoE slam.', hp: 800, atk: 35, range: 50, speed: 15, cd: 2.5, ai: 'tank', skill: 'cleave', elite: true, sp: 'pumpkin', gold: 150 },
+    { id: 'fangW', name: 'Phù Thủy Hoa', desc: 'Boss: Pháo đài bắn xa.', hp: 400, atk: 45, range: 160, speed: 18, cd: 1.8, ai: 'ranged', skill: 'multishot', elite: true, sp: 'fangW', gold: 120 }
 ];
 
 export function openDungeonView() {
@@ -456,13 +456,16 @@ function _doStartWave() {
     updateHUD();
     
     // Calculate enemies based on wave
-    let count = Math.min(10, 2 + Math.floor(currentWave * 0.6));
+    let count = Math.min(40, 5 + Math.floor(currentWave * 2));
     let spawnElite = currentWave % 3 === 0;
     let isBossWave = currentWave % 10 === 0;
     
     if (isBossWave) {
         count = Math.max(3, Math.floor(count / 2));
     }
+    
+    // Thêm chỉ số stressed
+    let stressed = Math.floor(currentWave / 5) * 0.5;
     
     for(let i=0; i<count; i++) {
         let type;
@@ -491,17 +494,17 @@ function _doStartWave() {
         
         arena.appendChild(el);
         
-        // Scale hp and atk based on wave (exponential after wave 5 for shop economy)
-        let hpMultiplier = 1 + (currentWave - 1) * 0.2;
-        let atkMultiplier = 1 + (currentWave - 1) * 0.15;
+        // Scale hp and atk based on wave and stressed
+        let hpMultiplier = 1 + (currentWave - 1) * 0.06 + stressed * 0.12;
+        let atkMultiplier = 1 + (currentWave - 1) * 0.03 + stressed * 0.08;
         if (currentWave > 5) {
             const extra = currentWave - 5;
-            hpMultiplier *= Math.pow(1.08, extra);
-            atkMultiplier *= Math.pow(1.05, extra);
+            hpMultiplier *= Math.pow(1.03, extra);
+            atkMultiplier *= Math.pow(1.01, extra);
         }
         if (isBossWave) {
-            hpMultiplier *= 2;
-            atkMultiplier *= 1.5;
+            hpMultiplier *= 1.5;
+            atkMultiplier *= 1.2;
         }
         
         enemies.push({
@@ -510,7 +513,7 @@ function _doStartWave() {
             maxHp: Math.round(type.hp * hpMultiplier), 
             atk: Math.round(type.atk * atkMultiplier),
             range: type.range, speed: type.speed, cd: 0, maxCd: type.cd, el, type: 'enemy',
-            skill: type.skill, ai: type.ai
+            skill: type.skill, ai: type.ai, gold: Math.round((type.gold || 5) * (1 + currentWave * 0.15))
         });
     }
     
@@ -577,6 +580,11 @@ function combatLoop(time) {
     enemies = enemies.filter(e => {
         if (e.hp <= 0) {
             e.el.remove();
+            if (e.gold) {
+                totalGold += e.gold;
+                spawnDmg({x: e.x, y: e.y - 10}, `+${e.gold} G`, 'gold');
+                updateHUD();
+            }
             return false;
         }
         return true;
@@ -596,18 +604,26 @@ function combatLoop(time) {
 }
 
 function spawnDmg(target, amount, type) {
-    amount = Math.round(amount);
+    const isStr = typeof amount === 'string';
+    if (!isStr) amount = Math.round(amount);
     const arena = All.$id('dg-arena');
     const dmg = document.createElement('div');
     dmg.className = 'dg-dmg' + (type ? ' ' + type : '');
-    dmg.textContent = type === 'miss' ? 'MISS!' : (amount > 0 ? '+' : '') + amount;
+    dmg.textContent = type === 'miss' ? 'MISS!' : (isStr ? amount : (amount > 0 ? '+' : '') + amount);
+    if (type === 'gold') {
+        dmg.style.color = '#ffd94d';
+        dmg.style.fontWeight = 'bold';
+    }
     dmg.style.left = target.x + 'px';
     dmg.style.top = (target.y - 8) + 'px';
     arena.appendChild(dmg);
     setTimeout(() => dmg.remove(), 800);
     
-    const pct = Math.max(0, target.hp / target.maxHp) * 100;
-    target.el.querySelector('.dg-hp-fill').style.width = pct + '%';
+    if (target.el && target.maxHp) {
+        const pct = Math.max(0, target.hp / target.maxHp) * 100;
+        const fill = target.el.querySelector('.dg-hp-fill');
+        if (fill) fill.style.width = pct + '%';
+    }
 }
 
 function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOverride) {
@@ -994,7 +1010,7 @@ function showWaveRewards() {
     
     // Calculate gold for this wave
     const isBoss = currentWave % 10 === 0;
-    const waveGold = (100 + currentWave * 50) * (isBoss ? 3 : 1);
+    const waveGold = (120 + currentWave * 60) * (isBoss ? 3 : 1);
     totalGold += waveGold;
     
     const arena = All.$id('dg-arena');
@@ -1071,17 +1087,20 @@ function showWaveRewards() {
                 { id: 'aspd', name: 'ATK SPD (+10%)', val: selectedPet.maxCd.toFixed(2)+'s', lv: u.aspd },
                 { id: 'spd', name: 'Move Speed (+10%)', val: selectedPet.speed, lv: u.spd },
                 { id: 'critR', name: 'Crit Rate (+5%)', val: (selectedPet.critRate*100).toFixed(0)+'%', lv: u.critR },
-                { id: 'critD', name: 'Crit Dmg (+20%)', val: (selectedPet.critDmg*100).toFixed(0)+'%', lv: u.critD }
+                { id: 'critD', name: 'Crit Dmg (+20%)', val: (selectedPet.critDmg*100).toFixed(0)+'%', lv: u.critD },
+                { id: 'heal_pet', name: 'Hồi Máu (+50%)', val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: '', cost: 50, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
+                { id: 'heal_team', name: 'Hồi Máu Team (+50%)', val: 'Tất cả', lv: '', cost: 150, forceCanBuy: fullTeam.some(member => member.hp < member.maxHp) }
             ];
 
             shopHtml += `<div class="dg-shop-grid">`;
             stats.forEach(s => {
-                const cost = getCost(s.lv);
-                const canAfford = totalGold >= cost;
+                const cost = s.cost !== undefined ? s.cost : getCost(s.lv);
+                const canAfford = totalGold >= cost && (s.forceCanBuy !== undefined ? s.forceCanBuy : true);
+                const lvText = s.lv !== '' ? ` <span style="color:#888;">(Lv ${s.lv})</span>` : '';
                 shopHtml += `
                 <div class="dg-shop-card">
                     <div>
-                        <div class="dg-shop-stat-name">${s.name} <span style="color:#888;">(Lv ${s.lv})</span></div>
+                        <div class="dg-shop-stat-name">${s.name}${lvText}</div>
                         <div class="dg-shop-stat-val">${s.val}</div>
                     </div>
                     <button class="dg-btn-buy" data-stat="${s.id}" data-cost="${cost}" ${!canAfford?'disabled':''}>
@@ -1115,6 +1134,12 @@ function showWaveRewards() {
                     if (statId === 'spd') { p.speed = Math.round(p.speed * 1.1); p.upgrades.spd++; }
                     if (statId === 'critR') { p.critRate = Math.min(1, p.critRate + 0.05); p.upgrades.critR++; }
                     if (statId === 'critD') { p.critDmg = Math.round((p.critDmg + 0.2)*10)/10; p.upgrades.critD++; }
+                    if (statId === 'heal_pet') { p.hp = Math.min(p.maxHp, p.hp + Math.round(p.maxHp * 0.5)); }
+                    if (statId === 'heal_team') {
+                        fullTeam.forEach(member => {
+                            member.hp = Math.min(member.maxHp, member.hp + Math.round(member.maxHp * 0.5));
+                        });
+                    }
                     renderShop(selectedIdx);
                 }
             };

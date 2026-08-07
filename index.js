@@ -7429,12 +7429,13 @@ function _doStartWave() {
   const w = arena.clientWidth;
   const h = arena.clientHeight;
   updateHUD();
-  let count = Math.min(10, 2 + Math.floor(currentWave * 0.6));
+  let count = Math.min(40, 5 + Math.floor(currentWave * 2));
   let spawnElite = currentWave % 3 === 0;
   let isBossWave = currentWave % 10 === 0;
   if (isBossWave) {
     count = Math.max(3, Math.floor(count / 2));
   }
+  let stressed = Math.floor(currentWave / 5) * 0.5;
   for (let i = 0; i < count; i++) {
     let type;
     if (spawnElite && i === 0 || isBossWave && i === 0) {
@@ -7456,16 +7457,16 @@ function _doStartWave() {
     const y = 40 + Math.random() * (h - 80);
     el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
     arena.appendChild(el);
-    let hpMultiplier = 1 + (currentWave - 1) * 0.2;
-    let atkMultiplier = 1 + (currentWave - 1) * 0.15;
+    let hpMultiplier = 1 + (currentWave - 1) * 0.06 + stressed * 0.12;
+    let atkMultiplier = 1 + (currentWave - 1) * 0.03 + stressed * 0.08;
     if (currentWave > 5) {
       const extra = currentWave - 5;
-      hpMultiplier *= Math.pow(1.08, extra);
-      atkMultiplier *= Math.pow(1.05, extra);
+      hpMultiplier *= Math.pow(1.03, extra);
+      atkMultiplier *= Math.pow(1.01, extra);
     }
     if (isBossWave) {
-      hpMultiplier *= 2;
-      atkMultiplier *= 1.5;
+      hpMultiplier *= 1.5;
+      atkMultiplier *= 1.2;
     }
     enemies.push({
       id: type.id,
@@ -7481,7 +7482,8 @@ function _doStartWave() {
       el,
       type: "enemy",
       skill: type.skill,
-      ai: type.ai
+      ai: type.ai,
+      gold: Math.round((type.gold || 5) * (1 + currentWave * 0.15))
     });
   }
   lastTime = performance.now();
@@ -7532,6 +7534,11 @@ function combatLoop(time) {
   enemies = enemies.filter((e) => {
     if (e.hp <= 0) {
       e.el.remove();
+      if (e.gold) {
+        totalGold += e.gold;
+        spawnDmg({ x: e.x, y: e.y - 10 }, `+${e.gold} G`, "gold");
+        updateHUD();
+      }
       return false;
     }
     return true;
@@ -7547,17 +7554,25 @@ function combatLoop(time) {
   gameLoopId = requestAnimationFrame(combatLoop);
 }
 function spawnDmg(target, amount, type) {
-  amount = Math.round(amount);
+  const isStr = typeof amount === "string";
+  if (!isStr) amount = Math.round(amount);
   const arena = $id("dg-arena");
   const dmg = document.createElement("div");
   dmg.className = "dg-dmg" + (type ? " " + type : "");
-  dmg.textContent = type === "miss" ? "MISS!" : (amount > 0 ? "+" : "") + amount;
+  dmg.textContent = type === "miss" ? "MISS!" : isStr ? amount : (amount > 0 ? "+" : "") + amount;
+  if (type === "gold") {
+    dmg.style.color = "#ffd94d";
+    dmg.style.fontWeight = "bold";
+  }
   dmg.style.left = target.x + "px";
   dmg.style.top = target.y - 8 + "px";
   arena.appendChild(dmg);
   setTimeout(() => dmg.remove(), 800);
-  const pct = Math.max(0, target.hp / target.maxHp) * 100;
-  target.el.querySelector(".dg-hp-fill").style.width = pct + "%";
+  if (target.el && target.maxHp) {
+    const pct = Math.max(0, target.hp / target.maxHp) * 100;
+    const fill = target.el.querySelector(".dg-hp-fill");
+    if (fill) fill.style.width = pct + "%";
+  }
 }
 function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOverride) {
   const atk = Math.round(overrideAtk || attacker.atk);
@@ -7893,7 +7908,7 @@ function showWaveRewards() {
   projectiles.forEach((p) => p.el.remove());
   projectiles = [];
   const isBoss = currentWave % 10 === 0;
-  const waveGold = (100 + currentWave * 50) * (isBoss ? 3 : 1);
+  const waveGold = (120 + currentWave * 60) * (isBoss ? 3 : 1);
   totalGold += waveGold;
   const arena = $id("dg-arena");
   fullTeam.forEach((p) => {
@@ -7968,16 +7983,19 @@ function showWaveRewards() {
         { id: "aspd", name: "ATK SPD (+10%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u.aspd },
         { id: "spd", name: "Move Speed (+10%)", val: selectedPet.speed, lv: u.spd },
         { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u.critR },
-        { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u.critD }
+        { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u.critD },
+        { id: "heal_pet", name: "H\u1ED3i M\xE1u (+50%)", val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: "", cost: 50, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
+        { id: "heal_team", name: "H\u1ED3i M\xE1u Team (+50%)", val: "T\u1EA5t c\u1EA3", lv: "", cost: 150, forceCanBuy: fullTeam.some((member) => member.hp < member.maxHp) }
       ];
       shopHtml += `<div class="dg-shop-grid">`;
       stats.forEach((s) => {
-        const cost = getCost(s.lv);
-        const canAfford = totalGold >= cost;
+        const cost = s.cost !== void 0 ? s.cost : getCost(s.lv);
+        const canAfford = totalGold >= cost && (s.forceCanBuy !== void 0 ? s.forceCanBuy : true);
+        const lvText = s.lv !== "" ? ` <span style="color:#888;">(Lv ${s.lv})</span>` : "";
         shopHtml += `
                 <div class="dg-shop-card">
                     <div>
-                        <div class="dg-shop-stat-name">${s.name} <span style="color:#888;">(Lv ${s.lv})</span></div>
+                        <div class="dg-shop-stat-name">${s.name}${lvText}</div>
                         <div class="dg-shop-stat-val">${s.val}</div>
                     </div>
                     <button class="dg-btn-buy" data-stat="${s.id}" data-cost="${cost}" ${!canAfford ? "disabled" : ""}>
@@ -8026,6 +8044,14 @@ function showWaveRewards() {
             p.critDmg = Math.round((p.critDmg + 0.2) * 10) / 10;
             p.upgrades.critD++;
           }
+          if (statId === "heal_pet") {
+            p.hp = Math.min(p.maxHp, p.hp + Math.round(p.maxHp * 0.5));
+          }
+          if (statId === "heal_team") {
+            fullTeam.forEach((member) => {
+              member.hp = Math.min(member.maxHp, member.hp + Math.round(member.maxHp * 0.5));
+            });
+          }
           renderShop(selectedIdx);
         }
       };
@@ -8063,38 +8089,38 @@ var init_dungeon = __esm({
     currentWave = 1;
     totalGold = 0;
     PET_STATS = {
-      slime: { name: "Slime Xanh", desc: "Chi\u1EBFn binh c\xE2n b\u1EB1ng, kh\xF4ng c\xF3 g\xEC n\u1ED5i b\u1EADt.", hp: 100, atk: 10, range: 40, speed: 40, cd: 1 },
-      octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "\u0110\xE1nh nhanh th\u1EAFng nhanh. \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao.", hp: 80, atk: 15, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
-      slimePink: { name: "Slime H\u1ED3ng", desc: "H\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu cho \u0111\u1ED3ng minh y\u1EBFu nh\u1EA5t.", hp: 120, atk: 15, range: 80, speed: 35, cd: 1.5, skill: "heal" },
-      peach_soda: { name: "Soda \u0110\xE0o", desc: "\u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.", hp: 90, atk: 18, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
-      octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "20% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.", hp: 150, atk: 12, range: 60, speed: 45, cd: 1.5, skill: "stun" },
-      jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "X\u1EA1 th\u1EE7: B\u1EAFn c\xE0ng xa s\xE1t th\u01B0\u01A1ng c\xE0ng l\u1EDBn.", hp: 70, atk: 25, range: 150, speed: 60, cd: 1.5, skill: "sniper" },
-      mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "H\u1ED3i m\xE1u cho b\u1EA3n th\xE2n b\u1EB1ng 50% s\xE1t th\u01B0\u01A1ng g\xE2y ra.", hp: 85, atk: 14, range: 50, speed: 55, cd: 1.1, skill: "lifesteal" },
-      ghostBlob: { name: "Ma Tr\u1EAFng", desc: "S\xE1t th\u1EE7: Lu\xF4n nh\u1EAFm v\xE0o k\u1EBB th\xF9 xa nh\u1EA5t.", hp: 60, atk: 35, range: 40, speed: 100, cd: 1.2, skill: "assassin" },
-      impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "\u0110\xE1nh lan: G\xE2y s\xE1t th\u01B0\u01A1ng AoE xung quanh m\u1EE5c ti\xEAu.", hp: 50, atk: 40, range: 40, speed: 60, cd: 1, skill: "cleave" },
-      angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "H\u1ED3i m\xE1u di\u1EC7n r\u1ED9ng cho c\xE1c \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 110, atk: 10, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal" },
-      starBell: { name: "Chu\xF4ng Sao", desc: "T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 95, atk: 12, range: 90, speed: 40, cd: 1, skill: "buff_atk" },
-      cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "Khi\xEAu kh\xEDch: Bu\u1ED9c k\u1EBB \u0111\u1ECBch t\u1EA5n c\xF4ng m\xECnh.", hp: 200, atk: 8, range: 40, speed: 30, cd: 2, skill: "taunt" },
-      dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "25% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.", hp: 105, atk: 14, range: 50, speed: 45, cd: 1.2, skill: "root" },
-      prismBlob: { name: "L\u0103ng K\xEDnh", desc: "B\u1EAFn 3 tia s\xE1ng c\xF9ng l\xFAc (s\xE1t th\u01B0\u01A1ng chia n\u1EEDa).", hp: 80, atk: 20, range: 140, speed: 40, cd: 1.4, skill: "multishot" },
-      penguin: { name: "C\xE1nh C\u1EE5t", desc: "\u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh.", hp: 120, atk: 16, range: 45, speed: 50, cd: 1, skill: "freeze" },
-      default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 100, atk: 10, range: 40, speed: 40, cd: 1 }
+      slime: { name: "Slime Xanh", desc: "Chi\u1EBFn binh c\xE2n b\u1EB1ng, kh\xF4ng c\xF3 g\xEC n\u1ED5i b\u1EADt.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 },
+      octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "\u0110\xE1nh nhanh th\u1EAFng nhanh. \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao.", hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
+      slimePink: { name: "Slime H\u1ED3ng", desc: "H\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu cho \u0111\u1ED3ng minh y\u1EBFu nh\u1EA5t.", hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: "heal" },
+      peach_soda: { name: "Soda \u0110\xE0o", desc: "\u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.", hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
+      octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "20% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.", hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: "stun" },
+      jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "X\u1EA1 th\u1EE7: B\u1EAFn c\xE0ng xa s\xE1t th\u01B0\u01A1ng c\xE0ng l\u1EDBn.", hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: "sniper" },
+      mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "H\u1ED3i m\xE1u cho b\u1EA3n th\xE2n b\u1EB1ng 50% s\xE1t th\u01B0\u01A1ng g\xE2y ra.", hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: "lifesteal" },
+      ghostBlob: { name: "Ma Tr\u1EAFng", desc: "S\xE1t th\u1EE7: Lu\xF4n nh\u1EAFm v\xE0o k\u1EBB th\xF9 xa nh\u1EA5t.", hp: 80, atk: 45, range: 40, speed: 100, cd: 1.2, skill: "assassin" },
+      impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "\u0110\xE1nh lan: G\xE2y s\xE1t th\u01B0\u01A1ng AoE xung quanh m\u1EE5c ti\xEAu.", hp: 70, atk: 50, range: 40, speed: 60, cd: 1, skill: "cleave" },
+      angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "H\u1ED3i m\xE1u di\u1EC7n r\u1ED9ng cho c\xE1c \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 140, atk: 12, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal" },
+      starBell: { name: "Chu\xF4ng Sao", desc: "T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: "buff_atk" },
+      cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "Khi\xEAu kh\xEDch: Bu\u1ED9c k\u1EBB \u0111\u1ECBch t\u1EA5n c\xF4ng m\xECnh.", hp: 250, atk: 10, range: 40, speed: 30, cd: 2, skill: "taunt" },
+      dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "25% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.", hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: "root" },
+      prismBlob: { name: "L\u0103ng K\xEDnh", desc: "B\u1EAFn 3 tia s\xE1ng c\xF9ng l\xFAc (s\xE1t th\u01B0\u01A1ng chia n\u1EEDa).", hp: 100, atk: 25, range: 140, speed: 40, cd: 1.4, skill: "multishot" },
+      penguin: { name: "C\xE1nh C\u1EE5t", desc: "\u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze" },
+      default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
     };
     ENEMY_TYPES = [
-      { id: "douya", name: "Gi\xE1 \u0110\u1ED7", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout" },
-      { id: "tomato", name: "C\xE0 Chua Tr\xF2n", desc: "C\u1EADn chi\u1EBFn c\u01A1 b\u1EA3n.", hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: "melee" },
-      { id: "radish", name: "C\u1EE7 C\u1EA3i T\u1ED1c \u0110\u1ED9", desc: "Ch\u1EA1y c\u1EF1c nhanh.", hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: "melee" },
-      { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: "assassin", sp: "moonberry" },
-      { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: "melee" },
-      { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: "melee" },
-      { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: "tank" },
-      { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: "ranged" },
-      { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot" },
-      { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root" },
-      { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: "ranged" },
-      { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true },
-      { id: "pumpkin", name: "Vua B\xED Ng\xF4", desc: "Boss: Tank AoE slam.", hp: 800, atk: 35, range: 50, speed: 15, cd: 2.5, ai: "tank", skill: "cleave", elite: true, sp: "pumpkin" },
-      { id: "fangW", name: "Ph\xF9 Th\u1EE7y Hoa", desc: "Boss: Ph\xE1o \u0111\xE0i b\u1EAFn xa.", hp: 400, atk: 45, range: 160, speed: 18, cd: 1.8, ai: "ranged", skill: "multishot", elite: true, sp: "fangW" }
+      { id: "douya", name: "Gi\xE1 \u0110\u1ED7", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout", gold: 2 },
+      { id: "tomato", name: "C\xE0 Chua Tr\xF2n", desc: "C\u1EADn chi\u1EBFn c\u01A1 b\u1EA3n.", hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: "melee", gold: 4 },
+      { id: "radish", name: "C\u1EE7 C\u1EA3i T\u1ED1c \u0110\u1ED9", desc: "Ch\u1EA1y c\u1EF1c nhanh.", hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: "melee", gold: 3 },
+      { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: "assassin", sp: "moonberry", gold: 5 },
+      { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: "melee", gold: 6 },
+      { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: "melee", gold: 8 },
+      { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: "tank", gold: 15 },
+      { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: "ranged", gold: 8 },
+      { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot", gold: 10 },
+      { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root", gold: 12 },
+      { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: "ranged", gold: 20 },
+      { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true, gold: 100 },
+      { id: "pumpkin", name: "Vua B\xED Ng\xF4", desc: "Boss: Tank AoE slam.", hp: 800, atk: 35, range: 50, speed: 15, cd: 2.5, ai: "tank", skill: "cleave", elite: true, sp: "pumpkin", gold: 150 },
+      { id: "fangW", name: "Ph\xF9 Th\u1EE7y Hoa", desc: "Boss: Ph\xE1o \u0111\xE0i b\u1EAFn xa.", hp: 400, atk: 45, range: 160, speed: 18, cd: 1.8, ai: "ranged", skill: "multishot", elite: true, sp: "fangW", gold: 120 }
     ];
     fullTeam = [];
   }
