@@ -2058,6 +2058,7 @@ var init_style = __esm({
       border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
       box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }
     #win.open { display: flex; }
+    #win.dungeon-mode { height: 92vh; height: 92dvh; }
     .titlebar { background: var(--sky); border-bottom: 4px solid var(--skyLine); padding: 9px 14px;
       display: flex; align-items: center; gap: 8px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.5);
       cursor: move; touch-action: none; user-select: none; flex: none; }
@@ -2073,7 +2074,7 @@ var init_style = __esm({
     .statusbar { display: flex; align-items: center; gap: 12px; padding: 7px 14px; background: #f4e6cf;
       border-bottom: 3px solid #ddc39a; font-size: 13px; font-weight: bold; color: #7a5c38; flex: none; flex-wrap: wrap; }
     .stat { display: flex; align-items: center; gap: 5px; }
-    #scroll { overflow: auto; flex: 1; min-height: 0; }
+    #scroll { overflow: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; }
     /* v0.8: thanh l\u1EADt trang ba trang */
     .pager { position: absolute; top: 7px; right: 7px; z-index: 7; display: flex; align-items: center; justify-content: center;
       background: rgba(58,48,30,.4); border: 2px solid rgba(255,246,224,.4); border-radius: 14px; overflow: hidden;
@@ -2405,7 +2406,7 @@ var init_style = __esm({
     .gacha-item-card.rarity-S\u1EED-thi { border-color: #a335ee !important; background: #faf0ff !important; }
     .gacha-item-card.rarity-Huy\u1EC1n-tho\u1EA1i { border-color: #ff8000 !important; background: #fff8f0 !important; box-shadow: 0 0 10px rgba(255,128,0,0.6) !important; }
     /* Dungeon View */
-    .dungeon-view { display: none; min-height: 70vh; width: 100%; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; box-sizing: border-box; }
+    .dungeon-view { display: none; flex: 1; width: 100%; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; box-sizing: border-box; }
     .dungeon-view.open { display: flex; }
     .dg-arena { flex: 1; position: relative; border: 4px solid #3f3a50; border-radius: 8px; background: rgba(0,0,0,0.1); overflow: hidden; }
     .dg-dock { height: 60px; background: rgba(58,48,30,.7); margin-top: 10px; border-radius: 8px; border: 2px solid #8a6a42; display: flex; align-items: center; padding: 0 10px; gap: 10px; overflow-x: auto; overflow-y: hidden; }
@@ -7001,6 +7002,7 @@ var init_state = __esm({
 // src/dungeon.js
 function openDungeonView() {
   isDungeonOpen = true;
+  $id("win").classList.add("dungeon-mode");
   const titleH1 = $id("drag").querySelector("h1");
   titleH1.innerHTML = `${spriteSVG("dungeonGate", 16)}Ai m\xE0 th\xE8m \u0111i Dungeon ch\u1EE9!`;
   $id("blocks").style.display = "none";
@@ -7021,6 +7023,7 @@ function openDungeonView() {
 function closeDungeonView() {
   if (!isDungeonOpen) return;
   isDungeonOpen = false;
+  $id("win").classList.remove("dungeon-mode");
   stopCombatLoop();
   dungeonView.style.display = "none";
   dungeonView.innerHTML = "";

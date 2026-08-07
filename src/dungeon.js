@@ -52,6 +52,7 @@ const ENEMY_TYPES = [
 
 export function openDungeonView() {
     isDungeonOpen = true;
+    All.$id('win').classList.add('dungeon-mode');
     
     // Change Title
     const titleH1 = All.$id('drag').querySelector('h1');
@@ -80,6 +81,7 @@ export function openDungeonView() {
 export function closeDungeonView() {
     if (!isDungeonOpen) return;
     isDungeonOpen = false;
+    All.$id('win').classList.remove('dungeon-mode');
     stopCombatLoop();
 
     // Hide Dungeon View
