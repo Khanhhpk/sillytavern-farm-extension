@@ -464,7 +464,7 @@ export const styleCSS = `
     
     .hero-pet-roster-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding: 4px; border: 1px solid #4a3461; border-radius: 4px; background: rgba(0,0,0,0.2); }
     .hero-roster-item { display: flex; align-items: center; justify-content: space-between; padding: 6px; background: #2c2538; border: 1px solid #4a3461; border-radius: 4px; }
-    .hero-roster-item.used { opacity: 0.5; filter: grayscale(0.5); pointer-events: none; }
+    .hero-roster-item.used { opacity: 0.5; filter: grayscale(0.5); }
     .h-r-pet { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 4px; cursor: pointer; }
     .h-r-pet:hover { background: rgba(255,255,255,0.1); }
     .h-r-info { flex: 1; margin: 0 10px; font-size: 11px; color: #d0c0e8; }
