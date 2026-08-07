@@ -6883,6 +6883,16 @@ function loadState() {
   [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach((arr) => (arr || []).forEach((p) => {
     if (p.crop && (p.crop.id === "mysbG" || p.crop.id === "mysbW" || p.crop.id === "mysbM" || p.crop.id === "moonberry")) p.crop.id = "strawberry";
   }));
+  if (ctx.S.ferts) {
+    if (ctx.S.ferts["f1"]) {
+      ctx.S.ferts["compost"] = (ctx.S.ferts["compost"] || 0) + ctx.S.ferts["f1"];
+      delete ctx.S.ferts["f1"];
+    }
+    if (ctx.S.ferts["f2"]) {
+      ctx.S.ferts["shiny"] = (ctx.S.ferts["shiny"] || 0) + ctx.S.ferts["f2"];
+      delete ctx.S.ferts["f2"];
+    }
+  }
   if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
   if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
@@ -8720,7 +8730,7 @@ function heroTick() {
           ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1;
           showFloatDrop("ticketNorm", partyEl);
         } else if (r < 0.8) {
-          ctx.S.ferts["f2"] = (ctx.S.ferts["f2"] || 0) + 1;
+          ctx.S.ferts["shiny"] = (ctx.S.ferts["shiny"] || 0) + 1;
           showFloatDrop("toolFert", partyEl);
         }
       } else {
@@ -8730,7 +8740,7 @@ function heroTick() {
           ctx.S.seeds[m.id] = (ctx.S.seeds[m.id] || 0) + 1;
           showFloatDrop(CROPS[m.id].sp || "seedLight", partyEl);
         } else if (r < 0.15) {
-          ctx.S.ferts["f1"] = (ctx.S.ferts["f1"] || 0) + 1;
+          ctx.S.ferts["compost"] = (ctx.S.ferts["compost"] || 0) + 1;
           showFloatDrop("toolFert", partyEl);
         }
       }

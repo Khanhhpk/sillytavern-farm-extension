@@ -827,12 +827,12 @@ function heroTick() {
         ctx.S.hero.pressure = (ctx.S.hero.pressure || 0) + 1;
         const r = Math.random();
         if (r < 0.5) { ctx.S.tickets = ctx.S.tickets || {}; ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 1; showFloatDrop('ticketNorm', partyEl); }
-        else if (r < 0.8) { ctx.S.ferts['f2'] = (ctx.S.ferts['f2'] || 0) + 1; showFloatDrop('toolFert', partyEl); }
+        else if (r < 0.8) { ctx.S.ferts['shiny'] = (ctx.S.ferts['shiny'] || 0) + 1; showFloatDrop('toolFert', partyEl); }
       } else {
         const m = runState.monsters[0];
         const r = Math.random();
         if (r < 0.1) { ctx.S.seeds[m.id] = (ctx.S.seeds[m.id] || 0) + 1; showFloatDrop(CROPS[m.id].sp || 'seedLight', partyEl); }
-        else if (r < 0.15) { ctx.S.ferts['f1'] = (ctx.S.ferts['f1'] || 0) + 1; showFloatDrop('toolFert', partyEl); }
+        else if (r < 0.15) { ctx.S.ferts['compost'] = (ctx.S.ferts['compost'] || 0) + 1; showFloatDrop('toolFert', partyEl); }
       }
       
       runState.stage++;
