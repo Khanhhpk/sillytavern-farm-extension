@@ -2,7 +2,7 @@ import { ctx } from './store.js';
 import * as All from './all.js';
 import { petSVG, spriteSVG } from './graphics.js';
 
-let isDungeonOpen = false;
+export let isDungeonOpen = false;
 let phase = 'placement'; // 'placement', 'combat', 'end'
 let gameLoopId = null;
 let lastTime = 0;

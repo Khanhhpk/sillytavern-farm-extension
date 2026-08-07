@@ -5442,7 +5442,7 @@ function renderPlots() {
   const expWrap = $id("explore-blocks");
   if (ctx.S && ctx.S.view === "explore") {
     if (wrap) wrap.style.display = "none";
-    if (expWrap) {
+    if (expWrap && !isDungeonOpen) {
       expWrap.style.display = "flex";
       if (!expWrap.hasChildNodes()) {
         expWrap.innerHTML = `

@@ -112,7 +112,7 @@ export function renderPlots() {
   
   if (ctx.S && ctx.S.view === 'explore') {
     if (wrap) wrap.style.display = 'none';
-    if (expWrap) {
+    if (expWrap && !All.isDungeonOpen) {
       expWrap.style.display = 'flex';
       if (!expWrap.hasChildNodes()) {
         expWrap.innerHTML = `
