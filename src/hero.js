@@ -1494,16 +1494,25 @@ export function onHeroDown(e) {
   if (!e.target.closest('.hero-drag')) return;
   
   bar.setPointerCapture(e.pointerId);
-  hGesture = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: bar.offsetLeft, oy: bar.offsetTop };
+  hGesture = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: bar.offsetLeft, oy: bar.offsetTop, moved: false };
 }
 
 export function onHeroMove(e) {
   if (!hGesture || e.pointerId !== hGesture.id) return;
-  const bar = All.$id('hero-bar');
-  bar.style.left = hGesture.ox + e.clientX - hGesture.sx + 'px';
-  bar.style.top = hGesture.oy + e.clientY - hGesture.sy + 'px';
-  bar.style.right = 'auto'; 
-  bar.style.bottom = 'auto';
+  const rawDx = e.clientX - hGesture.sx;
+  const rawDy = e.clientY - hGesture.sy;
+  
+  if (!hGesture.moved && (Math.abs(rawDx) > 4 || Math.abs(rawDy) > 4)) {
+    hGesture.moved = true;
+  }
+  
+  if (hGesture.moved) {
+    const bar = All.$id('hero-bar');
+    bar.style.left = hGesture.ox + rawDx + 'px';
+    bar.style.top = hGesture.oy + rawDy + 'px';
+    bar.style.right = 'auto'; 
+    bar.style.bottom = 'auto';
+  }
 }
 
 export function onHeroUp(e) {
@@ -1511,12 +1520,19 @@ export function onHeroUp(e) {
   const bar = All.$id('hero-bar');
   try { bar.releasePointerCapture(e.pointerId); } catch (er) {}
   
-  const vw = window.innerWidth, vh = window.innerHeight;
-  let newFx = bar.offsetLeft / vw;
-  let newFy = bar.offsetTop / vh;
-  if (!isNaN(newFx)) ctx.S.hero.fx = Math.min(Math.max(newFx, 0), 1);
-  if (!isNaN(newFy)) ctx.S.hero.fy = Math.min(Math.max(newFy, 0), 1);
-  save();
+  if (!hGesture.moved) {
+    bar.classList.toggle('minimized');
+    ctx.S.hero.minimized = bar.classList.contains('minimized');
+    save();
+  } else {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let newFx = bar.offsetLeft / vw;
+    let newFy = bar.offsetTop / vh;
+    if (!isNaN(newFx)) ctx.S.hero.fx = Math.min(Math.max(newFx, 0), 1);
+    if (!isNaN(newFy)) ctx.S.hero.fy = Math.min(Math.max(newFy, 0), 1);
+    save();
+  }
+  
   hGesture = null;
 }
 
@@ -1540,6 +1556,12 @@ export function placeHeroBar() {
   bar.style.top = y + 'px';
   bar.style.right = 'auto';
   bar.style.bottom = 'auto';
+  
+  if (ctx.S.hero.minimized) {
+    bar.classList.add('minimized');
+  } else {
+    bar.classList.remove('minimized');
+  }
 }
 
 export function initHero() {

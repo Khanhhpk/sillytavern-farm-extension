@@ -2481,6 +2481,9 @@ var styleCSS = `
     .hero-drag { width: 24px; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-right: 1px solid #4a3461; cursor: grab; color: #a58bd3; font-size: 14px; }
     .hero-drag:active { cursor: grabbing; background: rgba(0,0,0,0.5); }
     .hero-content { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; }
+    .hero-bar.minimized { width: auto; height: 32px; border-radius: 16px; padding: 0; background: transparent; border: none; box-shadow: none; pointer-events: none; }
+    .hero-bar.minimized .hero-drag { height: 32px; width: 32px; border-radius: 16px; border: 2px solid #6b4d8a; background: #221d28; box-shadow: 0 4px 15px rgba(0,0,0,0.8); pointer-events: auto; }
+    .hero-bar.minimized .hero-toast, .hero-bar.minimized .hero-content { display: none !important; }
     
     .hero-scene { flex: 1; position: relative; min-height: 0; overflow: hidden; }
     .hero-bg { position: absolute; inset: 0; background: repeating-linear-gradient(-45deg, #221c2d, #221c2d 20px, #1d1726 20px, #1d1726 40px); opacity: 0.8; animation: bgScroll 10s linear infinite; }
@@ -9234,15 +9237,22 @@ function onHeroDown(e) {
   const bar = $id("hero-bar");
   if (!e.target.closest(".hero-drag")) return;
   bar.setPointerCapture(e.pointerId);
-  hGesture = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: bar.offsetLeft, oy: bar.offsetTop };
+  hGesture = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: bar.offsetLeft, oy: bar.offsetTop, moved: false };
 }
 function onHeroMove(e) {
   if (!hGesture || e.pointerId !== hGesture.id) return;
-  const bar = $id("hero-bar");
-  bar.style.left = hGesture.ox + e.clientX - hGesture.sx + "px";
-  bar.style.top = hGesture.oy + e.clientY - hGesture.sy + "px";
-  bar.style.right = "auto";
-  bar.style.bottom = "auto";
+  const rawDx = e.clientX - hGesture.sx;
+  const rawDy = e.clientY - hGesture.sy;
+  if (!hGesture.moved && (Math.abs(rawDx) > 4 || Math.abs(rawDy) > 4)) {
+    hGesture.moved = true;
+  }
+  if (hGesture.moved) {
+    const bar = $id("hero-bar");
+    bar.style.left = hGesture.ox + rawDx + "px";
+    bar.style.top = hGesture.oy + rawDy + "px";
+    bar.style.right = "auto";
+    bar.style.bottom = "auto";
+  }
 }
 function onHeroUp(e) {
   if (!hGesture || e.pointerId !== hGesture.id) return;
@@ -9251,12 +9261,18 @@ function onHeroUp(e) {
     bar.releasePointerCapture(e.pointerId);
   } catch (er) {
   }
-  const vw = window.innerWidth, vh = window.innerHeight;
-  let newFx = bar.offsetLeft / vw;
-  let newFy = bar.offsetTop / vh;
-  if (!isNaN(newFx)) ctx.S.hero.fx = Math.min(Math.max(newFx, 0), 1);
-  if (!isNaN(newFy)) ctx.S.hero.fy = Math.min(Math.max(newFy, 0), 1);
-  save();
+  if (!hGesture.moved) {
+    bar.classList.toggle("minimized");
+    ctx.S.hero.minimized = bar.classList.contains("minimized");
+    save();
+  } else {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let newFx = bar.offsetLeft / vw;
+    let newFy = bar.offsetTop / vh;
+    if (!isNaN(newFx)) ctx.S.hero.fx = Math.min(Math.max(newFx, 0), 1);
+    if (!isNaN(newFy)) ctx.S.hero.fy = Math.min(Math.max(newFy, 0), 1);
+    save();
+  }
   hGesture = null;
 }
 function placeHeroBar() {
@@ -9276,6 +9292,11 @@ function placeHeroBar() {
   bar.style.top = y + "px";
   bar.style.right = "auto";
   bar.style.bottom = "auto";
+  if (ctx.S.hero.minimized) {
+    bar.classList.add("minimized");
+  } else {
+    bar.classList.remove("minimized");
+  }
 }
 function initHero() {
   const bar = $id("hero-bar");
