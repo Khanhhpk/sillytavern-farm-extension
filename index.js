@@ -7968,7 +7968,7 @@ function getPetStats(pId) {
 function openHeroPanel() {
   initHeroState();
   const styles = [
-    { id: "attack", name: "T\u1EA5n c\xF4ng (Dame x1.5, Nh\u1EADn x1.5)", icon: "emBang" },
+    { id: "attack", name: "T\u1EA5n c\xF4ng (Dame x1.5, Nh\u1EADn x1.5)", icon: "swordIcon" },
     { id: "defense", name: "Ph\xF2ng th\u1EE7 (Dame x0.6, Nh\u1EADn x0.6)", icon: "emStar" },
     { id: "balanced", name: "C\xE2n b\u1EB1ng (M\u1EB7c \u0111\u1ECBnh)", icon: "emLeaf" }
   ];
@@ -9162,6 +9162,9 @@ function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
     } else if (pId === "prismBlob") {
       animType = "projectile";
       spriteId = "rainbowBolt";
+    } else if (pId === "hero") {
+      animType = "projectile";
+      spriteId = "arrow";
     } else {
       animType = "projectile";
       spriteId = "fireball";
