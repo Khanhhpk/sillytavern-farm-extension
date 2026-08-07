@@ -7919,14 +7919,15 @@ function showWaveRewards() {
         }
       };
     });
-    overlay.querySelector("#dg-shop-next").onclick = () => {
+    const nextBtn = overlay.querySelector("#dg-shop-next");
+    nextBtn.onclick = () => {
       nextWaveSequence(overlay);
     };
-    overlay.querySelector("#dg-shop-next").onmouseover = function() {
-      this.style.transform = "scale(1.05)";
+    nextBtn.onmouseover = () => {
+      nextBtn.style.transform = "scale(1.05)";
     };
-    overlay.querySelector("#dg-shop-next").onmouseout = function() {
-      this.style.transform = "scale(1)";
+    nextBtn.onmouseout = () => {
+      nextBtn.style.transform = "scale(1)";
     };
   };
   arena.appendChild(overlay);
