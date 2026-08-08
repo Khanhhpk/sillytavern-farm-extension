@@ -677,4 +677,17 @@ export const styleCSS = `
 
     .pet-bump { animation: petBump 0.2s ease-out; }
     @keyframes petBump { 0% { transform: translateX(0); } 50% { transform: translateX(12px) scale(1.1); } 100% { transform: translateX(0); } }
+    
+    /* Giao dịch P2P */
+    .trade-split { display: flex; gap: 10px; margin-bottom: 10px; min-height: 250px; }
+    .trade-col { flex: 1; background: #faf0dc; border: 2px solid #c2a274; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; }
+    .trade-header { font-size: 13px; font-weight: bold; color: #7a5c38; border-bottom: 2px dashed #d9c49a; padding-bottom: 5px; margin-bottom: 8px; text-align: center; }
+    .trade-items { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: 200px; }
+    .trade-actions { margin-top: 10px; border-top: 2px dashed #d9c49a; padding-top: 10px; }
+    .trade-item { display: flex; align-items: center; gap: 6px; padding: 4px 6px; background: #fffdf4; border: 1px solid #d9c49a; border-radius: 6px; }
+    .trade-pick { display: flex; align-items: center; gap: 6px; padding: 6px; background: #fffdf4; border: 2px solid #d9c49a; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; color: #6b4f2e; }
+    .trade-pick:hover { border-color: var(--accLine); background: var(--accBg); color: var(--accFg); }
+    @media (max-width: 640px) {
+        .trade-split { flex-direction: column; }
+    }
 `;

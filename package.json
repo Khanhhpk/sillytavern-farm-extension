@@ -10,5 +10,8 @@
   "devDependencies": {
     "esbuild": "^0.23.0",
     "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "peerjs": "^1.5.5"
   }
 }

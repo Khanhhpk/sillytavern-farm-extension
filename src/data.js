@@ -14,11 +14,12 @@ export const SNAP_EDGE = 48;                                          // Sửa #
   /* zone: 1 đồng cỏ, 2 vùng nước, 3 khu mỏ (mặc định = 1); hidden: cửa hàng không bán / tìm kho báu không rơi (#34); họ mystery xem plant() */
 export const CROPS = {
     /* Số liệu chính thức v1.0 (chốt theo "Bảng số liệu chính thức - chờ duyệt.md"): grow/regrowM tính bằng phút thực */
-    douya:     { name: 'Giá đỗ',        grow: 5,   seed: 5,    sell: 12,   sp: 'sprout' },
+    douya:     { name: 'Giá đỗ',        grow: 5,   seed: 5,    sell: 12,   sp: 'douya' },
     radish:    { name: 'Củ cải cherry', grow: 10,  seed: 25,   sell: 45,   sp: 'radish' },
     tomato:    { name: 'Cà chua',       grow: 20,  regrowM: 15, seed: 100, sell: 90,   sp: 'tomato', regrow: true },
     strawberry: { name: 'Dâu tây',       grow: 90,  seed: 350,  sell: 800,  sp: 'strawberry' },
     pumpkin:   { name: 'Bí ngô',        grow: 120, seed: 500,  sell: 1300, sp: 'pumpkin' },
+    moonberry: { name: 'Dâu ánh trăng', grow: 180, seed: 600,  sell: 1500, sp: 'moonberry' },
     /* —— Vùng nước (trang 2) —— */
     chuncai:   { name: 'Rau thuần',     grow: 10,  seed: 40,   sell: 60,   sp: 'chuncai',  zone: 2 },
     biqi:      { name: 'Củ năng',       grow: 30,  seed: 120,  sell: 220,  sp: 'biqi',     zone: 2 },

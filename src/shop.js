@@ -1,12 +1,12 @@
 
-import { ctx } from './store.js';
+import { ctx, extensionName, NS } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
 import { pendingPick, renderStatus, renderAll, setPendingPick } from './render.js';
 import { fmtDur, mutDescOf, bagName, bagPrice } from './logic.js';
 import { openBuyDlg, toast, openPassDlg, useStarShard, openSellDlg, openSellSeedDlg, openTakeout } from './witch.js';
-import { save, freshState, testMode, setTestMode } from './state.js';
+import { save, freshState, testMode, setTestMode, loadState } from './state.js';
 import { renderPets } from './pets.js';
 import { esc, SEC, CS, clampN, saveSec, openSandbox, saveCharState, fetchModelList, testSecApi } from './events.js';
 import { applyTheme, sh } from './ui.js';
@@ -41,6 +41,9 @@ export function openPanel(kind) {
   }
   if (kind === 'bet') {
     return openBetModal();
+  }
+  if (kind === 'trade') {
+    return All.openTradeModal();
   }
   if (kind === 'shop') {
     const tabs = [['seed', 'Hạt giống'], ['fert', 'Phân bón'], ['pet', 'Thú cưng'], ['pass', 'Vé'], ['ticket', 'Vé Gacha']];
@@ -397,10 +400,16 @@ export function openPanel(kind) {
     });
   } else {
     openModal('Cài đặt', `
+      <div style="font-size:11px; color:#a3763d; text-align:center; margin-bottom: 12px; font-weight: bold; background: rgba(0,0,0,0.05); padding: 4px; border-radius: 4px; user-select: text;">ID Người Chơi: ${ctx.S.playerId}</div>
       <div class="shead" style="margin-top:0">Chủ đề giao diện</div>
       <div class="picker" style="margin-bottom:4px">
         <span class="pick${ctx.S.theme !== 'sky' ? ' active' : ''}" data-settheme="sakura">🌸 Hồng anh đào</span>
         <span class="pick${ctx.S.theme === 'sky' ? ' active' : ''}" data-settheme="sky">☁️ Trời quang</span>
+      </div>
+      <div class="shead">Đồng bộ hóa (Sync Save) qua mã (P2P)</div>
+      <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+        <span class="buy" onclick="FarmAll.openSyncHostModal()">Cấp Mã (Gửi Save)</span>
+        <span class="buy plain" onclick="FarmAll.openSyncJoinModal()">Nhập Mã (Nhận Save)</span>
       </div>
       <div class="shead">API phụ (dùng cho sự kiện thế giới quan)</div>
       <div style="display:flex;flex-direction:column;gap:6px">
@@ -438,7 +447,7 @@ export function openPanel(kind) {
         <input class="inp" id="cfgSkitFreq" type="number" min="5" max="7200" value="${ctx.S.skitFreq !== undefined ? ctx.S.skitFreq : 300}" style="width:60px;padding:3px 6px"> (Mặc định 300s = 5 phút)
       </label>
       <div class="shead">Công cụ dành cho Giám đốc Đồ hoạ / Dev</div>
-      <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
+      <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap;">
         <span class="buy plain" id="openSandboxBtn">🎨 Mở Xưởng Chế Tác AI</span>
         <input class="inp" type="password" id="testCode" placeholder="Mã ẩn..." style="width:100px;padding:3px 6px">
         <span class="buy" id="testBtn">Test Mode</span>
@@ -560,7 +569,8 @@ export function openPanel(kind) {
     let armed = false;
     All.$id('resetSave').addEventListener('click', () => {
       if (!armed) { armed = true; All.$id('resetSave').textContent = 'Bấm lần nữa để xác nhận đặt lại!'; return; }
-      ctx.S = freshState(); save(true); closeModal(); renderAll(); toast('Đã đặt lại');
+      if (ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName][NS] = null;
+      loadState(); save(true); closeModal(); renderAll(); toast('Đã đặt lại');
     });
   }
 }

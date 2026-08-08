@@ -148,6 +148,7 @@ export function initUI() {
         <div class="btn" data-open="shop">${spriteSVG('shopIcon', 22)}Cửa hàng</div>
         <div class="btn" data-open="bag">${spriteSVG('bagIcon', 22)}Balo</div>
         <div class="btn" data-open="gacha">${spriteSVG('gachapon', 22)}Gachapon</div>
+        <div class="btn" data-open="trade">${spriteSVG('tradeIcon', 22)}Trade</div>
         <div class="btn" data-open="cfg">${spriteSVG('gearIcon', 22)}Cài đặt</div>
     </div>
     <div class="modal" id="modal">
@@ -156,6 +157,26 @@ export function initUI() {
         <div class="mbody" id="mbody"></div>
       </div>
     </div>
+    
+    <div class="modal" id="trade-win" onclick="if(event.target === this) FarmAll.closeTradeModal()">
+      <div class="mpanel" style="width: min(600px, 96%);">
+        <div class="mtitle"><span>Trao đổi</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">×</div></div>
+        <div class="mbody" id="trade-body" style="min-height: 200px;"></div>
+      </div>
+    </div>
+    
+    <div class="modal" id="trade-popup" style="z-index: 35;" onclick="if(event.target === this) FarmAll.uiCloseAddItem()">
+      <div class="mpanel" style="width: min(300px, 96%);">
+        <div class="mtitle"><span>Thêm Đồ</span><span class="grow"></span><div class="close-x" onclick="FarmAll.uiCloseAddItem()">×</div></div>
+        <div class="mbody" id="trade-popup-list" style="max-height: 300px; overflow-y: auto; display:flex; flex-direction:column; gap:6px;"></div>
+        <div id="trade-popup-act" style="display:none; flex-direction:column; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 2px dashed #c9a273;">
+            <div id="lbl-trade-sel" style="font-size: 11px; color:#7a5c38;"></div>
+            <input type="number" id="inp-trade-amount" class="inp" min="1" value="1">
+            <div class="buy" onclick="FarmAll.uiConfirmAdd()" style="text-align:center;">Xác nhận</div>
+        </div>
+      </div>
+    </div>
+
     <div class="toast" id="toast"></div>
   </div>
   
