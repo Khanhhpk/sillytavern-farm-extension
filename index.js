@@ -4412,7 +4412,8 @@ function openGachaModal() {
         <span class="buy" id="gachaRollNorm10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#4e903a; border:1px solid #3c702c; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Th\u01B0\u1EDDng \xD710</span>
         <span class="buy" id="gachaRollSpec1" style="padding:10px 0; font-size:13px; font-weight:bold; background:#a335ee; border:1px solid #8a2acc; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay \u0110\u1EB7c Bi\u1EC7t \xD71</span>
         <span class="buy" id="gachaRollSpec10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#8a2acc; border:1px solid #6a1aa3; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay \u0110\u1EB7c Bi\u1EC7t \xD710</span>
-        <span class="buy" id="gachaRollSuper1" style="grid-column: 1 / -1; padding:10px 0; font-size:13px; font-weight:bold; background:linear-gradient(90deg, #ff8000, #ff4500); border:1px solid #cc3700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Si\xEAu C\u01B0\u1EDDng \xD71 (100% \u0110\u1ED3 X\u1ECBn)</span>
+        <span class="buy" id="gachaRollSuper1" style="padding:10px 0; font-size:13px; font-weight:bold; background:linear-gradient(90deg, #ff8000, #ff4500); border:1px solid #cc3700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Si\xEAu C\u01B0\u1EDDng \xD71</span>
+        <span class="buy" id="gachaRollSuper10" style="padding:10px 0; font-size:13px; font-weight:bold; background:linear-gradient(90deg, #cc3700, #9e2a00); border:1px solid #731e00; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Si\xEAu C\u01B0\u1EDDng \xD710</span>
       </div>
 
       <!-- Result Overlay Animation (L\u01B0\u1EDBi k\u1EBFt qu\u1EA3) -->
@@ -4601,6 +4602,7 @@ function openGachaModal() {
   $id("gachaRollSpec1")?.addEventListener("click", () => doRoll("spec", 1));
   $id("gachaRollSpec10")?.addEventListener("click", () => doRoll("spec", 10));
   $id("gachaRollSuper1")?.addEventListener("click", () => doRoll("super", 1));
+  $id("gachaRollSuper10")?.addEventListener("click", () => doRoll("super", 10));
 }
 function openGachaRatesModal() {
   const bodyHTML = `
@@ -5412,6 +5414,11 @@ function openPanel(kind) {
   } else {
     openModal("C\xE0i \u0111\u1EB7t", `
       <div style="font-size:11px; color:#a3763d; text-align:center; margin-bottom: 12px; font-weight: bold; background: rgba(0,0,0,0.05); padding: 4px; border-radius: 4px; user-select: text;">ID Ng\u01B0\u1EDDi Ch\u01A1i: ${ctx.S.playerId}</div>
+      <div class="shead" style="margin-top:0">T\xEAn ng\u01B0\u1EDDi ch\u01A1i (\u0111\u1EC3 giao d\u1ECBch)</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <input class="inp" id="cfgUsername" placeholder="Nh\u1EADp t\xEAn c\u1EE7a b\u1EA1n..." value="${esc(ctx.S.username || "")}" style="flex:1;">
+        <span class="buy" id="cfgSaveUsername">L\u01B0u t\xEAn</span>
+      </div>
       <div class="shead" style="margin-top:0">Ch\u1EE7 \u0111\u1EC1 giao di\u1EC7n</div>
       <div class="picker" style="margin-bottom:4px">
         <span class="pick${ctx.S.theme !== "sky" ? " active" : ""}" data-settheme="sakura">\u{1F338} H\u1ED3ng anh \u0111\xE0o</span>
@@ -5493,6 +5500,13 @@ function openPanel(kind) {
     });
     $id("secTest").addEventListener("click", () => testSecApi());
     $id("secModels").addEventListener("click", () => fetchModelList());
+    $id("cfgSaveUsername")?.addEventListener("click", () => {
+      const uname = $id("cfgUsername").value.trim();
+      if (!uname) return toast("T\xEAn kh\xF4ng \u0111\u01B0\u1EE3c \u0111\u1EC3 tr\u1ED1ng!");
+      ctx.S.username = uname;
+      save();
+      toast("\u0110\xE3 l\u01B0u t\xEAn ng\u01B0\u1EDDi ch\u01A1i");
+    });
     if ($id("openSandboxBtn")) $id("openSandboxBtn").addEventListener("click", openSandbox);
     const testBtn = $id("testBtn");
     if (testBtn) testBtn.addEventListener("click", () => {
@@ -7330,6 +7344,22 @@ var init_events = __esm({
 });
 
 // src/state.js
+var state_exports = {};
+__export(state_exports, {
+  addBlock: () => addBlock,
+  blockPrice: () => blockPrice,
+  curBlocks: () => curBlocks,
+  curPlots: () => curPlots,
+  eachPage: () => eachPage,
+  emptyPlots: () => emptyPlots,
+  freshState: () => freshState,
+  loadState: () => loadState,
+  now: () => now,
+  pagePlots: () => pagePlots,
+  save: () => save,
+  setTestMode: () => setTestMode,
+  testMode: () => testMode
+});
 function freshState() {
   return {
     version: 1,
@@ -15097,9 +15127,31 @@ function resetTradeState() {
   isConnected = false;
   tradeCompleted = false;
   cheatDetected = false;
+  partnerName = "\u0110\u1ED1i t\xE1c";
 }
 function renderTradeMenu() {
   const body = $id("trade-body");
+  if (!ctx.S.username) {
+    body.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
+                <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">T\u1EA1o T\xEAn Ng\u01B0\u1EDDi Ch\u01A1i</div>
+                <div style="font-size: 12px; color: #555;">Vui l\xF2ng nh\u1EADp t\xEAn \u0111\u1EC3 hi\u1EC3n th\u1ECB khi giao d\u1ECBch.</div>
+                <input type="text" id="inp-trade-username" class="inp" placeholder="Nh\u1EADp t\xEAn c\u1EE7a b\u1EA1n...">
+                <div class="buy" id="btn-trade-save-username" style="padding: 10px;">L\u01B0u t\xEAn</div>
+            </div>
+        `;
+    $id("btn-trade-save-username").onclick = () => {
+      const val = $id("inp-trade-username").value.trim();
+      if (val) {
+        ctx.S.username = val;
+        Promise.resolve().then(() => (init_state(), state_exports)).then((m) => m.save());
+        renderTradeMenu();
+      } else {
+        toast("T\xEAn kh\xF4ng \u0111\u01B0\u1EE3c \u0111\u1EC3 tr\u1ED1ng!");
+      }
+    };
+    return;
+  }
   body.innerHTML = `
         <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
             <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">M\u1EDF Ph\xF2ng Trade</div>
@@ -15194,7 +15246,7 @@ function setupConnection() {
     closeTradeModal();
   });
   setTimeout(() => {
-    sendData({ type: "HELLO", playerId: ctx.S.playerId });
+    sendData({ type: "HELLO", playerId: ctx.S.playerId, username: ctx.S.username });
   }, 500);
   renderTradeRoom();
 }
@@ -15237,6 +15289,9 @@ function handleNetData(data) {
       sendData({ type: "CHEAT_DETECTED" });
       if (conn) conn.close();
       closeTradeModal();
+    } else {
+      if (data.username) partnerName = data.username;
+      renderTradeRoom();
     }
   } else if (data.type === "CHEAT_DETECTED") {
     cheatDetected = true;
@@ -15395,7 +15450,7 @@ function renderTradeRoom() {
   body.innerHTML = `
         <div class="trade-split">
             <div class="trade-col">
-                <div class="trade-header">B\u1EA1n ${myLock ? '<span style="color:#388e3c">\u2713</span>' : ""} ${myConfirm ? '<span style="color:#2e7d32; font-size:10px;">(\u0110\xE3 XN)</span>' : ""}</div>
+                <div class="trade-header">${ctx.S.username || "B\u1EA1n"} ${myLock ? '<span style="color:#388e3c">\u2713</span>' : ""} ${myConfirm ? '<span style="color:#2e7d32; font-size:10px;">(\u0110\xE3 XN)</span>' : ""}</div>
                 <div class="trade-items">${myHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Tr\u1ED1ng</div>'}</div>
                 <div class="trade-actions">
                     <button class="buy ${myLock ? "plain" : ""}" onclick="FarmAll.uiToggleLock()" style="width:100%; text-align:center;">${myLock ? "M\u1EDF kho\xE1" : "S\u1EB5n s\xE0ng"}</button>
@@ -15403,7 +15458,7 @@ function renderTradeRoom() {
                 </div>
             </div>
             <div class="trade-col">
-                <div class="trade-header">\u0110\u1ED1i t\xE1c ${theirLock ? '<span style="color:#388e3c">\u2713</span>' : ""} ${theirConfirm ? '<span style="color:#2e7d32; font-size:10px;">(\u0110\xE3 XN)</span>' : ""}</div>
+                <div class="trade-header">${partnerName} ${theirLock ? '<span style="color:#388e3c">\u2713</span>' : ""} ${theirConfirm ? '<span style="color:#2e7d32; font-size:10px;">(\u0110\xE3 XN)</span>' : ""}</div>
                 <div class="trade-items">${theirHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Tr\u1ED1ng</div>'}</div>
             </div>
         </div>
@@ -15498,7 +15553,7 @@ function uiConfirmAdd() {
   renderTradeRoom();
   uiCloseAddItem();
 }
-var peer, conn, myItems, theirItems, myLock, theirLock, myConfirm, theirConfirm, isConnected, tradeCompleted, cheatDetected, theirUniques, theirMutDescs, selectedTradeId, selectedTradeMax;
+var peer, conn, myItems, theirItems, myLock, theirLock, myConfirm, theirConfirm, isConnected, tradeCompleted, cheatDetected, theirUniques, theirMutDescs, partnerName, selectedTradeId, selectedTradeMax;
 var init_trade = __esm({
   "src/trade.js"() {
     init_store();
@@ -15519,6 +15574,7 @@ var init_trade = __esm({
     cheatDetected = false;
     theirUniques = {};
     theirMutDescs = {};
+    partnerName = "\u0110\u1ED1i t\xE1c";
     selectedTradeId = null;
     selectedTradeMax = 0;
   }

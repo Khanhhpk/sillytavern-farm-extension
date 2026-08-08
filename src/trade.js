@@ -17,6 +17,7 @@ let tradeCompleted = false;
 let cheatDetected = false;
 let theirUniques = {};
 let theirMutDescs = {};
+let partnerName = 'Đối tác';
 
 function getItemName(id) {
     if (id === 'coins') return 'Tiền xu';
@@ -105,10 +106,33 @@ function resetTradeState() {
     isConnected = false;
     tradeCompleted = false;
     cheatDetected = false;
+    partnerName = 'Đối tác';
 }
 
 function renderTradeMenu() {
     const body = All.$id('trade-body');
+    if (!ctx.S.username) {
+        body.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
+                <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">Tạo Tên Người Chơi</div>
+                <div style="font-size: 12px; color: #555;">Vui lòng nhập tên để hiển thị khi giao dịch.</div>
+                <input type="text" id="inp-trade-username" class="inp" placeholder="Nhập tên của bạn...">
+                <div class="buy" id="btn-trade-save-username" style="padding: 10px;">Lưu tên</div>
+            </div>
+        `;
+        All.$id('btn-trade-save-username').onclick = () => {
+            const val = All.$id('inp-trade-username').value.trim();
+            if (val) {
+                ctx.S.username = val;
+                import('./state.js').then(m => m.save());
+                renderTradeMenu();
+            } else {
+                All.toast('Tên không được để trống!');
+            }
+        };
+        return;
+    }
+
     body.innerHTML = `
         <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
             <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">Mở Phòng Trade</div>
@@ -217,7 +241,7 @@ function setupConnection() {
     
     // Anti-cheat check: send our playerId
     setTimeout(() => {
-        sendData({ type: 'HELLO', playerId: ctx.S.playerId });
+        sendData({ type: 'HELLO', playerId: ctx.S.playerId, username: ctx.S.username });
     }, 500);
     
     renderTradeRoom();
@@ -262,6 +286,9 @@ function handleNetData(data) {
             sendData({ type: 'CHEAT_DETECTED' });
             if (conn) conn.close();
             closeTradeModal();
+        } else {
+            if (data.username) partnerName = data.username;
+            renderTradeRoom();
         }
     } else if (data.type === 'CHEAT_DETECTED') {
         cheatDetected = true;
@@ -433,7 +460,7 @@ function renderTradeRoom() {
     body.innerHTML = `
         <div class="trade-split">
             <div class="trade-col">
-                <div class="trade-header">Bạn ${myLock ? '<span style="color:#388e3c">✓</span>' : ''} ${myConfirm ? '<span style="color:#2e7d32; font-size:10px;">(Đã XN)</span>' : ''}</div>
+                <div class="trade-header">${ctx.S.username || 'Bạn'} ${myLock ? '<span style="color:#388e3c">✓</span>' : ''} ${myConfirm ? '<span style="color:#2e7d32; font-size:10px;">(Đã XN)</span>' : ''}</div>
                 <div class="trade-items">${myHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Trống</div>'}</div>
                 <div class="trade-actions">
                     <button class="buy ${myLock ? 'plain' : ''}" onclick="FarmAll.uiToggleLock()" style="width:100%; text-align:center;">${myLock ? 'Mở khoá' : 'Sẵn sàng'}</button>
@@ -441,7 +468,7 @@ function renderTradeRoom() {
                 </div>
             </div>
             <div class="trade-col">
-                <div class="trade-header">Đối tác ${theirLock ? '<span style="color:#388e3c">✓</span>' : ''} ${theirConfirm ? '<span style="color:#2e7d32; font-size:10px;">(Đã XN)</span>' : ''}</div>
+                <div class="trade-header">${partnerName} ${theirLock ? '<span style="color:#388e3c">✓</span>' : ''} ${theirConfirm ? '<span style="color:#2e7d32; font-size:10px;">(Đã XN)</span>' : ''}</div>
                 <div class="trade-items">${theirHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Trống</div>'}</div>
             </div>
         </div>

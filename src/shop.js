@@ -401,6 +401,11 @@ export function openPanel(kind) {
   } else {
     openModal('Cài đặt', `
       <div style="font-size:11px; color:#a3763d; text-align:center; margin-bottom: 12px; font-weight: bold; background: rgba(0,0,0,0.05); padding: 4px; border-radius: 4px; user-select: text;">ID Người Chơi: ${ctx.S.playerId}</div>
+      <div class="shead" style="margin-top:0">Tên người chơi (để giao dịch)</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <input class="inp" id="cfgUsername" placeholder="Nhập tên của bạn..." value="${esc(ctx.S.username || '')}" style="flex:1;">
+        <span class="buy" id="cfgSaveUsername">Lưu tên</span>
+      </div>
       <div class="shead" style="margin-top:0">Chủ đề giao diện</div>
       <div class="picker" style="margin-bottom:4px">
         <span class="pick${ctx.S.theme !== 'sky' ? ' active' : ''}" data-settheme="sakura">🌸 Hồng anh đào</span>
@@ -478,6 +483,13 @@ export function openPanel(kind) {
     });
     All.$id('secTest').addEventListener('click', () => testSecApi());
     All.$id('secModels').addEventListener('click', () => fetchModelList());
+    All.$id('cfgSaveUsername')?.addEventListener('click', () => {
+      const uname = All.$id('cfgUsername').value.trim();
+      if (!uname) return toast('Tên không được để trống!');
+      ctx.S.username = uname;
+      save();
+      toast('Đã lưu tên người chơi');
+    });
     if (All.$id('openSandboxBtn')) All.$id('openSandboxBtn').addEventListener('click', openSandbox);
 
     const testBtn = All.$id('testBtn');
