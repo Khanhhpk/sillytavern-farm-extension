@@ -7638,6 +7638,7 @@ function initPlacementPhase() {
   projectiles = [];
   currentWave = 1;
   totalGold = 0;
+  shopGold = 0;
   const best = ctx.S.dungeonBest || { wave: 0, gold: 0 };
   const bestHtml = best.wave > 0 ? `<div style="color:#b08a5c; font-size:12px; text-align:center; margin-top:4px;">\u{1F3C6} K\u1EF7 l\u1EE5c: Wave ${best.wave} \xB7 ${best.gold} G</div>` : "";
   dungeonView.innerHTML = `
@@ -7910,6 +7911,7 @@ function startCombat() {
   $id("dg-surrender-btn").style.display = "block";
   currentWave = 1;
   totalGold = 0;
+  shopGold = 0;
   fullTeam = [...team];
   startWave();
 }
@@ -7918,7 +7920,7 @@ function updateHUD() {
   if (!hud) return;
   const isBoss = currentWave % 10 === 0;
   hud.style.display = "block";
-  hud.innerHTML = `<span style="color:#ffd94d; font-weight:bold;">Wave ${currentWave}</span>${isBoss ? " \u{1F451}" : ""} <span style="color:#a4dc8c; margin-left:10px;">${spriteSVG("coin", 12).replace("display:block", "display:inline-block;vertical-align:middle")} ${totalGold} G</span>`;
+  hud.innerHTML = `<span style="color:#ffd94d; font-weight:bold;">Wave ${currentWave}</span>${isBoss ? " \u{1F451}" : ""} <span style="color:#a4dc8c; margin-left:10px;" title="V\xE0ng mang v\u1EC1">${spriteSVG("coin", 12).replace("display:block", "display:inline-block;vertical-align:middle")} ${totalGold}</span> <span style="color:#e06578; margin-left:10px;" title="V\xE0ng n\xE2ng c\u1EA5p">\u{1F6E0} ${shopGold}</span>`;
 }
 function startWave() {
   const isBossWave = currentWave % 10 === 0;
@@ -7945,7 +7947,7 @@ function _doStartWave() {
   const w = arena.clientWidth;
   const h = arena.clientHeight;
   updateHUD();
-  let count = Math.min(40, 5 + Math.floor(currentWave * 2));
+  let count = Math.min(30, 3 + Math.floor(currentWave * 1.5));
   let spawnElite = currentWave % 3 === 0;
   let isBossWave = currentWave % 10 === 0;
   if (isBossWave) {
@@ -8051,8 +8053,10 @@ function combatLoop(time) {
     if (e.hp <= 0) {
       e.el.remove();
       if (e.gold) {
-        totalGold += e.gold;
-        spawnDmg({ x: e.x, y: e.y - 10 }, `+${e.gold} G`, "gold");
+        const homeG = Math.floor(e.gold * 0.6);
+        totalGold += homeG;
+        shopGold += e.gold;
+        spawnDmg({ x: e.x, y: e.y - 10 }, `+${e.gold} \u{1F6E0}`, "gold");
         updateHUD();
       }
       return false;
@@ -8426,7 +8430,8 @@ function showWaveRewards() {
   projectiles = [];
   const isBoss = currentWave % 10 === 0;
   const waveGold = (120 + currentWave * 60) * (isBoss ? 3 : 1);
-  totalGold += waveGold;
+  totalGold += Math.floor(waveGold * 0.6);
+  shopGold += waveGold;
   const arena = $id("dg-arena");
   fullTeam.forEach((p) => {
     if (p.hp <= 0) {
@@ -8485,7 +8490,7 @@ function showWaveRewards() {
             <div class="dg-shop-header">
                 <div class="dg-shop-header-left">
                     <div class="dg-shop-title">Ch\u1EE3 \u0110en - Wave ${currentWave}</div>
-                    <div class="dg-shop-gold">${spriteSVG("coin", 18).replace("display:block", "display:inline-block;vertical-align:middle")} ${totalGold} G</div>
+                    <div class="dg-shop-gold">\u{1F6E0} ${shopGold} \u0110i\u1EC3m N\xE2ng C\u1EA5p</div>
                 </div>
                 <button id="dg-shop-next" class="dg-shop-next-btn">Ti\u1EBFp Theo \u2794</button>
             </div>
@@ -8504,9 +8509,9 @@ function showWaveRewards() {
         { id: "atk", name: "ATK (+20%)", val: selectedPet.atk, lv: u.atk, cost: Math.floor(40 * Math.pow(1.3, u.atk)) },
         { id: "aspd", name: "ATK SPD (+10%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u.aspd, cost: Math.floor(60 * Math.pow(1.4, u.aspd)) },
         { id: "spd", name: "Move Speed (+10%)", val: selectedPet.speed, lv: u.spd, cost: Math.floor(30 * Math.pow(1.2, u.spd)) },
-        { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u.critR, cost: Math.floor(50 * Math.pow(1.5, u.critR)) },
+        { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u.critR, cost: Math.floor(50 * Math.pow(1.5, u.critR)), forceCanBuy: selectedPet.critRate < 0.59 },
         { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u.critD, cost: Math.floor(50 * Math.pow(1.4, u.critD)) },
-        { id: "dodge", name: "N\xE9 Tr\xE1nh (+5%)", val: (selectedPet.dodge * 100).toFixed(0) + "%", lv: u.dodge || 0, cost: Math.floor(60 * Math.pow(1.5, u.dodge || 0)) }
+        { id: "dodge", name: "N\xE9 Tr\xE1nh (+5%)", val: (selectedPet.dodge * 100).toFixed(0) + "%", lv: u.dodge || 0, cost: Math.floor(60 * Math.pow(1.5, u.dodge || 0)), forceCanBuy: selectedPet.dodge < 0.39 }
       ];
       if (PET_STATS[selectedPet.id] && PET_STATS[selectedPet.id].range > 60) {
         stats.push({ id: "range", name: "T\u1EA7m \u0110\xE1nh (+10%)", val: Math.round(selectedPet.range), lv: u.range || 0, cost: Math.floor(40 * Math.pow(1.2, u.range || 0)) });
@@ -8518,7 +8523,7 @@ function showWaveRewards() {
       shopHtml += `<div class="dg-shop-grid">`;
       stats.forEach((s) => {
         const cost = s.cost !== void 0 ? s.cost : getCost(s.lv);
-        const canAfford = totalGold >= cost && (s.forceCanBuy !== void 0 ? s.forceCanBuy : true);
+        const canAfford = shopGold >= cost && (s.forceCanBuy !== void 0 ? s.forceCanBuy : true);
         const lvText = s.lv !== "" ? ` <span style="color:#888;">(Lv ${s.lv})</span>` : "";
         shopHtml += `
                 <div class="dg-shop-card">
@@ -8527,7 +8532,7 @@ function showWaveRewards() {
                         <div class="dg-shop-stat-val">${s.val}</div>
                     </div>
                     <button class="dg-btn-buy" data-stat="${s.id}" data-cost="${cost}" ${!canAfford ? "disabled" : ""}>
-                        ${cost} G
+                        ${cost} \u{1F6E0}
                     </button>
                 </div>`;
       });
@@ -8544,8 +8549,8 @@ function showWaveRewards() {
       el.onclick = () => {
         const statId = el.dataset.stat;
         const cost = parseInt(el.dataset.cost);
-        if (totalGold >= cost) {
-          totalGold -= cost;
+        if (shopGold >= cost) {
+          shopGold -= cost;
           const p = selectedPet;
           if (statId === "hp") {
             p.maxHp = Math.round(p.maxHp * 1.2);
@@ -8565,7 +8570,7 @@ function showWaveRewards() {
             p.upgrades.spd++;
           }
           if (statId === "critR") {
-            p.critRate = Math.min(1, p.critRate + 0.05);
+            p.critRate = Math.min(0.6, p.critRate + 0.05);
             p.upgrades.critR++;
           }
           if (statId === "critD") {
@@ -8573,7 +8578,7 @@ function showWaveRewards() {
             p.upgrades.critD++;
           }
           if (statId === "dodge") {
-            p.dodge = Math.min(0.8, p.dodge + 0.05);
+            p.dodge = Math.min(0.4, p.dodge + 0.05);
             p.upgrades.dodge = (p.upgrades.dodge || 0) + 1;
           }
           if (statId === "range") {
@@ -8609,7 +8614,7 @@ function nextWaveSequence(overlay) {
   });
   startWave();
 }
-var isDungeonOpen, phase, gameLoopId, lastTime, team, enemies, projectiles, currentWave, totalGold, PET_STATS, ENEMY_TYPES, fullTeam;
+var isDungeonOpen, phase, gameLoopId, lastTime, team, enemies, projectiles, currentWave, totalGold, shopGold, PET_STATS, ENEMY_TYPES, fullTeam;
 var init_dungeon = __esm({
   "src/dungeon.js"() {
     init_store();
@@ -8624,6 +8629,7 @@ var init_dungeon = __esm({
     projectiles = [];
     currentWave = 1;
     totalGold = 0;
+    shopGold = 0;
     PET_STATS = {
       slime: { name: "Slime Xanh", desc: "Chi\u1EBFn binh c\xE2n b\u1EB1ng, kh\xF4ng c\xF3 g\xEC n\u1ED5i b\u1EADt.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 },
       octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "\u0110\xE1nh nhanh th\u1EAFng nhanh. \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao.", hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
@@ -8649,9 +8655,9 @@ var init_dungeon = __esm({
       { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: "assassin", sp: "moonberry", gold: 5 },
       { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: "melee", gold: 6 },
       { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: "melee", gold: 8 },
-      { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: "tank", gold: 15 },
+      { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 250, atk: 20, range: 50, speed: 15, cd: 3, ai: "tank", gold: 15 },
       { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: "ranged", gold: 8 },
-      { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot", gold: 10 },
+      { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 80, atk: 8, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot", gold: 10 },
       { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root", gold: 12 },
       { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: "ranged", gold: 20 },
       { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true, gold: 100 },
