@@ -74,10 +74,11 @@ var init_data = __esm({
     SNAP_EDGE = 48;
     CROPS = {
       /* Số liệu chính thức v1.0 (chốt theo "Bảng số liệu chính thức - chờ duyệt.md"): grow/regrowM tính bằng phút thực */
-      douya: { name: "Gi\xE1 \u0111\u1ED7", grow: 5, seed: 5, sell: 12, sp: "sprout" },
+      douya: { name: "Gi\xE1 \u0111\u1ED7", grow: 5, seed: 5, sell: 12, sp: "douya" },
       radish: { name: "C\u1EE7 c\u1EA3i cherry", grow: 10, seed: 25, sell: 45, sp: "radish" },
       tomato: { name: "C\xE0 chua", grow: 20, regrowM: 15, seed: 100, sell: 90, sp: "tomato", regrow: true },
       strawberry: { name: "D\xE2u t\xE2y", grow: 90, seed: 350, sell: 800, sp: "strawberry" },
+      moonberry: { name: "D\xE2u \xE1nh tr\u0103ng", grow: 180, seed: 600, sell: 1500, sp: "moonberry" },
       pumpkin: { name: "B\xED ng\xF4", grow: 120, seed: 500, sell: 1300, sp: "pumpkin" },
       /* —— Vùng nước (trang 2) —— */
       chuncai: { name: "Rau thu\u1EA7n", grow: 10, seed: 40, sell: 60, sp: "chuncai", zone: 2 },
@@ -437,6 +438,7 @@ var init_graphics = __esm({
     SPR = {
       sprout: ["................", "................", "................", "................", "...DD......DD...", "..DEED....DEED..", ".DEGGGD..DGGGED.", ".DGGGGD..DGGGGD.", "..DGGGGDDGGGGD..", "...DGGGDDGGGD...", "....DGGGGGGD....", "......DGGD......", "...TTTDGGDTTT...", "..TTTTTTTTTTTT..", "................", "................"],
       seedling: ["................", "................", "................", "................", "................", "................", "................", "......EE........", ".....DGE........", "......DG........", "......GD........", "......GG........", "....TTGGTT......", "...TTTTTTTT.....", "................", "................"],
+      douya: ["................", "................", "................", "................", "......W.........", ".....WWW........", "....WGGG........", ".....WGW........", "......W.........", "......W.........", "......W.........", "......W.........", ".....TWT........", "....TTTTT.......", "................", "................"],
       radish: ["....DD...DD.....", "...DGED.DEGD....", "...DGGEDEGGD....", "....DGGDGGD.....", ".....DGGGD......", "......DGD.......", "....fDDGDDf.....", "...fFppFFFFf....", "..fFpppFFFFFf...", "..fFppFFFFFFf...", "..fFpFFFFFFFf...", ".TfFFFFFFFFFfT..", ".TTfFFFFFFFfTT..", "..TTfFFFFFfTT...", "...TTTfffTTT....", "................"],
       tomato: ["................", "......DDDD......", "....DDGEEGDD....", "...DGEGGGGEGD...", "..DGEGGGGGGEGD..", "..DGpRRGGRRpGD..", "..DGRRxGGxRRGD..", "..DGGGGGGGGGGD..", "...DGGGpRGGGD...", "...DGGGRxGGGD...", "....DGGGGGGD....", ".....DGGGGD.....", "....TTDGGDTT....", "...TTTTTTTTTT...", "................", "................"],
       pumpkin: ["................", "................", ".......SS.S.....", "......DSSDS.....", "...qqq.SS.qqq...", "..qOOOqqqqOOOq..", ".qOhhOQOOQOOOOq.", ".qOhOOQOOQOOOOq.", ".qOOOOQOOQOOOOq.", ".qOOOOQOOQOOOOq.", ".qOOOOQOOQOOOOq.", "..qOOOQOOQOOOq..", "...qqOOOOOOqq...", "..TTqqqqqqqqTT..", "...TTTTTTTTTT...", "................"],
@@ -14942,13 +14944,13 @@ function uiCloseAddItem() {
 function uiSelectAdd(id, max) {
   selectedTradeId = id;
   selectedTradeMax = max;
-  document.getElementById("trade-popup-act").style.display = "flex";
-  document.getElementById("inp-trade-amount").max = max;
-  document.getElementById("inp-trade-amount").value = 1;
-  document.getElementById("lbl-trade-sel").innerHTML = `\u0110\xE3 ch\u1ECDn: <b>${getItemName(id)}</b> (T\u1ED1i \u0111a: ${max})`;
+  $id("trade-popup-act").style.display = "flex";
+  $id("inp-trade-amount").max = max;
+  $id("inp-trade-amount").value = 1;
+  $id("lbl-trade-sel").innerHTML = `\u0110\xE3 ch\u1ECDn: <b>${getItemName(id)}</b> (T\u1ED1i \u0111a: ${max})`;
 }
 function uiConfirmAdd() {
-  let amt = parseInt(document.getElementById("inp-trade-amount").value) || 0;
+  let amt = parseInt($id("inp-trade-amount").value) || 0;
   if (amt <= 0 || amt > selectedTradeMax) {
     toast("S\u1ED1 l\u01B0\u1EE3ng kh\xF4ng h\u1EE3p l\u1EC7!");
     return;

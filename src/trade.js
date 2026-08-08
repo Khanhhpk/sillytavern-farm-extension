@@ -361,17 +361,17 @@ let selectedTradeMax = 0;
 export function uiSelectAdd(id, max) {
     selectedTradeId = id;
     selectedTradeMax = max;
-    document.getElementById('trade-popup-act').style.display = 'flex';
+    All.$id('trade-popup-act').style.display = 'flex';
     // @ts-ignore
-    document.getElementById('inp-trade-amount').max = max;
+    All.$id('inp-trade-amount').max = max;
     // @ts-ignore
-    document.getElementById('inp-trade-amount').value = 1;
-    document.getElementById('lbl-trade-sel').innerHTML = `Đã chọn: <b>${getItemName(id)}</b> (Tối đa: ${max})`;
+    All.$id('inp-trade-amount').value = 1;
+    All.$id('lbl-trade-sel').innerHTML = `Đã chọn: <b>${getItemName(id)}</b> (Tối đa: ${max})`;
 }
 
 export function uiConfirmAdd() {
     // @ts-ignore
-    let amt = parseInt(document.getElementById('inp-trade-amount').value) || 0;
+    let amt = parseInt(All.$id('inp-trade-amount').value) || 0;
     if (amt <= 0 || amt > selectedTradeMax) {
         All.toast('Số lượng không hợp lệ!');
         return;
