@@ -196,12 +196,20 @@ function setupConnection() {
 
 function handleNetData(data) {
     if (data.type === 'UPDATE_ITEMS') {
-        theirItems = data.items;
+        if (data.items) {
+            theirItems = {};
+            for (const [k, v] of Object.entries(data.items)) {
+                const amt = parseInt(v);
+                if (Number.isFinite(amt) && amt > 0) {
+                    theirItems[k] = amt;
+                }
+            }
+        }
         if (data.uniques) {
             theirUniques = data.uniques;
             for (const key in theirUniques) {
                 const u = theirUniques[key];
-                if (u.sp && u.spriteMap) {
+                if (u && u.sp && u.spriteMap) {
                     All.registerDynamicSprite(u.sp, u.spriteMap);
                 }
             }
@@ -286,6 +294,7 @@ function addInventory(id, amount) {
 
 function checkValidTrade() {
     for (const [id, amount] of Object.entries(myItems)) {
+        if (!Number.isFinite(amount) || amount <= 0) return false;
         if (getInventoryCount(id) < amount) return false;
     }
     return true;
