@@ -96,8 +96,8 @@ export function openPanel(kind) {
           <span class="buy${ctx.S.coins < 5000 ? ' off' : ''}" data-buyticket="spec">Mua</span></div>
         <div class="item"><span class="icon">${spriteSVG('ticketSuper', 32)}</span>
           <span class="info"><div class="name" style="color:#ff4500;">Vé Quay Siêu Cường</div><div class="meta">Dùng quay 1 phát 100% ra bảo vật AI (từ Hiếm đến Huyền Thoại) · Đang có ${ctx.S.tickets?.super || 0}</div></span>
-          <span class="price">${spriteSVG('coin', 16)}500,000</span>
-          <span class="buy${ctx.S.coins < 500000 ? ' off' : ''}" data-buyticket="super" style="background:#ff4500; border:1px solid #cc3700; color:#fff;">Mua</span></div>`;
+          <span class="price">${spriteSVG('coin', 16)}250,000</span>
+          <span class="buy${ctx.S.coins < 250000 ? ' off' : ''}" data-buyticket="super" style="background:#ff4500; border:1px solid #cc3700; color:#fff;">Mua</span></div>`;
     } else {
       items = Object.keys(PASSES).map(k => {
         const ps = PASSES[k];
@@ -278,7 +278,7 @@ export function openPanel(kind) {
       return;
     }
     if (bagTab === 'relic') {                            // v1.0: quà của bé tròn —— quầy riêng cho mảnh vỡ và hạt giống bí ẩn
-      const sh2 = ctx.S.shards || { prism: 0, star: 0 };
+      const sh2 = ctx.S.shards || { prism: 0, star: 0, legend: 0 };
       const normTk = ctx.S.tickets?.norm || 0;
       const specTk = ctx.S.tickets?.spec || 0;
       const ticketRows = (normTk > 0 ? `
@@ -401,6 +401,11 @@ export function openPanel(kind) {
   } else {
     openModal('Cài đặt', `
       <div style="font-size:11px; color:#a3763d; text-align:center; margin-bottom: 12px; font-weight: bold; background: rgba(0,0,0,0.05); padding: 4px; border-radius: 4px; user-select: text;">ID Người Chơi: ${ctx.S.playerId}</div>
+      <div class="shead" style="margin-top:0">Tên người chơi (để giao dịch)</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <input class="inp" id="cfgUsername" placeholder="Nhập tên của bạn..." value="${esc(ctx.S.username || '')}" style="flex:1;">
+        <span class="buy" id="cfgSaveUsername">Lưu tên</span>
+      </div>
       <div class="shead" style="margin-top:0">Chủ đề giao diện</div>
       <div class="picker" style="margin-bottom:4px">
         <span class="pick${ctx.S.theme !== 'sky' ? ' active' : ''}" data-settheme="sakura">🌸 Hồng anh đào</span>
@@ -478,6 +483,13 @@ export function openPanel(kind) {
     });
     All.$id('secTest').addEventListener('click', () => testSecApi());
     All.$id('secModels').addEventListener('click', () => fetchModelList());
+    All.$id('cfgSaveUsername')?.addEventListener('click', () => {
+      const uname = All.$id('cfgUsername').value.trim();
+      if (!uname) return toast('Tên không được để trống!');
+      ctx.S.username = uname;
+      save();
+      toast('Đã lưu tên người chơi');
+    });
     if (All.$id('openSandboxBtn')) All.$id('openSandboxBtn').addEventListener('click', openSandbox);
 
     const testBtn = All.$id('testBtn');

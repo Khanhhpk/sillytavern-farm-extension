@@ -9,14 +9,18 @@ import { openModal } from './shop.js';
 import { charName, CS, SEC, extractJson, collectWorldbook } from './events.js';
 import { GACHA_PROMPT } from './prompt.js';
 
-export const GACHA_NORM_PITY = 100;
-export const GACHA_SPEC_PITY = 50;
+export const GACHA_SPEC_PITY = 100;
+export const GACHA_SUPER_PITY = 200;
 export const GACHA_NORM_PRICE = 1000;
 export const GACHA_SPEC_PRICE = 5000;
 
 export function initGachaState() {
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
-  if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
+  if (ctx.S.tickets.super === undefined) ctx.S.tickets.super = 0;
+  
+  if (!ctx.S.gachaPity) ctx.S.gachaPity = { spec: 0, super: 0 };
+  if (ctx.S.gachaPity.super === undefined) ctx.S.gachaPity.super = 0;
+  
   if (!ctx.S.uniques) ctx.S.uniques = {};
 }
 
@@ -125,14 +129,14 @@ Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối c�
     }
 
     const rarityGuidance = rarity === 'Huyền thoại' 
-      ? "Thước đo ảnh hưởng to lớn (quyết định trật tự, quy tắc, hệ sinh thái, hoặc thao túng cả phương thế giới). Dù quyền bính to lớn nhưng phải CỤ THỂ, thao tác được, không viết khái niệm sáo rỗng."
+      ? "[Đột phá Quy tắc] Vật phẩm độc nhất vô nhị với khả năng bẻ cong hoặc viết lại một quy tắc cụ thể của trò chơi/thế giới. Sức mạnh vĩ mô, hiệu ứng hình ảnh hoành tráng. Dù cực mạnh, nó vẫn phải tuân theo logic của thế giới, không biến người chơi thành thần toàn năng nhàm chán."
       : rarity === 'Sử thi' 
-      ? "Thước đo ảnh hưởng cục bộ bối cảnh (thay đổi một khu vực, một nhóm, tạo cơ chế thu lợi dài hạn hoặc ưu thế chiến lược). Có giá trị kết hợp và kinh doanh."
+      ? "[Tài sản Chiến lược] Đồ vật mang tính thay đổi lối chơi (Game-changer). Có sức mạnh lớn, đa dụng, hoặc tự động hóa một quy trình phức tạp. Tuy nhiên, để phát huy tối đa cần có sự tính toán của người chơi."
       : rarity === 'Hiếm'
-      ? "Thước đo ảnh hưởng cá thể (công cụ nhỏ thay đổi một lần tương tác). Yêu cầu nhỏ mà chuẩn, nhẹ mà khéo, lập tức tạo ra ưu thế tinh xảo và chơi vui ngay lập tức."
+      ? "[Cơ chế Đặc biệt] Vật phẩm bắt đầu có 'cơ chế hoạt động' riêng biệt. Có thể thay đổi một phần nhỏ cục diện, mang lại lợi ích rõ rệt nhưng sẽ có thời gian hồi chiêu (cooldown) hoặc điều kiện kích hoạt."
       : rarity === 'Thường'
-      ? "Thước đo tiện ích. Những công cụ nhỏ giúp ích cho đời sống hàng ngày hoặc tương tác nhỏ. Vui vẻ, tiện lợi."
-      : "Thước đo phế phẩm (Junk). Đồ vật tưởng chừng vô dụng, buồn cười, tấu hài, công dụng kỳ quặc nhưng đôi khi có thể dùng trong các tình huống oái ăm.";
+      ? "[Công cụ Cơ bản] Vật phẩm có ích nhưng công năng đơn giản, giới hạn rõ ràng. Thường là đồ tiêu hao, công cụ hỗ trợ canh tác, sinh hoạt hoặc tăng chỉ số nhẹ."
+      : "[Vật phẩm Tấu hài/Vô dụng] Những món đồ kỳ cục, hỏng hóc hoặc có công dụng cực kỳ vô thưởng vô phạt. Chúng tồn tại chủ yếu để gây cười, tạo tình huống trớ trêu trong tương tác đời thường.";
 
     const basePrice = rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : rarity === 'Hiếm' ? 2500 : rarity === 'Thường' ? 500 : 100;
 
@@ -223,29 +227,8 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
   return null;
 }
 
-// Hệ thống tạo Vật Phẩm Độc Nhất Async với Retry Logic
-export async function generateUniqueItem(ticketType) {
+export async function generateUniqueItem({ rarity, color, sellPrice, ticketType }) {
   initGachaState();
-  const roll = Math.random() * 100;
-  let rarity = 'Rác';
-  let color = '#9e9e9e';
-  let sellPrice = 100;
-
-  if (ticketType === 'super') {
-    if (roll < 30) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
-    else if (roll < 80) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
-    else { rarity = 'Hiếm'; color = '#4a90e2'; sellPrice = 2500; }
-  } else if (ticketType === 'spec') {
-    if (roll < 10) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
-    else if (roll < 40) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
-    else if (roll < 80) { rarity = 'Hiếm'; color = '#4a90e2'; sellPrice = 2500; }
-    else { rarity = 'Thường'; color = '#b0bec5'; sellPrice = 500; }
-  } else {
-    if (roll < 2) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
-    else if (roll < 10) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
-    else if (roll < 30) { rarity = 'Hiếm'; color = '#4a90e2'; sellPrice = 2500; }
-    else if (roll < 70) { rarity = 'Thường'; color = '#b0bec5'; sellPrice = 500; }
-  }
 
   const timestamp = now();
   const randId = Math.floor(Math.random() * 10000);
@@ -275,6 +258,14 @@ export async function generateUniqueItem(ticketType) {
 
   registerDynamicSprite(spKey, finalSpriteMap);
 
+  let bonusDesc = '';
+  if (rarity === 'Sử thi' && (ticketType === 'norm' || ticketType === 'spec')) {
+    if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0, legend: 0 };
+    if (ctx.S.shards.legend === undefined) ctx.S.shards.legend = 0;
+    ctx.S.shards.legend++;
+    bonusDesc = '+1 Mảnh Huyền Thoại (Thưởng mở Sử thi)';
+  }
+
   ctx.S.uniques[key] = {
     key,
     name: finalName,
@@ -290,15 +281,13 @@ export async function generateUniqueItem(ticketType) {
   ctx.S.bag[key] = (ctx.S.bag[key] || 0) + 1;
   save();
 
-  return { key, name: finalName, rarity, color, desc: finalDesc, sell: sellPrice, sp: spKey };
+  return { key, name: finalName, rarity, color, desc: finalDesc, bonusDesc, sell: sellPrice, sp: spKey };
 }
 
 // Thực hiện quay Gacha Bất đồng bộ
 export async function executeGachaRoll(ticketType, count, updateLoadingText) {
   initGachaState();
   const ticketKey = ticketType;
-  const pityKey = ticketType === 'super' ? 'spec' : ticketType;
-  const maxPity = ticketType === 'spec' ? GACHA_SPEC_PITY : GACHA_NORM_PITY;
 
   const haveTickets = ctx.S.tickets[ticketKey] || 0;
   if (haveTickets < count) {
@@ -314,26 +303,74 @@ export async function executeGachaRoll(ticketType, count, updateLoadingText) {
   const rollsPlan = [];
 
   for (let i = 0; i < count; i++) {
-    ctx.S.gachaPity[pityKey]++;
-    const isPity = ctx.S.gachaPity[pityKey] >= maxPity;
-
     let rewardType = '';
+    let isPity = false;
+    let preRolledRarity = 'Rác';
+    let preRolledColor = '#9e9e9e';
+    let preRolledPrice = 100;
+
+    // TẦNG 1: Loại vật phẩm
     if (ticketType === 'super') {
       rewardType = 'unique';
-    } else if (isPity) {
-      rewardType = 'unique';
-    } else {
+    } else if (ticketType === 'spec') {
+      ctx.S.gachaPity.spec++;
+      const p = ctx.S.gachaPity.spec;
+      let uniqueRate = 10;
+      if (p >= 71) uniqueRate = 10 + (p - 70) * 3;
+      if (p >= GACHA_SPEC_PITY) uniqueRate = 100;
+
       const roll = Math.random() * 100;
-      if (roll < 40) rewardType = 'seed';
-      else if (roll < 80) rewardType = 'fert';
-      else if (roll < 90) rewardType = 'shard';
-      else rewardType = 'unique';
+      if (roll < uniqueRate) {
+        rewardType = 'unique';
+        if (p >= GACHA_SPEC_PITY) isPity = true;
+      } else {
+        const roll2 = Math.random() * 100;
+        if (roll2 < 44.4) rewardType = 'seed';
+        else if (roll2 < 88.8) rewardType = 'fert';
+        else rewardType = 'shard';
+      }
+    } else { // norm
+      const roll = Math.random() * 100;
+      if (roll < 5) rewardType = 'unique';
+      else if (roll < 47.5) rewardType = 'seed';
+      else if (roll < 90) rewardType = 'fert';
+      else rewardType = 'shard';
     }
 
+    // TẦNG 2: Phẩm chất
     if (rewardType === 'unique') {
-      ctx.S.gachaPity[pityKey] = 0; // Reset Pity ngay lập tức
+      const roll = Math.random() * 100;
+      if (ticketType === 'super') {
+        ctx.S.gachaPity.super++;
+        const p = ctx.S.gachaPity.super;
+        let legRate = 5;
+        if (p > 100) legRate = 5 + (p - 100) * 0.95;
+        if (p >= GACHA_SUPER_PITY) legRate = 100;
+
+        if (roll < legRate) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 20000; }
+        else if (roll < legRate + 50) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 8000; }
+        else { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 2500; }
+        
+        if (preRolledRarity === 'Huyền thoại') {
+          ctx.S.gachaPity.super = 0;
+          if (p >= GACHA_SUPER_PITY) isPity = true;
+        }
+      } else if (ticketType === 'spec') {
+        if (roll < 10) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 20000; }
+        else if (roll < 40) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 8000; }
+        else if (roll < 80) { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 2500; }
+        else { preRolledRarity = 'Thường'; preRolledColor = '#b0bec5'; preRolledPrice = 500; }
+        ctx.S.gachaPity.spec = 0; 
+      } else {
+        if (roll < 1) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 20000; }
+        else if (roll < 5) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 8000; }
+        else if (roll < 25) { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 2500; }
+        else if (roll < 60) { preRolledRarity = 'Thường'; preRolledColor = '#b0bec5'; preRolledPrice = 500; }
+        else { preRolledRarity = 'Rác'; preRolledColor = '#9e9e9e'; preRolledPrice = 100; }
+      }
     }
-    rollsPlan.push({ type: rewardType, isPity });
+
+    rollsPlan.push({ type: rewardType, isPity, preRolledRarity, preRolledColor, preRolledPrice, ticketType });
   }
 
   // Thu thập các unique items để chạy AI song song (Max concurrency 3)
@@ -345,7 +382,7 @@ export async function executeGachaRoll(ticketType, count, updateLoadingText) {
     if (updateLoadingText) {
       updateLoadingText(uniquePlans.length > 1 ? `Đang tỉnh thức bảo vật... (${uniqueCount}/${uniquePlans.length})` : 'Đang tỉnh thức bảo vật...');
     }
-    const item = await generateUniqueItem(ticketType);
+    const item = await generateUniqueItem({ rarity: plan.preRolledRarity, color: plan.preRolledColor, sellPrice: plan.preRolledPrice, ticketType: plan.ticketType });
     return {
       type: 'unique',
       name: item.name,
@@ -353,6 +390,7 @@ export async function executeGachaRoll(ticketType, count, updateLoadingText) {
       color: item.color,
       icon: spriteSVG(item.sp, 48),
       desc: item.desc,
+      bonusDesc: item.bonusDesc,
       spKey: item.sp,
       isPity: plan.isPity
     };
@@ -398,8 +436,16 @@ export function openGachaModal() {
   const normTicket = ctx.S.tickets?.norm || 0;
   const specTicket = ctx.S.tickets?.spec || 0;
   const superTicket = ctx.S.tickets?.super || 0;
-  const normPity = ctx.S.gachaPity?.norm || 0;
   const specPity = ctx.S.gachaPity?.spec || 0;
+  const superPity = ctx.S.gachaPity?.super || 0;
+
+  let specRate = 10;
+  if (specPity >= 71) specRate = 10 + (specPity - 70) * 3;
+  if (specPity >= GACHA_SPEC_PITY) specRate = 100;
+  
+  let superRate = 5;
+  if (superPity > 100) superRate = 5 + (superPity - 100) * 0.95;
+  if (superPity >= GACHA_SUPER_PITY) superRate = 100;
 
   const bodyHTML = `
     <div class="gacha-wrap" style="text-align:center; position:relative; overflow:hidden; padding:4px 0;">
@@ -413,7 +459,10 @@ export function openGachaModal() {
         <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
           <span class="buy" id="gachaBuyNormBtn" style="padding:4px 8px; font-size:11px;">+ Vé Thường (1000G)</span>
           <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé Đặc biệt (5000G)</span>
-          <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé Siêu cường (500KG)</span>
+          <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé Siêu cường (250KG)</span>
+        </div>
+        <div style="margin-top:4px;">
+          <span class="buy" id="gachaRatesBtn" style="padding:4px 12px; font-size:12px; background:#4a8098; border:1px solid #2a6078; color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:6px;">${spriteSVG('gachaRatesIcon', 18)} Xem Tỉ Lệ Gachapon</span>
         </div>
       </div>
 
@@ -428,23 +477,31 @@ export function openGachaModal() {
       <!-- Thanh Bảo Hiểm (Pity Bars) -->
       <div style="display:flex; flex-direction:column; gap:8px; background:rgba(0,0,0,0.03); padding:10px 12px; border-radius:8px; margin-bottom:14px;">
         <div>
-          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#4a7a26; margin-bottom:3px;">
-            <span>Bảo hiểm Quay Thường</span>
-            <span><span id="gachaNormPityTxt">${normPity}</span>/${GACHA_NORM_PITY}</span>
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#ff4500; margin-bottom:3px;">
+            <span>Bảo hiểm Siêu Cường <span style="font-weight:normal; color:#d86020;">(Tỉ lệ nổ Huyền thoại: <span id="gachaSuperRateTxt">${superRate % 1 === 0 ? superRate : superRate.toFixed(2)}</span>%)</span></span>
+            <span><span id="gachaSuperPityTxt">${superPity}</span>/${GACHA_SUPER_PITY}</span>
           </div>
           <div style="background:#e0e0e0; height:8px; border-radius:4px; overflow:hidden;">
-            <div id="gachaNormPityBar" style="background:linear-gradient(90deg, #6cb457, #4e903a); height:100%; width:${Math.min(100, (normPity / GACHA_NORM_PITY) * 100)}%; transition:width 0.3s;"></div>
+            <div id="gachaSuperPityBar" style="background:linear-gradient(90deg, #ff8000, #ff4500); height:100%; width:${Math.min(100, (superPity / GACHA_SUPER_PITY) * 100)}%; transition:width 0.3s;"></div>
           </div>
         </div>
 
         <div>
           <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#8a2acc; margin-bottom:3px;">
-            <span>Bảo hiểm Quay Đặc Biệt</span>
+            <span>Bảo hiểm Quay Đặc Biệt <span style="font-weight:normal; color:#8e60b8;">(Tỉ lệ nổ Bảo vật: <span id="gachaSpecRateTxt">${specRate}</span>%)</span></span>
             <span><span id="gachaSpecPityTxt">${specPity}</span>/${GACHA_SPEC_PITY}</span>
           </div>
           <div style="background:#e0e0e0; height:8px; border-radius:4px; overflow:hidden;">
             <div id="gachaSpecPityBar" style="background:linear-gradient(90deg, #a335ee, #ff8000); height:100%; width:${Math.min(100, (specPity / GACHA_SPEC_PITY) * 100)}%; transition:width 0.3s;"></div>
           </div>
+        </div>
+
+        <!-- Mảnh Huyền Thoại -->
+        <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,128,0,0.1); padding:6px 8px; border-radius:6px; border:1px solid rgba(255,128,0,0.3); margin-top:4px;">
+          <div style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:bold; color:#cc5200;">
+            ${spriteSVG('legendShard', 16)} Mảnh Huyền Thoại: <span id="gachaLegendCount">${ctx.S.shards?.legend || 0}</span>/10
+          </div>
+          <span class="buy" id="gachaExchangeLegendBtn" style="padding:4px 10px; font-size:11px; background:${(ctx.S.shards?.legend || 0) >= 10 ? 'linear-gradient(90deg, #ff8000, #ff4500)' : '#ccc'}; border:1px solid ${(ctx.S.shards?.legend || 0) >= 10 ? '#cc3700' : '#aaa'}; color:#fff; pointer-events:${(ctx.S.shards?.legend || 0) >= 10 ? 'auto' : 'none'};">Đổi Bảo Vật</span>
         </div>
       </div>
 
@@ -454,7 +511,8 @@ export function openGachaModal() {
         <span class="buy" id="gachaRollNorm10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#4e903a; border:1px solid #3c702c; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Thường ×10</span>
         <span class="buy" id="gachaRollSpec1" style="padding:10px 0; font-size:13px; font-weight:bold; background:#a335ee; border:1px solid #8a2acc; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Đặc Biệt ×1</span>
         <span class="buy" id="gachaRollSpec10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#8a2acc; border:1px solid #6a1aa3; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Đặc Biệt ×10</span>
-        <span class="buy" id="gachaRollSuper1" style="grid-column: 1 / -1; padding:10px 0; font-size:13px; font-weight:bold; background:linear-gradient(90deg, #ff8000, #ff4500); border:1px solid #cc3700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Siêu Cường ×1 (100% Đồ Xịn)</span>
+        <span class="buy" id="gachaRollSuper1" style="padding:10px 0; font-size:13px; font-weight:bold; background:linear-gradient(90deg, #ff8000, #ff4500); border:1px solid #cc3700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Siêu Cường ×1</span>
+        <span class="buy" id="gachaRollSuper10" style="padding:10px 0; font-size:13px; font-weight:bold; background:linear-gradient(90deg, #cc3700, #9e2a00); border:1px solid #731e00; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Siêu Cường ×10</span>
       </div>
 
       <!-- Result Overlay Animation (Lưới kết quả) -->
@@ -490,11 +548,37 @@ export function openGachaModal() {
     initGachaState();
     const elN = All.$id('gachaNormCount'); if (elN) elN.textContent = String(ctx.S.tickets.norm);
     const elS = All.$id('gachaSpecCount'); if (elS) elS.textContent = String(ctx.S.tickets.spec);
-    const pN = ctx.S.gachaPity.norm, pS = ctx.S.gachaPity.spec;
-    const txtN = All.$id('gachaNormPityTxt'); if (txtN) txtN.textContent = String(pN);
+    const elSup = All.$id('gachaSuperCount'); if (elSup) elSup.textContent = String(ctx.S.tickets.super);
+    const pS = ctx.S.gachaPity.spec, pSup = ctx.S.gachaPity.super;
+    const txtSup = All.$id('gachaSuperPityTxt'); if (txtSup) txtSup.textContent = String(pSup);
     const txtS = All.$id('gachaSpecPityTxt'); if (txtS) txtS.textContent = String(pS);
-    const barN = All.$id('gachaNormPityBar'); if (barN) barN.style.width = Math.min(100, (pN / GACHA_NORM_PITY) * 100) + '%';
+    const barSup = All.$id('gachaSuperPityBar'); if (barSup) barSup.style.width = Math.min(100, (pSup / GACHA_SUPER_PITY) * 100) + '%';
     const barS = All.$id('gachaSpecPityBar'); if (barS) barS.style.width = Math.min(100, (pS / GACHA_SPEC_PITY) * 100) + '%';
+
+    let sR = 10;
+    if (pS >= 71) sR = 10 + (pS - 70) * 3;
+    if (pS >= GACHA_SPEC_PITY) sR = 100;
+    const elSpecR = All.$id('gachaSpecRateTxt'); if (elSpecR) elSpecR.textContent = String(sR);
+
+    let supR = 5;
+    if (pSup > 100) supR = 5 + (pSup - 100) * 0.95;
+    if (pSup >= GACHA_SUPER_PITY) supR = 100;
+    const elSupR = All.$id('gachaSuperRateTxt'); if (elSupR) elSupR.textContent = String(supR % 1 === 0 ? supR : supR.toFixed(2));
+    
+    const legendCount = ctx.S.shards?.legend || 0;
+    const elLegCount = All.$id('gachaLegendCount'); if (elLegCount) elLegCount.textContent = String(legendCount);
+    const btnExLeg = All.$id('gachaExchangeLegendBtn');
+    if (btnExLeg) {
+      if (legendCount >= 10) {
+        btnExLeg.style.background = 'linear-gradient(90deg, #ff8000, #ff4500)';
+        btnExLeg.style.borderColor = '#cc3700';
+        btnExLeg.style.pointerEvents = 'auto';
+      } else {
+        btnExLeg.style.background = '#ccc';
+        btnExLeg.style.borderColor = '#aaa';
+        btnExLeg.style.pointerEvents = 'none';
+      }
+    }
   };
 
   All.$id('gachaBuyNormBtn')?.addEventListener('click', () => {
@@ -509,6 +593,10 @@ export function openGachaModal() {
     openBuyDlg('ticket', 'super', 'gacha');
   });
 
+  All.$id('gachaRatesBtn')?.addEventListener('click', () => {
+    openGachaRatesModal();
+  });
+
   const triggerGridResult = (ticketType, count, results) => {
     const overlay = All.$id('gachaResultOverlay');
     const animSlot = All.$id('gachaCapsuleAnim');
@@ -516,18 +604,19 @@ export function openGachaModal() {
     const grid = All.$id('gachaResultGrid');
 
     if (!overlay || !animSlot || !title || !grid) return;
-    const capsuleIcon = ticketType === 'super' ? spriteSVG('gachaCapsuleSpec', 48) : (ticketType === 'spec' ? spriteSVG('gachaCapsuleSpec', 48) : spriteSVG('gachaCapsuleNorm', 48));
+    const capsuleIcon = (ticketType === 'super' || ticketType === 'exchange') ? spriteSVG('gachaCapsuleSpec', 48) : (ticketType === 'spec' ? spriteSVG('gachaCapsuleSpec', 48) : spriteSVG('gachaCapsuleNorm', 48));
     animSlot.innerHTML = capsuleIcon;
     animSlot.style.animation = 'gachaDrop 0.5s ease-out';
 
     const tName = ticketType === 'super' ? 'Siêu cường' : (ticketType === 'spec' ? 'Đặc biệt' : 'Thường');
-    title.textContent = `Kết quả Quay ${tName} ×${count}`;
+    title.textContent = ticketType === 'exchange' ? `Kết quả Đổi Mảnh Huyền Thoại` : `Kết quả Quay ${tName} ×${count}`;
 
     grid.innerHTML = results.map(r => `
       <div class="gacha-item-card rarity-${r.rarity.replace(/\s+/g, '-')}" style="border:2px solid ${r.color}; border-radius:8px; padding:6px 8px; background:#fff; display:flex; flex-direction:column; align-items:center; width:100px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
         <div style="font-size:10px; font-weight:bold; color:${r.color}; margin-bottom:2px;">${r.rarity}${r.isPity ? ' ★Bảo hiểm' : ''}</div>
         <div style="margin:2px 0;">${r.icon}</div>
         <div style="font-size:11px; font-weight:bold; color:#3a2c22; margin-top:2px;">${r.name}</div>
+        ${r.bonusDesc ? `<div style="font-size:9px; color:#ff8000; font-weight:bold; margin-top:2px;">${r.bonusDesc}</div>` : ''}
       </div>
     `).join('');
 
@@ -550,7 +639,7 @@ export function openGachaModal() {
     
     if (haveTickets < count) {
       const missing = count - haveTickets;
-      const priceMap = { norm: 1000, spec: 5000, super: 500000 };
+      const priceMap = { norm: 1000, spec: 5000, super: 250000 };
       const ticketPrice = priceMap[ticketType] || 0;
       const cost = missing * ticketPrice;
       const tName = ticketType === 'super' ? 'Siêu cường' : (ticketType === 'spec' ? 'Đặc biệt' : 'Thường');
@@ -625,6 +714,13 @@ export function openGachaModal() {
           scIcon.innerHTML = spriteSVG(u.spKey, 64);
           scName.textContent = u.name;
           scDesc.textContent = u.desc;
+          if (u.bonusDesc) {
+            const bonusEl = document.createElement('div');
+            bonusEl.style.cssText = 'font-size:11px; font-weight:bold; color:#ff8000; margin-top:8px; text-align:center;';
+            bonusEl.textContent = u.bonusDesc;
+            scDesc.appendChild(document.createElement('br'));
+            scDesc.appendChild(bonusEl);
+          }
           showcaseOverlay.style.display = 'flex';
           
           scCard.style.animation = 'none';
@@ -644,9 +740,137 @@ export function openGachaModal() {
     }
   };
 
+  const doExchangeLegend = async () => {
+    if (!ctx.S.shards || !ctx.S.shards.legend || ctx.S.shards.legend < 10) return;
+    
+    ctx.S.shards.legend -= 10;
+    save();
+    
+    updateCounts();
+    
+    const loadOverlay = All.$id('gachaLoadingOverlay');
+    const loadText = All.$id('gachaLoadingText');
+    if (loadOverlay) loadOverlay.style.display = 'flex';
+    if (loadText) loadText.textContent = 'Đang đổi Mảnh Huyền Thoại...';
+    
+    const item = await generateUniqueItem({ rarity: 'Huyền thoại', color: '#ff8000', sellPrice: 20000, ticketType: 'exchange' });
+    
+    if (loadOverlay) loadOverlay.style.display = 'none';
+    
+    const results = [{ type: 'unique', name: item.name, rarity: item.rarity, color: item.color, icon: spriteSVG(item.sp, 48), desc: item.desc, spKey: item.sp, count: 1 }];
+    triggerGridResult('exchange', 1, results);
+  };
+
   All.$id('gachaRollNorm1')?.addEventListener('click', () => doRoll('norm', 1));
   All.$id('gachaRollNorm10')?.addEventListener('click', () => doRoll('norm', 10));
   All.$id('gachaRollSpec1')?.addEventListener('click', () => doRoll('spec', 1));
   All.$id('gachaRollSpec10')?.addEventListener('click', () => doRoll('spec', 10));
   All.$id('gachaRollSuper1')?.addEventListener('click', () => doRoll('super', 1));
+  All.$id('gachaRollSuper10')?.addEventListener('click', () => doRoll('super', 10));
+  All.$id('gachaExchangeLegendBtn')?.addEventListener('click', () => doExchangeLegend());
 }
+
+
+export function openGachaRatesModal() {
+  const bodyHTML = `
+    <div style='padding:4px; text-align:center;'>
+      <h3 style='margin-top:0; color:#3a2c22; font-size:14px; margin-bottom:12px;'>Bảng Tỉ Lệ Rơi Đồ Gachapon</h3>
+      
+      <div style='font-size:12px; font-weight:bold; color:#5a3f78; margin-bottom:4px; text-align:left;'>1. Tỉ lệ Loại Vật Phẩm</div>
+      <table style='width:100%; border-collapse:collapse; font-size:11px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); color:#3a2c22;'>
+        <thead>
+          <tr style='background:#f0e6d2; color:#3a2c22; text-align:center;'>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Loại</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Thường</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Đặc Biệt</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Siêu Cấp</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#4a7a26;'>Hạt giống</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>42.5%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40% <span style="color:#777;">(x5)</span></td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#e8963a;'>Phân bón</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>42.5%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40% <span style="color:#777;">(x3)</span></td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#4a8098;'>Mảnh vỡ (Sao/Lăng quang)</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#ff4500;'>Bảo vật Độc nhất (AI)</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>5%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>100%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style='font-size:12px; font-weight:bold; color:#5a3f78; margin-bottom:4px; text-align:left;'>2. Phẩm chất (khi trúng Bảo Vật Độc Nhất)</div>
+      <table style='width:100%; border-collapse:collapse; font-size:11px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); color:#3a2c22;'>
+        <thead>
+          <tr style='background:#f0e6d2; color:#3a2c22; text-align:center;'>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Độ hiếm</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Thường</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Đặc Biệt</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Siêu Cấp</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#ff8000;'>Huyền thoại</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>1%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>5%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#a335ee;'>Sử thi</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>4%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>30%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>50%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#4a90e2;'>Hiếm</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>20%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>45%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#b0bec5;'>Thường</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>35%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>20%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; font-weight:bold; color:#9e9e9e;'>Rác</td>
+            <td style='padding:6px;'>40%</td>
+            <td style='padding:6px;'>0%</td>
+            <td style='padding:6px;'>0%</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div style='font-size:11px; color:#555; text-align:left; background:#fafafa; padding:8px; border-radius:4px; border:1px dashed #ccc; margin-bottom:12px;'>
+        <div style='margin-bottom:4px;'><b>Cơ chế Soft-Pity (Tăng dần):</b></div>
+        <div style='margin-bottom:2px;'>- Vé Đặc Biệt: Từ mốc <b>71</b>, mỗi vé tăng 3% tỉ lệ ra Bảo Vật. Đến <b>${GACHA_SPEC_PITY}</b> chắc chắn ra Bảo Vật.</div>
+        <div>- Vé Siêu Cấp: Từ mốc <b>101</b>, mỗi vé tăng 0.95% tỉ lệ ra <b>Huyền Thoại</b>. Đến <b>${GACHA_SUPER_PITY}</b> chắc chắn ra Huyền Thoại.</div>
+      </div>
+
+      <span class="buy" id="gachaRatesBackBtn" style="padding:6px 16px; font-size:12px; background:#4a7a26; color:#fff; cursor:pointer;">Quay Lại Gacha</span>
+    </div>
+  `;
+  openModal('Tỉ Lệ Gachapon', bodyHTML);
+  
+  All.$id('gachaRatesBackBtn')?.addEventListener('click', () => {
+    openGachaModal();
+  });
+}
+

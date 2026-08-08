@@ -17,14 +17,16 @@ let tradeCompleted = false;
 let cheatDetected = false;
 let theirUniques = {};
 let theirMutDescs = {};
+let partnerName = 'Đối tác';
 
 function getItemName(id) {
     if (id === 'coins') return 'Tiền xu';
     if (id === 'norm') return 'Vé Thường';
     if (id === 'spec') return 'Vé Đặc Biệt';
-    if (id === 'super') return 'Vé Siêu Cấp';
-    if (id === 'prism') return 'Mảnh Lăng Kính';
-    if (id === 'star') return 'Mảnh Sao';
+    if (id === 'super') return 'Vé Siêu Cường';
+    if (id === 'prism') return 'Mảnh lăng quang';
+    if (id === 'star') return 'Mảnh ngôi sao';
+    if (id === 'legend') return 'Mảnh Huyền Thoại';
     if (id === 'compost') return 'Phân Hữu Cơ';
     if (id === 'shiny') return 'Phân Bón Bạc';
     if (id.startsWith('unique@')) {
@@ -46,6 +48,7 @@ function getItemDesc(id) {
     if (id === 'super') return 'Vé quay Gacha siêu cấp';
     if (id === 'prism') return 'Dùng để nâng cấp';
     if (id === 'star') return 'Mảnh sao quý hiếm';
+    if (id === 'legend') return 'Mảnh huyền thoại quý hiếm';
     if (id === 'compost') return 'Giảm 25% thời gian trồng cây';
     if (id === 'shiny') return 'Nhận thêm 25% tiền xu khi thu hoạch';
     if (id.startsWith('unique@')) {
@@ -61,8 +64,14 @@ function getItemDesc(id) {
 
 function getItemIcon(id) {
     if (id === 'coins') return All.spriteSVG('coin', 20);
-    if (id === 'norm' || id === 'spec' || id === 'super') return All.spriteSVG('tk_' + id, 20);
-    if (id === 'prism' || id === 'star') return All.spriteSVG('shard_' + id, 20);
+    if (id === 'norm' || id === 'spec' || id === 'super') {
+        const tId = id.charAt(0).toUpperCase() + id.slice(1);
+        return All.spriteSVG('ticket' + tId, 20);
+    }
+    if (id === 'prism' || id === 'star' || id === 'legend') {
+        const sId = id.charAt(0).toUpperCase() + id.slice(1);
+        return id === 'legend' ? All.spriteSVG('legendShard', 20) : All.spriteSVG('shard' + sId, 20);
+    }
     if (id === 'compost' || id === 'shiny') return All.spriteSVG('fert_' + id, 20);
     if (id.startsWith('unique@')) {
         const item = ctx.S.uniques?.[id] || theirUniques[id] || { sp: 'strawhat', color: '#4a90e2' };
@@ -105,10 +114,33 @@ function resetTradeState() {
     isConnected = false;
     tradeCompleted = false;
     cheatDetected = false;
+    partnerName = 'Đối tác';
 }
 
 function renderTradeMenu() {
     const body = All.$id('trade-body');
+    if (!ctx.S.username) {
+        body.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
+                <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">Tạo Tên Người Chơi</div>
+                <div style="font-size: 12px; color: #555;">Vui lòng nhập tên để hiển thị khi giao dịch.</div>
+                <input type="text" id="inp-trade-username" class="inp" placeholder="Nhập tên của bạn...">
+                <div class="buy" id="btn-trade-save-username" style="padding: 10px;">Lưu tên</div>
+            </div>
+        `;
+        All.$id('btn-trade-save-username').onclick = () => {
+            const val = All.$id('inp-trade-username').value.trim();
+            if (val) {
+                ctx.S.username = val;
+                import('./state.js').then(m => m.save());
+                renderTradeMenu();
+            } else {
+                All.toast('Tên không được để trống!');
+            }
+        };
+        return;
+    }
+
     body.innerHTML = `
         <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
             <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">Mở Phòng Trade</div>
@@ -217,7 +249,7 @@ function setupConnection() {
     
     // Anti-cheat check: send our playerId
     setTimeout(() => {
-        sendData({ type: 'HELLO', playerId: ctx.S.playerId });
+        sendData({ type: 'HELLO', playerId: ctx.S.playerId, username: ctx.S.username });
     }, 500);
     
     renderTradeRoom();
@@ -262,6 +294,9 @@ function handleNetData(data) {
             sendData({ type: 'CHEAT_DETECTED' });
             if (conn) conn.close();
             closeTradeModal();
+        } else {
+            if (data.username) partnerName = data.username;
+            renderTradeRoom();
         }
     } else if (data.type === 'CHEAT_DETECTED') {
         cheatDetected = true;
@@ -288,6 +323,7 @@ function getInventoryCount(id) {
     if (id === 'super') return ctx.S.tickets?.super || 0;
     if (id === 'prism') return ctx.S.shards?.prism || 0;
     if (id === 'star') return ctx.S.shards?.star || 0;
+    if (id === 'legend') return ctx.S.shards?.legend || 0;
     if (id === 'compost') return ctx.S.ferts?.compost || 0;
     if (id === 'shiny') return ctx.S.ferts?.shiny || 0;
     
@@ -304,6 +340,7 @@ function deductInventory(id, amount) {
     else if (id === 'super') ctx.S.tickets.super -= amount;
     else if (id === 'prism') ctx.S.shards.prism -= amount;
     else if (id === 'star') ctx.S.shards.star -= amount;
+    else if (id === 'legend') ctx.S.shards.legend -= amount;
     else if (id === 'compost') ctx.S.ferts.compost -= amount;
     else if (id === 'shiny') ctx.S.ferts.shiny -= amount;
     else if (ctx.S.bag && ctx.S.bag[id]) {
@@ -322,6 +359,7 @@ function addInventory(id, amount) {
     else if (id === 'super') ctx.S.tickets.super += amount;
     else if (id === 'prism') ctx.S.shards.prism += amount;
     else if (id === 'star') ctx.S.shards.star += amount;
+    else if (id === 'legend') ctx.S.shards.legend += amount;
     else if (id === 'compost') { if(!ctx.S.ferts) ctx.S.ferts={}; ctx.S.ferts.compost = (ctx.S.ferts.compost || 0) + amount; }
     else if (id === 'shiny') { if(!ctx.S.ferts) ctx.S.ferts={}; ctx.S.ferts.shiny = (ctx.S.ferts.shiny || 0) + amount; }
     else if (CROPS && CROPS[id]) {
@@ -433,7 +471,7 @@ function renderTradeRoom() {
     body.innerHTML = `
         <div class="trade-split">
             <div class="trade-col">
-                <div class="trade-header">Bạn ${myLock ? '<span style="color:#388e3c">✓</span>' : ''} ${myConfirm ? '<span style="color:#2e7d32; font-size:10px;">(Đã XN)</span>' : ''}</div>
+                <div class="trade-header">${ctx.S.username || 'Bạn'} ${myLock ? '<span style="color:#388e3c">✓</span>' : ''} ${myConfirm ? '<span style="color:#2e7d32; font-size:10px;">(Đã XN)</span>' : ''}</div>
                 <div class="trade-items">${myHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Trống</div>'}</div>
                 <div class="trade-actions">
                     <button class="buy ${myLock ? 'plain' : ''}" onclick="FarmAll.uiToggleLock()" style="width:100%; text-align:center;">${myLock ? 'Mở khoá' : 'Sẵn sàng'}</button>
@@ -441,7 +479,7 @@ function renderTradeRoom() {
                 </div>
             </div>
             <div class="trade-col">
-                <div class="trade-header">Đối tác ${theirLock ? '<span style="color:#388e3c">✓</span>' : ''} ${theirConfirm ? '<span style="color:#2e7d32; font-size:10px;">(Đã XN)</span>' : ''}</div>
+                <div class="trade-header">${partnerName} ${theirLock ? '<span style="color:#388e3c">✓</span>' : ''} ${theirConfirm ? '<span style="color:#2e7d32; font-size:10px;">(Đã XN)</span>' : ''}</div>
                 <div class="trade-items">${theirHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Trống</div>'}</div>
             </div>
         </div>
@@ -482,7 +520,7 @@ export function uiOpenAddItem() {
     
     let catTickets = '';
     ['norm', 'spec', 'super'].forEach(k => { if (ctx.S.tickets && ctx.S.tickets[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.tickets[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.tickets[k]})</div>`; });
-    ['prism', 'star'].forEach(k => { if (ctx.S.shards && ctx.S.shards[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.shards[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.shards[k]})</div>`; });
+    ['prism', 'star', 'legend'].forEach(k => { if (ctx.S.shards && ctx.S.shards[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.shards[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.shards[k]})</div>`; });
     
     let catFerts = '';
     ['compost', 'shiny'].forEach(k => { if (ctx.S.ferts && ctx.S.ferts[k] > 0) catFerts += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.ferts[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.ferts[k]})</div>`; });
