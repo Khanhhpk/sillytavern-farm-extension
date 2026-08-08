@@ -214,7 +214,7 @@ export function openPassDlg(k) {
 export function openBuyDlg(kind, id, returnTo = 'shop') {
   let def, price, name;
   if (kind === 'ticket') {
-    price = id === 'super' ? 500000 : (id === 'norm' ? 1000 : 5000);
+    price = id === 'super' ? 100000 : (id === 'norm' ? 1000 : 5000);
     name = id === 'super' ? 'Vé Quay Siêu Cường' : (id === 'norm' ? 'Vé Quay Thường' : 'Vé Quay Đặc Biệt');
   } else {
     def = kind === 'seed' ? CROPS[id] : FERTS[id];

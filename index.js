@@ -4368,7 +4368,7 @@ function openGachaModal() {
         <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
           <span class="buy" id="gachaBuyNormBtn" style="padding:4px 8px; font-size:11px;">+ V\xE9 Th\u01B0\u1EDDng (1000G)</span>
           <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 \u0110\u1EB7c bi\u1EC7t (5000G)</span>
-          <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 Si\xEAu c\u01B0\u1EDDng (500KG)</span>
+          <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 Si\xEAu c\u01B0\u1EDDng (100KG)</span>
         </div>
         <div style="margin-top:4px;">
           <span class="buy" id="gachaRatesBtn" style="padding:4px 12px; font-size:12px; background:#4a8098; border:1px solid #2a6078; color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:6px;">${spriteSVG("gachaRatesIcon", 18)} Xem T\u1EC9 L\u1EC7 Gachapon</span>
@@ -4515,7 +4515,7 @@ function openGachaModal() {
     const haveTickets = ctx.S.tickets?.[ticketType] || 0;
     if (haveTickets < count) {
       const missing = count - haveTickets;
-      const priceMap = { norm: 1e3, spec: 5e3, super: 5e5 };
+      const priceMap = { norm: 1e3, spec: 5e3, super: 1e5 };
       const ticketPrice = priceMap[ticketType] || 0;
       const cost = missing * ticketPrice;
       const tName = ticketType === "super" ? "Si\xEAu c\u01B0\u1EDDng" : ticketType === "spec" ? "\u0110\u1EB7c bi\u1EC7t" : "Th\u01B0\u1EDDng";
@@ -5071,8 +5071,8 @@ function openPanel(kind) {
           <span class="buy${ctx.S.coins < 5e3 ? " off" : ""}" data-buyticket="spec">Mua</span></div>
         <div class="item"><span class="icon">${spriteSVG("ticketSuper", 32)}</span>
           <span class="info"><div class="name" style="color:#ff4500;">V\xE9 Quay Si\xEAu C\u01B0\u1EDDng</div><div class="meta">D\xF9ng quay 1 ph\xE1t 100% ra b\u1EA3o v\u1EADt AI (t\u1EEB Hi\u1EBFm \u0111\u1EBFn Huy\u1EC1n Tho\u1EA1i) \xB7 \u0110ang c\xF3 ${ctx.S.tickets?.super || 0}</div></span>
-          <span class="price">${spriteSVG("coin", 16)}500,000</span>
-          <span class="buy${ctx.S.coins < 5e5 ? " off" : ""}" data-buyticket="super" style="background:#ff4500; border:1px solid #cc3700; color:#fff;">Mua</span></div>`;
+          <span class="price">${spriteSVG("coin", 16)}100,000</span>
+          <span class="buy${ctx.S.coins < 1e5 ? " off" : ""}" data-buyticket="super" style="background:#ff4500; border:1px solid #cc3700; color:#fff;">Mua</span></div>`;
     } else {
       items = Object.keys(PASSES).map((k) => {
         const ps = PASSES[k];
@@ -6516,7 +6516,7 @@ function openPassDlg(k) {
 function openBuyDlg(kind, id, returnTo = "shop") {
   let def, price, name;
   if (kind === "ticket") {
-    price = id === "super" ? 5e5 : id === "norm" ? 1e3 : 5e3;
+    price = id === "super" ? 1e5 : id === "norm" ? 1e3 : 5e3;
     name = id === "super" ? "V\xE9 Quay Si\xEAu C\u01B0\u1EDDng" : id === "norm" ? "V\xE9 Quay Th\u01B0\u1EDDng" : "V\xE9 Quay \u0110\u1EB7c Bi\u1EC7t";
   } else {
     def = kind === "seed" ? CROPS[id] : FERTS[id];
