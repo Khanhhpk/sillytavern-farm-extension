@@ -711,7 +711,7 @@ export function openGachaModal() {
           scCard.style.boxShadow = `0 0 30px ${u.color}80`;
           scIcon.innerHTML = spriteSVG(u.spKey, 64);
           scName.textContent = u.name;
-          scDesc.textContent = u.desc;
+          scDesc.innerHTML = u.desc;
           showcaseOverlay.style.display = 'flex';
           
           scCard.style.animation = 'none';
