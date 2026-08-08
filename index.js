@@ -3965,7 +3965,9 @@ V\u1EF1c l\u1ED1i ch\u01A1i quy\u1EBFt \u0111\u1ECBnh "k\u1EF3 v\u1EADt n\xE0y c
 // src/gacha.js
 function initGachaState() {
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+  if (ctx.S.tickets.super === void 0) ctx.S.tickets.super = 0;
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { spec: 0, super: 0 };
+  if (ctx.S.gachaPity.super === void 0) ctx.S.gachaPity.super = 0;
   if (!ctx.S.uniques) ctx.S.uniques = {};
 }
 async function pMap(array, asyncFn, concurrency) {

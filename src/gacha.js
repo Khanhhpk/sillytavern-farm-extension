@@ -16,7 +16,11 @@ export const GACHA_SPEC_PRICE = 5000;
 
 export function initGachaState() {
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+  if (ctx.S.tickets.super === undefined) ctx.S.tickets.super = 0;
+  
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { spec: 0, super: 0 };
+  if (ctx.S.gachaPity.super === undefined) ctx.S.gachaPity.super = 0;
+  
   if (!ctx.S.uniques) ctx.S.uniques = {};
 }
 
