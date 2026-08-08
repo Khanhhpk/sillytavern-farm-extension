@@ -42,10 +42,10 @@ async function pMap(array, asyncFn, concurrency) {
 export function generateProcedural32x32Sprite(rarity) {
   const map = [];
   const borderChar = 'K';
-  const mainChar = rarity === 'Huyền thoại' ? 'C' : rarity === 'Sử thi' ? 'V' : 'B';
-  const subChar = rarity === 'Huyền thoại' ? 'Y' : rarity === 'Sử thi' ? 'v' : 'b';
+  const mainChar = rarity === 'Huyền thoại' ? 'C' : rarity === 'Sử thi' ? 'V' : rarity === 'Hiếm' ? 'B' : rarity === 'Thường' ? 'G' : 'D';
+  const subChar = rarity === 'Huyền thoại' ? 'Y' : rarity === 'Sử thi' ? 'v' : rarity === 'Hiếm' ? 'b' : rarity === 'Thường' ? 'g' : 'd';
   const highlightChar = 'W';
-  const accentChar = rarity === 'Huyền thoại' ? 'R' : rarity === 'Sử thi' ? 'F' : 'E';
+  const accentChar = rarity === 'Huyền thoại' ? 'R' : rarity === 'Sử thi' ? 'F' : rarity === 'Hiếm' ? 'E' : rarity === 'Thường' ? 'L' : 'D';
 
   const type = Math.floor(Math.random() * 4); 
 
@@ -114,13 +114,13 @@ ${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể)'}
 Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối cảnh này, nếu không thì tự do sáng tạo. Tuy nhiên, KHÔNG ĐƯỢC tùy chỉnh kết quả thành "đáp án giải quyết khủng hoảng trước mắt". Kỳ vật phải duy trì tính độc lập ngẫu nhiên.`;
       
       thinkingInstructions = `1. TÌM Ý TƯỞNG: Đọc kỹ bối cảnh thế giới được cung cấp. Xác định Vực đề tài và Vực lối chơi.
-2. CƠ CHẾ: Căn cứ vào độ hiếm [${rarity}] để thiết lập cơ chế. Phải có lợi tuyệt đối, không có cái giá phải trả, thao tác cụ thể, cực kỳ thú vị và phá vỡ sáo rỗng (anti-cliché).
+2. CƠ CHẾ: Căn cứ vào độ hiếm [${rarity}] để thiết lập cơ chế. Thao tác cụ thể, cực kỳ thú vị và phá vỡ sáo rỗng (anti-cliché).
 3. VẼ PIXEL: Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!`;
     } else {
       contextStr = `KHÔNG CÓ CHỦ ĐỀ CỐ ĐỊNH. Để đảm bảo tính ngẫu nhiên tuyệt đối, bạn PHẢI tự bốc thăm Vực đề tài và Vực lối chơi bất kỳ. Mọi thứ trong vũ trụ đều có thể trở thành kỳ vật.`;
       
       thinkingInstructions = `1. BỐC THĂM CHỦ ĐỀ: Bốc thăm ngẫu nhiên Vực đề tài (Khí vật, sinh mệnh, quy tắc, không gian...) và Vực lối chơi (Xử lý thông tin, cải tạo bối cảnh, giao dịch đánh cược...).
-2. CƠ CHẾ: Căn cứ vào độ hiếm [${rarity}] để thiết lập cơ chế. Phải có lợi tuyệt đối, không có cái giá phải trả, thao tác cụ thể, cực kỳ thú vị và phá vỡ sáo rỗng (anti-cliché).
+2. CƠ CHẾ: Căn cứ vào độ hiếm [${rarity}] để thiết lập cơ chế. Thao tác cụ thể, cực kỳ thú vị và phá vỡ sáo rỗng (anti-cliché).
 3. VẼ PIXEL: Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!`;
     }
 
@@ -128,7 +128,11 @@ Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối c�
       ? "Thước đo ảnh hưởng to lớn (quyết định trật tự, quy tắc, hệ sinh thái, hoặc thao túng cả phương thế giới). Dù quyền bính to lớn nhưng phải CỤ THỂ, thao tác được, không viết khái niệm sáo rỗng."
       : rarity === 'Sử thi' 
       ? "Thước đo ảnh hưởng cục bộ bối cảnh (thay đổi một khu vực, một nhóm, tạo cơ chế thu lợi dài hạn hoặc ưu thế chiến lược). Có giá trị kết hợp và kinh doanh."
-      : "Thước đo ảnh hưởng cá thể (công cụ nhỏ thay đổi một lần tương tác). Yêu cầu nhỏ mà chuẩn, nhẹ mà khéo, lập tức tạo ra ưu thế tinh xảo và chơi vui ngay lập tức.";
+      : rarity === 'Hiếm'
+      ? "Thước đo ảnh hưởng cá thể (công cụ nhỏ thay đổi một lần tương tác). Yêu cầu nhỏ mà chuẩn, nhẹ mà khéo, lập tức tạo ra ưu thế tinh xảo và chơi vui ngay lập tức."
+      : rarity === 'Thường'
+      ? "Thước đo tiện ích. Những công cụ nhỏ giúp ích cho đời sống hàng ngày hoặc tương tác nhỏ. Vui vẻ, tiện lợi."
+      : "Thước đo phế phẩm (Junk). Đồ vật tưởng chừng vô dụng, buồn cười, tấu hài, công dụng kỳ quặc nhưng đôi khi có thể dùng trong các tình huống oái ăm.";
 
     const sysPrompt = `Bạn là một AI thiết kế "Kỳ vật dị giới" (Otherworldly Artifact) và chuyên gia Pixel Art (32x32).
 Hãy sáng tạo 1 KỲ VẬT ĐỘC NHẤT phẩm chất [${rarity}].
@@ -152,8 +156,8 @@ QUY TẮC ĐẦU RA BẮT BUỘC:
 Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json chứa cấu trúc:
 {
   "name": "Tên kỳ vật (2~7 chữ, ấn tượng, gợi sự tò mò)",
-  "desc": "Mô tả ngắn gọn CƠ CHẾ và CÁCH SỬ DỤNG của kỳ vật (dưới 35 chữ). Phải rõ ràng, thú vị, độc lạ.",
-  "price": Số nguyên định giá. Gợi ý cơ bản: ${rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : 2500}. NGHIÊM CẤM LẠM PHÁT, giá trị tối đa tuyệt đối KHÔNG ĐƯỢC VƯỢT QUÁ ${rarity === 'Huyền thoại' ? 50000 : rarity === 'Sử thi' ? 20000 : 8000}G,
+  "desc": "Mô tả ngắn gọn CƠ CHẾ và CÁCH SỬ DỤNG của kỳ vật (dưới 100 chữ). Phải rõ ràng, thú vị, độc lạ.",
+  "price": Số nguyên định giá. Gợi ý cơ bản: ${rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : rarity === 'Hiếm' ? 2500 : rarity === 'Thường' ? 500 : 100}. NGHIÊM CẤM LẠM PHÁT, giá trị tối đa tuyệt đối KHÔNG ĐƯỢC VƯỢT QUÁ ${rarity === 'Huyền thoại' ? 50000 : rarity === 'Sử thi' ? 20000 : rarity === 'Hiếm' ? 8000 : rarity === 'Thường' ? 2000 : 500}G,
   "spriteMap": [ mảng gồm ĐÚNG 32 chuỗi, mỗi chuỗi DÀI CHÍNH XÁC 32 ký tự chỉ dùng ký tự Bảng màu và dấu '.' cho điểm trong suốt ]
 }`;
 
@@ -207,7 +211,7 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
         
         // Đảm bảo có giá để hiển thị, nếu AI thiếu thì fallback
         if (typeof o.price !== 'number') {
-           o.price = rarity === 'Sử thi' ? 8000 : (rarity === 'Huyền thoại' ? 20000 : 2500);
+           o.price = rarity === 'Sử thi' ? 8000 : (rarity === 'Huyền thoại' ? 20000 : (rarity === 'Hiếm' ? 2500 : (rarity === 'Thường' ? 500 : 100)));
         }
         return o;
       }
@@ -220,18 +224,22 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
 export async function generateUniqueItem(ticketType) {
   initGachaState();
   const roll = Math.random() * 100;
-  let rarity = 'Hiếm';
-  let color = '#4a90e2';
-  let sellPrice = 2500;
+  let rarity = 'Rác';
+  let color = '#9e9e9e';
+  let sellPrice = 100;
 
   if (ticketType === 'super') {
     rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000;
   } else if (ticketType === 'spec') {
-    if (roll < 20) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
-    else if (roll < 65) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
+    if (roll < 10) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
+    else if (roll < 40) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
+    else if (roll < 80) { rarity = 'Hiếm'; color = '#4a90e2'; sellPrice = 2500; }
+    else { rarity = 'Thường'; color = '#b0bec5'; sellPrice = 500; }
   } else {
-    if (roll < 5) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
-    else if (roll < 30) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
+    if (roll < 2) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
+    else if (roll < 10) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
+    else if (roll < 30) { rarity = 'Hiếm'; color = '#4a90e2'; sellPrice = 2500; }
+    else if (roll < 70) { rarity = 'Thường'; color = '#b0bec5'; sellPrice = 500; }
   }
 
   const timestamp = now();
