@@ -14636,7 +14636,6 @@ var init_bundler = __esm({
 // src/trade.js
 function getItemName(id) {
   if (id === "coins") return "Ti\u1EC1n xu";
-  if (CROPS && CROPS[id]) return CROPS[id].name;
   if (id === "norm") return "V\xE9 Th\u01B0\u1EDDng";
   if (id === "spec") return "V\xE9 \u0110\u1EB7c Bi\u1EC7t";
   if (id === "super") return "V\xE9 Si\xEAu C\u1EA5p";
@@ -14648,11 +14647,15 @@ function getItemName(id) {
     const item = ctx.S.uniques?.[id] || theirUniques[id];
     return item?.name || "V\u1EADt ph\u1EA9m Gacha";
   }
+  if (id.includes("@") && !id.startsWith("unique@")) {
+    const parts = id.split("@");
+    return (parts[1] ? parts[1] + "\xB7" : "") + (CROPS[parts[0]] || { name: "?" }).name;
+  }
+  if (CROPS && CROPS[id]) return CROPS[id].name;
   return id;
 }
 function getItemDesc(id) {
   if (id === "coins") return "D\xF9ng \u0111\u1EC3 mua \u0111\u1ED3 trong c\u1EEDa h\xE0ng";
-  if (CROPS && CROPS[id]) return CROPS[id].desc || "";
   if (id === "norm") return "V\xE9 quay Gacha th\u01B0\u1EDDng";
   if (id === "spec") return "V\xE9 quay Gacha \u0111\u1EB7c bi\u1EC7t";
   if (id === "super") return "V\xE9 quay Gacha si\xEAu c\u1EA5p";
@@ -14664,11 +14667,14 @@ function getItemDesc(id) {
     const item = ctx.S.uniques?.[id] || theirUniques[id];
     return item?.desc ? item.desc.replace(/"/g, "&quot;") : "V\u1EADt ph\u1EA9m b\xED \u1EA9n";
   }
+  if (id.includes("@") && !id.startsWith("unique@")) {
+    return mutDescOf(id) || theirMutDescs[id] || "N\xF4ng s\u1EA3n \u0111\u1ED9t bi\u1EBFn k\u1EF3 l\u1EA1";
+  }
+  if (CROPS && CROPS[id]) return CROPS[id].desc || "";
   return "";
 }
 function getItemIcon(id) {
   if (id === "coins") return spriteSVG("coin", 20);
-  if (CROPS && CROPS[id]) return spriteSVG(id, 20);
   if (id === "norm" || id === "spec" || id === "super") return spriteSVG("tk_" + id, 20);
   if (id === "prism" || id === "star") return spriteSVG("shard_" + id, 20);
   if (id === "compost" || id === "shiny") return spriteSVG("fert_" + id, 20);
@@ -14676,6 +14682,11 @@ function getItemIcon(id) {
     const item = ctx.S.uniques?.[id] || theirUniques[id] || { sp: "strawhat", color: "#4a90e2" };
     return `<span style="color:${item.color}">${spriteSVG(item.sp, 20)}</span>`;
   }
+  if (id.includes("@") && !id.startsWith("unique@")) {
+    const parts = id.split("@");
+    return spriteSVG(CROPS[parts[0]]?.sp || "sprout", 20);
+  }
+  if (CROPS && CROPS[id]) return spriteSVG(CROPS[id].sp || id, 20);
   return "";
 }
 function openTradeModal() {
@@ -14701,6 +14712,7 @@ function resetTradeState() {
   myConfirm = false;
   theirConfirm = false;
   theirUniques = {};
+  theirMutDescs = {};
   isConnected = false;
 }
 function renderTradeMenu() {
@@ -14790,6 +14802,7 @@ function handleNetData(data) {
         }
       }
     }
+    theirMutDescs = data.mutDescs || {};
     renderTradeRoom();
   } else if (data.type === "LOCK") {
     theirLock = data.lock;
@@ -14859,7 +14872,7 @@ function addInventory(id, amount) {
       if (!ctx.S.bag) ctx.S.bag = {};
       ctx.S.bag[id] = (ctx.S.bag[id] || 0) + amount;
     }
-  } else if (id.startsWith("unique@")) {
+  } else if (id.startsWith("unique@") || id.includes("@")) {
     if (!ctx.S.bag) ctx.S.bag = {};
     ctx.S.bag[id] = (ctx.S.bag[id] || 0) + amount;
   }
@@ -14884,6 +14897,11 @@ function executeTrade() {
     if (id.startsWith("unique@") && theirUniques[id]) {
       if (!ctx.S.uniques) ctx.S.uniques = {};
       ctx.S.uniques[id] = theirUniques[id];
+    } else if (id.includes("@") && !id.startsWith("unique@") && theirMutDescs[id]) {
+      if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
+      const parts = id.split("@");
+      const mutCode = parts.slice(1).join("@");
+      ctx.S.mutDesc[mutCode + "@" + (CROPS[parts[0]] || { name: "" }).name] = theirMutDescs[id];
     }
   }
   save(true);
@@ -14960,12 +14978,16 @@ function renderTradeRoom() {
 }
 function sendItemsUpdate() {
   const uniques = {};
+  const mutDescs = {};
   for (const id in myItems) {
     if (id.startsWith("unique@") && ctx.S.uniques?.[id]) {
       uniques[id] = ctx.S.uniques[id];
+    } else if (id.includes("@") && !id.startsWith("unique@")) {
+      const desc = mutDescOf(id);
+      if (desc) mutDescs[id] = desc;
     }
   }
-  sendData({ type: "UPDATE_ITEMS", items: myItems, uniques });
+  sendData({ type: "UPDATE_ITEMS", items: myItems, uniques, mutDescs });
 }
 function uiRemoveTradeItem(id) {
   if (myLock) return;
@@ -15041,7 +15063,7 @@ function uiConfirmAdd() {
   renderTradeRoom();
   uiCloseAddItem();
 }
-var peer, conn, myItems, theirItems, myLock, theirLock, myConfirm, theirConfirm, isConnected, theirUniques, selectedTradeId, selectedTradeMax;
+var peer, conn, myItems, theirItems, myLock, theirLock, myConfirm, theirConfirm, isConnected, theirUniques, theirMutDescs, selectedTradeId, selectedTradeMax;
 var init_trade = __esm({
   "src/trade.js"() {
     init_store();
@@ -15058,6 +15080,7 @@ var init_trade = __esm({
     theirConfirm = false;
     isConnected = false;
     theirUniques = {};
+    theirMutDescs = {};
     selectedTradeId = null;
     selectedTradeMax = 0;
   }

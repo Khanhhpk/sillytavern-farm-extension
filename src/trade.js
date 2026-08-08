@@ -13,10 +13,10 @@ let myConfirm = false;
 let theirConfirm = false;
 let isConnected = false;
 let theirUniques = {};
+let theirMutDescs = {};
 
 function getItemName(id) {
     if (id === 'coins') return 'Tiền xu';
-    if (CROPS && CROPS[id]) return CROPS[id].name;
     if (id === 'norm') return 'Vé Thường';
     if (id === 'spec') return 'Vé Đặc Biệt';
     if (id === 'super') return 'Vé Siêu Cấp';
@@ -28,12 +28,16 @@ function getItemName(id) {
         const item = ctx.S.uniques?.[id] || theirUniques[id];
         return item?.name || 'Vật phẩm Gacha';
     }
+    if (id.includes('@') && !id.startsWith('unique@')) {
+        const parts = id.split('@');
+        return (parts[1] ? parts[1] + '·' : '') + (CROPS[parts[0]] || { name: '?' }).name;
+    }
+    if (CROPS && CROPS[id]) return CROPS[id].name;
     return id;
 }
 
 function getItemDesc(id) {
     if (id === 'coins') return 'Dùng để mua đồ trong cửa hàng';
-    if (CROPS && CROPS[id]) return CROPS[id].desc || '';
     if (id === 'norm') return 'Vé quay Gacha thường';
     if (id === 'spec') return 'Vé quay Gacha đặc biệt';
     if (id === 'super') return 'Vé quay Gacha siêu cấp';
@@ -45,12 +49,15 @@ function getItemDesc(id) {
         const item = ctx.S.uniques?.[id] || theirUniques[id];
         return item?.desc ? item.desc.replace(/"/g, '&quot;') : 'Vật phẩm bí ẩn';
     }
+    if (id.includes('@') && !id.startsWith('unique@')) {
+        return All.mutDescOf(id) || theirMutDescs[id] || 'Nông sản đột biến kỳ lạ';
+    }
+    if (CROPS && CROPS[id]) return CROPS[id].desc || '';
     return '';
 }
 
 function getItemIcon(id) {
     if (id === 'coins') return All.spriteSVG('coin', 20);
-    if (CROPS && CROPS[id]) return All.spriteSVG(id, 20);
     if (id === 'norm' || id === 'spec' || id === 'super') return All.spriteSVG('tk_' + id, 20);
     if (id === 'prism' || id === 'star') return All.spriteSVG('shard_' + id, 20);
     if (id === 'compost' || id === 'shiny') return All.spriteSVG('fert_' + id, 20);
@@ -58,6 +65,11 @@ function getItemIcon(id) {
         const item = ctx.S.uniques?.[id] || theirUniques[id] || { sp: 'strawhat', color: '#4a90e2' };
         return `<span style="color:${item.color}">${All.spriteSVG(item.sp, 20)}</span>`;
     }
+    if (id.includes('@') && !id.startsWith('unique@')) {
+        const parts = id.split('@');
+        return All.spriteSVG(CROPS[parts[0]]?.sp || 'sprout', 20);
+    }
+    if (CROPS && CROPS[id]) return All.spriteSVG(CROPS[id].sp || id, 20);
     return '';
 }
 
@@ -86,6 +98,7 @@ function resetTradeState() {
     myConfirm = false;
     theirConfirm = false;
     theirUniques = {};
+    theirMutDescs = {};
     isConnected = false;
 }
 
@@ -189,6 +202,7 @@ function handleNetData(data) {
                 }
             }
         }
+        theirMutDescs = data.mutDescs || {};
         renderTradeRoom();
     } else if (data.type === 'LOCK') {
         theirLock = data.lock;
@@ -260,7 +274,7 @@ function addInventory(id, amount) {
             if (!ctx.S.bag) ctx.S.bag = {};
             ctx.S.bag[id] = (ctx.S.bag[id] || 0) + amount;
         }
-    } else if (id.startsWith('unique@')) {
+    } else if (id.startsWith('unique@') || id.includes('@')) {
         if (!ctx.S.bag) ctx.S.bag = {};
         ctx.S.bag[id] = (ctx.S.bag[id] || 0) + amount;
     }
@@ -289,6 +303,11 @@ function executeTrade() {
         if (id.startsWith('unique@') && theirUniques[id]) {
             if (!ctx.S.uniques) ctx.S.uniques = {};
             ctx.S.uniques[id] = theirUniques[id];
+        } else if (id.includes('@') && !id.startsWith('unique@') && theirMutDescs[id]) {
+            if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
+            const parts = id.split('@');
+            const mutCode = parts.slice(1).join('@');
+            ctx.S.mutDesc[mutCode + '@' + (CROPS[parts[0]] || { name: '' }).name] = theirMutDescs[id];
         }
     }
     
@@ -373,12 +392,16 @@ function renderTradeRoom() {
 
 function sendItemsUpdate() {
     const uniques = {};
+    const mutDescs = {};
     for (const id in myItems) {
         if (id.startsWith('unique@') && ctx.S.uniques?.[id]) {
             uniques[id] = ctx.S.uniques[id];
+        } else if (id.includes('@') && !id.startsWith('unique@')) {
+            const desc = All.mutDescOf(id);
+            if (desc) mutDescs[id] = desc;
         }
     }
-    sendData({ type: 'UPDATE_ITEMS', items: myItems, uniques: uniques });
+    sendData({ type: 'UPDATE_ITEMS', items: myItems, uniques: uniques, mutDescs: mutDescs });
 }
 
 export function uiRemoveTradeItem(id) {
