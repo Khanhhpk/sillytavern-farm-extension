@@ -14750,6 +14750,7 @@ function resetTradeState() {
   theirMutDescs = {};
   isConnected = false;
   tradeCompleted = false;
+  cheatDetected = false;
 }
 function renderTradeMenu() {
   const body = $id("trade-body");
@@ -14821,7 +14822,7 @@ function setupConnection() {
     handleNetData(data);
   });
   conn.on("close", () => {
-    if (!tradeCompleted) {
+    if (!tradeCompleted && !cheatDetected) {
       toast("\u0110\u1ED1i t\xE1c \u0111\xE3 ng\u1EAFt k\u1EBFt n\u1ED1i!");
     }
     closeTradeModal();
@@ -14865,10 +14866,17 @@ function handleNetData(data) {
     }
   } else if (data.type === "HELLO") {
     if (data.playerId === ctx.S.playerId) {
+      cheatDetected = true;
       toast("Ph\xE1t hi\u1EC7n gian l\u1EADn: Kh\xF4ng th\u1EC3 giao d\u1ECBch v\u1EDBi ch\xEDnh m\xECnh (Tr\xF9ng ID Ng\u01B0\u1EDDi Ch\u01A1i)!");
+      sendData({ type: "CHEAT_DETECTED" });
       if (conn) conn.close();
       closeTradeModal();
     }
+  } else if (data.type === "CHEAT_DETECTED") {
+    cheatDetected = true;
+    toast("Ph\xE1t hi\u1EC7n gian l\u1EADn: Kh\xF4ng th\u1EC3 giao d\u1ECBch v\u1EDBi ch\xEDnh m\xECnh (Tr\xF9ng ID Ng\u01B0\u1EDDi Ch\u01A1i)!");
+    if (conn) conn.close();
+    closeTradeModal();
   }
 }
 function sendData(data) {
@@ -15120,7 +15128,7 @@ function uiConfirmAdd() {
   renderTradeRoom();
   uiCloseAddItem();
 }
-var peer, conn, myItems, theirItems, myLock, theirLock, myConfirm, theirConfirm, isConnected, tradeCompleted, theirUniques, theirMutDescs, selectedTradeId, selectedTradeMax;
+var peer, conn, myItems, theirItems, myLock, theirLock, myConfirm, theirConfirm, isConnected, tradeCompleted, cheatDetected, theirUniques, theirMutDescs, selectedTradeId, selectedTradeMax;
 var init_trade = __esm({
   "src/trade.js"() {
     init_store();
@@ -15137,6 +15145,7 @@ var init_trade = __esm({
     theirConfirm = false;
     isConnected = false;
     tradeCompleted = false;
+    cheatDetected = false;
     theirUniques = {};
     theirMutDescs = {};
     selectedTradeId = null;

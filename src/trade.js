@@ -13,6 +13,7 @@ let myConfirm = false;
 let theirConfirm = false;
 let isConnected = false;
 let tradeCompleted = false;
+let cheatDetected = false;
 let theirUniques = {};
 let theirMutDescs = {};
 
@@ -102,6 +103,7 @@ function resetTradeState() {
     theirMutDescs = {};
     isConnected = false;
     tradeCompleted = false;
+    cheatDetected = false;
 }
 
 function renderTradeMenu() {
@@ -186,7 +188,7 @@ function setupConnection() {
         handleNetData(data);
     });
     conn.on('close', () => {
-        if (!tradeCompleted) {
+        if (!tradeCompleted && !cheatDetected) {
             All.toast('Đối tác đã ngắt kết nối!');
         }
         closeTradeModal();
@@ -234,10 +236,17 @@ function handleNetData(data) {
         }
     } else if (data.type === 'HELLO') {
         if (data.playerId === ctx.S.playerId) {
+            cheatDetected = true;
             All.toast('Phát hiện gian lận: Không thể giao dịch với chính mình (Trùng ID Người Chơi)!');
+            sendData({ type: 'CHEAT_DETECTED' });
             if (conn) conn.close();
             closeTradeModal();
         }
+    } else if (data.type === 'CHEAT_DETECTED') {
+        cheatDetected = true;
+        All.toast('Phát hiện gian lận: Không thể giao dịch với chính mình (Trùng ID Người Chơi)!');
+        if (conn) conn.close();
+        closeTradeModal();
     }
 }
 
