@@ -5259,6 +5259,20 @@ function openPanel(kind) {
     }
     if (bagTab === "gacha") {
       const gachaKeys = Object.keys(ctx.S.bag || {}).filter((k) => k.startsWith("unique@"));
+      const rarityVal = { "Th\u01B0\u1EDDng": 1, "Hi\u1EBFm": 2, "S\u1EED thi": 3, "Huy\u1EC1n tho\u1EA1i": 4 };
+      if (gachaSortMode === "desc") {
+        gachaKeys.sort((a, b) => {
+          const rA = ctx.S.uniques?.[a]?.rarity || "Th\u01B0\u1EDDng";
+          const rB = ctx.S.uniques?.[b]?.rarity || "Th\u01B0\u1EDDng";
+          return (rarityVal[rB] || 0) - (rarityVal[rA] || 0);
+        });
+      } else if (gachaSortMode === "asc") {
+        gachaKeys.sort((a, b) => {
+          const rA = ctx.S.uniques?.[a]?.rarity || "Th\u01B0\u1EDDng";
+          const rB = ctx.S.uniques?.[b]?.rarity || "Th\u01B0\u1EDDng";
+          return (rarityVal[rA] || 0) - (rarityVal[rB] || 0);
+        });
+      }
       const rows2 = gachaKeys.map((key) => {
         const n = ctx.S.bag[key];
         const item = ctx.S.uniques?.[key] || { name: "V\u1EADt ph\u1EA9m Gacha", rarity: "\u0110\u1EB7c bi\u1EC7t", desc: "", color: "#4a90e2", sell: 2500, sp: "strawhat" };
@@ -5281,15 +5295,18 @@ function openPanel(kind) {
       }).join("");
       let sellBar2 = "";
       if (gachaKeys.length) {
+        const sortLabel = gachaSortMode === "default" ? "L\u1ECDc: M\u1EDBi nh\u1EA5t" : gachaSortMode === "desc" ? "L\u1ECDc: Hi\u1EBFm gi\u1EA3m d\u1EA7n" : "L\u1ECDc: Hi\u1EBFm t\u0103ng d\u1EA7n";
         if (bagSellMode) {
           const total = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.bag[k]).reduce((s, k) => s + bagPrice(k) * ctx.S.bag[k], 0);
           sellBar2 = `<div class="note" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:8px;white-space:nowrap;overflow:hidden">
             <b style="overflow:hidden;text-overflow:ellipsis">${total > 0 ? "T\u1ED5ng " + total.toLocaleString() + " G" : "B\u1EA5m v\xE0o t\u1EEBng m\u1EE5c \u0111\u1EC3 tick ch\u1ECDn th\u1EE9 mu\u1ED1n b\xE1n"}</b><span style="flex:1"></span>
+            <span class="buy plain" id="sortGachaBtn" style="padding:4px 8px;font-size:11px;flex:none">${sortLabel}</span>
             <span class="buy" id="sellSelGo" style="padding:4px 10px;font-size:11px;flex:none">B\xE1n</span>
             <span class="buy plain" id="sellSelNo" style="padding:4px 10px;font-size:11px;flex:none">Hu\u1EF7</span></div>`;
         } else {
           sellBar2 = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
             <div class="note" style="flex:1">B\u1EA5m \xAB!\xBB \u0111\u1EC3 l\u1EA5y \u0111\u1ED3 Gacha ra mang v\xE0o c\u1ED1t truy\u1EC7n</div>
+            <span class="buy plain" id="sortGachaBtn" style="padding:4px 8px;font-size:11px;flex:none">${sortLabel}</span>
             <span class="buy" id="sellModeGo" style="flex:none">B\xE1n m\u1ED9t ch\u1EA1m</span></div>`;
         }
       }
@@ -5304,6 +5321,11 @@ function openPanel(kind) {
       if (smGo2) smGo2.addEventListener("click", () => {
         bagSellMode = true;
         bagSel = {};
+        openPanel("bag");
+      });
+      const sortBtn = $id("sortGachaBtn");
+      if (sortBtn) sortBtn.addEventListener("click", () => {
+        gachaSortMode = gachaSortMode === "default" ? "desc" : gachaSortMode === "desc" ? "asc" : "default";
         openPanel("bag");
       });
       $id("mbody").querySelectorAll("[data-selkey]").forEach((el) => el.addEventListener("click", () => {
@@ -5677,7 +5699,7 @@ function initShop() {
   });
   sh.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => openPanel(b.dataset.open)));
 }
-var shopTab, bagTab, bagSellMode, bagSel;
+var shopTab, bagTab, bagSellMode, bagSel, gachaSortMode;
 var init_shop = __esm({
   "src/shop.js"() {
     init_store();
@@ -5698,6 +5720,7 @@ var init_shop = __esm({
     bagTab = "crop";
     bagSellMode = false;
     bagSel = {};
+    gachaSortMode = "default";
   }
 });
 
@@ -15902,6 +15925,7 @@ __export(all_exports, {
   fmtLeft: () => fmtLeft,
   freshState: () => freshState,
   fxLayer: () => fxLayer,
+  gachaSortMode: () => gachaSortMode,
   gaitOf: () => gaitOf,
   gameDay: () => gameDay,
   generateAIUniqueItemData: () => generateAIUniqueItemData,

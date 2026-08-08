@@ -32,6 +32,7 @@ export function closeModal() {
 export let shopTab = 'seed';
 export let bagTab = 'crop';
 export let bagSellMode = false, bagSel = {};              // Bán một chạm: chế độ tick chọn (mặc định chọn hết)
+export let gachaSortMode = 'default';
 export function openPanel(kind) {
   if (kind === 'gacha') {
     return openGachaModal();
@@ -214,6 +215,20 @@ export function openPanel(kind) {
     }
     if (bagTab === 'gacha') {
       const gachaKeys = Object.keys(ctx.S.bag || {}).filter(k => k.startsWith('unique@'));
+      const rarityVal = { 'Thường': 1, 'Hiếm': 2, 'Sử thi': 3, 'Huyền thoại': 4 };
+      if (gachaSortMode === 'desc') {
+        gachaKeys.sort((a, b) => {
+          const rA = ctx.S.uniques?.[a]?.rarity || 'Thường';
+          const rB = ctx.S.uniques?.[b]?.rarity || 'Thường';
+          return (rarityVal[rB] || 0) - (rarityVal[rA] || 0);
+        });
+      } else if (gachaSortMode === 'asc') {
+        gachaKeys.sort((a, b) => {
+          const rA = ctx.S.uniques?.[a]?.rarity || 'Thường';
+          const rB = ctx.S.uniques?.[b]?.rarity || 'Thường';
+          return (rarityVal[rA] || 0) - (rarityVal[rB] || 0);
+        });
+      }
       const rows = gachaKeys.map(key => {
         const n = ctx.S.bag[key];
         const item = ctx.S.uniques?.[key] || { name: 'Vật phẩm Gacha', rarity: 'Đặc biệt', desc: '', color: '#4a90e2', sell: 2500, sp: 'strawhat' };
@@ -236,15 +251,18 @@ export function openPanel(kind) {
       }).join('');
       let sellBar = '';
       if (gachaKeys.length) {
+        const sortLabel = gachaSortMode === 'default' ? 'Lọc: Mới nhất' : (gachaSortMode === 'desc' ? 'Lọc: Hiếm giảm dần' : 'Lọc: Hiếm tăng dần');
         if (bagSellMode) {
           const total = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.bag[k]).reduce((s, k) => s + bagPrice(k) * ctx.S.bag[k], 0);
           sellBar = `<div class="note" style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:8px;white-space:nowrap;overflow:hidden">
             <b style="overflow:hidden;text-overflow:ellipsis">${total > 0 ? 'Tổng ' + total.toLocaleString() + ' G' : 'Bấm vào từng mục để tick chọn thứ muốn bán'}</b><span style="flex:1"></span>
+            <span class="buy plain" id="sortGachaBtn" style="padding:4px 8px;font-size:11px;flex:none">${sortLabel}</span>
             <span class="buy" id="sellSelGo" style="padding:4px 10px;font-size:11px;flex:none">Bán</span>
             <span class="buy plain" id="sellSelNo" style="padding:4px 10px;font-size:11px;flex:none">Huỷ</span></div>`;
         } else {
           sellBar = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
             <div class="note" style="flex:1">Bấm «!» để lấy đồ Gacha ra mang vào cốt truyện</div>
+            <span class="buy plain" id="sortGachaBtn" style="padding:4px 8px;font-size:11px;flex:none">${sortLabel}</span>
             <span class="buy" id="sellModeGo" style="flex:none">Bán một chạm</span></div>`;
         }
       }
@@ -257,6 +275,11 @@ export function openPanel(kind) {
       All.$id('mbody').querySelectorAll('[data-takeout]').forEach(b => b.addEventListener('click', () => openTakeout(b.dataset.takeout)));
       const smGo = All.$id('sellModeGo');
       if (smGo) smGo.addEventListener('click', () => { bagSellMode = true; bagSel = {}; openPanel('bag'); });
+      const sortBtn = All.$id('sortGachaBtn');
+      if (sortBtn) sortBtn.addEventListener('click', () => {
+        gachaSortMode = gachaSortMode === 'default' ? 'desc' : (gachaSortMode === 'desc' ? 'asc' : 'default');
+        openPanel('bag');
+      });
       All.$id('mbody').querySelectorAll('[data-selkey]').forEach(el => el.addEventListener('click', () => {
         // @ts-ignore
         bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
