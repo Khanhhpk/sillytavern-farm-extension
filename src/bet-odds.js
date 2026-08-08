@@ -2,7 +2,7 @@
    File này cố ý KHÔNG import gì và KHÔNG đụng tới DOM hay ctx,
    để chạy test bằng `node --test` thẳng trên nó. */
 
-export const POT_CAP = 100000000;        // Trần tiền trên bàn, chặn tràn số
+export const POT_CAP = Number.MAX_SAFE_INTEGER;        // Trần tiền trên bàn, chặn tràn số
 export const HOUSE_RETURN = 97;          // Tử số công thức hệ số: nhà cái giữ lại 3%
 export const MIN_MULT = 1.01;            // Sàn hệ số: thắng mà vẫn lỗ thì rất phản cảm
 

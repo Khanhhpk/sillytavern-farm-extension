@@ -4844,7 +4844,7 @@ function resultLabel(roll, kq, mult, nextAnchor) {
 var POT_CAP, HOUSE_RETURN, MIN_MULT, ANCHOR_MIN, ANCHOR_MAX;
 var init_bet_odds = __esm({
   "src/bet-odds.js"() {
-    POT_CAP = 1e8;
+    POT_CAP = Number.MAX_SAFE_INTEGER;
     HOUSE_RETURN = 97;
     MIN_MULT = 1.01;
     ANCHOR_MIN = 5;
