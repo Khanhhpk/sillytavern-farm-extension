@@ -2890,21 +2890,21 @@ function initUI() {
         <div class="btn" data-open="trade">${spriteSVG("tradeIcon", 22)}Trade</div>
         <div class="btn" data-open="cfg">${spriteSVG("gearIcon", 22)}C\xE0i \u0111\u1EB7t</div>
     </div>
-    <div class="modal" id="modal">
+    <div class="modal" id="modal" onclick="if(event.target === this) document.getElementById('mclose').click()">
       <div class="mpanel">
         <div class="mtitle"><span id="mtitle-text"></span><span class="grow"></span><div class="close-x" id="mclose">\xD7</div></div>
         <div class="mbody" id="mbody"></div>
       </div>
     </div>
     
-    <div class="modal" id="trade-win">
+    <div class="modal" id="trade-win" onclick="if(event.target === this) FarmAll.closeTradeModal()">
       <div class="mpanel" style="width: min(600px, 96%);">
-        <div class="mtitle"><span>Giao d\u1ECBch P2P</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">\xD7</div></div>
+        <div class="mtitle"><span>Trao \u0111\u1ED5i</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">\xD7</div></div>
         <div class="mbody" id="trade-body" style="min-height: 200px;"></div>
       </div>
     </div>
     
-    <div class="modal" id="trade-popup" style="z-index: 35;">
+    <div class="modal" id="trade-popup" style="z-index: 35;" onclick="if(event.target === this) FarmAll.uiCloseAddItem()">
       <div class="mpanel" style="width: min(300px, 96%);">
         <div class="mtitle"><span>Th\xEAm \u0110\u1ED3</span><span class="grow"></span><div class="close-x" onclick="FarmAll.uiCloseAddItem()">\xD7</div></div>
         <div class="mbody" id="trade-popup-list" style="max-height: 300px; overflow-y: auto; display:flex; flex-direction:column; gap:6px;"></div>
@@ -14746,7 +14746,7 @@ function renderTradeMenu() {
   const body = $id("trade-body");
   body.innerHTML = `
         <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
-            <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">K\u1EBFt n\u1ED1i WebRTC P2P</div>
+            <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">M\u1EDF Ph\xF2ng Trade</div>
             <div class="buy" id="btn-trade-host" style="padding: 10px; text-align:center;">T\u1EA1o ph\xF2ng (Host)</div>
             <div style="display:flex; gap: 8px;">
                 <input type="text" id="inp-trade-code" class="inp" placeholder="Nh\u1EADp m\xE3 ph\xF2ng..." style="flex:1;">

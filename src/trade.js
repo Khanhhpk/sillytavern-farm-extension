@@ -108,7 +108,7 @@ function renderTradeMenu() {
     const body = All.$id('trade-body');
     body.innerHTML = `
         <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
-            <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">Kết nối WebRTC P2P</div>
+            <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">Mở Phòng Trade</div>
             <div class="buy" id="btn-trade-host" style="padding: 10px; text-align:center;">Tạo phòng (Host)</div>
             <div style="display:flex; gap: 8px;">
                 <input type="text" id="inp-trade-code" class="inp" placeholder="Nhập mã phòng..." style="flex:1;">

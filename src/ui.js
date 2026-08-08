@@ -151,21 +151,21 @@ export function initUI() {
         <div class="btn" data-open="trade">${spriteSVG('tradeIcon', 22)}Trade</div>
         <div class="btn" data-open="cfg">${spriteSVG('gearIcon', 22)}Cài đặt</div>
     </div>
-    <div class="modal" id="modal">
+    <div class="modal" id="modal" onclick="if(event.target === this) document.getElementById('mclose').click()">
       <div class="mpanel">
         <div class="mtitle"><span id="mtitle-text"></span><span class="grow"></span><div class="close-x" id="mclose">×</div></div>
         <div class="mbody" id="mbody"></div>
       </div>
     </div>
     
-    <div class="modal" id="trade-win">
+    <div class="modal" id="trade-win" onclick="if(event.target === this) FarmAll.closeTradeModal()">
       <div class="mpanel" style="width: min(600px, 96%);">
-        <div class="mtitle"><span>Giao dịch P2P</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">×</div></div>
+        <div class="mtitle"><span>Trao đổi</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">×</div></div>
         <div class="mbody" id="trade-body" style="min-height: 200px;"></div>
       </div>
     </div>
     
-    <div class="modal" id="trade-popup" style="z-index: 35;">
+    <div class="modal" id="trade-popup" style="z-index: 35;" onclick="if(event.target === this) FarmAll.uiCloseAddItem()">
       <div class="mpanel" style="width: min(300px, 96%);">
         <div class="mtitle"><span>Thêm Đồ</span><span class="grow"></span><div class="close-x" onclick="FarmAll.uiCloseAddItem()">×</div></div>
         <div class="mbody" id="trade-popup-list" style="max-height: 300px; overflow-y: auto; display:flex; flex-direction:column; gap:6px;"></div>
