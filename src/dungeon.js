@@ -34,7 +34,7 @@ const PET_STATS = {
 };
 
 const ENEMY_TYPES = [
-    { id: 'douya', name: 'Giá Đỗ', desc: 'Lính bầy đàn.', hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: 'melee', sp: 'sprout', gold: 2 },
+    { id: 'douya', name: 'Mầm Non', desc: 'Lính bầy đàn.', hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: 'melee', sp: 'sprout', gold: 2 },
     { id: 'tomato', name: 'Cà Chua Tròn', desc: 'Cận chiến cơ bản.', hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: 'melee', gold: 4 },
     { id: 'radish', name: 'Củ Cải Tốc Độ', desc: 'Chạy cực nhanh.', hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: 'melee', gold: 3 },
     { id: 'moonberry', name: 'Dâu Tây Gai', desc: 'Thích khách tập kích.', hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: 'assassin', sp: 'moonberry', gold: 5 },
