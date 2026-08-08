@@ -115,13 +115,13 @@ Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối c�
       
       thinkingInstructions = `1. TÌM Ý TƯỞNG: Đọc kỹ bối cảnh thế giới được cung cấp. Xác định Vực đề tài và Vực lối chơi.
 2. CƠ CHẾ: Căn cứ vào độ hiếm [${rarity}] để thiết lập cơ chế. Thao tác cụ thể, cực kỳ thú vị và phá vỡ sáo rỗng (anti-cliché).
-3. VẼ PIXEL: Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!`;
+3. VẼ PIXEL: Khung cơ bản là 32x32, nhưng bạn CÓ THỂ tự do thay đổi kích thước (ví dụ 16x16, 24x24, 16x32...) nếu thấy phù hợp với hình dáng kỳ vật. Bắt buộc vẽ thành lưới hình chữ nhật hợp lệ.`;
     } else {
       contextStr = `KHÔNG CÓ CHỦ ĐỀ CỐ ĐỊNH. Để đảm bảo tính ngẫu nhiên tuyệt đối, bạn PHẢI tự bốc thăm Vực đề tài và Vực lối chơi bất kỳ. Mọi thứ trong vũ trụ đều có thể trở thành kỳ vật.`;
       
       thinkingInstructions = `1. BỐC THĂM CHỦ ĐỀ: Bốc thăm ngẫu nhiên Vực đề tài (Khí vật, sinh mệnh, quy tắc, không gian...) và Vực lối chơi (Xử lý thông tin, cải tạo bối cảnh, giao dịch đánh cược...).
 2. CƠ CHẾ: Căn cứ vào độ hiếm [${rarity}] để thiết lập cơ chế. Thao tác cụ thể, cực kỳ thú vị và phá vỡ sáo rỗng (anti-cliché).
-3. VẼ PIXEL: Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!`;
+3. VẼ PIXEL: Khung cơ bản là 32x32, nhưng bạn CÓ THỂ tự do thay đổi kích thước (ví dụ 16x16, 24x24, 16x32...) nếu thấy phù hợp với hình dáng kỳ vật. Bắt buộc vẽ thành lưới hình chữ nhật hợp lệ.`;
     }
 
     const rarityGuidance = rarity === 'Huyền thoại' 
@@ -160,7 +160,7 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
   "name": "Tên kỳ vật (2~7 chữ, ấn tượng, gợi sự tò mò)",
   "desc": "Mô tả ngắn gọn CƠ CHẾ và CÁCH SỬ DỤNG của kỳ vật (dưới 100 chữ). Phải rõ ràng, thú vị, độc lạ.",
   "price": Số nguyên định giá. Gợi ý cơ bản: ${basePrice}. NGHIÊM CẤM LẠM PHÁT, giá trị tối đa tuyệt đối KHÔNG ĐƯỢC VƯỢT QUÁ ${basePrice * 5}G,
-  "spriteMap": [ mảng gồm ĐÚNG 32 chuỗi, mỗi chuỗi DÀI CHÍNH XÁC 32 ký tự chỉ dùng ký tự Bảng màu và dấu '.' cho điểm trong suốt ]
+  "spriteMap": [ mảng các chuỗi, tự do định cỡ (ví dụ 16x16, 32x32, 20x40...), nhưng phải tạo thành lưới hình chữ nhật chuẩn xác. Chỉ dùng ký tự Bảng màu và dấu '.' cho điểm trong suốt ]
 }`;
 
     const userPrompt = `Hãy sáng tạo 1 vật phẩm đặc biệt ngẫu nhiên phẩm chất ${rarity}.`;
