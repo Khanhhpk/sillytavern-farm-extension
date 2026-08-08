@@ -9,7 +9,10 @@ let myItems = {};
 let theirItems = {};
 let myLock = false;
 let theirLock = false;
+let myConfirm = false;
+let theirConfirm = false;
 let isConnected = false;
+let theirUniques = {};
 
 function getItemName(id) {
     if (id === 'coins') return 'Tiền xu';
@@ -21,7 +24,10 @@ function getItemName(id) {
     if (id === 'star') return 'Mảnh Sao';
     if (id === 'compost') return 'Phân Hữu Cơ';
     if (id === 'shiny') return 'Phân Bón Bạc';
-    if (id.startsWith('unique@')) return ctx.S.uniques?.[id]?.name || 'Vật phẩm Gacha';
+    if (id.startsWith('unique@')) {
+        const item = ctx.S.uniques?.[id] || theirUniques[id];
+        return item?.name || 'Vật phẩm Gacha';
+    }
     return id;
 }
 
@@ -32,7 +38,7 @@ function getItemIcon(id) {
     if (id === 'prism' || id === 'star') return All.spriteSVG('shard_' + id, 20);
     if (id === 'compost' || id === 'shiny') return All.spriteSVG('fert_' + id, 20);
     if (id.startsWith('unique@')) {
-        const item = ctx.S.uniques?.[id] || { sp: 'strawhat', color: '#4a90e2' };
+        const item = ctx.S.uniques?.[id] || theirUniques[id] || { sp: 'strawhat', color: '#4a90e2' };
         return `<span style="color:${item.color}">${All.spriteSVG(item.sp, 20)}</span>`;
     }
     return '';
@@ -60,6 +66,9 @@ function resetTradeState() {
     theirItems = {};
     myLock = false;
     theirLock = false;
+    myConfirm = false;
+    theirConfirm = false;
+    theirUniques = {};
     isConnected = false;
 }
 
@@ -154,12 +163,16 @@ function setupConnection() {
 function handleNetData(data) {
     if (data.type === 'UPDATE_ITEMS') {
         theirItems = data.items;
+        if (data.uniques) theirUniques = data.uniques;
         renderTradeRoom();
     } else if (data.type === 'LOCK') {
         theirLock = data.lock;
+        if (!theirLock) theirConfirm = false;
         renderTradeRoom();
     } else if (data.type === 'CONFIRM') {
-        if (myLock && theirLock) {
+        theirConfirm = true;
+        renderTradeRoom();
+        if (myConfirm && theirConfirm) {
             executeTrade();
         }
     }
@@ -222,6 +235,9 @@ function addInventory(id, amount) {
             if (!ctx.S.bag) ctx.S.bag = {};
             ctx.S.bag[id] = (ctx.S.bag[id] || 0) + amount;
         }
+    } else if (id.startsWith('unique@')) {
+        if (!ctx.S.bag) ctx.S.bag = {};
+        ctx.S.bag[id] = (ctx.S.bag[id] || 0) + amount;
     }
 }
 
@@ -245,6 +261,10 @@ function executeTrade() {
     
     for (const [id, amount] of Object.entries(theirItems)) {
         addInventory(id, amount);
+        if (id.startsWith('unique@') && theirUniques[id]) {
+            if (!ctx.S.uniques) ctx.S.uniques = {};
+            ctx.S.uniques[id] = theirUniques[id];
+        }
     }
     
     All.save(true);
@@ -254,8 +274,13 @@ function executeTrade() {
 }
 
 export function uiConfirmTrade() {
+    if (myConfirm) return;
+    myConfirm = true;
     sendData({ type: 'CONFIRM' });
-    if (myLock && theirLock) executeTrade();
+    renderTradeRoom();
+    if (myConfirm && theirConfirm) {
+        executeTrade();
+    }
 }
 
 export function uiToggleLock() {
@@ -264,6 +289,7 @@ export function uiToggleLock() {
         return;
     }
     myLock = !myLock;
+    if (!myLock) myConfirm = false;
     sendData({ type: 'LOCK', lock: myLock });
     renderTradeRoom();
 }
@@ -282,7 +308,7 @@ function renderTradeRoom() {
     body.innerHTML = `
         <div class="trade-split">
             <div class="trade-col">
-                <div class="trade-header">Bạn ${myLock ? '<span style="color:#388e3c">✓</span>' : ''}</div>
+                <div class="trade-header">Bạn ${myLock ? '<span style="color:#388e3c">✓</span>' : ''} ${myConfirm ? '<span style="color:#2e7d32; font-size:10px;">(Đã XN)</span>' : ''}</div>
                 <div class="trade-items">${myHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Trống</div>'}</div>
                 <div class="trade-actions">
                     <button class="buy ${myLock ? 'plain' : ''}" onclick="FarmAll.uiToggleLock()" style="width:100%; text-align:center;">${myLock ? 'Mở khoá' : 'Sẵn sàng'}</button>
@@ -290,18 +316,29 @@ function renderTradeRoom() {
                 </div>
             </div>
             <div class="trade-col">
-                <div class="trade-header">Đối tác ${theirLock ? '<span style="color:#388e3c">✓</span>' : ''}</div>
+                <div class="trade-header">Đối tác ${theirLock ? '<span style="color:#388e3c">✓</span>' : ''} ${theirConfirm ? '<span style="color:#2e7d32; font-size:10px;">(Đã XN)</span>' : ''}</div>
                 <div class="trade-items">${theirHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Trống</div>'}</div>
             </div>
         </div>
-        ${myLock && theirLock ? `<div style="padding: 10px; margin-top: -10px;"><button class="buy" onclick="FarmAll.uiConfirmTrade()" style="width:100%; background: linear-gradient(to bottom, #4caf50, #388e3c); color:white; border-color: #2e7d32; text-align:center;">Xác nhận Giao dịch</button></div>` : ''}
+        ${myLock && theirLock && !myConfirm ? `<div style="padding: 10px; margin-top: -10px;"><button class="buy" onclick="FarmAll.uiConfirmTrade()" style="width:100%; background: linear-gradient(to bottom, #4caf50, #388e3c); color:white; border-color: #2e7d32; text-align:center;">Xác nhận Giao dịch</button></div>` : ''}
+        ${myLock && theirLock && myConfirm ? `<div style="padding: 10px; margin-top: -10px; text-align:center; color:#388e3c; font-weight:bold;">Đang chờ đối tác xác nhận...</div>` : ''}
     `;
+}
+
+function sendItemsUpdate() {
+    const uniques = {};
+    for (const id in myItems) {
+        if (id.startsWith('unique@') && ctx.S.uniques?.[id]) {
+            uniques[id] = ctx.S.uniques[id];
+        }
+    }
+    sendData({ type: 'UPDATE_ITEMS', items: myItems, uniques: uniques });
 }
 
 export function uiRemoveTradeItem(id) {
     if (myLock) return;
     delete myItems[id];
-    sendData({ type: 'UPDATE_ITEMS', items: myItems });
+    sendItemsUpdate();
     renderTradeRoom();
 }
 
@@ -380,7 +417,7 @@ export function uiConfirmAdd() {
     if (myItems[selectedTradeId] > getInventoryCount(selectedTradeId)) {
         myItems[selectedTradeId] = getInventoryCount(selectedTradeId);
     }
-    sendData({ type: 'UPDATE_ITEMS', items: myItems });
+    sendItemsUpdate();
     renderTradeRoom();
     uiCloseAddItem();
 }

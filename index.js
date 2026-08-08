@@ -14644,7 +14644,10 @@ function getItemName(id) {
   if (id === "star") return "M\u1EA3nh Sao";
   if (id === "compost") return "Ph\xE2n H\u1EEFu C\u01A1";
   if (id === "shiny") return "Ph\xE2n B\xF3n B\u1EA1c";
-  if (id.startsWith("unique@")) return ctx.S.uniques?.[id]?.name || "V\u1EADt ph\u1EA9m Gacha";
+  if (id.startsWith("unique@")) {
+    const item = ctx.S.uniques?.[id] || theirUniques[id];
+    return item?.name || "V\u1EADt ph\u1EA9m Gacha";
+  }
   return id;
 }
 function getItemIcon(id) {
@@ -14654,7 +14657,7 @@ function getItemIcon(id) {
   if (id === "prism" || id === "star") return spriteSVG("shard_" + id, 20);
   if (id === "compost" || id === "shiny") return spriteSVG("fert_" + id, 20);
   if (id.startsWith("unique@")) {
-    const item = ctx.S.uniques?.[id] || { sp: "strawhat", color: "#4a90e2" };
+    const item = ctx.S.uniques?.[id] || theirUniques[id] || { sp: "strawhat", color: "#4a90e2" };
     return `<span style="color:${item.color}">${spriteSVG(item.sp, 20)}</span>`;
   }
   return "";
@@ -14679,6 +14682,9 @@ function resetTradeState() {
   theirItems = {};
   myLock = false;
   theirLock = false;
+  myConfirm = false;
+  theirConfirm = false;
+  theirUniques = {};
   isConnected = false;
 }
 function renderTradeMenu() {
@@ -14759,12 +14765,16 @@ function setupConnection() {
 function handleNetData(data) {
   if (data.type === "UPDATE_ITEMS") {
     theirItems = data.items;
+    if (data.uniques) theirUniques = data.uniques;
     renderTradeRoom();
   } else if (data.type === "LOCK") {
     theirLock = data.lock;
+    if (!theirLock) theirConfirm = false;
     renderTradeRoom();
   } else if (data.type === "CONFIRM") {
-    if (myLock && theirLock) {
+    theirConfirm = true;
+    renderTradeRoom();
+    if (myConfirm && theirConfirm) {
       executeTrade();
     }
   }
@@ -14825,6 +14835,9 @@ function addInventory(id, amount) {
       if (!ctx.S.bag) ctx.S.bag = {};
       ctx.S.bag[id] = (ctx.S.bag[id] || 0) + amount;
     }
+  } else if (id.startsWith("unique@")) {
+    if (!ctx.S.bag) ctx.S.bag = {};
+    ctx.S.bag[id] = (ctx.S.bag[id] || 0) + amount;
   }
 }
 function checkValidTrade() {
@@ -14844,6 +14857,10 @@ function executeTrade() {
   }
   for (const [id, amount] of Object.entries(theirItems)) {
     addInventory(id, amount);
+    if (id.startsWith("unique@") && theirUniques[id]) {
+      if (!ctx.S.uniques) ctx.S.uniques = {};
+      ctx.S.uniques[id] = theirUniques[id];
+    }
   }
   save(true);
   toast("Giao d\u1ECBch th\xE0nh c\xF4ng!");
@@ -14851,8 +14868,13 @@ function executeTrade() {
   renderBanner();
 }
 function uiConfirmTrade() {
+  if (myConfirm) return;
+  myConfirm = true;
   sendData({ type: "CONFIRM" });
-  if (myLock && theirLock) executeTrade();
+  renderTradeRoom();
+  if (myConfirm && theirConfirm) {
+    executeTrade();
+  }
 }
 function uiToggleLock() {
   if (!checkValidTrade()) {
@@ -14860,6 +14882,7 @@ function uiToggleLock() {
     return;
   }
   myLock = !myLock;
+  if (!myLock) myConfirm = false;
   sendData({ type: "LOCK", lock: myLock });
   renderTradeRoom();
 }
@@ -14874,7 +14897,7 @@ function renderTradeRoom() {
   body.innerHTML = `
         <div class="trade-split">
             <div class="trade-col">
-                <div class="trade-header">B\u1EA1n ${myLock ? '<span style="color:#388e3c">\u2713</span>' : ""}</div>
+                <div class="trade-header">B\u1EA1n ${myLock ? '<span style="color:#388e3c">\u2713</span>' : ""} ${myConfirm ? '<span style="color:#2e7d32; font-size:10px;">(\u0110\xE3 XN)</span>' : ""}</div>
                 <div class="trade-items">${myHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Tr\u1ED1ng</div>'}</div>
                 <div class="trade-actions">
                     <button class="buy ${myLock ? "plain" : ""}" onclick="FarmAll.uiToggleLock()" style="width:100%; text-align:center;">${myLock ? "M\u1EDF kho\xE1" : "S\u1EB5n s\xE0ng"}</button>
@@ -14882,17 +14905,27 @@ function renderTradeRoom() {
                 </div>
             </div>
             <div class="trade-col">
-                <div class="trade-header">\u0110\u1ED1i t\xE1c ${theirLock ? '<span style="color:#388e3c">\u2713</span>' : ""}</div>
+                <div class="trade-header">\u0110\u1ED1i t\xE1c ${theirLock ? '<span style="color:#388e3c">\u2713</span>' : ""} ${theirConfirm ? '<span style="color:#2e7d32; font-size:10px;">(\u0110\xE3 XN)</span>' : ""}</div>
                 <div class="trade-items">${theirHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Tr\u1ED1ng</div>'}</div>
             </div>
         </div>
-        ${myLock && theirLock ? `<div style="padding: 10px; margin-top: -10px;"><button class="buy" onclick="FarmAll.uiConfirmTrade()" style="width:100%; background: linear-gradient(to bottom, #4caf50, #388e3c); color:white; border-color: #2e7d32; text-align:center;">X\xE1c nh\u1EADn Giao d\u1ECBch</button></div>` : ""}
+        ${myLock && theirLock && !myConfirm ? `<div style="padding: 10px; margin-top: -10px;"><button class="buy" onclick="FarmAll.uiConfirmTrade()" style="width:100%; background: linear-gradient(to bottom, #4caf50, #388e3c); color:white; border-color: #2e7d32; text-align:center;">X\xE1c nh\u1EADn Giao d\u1ECBch</button></div>` : ""}
+        ${myLock && theirLock && myConfirm ? `<div style="padding: 10px; margin-top: -10px; text-align:center; color:#388e3c; font-weight:bold;">\u0110ang ch\u1EDD \u0111\u1ED1i t\xE1c x\xE1c nh\u1EADn...</div>` : ""}
     `;
+}
+function sendItemsUpdate() {
+  const uniques = {};
+  for (const id in myItems) {
+    if (id.startsWith("unique@") && ctx.S.uniques?.[id]) {
+      uniques[id] = ctx.S.uniques[id];
+    }
+  }
+  sendData({ type: "UPDATE_ITEMS", items: myItems, uniques });
 }
 function uiRemoveTradeItem(id) {
   if (myLock) return;
   delete myItems[id];
-  sendData({ type: "UPDATE_ITEMS", items: myItems });
+  sendItemsUpdate();
   renderTradeRoom();
 }
 function uiOpenAddItem() {
@@ -14959,11 +14992,11 @@ function uiConfirmAdd() {
   if (myItems[selectedTradeId] > getInventoryCount(selectedTradeId)) {
     myItems[selectedTradeId] = getInventoryCount(selectedTradeId);
   }
-  sendData({ type: "UPDATE_ITEMS", items: myItems });
+  sendItemsUpdate();
   renderTradeRoom();
   uiCloseAddItem();
 }
-var peer, conn, myItems, theirItems, myLock, theirLock, isConnected, selectedTradeId, selectedTradeMax;
+var peer, conn, myItems, theirItems, myLock, theirLock, myConfirm, theirConfirm, isConnected, theirUniques, selectedTradeId, selectedTradeMax;
 var init_trade = __esm({
   "src/trade.js"() {
     init_store();
@@ -14976,7 +15009,10 @@ var init_trade = __esm({
     theirItems = {};
     myLock = false;
     theirLock = false;
+    myConfirm = false;
+    theirConfirm = false;
     isConnected = false;
+    theirUniques = {};
     selectedTradeId = null;
     selectedTradeMax = 0;
   }
