@@ -416,7 +416,7 @@ export function openGachaModal() {
           <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé Siêu cường (500KG)</span>
         </div>
         <div style="margin-top:4px;">
-          <span class="buy" id="gachaRatesBtn" style="padding:4px 12px; font-size:11px; background:#4a8098; border:1px solid #2a6078; color:#fff; display:inline-flex; align-items:center; gap:4px;"><div style="width:14px; height:14px;">${spriteSVG('gachaRatesIcon', 14)}</div> Xem Tỉ Lệ Gachapon</span>
+          <span class="buy" id="gachaRatesBtn" style="padding:4px 12px; font-size:12px; background:#4a8098; border:1px solid #2a6078; color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:6px;">${spriteSVG('gachaRatesIcon', 18)} Xem Tỉ Lệ Gachapon</span>
         </div>
       </div>
 
@@ -667,7 +667,7 @@ export function openGachaRatesModal() {
       <div style='font-size:12px; font-weight:bold; color:#5a3f78; margin-bottom:4px; text-align:left;'>1. Tỉ lệ Loại Vật Phẩm</div>
       <table style='width:100%; border-collapse:collapse; font-size:11px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); color:#3a2c22;'>
         <thead>
-          <tr style='background:#f0e6d2; color:#3a2c22; text-align:left;'>
+          <tr style='background:#f0e6d2; color:#3a2c22; text-align:center;'>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Loại</th>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Thường / Đặc Biệt</th>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Siêu Cấp</th>
@@ -700,7 +700,7 @@ export function openGachaRatesModal() {
       <div style='font-size:12px; font-weight:bold; color:#5a3f78; margin-bottom:4px; text-align:left;'>2. Phẩm chất (khi trúng Bảo Vật Độc Nhất)</div>
       <table style='width:100%; border-collapse:collapse; font-size:11px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); color:#3a2c22;'>
         <thead>
-          <tr style='background:#f0e6d2; color:#3a2c22; text-align:left;'>
+          <tr style='background:#f0e6d2; color:#3a2c22; text-align:center;'>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Độ hiếm</th>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Thường</th>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Đặc Biệt</th>

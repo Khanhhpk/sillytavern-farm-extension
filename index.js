@@ -4339,7 +4339,7 @@ function openGachaModal() {
           <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 Si\xEAu c\u01B0\u1EDDng (500KG)</span>
         </div>
         <div style="margin-top:4px;">
-          <span class="buy" id="gachaRatesBtn" style="padding:4px 12px; font-size:11px; background:#4a8098; border:1px solid #2a6078; color:#fff; display:inline-flex; align-items:center; gap:4px;"><div style="width:14px; height:14px;">${spriteSVG("gachaRatesIcon", 14)}</div> Xem T\u1EC9 L\u1EC7 Gachapon</span>
+          <span class="buy" id="gachaRatesBtn" style="padding:4px 12px; font-size:12px; background:#4a8098; border:1px solid #2a6078; color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:6px;">${spriteSVG("gachaRatesIcon", 18)} Xem T\u1EC9 L\u1EC7 Gachapon</span>
         </div>
       </div>
 
@@ -4566,7 +4566,7 @@ function openGachaRatesModal() {
       <div style='font-size:12px; font-weight:bold; color:#5a3f78; margin-bottom:4px; text-align:left;'>1. T\u1EC9 l\u1EC7 Lo\u1EA1i V\u1EADt Ph\u1EA9m</div>
       <table style='width:100%; border-collapse:collapse; font-size:11px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); color:#3a2c22;'>
         <thead>
-          <tr style='background:#f0e6d2; color:#3a2c22; text-align:left;'>
+          <tr style='background:#f0e6d2; color:#3a2c22; text-align:center;'>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Lo\u1EA1i</th>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>V\xE9 Th\u01B0\u1EDDng / \u0110\u1EB7c Bi\u1EC7t</th>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>V\xE9 Si\xEAu C\u1EA5p</th>
@@ -4599,7 +4599,7 @@ function openGachaRatesModal() {
       <div style='font-size:12px; font-weight:bold; color:#5a3f78; margin-bottom:4px; text-align:left;'>2. Ph\u1EA9m ch\u1EA5t (khi tr\xFAng B\u1EA3o V\u1EADt \u0110\u1ED9c Nh\u1EA5t)</div>
       <table style='width:100%; border-collapse:collapse; font-size:11px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1); color:#3a2c22;'>
         <thead>
-          <tr style='background:#f0e6d2; color:#3a2c22; text-align:left;'>
+          <tr style='background:#f0e6d2; color:#3a2c22; text-align:center;'>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>\u0110\u1ED9 hi\u1EBFm</th>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>V\xE9 Th\u01B0\u1EDDng</th>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>V\xE9 \u0110\u1EB7c Bi\u1EC7t</th>
