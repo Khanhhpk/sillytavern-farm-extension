@@ -4348,6 +4348,12 @@ function openGachaModal() {
   const superTicket = ctx.S.tickets?.super || 0;
   const specPity = ctx.S.gachaPity?.spec || 0;
   const superPity = ctx.S.gachaPity?.super || 0;
+  let specRate = 10;
+  if (specPity >= 71) specRate = 10 + (specPity - 70) * 3;
+  if (specPity >= GACHA_SPEC_PITY) specRate = 100;
+  let superRate = 5;
+  if (superPity > 100) superRate = 5 + (superPity - 100) * 0.95;
+  if (superPity >= GACHA_SUPER_PITY) superRate = 100;
   const bodyHTML = `
     <div class="gacha-wrap" style="text-align:center; position:relative; overflow:hidden; padding:4px 0;">
       <!-- Header Th\xF4ng tin v\xE9 & Mua nhanh -->
@@ -4379,7 +4385,7 @@ function openGachaModal() {
       <div style="display:flex; flex-direction:column; gap:8px; background:rgba(0,0,0,0.03); padding:10px 12px; border-radius:8px; margin-bottom:14px;">
         <div>
           <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#ff4500; margin-bottom:3px;">
-            <span>B\u1EA3o hi\u1EC3m Si\xEAu C\u01B0\u1EDDng (ra Huy\u1EC1n Tho\u1EA1i)</span>
+            <span>B\u1EA3o hi\u1EC3m Si\xEAu C\u01B0\u1EDDng <span style="font-weight:normal; color:#d86020;">(T\u1EC9 l\u1EC7 n\u1ED5 Huy\u1EC1n tho\u1EA1i: <span id="gachaSuperRateTxt">${superRate % 1 === 0 ? superRate : superRate.toFixed(2)}</span>%)</span></span>
             <span><span id="gachaSuperPityTxt">${superPity}</span>/${GACHA_SUPER_PITY}</span>
           </div>
           <div style="background:#e0e0e0; height:8px; border-radius:4px; overflow:hidden;">
@@ -4389,7 +4395,7 @@ function openGachaModal() {
 
         <div>
           <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#8a2acc; margin-bottom:3px;">
-            <span>B\u1EA3o hi\u1EC3m Quay \u0110\u1EB7c Bi\u1EC7t</span>
+            <span>B\u1EA3o hi\u1EC3m Quay \u0110\u1EB7c Bi\u1EC7t <span style="font-weight:normal; color:#8e60b8;">(T\u1EC9 l\u1EC7 n\u1ED5 B\u1EA3o v\u1EADt: <span id="gachaSpecRateTxt">${specRate}</span>%)</span></span>
             <span><span id="gachaSpecPityTxt">${specPity}</span>/${GACHA_SPEC_PITY}</span>
           </div>
           <div style="background:#e0e0e0; height:8px; border-radius:4px; overflow:hidden;">
@@ -4451,6 +4457,16 @@ function openGachaModal() {
     if (barSup) barSup.style.width = Math.min(100, pSup / GACHA_SUPER_PITY * 100) + "%";
     const barS = $id("gachaSpecPityBar");
     if (barS) barS.style.width = Math.min(100, pS / GACHA_SPEC_PITY * 100) + "%";
+    let sR = 10;
+    if (pS >= 71) sR = 10 + (pS - 70) * 3;
+    if (pS >= GACHA_SPEC_PITY) sR = 100;
+    const elSpecR = $id("gachaSpecRateTxt");
+    if (elSpecR) elSpecR.textContent = String(sR);
+    let supR = 5;
+    if (pSup > 100) supR = 5 + (pSup - 100) * 0.95;
+    if (pSup >= GACHA_SUPER_PITY) supR = 100;
+    const elSupR = $id("gachaSuperRateTxt");
+    if (elSupR) elSupR.textContent = String(supR % 1 === 0 ? supR : supR.toFixed(2));
   };
   $id("gachaBuyNormBtn")?.addEventListener("click", () => {
     openBuyDlg("ticket", "norm", "gacha");

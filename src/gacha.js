@@ -426,6 +426,14 @@ export function openGachaModal() {
   const specPity = ctx.S.gachaPity?.spec || 0;
   const superPity = ctx.S.gachaPity?.super || 0;
 
+  let specRate = 10;
+  if (specPity >= 71) specRate = 10 + (specPity - 70) * 3;
+  if (specPity >= GACHA_SPEC_PITY) specRate = 100;
+  
+  let superRate = 5;
+  if (superPity > 100) superRate = 5 + (superPity - 100) * 0.95;
+  if (superPity >= GACHA_SUPER_PITY) superRate = 100;
+
   const bodyHTML = `
     <div class="gacha-wrap" style="text-align:center; position:relative; overflow:hidden; padding:4px 0;">
       <!-- Header Thông tin vé & Mua nhanh -->
@@ -457,7 +465,7 @@ export function openGachaModal() {
       <div style="display:flex; flex-direction:column; gap:8px; background:rgba(0,0,0,0.03); padding:10px 12px; border-radius:8px; margin-bottom:14px;">
         <div>
           <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#ff4500; margin-bottom:3px;">
-            <span>Bảo hiểm Siêu Cường (ra Huyền Thoại)</span>
+            <span>Bảo hiểm Siêu Cường <span style="font-weight:normal; color:#d86020;">(Tỉ lệ nổ Huyền thoại: <span id="gachaSuperRateTxt">${superRate % 1 === 0 ? superRate : superRate.toFixed(2)}</span>%)</span></span>
             <span><span id="gachaSuperPityTxt">${superPity}</span>/${GACHA_SUPER_PITY}</span>
           </div>
           <div style="background:#e0e0e0; height:8px; border-radius:4px; overflow:hidden;">
@@ -467,7 +475,7 @@ export function openGachaModal() {
 
         <div>
           <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#8a2acc; margin-bottom:3px;">
-            <span>Bảo hiểm Quay Đặc Biệt</span>
+            <span>Bảo hiểm Quay Đặc Biệt <span style="font-weight:normal; color:#8e60b8;">(Tỉ lệ nổ Bảo vật: <span id="gachaSpecRateTxt">${specRate}</span>%)</span></span>
             <span><span id="gachaSpecPityTxt">${specPity}</span>/${GACHA_SPEC_PITY}</span>
           </div>
           <div style="background:#e0e0e0; height:8px; border-radius:4px; overflow:hidden;">
@@ -524,6 +532,16 @@ export function openGachaModal() {
     const txtS = All.$id('gachaSpecPityTxt'); if (txtS) txtS.textContent = String(pS);
     const barSup = All.$id('gachaSuperPityBar'); if (barSup) barSup.style.width = Math.min(100, (pSup / GACHA_SUPER_PITY) * 100) + '%';
     const barS = All.$id('gachaSpecPityBar'); if (barS) barS.style.width = Math.min(100, (pS / GACHA_SPEC_PITY) * 100) + '%';
+
+    let sR = 10;
+    if (pS >= 71) sR = 10 + (pS - 70) * 3;
+    if (pS >= GACHA_SPEC_PITY) sR = 100;
+    const elSpecR = All.$id('gachaSpecRateTxt'); if (elSpecR) elSpecR.textContent = String(sR);
+
+    let supR = 5;
+    if (pSup > 100) supR = 5 + (pSup - 100) * 0.95;
+    if (pSup >= GACHA_SUPER_PITY) supR = 100;
+    const elSupR = All.$id('gachaSuperRateTxt'); if (elSupR) elSupR.textContent = String(supR % 1 === 0 ? supR : supR.toFixed(2));
   };
 
   All.$id('gachaBuyNormBtn')?.addEventListener('click', () => {
