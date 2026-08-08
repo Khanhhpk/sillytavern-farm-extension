@@ -2890,7 +2890,7 @@ function initUI() {
         <div class="btn" data-open="trade">${spriteSVG("tradeIcon", 22)}Trade</div>
         <div class="btn" data-open="cfg">${spriteSVG("gearIcon", 22)}C\xE0i \u0111\u1EB7t</div>
     </div>
-    <div class="modal" id="modal" onclick="if(event.target === this) document.getElementById('mclose').click()">
+    <div class="modal" id="modal">
       <div class="mpanel">
         <div class="mtitle"><span id="mtitle-text"></span><span class="grow"></span><div class="close-x" id="mclose">\xD7</div></div>
         <div class="mbody" id="mbody"></div>
