@@ -21,6 +21,7 @@ function getItemName(id) {
     if (id === 'star') return 'Mảnh Sao';
     if (id === 'compost') return 'Phân Hữu Cơ';
     if (id === 'shiny') return 'Phân Bón Bạc';
+    if (id.startsWith('unique@')) return ctx.S.uniques?.[id]?.name || 'Vật phẩm Gacha';
     return id;
 }
 
@@ -30,6 +31,10 @@ function getItemIcon(id) {
     if (id === 'norm' || id === 'spec' || id === 'super') return All.spriteSVG('tk_' + id, 20);
     if (id === 'prism' || id === 'star') return All.spriteSVG('shard_' + id, 20);
     if (id === 'compost' || id === 'shiny') return All.spriteSVG('fert_' + id, 20);
+    if (id.startsWith('unique@')) {
+        const item = ctx.S.uniques?.[id] || { sp: 'strawhat', color: '#4a90e2' };
+        return `<span style="color:${item.color}">${All.spriteSVG(item.sp, 20)}</span>`;
+    }
     return '';
 }
 
@@ -306,24 +311,41 @@ export function uiOpenAddItem() {
     const pop = document.getElementById('trade-popup');
     pop.classList.add('open');
     
-    let html = '';
-    if (ctx.S.coins > 0) html += `<div class="trade-pick" onclick="All.uiSelectAdd('coins', ${ctx.S.coins})">${getItemIcon('coins')} Tiền xu (Có: ${ctx.S.coins})</div>`;
+    let catCoins = '';
+    if (ctx.S.coins > 0) catCoins += `<div class="trade-pick" onclick="All.uiSelectAdd('coins', ${ctx.S.coins})">${getItemIcon('coins')} Tiền xu (Có: ${ctx.S.coins})</div>`;
     
-    ['norm', 'spec', 'super'].forEach(k => { if (ctx.S.tickets && ctx.S.tickets[k] > 0) html += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${ctx.S.tickets[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.tickets[k]})</div>`; });
-    ['prism', 'star'].forEach(k => { if (ctx.S.shards && ctx.S.shards[k] > 0) html += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${ctx.S.shards[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.shards[k]})</div>`; });
+    let catTickets = '';
+    ['norm', 'spec', 'super'].forEach(k => { if (ctx.S.tickets && ctx.S.tickets[k] > 0) catTickets += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${ctx.S.tickets[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.tickets[k]})</div>`; });
+    ['prism', 'star'].forEach(k => { if (ctx.S.shards && ctx.S.shards[k] > 0) catTickets += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${ctx.S.shards[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.shards[k]})</div>`; });
     
-    ['compost', 'shiny'].forEach(k => { if (ctx.S.ferts && ctx.S.ferts[k] > 0) html += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${ctx.S.ferts[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.ferts[k]})</div>`; });
+    let catFerts = '';
+    ['compost', 'shiny'].forEach(k => { if (ctx.S.ferts && ctx.S.ferts[k] > 0) catFerts += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${ctx.S.ferts[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.ferts[k]})</div>`; });
     
+    let catBag = '';
+    let catGacha = '';
     if (ctx.S.bag) {
         Object.entries(ctx.S.bag).forEach(([k, v]) => {
-            if (v > 0) html += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (Có: ${v})</div>`;
+            if (v > 0) {
+                if (k.startsWith('unique@')) catGacha += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (Có: ${v})</div>`;
+                else catBag += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (Có: ${v})</div>`;
+            }
         });
     }
+    
+    let catSeeds = '';
     if (ctx.S.seeds) {
         Object.entries(ctx.S.seeds).forEach(([k, v]) => {
-            if (v > 0) html += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (Có: ${v})</div>`;
+            if (v > 0) catSeeds += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (Có: ${v})</div>`;
         });
     }
+    
+    let html = '';
+    if (catCoins) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">TIỀN TỆ</div>` + catCoins;
+    if (catBag) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">NÔNG SẢN</div>` + catBag;
+    if (catSeeds) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">HẠT GIỐNG</div>` + catSeeds;
+    if (catFerts) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">PHÂN BÓN</div>` + catFerts;
+    if (catTickets) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">VÉ & MẢNH</div>` + catTickets;
+    if (catGacha) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">ĐỒ GACHA</div>` + catGacha;
     
     document.getElementById('trade-popup-list').innerHTML = html || '<div style="padding:10px;text-align:center;font-weight:bold;color:#a3763d;">Không có đồ để giao dịch</div>';
     document.getElementById('trade-popup-act').style.display = 'none';

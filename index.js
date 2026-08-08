@@ -14639,6 +14639,7 @@ function getItemName(id) {
   if (id === "star") return "M\u1EA3nh Sao";
   if (id === "compost") return "Ph\xE2n H\u1EEFu C\u01A1";
   if (id === "shiny") return "Ph\xE2n B\xF3n B\u1EA1c";
+  if (id.startsWith("unique@")) return ctx.S.uniques?.[id]?.name || "V\u1EADt ph\u1EA9m Gacha";
   return id;
 }
 function getItemIcon(id) {
@@ -14647,6 +14648,10 @@ function getItemIcon(id) {
   if (id === "norm" || id === "spec" || id === "super") return spriteSVG("tk_" + id, 20);
   if (id === "prism" || id === "star") return spriteSVG("shard_" + id, 20);
   if (id === "compost" || id === "shiny") return spriteSVG("fert_" + id, 20);
+  if (id.startsWith("unique@")) {
+    const item = ctx.S.uniques?.[id] || { sp: "strawhat", color: "#4a90e2" };
+    return `<span style="color:${item.color}">${spriteSVG(item.sp, 20)}</span>`;
+  }
   return "";
 }
 function openTradeModal() {
