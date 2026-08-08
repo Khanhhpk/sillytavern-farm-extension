@@ -5275,7 +5275,8 @@ function openPanel(kind) {
         $id("resetSave").textContent = "B\u1EA5m l\u1EA7n n\u1EEFa \u0111\u1EC3 x\xE1c nh\u1EADn \u0111\u1EB7t l\u1EA1i!";
         return;
       }
-      ctx.S = freshState();
+      if (ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName][NS] = null;
+      loadState();
       save(true);
       closeModal();
       renderAll();

@@ -1,12 +1,12 @@
 
-import { ctx } from './store.js';
+import { ctx, extensionName, NS } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
 import { pendingPick, renderStatus, renderAll, setPendingPick } from './render.js';
 import { fmtDur, mutDescOf, bagName, bagPrice } from './logic.js';
 import { openBuyDlg, toast, openPassDlg, useStarShard, openSellDlg, openSellSeedDlg, openTakeout } from './witch.js';
-import { save, freshState, testMode, setTestMode } from './state.js';
+import { save, freshState, testMode, setTestMode, loadState } from './state.js';
 import { renderPets } from './pets.js';
 import { esc, SEC, CS, clampN, saveSec, openSandbox, saveCharState, fetchModelList, testSecApi } from './events.js';
 import { applyTheme, sh } from './ui.js';
@@ -563,7 +563,8 @@ export function openPanel(kind) {
     let armed = false;
     All.$id('resetSave').addEventListener('click', () => {
       if (!armed) { armed = true; All.$id('resetSave').textContent = 'Bấm lần nữa để xác nhận đặt lại!'; return; }
-      ctx.S = freshState(); save(true); closeModal(); renderAll(); toast('Đã đặt lại');
+      if (ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName][NS] = null;
+      loadState(); save(true); closeModal(); renderAll(); toast('Đã đặt lại');
     });
   }
 }
