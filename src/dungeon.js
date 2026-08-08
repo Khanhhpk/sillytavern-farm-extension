@@ -534,8 +534,11 @@ function stopCombatLoop() {
 function combatLoop(time) {
     if (phase !== 'combat') return;
     
-    const dt = (time - lastTime) / 1000;
+    let dt = (time - lastTime) / 1000;
     lastTime = time;
+    
+    // Ngăn lỗi nhảy vọt vị trí khi chuyển tab (browser throttle requestAnimationFrame)
+    if (dt > 0.1) dt = 0.1;
     
     updateEntities(team, enemies, dt);
     updateEntities(enemies, team, dt);

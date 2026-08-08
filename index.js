@@ -8015,8 +8015,9 @@ function stopCombatLoop() {
 }
 function combatLoop(time) {
   if (phase !== "combat") return;
-  const dt = (time - lastTime) / 1e3;
+  let dt = (time - lastTime) / 1e3;
   lastTime = time;
+  if (dt > 0.1) dt = 0.1;
   updateEntities(team, enemies, dt);
   updateEntities(enemies, team, dt);
   const arena = $id("dg-arena");
