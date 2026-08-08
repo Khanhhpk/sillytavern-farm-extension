@@ -3965,7 +3965,7 @@ V\u1EF1c l\u1ED1i ch\u01A1i quy\u1EBFt \u0111\u1ECBnh "k\u1EF3 v\u1EADt n\xE0y c
 // src/gacha.js
 function initGachaState() {
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
-  if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
+  if (!ctx.S.gachaPity) ctx.S.gachaPity = { spec: 0, super: 0 };
   if (!ctx.S.uniques) ctx.S.uniques = {};
 }
 async function pMap(array, asyncFn, concurrency) {
@@ -4138,63 +4138,8 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
   }
   return null;
 }
-async function generateUniqueItem(ticketType) {
+async function generateUniqueItem({ rarity, color, sellPrice }) {
   initGachaState();
-  const roll = Math.random() * 100;
-  let rarity = "R\xE1c";
-  let color = "#9e9e9e";
-  let sellPrice = 100;
-  if (ticketType === "super") {
-    if (roll < 30) {
-      rarity = "Huy\u1EC1n tho\u1EA1i";
-      color = "#ff8000";
-      sellPrice = 2e4;
-    } else if (roll < 80) {
-      rarity = "S\u1EED thi";
-      color = "#a335ee";
-      sellPrice = 8e3;
-    } else {
-      rarity = "Hi\u1EBFm";
-      color = "#4a90e2";
-      sellPrice = 2500;
-    }
-  } else if (ticketType === "spec") {
-    if (roll < 10) {
-      rarity = "Huy\u1EC1n tho\u1EA1i";
-      color = "#ff8000";
-      sellPrice = 2e4;
-    } else if (roll < 40) {
-      rarity = "S\u1EED thi";
-      color = "#a335ee";
-      sellPrice = 8e3;
-    } else if (roll < 80) {
-      rarity = "Hi\u1EBFm";
-      color = "#4a90e2";
-      sellPrice = 2500;
-    } else {
-      rarity = "Th\u01B0\u1EDDng";
-      color = "#b0bec5";
-      sellPrice = 500;
-    }
-  } else {
-    if (roll < 2) {
-      rarity = "Huy\u1EC1n tho\u1EA1i";
-      color = "#ff8000";
-      sellPrice = 2e4;
-    } else if (roll < 10) {
-      rarity = "S\u1EED thi";
-      color = "#a335ee";
-      sellPrice = 8e3;
-    } else if (roll < 30) {
-      rarity = "Hi\u1EBFm";
-      color = "#4a90e2";
-      sellPrice = 2500;
-    } else if (roll < 70) {
-      rarity = "Th\u01B0\u1EDDng";
-      color = "#b0bec5";
-      sellPrice = 500;
-    }
-  }
   const timestamp = now();
   const randId = Math.floor(Math.random() * 1e4);
   const key = `unique@${timestamp}_${randId}`;
@@ -4235,8 +4180,6 @@ async function generateUniqueItem(ticketType) {
 async function executeGachaRoll(ticketType, count, updateLoadingText) {
   initGachaState();
   const ticketKey = ticketType;
-  const pityKey = ticketType === "super" ? "spec" : ticketType;
-  const maxPity = ticketType === "spec" ? GACHA_SPEC_PITY : GACHA_NORM_PITY;
   const haveTickets = ctx.S.tickets[ticketKey] || 0;
   if (haveTickets < count) {
     const tName = ticketType === "super" ? "Si\xEAu c\u01B0\u1EDDng" : ticketType === "spec" ? "\u0110\u1EB7c bi\u1EC7t" : "Th\u01B0\u1EDDng";
@@ -4248,24 +4191,105 @@ async function executeGachaRoll(ticketType, count, updateLoadingText) {
   const fertIds = Object.keys(FERTS);
   const rollsPlan = [];
   for (let i = 0; i < count; i++) {
-    ctx.S.gachaPity[pityKey]++;
-    const isPity = ctx.S.gachaPity[pityKey] >= maxPity;
     let rewardType = "";
+    let isPity = false;
+    let preRolledRarity = "R\xE1c";
+    let preRolledColor = "#9e9e9e";
+    let preRolledPrice = 100;
     if (ticketType === "super") {
       rewardType = "unique";
-    } else if (isPity) {
-      rewardType = "unique";
+    } else if (ticketType === "spec") {
+      ctx.S.gachaPity.spec++;
+      const p = ctx.S.gachaPity.spec;
+      let uniqueRate = 10;
+      if (p >= 71) uniqueRate = 10 + (p - 70) * 3;
+      if (p >= GACHA_SPEC_PITY) uniqueRate = 100;
+      const roll = Math.random() * 100;
+      if (roll < uniqueRate) {
+        rewardType = "unique";
+        if (p >= GACHA_SPEC_PITY) isPity = true;
+      } else {
+        const roll2 = Math.random() * 100;
+        if (roll2 < 44.4) rewardType = "seed";
+        else if (roll2 < 88.8) rewardType = "fert";
+        else rewardType = "shard";
+      }
     } else {
       const roll = Math.random() * 100;
-      if (roll < 40) rewardType = "seed";
-      else if (roll < 80) rewardType = "fert";
-      else if (roll < 90) rewardType = "shard";
-      else rewardType = "unique";
+      if (roll < 5) rewardType = "unique";
+      else if (roll < 47.5) rewardType = "seed";
+      else if (roll < 90) rewardType = "fert";
+      else rewardType = "shard";
     }
     if (rewardType === "unique") {
-      ctx.S.gachaPity[pityKey] = 0;
+      const roll = Math.random() * 100;
+      if (ticketType === "super") {
+        ctx.S.gachaPity.super++;
+        const p = ctx.S.gachaPity.super;
+        let legRate = 5;
+        if (p > 100) legRate = 5 + (p - 100) * 0.95;
+        if (p >= GACHA_SUPER_PITY) legRate = 100;
+        if (roll < legRate) {
+          preRolledRarity = "Huy\u1EC1n tho\u1EA1i";
+          preRolledColor = "#ff8000";
+          preRolledPrice = 2e4;
+        } else if (roll < legRate + 50) {
+          preRolledRarity = "S\u1EED thi";
+          preRolledColor = "#a335ee";
+          preRolledPrice = 8e3;
+        } else {
+          preRolledRarity = "Hi\u1EBFm";
+          preRolledColor = "#4a90e2";
+          preRolledPrice = 2500;
+        }
+        if (preRolledRarity === "Huy\u1EC1n tho\u1EA1i") {
+          ctx.S.gachaPity.super = 0;
+          if (p >= GACHA_SUPER_PITY) isPity = true;
+        }
+      } else if (ticketType === "spec") {
+        if (roll < 10) {
+          preRolledRarity = "Huy\u1EC1n tho\u1EA1i";
+          preRolledColor = "#ff8000";
+          preRolledPrice = 2e4;
+        } else if (roll < 40) {
+          preRolledRarity = "S\u1EED thi";
+          preRolledColor = "#a335ee";
+          preRolledPrice = 8e3;
+        } else if (roll < 80) {
+          preRolledRarity = "Hi\u1EBFm";
+          preRolledColor = "#4a90e2";
+          preRolledPrice = 2500;
+        } else {
+          preRolledRarity = "Th\u01B0\u1EDDng";
+          preRolledColor = "#b0bec5";
+          preRolledPrice = 500;
+        }
+        ctx.S.gachaPity.spec = 0;
+      } else {
+        if (roll < 1) {
+          preRolledRarity = "Huy\u1EC1n tho\u1EA1i";
+          preRolledColor = "#ff8000";
+          preRolledPrice = 2e4;
+        } else if (roll < 5) {
+          preRolledRarity = "S\u1EED thi";
+          preRolledColor = "#a335ee";
+          preRolledPrice = 8e3;
+        } else if (roll < 25) {
+          preRolledRarity = "Hi\u1EBFm";
+          preRolledColor = "#4a90e2";
+          preRolledPrice = 2500;
+        } else if (roll < 60) {
+          preRolledRarity = "Th\u01B0\u1EDDng";
+          preRolledColor = "#b0bec5";
+          preRolledPrice = 500;
+        } else {
+          preRolledRarity = "R\xE1c";
+          preRolledColor = "#9e9e9e";
+          preRolledPrice = 100;
+        }
+      }
     }
-    rollsPlan.push({ type: rewardType, isPity });
+    rollsPlan.push({ type: rewardType, isPity, preRolledRarity, preRolledColor, preRolledPrice });
   }
   const uniquePlans = rollsPlan.filter((r) => r.type === "unique");
   let uniqueCount = 0;
@@ -4274,7 +4298,7 @@ async function executeGachaRoll(ticketType, count, updateLoadingText) {
     if (updateLoadingText) {
       updateLoadingText(uniquePlans.length > 1 ? `\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt... (${uniqueCount}/${uniquePlans.length})` : "\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt...");
     }
-    const item = await generateUniqueItem(ticketType);
+    const item = await generateUniqueItem({ rarity: plan.preRolledRarity, color: plan.preRolledColor, sellPrice: plan.preRolledPrice });
     return {
       type: "unique",
       name: item.name,
@@ -4322,8 +4346,8 @@ function openGachaModal() {
   const normTicket = ctx.S.tickets?.norm || 0;
   const specTicket = ctx.S.tickets?.spec || 0;
   const superTicket = ctx.S.tickets?.super || 0;
-  const normPity = ctx.S.gachaPity?.norm || 0;
   const specPity = ctx.S.gachaPity?.spec || 0;
+  const superPity = ctx.S.gachaPity?.super || 0;
   const bodyHTML = `
     <div class="gacha-wrap" style="text-align:center; position:relative; overflow:hidden; padding:4px 0;">
       <!-- Header Th\xF4ng tin v\xE9 & Mua nhanh -->
@@ -4354,12 +4378,12 @@ function openGachaModal() {
       <!-- Thanh B\u1EA3o Hi\u1EC3m (Pity Bars) -->
       <div style="display:flex; flex-direction:column; gap:8px; background:rgba(0,0,0,0.03); padding:10px 12px; border-radius:8px; margin-bottom:14px;">
         <div>
-          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#4a7a26; margin-bottom:3px;">
-            <span>B\u1EA3o hi\u1EC3m Quay Th\u01B0\u1EDDng</span>
-            <span><span id="gachaNormPityTxt">${normPity}</span>/${GACHA_NORM_PITY}</span>
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:bold; color:#ff4500; margin-bottom:3px;">
+            <span>B\u1EA3o hi\u1EC3m Si\xEAu C\u01B0\u1EDDng (ra Huy\u1EC1n Tho\u1EA1i)</span>
+            <span><span id="gachaSuperPityTxt">${superPity}</span>/${GACHA_SUPER_PITY}</span>
           </div>
           <div style="background:#e0e0e0; height:8px; border-radius:4px; overflow:hidden;">
-            <div id="gachaNormPityBar" style="background:linear-gradient(90deg, #6cb457, #4e903a); height:100%; width:${Math.min(100, normPity / GACHA_NORM_PITY * 100)}%; transition:width 0.3s;"></div>
+            <div id="gachaSuperPityBar" style="background:linear-gradient(90deg, #ff8000, #ff4500); height:100%; width:${Math.min(100, superPity / GACHA_SUPER_PITY * 100)}%; transition:width 0.3s;"></div>
           </div>
         </div>
 
@@ -4416,13 +4440,15 @@ function openGachaModal() {
     if (elN) elN.textContent = String(ctx.S.tickets.norm);
     const elS = $id("gachaSpecCount");
     if (elS) elS.textContent = String(ctx.S.tickets.spec);
-    const pN = ctx.S.gachaPity.norm, pS = ctx.S.gachaPity.spec;
-    const txtN = $id("gachaNormPityTxt");
-    if (txtN) txtN.textContent = String(pN);
+    const elSup = $id("gachaSuperCount");
+    if (elSup) elSup.textContent = String(ctx.S.tickets.super);
+    const pS = ctx.S.gachaPity.spec, pSup = ctx.S.gachaPity.super;
+    const txtSup = $id("gachaSuperPityTxt");
+    if (txtSup) txtSup.textContent = String(pSup);
     const txtS = $id("gachaSpecPityTxt");
     if (txtS) txtS.textContent = String(pS);
-    const barN = $id("gachaNormPityBar");
-    if (barN) barN.style.width = Math.min(100, pN / GACHA_NORM_PITY * 100) + "%";
+    const barSup = $id("gachaSuperPityBar");
+    if (barSup) barSup.style.width = Math.min(100, pSup / GACHA_SUPER_PITY * 100) + "%";
     const barS = $id("gachaSpecPityBar");
     if (barS) barS.style.width = Math.min(100, pS / GACHA_SPEC_PITY * 100) + "%";
   };
@@ -4568,28 +4594,33 @@ function openGachaRatesModal() {
         <thead>
           <tr style='background:#f0e6d2; color:#3a2c22; text-align:center;'>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Lo\u1EA1i</th>
-            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>V\xE9 Th\u01B0\u1EDDng / \u0110\u1EB7c Bi\u1EC7t</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>V\xE9 Th\u01B0\u1EDDng</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>V\xE9 \u0110\u1EB7c Bi\u1EC7t</th>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>V\xE9 Si\xEAu C\u1EA5p</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#4a7a26;'>H\u1EA1t gi\u1ED1ng</td>
-            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40% <span style="color:#777;">(T: x2, \u0110B: x5)</span></td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>42.5%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40% <span style="color:#777;">(x5)</span></td>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
           </tr>
           <tr>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#e8963a;'>Ph\xE2n b\xF3n</td>
-            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40% <span style="color:#777;">(T: x1, \u0110B: x3)</span></td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>42.5%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40% <span style="color:#777;">(x3)</span></td>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
           </tr>
           <tr>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#4a8098;'>M\u1EA3nh v\u1EE1 (Sao/L\u0103ng quang)</td>
-            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10% <span style="color:#777;">(x1)</span></td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10%</td>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
           </tr>
           <tr>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#ff4500;'>B\u1EA3o v\u1EADt \u0110\u1ED9c nh\u1EA5t (AI)</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>5%</td>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10%</td>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>100%</td>
           </tr>
@@ -4609,13 +4640,13 @@ function openGachaRatesModal() {
         <tbody>
           <tr>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#ff8000;'>Huy\u1EC1n tho\u1EA1i</td>
-            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>2%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>1%</td>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10%</td>
-            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>30%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>5%</td>
           </tr>
           <tr>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#a335ee;'>S\u1EED thi</td>
-            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>8%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>4%</td>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>30%</td>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>50%</td>
           </tr>
@@ -4623,17 +4654,17 @@ function openGachaRatesModal() {
             <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#4a90e2;'>Hi\u1EBFm</td>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>20%</td>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40%</td>
-            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>20%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>45%</td>
           </tr>
           <tr>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#b0bec5;'>Th\u01B0\u1EDDng</td>
-            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>35%</td>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>20%</td>
             <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
           </tr>
           <tr>
             <td style='padding:6px; font-weight:bold; color:#9e9e9e;'>R\xE1c</td>
-            <td style='padding:6px;'>30%</td>
+            <td style='padding:6px;'>40%</td>
             <td style='padding:6px;'>0%</td>
             <td style='padding:6px;'>0%</td>
           </tr>
@@ -4641,9 +4672,9 @@ function openGachaRatesModal() {
       </table>
       
       <div style='font-size:11px; color:#555; text-align:left; background:#fafafa; padding:8px; border-radius:4px; border:1px dashed #ccc; margin-bottom:12px;'>
-        <div style='margin-bottom:4px;'><b>B\u1EA3o hi\u1EC3m (Pity):</b></div>
-        <div>- T\xEDch <b>${GACHA_NORM_PITY}</b> \u0111i\u1EC3m V\xE9 Th\u01B0\u1EDDng s\u1EBD ch\u1EAFc ch\u1EAFn tr\xFAng <b>B\u1EA3o V\u1EADt (Hi\u1EBFm tr\u1EDF l\xEAn)</b>.</div>
-        <div>- T\xEDch <b>${GACHA_SPEC_PITY}</b> \u0111i\u1EC3m V\xE9 \u0110\u1EB7c Bi\u1EC7t s\u1EBD ch\u1EAFc ch\u1EAFn tr\xFAng <b>B\u1EA3o V\u1EADt (S\u1EED thi tr\u1EDF l\xEAn)</b>.</div>
+        <div style='margin-bottom:4px;'><b>C\u01A1 ch\u1EBF Soft-Pity (T\u0103ng d\u1EA7n):</b></div>
+        <div style='margin-bottom:2px;'>- V\xE9 \u0110\u1EB7c Bi\u1EC7t: T\u1EEB m\u1ED1c <b>71</b>, m\u1ED7i v\xE9 t\u0103ng 3% t\u1EC9 l\u1EC7 ra B\u1EA3o V\u1EADt. \u0110\u1EBFn <b>${GACHA_SPEC_PITY}</b> ch\u1EAFc ch\u1EAFn ra B\u1EA3o V\u1EADt.</div>
+        <div>- V\xE9 Si\xEAu C\u1EA5p: T\u1EEB m\u1ED1c <b>101</b>, m\u1ED7i v\xE9 t\u0103ng 0.95% t\u1EC9 l\u1EC7 ra <b>Huy\u1EC1n Tho\u1EA1i</b>. \u0110\u1EBFn <b>${GACHA_SUPER_PITY}</b> ch\u1EAFc ch\u1EAFn ra Huy\u1EC1n Tho\u1EA1i.</div>
       </div>
 
       <span class="buy" id="gachaRatesBackBtn" style="padding:6px 16px; font-size:12px; background:#4a7a26; color:#fff; cursor:pointer;">Quay L\u1EA1i Gacha</span>
@@ -4654,7 +4685,7 @@ function openGachaRatesModal() {
     openGachaModal();
   });
 }
-var GACHA_NORM_PITY, GACHA_SPEC_PITY, GACHA_NORM_PRICE, GACHA_SPEC_PRICE;
+var GACHA_SPEC_PITY, GACHA_SUPER_PITY, GACHA_NORM_PRICE, GACHA_SPEC_PRICE;
 var init_gacha = __esm({
   "src/gacha.js"() {
     init_state();
@@ -4667,8 +4698,8 @@ var init_gacha = __esm({
     init_shop();
     init_events();
     init_prompt();
-    GACHA_NORM_PITY = 100;
-    GACHA_SPEC_PITY = 50;
+    GACHA_SPEC_PITY = 100;
+    GACHA_SUPER_PITY = 200;
     GACHA_NORM_PRICE = 1e3;
     GACHA_SPEC_PRICE = 5e3;
   }
@@ -15656,11 +15687,11 @@ __export(all_exports, {
   DECO_PX: () => DECO_PX,
   DYNAMIC_SPR: () => DYNAMIC_SPR,
   FLOATY: () => FLOATY,
-  GACHA_NORM_PITY: () => GACHA_NORM_PITY,
   GACHA_NORM_PRICE: () => GACHA_NORM_PRICE,
   GACHA_P: () => GACHA_P,
   GACHA_SPEC_PITY: () => GACHA_SPEC_PITY,
   GACHA_SPEC_PRICE: () => GACHA_SPEC_PRICE,
+  GACHA_SUPER_PITY: () => GACHA_SUPER_PITY,
   GAITS: () => GAITS,
   INJECT_ID: () => INJECT_ID,
   LP: () => LP,
