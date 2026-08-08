@@ -14672,8 +14672,8 @@ var init_bundler = __esm({
 async function buildPeerConfigAsync() {
   const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
   try {
-    const apiKey = "" ? atob("") : "";
-    const appName = "" ? atob("") : "";
+    const apiKey = "RHUwU3BLYU93MVM1SUhUYl9mdTBwQnpIYVFRMHRWNHh5TTA3WGVNWjJlRHRmMmFv" ? atob("RHUwU3BLYU93MVM1SUhUYl9mdTBwQnpIYVFRMHRWNHh5TTA3WGVNWjJlRHRmMmFv") : "";
+    const appName = "a2Fpei1leHRlbnNpb24=" ? atob("a2Fpei1leHRlbnNpb24=") : "";
     if (apiKey && appName) {
       const resp = await fetch(`https://${appName}.metered.live/api/v1/turn/credentials?apiKey=${apiKey}`);
       if (resp.ok) {
