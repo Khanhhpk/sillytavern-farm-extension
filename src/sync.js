@@ -58,7 +58,7 @@ export async function openSyncHostModal() {
             statusEl.style.color = '#1976d2';
         }
         
-        syncConn.on('open', () => {
+        const handleSyncOpen = () => {
             if (statusEl) {
                 statusEl.textContent = 'Máy khác đã kết nối! Đang gửi dữ liệu...';
             }
@@ -72,7 +72,13 @@ export async function openSyncHostModal() {
                 cleanupSync();
                 All.closeModal();
             }, 3000);
-        });
+        };
+        
+        if (syncConn.open) {
+            handleSyncOpen();
+        } else {
+            syncConn.on('open', handleSyncOpen);
+        }
     });
 
     syncPeer.on('error', (err) => {

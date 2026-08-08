@@ -14844,9 +14844,13 @@ async function hostRoom() {
     }
     conn = connection;
     updateStatus("\u0110ang thi\u1EBFt l\u1EADp \u0111\u01B0\u1EDDng truy\u1EC1n d\u1EEF li\u1EC7u...", "#7a5c38");
-    conn.on("open", () => {
+    if (conn.open) {
       setupConnection();
-    });
+    } else {
+      conn.on("open", () => {
+        setupConnection();
+      });
+    }
   });
   peer.on("error", (err) => {
     updateStatus("L\u1ED7i: " + err.type, "#d32f2f");
@@ -15269,7 +15273,7 @@ async function openSyncHostModal() {
       statusEl.textContent = "\u0110ang thi\u1EBFt l\u1EADp \u0111\u01B0\u1EDDng truy\u1EC1n d\u1EEF li\u1EC7u...";
       statusEl.style.color = "#1976d2";
     }
-    syncConn.on("open", () => {
+    const handleSyncOpen = () => {
       if (statusEl) {
         statusEl.textContent = "M\xE1y kh\xE1c \u0111\xE3 k\u1EBFt n\u1ED1i! \u0110ang g\u1EEDi d\u1EEF li\u1EC7u...";
       }
@@ -15283,7 +15287,12 @@ async function openSyncHostModal() {
         cleanupSync();
         closeModal();
       }, 3e3);
-    });
+    };
+    if (syncConn.open) {
+      handleSyncOpen();
+    } else {
+      syncConn.on("open", handleSyncOpen);
+    }
   });
   syncPeer.on("error", (err) => {
     const statusEl = $id("sync-host-status");

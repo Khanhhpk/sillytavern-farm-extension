@@ -161,9 +161,14 @@ async function hostRoom() {
         }
         conn = connection;
         updateStatus('Đang thiết lập đường truyền dữ liệu...', '#7a5c38');
-        conn.on('open', () => {
+        
+        if (conn.open) {
             setupConnection();
-        });
+        } else {
+            conn.on('open', () => {
+                setupConnection();
+            });
+        }
     });
 
     peer.on('error', (err) => {
