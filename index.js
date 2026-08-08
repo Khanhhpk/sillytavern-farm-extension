@@ -5259,7 +5259,7 @@ function openPanel(kind) {
     }
     if (bagTab === "gacha") {
       const gachaKeys = Object.keys(ctx.S.bag || {}).filter((k) => k.startsWith("unique@"));
-      const rarityVal = { "Th\u01B0\u1EDDng": 1, "Hi\u1EBFm": 2, "S\u1EED thi": 3, "Huy\u1EC1n tho\u1EA1i": 4 };
+      const rarityVal = { "R\xE1c": 0, "Th\u01B0\u1EDDng": 1, "Hi\u1EBFm": 2, "S\u1EED thi": 3, "Huy\u1EC1n tho\u1EA1i": 4 };
       if (gachaSortMode === "desc") {
         gachaKeys.sort((a, b) => {
           const rA = ctx.S.uniques?.[a]?.rarity || "Th\u01B0\u1EDDng";
