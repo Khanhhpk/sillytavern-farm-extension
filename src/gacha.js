@@ -7,6 +7,7 @@ import { toast, openBuyDlg } from './witch.js';
 import { renderStatus } from './render.js';
 import { openModal } from './shop.js';
 import { charName, CS, SEC, extractJson, collectWorldbook } from './events.js';
+import { GACHA_PROMPT } from './prompt.js';
 
 export const GACHA_NORM_PITY = 100;
 export const GACHA_SPEC_PITY = 50;
@@ -133,15 +134,16 @@ Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối c�
 Hãy sáng tạo 1 KỲ VẬT ĐỘC NHẤT phẩm chất [${rarity}].
 ${contextStr}
 
+--- QUY TẮC CỐT LÕI TỪ VẠN HỮU ĐẠO NGUYÊN ---
+${GACHA_PROMPT}
+--- KẾT THÚC QUY TẮC CỐT LÕI ---
+
 BẢNG MÀU PIXEL 32x32 CHO PHÉP (Ký tự: Mã màu Hex):
 ${paletteStr}
 
-QUY TẮC THIẾT KẾ KỲ VẬT:
-1. Có lợi tuyệt đối: Bất kỳ kỳ vật nào cũng phải mang lại ưu thế dương, dễ dùng. NGHIÊM CẤM mọi loại phản phệ, nguyền rủa, hao tổn tuổi thọ, hiến tế hay tác dụng phụ.
-2. Khả chơi mạnh mẽ & Thú vị: Đồ vật phải sở hữu cơ chế độc đáo, có thể chủ động thao tác. Không được viết thành bùa lợi (buff) tăng chỉ số thuần túy hoặc món đồ trang bị nhàm chán.
-3. Cấp độ sức mạnh:
-- Phẩm chất [${rarity}]: ${rarityGuidance}
-4. Định giá hợp lý: Không được phá giá kinh tế game.
+QUY TẮC BỔ SUNG:
+1. Cấp độ sức mạnh hiện tại: Phẩm chất [${rarity}] - ${rarityGuidance}
+2. Định giá hợp lý: Không được phá giá kinh tế game.
 
 HƯỚNG DẪN TƯ DUY (Bắt buộc phải có thẻ <thinking> trước khi xuất mã):
 ${thinkingInstructions}
