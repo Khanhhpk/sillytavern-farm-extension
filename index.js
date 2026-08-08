@@ -14668,6 +14668,49 @@ var init_bundler = __esm({
   }
 });
 
+// src/net.js
+async function buildPeerConfigAsync() {
+  const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
+  try {
+    const apiKey = "MDgwZDg0ODYxZmZmYzdkMWNkZDY0NTk2OTNkMmJiNmIyZTcw" ? atob("MDgwZDg0ODYxZmZmYzdkMWNkZDY0NTk2OTNkMmJiNmIyZTcw") : "";
+    const appName = "a2Fpei1leHRlbnNpb24=" ? atob("a2Fpei1leHRlbnNpb24=") : "";
+    if (apiKey && appName) {
+      const resp = await fetch(`https://${appName}.metered.live/api/v1/turn/credentials?apiKey=${apiKey}`);
+      if (resp.ok) {
+        const servers = await resp.json();
+        iceServers.push(...servers);
+        return { config: { iceServers } };
+      }
+    }
+    const secret = "openrelayprojectsecret";
+    const expiry = Math.floor(Date.now() / 1e3) + 24 * 3600;
+    const username = String(expiry);
+    const enc = new TextEncoder();
+    const keyMat = await crypto.subtle.importKey(
+      "raw",
+      enc.encode(secret),
+      { name: "HMAC", hash: "SHA-1" },
+      false,
+      ["sign"]
+    );
+    const sig = await crypto.subtle.sign("HMAC", keyMat, enc.encode(username));
+    const credential = btoa(String.fromCharCode(...new Uint8Array(sig)));
+    iceServers.push(
+      { urls: "stun:openrelay.metered.ca:80" },
+      { urls: "turn:openrelay.metered.ca:80", username, credential },
+      { urls: "turn:openrelay.metered.ca:443", username, credential },
+      { urls: "turns:openrelay.metered.ca:443", username, credential }
+    );
+  } catch (err) {
+    console.warn("Failed to generate OpenRelay credentials:", err);
+  }
+  return { config: { iceServers } };
+}
+var init_net = __esm({
+  "src/net.js"() {
+  }
+});
+
 // src/trade.js
 function getItemName(id) {
   if (id === "coins") return "Ti\u1EC1n xu";
@@ -14775,10 +14818,11 @@ function updateStatus(msg, color = "#7a5c38") {
     el.style.color = color;
   }
 }
-function hostRoom() {
+async function hostRoom() {
   updateStatus("\u0110ang t\u1EA1o ph\xF2ng...", "#7a5c38");
   const roomId = "farm-" + Math.random().toString(36).substr(2, 6);
-  peer = new $416260bce337df90$export$ecd1fc136c422448(roomId);
+  const peerOptions = await buildPeerConfigAsync();
+  peer = new $416260bce337df90$export$ecd1fc136c422448(roomId, peerOptions);
   peer.on("open", (id) => {
     updateStatus(`Ph\xF2ng \u0111\xE3 t\u1EA1o! M\xE3 c\u1EE7a b\u1EA1n: ${id}. H\xE3y g\u1EEDi m\xE3 n\xE0y cho \u0111\u1ED1i t\xE1c.`, "#388e3c");
     const body = $id("trade-body");
@@ -14799,17 +14843,29 @@ function hostRoom() {
       return;
     }
     conn = connection;
-    setupConnection();
+    updateStatus("\u0110ang thi\u1EBFt l\u1EADp \u0111\u01B0\u1EDDng truy\u1EC1n d\u1EEF li\u1EC7u...", "#7a5c38");
+    if (conn.open) {
+      setupConnection();
+    } else {
+      conn.on("open", () => {
+        setupConnection();
+      });
+    }
   });
   peer.on("error", (err) => {
     updateStatus("L\u1ED7i: " + err.type, "#d32f2f");
   });
 }
-function joinRoom() {
-  const code = $id("inp-trade-code").value.trim();
-  if (!code) return updateStatus("Vui l\xF2ng nh\u1EADp m\xE3 ph\xF2ng!", "#d32f2f");
+async function joinRoom() {
+  const codeEl = $id("inp-trade-code");
+  const code = codeEl ? codeEl.value.trim() : "";
+  if (!code) {
+    updateStatus("Vui l\xF2ng nh\u1EADp m\xE3 ph\xF2ng!", "#d32f2f");
+    return;
+  }
   updateStatus("\u0110ang k\u1EBFt n\u1ED1i...", "#7a5c38");
-  peer = new $416260bce337df90$export$ecd1fc136c422448();
+  const peerOptions = await buildPeerConfigAsync();
+  peer = new $416260bce337df90$export$ecd1fc136c422448(void 0, peerOptions);
   peer.on("open", () => {
     conn = peer.connect(code, { reliable: true });
     conn.on("open", () => {
@@ -15146,6 +15202,7 @@ var init_trade = __esm({
     init_all();
     init_data();
     init_bundler();
+    init_net();
     peer = null;
     conn = null;
     myItems = {};
@@ -15175,7 +15232,7 @@ function cleanupSync() {
     syncPeer = null;
   }
 }
-function openSyncHostModal() {
+async function openSyncHostModal() {
   cleanupSync();
   openModal("C\u1EA5p M\xE3 (G\u1EEDi Save)", `
         <div style="display:flex; flex-direction:column; gap: 15px; padding: 10px; text-align: center;">
@@ -15188,7 +15245,8 @@ function openSyncHostModal() {
         </div>
     `);
   const roomId = "fsync-" + Math.random().toString(36).substr(2, 6);
-  syncPeer = new $416260bce337df90$export$ecd1fc136c422448(roomId);
+  const peerOptions = await buildPeerConfigAsync();
+  syncPeer = new $416260bce337df90$export$ecd1fc136c422448(roomId, peerOptions);
   syncPeer.on("open", (id) => {
     const codeEl = $id("sync-host-code");
     const statusEl = $id("sync-host-status");
@@ -15212,10 +15270,13 @@ function openSyncHostModal() {
     syncConn = connection;
     const statusEl = $id("sync-host-status");
     if (statusEl) {
-      statusEl.textContent = "M\xE1y kh\xE1c \u0111\xE3 k\u1EBFt n\u1ED1i! \u0110ang g\u1EEDi d\u1EEF li\u1EC7u...";
+      statusEl.textContent = "\u0110ang thi\u1EBFt l\u1EADp \u0111\u01B0\u1EDDng truy\u1EC1n d\u1EEF li\u1EC7u...";
       statusEl.style.color = "#1976d2";
     }
-    syncConn.on("open", () => {
+    const handleSyncOpen = () => {
+      if (statusEl) {
+        statusEl.textContent = "M\xE1y kh\xE1c \u0111\xE3 k\u1EBFt n\u1ED1i! \u0110ang g\u1EEDi d\u1EEF li\u1EC7u...";
+      }
       syncConn.send({ type: "FULL_SAVE", data: ctx.S });
       if (statusEl) {
         statusEl.textContent = "\u0110\xE3 g\u1EEDi save th\xE0nh c\xF4ng!";
@@ -15226,7 +15287,12 @@ function openSyncHostModal() {
         cleanupSync();
         closeModal();
       }, 3e3);
-    });
+    };
+    if (syncConn.open) {
+      handleSyncOpen();
+    } else {
+      syncConn.on("open", handleSyncOpen);
+    }
   });
   syncPeer.on("error", (err) => {
     const statusEl = $id("sync-host-status");
@@ -15252,7 +15318,7 @@ function openSyncJoinModal() {
         </div>
     `);
 }
-function executeSyncJoin() {
+async function executeSyncJoin() {
   const codeEl = $id("sync-join-code");
   const code = codeEl ? codeEl.value.trim() : "";
   const statusEl = $id("sync-join-status");
@@ -15268,7 +15334,8 @@ function executeSyncJoin() {
     statusEl.style.color = "#7a5c38";
   }
   cleanupSync();
-  syncPeer = new $416260bce337df90$export$ecd1fc136c422448();
+  const peerOptions = await buildPeerConfigAsync();
+  syncPeer = new $416260bce337df90$export$ecd1fc136c422448(void 0, peerOptions);
   syncPeer.on("open", () => {
     syncConn = syncPeer.connect(code, { reliable: true });
     syncConn.on("open", () => {
@@ -15321,6 +15388,7 @@ var init_sync = __esm({
     init_store();
     init_all();
     init_bundler();
+    init_net();
     syncPeer = null;
     syncConn = null;
   }

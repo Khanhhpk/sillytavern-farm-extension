@@ -5,9 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "esbuild src/main.js --bundle --outfile=index.js --format=esm"
+    "build": "node build.js"
   },
   "devDependencies": {
+    "dotenv": "^17.4.2",
     "esbuild": "^0.23.0",
     "typescript": "^7.0.2"
   },

@@ -1,6 +1,7 @@
 import { ctx, extensionName, NS } from './store.js';
 import * as All from './all.js';
 import { Peer } from 'peerjs';
+import { buildPeerConfigAsync } from './net.js';
 
 let syncPeer = null;
 let syncConn = null;
@@ -10,7 +11,7 @@ function cleanupSync() {
     if (syncPeer) { syncPeer.destroy(); syncPeer = null; }
 }
 
-export function openSyncHostModal() {
+export async function openSyncHostModal() {
     cleanupSync();
     
     All.openModal('Cấp Mã (Gửi Save)', `
@@ -25,7 +26,9 @@ export function openSyncHostModal() {
     `);
 
     const roomId = 'fsync-' + Math.random().toString(36).substr(2, 6);
-    syncPeer = new Peer(roomId);
+    
+    const peerOptions = await buildPeerConfigAsync();
+    syncPeer = new Peer(roomId, peerOptions);
     
     syncPeer.on('open', (id) => {
         const codeEl = All.$id('sync-host-code');
@@ -51,11 +54,14 @@ export function openSyncHostModal() {
         syncConn = connection;
         const statusEl = All.$id('sync-host-status');
         if (statusEl) {
-            statusEl.textContent = 'Máy khác đã kết nối! Đang gửi dữ liệu...';
+            statusEl.textContent = 'Đang thiết lập đường truyền dữ liệu...';
             statusEl.style.color = '#1976d2';
         }
         
-        syncConn.on('open', () => {
+        const handleSyncOpen = () => {
+            if (statusEl) {
+                statusEl.textContent = 'Máy khác đã kết nối! Đang gửi dữ liệu...';
+            }
             syncConn.send({ type: 'FULL_SAVE', data: ctx.S });
             if (statusEl) {
                 statusEl.textContent = 'Đã gửi save thành công!';
@@ -66,7 +72,13 @@ export function openSyncHostModal() {
                 cleanupSync();
                 All.closeModal();
             }, 3000);
-        });
+        };
+        
+        if (syncConn.open) {
+            handleSyncOpen();
+        } else {
+            syncConn.on('open', handleSyncOpen);
+        }
     });
 
     syncPeer.on('error', (err) => {
@@ -96,7 +108,7 @@ export function openSyncJoinModal() {
     `);
 }
 
-export function executeSyncJoin() {
+export async function executeSyncJoin() {
     // @ts-ignore
     const codeEl = All.$id('sync-join-code');
     const code = codeEl ? codeEl.value.trim() : '';
@@ -109,7 +121,9 @@ export function executeSyncJoin() {
     if (statusEl) { statusEl.textContent = 'Đang kết nối...'; statusEl.style.color = '#7a5c38'; }
     
     cleanupSync();
-    syncPeer = new Peer();
+    
+    const peerOptions = await buildPeerConfigAsync();
+    syncPeer = new Peer(undefined, peerOptions);
     
     syncPeer.on('open', () => {
         syncConn = syncPeer.connect(code, { reliable: true });
