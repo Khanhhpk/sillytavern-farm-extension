@@ -9128,6 +9128,7 @@ function openHeroMode() {
       if (type === "atk_party") partyAtkMult += val;
     }
   });
+  ctx.S.hero.pressure = 0;
   runState = {
     stage: 1,
     pets: ctx.S.hero.party.map((pId) => {
@@ -9320,6 +9321,7 @@ function heroTick() {
     heroToast("\u0110\u1ED9i h\xECnh \u0111\xE3 g\u1EE5c ng\xE3! V\u1EC1 Stage 1...");
     setTimeout(() => {
       if (!runState) return;
+      ctx.S.hero.pressure = 0;
       runState.stage = 1;
       runState.pets.forEach((p) => p.hp = p.maxHp);
       renderHeroUI();
@@ -9538,12 +9540,14 @@ function heroTick() {
               tMob.atkDebuffTimer = aSk.duration;
               setTimeout(() => showFloatDamage("CHARMED", mobEl, "#ff88dd"), 0);
             } else if (aSk.type === "shield_self") {
-              p.shield = (p.shield || 0) + aSk.val;
+              const shieldAmt = aSk.val < 1 ? p.maxHp * aSk.val : aSk.val;
+              p.shield = (p.shield || 0) + shieldAmt;
               setTimeout(() => showFloatDamage("SHIELD", pEl, "#aaddff"), 0);
               spawnSkillEffect(pEl, pEl, "shield");
             } else if (aSk.type === "shield_party") {
               alivePets.forEach((ap) => {
-                ap.shield = (ap.shield || 0) + aSk.val;
+                const shieldAmt = aSk.val < 1 ? ap.maxHp * aSk.val : aSk.val;
+                ap.shield = (ap.shield || 0) + shieldAmt;
                 const tIdx = runState.pets.indexOf(ap);
                 const tEl = $id("hpet-" + tIdx);
                 setTimeout(() => showFloatDamage("SHIELD", tEl, "#aaddff"), 0);
@@ -9611,7 +9615,7 @@ function heroTick() {
               spawnSkillEffect(pEl, mobEl, aSk.type);
             } else if (aSk.type === "vampiric_buff") {
               alivePets.forEach((ap) => {
-                if (ap !== p) ap.hp = Math.max(1, ap.hp - 10);
+                if (ap !== p) ap.hp = Math.max(1, ap.hp - ap.maxHp * 0.1);
               });
               p.atkBuff = (p.atkBuff || 1) + aSk.val;
               p.atkBuffTimer = aSk.duration;
@@ -9657,9 +9661,10 @@ function heroTick() {
               setTimeout(() => showFloatDamage("-" + dmg, mobEl, "#e0f7fa"), 0);
               spawnSkillEffect(pEl, mobEl, aSk.type);
             } else if (aSk.type === "coin_toss") {
-              const dmg = 999;
+              const cost = Math.floor(ctx.S.hero.gold * 0.2);
+              if (cost > 0) ctx.S.hero.gold -= cost;
+              const dmg = Math.floor(tMob.maxHp * 0.5);
               tMob.hp -= dmg;
-              if (ctx.S.hero.gold >= 500) ctx.S.hero.gold -= 500;
               setTimeout(() => showFloatDamage("-" + dmg + " True DMG", mobEl, "#ffca28"), 0);
             } else if (aSk.type === "atk_up") {
               p.atkBuff = (p.atkBuff || 1) + aSk.val;
@@ -10210,13 +10215,13 @@ var init_hero = __esm({
         p2: { name: "Ph\u1EE7 \u0110\u1EA7u", type: "first_strike", val: 5, desc: "\u0110\xF2n \u0111\xE1nh \u0111\u1EA7u m\u1ED7i qu\xE1i x5 S\xE1t th\u01B0\u01A1ng" }
       },
       slimePink: {
-        a1: { name: "M\u01B0a D\xE2u T\xE2y", type: "heal_party", val: 15, cd: 4, duration: 0, desc: "H\u1ED3i 15 HP cho to\xE0n \u0111\u1ED9i" },
+        a1: { name: "M\u01B0a D\xE2u T\xE2y", type: "heal_party", val: 0.15, cd: 4, duration: 0, desc: "H\u1ED3i 15% Max HP cho to\xE0n \u0111\u1ED9i" },
         a2: { name: "M\xF9i H\u01B0\u01A1ng", type: "charm", val: 0.5, cd: 8, duration: 3, desc: "Gi\u1EA3m 50% ATK c\u1EE7a qu\xE1i trong 3s" },
         p1: { name: "C\u1EAFn Ng\u1ECDt", type: "lifesteal", val: 0.3, desc: "H\xFAt m\xE1u 30% s\xE1t th\u01B0\u01A1ng g\xE2y ra" },
         p2: { name: "L\u1EDBp K\u1EB9o D\u1EBBo", type: "dmg_reduction", val: 0.2, desc: "Gi\u1EA3m 20% m\u1ECDi s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o" }
       },
       octoCream: {
-        a1: { name: "Kem Khi\xEAn", type: "shield_self", val: 100, cd: 8, duration: 0, desc: "T\u1EA1o Khi\xEAn 100 HP cho b\u1EA3n th\xE2n" },
+        a1: { name: "Kem Khi\xEAn", type: "shield_self", val: 0.25, cd: 8, duration: 0, desc: "T\u1EA1o Khi\xEAn 25% Max HP cho b\u1EA3n th\xE2n" },
         a2: { name: "H\u01A1i L\u1EA1nh", type: "slow", val: 0.5, cd: 7, duration: 3, desc: "Gi\u1EA3m 50% T\u1ED1c \u0111\xE1nh c\u1EE7a qu\xE1i" },
         p1: { name: "\u0110\xE1 B\xE0o", type: "reflect", val: 0.4, desc: "Ph\u1EA3n l\u1EA1i 40% s\xE1t th\u01B0\u01A1ng" },
         p2: { name: "N\xE9 Tr\xE1nh", type: "dodge", val: 0.3, desc: "T\u1EC9 l\u1EC7 n\xE9 30%" }
@@ -10253,13 +10258,13 @@ var init_hero = __esm({
       },
       impBlob: {
         a1: { name: "H\u1ECFa Ng\u1EE5c", type: "hellfire", val: 5, cd: 8, duration: 0, desc: "x5 ATK nh\u01B0ng t\u1EF1 tr\u1EEB 20% HP hi\u1EC7n t\u1EA1i" },
-        a2: { name: "H\xFAt M\xE1u \u0110\u1ED3ng B\u1ECDn", type: "vampiric_buff", val: 2, cd: 5, duration: 5, desc: "R\xFAt 10 HP \u0111\u1ED3ng minh \u0111\u1EC3 t\u1EF1 buff x2 ATK" },
+        a2: { name: "H\xFAt M\xE1u \u0110\u1ED3ng B\u1ECDn", type: "vampiric_buff", val: 2, cd: 5, duration: 5, desc: "R\xFAt 10% Max HP \u0111\u1ED3ng minh \u0111\u1EC3 t\u1EF1 buff x2 ATK" },
         p1: { name: "Cu\u1ED3ng N\u1ED9 (Berserk)", type: "berserk", val: 0.5, desc: "HP < 50% => x2 ATK & T\u1ED1c \u0110\xE1nh" },
         p2: { name: "\u0110\xF2n K\u1EBFt Li\u1EC5u", type: "execute", val: 0.2, desc: "5% T\u1EC9 l\u1EC7 k\u1EBFt li\u1EC5u ngay qu\xE1i m\xE1u <20%" }
       },
       angelBlob: {
         a1: { name: "G\u1ECDi H\u1ED3n", type: "resurrect", val: 0.3, cd: 15, duration: 0, desc: "H\u1ED3i sinh 1 \u0111\u1ED3ng minh \u0111\xE3 ch\u1EBFt (30% HP)" },
-        a2: { name: "Khi\xEAn Th\xE1nh", type: "shield_party", val: 50, cd: 10, duration: 0, desc: "T\u1EA1o Khi\xEAn 50 HP cho to\xE0n \u0111\u1ED9i" },
+        a2: { name: "Khi\xEAn Th\xE1nh", type: "shield_party", val: 0.15, cd: 10, duration: 0, desc: "T\u1EA1o Khi\xEAn 15% Max HP cho to\xE0n \u0111\u1ED9i" },
         p1: { name: "H\xE0o Quang B\u1EA3o H\u1ED9", type: "party_dmg_resist", val: 0.1, desc: "Gi\u1EA3m 10% s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o to\xE0n \u0111\u1ED9i" },
         p2: { name: "H\u1EA1t Gi\u1ED1ng Sinh M\u1EC7nh", type: "cheat_death", val: 1, desc: "Gi\u1EEF l\u1EA1i 1 HP khi ch\u1EBFt (1 l\u1EA7n/M\xE0n)" }
       },
@@ -10283,7 +10288,7 @@ var init_hero = __esm({
       },
       penguin: {
         a1: { name: "B\xF3ng Tuy\u1EBFt Tr\u01B0\u1EE3t", type: "snowball_roll", val: 2, cd: 5, duration: 0, desc: "G\xE2y x2 ATK & \u0111\u1EA9y l\xF9i qu\xE1i" },
-        a2: { name: "N\xE9m Ti\u1EC1n", type: "coin_toss", val: 500, cd: 10, duration: 0, desc: "V\u1EE9t 500 V\xE0ng g\xE2y 999 ST Chu\u1EA9n" },
+        a2: { name: "N\xE9m Ti\u1EC1n", type: "coin_toss", val: 0, cd: 10, duration: 0, desc: "Ti\xEAu 20% V\xE0ng \u0111\xE1nh bay 50% HP qu\xE1i" },
         p1: { name: "M\u1ECF V\xE0ng", type: "gold_drop", val: 2, desc: "Nh\xE2n \u0111\xF4i V\xE0ng r\u1EDBt ra t\u1EEB qu\xE1i" },
         p2: { name: "Nh\u1EB7t Nh\u1EA1nh", type: "scavenger", val: 0.05, desc: "Khi \u0111\u1EA7y m\xE1u, \u0111\xE1nh c\xF3 5% r\u01A1i 1 V\xE0ng" }
       },

@@ -25,13 +25,13 @@ export const PET_SKILLS = {
     p2: { name: 'Phủ Đầu', type: 'first_strike', val: 5.0, desc: 'Đòn đánh đầu mỗi quái x5 Sát thương' }
   },
   slimePink: {
-    a1: { name: 'Mưa Dâu Tây', type: 'heal_party', val: 15, cd: 4, duration: 0, desc: 'Hồi 15 HP cho toàn đội' },
+    a1: { name: 'Mưa Dâu Tây', type: 'heal_party', val: 0.15, cd: 4, duration: 0, desc: 'Hồi 15% Max HP cho toàn đội' },
     a2: { name: 'Mùi Hương', type: 'charm', val: 0.5, cd: 8, duration: 3, desc: 'Giảm 50% ATK của quái trong 3s' },
     p1: { name: 'Cắn Ngọt', type: 'lifesteal', val: 0.3, desc: 'Hút máu 30% sát thương gây ra' },
     p2: { name: 'Lớp Kẹo Dẻo', type: 'dmg_reduction', val: 0.2, desc: 'Giảm 20% mọi sát thương nhận vào' }
   },
   octoCream: {
-    a1: { name: 'Kem Khiên', type: 'shield_self', val: 100, cd: 8, duration: 0, desc: 'Tạo Khiên 100 HP cho bản thân' },
+    a1: { name: 'Kem Khiên', type: 'shield_self', val: 0.25, cd: 8, duration: 0, desc: 'Tạo Khiên 25% Max HP cho bản thân' },
     a2: { name: 'Hơi Lạnh', type: 'slow', val: 0.5, cd: 7, duration: 3, desc: 'Giảm 50% Tốc đánh của quái' },
     p1: { name: 'Đá Bào', type: 'reflect', val: 0.4, desc: 'Phản lại 40% sát thương' },
     p2: { name: 'Né Tránh', type: 'dodge', val: 0.3, desc: 'Tỉ lệ né 30%' }
@@ -68,13 +68,13 @@ export const PET_SKILLS = {
   },
   impBlob: {
     a1: { name: 'Hỏa Ngục', type: 'hellfire', val: 5.0, cd: 8, duration: 0, desc: 'x5 ATK nhưng tự trừ 20% HP hiện tại' },
-    a2: { name: 'Hút Máu Đồng Bọn', type: 'vampiric_buff', val: 2.0, cd: 5, duration: 5, desc: 'Rút 10 HP đồng minh để tự buff x2 ATK' },
+    a2: { name: 'Hút Máu Đồng Bọn', type: 'vampiric_buff', val: 2.0, cd: 5, duration: 5, desc: 'Rút 10% Max HP đồng minh để tự buff x2 ATK' },
     p1: { name: 'Cuồng Nộ (Berserk)', type: 'berserk', val: 0.5, desc: 'HP < 50% => x2 ATK & Tốc Đánh' },
     p2: { name: 'Đòn Kết Liễu', type: 'execute', val: 0.2, desc: '5% Tỉ lệ kết liễu ngay quái máu <20%' }
   },
   angelBlob: {
     a1: { name: 'Gọi Hồn', type: 'resurrect', val: 0.3, cd: 15, duration: 0, desc: 'Hồi sinh 1 đồng minh đã chết (30% HP)' },
-    a2: { name: 'Khiên Thánh', type: 'shield_party', val: 50, cd: 10, duration: 0, desc: 'Tạo Khiên 50 HP cho toàn đội' },
+    a2: { name: 'Khiên Thánh', type: 'shield_party', val: 0.15, cd: 10, duration: 0, desc: 'Tạo Khiên 15% Max HP cho toàn đội' },
     p1: { name: 'Hào Quang Bảo Hộ', type: 'party_dmg_resist', val: 0.1, desc: 'Giảm 10% sát thương nhận vào toàn đội' },
     p2: { name: 'Hạt Giống Sinh Mệnh', type: 'cheat_death', val: 1, desc: 'Giữ lại 1 HP khi chết (1 lần/Màn)' }
   },
@@ -98,7 +98,7 @@ export const PET_SKILLS = {
   },
   penguin: {
     a1: { name: 'Bóng Tuyết Trượt', type: 'snowball_roll', val: 2.0, cd: 5, duration: 0, desc: 'Gây x2 ATK & đẩy lùi quái' },
-    a2: { name: 'Ném Tiền', type: 'coin_toss', val: 500, cd: 10, duration: 0, desc: 'Vứt 500 Vàng gây 999 ST Chuẩn' },
+    a2: { name: 'Ném Tiền', type: 'coin_toss', val: 0, cd: 10, duration: 0, desc: 'Tiêu 20% Vàng đánh bay 50% HP quái' },
     p1: { name: 'Mỏ Vàng', type: 'gold_drop', val: 2.0, desc: 'Nhân đôi Vàng rớt ra từ quái' },
     p2: { name: 'Nhặt Nhạnh', type: 'scavenger', val: 0.05, desc: 'Khi đầy máu, đánh có 5% rơi 1 Vàng' }
   },
@@ -500,6 +500,7 @@ export function openHeroMode() {
   });
 
   // Khởi tạo Run
+  ctx.S.hero.pressure = 0;
   runState = {
     stage: 1,
     pets: ctx.S.hero.party.map(pId => {
@@ -718,6 +719,7 @@ function heroTick() {
     heroToast('Đội hình đã gục ngã! Về Stage 1...');
     setTimeout(() => {
       if (!runState) return;
+      ctx.S.hero.pressure = 0; // Đặt lại áp lực khi chết
       runState.stage = 1;
       runState.pets.forEach(p => p.hp = p.maxHp);
       renderHeroUI();
@@ -953,12 +955,14 @@ function heroTick() {
                tMob.atkDebuffTimer = aSk.duration;
                setTimeout(() => showFloatDamage('CHARMED', mobEl, '#ff88dd'), 0);
             } else if (aSk.type === 'shield_self') {
-               p.shield = (p.shield || 0) + aSk.val;
+               const shieldAmt = (aSk.val < 1) ? p.maxHp * aSk.val : aSk.val;
+               p.shield = (p.shield || 0) + shieldAmt;
                setTimeout(() => showFloatDamage('SHIELD', pEl, '#aaddff'), 0);
                spawnSkillEffect(pEl, pEl, 'shield');
             } else if (aSk.type === 'shield_party') {
                alivePets.forEach(ap => {
-                   ap.shield = (ap.shield || 0) + aSk.val;
+                   const shieldAmt = (aSk.val < 1) ? ap.maxHp * aSk.val : aSk.val;
+                   ap.shield = (ap.shield || 0) + shieldAmt;
                    const tIdx = runState.pets.indexOf(ap);
                    const tEl = All.$id('hpet-' + tIdx);
                    setTimeout(() => showFloatDamage('SHIELD', tEl, '#aaddff'), 0);
@@ -1023,7 +1027,7 @@ function heroTick() {
                setTimeout(() => showFloatDamage('-' + dmg, mobEl, '#ff5722'), 0);
                spawnSkillEffect(pEl, mobEl, aSk.type);
             } else if (aSk.type === 'vampiric_buff') {
-               alivePets.forEach(ap => { if (ap !== p) ap.hp = Math.max(1, ap.hp - 10); });
+               alivePets.forEach(ap => { if (ap !== p) ap.hp = Math.max(1, ap.hp - ap.maxHp * 0.1); });
                p.atkBuff = (p.atkBuff || 1) + aSk.val;
                p.atkBuffTimer = aSk.duration;
                setTimeout(() => showFloatDamage('VAMPIRIC', pEl, '#d32f2f'), 0);
@@ -1065,9 +1069,10 @@ function heroTick() {
                setTimeout(() => showFloatDamage('-' + dmg, mobEl, '#e0f7fa'), 0);
                spawnSkillEffect(pEl, mobEl, aSk.type);
             } else if (aSk.type === 'coin_toss') {
-               const dmg = 999;
+               const cost = Math.floor(ctx.S.hero.gold * 0.2);
+               if (cost > 0) ctx.S.hero.gold -= cost;
+               const dmg = Math.floor(tMob.maxHp * 0.5);
                tMob.hp -= dmg;
-               if (ctx.S.hero.gold >= 500) ctx.S.hero.gold -= 500;
                setTimeout(() => showFloatDamage('-' + dmg + ' True DMG', mobEl, '#ffca28'), 0);
             } else if (aSk.type === 'atk_up') {
                p.atkBuff = (p.atkBuff || 1) + aSk.val;
