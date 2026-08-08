@@ -4122,9 +4122,19 @@ async function generateUniqueItem(ticketType) {
   let color = "#9e9e9e";
   let sellPrice = 100;
   if (ticketType === "super") {
-    rarity = "Huy\u1EC1n tho\u1EA1i";
-    color = "#ff8000";
-    sellPrice = 2e4;
+    if (roll < 30) {
+      rarity = "Huy\u1EC1n tho\u1EA1i";
+      color = "#ff8000";
+      sellPrice = 2e4;
+    } else if (roll < 80) {
+      rarity = "S\u1EED thi";
+      color = "#a335ee";
+      sellPrice = 8e3;
+    } else {
+      rarity = "Hi\u1EBFm";
+      color = "#4a90e2";
+      sellPrice = 2500;
+    }
   } else if (ticketType === "spec") {
     if (roll < 10) {
       rarity = "Huy\u1EC1n tho\u1EA1i";

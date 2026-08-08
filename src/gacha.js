@@ -232,7 +232,9 @@ export async function generateUniqueItem(ticketType) {
   let sellPrice = 100;
 
   if (ticketType === 'super') {
-    rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000;
+    if (roll < 30) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
+    else if (roll < 80) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
+    else { rarity = 'Hiếm'; color = '#4a90e2'; sellPrice = 2500; }
   } else if (ticketType === 'spec') {
     if (roll < 10) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
     else if (roll < 40) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
