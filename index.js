@@ -438,7 +438,7 @@ var init_graphics = __esm({
     SPR = {
       sprout: ["................", "................", "................", "................", "...DD......DD...", "..DEED....DEED..", ".DEGGGD..DGGGED.", ".DGGGGD..DGGGGD.", "..DGGGGDDGGGGD..", "...DGGGDDGGGD...", "....DGGGGGGD....", "......DGGD......", "...TTTDGGDTTT...", "..TTTTTTTTTTTT..", "................", "................"],
       seedling: ["................", "................", "................", "................", "................", "................", "................", "......EE........", ".....DGE........", "......DG........", "......GD........", "......GG........", "....TTGGTT......", "...TTTTTTTT.....", "................", "................"],
-      douya: ["................", "................", "................", "................", ".....CCCCC......", "....CCCWWCC.....", "....CCCWWCC.....", ".....CCCCC......", ".......WW.......", ".......W........", ".......W........", "......WW........", "......TWT.......", ".....TTTTT......", "................", "................"],
+      douya: ["................", "................", "................", "................", "...DD......DD...", "..DEED....DEED..", ".DEGGGD..DGGGED.", ".DGGGGD..DGGGGD.", "..DGGGGDDGGGGD..", "...DGGGDDGGGD...", "....DGGGGGGD....", "......DGGD......", "...TTTDGGDTTT...", "..TTTTTTTTTTTT..", "................", "................"],
       radish: ["....DD...DD.....", "...DGED.DEGD....", "...DGGEDEGGD....", "....DGGDGGD.....", ".....DGGGD......", "......DGD.......", "....fDDGDDf.....", "...fFppFFFFf....", "..fFpppFFFFFf...", "..fFppFFFFFFf...", "..fFpFFFFFFFf...", ".TfFFFFFFFFFfT..", ".TTfFFFFFFFfTT..", "..TTfFFFFFfTT...", "...TTTfffTTT....", "................"],
       tomato: ["................", "......DDDD......", "....DDGEEGDD....", "...DGEGGGGEGD...", "..DGEGGGGGGEGD..", "..DGpRRGGRRpGD..", "..DGRRxGGxRRGD..", "..DGGGGGGGGGGD..", "...DGGGpRGGGD...", "...DGGGRxGGGD...", "....DGGGGGGD....", ".....DGGGGD.....", "....TTDGGDTT....", "...TTTTTTTTTT...", "................", "................"],
       pumpkin: ["................", "................", ".......SS.S.....", "......DSSDS.....", "...qqq.SS.qqq...", "..qOOOqqqqOOOq..", ".qOhhOQOOQOOOOq.", ".qOhOOQOOQOOOOq.", ".qOOOOQOOQOOOOq.", ".qOOOOQOOQOOOOq.", ".qOOOOQOOQOOOOq.", "..qOOOQOOQOOOq..", "...qqOOOOOOqq...", "..TTqqqqqqqqTT..", "...TTTTTTTTTT...", "................"],
@@ -14650,6 +14650,22 @@ function getItemName(id) {
   }
   return id;
 }
+function getItemDesc(id) {
+  if (id === "coins") return "D\xF9ng \u0111\u1EC3 mua \u0111\u1ED3 trong c\u1EEDa h\xE0ng";
+  if (CROPS && CROPS[id]) return CROPS[id].desc || "";
+  if (id === "norm") return "V\xE9 quay Gacha th\u01B0\u1EDDng";
+  if (id === "spec") return "V\xE9 quay Gacha \u0111\u1EB7c bi\u1EC7t";
+  if (id === "super") return "V\xE9 quay Gacha si\xEAu c\u1EA5p";
+  if (id === "prism") return "D\xF9ng \u0111\u1EC3 n\xE2ng c\u1EA5p";
+  if (id === "star") return "M\u1EA3nh sao qu\xFD hi\u1EBFm";
+  if (id === "compost") return "Gi\u1EA3m 25% th\u1EDDi gian tr\u1ED3ng c\xE2y";
+  if (id === "shiny") return "Nh\u1EADn th\xEAm 25% ti\u1EC1n xu khi thu ho\u1EA1ch";
+  if (id.startsWith("unique@")) {
+    const item = ctx.S.uniques?.[id] || theirUniques[id];
+    return item?.desc ? item.desc.replace(/"/g, "&quot;") : "V\u1EADt ph\u1EA9m b\xED \u1EA9n";
+  }
+  return "";
+}
 function getItemIcon(id) {
   if (id === "coins") return spriteSVG("coin", 20);
   if (CROPS && CROPS[id]) return spriteSVG(id, 20);
@@ -14765,7 +14781,15 @@ function setupConnection() {
 function handleNetData(data) {
   if (data.type === "UPDATE_ITEMS") {
     theirItems = data.items;
-    if (data.uniques) theirUniques = data.uniques;
+    if (data.uniques) {
+      theirUniques = data.uniques;
+      for (const key in theirUniques) {
+        const u = theirUniques[key];
+        if (u.sp && u.spriteMap) {
+          registerDynamicSprite(u.sp, u.spriteMap);
+        }
+      }
+    }
     renderTradeRoom();
   } else if (data.type === "LOCK") {
     theirLock = data.lock;
@@ -14888,12 +14912,14 @@ function uiToggleLock() {
 }
 function renderTradeRoom() {
   const body = $id("trade-body");
-  const myHTML = Object.entries(myItems).map(
-    ([id, amt]) => `<div class="trade-item">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b> ${!myLock ? `<div class="close-x" style="width:18px;height:18px;line-height:12px;font-size:14px;" onclick="FarmAll.uiRemoveTradeItem('${id}')">\xD7</div>` : ""}</div>`
-  ).join("");
-  const theirHTML = Object.entries(theirItems).map(
-    ([id, amt]) => `<div class="trade-item">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b></div>`
-  ).join("");
+  const myHTML = Object.entries(myItems).map(([id, amt]) => {
+    const desc = getItemDesc(id);
+    return `<div class="trade-item" title="${desc}">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b> ${!myLock ? `<div class="close-x" style="width:18px;height:18px;line-height:12px;font-size:14px;" onclick="FarmAll.uiRemoveTradeItem('${id}')">\xD7</div>` : ""}</div>`;
+  }).join("");
+  const theirHTML = Object.entries(theirItems).map(([id, amt]) => {
+    const desc = getItemDesc(id);
+    return `<div class="trade-item" title="${desc}">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b></div>`;
+  }).join("");
   body.innerHTML = `
         <div class="trade-split">
             <div class="trade-col">

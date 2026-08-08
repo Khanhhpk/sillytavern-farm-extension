@@ -31,6 +31,23 @@ function getItemName(id) {
     return id;
 }
 
+function getItemDesc(id) {
+    if (id === 'coins') return 'Dùng để mua đồ trong cửa hàng';
+    if (CROPS && CROPS[id]) return CROPS[id].desc || '';
+    if (id === 'norm') return 'Vé quay Gacha thường';
+    if (id === 'spec') return 'Vé quay Gacha đặc biệt';
+    if (id === 'super') return 'Vé quay Gacha siêu cấp';
+    if (id === 'prism') return 'Dùng để nâng cấp';
+    if (id === 'star') return 'Mảnh sao quý hiếm';
+    if (id === 'compost') return 'Giảm 25% thời gian trồng cây';
+    if (id === 'shiny') return 'Nhận thêm 25% tiền xu khi thu hoạch';
+    if (id.startsWith('unique@')) {
+        const item = ctx.S.uniques?.[id] || theirUniques[id];
+        return item?.desc ? item.desc.replace(/"/g, '&quot;') : 'Vật phẩm bí ẩn';
+    }
+    return '';
+}
+
 function getItemIcon(id) {
     if (id === 'coins') return All.spriteSVG('coin', 20);
     if (CROPS && CROPS[id]) return All.spriteSVG(id, 20);
@@ -163,7 +180,15 @@ function setupConnection() {
 function handleNetData(data) {
     if (data.type === 'UPDATE_ITEMS') {
         theirItems = data.items;
-        if (data.uniques) theirUniques = data.uniques;
+        if (data.uniques) {
+            theirUniques = data.uniques;
+            for (const key in theirUniques) {
+                const u = theirUniques[key];
+                if (u.sp && u.spriteMap) {
+                    All.registerDynamicSprite(u.sp, u.spriteMap);
+                }
+            }
+        }
         renderTradeRoom();
     } else if (data.type === 'LOCK') {
         theirLock = data.lock;
@@ -297,13 +322,15 @@ export function uiToggleLock() {
 function renderTradeRoom() {
     const body = All.$id('trade-body');
     
-    const myHTML = Object.entries(myItems).map(([id, amt]) => 
-        `<div class="trade-item">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b> ${!myLock ? `<div class="close-x" style="width:18px;height:18px;line-height:12px;font-size:14px;" onclick="FarmAll.uiRemoveTradeItem('${id}')">×</div>` : ''}</div>`
-    ).join('');
+    const myHTML = Object.entries(myItems).map(([id, amt]) => {
+        const desc = getItemDesc(id);
+        return `<div class="trade-item" title="${desc}">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b> ${!myLock ? `<div class="close-x" style="width:18px;height:18px;line-height:12px;font-size:14px;" onclick="FarmAll.uiRemoveTradeItem('${id}')">×</div>` : ''}</div>`
+    }).join('');
     
-    const theirHTML = Object.entries(theirItems).map(([id, amt]) => 
-        `<div class="trade-item">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b></div>`
-    ).join('');
+    const theirHTML = Object.entries(theirItems).map(([id, amt]) => {
+        const desc = getItemDesc(id);
+        return `<div class="trade-item" title="${desc}">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b></div>`
+    }).join('');
 
     body.innerHTML = `
         <div class="trade-split">
