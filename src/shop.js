@@ -42,6 +42,9 @@ export function openPanel(kind) {
   if (kind === 'bet') {
     return openBetModal();
   }
+  if (kind === 'trade') {
+    return All.openTradeModal();
+  }
   if (kind === 'shop') {
     const tabs = [['seed', 'Hạt giống'], ['fert', 'Phân bón'], ['pet', 'Thú cưng'], ['pass', 'Vé'], ['ticket', 'Vé Gacha']];
     let items = '';

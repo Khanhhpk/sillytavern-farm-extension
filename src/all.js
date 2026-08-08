@@ -15,3 +15,4 @@ export * from './dungeon.js';
 export * from './destroy.js';
 export * from './bet.js';
 export * from './hero.js';
+export * from './trade.js';
