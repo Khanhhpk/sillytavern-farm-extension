@@ -4543,9 +4543,43 @@ function openGachaModal() {
 function openGachaRatesModal() {
   const bodyHTML = `
     <div style='padding:4px; text-align:center;'>
-      <h3 style='margin-top:0; color:#3a2c22; font-size:14px;'>B\u1EA3ng T\u1EC9 L\u1EC7 R\u01A1i \u0110\u1ED3 Gachapon</h3>
+      <h3 style='margin-top:0; color:#3a2c22; font-size:14px; margin-bottom:12px;'>B\u1EA3ng T\u1EC9 L\u1EC7 R\u01A1i \u0110\u1ED3 Gachapon</h3>
       
-      <table style='width:100%; border-collapse:collapse; font-size:12px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1);'>
+      <div style='font-size:12px; font-weight:bold; color:#5a3f78; margin-bottom:4px; text-align:left;'>1. T\u1EC9 l\u1EC7 Lo\u1EA1i V\u1EADt Ph\u1EA9m</div>
+      <table style='width:100%; border-collapse:collapse; font-size:11px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1);'>
+        <thead>
+          <tr style='background:#f0e6d2; color:#3a2c22; text-align:left;'>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Lo\u1EA1i</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>V\xE9 Th\u01B0\u1EDDng / \u0110\u1EB7c Bi\u1EC7t</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>V\xE9 Si\xEAu C\u1EA5p</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#4a7a26;'>H\u1EA1t gi\u1ED1ng</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40% <span style="color:#777;">(T: x2, \u0110B: x5)</span></td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#e8963a;'>Ph\xE2n b\xF3n</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40% <span style="color:#777;">(T: x1, \u0110B: x3)</span></td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#4a8098;'>M\u1EA3nh v\u1EE1 (Sao/L\u0103ng quang)</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10% <span style="color:#777;">(x1)</span></td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#ff4500;'>B\u1EA3o v\u1EADt \u0110\u1ED9c nh\u1EA5t (AI)</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>100%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style='font-size:12px; font-weight:bold; color:#5a3f78; margin-bottom:4px; text-align:left;'>2. Ph\u1EA9m ch\u1EA5t (khi tr\xFAng B\u1EA3o V\u1EADt \u0110\u1ED9c Nh\u1EA5t)</div>
+      <table style='width:100%; border-collapse:collapse; font-size:11px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1);'>
         <thead>
           <tr style='background:#f0e6d2; color:#3a2c22; text-align:left;'>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>\u0110\u1ED9 hi\u1EBFm</th>
@@ -4590,8 +4624,8 @@ function openGachaRatesModal() {
       
       <div style='font-size:11px; color:#555; text-align:left; background:#fafafa; padding:8px; border-radius:4px; border:1px dashed #ccc; margin-bottom:12px;'>
         <div style='margin-bottom:4px;'><b>B\u1EA3o hi\u1EC3m (Pity):</b></div>
-        <div>- T\xEDch <b>${GACHA_NORM_PITY}</b> \u0111i\u1EC3m V\xE9 Th\u01B0\u1EDDng s\u1EBD ch\u1EAFc ch\u1EAFn tr\xFAng <b>Hi\u1EBFm</b> tr\u1EDF l\xEAn.</div>
-        <div>- T\xEDch <b>${GACHA_SPEC_PITY}</b> \u0111i\u1EC3m V\xE9 \u0110\u1EB7c Bi\u1EC7t s\u1EBD ch\u1EAFc ch\u1EAFn tr\xFAng <b>S\u1EED thi</b> tr\u1EDF l\xEAn.</div>
+        <div>- T\xEDch <b>${GACHA_NORM_PITY}</b> \u0111i\u1EC3m V\xE9 Th\u01B0\u1EDDng s\u1EBD ch\u1EAFc ch\u1EAFn tr\xFAng <b>B\u1EA3o V\u1EADt (Hi\u1EBFm tr\u1EDF l\xEAn)</b>.</div>
+        <div>- T\xEDch <b>${GACHA_SPEC_PITY}</b> \u0111i\u1EC3m V\xE9 \u0110\u1EB7c Bi\u1EC7t s\u1EBD ch\u1EAFc ch\u1EAFn tr\xFAng <b>B\u1EA3o V\u1EADt (S\u1EED thi tr\u1EDF l\xEAn)</b>.</div>
       </div>
 
       <span class="buy" id="gachaRatesBackBtn" style="padding:6px 16px; font-size:12px; background:#4a7a26; color:#fff; cursor:pointer;">Quay L\u1EA1i Gacha</span>

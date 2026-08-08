@@ -662,9 +662,43 @@ export function openGachaModal() {
 export function openGachaRatesModal() {
   const bodyHTML = `
     <div style='padding:4px; text-align:center;'>
-      <h3 style='margin-top:0; color:#3a2c22; font-size:14px;'>Bảng Tỉ Lệ Rơi Đồ Gachapon</h3>
+      <h3 style='margin-top:0; color:#3a2c22; font-size:14px; margin-bottom:12px;'>Bảng Tỉ Lệ Rơi Đồ Gachapon</h3>
       
-      <table style='width:100%; border-collapse:collapse; font-size:12px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1);'>
+      <div style='font-size:12px; font-weight:bold; color:#5a3f78; margin-bottom:4px; text-align:left;'>1. Tỉ lệ Loại Vật Phẩm</div>
+      <table style='width:100%; border-collapse:collapse; font-size:11px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1);'>
+        <thead>
+          <tr style='background:#f0e6d2; color:#3a2c22; text-align:left;'>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Loại</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Thường / Đặc Biệt</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Siêu Cấp</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#4a7a26;'>Hạt giống</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40% <span style="color:#777;">(T: x2, ĐB: x5)</span></td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#e8963a;'>Phân bón</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40% <span style="color:#777;">(T: x1, ĐB: x3)</span></td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#4a8098;'>Mảnh vỡ (Sao/Lăng quang)</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10% <span style="color:#777;">(x1)</span></td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#ff4500;'>Bảo vật Độc nhất (AI)</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>100%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style='font-size:12px; font-weight:bold; color:#5a3f78; margin-bottom:4px; text-align:left;'>2. Phẩm chất (khi trúng Bảo Vật Độc Nhất)</div>
+      <table style='width:100%; border-collapse:collapse; font-size:11px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1);'>
         <thead>
           <tr style='background:#f0e6d2; color:#3a2c22; text-align:left;'>
             <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Độ hiếm</th>
@@ -709,8 +743,8 @@ export function openGachaRatesModal() {
       
       <div style='font-size:11px; color:#555; text-align:left; background:#fafafa; padding:8px; border-radius:4px; border:1px dashed #ccc; margin-bottom:12px;'>
         <div style='margin-bottom:4px;'><b>Bảo hiểm (Pity):</b></div>
-        <div>- Tích <b>${GACHA_NORM_PITY}</b> điểm Vé Thường sẽ chắc chắn trúng <b>Hiếm</b> trở lên.</div>
-        <div>- Tích <b>${GACHA_SPEC_PITY}</b> điểm Vé Đặc Biệt sẽ chắc chắn trúng <b>Sử thi</b> trở lên.</div>
+        <div>- Tích <b>${GACHA_NORM_PITY}</b> điểm Vé Thường sẽ chắc chắn trúng <b>Bảo Vật (Hiếm trở lên)</b>.</div>
+        <div>- Tích <b>${GACHA_SPEC_PITY}</b> điểm Vé Đặc Biệt sẽ chắc chắn trúng <b>Bảo Vật (Sử thi trở lên)</b>.</div>
       </div>
 
       <span class="buy" id="gachaRatesBackBtn" style="padding:6px 16px; font-size:12px; background:#4a7a26; color:#fff; cursor:pointer;">Quay Lại Gacha</span>
