@@ -2,6 +2,7 @@ import { ctx } from './store.js';
 import * as All from './all.js';
 import { CROPS } from './data.js';
 import { Peer } from 'peerjs';
+import { buildPeerConfigAsync } from './net.js';
 
 let peer = null;
 let conn = null;
@@ -132,11 +133,12 @@ function updateStatus(msg, color = '#7a5c38') {
     }
 }
 
-function hostRoom() {
+async function hostRoom() {
     updateStatus('Đang tạo phòng...', '#7a5c38');
     const roomId = 'farm-' + Math.random().toString(36).substr(2, 6);
     
-    peer = new Peer(roomId);
+    const peerOptions = await buildPeerConfigAsync();
+    peer = new Peer(roomId, peerOptions);
     peer.on('open', (id) => {
         updateStatus(`Phòng đã tạo! Mã của bạn: ${id}. Hãy gửi mã này cho đối tác.`, '#388e3c');
         const body = All.$id('trade-body');
@@ -166,13 +168,17 @@ function hostRoom() {
     });
 }
 
-function joinRoom() {
-    // @ts-ignore
-    const code = All.$id('inp-trade-code').value.trim();
-    if (!code) return updateStatus('Vui lòng nhập mã phòng!', '#d32f2f');
-    
+async function joinRoom() {
+    const codeEl = All.$id('inp-trade-code');
+    const code = codeEl ? codeEl.value.trim() : '';
+    if (!code) {
+        updateStatus('Vui lòng nhập mã phòng!', '#d32f2f');
+        return;
+    }
     updateStatus('Đang kết nối...', '#7a5c38');
-    peer = new Peer();
+    
+    const peerOptions = await buildPeerConfigAsync();
+    peer = new Peer(undefined, peerOptions);
     
     peer.on('open', () => {
         conn = peer.connect(code, { reliable: true });
