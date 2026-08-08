@@ -136,7 +136,7 @@ Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối c�
 
     const basePrice = rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : rarity === 'Hiếm' ? 2500 : rarity === 'Thường' ? 500 : 100;
 
-    const sysPrompt = `Bạn là một AI thiết kế "Kỳ vật dị giới" (Otherworldly Artifact) và chuyên gia Pixel Art (32x32).
+    const sysPrompt = `Bạn là một AI thiết kế "Kỳ vật dị giới" (Otherworldly Artifact) và chuyên gia Pixel Art (n x n, tối thiểu 32x32).
 Hãy sáng tạo 1 KỲ VẬT ĐỘC NHẤT phẩm chất [${rarity}].
 ${contextStr}
 
@@ -144,7 +144,7 @@ ${contextStr}
 ${GACHA_PROMPT}
 --- KẾT THÚC QUY TẮC CỐT LÕI ---
 
-BẢNG MÀU PIXEL 32x32 CHO PHÉP (Ký tự: Mã màu Hex):
+BẢNG MÀU PIXEL CHO PHÉP (Ký tự: Mã màu Hex):
 ${paletteStr}
 
 QUY TẮC BỔ SUNG:

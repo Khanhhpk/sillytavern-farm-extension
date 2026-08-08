@@ -4037,7 +4037,7 @@ N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y thi\u1EBFt k\u1EBF k\u1EF3 v\u1EADt l
     }
     const rarityGuidance = rarity === "Huy\u1EC1n tho\u1EA1i" ? "Th\u01B0\u1EDBc \u0111o \u1EA3nh h\u01B0\u1EDFng to l\u1EDBn (quy\u1EBFt \u0111\u1ECBnh tr\u1EADt t\u1EF1, quy t\u1EAFc, h\u1EC7 sinh th\xE1i, ho\u1EB7c thao t\xFAng c\u1EA3 ph\u01B0\u01A1ng th\u1EBF gi\u1EDBi). D\xF9 quy\u1EC1n b\xEDnh to l\u1EDBn nh\u01B0ng ph\u1EA3i C\u1EE4 TH\u1EC2, thao t\xE1c \u0111\u01B0\u1EE3c, kh\xF4ng vi\u1EBFt kh\xE1i ni\u1EC7m s\xE1o r\u1ED7ng." : rarity === "S\u1EED thi" ? "Th\u01B0\u1EDBc \u0111o \u1EA3nh h\u01B0\u1EDFng c\u1EE5c b\u1ED9 b\u1ED1i c\u1EA3nh (thay \u0111\u1ED5i m\u1ED9t khu v\u1EF1c, m\u1ED9t nh\xF3m, t\u1EA1o c\u01A1 ch\u1EBF thu l\u1EE3i d\xE0i h\u1EA1n ho\u1EB7c \u01B0u th\u1EBF chi\u1EBFn l\u01B0\u1EE3c). C\xF3 gi\xE1 tr\u1ECB k\u1EBFt h\u1EE3p v\xE0 kinh doanh." : rarity === "Hi\u1EBFm" ? "Th\u01B0\u1EDBc \u0111o \u1EA3nh h\u01B0\u1EDFng c\xE1 th\u1EC3 (c\xF4ng c\u1EE5 nh\u1ECF thay \u0111\u1ED5i m\u1ED9t l\u1EA7n t\u01B0\u01A1ng t\xE1c). Y\xEAu c\u1EA7u nh\u1ECF m\xE0 chu\u1EA9n, nh\u1EB9 m\xE0 kh\xE9o, l\u1EADp t\u1EE9c t\u1EA1o ra \u01B0u th\u1EBF tinh x\u1EA3o v\xE0 ch\u01A1i vui ngay l\u1EADp t\u1EE9c." : rarity === "Th\u01B0\u1EDDng" ? "Th\u01B0\u1EDBc \u0111o ti\u1EC7n \xEDch. Nh\u1EEFng c\xF4ng c\u1EE5 nh\u1ECF gi\xFAp \xEDch cho \u0111\u1EDDi s\u1ED1ng h\xE0ng ng\xE0y ho\u1EB7c t\u01B0\u01A1ng t\xE1c nh\u1ECF. Vui v\u1EBB, ti\u1EC7n l\u1EE3i." : "Th\u01B0\u1EDBc \u0111o ph\u1EBF ph\u1EA9m (Junk). \u0110\u1ED3 v\u1EADt t\u01B0\u1EDFng ch\u1EEBng v\xF4 d\u1EE5ng, bu\u1ED3n c\u01B0\u1EDDi, t\u1EA5u h\xE0i, c\xF4ng d\u1EE5ng k\u1EF3 qu\u1EB7c nh\u01B0ng \u0111\xF4i khi c\xF3 th\u1EC3 d\xF9ng trong c\xE1c t\xECnh hu\u1ED1ng o\xE1i \u0103m.";
     const basePrice = rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "S\u1EED thi" ? 8e3 : rarity === "Hi\u1EBFm" ? 2500 : rarity === "Th\u01B0\u1EDDng" ? 500 : 100;
-    const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF "K\u1EF3 v\u1EADt d\u1ECB gi\u1EDBi" (Otherworldly Artifact) v\xE0 chuy\xEAn gia Pixel Art (32x32).
+    const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF "K\u1EF3 v\u1EADt d\u1ECB gi\u1EDBi" (Otherworldly Artifact) v\xE0 chuy\xEAn gia Pixel Art (n x n, t\u1ED1i thi\u1EC3u 32x32).
 H\xE3y s\xE1ng t\u1EA1o 1 K\u1EF2 V\u1EACT \u0110\u1ED8C NH\u1EA4T ph\u1EA9m ch\u1EA5t [${rarity}].
 ${contextStr}
 
@@ -4045,7 +4045,7 @@ ${contextStr}
 ${GACHA_PROMPT}
 --- K\u1EBET TH\xDAC QUY T\u1EAEC C\u1ED0T L\xD5I ---
 
-B\u1EA2NG M\xC0U PIXEL 32x32 CHO PH\xC9P (K\xFD t\u1EF1: M\xE3 m\xE0u Hex):
+B\u1EA2NG M\xC0U PIXEL CHO PH\xC9P (K\xFD t\u1EF1: M\xE3 m\xE0u Hex):
 ${paletteStr}
 
 QUY T\u1EAEC B\u1ED4 SUNG:
