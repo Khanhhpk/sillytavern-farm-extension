@@ -4186,7 +4186,7 @@ async function generateUniqueItem({ rarity, color, sellPrice, ticketType }) {
   save();
   return { key, name: finalName, rarity, color, desc: finalDesc + bonusDesc, sell: sellPrice, sp: spKey };
 }
-async function executeGachaRoll(ticketType, count, updateLoadingText2) {
+async function executeGachaRoll(ticketType, count, updateLoadingText) {
   initGachaState();
   const ticketKey = ticketType;
   const haveTickets = ctx.S.tickets[ticketKey] || 0;
@@ -4304,8 +4304,8 @@ async function executeGachaRoll(ticketType, count, updateLoadingText2) {
   let uniqueCount = 0;
   const uniqueResults = await pMap(uniquePlans, async (plan) => {
     uniqueCount++;
-    if (updateLoadingText2) {
-      updateLoadingText2(uniquePlans.length > 1 ? `\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt... (${uniqueCount}/${uniquePlans.length})` : "\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt...");
+    if (updateLoadingText) {
+      updateLoadingText(uniquePlans.length > 1 ? `\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt... (${uniqueCount}/${uniquePlans.length})` : "\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt...");
     }
     const item = await generateUniqueItem({ rarity: plan.preRolledRarity, color: plan.preRolledColor, sellPrice: plan.preRolledPrice, ticketType: plan.ticketType });
     return {
@@ -4519,11 +4519,11 @@ function openGachaModal() {
     const title = $id("gachaResultTitle");
     const grid = $id("gachaResultGrid");
     if (!overlay || !animSlot || !title || !grid) return;
-    const capsuleIcon = ticketType === "super" ? spriteSVG("gachaCapsuleSpec", 48) : ticketType === "spec" ? spriteSVG("gachaCapsuleSpec", 48) : spriteSVG("gachaCapsuleNorm", 48);
+    const capsuleIcon = ticketType === "super" || ticketType === "exchange" ? spriteSVG("gachaCapsuleSpec", 48) : ticketType === "spec" ? spriteSVG("gachaCapsuleSpec", 48) : spriteSVG("gachaCapsuleNorm", 48);
     animSlot.innerHTML = capsuleIcon;
     animSlot.style.animation = "gachaDrop 0.5s ease-out";
     const tName = ticketType === "super" ? "Si\xEAu c\u01B0\u1EDDng" : ticketType === "spec" ? "\u0110\u1EB7c bi\u1EC7t" : "Th\u01B0\u1EDDng";
-    title.textContent = `K\u1EBFt qu\u1EA3 Quay ${tName} \xD7${count}`;
+    title.textContent = ticketType === "exchange" ? `K\u1EBFt qu\u1EA3 \u0110\u1ED5i M\u1EA3nh Huy\u1EC1n Tho\u1EA1i` : `K\u1EBFt qu\u1EA3 Quay ${tName} \xD7${count}`;
     grid.innerHTML = results.map((r) => `
       <div class="gacha-item-card rarity-${r.rarity.replace(/\s+/g, "-")}" style="border:2px solid ${r.color}; border-radius:8px; padding:6px 8px; background:#fff; display:flex; flex-direction:column; align-items:center; width:100px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
         <div style="font-size:10px; font-weight:bold; color:${r.color}; margin-bottom:2px;">${r.rarity}${r.isPity ? " \u2605B\u1EA3o hi\u1EC3m" : ""}</div>
@@ -4627,6 +4627,20 @@ function openGachaModal() {
       }
     }
   };
+  const doExchangeLegend = async () => {
+    if (!ctx.S.shards || !ctx.S.shards.legend || ctx.S.shards.legend < 10) return;
+    ctx.S.shards.legend -= 10;
+    save();
+    updateCounts();
+    const loadOverlay = $id("gachaLoadingOverlay");
+    const loadText = $id("gachaLoadingText");
+    if (loadOverlay) loadOverlay.style.display = "flex";
+    if (loadText) loadText.textContent = "\u0110ang \u0111\u1ED5i M\u1EA3nh Huy\u1EC1n Tho\u1EA1i...";
+    const item = await generateUniqueItem({ rarity: "Huy\u1EC1n tho\u1EA1i", color: "#ff8000", sellPrice: 2e4, ticketType: "exchange" });
+    if (loadOverlay) loadOverlay.style.display = "none";
+    const results = [{ type: "unique", name: item.name, rarity: item.rarity, color: item.color, icon: spriteSVG(item.sp, 48), desc: item.desc, spKey: item.sp, count: 1 }];
+    triggerGridResult("exchange", 1, results);
+  };
   $id("gachaRollNorm1")?.addEventListener("click", () => doRoll("norm", 1));
   $id("gachaRollNorm10")?.addEventListener("click", () => doRoll("norm", 10));
   $id("gachaRollSpec1")?.addEventListener("click", () => doRoll("spec", 1));
@@ -4634,24 +4648,6 @@ function openGachaModal() {
   $id("gachaRollSuper1")?.addEventListener("click", () => doRoll("super", 1));
   $id("gachaRollSuper10")?.addEventListener("click", () => doRoll("super", 10));
   $id("gachaExchangeLegendBtn")?.addEventListener("click", () => doExchangeLegend());
-}
-async function doExchangeLegend() {
-  if (!ctx.S.shards || !ctx.S.shards.legend || ctx.S.shards.legend < 10) return;
-  ctx.S.shards.legend -= 10;
-  save();
-  $id("gachaLegendCount").innerText = ctx.S.shards.legend;
-  if (ctx.S.shards.legend < 10) {
-    const btn = $id("gachaExchangeLegendBtn");
-    if (btn) {
-      btn.style.background = "#ccc";
-      btn.style.borderColor = "#aaa";
-      btn.style.pointerEvents = "none";
-    }
-  }
-  if (updateLoadingText) updateLoadingText("\u0110ang \u0111\u1ED5i M\u1EA3nh Huy\u1EC1n Tho\u1EA1i...");
-  const item = await generateUniqueItem({ rarity: "Huy\u1EC1n tho\u1EA1i", color: "#ff8000", sellPrice: 2e4, ticketType: "exchange" });
-  const results = [{ type: "unique", name: item.name, rarity: item.rarity, color: item.color, sp: item.sp, count: 1 }];
-  showGachaResult(results);
 }
 function openGachaRatesModal() {
   const bodyHTML = `

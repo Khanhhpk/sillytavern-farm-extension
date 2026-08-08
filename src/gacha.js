@@ -603,12 +603,12 @@ export function openGachaModal() {
     const grid = All.$id('gachaResultGrid');
 
     if (!overlay || !animSlot || !title || !grid) return;
-    const capsuleIcon = ticketType === 'super' ? spriteSVG('gachaCapsuleSpec', 48) : (ticketType === 'spec' ? spriteSVG('gachaCapsuleSpec', 48) : spriteSVG('gachaCapsuleNorm', 48));
+    const capsuleIcon = (ticketType === 'super' || ticketType === 'exchange') ? spriteSVG('gachaCapsuleSpec', 48) : (ticketType === 'spec' ? spriteSVG('gachaCapsuleSpec', 48) : spriteSVG('gachaCapsuleNorm', 48));
     animSlot.innerHTML = capsuleIcon;
     animSlot.style.animation = 'gachaDrop 0.5s ease-out';
 
     const tName = ticketType === 'super' ? 'Siêu cường' : (ticketType === 'spec' ? 'Đặc biệt' : 'Thường');
-    title.textContent = `Kết quả Quay ${tName} ×${count}`;
+    title.textContent = ticketType === 'exchange' ? `Kết quả Đổi Mảnh Huyền Thoại` : `Kết quả Quay ${tName} ×${count}`;
 
     grid.innerHTML = results.map(r => `
       <div class="gacha-item-card rarity-${r.rarity.replace(/\s+/g, '-')}" style="border:2px solid ${r.color}; border-radius:8px; padding:6px 8px; background:#fff; display:flex; flex-direction:column; align-items:center; width:100px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
@@ -731,6 +731,27 @@ export function openGachaModal() {
     }
   };
 
+  const doExchangeLegend = async () => {
+    if (!ctx.S.shards || !ctx.S.shards.legend || ctx.S.shards.legend < 10) return;
+    
+    ctx.S.shards.legend -= 10;
+    save();
+    
+    updateCounts();
+    
+    const loadOverlay = All.$id('gachaLoadingOverlay');
+    const loadText = All.$id('gachaLoadingText');
+    if (loadOverlay) loadOverlay.style.display = 'flex';
+    if (loadText) loadText.textContent = 'Đang đổi Mảnh Huyền Thoại...';
+    
+    const item = await generateUniqueItem({ rarity: 'Huyền thoại', color: '#ff8000', sellPrice: 20000, ticketType: 'exchange' });
+    
+    if (loadOverlay) loadOverlay.style.display = 'none';
+    
+    const results = [{ type: 'unique', name: item.name, rarity: item.rarity, color: item.color, icon: spriteSVG(item.sp, 48), desc: item.desc, spKey: item.sp, count: 1 }];
+    triggerGridResult('exchange', 1, results);
+  };
+
   All.$id('gachaRollNorm1')?.addEventListener('click', () => doRoll('norm', 1));
   All.$id('gachaRollNorm10')?.addEventListener('click', () => doRoll('norm', 10));
   All.$id('gachaRollSpec1')?.addEventListener('click', () => doRoll('spec', 1));
@@ -738,29 +759,6 @@ export function openGachaModal() {
   All.$id('gachaRollSuper1')?.addEventListener('click', () => doRoll('super', 1));
   All.$id('gachaRollSuper10')?.addEventListener('click', () => doRoll('super', 10));
   All.$id('gachaExchangeLegendBtn')?.addEventListener('click', () => doExchangeLegend());
-}
-
-async function doExchangeLegend() {
-  if (!ctx.S.shards || !ctx.S.shards.legend || ctx.S.shards.legend < 10) return;
-  
-  ctx.S.shards.legend -= 10;
-  save();
-  
-  All.$id('gachaLegendCount').innerText = ctx.S.shards.legend;
-  if (ctx.S.shards.legend < 10) {
-    const btn = All.$id('gachaExchangeLegendBtn');
-    if (btn) {
-      btn.style.background = '#ccc';
-      btn.style.borderColor = '#aaa';
-      btn.style.pointerEvents = 'none';
-    }
-  }
-  
-  if (updateLoadingText) updateLoadingText('Đang đổi Mảnh Huyền Thoại...');
-  const item = await generateUniqueItem({ rarity: 'Huyền thoại', color: '#ff8000', sellPrice: 20000, ticketType: 'exchange' });
-  
-  const results = [{ type: 'unique', name: item.name, rarity: item.rarity, color: item.color, sp: item.sp, count: 1 }];
-  showGachaResult(results);
 }
 
 
