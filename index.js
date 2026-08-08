@@ -4060,7 +4060,7 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
 {
   "name": "T\xEAn k\u1EF3 v\u1EADt (2~7 ch\u1EEF, \u1EA5n t\u01B0\u1EE3ng, g\u1EE3i s\u1EF1 t\xF2 m\xF2)",
   "desc": "M\xF4 t\u1EA3 ng\u1EAFn g\u1ECDn C\u01A0 CH\u1EBE v\xE0 C\xC1CH S\u1EEC D\u1EE4NG c\u1EE7a k\u1EF3 v\u1EADt (d\u01B0\u1EDBi 100 ch\u1EEF). Ph\u1EA3i r\xF5 r\xE0ng, th\xFA v\u1ECB, \u0111\u1ED9c l\u1EA1.",
-  "price": S\u1ED1 nguy\xEAn \u0111\u1ECBnh gi\xE1. G\u1EE3i \xFD c\u01A1 b\u1EA3n: ${basePrice}. NGHI\xCAM C\u1EA4M L\u1EA0M PH\xC1T, gi\xE1 tr\u1ECB t\u1ED1i \u0111a tuy\u1EC7t \u0111\u1ED1i KH\xD4NG \u0110\u01AF\u1EE2C V\u01AF\u1EE2T QU\xC1 ${basePrice * 5}G,
+  "price": S\u1ED1 nguy\xEAn \u0111\u1ECBnh gi\xE1. Gi\xE1 t\u1ED1i thi\u1EC3u: ${basePrice}G. NGHI\xCAM C\u1EA4M L\u1EA0M PH\xC1T, gi\xE1 tr\u1ECB t\u1ED1i \u0111a tuy\u1EC7t \u0111\u1ED1i KH\xD4NG \u0110\u01AF\u1EE2C V\u01AF\u1EE2T QU\xC1 ${basePrice * 5}G,
   "spriteMap": [ m\u1EA3ng c\xE1c chu\u1ED7i. N\u1EBFu ch\u1ECDn k\xEDch th\u01B0\u1EDBc n x n, m\u1EA3ng PH\u1EA2I C\xD3 \u0110\xDANG n chu\u1ED7i, v\xE0 m\u1ED7i chu\u1ED7i D\xC0I CH\xCDNH X\xC1C n k\xFD t\u1EF1. Ph\u1EA3i l\xE0 h\xECnh vu\xF4ng (min 32x32). Ch\u1EC9 d\xF9ng k\xFD t\u1EF1 B\u1EA3ng m\xE0u v\xE0 d\u1EA5u '.' cho \u0111i\u1EC3m trong su\u1ED1t ]
 }`;
     const userPrompt = `H\xE3y s\xE1ng t\u1EA1o 1 v\u1EADt ph\u1EA9m \u0111\u1EB7c bi\u1EC7t ng\u1EABu nhi\xEAn ph\u1EA9m ch\u1EA5t ${rarity}.`;
