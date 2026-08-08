@@ -660,7 +660,7 @@ export function openGachaModal() {
 
 
 export function openGachaRatesModal() {
-  const bodyHTML = \
+  const bodyHTML = `
     <div style='padding:4px; text-align:center;'>
       <h3 style='margin-top:0; color:#3a2c22; font-size:14px;'>Bảng Tỉ Lệ Rơi Đồ Gachapon</h3>
       
@@ -715,7 +715,7 @@ export function openGachaRatesModal() {
 
       <span class="buy" id="gachaRatesBackBtn" style="padding:6px 16px; font-size:12px; background:#4a7a26; color:#fff; cursor:pointer;">Quay Lại Gacha</span>
     </div>
-  \;
+  `;
   openModal('Tỉ Lệ Gachapon', bodyHTML);
   
   All.$id('gachaRatesBackBtn')?.addEventListener('click', () => {

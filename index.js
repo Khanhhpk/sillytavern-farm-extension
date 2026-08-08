@@ -4320,6 +4320,9 @@ function openGachaModal() {
           <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 \u0110\u1EB7c bi\u1EC7t (5000G)</span>
           <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 Si\xEAu c\u01B0\u1EDDng (500KG)</span>
         </div>
+        <div style="margin-top:4px;">
+          <span class="buy" id="gachaRatesBtn" style="padding:4px 12px; font-size:11px; background:#4a8098; border:1px solid #2a6078; color:#fff;">\u{1F4CA} Xem T\u1EC9 L\u1EC7 Gachapon</span>
+        </div>
       </div>
 
       <!-- M\xE1y Gachapon & Slot -->
@@ -4413,6 +4416,9 @@ function openGachaModal() {
   });
   $id("gachaBuySuperBtn")?.addEventListener("click", () => {
     openBuyDlg("ticket", "super", "gacha");
+  });
+  $id("gachaRatesBtn")?.addEventListener("click", () => {
+    openGachaRatesModal();
   });
   const triggerGridResult = (ticketType, count, results) => {
     const overlay = $id("gachaResultOverlay");
@@ -4533,6 +4539,68 @@ function openGachaModal() {
   $id("gachaRollSpec1")?.addEventListener("click", () => doRoll("spec", 1));
   $id("gachaRollSpec10")?.addEventListener("click", () => doRoll("spec", 10));
   $id("gachaRollSuper1")?.addEventListener("click", () => doRoll("super", 1));
+}
+function openGachaRatesModal() {
+  const bodyHTML = `
+    <div style='padding:4px; text-align:center;'>
+      <h3 style='margin-top:0; color:#3a2c22; font-size:14px;'>B\u1EA3ng T\u1EC9 L\u1EC7 R\u01A1i \u0110\u1ED3 Gachapon</h3>
+      
+      <table style='width:100%; border-collapse:collapse; font-size:12px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1);'>
+        <thead>
+          <tr style='background:#f0e6d2; color:#3a2c22; text-align:left;'>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>\u0110\u1ED9 hi\u1EBFm</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>V\xE9 Th\u01B0\u1EDDng</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>V\xE9 \u0110\u1EB7c Bi\u1EC7t</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>V\xE9 Si\xEAu C\u1EA5p</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#ff8000;'>Huy\u1EC1n tho\u1EA1i</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>2%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>30%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#a335ee;'>S\u1EED thi</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>8%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>30%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>50%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#4a90e2;'>Hi\u1EBFm</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>20%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>20%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#b0bec5;'>Th\u01B0\u1EDDng</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>20%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; font-weight:bold; color:#9e9e9e;'>R\xE1c</td>
+            <td style='padding:6px;'>30%</td>
+            <td style='padding:6px;'>0%</td>
+            <td style='padding:6px;'>0%</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div style='font-size:11px; color:#555; text-align:left; background:#fafafa; padding:8px; border-radius:4px; border:1px dashed #ccc; margin-bottom:12px;'>
+        <div style='margin-bottom:4px;'><b>B\u1EA3o hi\u1EC3m (Pity):</b></div>
+        <div>- T\xEDch <b>${GACHA_NORM_PITY}</b> \u0111i\u1EC3m V\xE9 Th\u01B0\u1EDDng s\u1EBD ch\u1EAFc ch\u1EAFn tr\xFAng <b>Hi\u1EBFm</b> tr\u1EDF l\xEAn.</div>
+        <div>- T\xEDch <b>${GACHA_SPEC_PITY}</b> \u0111i\u1EC3m V\xE9 \u0110\u1EB7c Bi\u1EC7t s\u1EBD ch\u1EAFc ch\u1EAFn tr\xFAng <b>S\u1EED thi</b> tr\u1EDF l\xEAn.</div>
+      </div>
+
+      <span class="buy" id="gachaRatesBackBtn" style="padding:6px 16px; font-size:12px; background:#4a7a26; color:#fff; cursor:pointer;">Quay L\u1EA1i Gacha</span>
+    </div>
+  `;
+  openModal("T\u1EC9 L\u1EC7 Gachapon", bodyHTML);
+  $id("gachaRatesBackBtn")?.addEventListener("click", () => {
+    openGachaModal();
+  });
 }
 var GACHA_NORM_PITY, GACHA_SPEC_PITY, GACHA_NORM_PRICE, GACHA_SPEC_PRICE;
 var init_gacha = __esm({
@@ -15661,6 +15729,7 @@ __export(all_exports, {
   openBuyDlg: () => openBuyDlg,
   openDungeonView: () => openDungeonView,
   openGachaModal: () => openGachaModal,
+  openGachaRatesModal: () => openGachaRatesModal,
   openHeroMode: () => openHeroMode,
   openHeroPanel: () => openHeroPanel,
   openModal: () => openModal,
