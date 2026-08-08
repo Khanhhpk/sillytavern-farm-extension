@@ -26,6 +26,7 @@ function initFarm() {
 
   const api = { destroy: All.destroy };
   window[RUNTIME_KEY] = api;
+  window.FarmAll = All;
 
   All.renderToolbar();
   All.renderChips();

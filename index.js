@@ -2871,19 +2871,19 @@ function initUI() {
     
     <div class="modal" id="trade-win">
       <div class="mpanel" style="width: min(600px, 96%);">
-        <div class="mtitle"><span>Giao d\u1ECBch P2P</span><span class="grow"></span><div class="close-x" onclick="All.closeTradeModal()">\xD7</div></div>
+        <div class="mtitle"><span>Giao d\u1ECBch P2P</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">\xD7</div></div>
         <div class="mbody" id="trade-body" style="min-height: 200px;"></div>
       </div>
     </div>
     
     <div class="modal" id="trade-popup" style="z-index: 35;">
       <div class="mpanel" style="width: min(300px, 96%);">
-        <div class="mtitle"><span>Th\xEAm \u0110\u1ED3</span><span class="grow"></span><div class="close-x" onclick="All.uiCloseAddItem()">\xD7</div></div>
+        <div class="mtitle"><span>Th\xEAm \u0110\u1ED3</span><span class="grow"></span><div class="close-x" onclick="FarmAll.uiCloseAddItem()">\xD7</div></div>
         <div class="mbody" id="trade-popup-list" style="max-height: 300px; overflow-y: auto; display:flex; flex-direction:column; gap:6px;"></div>
         <div id="trade-popup-act" style="display:none; flex-direction:column; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 2px dashed #c9a273;">
             <div id="lbl-trade-sel" style="font-size: 11px; color:#7a5c38;"></div>
             <input type="number" id="inp-trade-amount" class="inp" min="1" value="1">
-            <div class="buy" onclick="All.uiConfirmAdd()" style="text-align:center;">X\xE1c nh\u1EADn</div>
+            <div class="buy" onclick="FarmAll.uiConfirmAdd()" style="text-align:center;">X\xE1c nh\u1EADn</div>
         </div>
       </div>
     </div>
@@ -4373,7 +4373,7 @@ function openGachaModal() {
   $id("gachaRollSpec10")?.addEventListener("click", () => doRoll("spec", 10));
   $id("gachaRollSuper1")?.addEventListener("click", () => doRoll("super", 1));
 }
-var GACHA_NORM_PITY, GACHA_SPEC_PITY;
+var GACHA_NORM_PITY, GACHA_SPEC_PITY, GACHA_NORM_PRICE, GACHA_SPEC_PRICE;
 var init_gacha = __esm({
   "src/gacha.js"() {
     init_state();
@@ -4387,6 +4387,8 @@ var init_gacha = __esm({
     init_events();
     GACHA_NORM_PITY = 100;
     GACHA_SPEC_PITY = 50;
+    GACHA_NORM_PRICE = 1e3;
+    GACHA_SPEC_PRICE = 5e3;
   }
 });
 
@@ -14711,7 +14713,7 @@ function hostRoom() {
             <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
                 <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">\u0110ang ch\u1EDD \u0111\u1ED1i t\xE1c k\u1EBFt n\u1ED1i...</div>
                 <div style="font-size: 20px; font-weight: bold; color: #e91e63; user-select: all; background: #fce4ec; padding: 10px; border-radius: 8px; border: 2px dashed #f06292;">${id}</div>
-                <div class="buy plain" onclick="All.closeTradeModal()" style="padding: 8px; margin-top: 20px; text-align:center;">Hu\u1EF7</div>
+                <div class="buy plain" onclick="FarmAll.closeTradeModal()" style="padding: 8px; margin-top: 20px; text-align:center;">Hu\u1EF7</div>
             </div>
         `;
   });
@@ -14763,6 +14765,11 @@ function handleNetData(data) {
     if (myLock && theirLock) {
       executeTrade();
     }
+  }
+}
+function sendData(data) {
+  if (conn && conn.open) {
+    conn.send(data);
   }
 }
 function getInventoryCount(id) {
@@ -14841,10 +14848,23 @@ function executeTrade() {
   closeTradeModal();
   renderBanner();
 }
+function uiConfirmTrade() {
+  sendData({ type: "CONFIRM" });
+  if (myLock && theirLock) executeTrade();
+}
+function uiToggleLock() {
+  if (!checkValidTrade()) {
+    toast("B\u1EA1n kh\xF4ng \u0111\u1EE7 \u0111\u1ED3 trong kho!");
+    return;
+  }
+  myLock = !myLock;
+  sendData({ type: "LOCK", lock: myLock });
+  renderTradeRoom();
+}
 function renderTradeRoom() {
   const body = $id("trade-body");
   const myHTML = Object.entries(myItems).map(
-    ([id, amt]) => `<div class="trade-item">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b> ${!myLock ? `<div class="close-x" style="width:18px;height:18px;line-height:12px;font-size:14px;" onclick="All.uiRemoveTradeItem('${id}')">\xD7</div>` : ""}</div>`
+    ([id, amt]) => `<div class="trade-item">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b> ${!myLock ? `<div class="close-x" style="width:18px;height:18px;line-height:12px;font-size:14px;" onclick="FarmAll.uiRemoveTradeItem('${id}')">\xD7</div>` : ""}</div>`
   ).join("");
   const theirHTML = Object.entries(theirItems).map(
     ([id, amt]) => `<div class="trade-item">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b></div>`
@@ -14855,8 +14875,8 @@ function renderTradeRoom() {
                 <div class="trade-header">B\u1EA1n ${myLock ? '<span style="color:#388e3c">\u2713</span>' : ""}</div>
                 <div class="trade-items">${myHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Tr\u1ED1ng</div>'}</div>
                 <div class="trade-actions">
-                    <button class="buy ${myLock ? "plain" : ""}" onclick="All.uiToggleLock()" style="width:100%; text-align:center;">${myLock ? "M\u1EDF kho\xE1" : "S\u1EB5n s\xE0ng"}</button>
-                    ${!myLock ? `<button class="buy plain" onclick="All.uiOpenAddItem()" style="width:100%; margin-top:6px; text-align:center;">+ Th\xEAm \u0111\u1ED3</button>` : ""}
+                    <button class="buy ${myLock ? "plain" : ""}" onclick="FarmAll.uiToggleLock()" style="width:100%; text-align:center;">${myLock ? "M\u1EDF kho\xE1" : "S\u1EB5n s\xE0ng"}</button>
+                    ${!myLock ? `<button class="buy plain" onclick="FarmAll.uiOpenAddItem()" style="width:100%; margin-top:6px; text-align:center;">+ Th\xEAm \u0111\u1ED3</button>` : ""}
                 </div>
             </div>
             <div class="trade-col">
@@ -14864,13 +14884,84 @@ function renderTradeRoom() {
                 <div class="trade-items">${theirHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Tr\u1ED1ng</div>'}</div>
             </div>
         </div>
-        ${myLock && theirLock ? `<div style="padding: 10px; margin-top: -10px;"><button class="buy" onclick="All.uiConfirmTrade()" style="width:100%; background: linear-gradient(to bottom, #4caf50, #388e3c); color:white; border-color: #2e7d32; text-align:center;">X\xE1c nh\u1EADn Giao d\u1ECBch</button></div>` : ""}
+        ${myLock && theirLock ? `<div style="padding: 10px; margin-top: -10px;"><button class="buy" onclick="FarmAll.uiConfirmTrade()" style="width:100%; background: linear-gradient(to bottom, #4caf50, #388e3c); color:white; border-color: #2e7d32; text-align:center;">X\xE1c nh\u1EADn Giao d\u1ECBch</button></div>` : ""}
     `;
+}
+function uiRemoveTradeItem(id) {
+  if (myLock) return;
+  delete myItems[id];
+  sendData({ type: "UPDATE_ITEMS", items: myItems });
+  renderTradeRoom();
+}
+function uiOpenAddItem() {
+  if (myLock) return;
+  const pop = $id("trade-popup");
+  pop.classList.add("open");
+  let catCoins = "";
+  if (ctx.S.coins > 0) catCoins += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('coins', ${ctx.S.coins})">${getItemIcon("coins")} Ti\u1EC1n xu (C\xF3: ${ctx.S.coins})</div>`;
+  let catTickets = "";
+  ["norm", "spec", "super"].forEach((k) => {
+    if (ctx.S.tickets && ctx.S.tickets[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.tickets[k]})">${getItemIcon(k)} ${getItemName(k)} (C\xF3: ${ctx.S.tickets[k]})</div>`;
+  });
+  ["prism", "star"].forEach((k) => {
+    if (ctx.S.shards && ctx.S.shards[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.shards[k]})">${getItemIcon(k)} ${getItemName(k)} (C\xF3: ${ctx.S.shards[k]})</div>`;
+  });
+  let catFerts = "";
+  ["compost", "shiny"].forEach((k) => {
+    if (ctx.S.ferts && ctx.S.ferts[k] > 0) catFerts += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.ferts[k]})">${getItemIcon(k)} ${getItemName(k)} (C\xF3: ${ctx.S.ferts[k]})</div>`;
+  });
+  let catBag = "";
+  let catGacha = "";
+  if (ctx.S.bag) {
+    Object.entries(ctx.S.bag).forEach(([k, v]) => {
+      if (v > 0) {
+        if (k.startsWith("unique@")) catGacha += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (C\xF3: ${v})</div>`;
+        else catBag += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (C\xF3: ${v})</div>`;
+      }
+    });
+  }
+  let catSeeds = "";
+  if (ctx.S.seeds) {
+    Object.entries(ctx.S.seeds).forEach(([k, v]) => {
+      if (v > 0) catSeeds += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (C\xF3: ${v})</div>`;
+    });
+  }
+  let html = "";
+  if (catCoins) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">TI\u1EC0N T\u1EC6</div>` + catCoins;
+  if (catBag) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">N\xD4NG S\u1EA2N</div>` + catBag;
+  if (catSeeds) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">H\u1EA0T GI\u1ED0NG</div>` + catSeeds;
+  if (catFerts) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">PH\xC2N B\xD3N</div>` + catFerts;
+  if (catTickets) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">V\xC9 & M\u1EA2NH</div>` + catTickets;
+  if (catGacha) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">\u0110\u1ED2 GACHA</div>` + catGacha;
+  $id("trade-popup-list").innerHTML = html || '<div style="padding:10px;text-align:center;font-weight:bold;color:#a3763d;">Kh\xF4ng c\xF3 \u0111\u1ED3 \u0111\u1EC3 giao d\u1ECBch</div>';
+  $id("trade-popup-act").style.display = "none";
 }
 function uiCloseAddItem() {
   $id("trade-popup").classList.remove("open");
 }
-var peer, conn, myItems, theirItems, myLock, theirLock, isConnected;
+function uiSelectAdd(id, max) {
+  selectedTradeId = id;
+  selectedTradeMax = max;
+  document.getElementById("trade-popup-act").style.display = "flex";
+  document.getElementById("inp-trade-amount").max = max;
+  document.getElementById("inp-trade-amount").value = 1;
+  document.getElementById("lbl-trade-sel").innerHTML = `\u0110\xE3 ch\u1ECDn: <b>${getItemName(id)}</b> (T\u1ED1i \u0111a: ${max})`;
+}
+function uiConfirmAdd() {
+  let amt = parseInt(document.getElementById("inp-trade-amount").value) || 0;
+  if (amt <= 0 || amt > selectedTradeMax) {
+    toast("S\u1ED1 l\u01B0\u1EE3ng kh\xF4ng h\u1EE3p l\u1EC7!");
+    return;
+  }
+  myItems[selectedTradeId] = (myItems[selectedTradeId] || 0) + amt;
+  if (myItems[selectedTradeId] > getInventoryCount(selectedTradeId)) {
+    myItems[selectedTradeId] = getInventoryCount(selectedTradeId);
+  }
+  sendData({ type: "UPDATE_ITEMS", items: myItems });
+  renderTradeRoom();
+  uiCloseAddItem();
+}
+var peer, conn, myItems, theirItems, myLock, theirLock, isConnected, selectedTradeId, selectedTradeMax;
 var init_trade = __esm({
   "src/trade.js"() {
     init_store();
@@ -14884,10 +14975,255 @@ var init_trade = __esm({
     myLock = false;
     theirLock = false;
     isConnected = false;
+    selectedTradeId = null;
+    selectedTradeMax = 0;
   }
 });
 
 // src/all.js
+var all_exports = {};
+__export(all_exports, {
+  $id: () => $id,
+  CS: () => CS,
+  DECO_PX: () => DECO_PX,
+  DYNAMIC_SPR: () => DYNAMIC_SPR,
+  FLOATY: () => FLOATY,
+  GACHA_NORM_PITY: () => GACHA_NORM_PITY,
+  GACHA_NORM_PRICE: () => GACHA_NORM_PRICE,
+  GACHA_P: () => GACHA_P,
+  GACHA_SPEC_PITY: () => GACHA_SPEC_PITY,
+  GACHA_SPEC_PRICE: () => GACHA_SPEC_PRICE,
+  GAITS: () => GAITS,
+  INJECT_ID: () => INJECT_ID,
+  LP: () => LP,
+  P: () => P,
+  PASSES: () => PASSES,
+  PETS: () => PETS,
+  PET_P: () => PET_P,
+  PET_SKILLS: () => PET_SKILLS,
+  PET_STATS: () => PET_STATS2,
+  SEC: () => SEC,
+  SEC_LS_KEY: () => SEC_LS_KEY,
+  SPRITE_PX: () => SPRITE_PX,
+  TOOLS: () => TOOLS,
+  WITCH_CRY: () => WITCH_CRY,
+  WORK_BAND: () => WORK_BAND,
+  addBlock: () => addBlock,
+  applyDayEvent: () => applyDayEvent,
+  applyPageSkin: () => applyPageSkin,
+  applyTheme: () => applyTheme,
+  applyViewState: () => applyViewState,
+  bagName: () => bagName,
+  bagPrice: () => bagPrice,
+  bagSel: () => bagSel,
+  bagSellMode: () => bagSellMode,
+  bagTab: () => bagTab,
+  blockPrice: () => blockPrice,
+  buildEventPrompt: () => buildEventPrompt,
+  buildTicket: () => buildTicket,
+  buyBlock: () => buyBlock,
+  buyConfirm: () => buyConfirm,
+  cacheBlockTxt: () => cacheBlockTxt,
+  cacheCoins: () => cacheCoins,
+  cacheDayTxt: () => cacheDayTxt,
+  cacheWicon: () => cacheWicon,
+  cashOut: () => cashOut,
+  cashOutHero: () => cashOutHero,
+  charName: () => charName,
+  clampN: () => clampN,
+  closeDungeonView: () => closeDungeonView,
+  closeHeroMode: () => closeHeroMode,
+  closeModal: () => closeModal,
+  closeTradeModal: () => closeTradeModal,
+  closeWin: () => closeWin,
+  collectWorldbook: () => collectWorldbook,
+  curBlocks: () => curBlocks,
+  curPlots: () => curPlots,
+  decoLayer: () => decoLayer,
+  destroy: () => destroy,
+  disposers: () => disposers,
+  dragBar: () => dragBar,
+  dungeonView: () => dungeonView,
+  eachPage: () => eachPage,
+  emptyPlots: () => emptyPlots,
+  endScene: () => endScene,
+  esc: () => esc,
+  eventFresh: () => eventFresh,
+  eventPending: () => eventPending,
+  executeGachaRoll: () => executeGachaRoll,
+  extMenuBtn: () => extMenuBtn,
+  extractJson: () => extractJson,
+  fallbackEvent: () => fallbackEvent,
+  fertilize: () => fertilize,
+  fetchModelList: () => fetchModelList,
+  fieldEl: () => fieldEl,
+  fmtDur: () => fmtDur,
+  fmtLeft: () => fmtLeft,
+  freshState: () => freshState,
+  fxLayer: () => fxLayer,
+  gaitOf: () => gaitOf,
+  gameDay: () => gameDay,
+  generateAIUniqueItemData: () => generateAIUniqueItemData,
+  generateProcedural32x32Sprite: () => generateProcedural32x32Sprite,
+  generateUniqueItem: () => generateUniqueItem,
+  gesture: () => gesture,
+  getPetStats: () => getPetStats,
+  getPot: () => getPot,
+  growMs: () => growMs,
+  hGesture: () => hGesture,
+  harvest: () => harvest,
+  heartbeat: () => heartbeat,
+  heroToast: () => heroToast,
+  hopStep: () => hopStep,
+  initEvents: () => initEvents,
+  initGachaState: () => initGachaState,
+  initHero: () => initHero,
+  initHeroState: () => initHeroState,
+  initOrb: () => initOrb,
+  initPets: () => initPets,
+  initRender: () => initRender,
+  initShop: () => initShop,
+  initUI: () => initUI,
+  initWindows: () => initWindows,
+  initWitch: () => initWitch,
+  isDungeonOpen: () => isDungeonOpen,
+  isRain: () => isRain,
+  lastScene: () => lastScene,
+  layout: () => layout,
+  loadCharState: () => loadCharState,
+  loadState: () => loadState,
+  makeWitchOrder: () => makeWitchOrder,
+  mode: () => mode,
+  moveTo: () => moveTo,
+  mulberry32: () => mulberry32,
+  mutCountOf: () => mutCountOf,
+  mutDescOf: () => mutDescOf,
+  mutKeysOf: () => mutKeysOf,
+  nextSceneAt: () => nextSceneAt,
+  now: () => now,
+  onHeroDown: () => onHeroDown,
+  onHeroMove: () => onHeroMove,
+  onHeroUp: () => onHeroUp,
+  onOrbDown: () => onOrbDown,
+  onOrbMove: () => onOrbMove,
+  onOrbUp: () => onOrbUp,
+  onResize: () => onResize,
+  openBetModal: () => openBetModal,
+  openBuyDlg: () => openBuyDlg,
+  openDungeonView: () => openDungeonView,
+  openGachaModal: () => openGachaModal,
+  openHeroMode: () => openHeroMode,
+  openHeroPanel: () => openHeroPanel,
+  openModal: () => openModal,
+  openPanel: () => openPanel,
+  openPassDlg: () => openPassDlg,
+  openSandbox: () => openSandbox,
+  openSellDlg: () => openSellDlg,
+  openSellSeedDlg: () => openSellSeedDlg,
+  openTakeout: () => openTakeout,
+  openTradeModal: () => openTradeModal,
+  openWitchDlg: () => openWitchDlg,
+  pagePlots: () => pagePlots,
+  pageUnlocked: () => pageUnlocked,
+  pendingPick: () => pendingPick,
+  petArrive: () => petArrive,
+  petBubble: () => petBubble,
+  petEl: () => petEl,
+  petFert: () => petFert,
+  petHarvest: () => petHarvest,
+  petHopT: () => petHopT,
+  petPlant: () => petPlant,
+  petPos: () => petPos,
+  petSVG: () => petSVG,
+  petSleepT: () => petSleepT,
+  petSpot: () => petSpot,
+  petTgt: () => petTgt,
+  petTouch: () => petTouch,
+  pickFrom: () => pickFrom,
+  pileWith: () => pileWith,
+  placeDungeonWin: () => placeDungeonWin,
+  placeHeroBar: () => placeHeroBar,
+  placeOrb: () => placeOrb,
+  placePet: () => placePet,
+  placeWin: () => placeWin,
+  plant: () => plant,
+  plotEmote: () => plotEmote,
+  plotHTML: () => plotHTML,
+  registerDynamicSprite: () => registerDynamicSprite,
+  regrowMs: () => regrowMs,
+  renderAll: () => renderAll,
+  renderBanner: () => renderBanner,
+  renderChips: () => renderChips,
+  renderDynamic: () => renderDynamic,
+  renderPager: () => renderPager,
+  renderPets: () => renderPets,
+  renderPlots: () => renderPlots,
+  renderStatus: () => renderStatus,
+  renderTimeout: () => renderTimeout,
+  renderToolbar: () => renderToolbar,
+  renderWitch: () => renderWitch,
+  requestDayEvent: () => requestDayEvent,
+  resetDestroyed: () => resetDestroyed,
+  resizeTimer: () => resizeTimer,
+  rollMutation: () => rollMutation,
+  root: () => root,
+  runState: () => runState,
+  sanitizeEvent: () => sanitizeEvent,
+  save: () => save,
+  saveCharState: () => saveCharState,
+  saveSec: () => saveSec,
+  scene: () => scene,
+  sceneBusy: () => sceneBusy,
+  sceneTimer: () => sceneTimer,
+  sell: () => sell,
+  sellSeed: () => sellSeed,
+  setInjection: () => setInjection,
+  setMode: () => setMode,
+  setPendingPick: () => setPendingPick,
+  setPot: () => setPot,
+  setTakeoutNote: () => setTakeoutNote,
+  setTestMode: () => setTestMode,
+  settle: () => settle,
+  setupExtButton: () => setupExtButton,
+  setupSlashCommand: () => setupSlashCommand,
+  sh: () => sh,
+  shopTab: () => shopTab,
+  shovel: () => shovel,
+  sleepPet: () => sleepPet,
+  spriteSVG: () => spriteSVG,
+  stopHop: () => stopHop,
+  takeoutNote: () => takeoutNote,
+  testMode: () => testMode,
+  testSecApi: () => testSecApi,
+  tick: () => tick,
+  tileURI: () => tileURI,
+  toast: () => toast,
+  toastTimer: () => toastTimer,
+  todayEvent: () => todayEvent,
+  toggleWin: () => toggleWin,
+  toolbarOpen: () => toolbarOpen,
+  touchBase: () => touchBase,
+  tryScene: () => tryScene,
+  uiCloseAddItem: () => uiCloseAddItem,
+  uiConfirmAdd: () => uiConfirmAdd,
+  uiConfirmTrade: () => uiConfirmTrade,
+  uiOpenAddItem: () => uiOpenAddItem,
+  uiRemoveTradeItem: () => uiRemoveTradeItem,
+  uiSelectAdd: () => uiSelectAdd,
+  uiToggleLock: () => uiToggleLock,
+  updateInjection: () => updateInjection,
+  updateNextScene: () => updateNextScene,
+  useStarShard: () => useStarShard,
+  wakePet: () => wakePet,
+  walkTo: () => walkTo,
+  wander: () => wander,
+  warmUpCache: () => warmUpCache,
+  water: () => water,
+  weatherOf: () => weatherOf,
+  wg: () => wg,
+  witchArrive: () => witchArrive,
+  witchDeliver: () => witchDeliver
+});
 var init_all = __esm({
   "src/all.js"() {
     init_state();
@@ -14939,6 +15275,7 @@ function initFarm() {
   setupSlashCommand();
   const api = { destroy };
   window[RUNTIME_KEY] = api;
+  window.FarmAll = all_exports;
   renderToolbar();
   renderChips();
   renderBanner();

@@ -101,7 +101,7 @@ function hostRoom() {
             <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
                 <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">Đang chờ đối tác kết nối...</div>
                 <div style="font-size: 20px; font-weight: bold; color: #e91e63; user-select: all; background: #fce4ec; padding: 10px; border-radius: 8px; border: 2px dashed #f06292;">${id}</div>
-                <div class="buy plain" onclick="All.closeTradeModal()" style="padding: 8px; margin-top: 20px; text-align:center;">Huỷ</div>
+                <div class="buy plain" onclick="FarmAll.closeTradeModal()" style="padding: 8px; margin-top: 20px; text-align:center;">Huỷ</div>
             </div>
         `;
     });
@@ -272,7 +272,7 @@ function renderTradeRoom() {
     const body = All.$id('trade-body');
     
     const myHTML = Object.entries(myItems).map(([id, amt]) => 
-        `<div class="trade-item">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b> ${!myLock ? `<div class="close-x" style="width:18px;height:18px;line-height:12px;font-size:14px;" onclick="All.uiRemoveTradeItem('${id}')">×</div>` : ''}</div>`
+        `<div class="trade-item">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b> ${!myLock ? `<div class="close-x" style="width:18px;height:18px;line-height:12px;font-size:14px;" onclick="FarmAll.uiRemoveTradeItem('${id}')">×</div>` : ''}</div>`
     ).join('');
     
     const theirHTML = Object.entries(theirItems).map(([id, amt]) => 
@@ -285,8 +285,8 @@ function renderTradeRoom() {
                 <div class="trade-header">Bạn ${myLock ? '<span style="color:#388e3c">✓</span>' : ''}</div>
                 <div class="trade-items">${myHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Trống</div>'}</div>
                 <div class="trade-actions">
-                    <button class="buy ${myLock ? 'plain' : ''}" onclick="All.uiToggleLock()" style="width:100%; text-align:center;">${myLock ? 'Mở khoá' : 'Sẵn sàng'}</button>
-                    ${!myLock ? `<button class="buy plain" onclick="All.uiOpenAddItem()" style="width:100%; margin-top:6px; text-align:center;">+ Thêm đồ</button>` : ''}
+                    <button class="buy ${myLock ? 'plain' : ''}" onclick="FarmAll.uiToggleLock()" style="width:100%; text-align:center;">${myLock ? 'Mở khoá' : 'Sẵn sàng'}</button>
+                    ${!myLock ? `<button class="buy plain" onclick="FarmAll.uiOpenAddItem()" style="width:100%; margin-top:6px; text-align:center;">+ Thêm đồ</button>` : ''}
                 </div>
             </div>
             <div class="trade-col">
@@ -294,7 +294,7 @@ function renderTradeRoom() {
                 <div class="trade-items">${theirHTML || '<div style="opacity:0.5;text-align:center;margin-top:20px;">Trống</div>'}</div>
             </div>
         </div>
-        ${myLock && theirLock ? `<div style="padding: 10px; margin-top: -10px;"><button class="buy" onclick="All.uiConfirmTrade()" style="width:100%; background: linear-gradient(to bottom, #4caf50, #388e3c); color:white; border-color: #2e7d32; text-align:center;">Xác nhận Giao dịch</button></div>` : ''}
+        ${myLock && theirLock ? `<div style="padding: 10px; margin-top: -10px;"><button class="buy" onclick="FarmAll.uiConfirmTrade()" style="width:100%; background: linear-gradient(to bottom, #4caf50, #388e3c); color:white; border-color: #2e7d32; text-align:center;">Xác nhận Giao dịch</button></div>` : ''}
     `;
 }
 
@@ -312,22 +312,22 @@ export function uiOpenAddItem() {
     pop.classList.add('open');
     
     let catCoins = '';
-    if (ctx.S.coins > 0) catCoins += `<div class="trade-pick" onclick="All.uiSelectAdd('coins', ${ctx.S.coins})">${getItemIcon('coins')} Tiền xu (Có: ${ctx.S.coins})</div>`;
+    if (ctx.S.coins > 0) catCoins += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('coins', ${ctx.S.coins})">${getItemIcon('coins')} Tiền xu (Có: ${ctx.S.coins})</div>`;
     
     let catTickets = '';
-    ['norm', 'spec', 'super'].forEach(k => { if (ctx.S.tickets && ctx.S.tickets[k] > 0) catTickets += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${ctx.S.tickets[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.tickets[k]})</div>`; });
-    ['prism', 'star'].forEach(k => { if (ctx.S.shards && ctx.S.shards[k] > 0) catTickets += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${ctx.S.shards[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.shards[k]})</div>`; });
+    ['norm', 'spec', 'super'].forEach(k => { if (ctx.S.tickets && ctx.S.tickets[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.tickets[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.tickets[k]})</div>`; });
+    ['prism', 'star'].forEach(k => { if (ctx.S.shards && ctx.S.shards[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.shards[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.shards[k]})</div>`; });
     
     let catFerts = '';
-    ['compost', 'shiny'].forEach(k => { if (ctx.S.ferts && ctx.S.ferts[k] > 0) catFerts += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${ctx.S.ferts[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.ferts[k]})</div>`; });
+    ['compost', 'shiny'].forEach(k => { if (ctx.S.ferts && ctx.S.ferts[k] > 0) catFerts += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.ferts[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.ferts[k]})</div>`; });
     
     let catBag = '';
     let catGacha = '';
     if (ctx.S.bag) {
         Object.entries(ctx.S.bag).forEach(([k, v]) => {
             if (v > 0) {
-                if (k.startsWith('unique@')) catGacha += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (Có: ${v})</div>`;
-                else catBag += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (Có: ${v})</div>`;
+                if (k.startsWith('unique@')) catGacha += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (Có: ${v})</div>`;
+                else catBag += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (Có: ${v})</div>`;
             }
         });
     }
@@ -335,7 +335,7 @@ export function uiOpenAddItem() {
     let catSeeds = '';
     if (ctx.S.seeds) {
         Object.entries(ctx.S.seeds).forEach(([k, v]) => {
-            if (v > 0) catSeeds += `<div class="trade-pick" onclick="All.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (Có: ${v})</div>`;
+            if (v > 0) catSeeds += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${v})">${getItemIcon(k)} ${getItemName(k)} (Có: ${v})</div>`;
         });
     }
     
