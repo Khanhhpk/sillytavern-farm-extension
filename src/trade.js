@@ -160,7 +160,10 @@ async function hostRoom() {
             return;
         }
         conn = connection;
-        setupConnection();
+        updateStatus('Đang thiết lập đường truyền dữ liệu...', '#7a5c38');
+        conn.on('open', () => {
+            setupConnection();
+        });
     });
 
     peer.on('error', (err) => {

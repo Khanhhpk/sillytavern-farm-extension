@@ -54,11 +54,14 @@ export async function openSyncHostModal() {
         syncConn = connection;
         const statusEl = All.$id('sync-host-status');
         if (statusEl) {
-            statusEl.textContent = 'Máy khác đã kết nối! Đang gửi dữ liệu...';
+            statusEl.textContent = 'Đang thiết lập đường truyền dữ liệu...';
             statusEl.style.color = '#1976d2';
         }
         
         syncConn.on('open', () => {
+            if (statusEl) {
+                statusEl.textContent = 'Máy khác đã kết nối! Đang gửi dữ liệu...';
+            }
             syncConn.send({ type: 'FULL_SAVE', data: ctx.S });
             if (statusEl) {
                 statusEl.textContent = 'Đã gửi save thành công!';
