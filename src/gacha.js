@@ -134,6 +134,8 @@ Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối c�
       ? "Thước đo tiện ích. Những công cụ nhỏ giúp ích cho đời sống hàng ngày hoặc tương tác nhỏ. Vui vẻ, tiện lợi."
       : "Thước đo phế phẩm (Junk). Đồ vật tưởng chừng vô dụng, buồn cười, tấu hài, công dụng kỳ quặc nhưng đôi khi có thể dùng trong các tình huống oái ăm.";
 
+    const basePrice = rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : rarity === 'Hiếm' ? 2500 : rarity === 'Thường' ? 500 : 100;
+
     const sysPrompt = `Bạn là một AI thiết kế "Kỳ vật dị giới" (Otherworldly Artifact) và chuyên gia Pixel Art (32x32).
 Hãy sáng tạo 1 KỲ VẬT ĐỘC NHẤT phẩm chất [${rarity}].
 ${contextStr}
@@ -157,7 +159,7 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
 {
   "name": "Tên kỳ vật (2~7 chữ, ấn tượng, gợi sự tò mò)",
   "desc": "Mô tả ngắn gọn CƠ CHẾ và CÁCH SỬ DỤNG của kỳ vật (dưới 100 chữ). Phải rõ ràng, thú vị, độc lạ.",
-  "price": Số nguyên định giá. Gợi ý cơ bản: ${rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : rarity === 'Hiếm' ? 2500 : rarity === 'Thường' ? 500 : 100}. NGHIÊM CẤM LẠM PHÁT, giá trị tối đa tuyệt đối KHÔNG ĐƯỢC VƯỢT QUÁ ${rarity === 'Huyền thoại' ? 50000 : rarity === 'Sử thi' ? 20000 : rarity === 'Hiếm' ? 8000 : rarity === 'Thường' ? 2000 : 500}G,
+  "price": Số nguyên định giá. Gợi ý cơ bản: ${basePrice}. NGHIÊM CẤM LẠM PHÁT, giá trị tối đa tuyệt đối KHÔNG ĐƯỢC VƯỢT QUÁ ${basePrice * 5}G,
   "spriteMap": [ mảng gồm ĐÚNG 32 chuỗi, mỗi chuỗi DÀI CHÍNH XÁC 32 ký tự chỉ dùng ký tự Bảng màu và dấu '.' cho điểm trong suốt ]
 }`;
 
