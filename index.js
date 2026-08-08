@@ -4354,7 +4354,7 @@ function openGachaModal() {
         <span class="buy" id="gachaRollNorm10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#4e903a; border:1px solid #3c702c; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Th\u01B0\u1EDDng \xD710</span>
         <span class="buy" id="gachaRollSpec1" style="padding:10px 0; font-size:13px; font-weight:bold; background:#a335ee; border:1px solid #8a2acc; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay \u0110\u1EB7c Bi\u1EC7t \xD71</span>
         <span class="buy" id="gachaRollSpec10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#8a2acc; border:1px solid #6a1aa3; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay \u0110\u1EB7c Bi\u1EC7t \xD710</span>
-        <span class="buy" id="gachaRollSuper1" style="grid-column: 1 / -1; padding:10px 0; font-size:13px; font-weight:bold; background:linear-gradient(90deg, #ff8000, #ff4500); border:1px solid #cc3700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Si\xEAu C\u01B0\u1EDDng \xD71 (100% Huy\u1EC1n Tho\u1EA1i)</span>
+        <span class="buy" id="gachaRollSuper1" style="grid-column: 1 / -1; padding:10px 0; font-size:13px; font-weight:bold; background:linear-gradient(90deg, #ff8000, #ff4500); border:1px solid #cc3700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Si\xEAu C\u01B0\u1EDDng \xD71 (100% \u0110\u1ED3 X\u1ECBn)</span>
       </div>
 
       <!-- Result Overlay Animation (L\u01B0\u1EDBi k\u1EBFt qu\u1EA3) -->
@@ -4896,7 +4896,7 @@ function openPanel(kind) {
           <span class="price">${spriteSVG("coin", 16)}5,000</span>
           <span class="buy${ctx.S.coins < 5e3 ? " off" : ""}" data-buyticket="spec">Mua</span></div>
         <div class="item"><span class="icon">${spriteSVG("ticketSuper", 32)}</span>
-          <span class="info"><div class="name" style="color:#ff4500;">V\xE9 Quay Si\xEAu C\u01B0\u1EDDng</div><div class="meta">D\xF9ng quay 1 ph\xE1t 100% ra b\u1EA3o v\u1EADt AI ph\u1EA9m ch\u1EA5t Huy\u1EC1n Tho\u1EA1i \xB7 \u0110ang c\xF3 ${ctx.S.tickets?.super || 0}</div></span>
+          <span class="info"><div class="name" style="color:#ff4500;">V\xE9 Quay Si\xEAu C\u01B0\u1EDDng</div><div class="meta">D\xF9ng quay 1 ph\xE1t 100% ra b\u1EA3o v\u1EADt AI (t\u1EEB Hi\u1EBFm \u0111\u1EBFn Huy\u1EC1n Tho\u1EA1i) \xB7 \u0110ang c\xF3 ${ctx.S.tickets?.super || 0}</div></span>
           <span class="price">${spriteSVG("coin", 16)}500,000</span>
           <span class="buy${ctx.S.coins < 5e5 ? " off" : ""}" data-buyticket="super" style="background:#ff4500; border:1px solid #cc3700; color:#fff;">Mua</span></div>`;
     } else {
