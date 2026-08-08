@@ -324,12 +324,31 @@ function renderTradeRoom() {
     
     const myHTML = Object.entries(myItems).map(([id, amt]) => {
         const desc = getItemDesc(id);
-        return `<div class="trade-item" title="${desc}">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b> ${!myLock ? `<div class="close-x" style="width:18px;height:18px;line-height:12px;font-size:14px;" onclick="FarmAll.uiRemoveTradeItem('${id}')">×</div>` : ''}</div>`
+        return `<div class="trade-item" style="align-items:flex-start;">
+                    <div style="margin-top:2px;">${getItemIcon(id)}</div>
+                    <div style="display:flex; flex-direction:column; margin-left:5px; flex:1;">
+                        <div style="display:flex; align-items:center;">
+                            <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span>
+                            <b style="margin-left:auto; color:#a3763d;">x${amt}</b>
+                        </div>
+                        ${desc ? `<div style="font-size:10px; color:#888; font-style:italic; line-height:1.2; margin-top:2px; word-break:break-word;">${desc}</div>` : ''}
+                    </div>
+                    ${!myLock ? `<div class="close-x" style="width:18px;height:18px;line-height:12px;font-size:14px;margin-left:5px;margin-top:2px;" onclick="FarmAll.uiRemoveTradeItem('${id}')">×</div>` : ''}
+                </div>`;
     }).join('');
     
     const theirHTML = Object.entries(theirItems).map(([id, amt]) => {
         const desc = getItemDesc(id);
-        return `<div class="trade-item" title="${desc}">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b></div>`
+        return `<div class="trade-item" style="align-items:flex-start;">
+                    <div style="margin-top:2px;">${getItemIcon(id)}</div>
+                    <div style="display:flex; flex-direction:column; margin-left:5px; flex:1;">
+                        <div style="display:flex; align-items:center;">
+                            <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span>
+                            <b style="margin-left:auto; color:#a3763d;">x${amt}</b>
+                        </div>
+                        ${desc ? `<div style="font-size:10px; color:#888; font-style:italic; line-height:1.2; margin-top:2px; word-break:break-word;">${desc}</div>` : ''}
+                    </div>
+                </div>`;
     }).join('');
 
     body.innerHTML = `
