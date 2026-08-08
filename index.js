@@ -14672,6 +14672,16 @@ var init_bundler = __esm({
 async function buildPeerConfigAsync() {
   const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
   try {
+    const apiKey = "" ? atob("") : "";
+    const appName = "" ? atob("") : "";
+    if (apiKey && appName) {
+      const resp = await fetch(`https://${appName}.metered.live/api/v1/turn/credentials?apiKey=${apiKey}`);
+      if (resp.ok) {
+        const servers = await resp.json();
+        iceServers.push(...servers);
+        return { config: { iceServers } };
+      }
+    }
     const secret = "openrelayprojectsecret";
     const expiry = Math.floor(Date.now() / 1e3) + 24 * 3600;
     const username = String(expiry);
