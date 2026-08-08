@@ -8252,18 +8252,25 @@ function updateEntities(groupA, groupB, dt) {
         });
       }
     } else if (a.skill === "assassin" || a.ai === "assassin") {
-      let maxDist = -1;
-      let validTargets = targetGroup.filter((b) => b.hp > 0 && b.hp - (b.incomingDmg || 0) > 0);
-      if (validTargets.length === 0) validTargets = targetGroup.filter((b) => b.hp > 0);
-      validTargets.forEach((b) => {
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
+      let validTargets = targetGroup.filter((b) => b.hp > 0);
+      if (a.lockedTarget && validTargets.includes(a.lockedTarget)) {
+        const dx = a.lockedTarget.x - a.x;
+        const dy = a.lockedTarget.y - a.y;
         const dist = Math.hypot(dx, dy);
-        if (dist > maxDist) {
-          maxDist = dist;
-          closest = { b, dx, dy, dist };
-        }
-      });
+        closest = { b: a.lockedTarget, dx, dy, dist };
+      } else {
+        let minMaxHp = Infinity;
+        validTargets.forEach((b) => {
+          if (b.maxHp < minMaxHp) {
+            minMaxHp = b.maxHp;
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+            const dist = Math.hypot(dx, dy);
+            closest = { b, dx, dy, dist };
+          }
+        });
+        if (closest) a.lockedTarget = closest.b;
+      }
     } else {
       let validTargets = targetGroup.filter((b) => b.hp > 0 && b.hp - (b.incomingDmg || 0) > 0);
       if (validTargets.length === 0) validTargets = targetGroup.filter((b) => b.hp > 0);
@@ -8285,13 +8292,55 @@ function updateEntities(groupA, groupB, dt) {
       else if (closest.dx <= 0 && a.type === "enemy") a.el.classList.remove("flip");
       let isRanged = a.range >= 80 || a.ai === "ranged";
       let inRange = closest.dist <= a.range || a.skill === "heal" && closest.dist <= 10;
-      let tooClose = isRanged && closest.dist < a.range * 0.4 && closest.b.type !== a.type;
-      if (tooClose && !isRooted) {
+      let baseRange = a.range;
+      if (a.type === "pet" && PET_STATS[a.id]) baseRange = PET_STATS[a.id].range;
+      if (a.type === "enemy") {
+        const en = ENEMY_TYPES.find((e) => e.id === a.id);
+        if (en) baseRange = en.range;
+      }
+      let tooClose = isRanged && closest.dist < baseRange * 0.4 && closest.b.type !== a.type;
+      if (a.panic > 0) a.panic -= dt;
+      if (a.panic > 0 && !isRooted) {
         a.el.classList.add("walk");
-        const speed = a.speed * speedMult * dt;
-        a.x -= closest.dx / closest.dist * speed;
-        a.y -= closest.dy / closest.dist * speed;
         const arenaRect = arena.getBoundingClientRect();
+        const speed = a.speed * speedMult * dt;
+        let cx = arenaRect.width / 2 - a.x;
+        let cy = arenaRect.height / 2 - a.y;
+        let dist = Math.hypot(cx, cy);
+        if (dist > 5) {
+          a.x += cx / dist * speed;
+          a.y += cy / dist * speed;
+        }
+        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+      } else if (tooClose && !isRooted) {
+        a.el.classList.add("walk");
+        const arenaRect = arena.getBoundingClientRect();
+        const speed = a.speed * speedMult * dt;
+        let kx = -(closest.dx / closest.dist);
+        let ky = -(closest.dy / closest.dist);
+        let moveX = kx * speed;
+        let moveY = ky * speed;
+        let nextX = a.x + moveX;
+        let nextY = a.y + moveY;
+        let hitLeft = nextX < 20;
+        let hitRight = nextX > arenaRect.width - 20;
+        let hitTop = nextY < 20;
+        let hitBottom = nextY > arenaRect.height - 20;
+        let hitX = hitLeft || hitRight;
+        let hitY = hitTop || hitBottom;
+        if (hitX && hitY) {
+          a.panic = 1;
+        } else if (hitX) {
+          moveX = 0;
+          moveY = (ky !== 0 ? Math.sign(ky) : Math.random() < 0.5 ? 1 : -1) * speed;
+        } else if (hitY) {
+          moveY = 0;
+          moveX = (kx !== 0 ? Math.sign(kx) : Math.random() < 0.5 ? 1 : -1) * speed;
+        }
+        if (!(hitX && hitY)) {
+          a.x += moveX;
+          a.y += moveY;
+        }
         a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
         a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
         a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
