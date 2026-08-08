@@ -5108,6 +5108,7 @@ function openPanel(kind) {
     });
   } else {
     openModal("C\xE0i \u0111\u1EB7t", `
+      <div style="font-size:11px; color:#a3763d; text-align:center; margin-bottom: 12px; font-weight: bold; background: rgba(0,0,0,0.05); padding: 4px; border-radius: 4px; user-select: text;">ID Ng\u01B0\u1EDDi Ch\u01A1i: ${ctx.S.playerId}</div>
       <div class="shead" style="margin-top:0">Ch\u1EE7 \u0111\u1EC1 giao di\u1EC7n</div>
       <div class="picker" style="margin-bottom:4px">
         <span class="pick${ctx.S.theme !== "sky" ? " active" : ""}" data-settheme="sakura">\u{1F338} H\u1ED3ng anh \u0111\xE0o</span>
@@ -5149,7 +5150,7 @@ function openPanel(kind) {
         <input class="inp" id="cfgSkitFreq" type="number" min="5" max="7200" value="${ctx.S.skitFreq !== void 0 ? ctx.S.skitFreq : 300}" style="width:60px;padding:3px 6px"> (M\u1EB7c \u0111\u1ECBnh 300s = 5 ph\xFAt)
       </label>
       <div class="shead">C\xF4ng c\u1EE5 d\xE0nh cho Gi\xE1m \u0111\u1ED1c \u0110\u1ED3 ho\u1EA1 / Dev</div>
-      <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
+      <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap;">
         <span class="buy plain" id="openSandboxBtn">\u{1F3A8} M\u1EDF X\u01B0\u1EDFng Ch\u1EBF T\xE1c AI</span>
         <input class="inp" type="password" id="testCode" placeholder="M\xE3 \u1EA9n..." style="width:100px;padding:3px 6px">
         <span class="buy" id="testBtn">Test Mode</span>
@@ -7024,6 +7025,7 @@ var init_events = __esm({
 function freshState() {
   return {
     version: 1,
+    playerId: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).substr(2, 9),
     coins: TEST_MODE ? 9999 : 999,
     totalSales: 0,
     unlockedBlocks: 2,
@@ -7056,6 +7058,7 @@ function loadState() {
   }
   const g = ctx.extension_settings[extensionName] || {};
   ctx.S = g[NS] && g[NS].version === 1 ? g[NS] : freshState();
+  if (!ctx.S.playerId) ctx.S.playerId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).substr(2, 9);
   if (!ctx.S.petPoke) ctx.S.petPoke = {};
   if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
   if (!ctx.S.passes) ctx.S.passes = {};

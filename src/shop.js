@@ -400,6 +400,7 @@ export function openPanel(kind) {
     });
   } else {
     openModal('Cài đặt', `
+      <div style="font-size:11px; color:#a3763d; text-align:center; margin-bottom: 12px; font-weight: bold; background: rgba(0,0,0,0.05); padding: 4px; border-radius: 4px; user-select: text;">ID Người Chơi: ${ctx.S.playerId}</div>
       <div class="shead" style="margin-top:0">Chủ đề giao diện</div>
       <div class="picker" style="margin-bottom:4px">
         <span class="pick${ctx.S.theme !== 'sky' ? ' active' : ''}" data-settheme="sakura">🌸 Hồng anh đào</span>
@@ -441,7 +442,7 @@ export function openPanel(kind) {
         <input class="inp" id="cfgSkitFreq" type="number" min="5" max="7200" value="${ctx.S.skitFreq !== undefined ? ctx.S.skitFreq : 300}" style="width:60px;padding:3px 6px"> (Mặc định 300s = 5 phút)
       </label>
       <div class="shead">Công cụ dành cho Giám đốc Đồ hoạ / Dev</div>
-      <div style="display:flex;gap:8px;margin-top:6px;align-items:center;">
+      <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap;">
         <span class="buy plain" id="openSandboxBtn">🎨 Mở Xưởng Chế Tác AI</span>
         <input class="inp" type="password" id="testCode" placeholder="Mã ẩn..." style="width:100px;padding:3px 6px">
         <span class="buy" id="testBtn">Test Mode</span>
