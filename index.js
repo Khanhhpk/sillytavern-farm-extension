@@ -3932,34 +3932,41 @@ async function generateAIUniqueItemData(rarity) {
     if (CS.link) {
       const worldbook = await collectWorldbook();
       contextStr = `Tr\xEDch xu\u1EA5t b\u1ED1i c\u1EA3nh th\u1EBF gi\u1EDBi (Worldbook) & L\u1ECBch s\u1EED tr\xF2 chuy\u1EC7n g\u1EA7n nh\u1EA5t:
-${worldbook ? worldbook : "(Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u th\u1EBF gi\u1EDBi c\u1EE5 th\u1EC3, h\xE3y t\u1EF1 do s\xE1ng t\u1EA1o)"}
-N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m li\xEAn k\u1EBFt v\u1EDBi b\u1ED1i c\u1EA3nh n\xE0y, n\u1EBFu kh\xF4ng th\xEC t\u1EF1 do s\xE1ng t\u1EA1o.`;
-      thinkingInstructions = `1. T\xCCM \xDD T\u01AF\u1EDENG: \u0110\u1ECDc k\u1EF9 b\u1ED1i c\u1EA3nh th\u1EBF gi\u1EDBi \u0111\u01B0\u1EE3c cung c\u1EA5p. Ch\u1ECDn ra 1 y\u1EBFu t\u1ED1 \u0111\u1EB7c tr\u01B0ng nh\u1EA5t (nh\xE2n v\u1EADt, ph\xE9p thu\u1EADt, s\u1EF1 ki\u1EC7n, \u0111\u1ED3 v\u1EADt...) \u0111\u1EC3 l\xE0m c\u1EA3m h\u1EE9ng.
-2. THI\u1EBET K\u1EBE: Bi\u1EBFn \xFD t\u01B0\u1EDFng \u0111\xF3 th\xE0nh m\u1ED9t v\u1EADt ph\u1EA9m mang thu\u1ED9c t\xEDnh \u0111\u1EB7c bi\u1EC7t. Ph\xE2n t\xEDch m\xE0u s\u1EAFc v\xE0 h\xECnh d\xE1ng v\u1EADt th\u1EC3.
-3. V\u1EBC PIXEL: \u0110\u1EBFm ch\xEDnh x\xE1c s\u1ED1 l\u01B0\u1EE3ng k\xFD t\u1EF1 tr\xEAn m\u1ED7i d\xF2ng. Khung canvas l\xE0 32x32, m\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng 32 k\xFD t\u1EF1, t\u1ED5ng c\u1ED9ng 32 d\xF2ng. N\u1EBFu thi\u1EBFu/th\u1EEBa k\xFD t\u1EF1, h\xECnh s\u1EBD b\u1ECB c\u1EAFt m\xE9o!`;
+${worldbook ? worldbook : "(Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u th\u1EBF gi\u1EDBi c\u1EE5 th\u1EC3)"}
+N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y thi\u1EBFt k\u1EBF k\u1EF3 v\u1EADt li\xEAn k\u1EBFt v\u1EDBi b\u1ED1i c\u1EA3nh n\xE0y, n\u1EBFu kh\xF4ng th\xEC t\u1EF1 do s\xE1ng t\u1EA1o. Tuy nhi\xEAn, KH\xD4NG \u0110\u01AF\u1EE2C t\xF9y ch\u1EC9nh k\u1EBFt qu\u1EA3 th\xE0nh "\u0111\xE1p \xE1n gi\u1EA3i quy\u1EBFt kh\u1EE7ng ho\u1EA3ng tr\u01B0\u1EDBc m\u1EAFt". K\u1EF3 v\u1EADt ph\u1EA3i duy tr\xEC t\xEDnh \u0111\u1ED9c l\u1EADp ng\u1EABu nhi\xEAn.`;
+      thinkingInstructions = `1. T\xCCM \xDD T\u01AF\u1EDENG: \u0110\u1ECDc k\u1EF9 b\u1ED1i c\u1EA3nh th\u1EBF gi\u1EDBi \u0111\u01B0\u1EE3c cung c\u1EA5p. X\xE1c \u0111\u1ECBnh V\u1EF1c \u0111\u1EC1 t\xE0i v\xE0 V\u1EF1c l\u1ED1i ch\u01A1i.
+2. C\u01A0 CH\u1EBE: C\u0103n c\u1EE9 v\xE0o \u0111\u1ED9 hi\u1EBFm [${rarity}] \u0111\u1EC3 thi\u1EBFt l\u1EADp c\u01A1 ch\u1EBF. Ph\u1EA3i c\xF3 l\u1EE3i tuy\u1EC7t \u0111\u1ED1i, kh\xF4ng c\xF3 c\xE1i gi\xE1 ph\u1EA3i tr\u1EA3, thao t\xE1c c\u1EE5 th\u1EC3, c\u1EF1c k\u1EF3 th\xFA v\u1ECB v\xE0 ph\xE1 v\u1EE1 s\xE1o r\u1ED7ng (anti-clich\xE9).
+3. V\u1EBC PIXEL: Khung canvas l\xE0 32x32, m\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng 32 k\xFD t\u1EF1, t\u1ED5ng c\u1ED9ng 32 d\xF2ng. N\u1EBFu thi\u1EBFu/th\u1EEBa k\xFD t\u1EF1, h\xECnh s\u1EBD b\u1ECB c\u1EAFt m\xE9o!`;
     } else {
-      contextStr = `KH\xD4NG C\xD3 CH\u1EE6 \u0110\u1EC0 C\u1ED0 \u0110\u1ECANH. \u0110\u1EC3 \u0111\u1EA3m b\u1EA3o t\xEDnh ng\u1EABu nhi\xEAn tuy\u1EC7t \u0111\u1ED1i, b\u1EA1n PH\u1EA2I t\u1EF1 b\u1ED1c th\u0103m m\u1ED9t ch\u1EE7 \u0111\u1EC1 b\u1EA5t k\u1EF3 tr\u01B0\u1EDBc khi b\u1EAFt \u0111\u1EA7u thi\u1EBFt k\u1EBF. M\u1ECDi th\u1EE9 trong v\u0169 tr\u1EE5 \u0111\u1EC1u c\xF3 th\u1EC3 tr\u1EDF th\xE0nh v\u1EADt ph\u1EA9m.`;
-      thinkingInstructions = `1. B\u1ED0C TH\u0102M CH\u1EE6 \u0110\u1EC0: \u0110\u1EA7u ti\xEAn, h\xE3y suy ngh\u0129 ra 3 danh t\u1EEB ho\xE0n to\xE0n ng\u1EABu nhi\xEAn v\xE0 kh\xF4ng li\xEAn quan \u0111\u1EBFn nhau. Ch\u1ECDn 1 trong s\u1ED1 \u0111\xF3 l\xE0m ch\u1EE7 \u0111\u1EC1 ch\xEDnh.
-2. THI\u1EBET K\u1EBE: Bi\u1EBFn danh t\u1EEB v\u1EEBa ch\u1ECDn th\xE0nh m\u1ED9t v\u1EADt ph\u1EA9m mang thu\u1ED9c t\xEDnh \u0111\u1EB7c bi\u1EC7t. Ph\xE2n t\xEDch m\xE0u s\u1EAFc v\xE0 h\xECnh d\xE1ng v\u1EADt th\u1EC3.
-3. V\u1EBC PIXEL: \u0110\u1EBFm ch\xEDnh x\xE1c s\u1ED1 l\u01B0\u1EE3ng k\xFD t\u1EF1 tr\xEAn m\u1ED7i d\xF2ng. Khung canvas l\xE0 32x32, m\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng 32 k\xFD t\u1EF1, t\u1ED5ng c\u1ED9ng 32 d\xF2ng. N\u1EBFu thi\u1EBFu/th\u1EEBa k\xFD t\u1EF1, h\xECnh s\u1EBD b\u1ECB c\u1EAFt m\xE9o!`;
+      contextStr = `KH\xD4NG C\xD3 CH\u1EE6 \u0110\u1EC0 C\u1ED0 \u0110\u1ECANH. \u0110\u1EC3 \u0111\u1EA3m b\u1EA3o t\xEDnh ng\u1EABu nhi\xEAn tuy\u1EC7t \u0111\u1ED1i, b\u1EA1n PH\u1EA2I t\u1EF1 b\u1ED1c th\u0103m V\u1EF1c \u0111\u1EC1 t\xE0i v\xE0 V\u1EF1c l\u1ED1i ch\u01A1i b\u1EA5t k\u1EF3. M\u1ECDi th\u1EE9 trong v\u0169 tr\u1EE5 \u0111\u1EC1u c\xF3 th\u1EC3 tr\u1EDF th\xE0nh k\u1EF3 v\u1EADt.`;
+      thinkingInstructions = `1. B\u1ED0C TH\u0102M CH\u1EE6 \u0110\u1EC0: B\u1ED1c th\u0103m ng\u1EABu nhi\xEAn V\u1EF1c \u0111\u1EC1 t\xE0i (Kh\xED v\u1EADt, sinh m\u1EC7nh, quy t\u1EAFc, kh\xF4ng gian...) v\xE0 V\u1EF1c l\u1ED1i ch\u01A1i (X\u1EED l\xFD th\xF4ng tin, c\u1EA3i t\u1EA1o b\u1ED1i c\u1EA3nh, giao d\u1ECBch \u0111\xE1nh c\u01B0\u1EE3c...).
+2. C\u01A0 CH\u1EBE: C\u0103n c\u1EE9 v\xE0o \u0111\u1ED9 hi\u1EBFm [${rarity}] \u0111\u1EC3 thi\u1EBFt l\u1EADp c\u01A1 ch\u1EBF. Ph\u1EA3i c\xF3 l\u1EE3i tuy\u1EC7t \u0111\u1ED1i, kh\xF4ng c\xF3 c\xE1i gi\xE1 ph\u1EA3i tr\u1EA3, thao t\xE1c c\u1EE5 th\u1EC3, c\u1EF1c k\u1EF3 th\xFA v\u1ECB v\xE0 ph\xE1 v\u1EE1 s\xE1o r\u1ED7ng (anti-clich\xE9).
+3. V\u1EBC PIXEL: Khung canvas l\xE0 32x32, m\u1ED7i d\xF2ng b\u1EAFt bu\u1ED9c d\xE0i \u0111\xFAng 32 k\xFD t\u1EF1, t\u1ED5ng c\u1ED9ng 32 d\xF2ng. N\u1EBFu thi\u1EBFu/th\u1EEBa k\xFD t\u1EF1, h\xECnh s\u1EBD b\u1ECB c\u1EAFt m\xE9o!`;
     }
-    const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF v\u1EADt ph\u1EA9m game nh\u1EADp vai v\xE0 chuy\xEAn gia Pixel Art (32x32).
-H\xE3y s\xE1ng t\u1EA1o 1 V\u1EACT PH\u1EA8M \u0110\u1ED8C NH\u1EA4T ph\u1EA9m ch\u1EA5t [${rarity}].
+    const rarityGuidance = rarity === "Huy\u1EC1n tho\u1EA1i" ? "Th\u01B0\u1EDBc \u0111o \u1EA3nh h\u01B0\u1EDFng to l\u1EDBn (quy\u1EBFt \u0111\u1ECBnh tr\u1EADt t\u1EF1, quy t\u1EAFc, h\u1EC7 sinh th\xE1i, ho\u1EB7c thao t\xFAng c\u1EA3 ph\u01B0\u01A1ng th\u1EBF gi\u1EDBi). D\xF9 quy\u1EC1n b\xEDnh to l\u1EDBn nh\u01B0ng ph\u1EA3i C\u1EE4 TH\u1EC2, thao t\xE1c \u0111\u01B0\u1EE3c, kh\xF4ng vi\u1EBFt kh\xE1i ni\u1EC7m s\xE1o r\u1ED7ng." : rarity === "S\u1EED thi" ? "Th\u01B0\u1EDBc \u0111o \u1EA3nh h\u01B0\u1EDFng c\u1EE5c b\u1ED9 b\u1ED1i c\u1EA3nh (thay \u0111\u1ED5i m\u1ED9t khu v\u1EF1c, m\u1ED9t nh\xF3m, t\u1EA1o c\u01A1 ch\u1EBF thu l\u1EE3i d\xE0i h\u1EA1n ho\u1EB7c \u01B0u th\u1EBF chi\u1EBFn l\u01B0\u1EE3c). C\xF3 gi\xE1 tr\u1ECB k\u1EBFt h\u1EE3p v\xE0 kinh doanh." : "Th\u01B0\u1EDBc \u0111o \u1EA3nh h\u01B0\u1EDFng c\xE1 th\u1EC3 (c\xF4ng c\u1EE5 nh\u1ECF thay \u0111\u1ED5i m\u1ED9t l\u1EA7n t\u01B0\u01A1ng t\xE1c). Y\xEAu c\u1EA7u nh\u1ECF m\xE0 chu\u1EA9n, nh\u1EB9 m\xE0 kh\xE9o, l\u1EADp t\u1EE9c t\u1EA1o ra \u01B0u th\u1EBF tinh x\u1EA3o v\xE0 ch\u01A1i vui ngay l\u1EADp t\u1EE9c.";
+    const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF "K\u1EF3 v\u1EADt d\u1ECB gi\u1EDBi" (Otherworldly Artifact) v\xE0 chuy\xEAn gia Pixel Art (32x32).
+H\xE3y s\xE1ng t\u1EA1o 1 K\u1EF2 V\u1EACT \u0110\u1ED8C NH\u1EA4T ph\u1EA9m ch\u1EA5t [${rarity}].
 ${contextStr}
 
 B\u1EA2NG M\xC0U PIXEL 32x32 CHO PH\xC9P (K\xFD t\u1EF1: M\xE3 m\xE0u Hex):
 ${paletteStr}
 
+QUY T\u1EAEC THI\u1EBET K\u1EBE K\u1EF2 V\u1EACT:
+1. C\xF3 l\u1EE3i tuy\u1EC7t \u0111\u1ED1i: B\u1EA5t k\u1EF3 k\u1EF3 v\u1EADt n\xE0o c\u0169ng ph\u1EA3i mang l\u1EA1i \u01B0u th\u1EBF d\u01B0\u01A1ng, d\u1EC5 d\xF9ng. NGHI\xCAM C\u1EA4M m\u1ECDi lo\u1EA1i ph\u1EA3n ph\u1EC7, nguy\u1EC1n r\u1EE7a, hao t\u1ED5n tu\u1ED5i th\u1ECD, hi\u1EBFn t\u1EBF hay t\xE1c d\u1EE5ng ph\u1EE5.
+2. Kh\u1EA3 ch\u01A1i m\u1EA1nh m\u1EBD & Th\xFA v\u1ECB: \u0110\u1ED3 v\u1EADt ph\u1EA3i s\u1EDF h\u1EEFu c\u01A1 ch\u1EBF \u0111\u1ED9c \u0111\xE1o, c\xF3 th\u1EC3 ch\u1EE7 \u0111\u1ED9ng thao t\xE1c. Kh\xF4ng \u0111\u01B0\u1EE3c vi\u1EBFt th\xE0nh b\xF9a l\u1EE3i (buff) t\u0103ng ch\u1EC9 s\u1ED1 thu\u1EA7n t\xFAy ho\u1EB7c m\xF3n \u0111\u1ED3 trang b\u1ECB nh\xE0m ch\xE1n.
+3. C\u1EA5p \u0111\u1ED9 s\u1EE9c m\u1EA1nh:
+- Ph\u1EA9m ch\u1EA5t [${rarity}]: ${rarityGuidance}
+4. \u0110\u1ECBnh gi\xE1 h\u1EE3p l\xFD: Kh\xF4ng \u0111\u01B0\u1EE3c ph\xE1 gi\xE1 kinh t\u1EBF game.
+
 H\u01AF\u1EDANG D\u1EAAN T\u01AF DUY (B\u1EAFt bu\u1ED9c ph\u1EA3i c\xF3 th\u1EBB <thinking> tr\u01B0\u1EDBc khi xu\u1EA5t m\xE3):
-\u0110\u1EC3 v\u1EBD pixel art chu\u1EA9n 32x32:
 ${thinkingInstructions}
 
 QUY T\u1EAEC \u0110\u1EA6U RA B\u1EAET BU\u1ED8C:
 Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\u1ED1i m\xE3 \`\`\`json ch\u1EE9a c\u1EA5u tr\xFAc:
 {
-  "name": "T\xEAn v\u1EADt ph\u1EA9m (2~5 ch\u1EEF, \u1EA5n t\u01B0\u1EE3ng, s\xE1ng t\u1EA1o)",
-  "desc": "M\xF4 t\u1EA3 1 c\xE2u v\u1EC1 c\xF4ng d\u1EE5ng/hi\u1EC7u \u1EE9ng khi d\xF9ng trong c\u1ED1t truy\u1EC7n (d\u01B0\u1EDBi 35 ch\u1EEF)",
-  "price": M\u1ED9t s\u1ED1 nguy\xEAn \u0111\u1ECBnh gi\xE1 G c\u1EE7a v\u1EADt ph\u1EA9m (G\u1EE3i \xFD: quanh m\u1EE9c ${rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "S\u1EED thi" ? 8e3 : 2500}G, c\xF3 th\u1EC3 t\u1EF1 do t\u0103ng gi\u1EA3m tu\u1EF3 \xFD),
+  "name": "T\xEAn k\u1EF3 v\u1EADt (2~7 ch\u1EEF, \u1EA5n t\u01B0\u1EE3ng, g\u1EE3i s\u1EF1 t\xF2 m\xF2)",
+  "desc": "M\xF4 t\u1EA3 ng\u1EAFn g\u1ECDn C\u01A0 CH\u1EBE v\xE0 C\xC1CH S\u1EEC D\u1EE4NG c\u1EE7a k\u1EF3 v\u1EADt (d\u01B0\u1EDBi 35 ch\u1EEF). Ph\u1EA3i r\xF5 r\xE0ng, th\xFA v\u1ECB, \u0111\u1ED9c l\u1EA1.",
+  "price": S\u1ED1 nguy\xEAn \u0111\u1ECBnh gi\xE1. G\u1EE3i \xFD c\u01A1 b\u1EA3n: ${rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "S\u1EED thi" ? 8e3 : 2500}. NGHI\xCAM C\u1EA4M L\u1EA0M PH\xC1T, gi\xE1 tr\u1ECB t\u1ED1i \u0111a tuy\u1EC7t \u0111\u1ED1i KH\xD4NG \u0110\u01AF\u1EE2C V\u01AF\u1EE2T QU\xC1 ${rarity === "Huy\u1EC1n tho\u1EA1i" ? 5e4 : rarity === "S\u1EED thi" ? 2e4 : 8e3}G,
   "spriteMap": [ m\u1EA3ng g\u1ED3m \u0110\xDANG 32 chu\u1ED7i, m\u1ED7i chu\u1ED7i D\xC0I CH\xCDNH X\xC1C 32 k\xFD t\u1EF1 ch\u1EC9 d\xF9ng k\xFD t\u1EF1 B\u1EA3ng m\xE0u v\xE0 d\u1EA5u '.' cho \u0111i\u1EC3m trong su\u1ED1t ]
 }`;
     const userPrompt = `H\xE3y s\xE1ng t\u1EA1o 1 v\u1EADt ph\u1EA9m \u0111\u1EB7c bi\u1EC7t ng\u1EABu nhi\xEAn ph\u1EA9m ch\u1EA5t ${rarity}.`;

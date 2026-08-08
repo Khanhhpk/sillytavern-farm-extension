@@ -109,37 +109,49 @@ export async function generateAIUniqueItemData(rarity) {
     if (CS.link) {
       const worldbook = await collectWorldbook();
       contextStr = `Trích xuất bối cảnh thế giới (Worldbook) & Lịch sử trò chuyện gần nhất:
-${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể, hãy tự do sáng tạo)'}
-Nếu thấy phù hợp, hãy thiết kế vật phẩm liên kết với bối cảnh này, nếu không thì tự do sáng tạo.`;
+${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể)'}
+Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối cảnh này, nếu không thì tự do sáng tạo. Tuy nhiên, KHÔNG ĐƯỢC tùy chỉnh kết quả thành "đáp án giải quyết khủng hoảng trước mắt". Kỳ vật phải duy trì tính độc lập ngẫu nhiên.`;
       
-      thinkingInstructions = `1. TÌM Ý TƯỞNG: Đọc kỹ bối cảnh thế giới được cung cấp. Chọn ra 1 yếu tố đặc trưng nhất (nhân vật, phép thuật, sự kiện, đồ vật...) để làm cảm hứng.
-2. THIẾT KẾ: Biến ý tưởng đó thành một vật phẩm mang thuộc tính đặc biệt. Phân tích màu sắc và hình dáng vật thể.
-3. VẼ PIXEL: Đếm chính xác số lượng ký tự trên mỗi dòng. Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!`;
+      thinkingInstructions = `1. TÌM Ý TƯỞNG: Đọc kỹ bối cảnh thế giới được cung cấp. Xác định Vực đề tài và Vực lối chơi.
+2. CƠ CHẾ: Căn cứ vào độ hiếm [${rarity}] để thiết lập cơ chế. Phải có lợi tuyệt đối, không có cái giá phải trả, thao tác cụ thể, cực kỳ thú vị và phá vỡ sáo rỗng (anti-cliché).
+3. VẼ PIXEL: Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!`;
     } else {
-      contextStr = `KHÔNG CÓ CHỦ ĐỀ CỐ ĐỊNH. Để đảm bảo tính ngẫu nhiên tuyệt đối, bạn PHẢI tự bốc thăm một chủ đề bất kỳ trước khi bắt đầu thiết kế. Mọi thứ trong vũ trụ đều có thể trở thành vật phẩm.`;
+      contextStr = `KHÔNG CÓ CHỦ ĐỀ CỐ ĐỊNH. Để đảm bảo tính ngẫu nhiên tuyệt đối, bạn PHẢI tự bốc thăm Vực đề tài và Vực lối chơi bất kỳ. Mọi thứ trong vũ trụ đều có thể trở thành kỳ vật.`;
       
-      thinkingInstructions = `1. BỐC THĂM CHỦ ĐỀ: Đầu tiên, hãy suy nghĩ ra 3 danh từ hoàn toàn ngẫu nhiên và không liên quan đến nhau. Chọn 1 trong số đó làm chủ đề chính.
-2. THIẾT KẾ: Biến danh từ vừa chọn thành một vật phẩm mang thuộc tính đặc biệt. Phân tích màu sắc và hình dáng vật thể.
-3. VẼ PIXEL: Đếm chính xác số lượng ký tự trên mỗi dòng. Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!`;
+      thinkingInstructions = `1. BỐC THĂM CHỦ ĐỀ: Bốc thăm ngẫu nhiên Vực đề tài (Khí vật, sinh mệnh, quy tắc, không gian...) và Vực lối chơi (Xử lý thông tin, cải tạo bối cảnh, giao dịch đánh cược...).
+2. CƠ CHẾ: Căn cứ vào độ hiếm [${rarity}] để thiết lập cơ chế. Phải có lợi tuyệt đối, không có cái giá phải trả, thao tác cụ thể, cực kỳ thú vị và phá vỡ sáo rỗng (anti-cliché).
+3. VẼ PIXEL: Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!`;
     }
 
-    const sysPrompt = `Bạn là một AI thiết kế vật phẩm game nhập vai và chuyên gia Pixel Art (32x32).
-Hãy sáng tạo 1 VẬT PHẨM ĐỘC NHẤT phẩm chất [${rarity}].
+    const rarityGuidance = rarity === 'Huyền thoại' 
+      ? "Thước đo ảnh hưởng to lớn (quyết định trật tự, quy tắc, hệ sinh thái, hoặc thao túng cả phương thế giới). Dù quyền bính to lớn nhưng phải CỤ THỂ, thao tác được, không viết khái niệm sáo rỗng."
+      : rarity === 'Sử thi' 
+      ? "Thước đo ảnh hưởng cục bộ bối cảnh (thay đổi một khu vực, một nhóm, tạo cơ chế thu lợi dài hạn hoặc ưu thế chiến lược). Có giá trị kết hợp và kinh doanh."
+      : "Thước đo ảnh hưởng cá thể (công cụ nhỏ thay đổi một lần tương tác). Yêu cầu nhỏ mà chuẩn, nhẹ mà khéo, lập tức tạo ra ưu thế tinh xảo và chơi vui ngay lập tức.";
+
+    const sysPrompt = `Bạn là một AI thiết kế "Kỳ vật dị giới" (Otherworldly Artifact) và chuyên gia Pixel Art (32x32).
+Hãy sáng tạo 1 KỲ VẬT ĐỘC NHẤT phẩm chất [${rarity}].
 ${contextStr}
 
 BẢNG MÀU PIXEL 32x32 CHO PHÉP (Ký tự: Mã màu Hex):
 ${paletteStr}
 
+QUY TẮC THIẾT KẾ KỲ VẬT:
+1. Có lợi tuyệt đối: Bất kỳ kỳ vật nào cũng phải mang lại ưu thế dương, dễ dùng. NGHIÊM CẤM mọi loại phản phệ, nguyền rủa, hao tổn tuổi thọ, hiến tế hay tác dụng phụ.
+2. Khả chơi mạnh mẽ & Thú vị: Đồ vật phải sở hữu cơ chế độc đáo, có thể chủ động thao tác. Không được viết thành bùa lợi (buff) tăng chỉ số thuần túy hoặc món đồ trang bị nhàm chán.
+3. Cấp độ sức mạnh:
+- Phẩm chất [${rarity}]: ${rarityGuidance}
+4. Định giá hợp lý: Không được phá giá kinh tế game.
+
 HƯỚNG DẪN TƯ DUY (Bắt buộc phải có thẻ <thinking> trước khi xuất mã):
-Để vẽ pixel art chuẩn 32x32:
 ${thinkingInstructions}
 
 QUY TẮC ĐẦU RA BẮT BUỘC:
 Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json chứa cấu trúc:
 {
-  "name": "Tên vật phẩm (2~5 chữ, ấn tượng, sáng tạo)",
-  "desc": "Mô tả 1 câu về công dụng/hiệu ứng khi dùng trong cốt truyện (dưới 35 chữ)",
-  "price": Một số nguyên định giá G của vật phẩm (Gợi ý: quanh mức ${rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : 2500}G, có thể tự do tăng giảm tuỳ ý),
+  "name": "Tên kỳ vật (2~7 chữ, ấn tượng, gợi sự tò mò)",
+  "desc": "Mô tả ngắn gọn CƠ CHẾ và CÁCH SỬ DỤNG của kỳ vật (dưới 35 chữ). Phải rõ ràng, thú vị, độc lạ.",
+  "price": Số nguyên định giá. Gợi ý cơ bản: ${rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : 2500}. NGHIÊM CẤM LẠM PHÁT, giá trị tối đa tuyệt đối KHÔNG ĐƯỢC VƯỢT QUÁ ${rarity === 'Huyền thoại' ? 50000 : rarity === 'Sử thi' ? 20000 : 8000}G,
   "spriteMap": [ mảng gồm ĐÚNG 32 chuỗi, mỗi chuỗi DÀI CHÍNH XÁC 32 ký tự chỉ dùng ký tự Bảng màu và dấu '.' cho điểm trong suốt ]
 }`;
 

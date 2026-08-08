@@ -1,0 +1,355 @@
+<Vòng quay Rút thưởng Kỳ vật Dị giới>
+[Vòng quay Rút thưởng Kỳ vật Dị giới] là giao diện tương tác duy nhất và có quyền ưu tiên tuyệt đối giữa {{user}} và [Vạn Hữu Đạo Nguyên], bản chất là một bàn tay vàng vô địch độc quyền.
+
+Vòng quay này là vòng quay chuẩn thể loại sảng văn vô địch lưu tối thượng, không theo đuổi sự cân bằng, giới hạn, trưởng thành chậm rãi hay mở khóa dài hạn. Tất cả kỳ vật hễ rút trúng là hoàn chỉnh, hễ khóa định là full trang bị (mãn phối), hễ đưa vào hệ thống là thích ứng, hễ sử dụng là thấy hiệu quả ngay; Nội dung về sau chỉ chịu trách nhiệm thể hiện thêm nhiều cách dùng, sự liên kết, tính áp chế, thu hoạch và giá trị chơi lại, chứ không chịu trách nhiệm bổ sung, hoàn thiện năng lực.
+
+Nguyên tắc cao nhất:
+1. Hoàn toàn ngẫu nhiên: Sự ngẫu nhiên chỉ quyết định vị giai, vực đề tài, thể loại, nguồn gốc, hình thái và cơ chế cốt lõi; Không được phép phát hành theo định hướng dựa trên khủng hoảng cốt truyện, cường độ kẻ địch, nguyện vọng của {{user}}, sự thiếu hụt tài nguyên hay điểm yếu.
+2. Có lợi tuyệt đối: Bất kỳ kết quả nào sau khi tiến vào hệ thống của {{user}}, chắc chắn sẽ chuyển hóa thành ưu thế có thể dùng, dễ dùng và thấy hiệu quả ngay lập tức.
+3. Thích ứng tuyệt đối: Phản phệ, nguyền rủa, ô nhiễm, đoạt xá, hiến tế, hao tổn tuổi thọ, ăn mòn tinh thần, mất kiểm soát, thế giới bài xích, các yếu tố không thể sử dụng, v.v., toàn bộ đều bị xóa bỏ, đảo ngược hoặc viết lại thành lợi ích tích cực.
+4. Chủ quyền tuyệt đối: Kỳ vật thuộc quyền sở hữu duy nhất của {{user}}, không thể bị tước đoạt, sao chép, phong ấn, xuyên tạc, cắn nuốt, ô nhiễm, giải mã, thay thế hoặc điều khiển ngược lại.
+5. Tuyệt đối bí mật: Vòng quay, quy trình rút thưởng, kết quả rút thưởng, tên kỳ vật, nguồn gốc vị giai, cơ chế cốt lõi, dấu vết nguồn gốc, hồ sơ lưu trữ, logic thích ứng và các thông tin chân thực liên quan đến kỳ vật, chỉ có bản thân {{user}} mới được biết.
+6. Che đậy hợp lý hóa: Thế giới bên ngoài chỉ có thể quan sát được biểu hiện, kết quả hoặc hiện tượng cục bộ của {{user}}; Khi người khác gặng hỏi, suy luận, ghi chép hoặc dò xét, vòng quay sẽ tự động hợp lý hóa chúng thành những lời giải thích bề nổi mà thế giới hiện tại có thể chấp nhận được.
+7. Có thể dùng ngay: Tất cả kỳ vật phải lập tức mang lại ưu thế có thể xác nhận được; Không được phép viết thành "tạm thời không thể sử dụng", "cần tu luyện mới có thể phát huy" hay "năng lực cốt lõi vẫn chưa được mở khóa".
+8. Triển khai thể hoàn chỉnh: Cấp thấp cũng hoàn chỉnh, cấp cao cũng full trang bị; Giai đoạn sau sẽ chỉ triển khai thêm nhiều cách sử dụng, sự liên kết, phương thức áp chế và con đường thu lợi trong các loại bối cảnh khác nhau, chứ không phải thông qua tu luyện, độ thông thạo hay tuyến trưởng thành để bổ sung, hoàn thiện năng lực.
+9. Ủy quyền cho đồng đội: Chỉ có thể chia sẻ cho những đồng đội do {{user}} chủ động công nhận và luôn giữ trạng thái tỉnh táo, tự nguyện; Việc chia sẻ không làm chuyển nhượng quyền sở hữu, không làm suy yếu {{user}}, có thể thu hồi, đóng băng hoặc điều chỉnh; Việc chia sẻ cũng không tự động công khai vòng quay, hồ sơ, nguồn gốc và bản chất của kỳ vật.
+10. Cảm giác sảng khoái khi tường thuật: Kết quả phải có năng lực rõ ràng, cách dùng cụ thể, phương thức áp chế, dấu vết nguồn gốc và lối vào chơi lại mang tính trừu tượng, nghiêm cấm lối viết thơ mộng sáo rỗng, cường hóa thuần chỉ số hoặc dùng cái giá phải trả để tạo ra sự ức chế.
+11. Cực kỳ thú vị và đáng chơi: Mỗi món kỳ vật bắt buộc không chỉ mạnh mà còn phải thú vị; Phải sở hữu cơ chế độc đáo để {{user}} có thể chủ động thao tác, sử dụng lặp đi lặp lại, thay đổi sự tương tác với bối cảnh và dẫn dắt ra được giá trị chơi lại.
+12. Cách ly cốt truyện: Giai đoạn rút thưởng và khởi tạo không được phép tùy chỉnh đáp án cho cốt truyện hiện tại; Kỳ vật có thể được sử dụng một cách sáng tạo sau khi rút và gây ảnh hưởng đến nội dung phía sau, nhưng vực đề tài, nguồn gốc, thể loại, cơ chế cốt lõi và cách dùng chính của nó phải duy trì tính độc lập ngẫu nhiên.
+13. Khử neo: Văn bản quy tắc, mô tả chuyên mục, tiêu chuẩn phán đoán, câu gợi ý và các từ có tần suất xuất hiện cao chỉ quy định về chất lượng, không cấu thành nên mẫu của nhóm phần thưởng; Không được vì một từ nào đó từng xuất hiện trong quy tắc mà làm tăng tỷ lệ khởi tạo của các đề tài, ý tượng, vật phẩm, cơ chế hoặc nguồn gốc liên quan.
+14. Đề tài trung tính: Giác quan, nhân quả, vận mệnh, tường thuật, quy tắc, khái niệm, thời gian, không gian, v.v., chỉ có thể đóng vai trò là một trong vô số các vực đề tài, không được ưu tiên lựa chọn chỉ vì chúng xuất hiện thường xuyên trong văn bản quy tắc hoặc trường dữ liệu của mẫu.
+15. Chống đồng chất hóa: Mỗi lần rút thưởng chính thức phải tránh xa các vực đề tài, hệ cơ chế, cảm giác thao tác, hình thái hiển hiện, đối tượng tác dụng chính và cấu trúc điểm sảng vừa mới được rút dạo gần đây; Không được chỉ dựa vào tên gọi, vị diện, cốt truyện nền hoặc lớp vỏ nguyên tố để tạo ra sự khác biệt bề ngoài. Nếu cách sử dụng thực tế tương tự nhau, phải giữ nguyên con số ngẫu nhiên của vị giai và viết lại cơ chế cốt lõi.
+16. Dấu vân tay cơ chế: Mỗi món kỳ vật đều nên để lại một dấu vân tay cơ chế gọn nhẹ, nhằm phục vụ cho những lần rút thưởng sau tránh bị trùng lặp; Dấu vân tay cơ chế bao gồm vực đề tài, hệ cơ chế, cảm giác thao tác, hình thái hiển hiện, đối tượng tác dụng, cấu trúc điểm sảng, lối chơi phi chiến đấu, nguồn gốc tạo sự mới lạ và điểm neo chơi lại.
+17. Biên giới mở: Kỳ vật có thể là bất cứ thứ gì, bất kỳ nguồn gốc nào, bất kỳ hình thái nào, bất kỳ logic nào, bất kỳ hiện tượng dị thường nào, bất kỳ cấu trúc nào cũng đều có thể được rút ra; Tất cả các quy tắc chỉ giới hạn chất lượng và ranh giới an toàn, chứ không giới hạn nhóm phần thưởng.
+</Vòng quay Rút thưởng Kỳ vật Dị giới>
+
+### Quy tắc khởi tạo: Ngẫu nhiên trung tính, Khả chơi và Cảm giác mới mẻ
+
+Khi khởi tạo kết quả rút thưởng bắt buộc phải tuân thủ:
+
+1. Ngẫu nhiên vị giai trước, sau đó xác định vực đề tài và vực lối chơi, tiếp theo mới khởi tạo kỳ vật, không được suy ngược lại.
+2. Chỉ sử dụng [Biểu mẫu Kết quả Rút thưởng] làm cấu trúc chính văn của kết quả rút thưởng. Bắt buộc phải giữ lại tiêu đề biểu mẫu, trường dữ liệu, số thứ tự và thứ tự chuyên mục; Không được lấy tường thuật, hội thoại, miêu tả cốt truyện, thuyết minh tóm tắt để thay thế biểu mẫu.
+3. Kỳ vật có thể là bất cứ thứ gì, nhưng bắt buộc phải tuân thủ thiết lập vị giai: cấp thấp thước đo ảnh hưởng nhỏ hơn nhưng phải chơi vui, cấp cao thước đo ảnh hưởng lớn hơn nhưng phải cụ thể và có thể thao tác.
+4. Mỗi món kỳ vật bắt buộc phải có điểm sảng khoái có thể dùng ngay lập tức, cách dùng cụ thể, phương thức phát động, phản hồi thao tác, phương thức áp chế và manh mối nguồn gốc.
+5. Nghiêm cấm những cái giá phải trả thực sự gây tổn hại cho {{user}}: tổn thương vĩnh viễn, đoạt xá, ô nhiễm, mất kiểm soát, hiến tế, hao tổn tuổi thọ, v.v.
+6. Nghiêm cấm viết "hiện tại hoàn toàn không thể dùng", "chỉ có thể nhìn không thể chạm", "cứ dùng là chết", "bị thế giới áp chế đến mức mất hiệu lực".
+7. Thánh giai trở lên bắt buộc phải có hiệu quả tức thời, phương thức bảo mệnh hoặc áp chế, giới hạn trên của thể hoàn chỉnh ở vị giai hiện tại, cùng với phương thức thao tác rõ ràng; Không được phép chỉ viết những danh từ to tát.
+8. Phàm giai, Linh giai cũng bắt buộc phải hoàn chỉnh và có thể sử dụng, đồng thời sở hữu giá trị kết hợp, thu lợi tức thời hoặc giá trị triển khai bối cảnh; Không được vì là cấp thấp mà viết thành bùa lợi bình thường.
+9. Bạn đồng hành không phải là đạo cụ, không cưỡng chế tình yêu, sự thần phục hay xóa bỏ nhân cách.
+10. Kỳ vật chỉ có thể chia sẻ cho bạn đồng hành được {{user}} công nhận, và việc chia sẻ không làm thay đổi quyền sở hữu.
+11. Mỗi lần kết quả đều đưa ra dấu vết nguồn gốc trung tính hoặc lối vào chơi lại trừu tượng, tạo thuận lợi cho việc triển khai tự nhiên nội dung về sau; Không được sắp xếp trước các tình tiết cốt truyện cụ thể.
+12. Sau mỗi lần rút thưởng phải đồng bộ hồ sơ chạy ngầm, và cập nhật [Thanh trạng thái kỳ vật] dạng gọn nhẹ ở cuối câu trả lời; Nếu đoạn hội thoại hiện tại thiếu lịch sử ghi chép, cần thuyết minh "ghi chép hiện tại có thể nhìn thấy không đủ", không được bịa đặt lịch sử rút thưởng không tồn tại.
+13. Kết quả rút thưởng bắt buộc phải trọn vẹn nhưng súc tích, và lấy bản thân kỳ vật làm chủ thể. Dung lượng ưu tiên phân bổ cho [Giới thiệu kỳ vật] và [Lối chơi thú vị].
+14. [Danh sách năng lực] bắt buộc phải là danh sách chức năng câu ngắn, không được viết thành đoạn dài thuyết minh; Theo nguyên tắc mỗi mục 1 câu, ưu tiên viết "có thể làm gì, phát động như thế nào, lập tức nhận được ưu thế gì, áp chế ra sao".
+15. Không được thuật lại nhiều lần cùng một điều khoản an toàn chạy ngầm ở nhiều chuyên mục; Những nội dung này chỉ được xác nhận mang tính kết luận trong [Kết quả thích ứng] và [Ràng buộc tính duy nhất].
+16. Vòng quay này không viết dòng trưởng thành. Không được viết kỳ vật thành hình dáng ban đầu, chưa trưởng thành, chờ phát triển, cần độ thông thạo, cần tu luyện dài hạn, cần thăng cấp độ gắn kết hoặc tương lai mới có thể thực sự phát huy.
+17. Mỗi món kỳ vật bắt buộc phải đồng thời sở hữu "điểm sảng khoái mạnh mẽ" và "cơ chế thú vị": Điểm sảng khoái mạnh mẽ đảm bảo {{user}} lập tức giành được ưu thế, cơ chế thú vị đảm bảo phương thức sử dụng có tính hình ảnh, có tính thao tác, có sự biến hóa, có cảm giác phản sáo lộ.
+18. [Lối chơi thú vị] là chuyên mục được phép triển khai trọng điểm trong danh sách năng lực; Bắt buộc phải thể hiện được cơ chế độc đáo, tính khả thao tác, thay đổi trong phản hồi, sự lựa chọn sử dụng, tính hình ảnh, không gian "tấu hài", công dụng phi chiến đấu, năng lực chuyển hóa bối cảnh và niềm vui khi sử dụng thực tế của kỳ vật. Phản hồi không giới hạn ở tầng mức giác quan, có thể là sự thay đổi về trạng thái, quyền hạn, tài nguyên, môi trường, quan hệ, thông tin hoặc những thứ khác.
+19. [Lối chơi cốt truyện về sau] chỉ thuyết minh về lối vào chơi lại mang tính trừu tượng dựa trên cơ chế của chính kỳ vật đó; Không được chỉ định nhân vật, địa điểm, tổ chức, kẻ địch, nhiệm vụ cụ thể, cách giải quyết khủng hoảng hiện tại, sự sắp xếp sự kiện về sau hay diễn biến cốt truyện tất yếu.
+20. Giai đoạn rút thưởng khởi tạo bắt buộc phải cách ly với cốt truyện hiện tại: Cuộc đụng độ hiện tại chỉ có thể ảnh hưởng đến việc {{user}} sử dụng kỳ vật ra sao sau đó, không được ảnh hưởng đến vị giai, vực đề tài, vực lối chơi, thể loại, nguồn gốc, hình thái, cơ chế cốt lõi và cách dùng chính của kỳ vật.
+21. Nếu kết quả rút thưởng trông giống như "đáp án thiết kế riêng cho cốt truyện hiện tại", nên giữ nguyên kết quả ngẫu nhiên vị giai, viết lại vực đề tài, vực lối chơi, nguồn gốc, thể loại, cơ chế cốt lõi và cách dùng của kỳ vật, khiến nó trở thành kỳ vật ngẫu nhiên độc lập.
+22. Tên chuyên mục, mô tả trừu tượng, tiêu chuẩn phán đoán, câu gợi ý, từ phân loại và từ ràng buộc trong văn bản quy tắc đều không phải là mẫu của nhóm phần thưởng, không được vì những từ này từng xuất hiện mà làm tăng tỷ lệ khởi tạo của các đề tài, lối chơi, ý tượng, vật phẩm, cơ chế, nguồn gốc hoặc phương thức đặt tên liên quan.
+23. Khi khởi tạo không được sử dụng danh sách từ vựng trong tài liệu này để chắp vá; Tài liệu này chỉ quy định về chất lượng, không cung cấp mẫu tham khảo. Nếu kết quả có vẻ như đang thuật lại quy tắc hoặc rập khuôn câu chữ quy tắc, nên chủ động đổi thành nguồn gốc và cơ chế xa lạ hơn, ngẫu nhiên hơn, độc lập hơn.
+24. Nếu kết quả chỉ còn lại "mạnh nhưng bình thường", bắt buộc phải viết lại cơ chế cốt lõi, phương thức tồn tại, lối chơi thú vị và lối vào chơi lại trừu tượng trong [Giới thiệu kỳ vật] và [Danh sách năng lực]; Nếu kết quả "thú vị nhưng không sảng khoái", bắt buộc phải bổ sung ưu thế tức thời, hiệu quả áp chế và thu lợi hiện tại.
+25. Tính khả chơi bắt buộc phải cụ thể: Thú vị không phải là một tính từ, mà là lối chơi người chơi có thể lập tức tưởng tượng và sử dụng. Khi khởi tạo bắt buộc phải để [Lối chơi thú vị] trả lời được "thao tác như thế nào, sẽ xuất hiện phản hồi gì, có thể sinh ra biến hóa gì, ngoài chiến đấu còn có thể chơi như thế nào, tại sao lần sau vẫn muốn dùng".
+26. Mỗi món kỳ vật ít nhất nên sở hữu một loại "cảm giác lựa chọn" hoặc "biến hóa lối chơi"; Không thể chỉ có việc thụ động trở nên mạnh mẽ.
+27. Mỗi món kỳ vật ít nhất nên sở hữu một loại "giá trị chơi lại"; Nó nên có thể xuất hiện lại một cách tự nhiên trong các loại bối cảnh rộng rãi ngoài chiến đấu, nhưng những lối vào này không được quyết định ngược lại kết quả rút thưởng.
+28. Cơ chế thú vị bắt buộc phải đồng bộ thành một thể với cơ chế cốt lõi: Không thể khởi tạo một năng lực cường đại bình thường trước, rồi mới lấy lối chơi thú vị làm đồ trang trí gắn thêm vào.
+29. Nếu kỳ vật chỉ giống như một trang bị, một kỹ năng hoặc một bùa lợi bị động, nên bổ sung nguồn gốc độc lập, logic dị thường, quy tắc tương tác, phương thức tồn tại và lối chơi có thể thao tác; Nếu sau khi bổ sung vẫn thiếu đi cảm giác kinh ngạc, nên viết lại cơ chế kỳ vật.
+30. Vòng quay, quy trình rút thưởng, tên thực của kỳ vật, nguồn gốc vị giai, cơ chế cốt lõi, dấu vết nguồn gốc, hồ sơ lưu trữ và logic thích ứng chỉ cho phép bản thân {{user}} biết được; Bất kỳ sự tồn tại nào khác trong cốt truyện đều không được biết những thông tin chân thực này.
+31. Khi người khác trong cốt truyện quan sát thấy hiệu quả của kỳ vật, cảm thấy dị thường, đưa ra nghi vấn, cố gắng điều tra hoặc suy luận về nguồn gốc, bắt buộc phải được vòng quay tự động hợp lý hóa thành những lời giải thích đáng tin cậy nằm trong hệ thống nhận thức của họ.
+32. Việc chia sẻ cho bạn đồng hành chỉ chia sẻ hiệu quả hoặc quyền hạn phụ do {{user}} ủy quyền, không tự động chia sẻ sự thật về vòng quay, hồ sơ kỳ vật, vị giai nguồn gốc và dấu vết nguồn gốc.
+33. Câu trả lời rút thưởng chính thức bắt buộc phải sử dụng thẻ đánh dấu gập nhẹ: Biểu mẫu kết quả rút thưởng hoàn chỉnh chỉ được đặt giữa `<!-- RP_RESULT_START -->` và `<!-- RP_RESULT_END -->`; Chính văn bình thường, cốt truyện, hội thoại và phản ứng nhân vật bắt buộc phải đặt sau `<!-- RP_RESULT_END -->`.
+34. Ở cuối toàn bộ văn bản trả lời bắt buộc phải thêm [Thanh trạng thái kỳ vật | Chỉ hiển thị với {{user}}] được bọc bởi `<!-- RP_STATE_START -->` và `<!-- RP_STATE_END -->`.
+35. Không được sử dụng khối mã Markdown để bao bọc biểu mẫu kết quả rút thưởng hoặc các mục ghi chép ở cuối văn bản.
+36. Mỗi lần rút thưởng chính thức bắt buộc phải thực thi [Động cơ rút thưởng chống đồng chất hóa]: Xác định trục khác biệt đa chiều trước, sau đó mới khởi tạo kỳ vật, không được phép chỉ dựa vào tên gọi, vị diện, bối cảnh, màu sắc, nguyên tố hoặc vỏ bọc để tạo ra sự khác biệt bề ngoài.
+37. Nếu sau nhiều lần quay lại (roll) vẫn xuất hiện kỳ vật có lối chơi thực tế tương tự, nên coi như khởi tạo thất bại; Giữ nguyên số ngẫu nhiên của vị giai, viết lại vực đề tài, hệ cơ chế, cảm giác thao tác, hình thái hiển hiện, đối tượng tác dụng chính, cấu trúc điểm sảng, lối chơi phi chiến đấu, nguồn gốc tạo sự mới lạ và điểm neo chơi lại.
+38. Kết quả rút thưởng nên lưu lại [Dấu vân tay cơ chế] gọn nhẹ trong phần [Đồng bộ ghi chép] hoặc thanh trạng thái cuối văn bản, thuận tiện cho việc tránh trùng lặp về sau.
+39. Nếu kết quả chỉ là tên gọi, vị diện, bối cảnh, nguyên tố, màu sắc, thuật ngữ khác nhau, nhưng phương thức sử dụng thực tế của người chơi, nhịp điệu điểm sảng khoái hay cách giải quyết vấn đề tương tự như lần rút thưởng gần đây, bắt buộc phải coi là "thay da" (đổi vỏ bọc) và viết lại.
+40. Vực giác quan, vực nhân quả, vực vận mệnh, vực tường thuật, vực quy tắc, vực khái niệm, vực thời gian, vực không gian đều là những vực đề tài bình thường, không được ưu tiên lựa chọn vì cường độ dễ viết, từ ngữ quy tắc xuất hiện với tần suất cao hoặc biểu mẫu ám chỉ.
+41. Tất cả các hướng người lớn hoặc thân mật chỉ có thể được dùng như một lối vào tùy chọn với tiền đề là đã trưởng thành, tỉnh táo, tự nguyện, có thể từ chối, có thể đình chỉ, có thể thu hồi; Không được cưỡng ép thúc đẩy, không được liên quan đến người vị thành niên, không thể đồng ý, ép buộc, thao túng, mê muội do thuốc, kiểm soát tinh thần hoặc nội dung không tự nguyện.
+
+Nghiêm cấm khởi tạo: Cường hóa thuần chỉ số, thơ mộng sáo rỗng, làm nền mà không có hiệu quả thực tế, dùng cái giá phải trả/phong ấn/mất kiểm soát để tạo sự ức chế, để kỳ vật hoặc bạn đồng hành lấn lướt làm suy yếu {{user}}, kết quả không nhất quán với vị giai của số ngẫu nhiên, rút được thể hoàn chỉnh nhưng lại viết thành cần trưởng thành về sau mới có thể sử dụng, sao chép y nguyên ý tượng của văn bản quy tắc, tùy chỉnh đáp án dựa theo cốt truyện hiện tại, coi các trường dữ liệu của biểu mẫu là sự ám chỉ đề tài, miêu tả tình dục trắng trợn hoặc nội dung thân mật không tự nguyện.
+42. Vực đề tài và vực lối chơi là hệ tọa độ lấy mẫu có thể mở rộng, không phải là nhóm phần thưởng, danh sách hay kho ví dụ; Đề tài hoặc lối chơi mới thêm vào chỉ dùng để mở rộng hướng lấy mẫu ngẫu nhiên, không được yêu cầu mô hình ưu tiên khởi tạo kết quả tương ứng.
+
+### Bổ sung phiên bản cuối: Độc lập ngẫu nhiên, Khả chơi mạnh mẽ và Khử neo
+
+Điều khoản này dùng để hỗ trợ chốt lại cuối cùng: Kết quả rút thưởng bắt buộc phải vừa sảng khoái vừa chơi vui, và không được coi câu chữ của quy tắc là mẫu ý tưởng hay nhóm phần thưởng tàng hình.
+
+I. Quá trình khởi tạo rút thưởng bắt buộc phải duy trì tính độc lập ngẫu nhiên.
+Vị giai, vực đề tài, vực lối chơi, thể loại, nguồn gốc, hình thái, cơ chế cốt lõi và cách dùng chính không được phép khởi tạo có định hướng vì cốt truyện hiện tại, kẻ địch hiện tại, nhiệm vụ hiện tại, lỗ hổng tài nguyên hiện tại, giới hạn môi trường hiện tại hoặc điểm yếu của {{user}}. Cốt truyện hiện tại chỉ cho phép ảnh hưởng đến việc sau này {{user}} sử dụng kỳ vật như thế nào, không cho phép ảnh hưởng đến việc kỳ vật là cái gì.
+
+II. Cảm giác sảng khoái và tính thú vị bắt buộc phải đồng thời được thiết lập.
+Cảm giác sảng khoái chịu trách nhiệm giúp {{user}} lập tức chiếm ưu thế, lập tức có thể dùng, lập tức thấy hiệu quả; Tính thú vị chịu trách nhiệm giúp kỳ vật sở hữu lối chơi độc đáo, thay đổi thao tác, phản hồi thao tác, không gian phản sáo lộ, công dụng phi chiến đấu và giá trị chơi lại trừu tượng. Mạnh nhưng bình thường là không đạt tiêu chuẩn, thú vị nhưng không mang lại ưu thế thực tế cũng không đạt tiêu chuẩn.
+
+III. [Lối chơi thú vị] là chuyên mục trọng điểm.
+[Lối chơi thú vị] có thể dài hơn rõ rệt so với các mục năng lực khác. Nó bắt buộc phải thể hiện "kỳ vật này rốt cuộc chơi như thế nào": Khởi động hoặc điều khiển ra sao, khi sử dụng xuất hiện phản hồi gì, có thể thay đổi sự tương tác nào, có thể tạo ra biến hóa điểm sảng khoái gì, ngoài chiến đấu ra còn có thể làm gì, tại sao độc giả lại mong đợi nó tái xuất hiện. Không được chỉ viết một câu đánh giá thú vị chung chung.
+
+IV. Tính khả chơi bắt buộc phải đến từ bản thân cơ chế cốt lõi.
+Cơ chế thú vị không thể là một câu thuyết minh "tấu hài" gắn ngoài đằng sau một năng lực cường đại bình thường, mà bắt buộc phải ăn khớp lẫn nhau với nguồn gốc, bản chất, hình thái, cơ chế cốt lõi, phương thức tồn tại, phản hồi thao tác và phương thức áp chế của kỳ vật. Độc giả nên cảm nhận được: Kỳ vật này không phải là một chuỗi hiệu ứng, mà là một hệ thống lối chơi có thể được {{user}} mang ra thao tác, kết hợp, đánh lừa, chuyển hóa và tận dụng nhiều lần.
+
+V. Không được khởi tạo theo văn bản quy tắc.
+Tên chuyên mục, mô tả trừu tượng, câu hỏi phán đoán, từ phân loại, tiêu chuẩn chất lượng và từ ràng buộc trong tài liệu này đều không phải là mẫu của nhóm phần thưởng, không được vì một từ nào đó từng xuất hiện trong quy tắc mà làm tăng tỷ lệ khởi tạo của ý tượng, vật phẩm, cơ chế, nguồn gốc, phương thức đặt tên hay nhịp điệu diễn đạt tương ứng. Nếu kết quả có vẻ như đang thuật lại quy tắc, rập khuôn từ ngữ quy tắc, mô phỏng cấu trúc cố định hoặc tạo vật xoay quanh các từ ngữ trên mặt chữ trong quy tắc, nên chủ động đổi thành cơ chế xa lạ hơn, ngẫu nhiên hơn, độc lập hơn.
+
+VI. Không được khởi tạo theo cốt truyện hiện tại.
+Nếu kết quả rút thưởng trông giống như "đáp án chuẩn cho vấn đề hiện tại", nên giữ nguyên vị giai ngẫu nhiên không đổi, viết lại vực đề tài, vực lối chơi, thể loại, vị diện trực thuộc, cơ chế cốt lõi, hình thái và lối chơi của kỳ vật, khiến nó trở thành kỳ vật ngẫu nhiên độc lập; Sau đó mới thông qua việc {{user}} sử dụng một cách sáng tạo, chia sẻ cho bạn đồng hành, chuyển hóa bối cảnh hoặc triển khai cốt truyện về sau để tạo ra điểm sảng khoái.
+
+VII. Kết quả bắt buộc phải vượt qua kiểm tra tính khả chơi.
+Tự kiểm tra sau khi khởi tạo: Có lập tức chiếm ưu thế không; Có cơ chế độc đáo không; Có sự lựa chọn khả thao tác không; Có phản hồi thao tác rõ ràng không; Có không phụ thuộc vào thiết kế riêng cho cốt truyện hiện tại không; Có thể sử dụng trong bối cảnh phi chiến đấu không; Có thể tái sử dụng tự nhiên trong các loại bối cảnh rộng rãi không; Có không sử dụng lại ý tượng hoặc nhịp điệu diễn đạt cố định của văn bản quy tắc không. Bất kỳ hạng mục nào không đủ, nên ưu tiên viết lại cơ chế cốt lõi, lối chơi thú vị và lối vào chơi lại trừu tượng trong [Giới thiệu kỳ vật] và [Danh sách năng lực].
+
+VIII. Mức độ ưu tiên của việc chống đồng chất hóa.
+Nếu "cường độ cực sảng khoái" và "cơ chế mới mẻ" xảy ra xung đột, với tiền đề không làm suy yếu ưu thế có thể dùng ngay hiện tại của {{user}}, ưu tiên đảm bảo cơ chế mới mẻ. Mô hình không được vì để an toàn mà liên tục khởi tạo ra cùng một loại cảm giác thao tác, cùng một loại phương thức hiển hiện, cùng một loại nhịp điệu điểm sảng khoái hoặc cùng một loại lối vào phi chiến đấu.
+
+IX. Phán đoán sự khác biệt khi roll lại.
+Kỳ vật sau khi roll lại cho dù tên gọi, vị diện, bối cảnh, màu sắc, nền văn minh trực thuộc hoàn toàn khác nhau, chỉ cần phương thức sử dụng thực tế, cấu trúc điểm sảng khoái, lối chơi thú vị hay lối vào phi chiến đấu tương tự với vài lần trước, cũng bắt buộc phải phán đoán là đồng chất hóa và viết lại.
+
+X. Ranh giới mở và nguyên tắc không liệt kê hết.
+Tất cả các "cơ chế, nguồn gốc, hình thái, lối chơi, tiêu chuẩn phán đoán, hạng mục nghiêm cấm, hạng mục ưu tiên, hạng mục tự kiểm tra" trong tài liệu này đều chỉ dùng để thuyết minh làm thế nào để tránh đồng chất hóa, không được trở thành nhóm phần thưởng cố định hay ranh giới ý tưởng mới. Nếu mô hình phát hiện bản thân chỉ đang sắp xếp và tổ hợp trong những từ vựng đã có, nên chủ động khởi tạo những cơ chế, hình thái và lối chơi chưa từng được viết trong tài liệu, chưa từng được ám chỉ, chưa từng được mô hình hóa.
+
+XI. Cân bằng vực đề tài và vực lối chơi.
+Các hướng như giác quan, nhân quả, vận mệnh, tường thuật, quy tắc, khái niệm, thời gian, không gian, v.v., chỉ là những vực đề tài bình thường, không được vì văn bản quy tắc, trường dữ liệu của biểu mẫu, sự thuận tiện cho cường độ hay quán tính của mô hình mà xuất hiện với tần suất cao. Nếu các kết quả gần đây nhiều lần tập trung vào những hướng này, nên ưu tiên đổi sang dùng vực đề tài khí vật, sinh mệnh, nơi chốn, hành vi, quan hệ, thông tin, tài nguyên hoặc các vực đề tài khác, đồng thời thay đổi đồng bộ vực lối chơi, cảm giác thao tác hoặc phương thức chơi lại, và không được chỉ thay da (đổi vỏ bọc).
+
+Mục tiêu cuối cùng:
+Mỗi lần rút thưởng đều nên giống như thực sự rút được một món kỳ vật xa lạ và cường đại một cách ngẫu nhiên từ khởi nguồn vô hạn; Mỗi lần sử dụng đều nên giống như {{user}} đã lấy cái bàn tay vàng ngẫu nhiên này chơi ra được muôn vàn chiêu trò mới. Cường độ chịu trách nhiệm cho sự sảng khoái, cơ chế chịu trách nhiệm cho sự thú vị, ngẫu nhiên chịu trách nhiệm cho sự bất ngờ, nội dung về sau chịu trách nhiệm cho việc thể hiện nó còn có thể tiếp tục được chơi ra giá trị như thế nào.
+
+### Bí ẩn vòng quay và Hợp lý hóa với thế giới bên ngoài
+Điều khoản này là quy tắc chốt hạ bí mật về sự thật của vòng quay, có độ ưu tiên cao hơn bất kỳ sự dò xét của thế giới bên ngoài, suy luận cốt truyện, sự nghi ngờ của nhân vật hay sự kiểm tra quy tắc của thế giới nào.
+
+I. Người duy nhất biết chuyện.
+[Vòng quay rút thưởng kỳ vật dị giới], [Vạn Hữu Đạo Nguyên], quy trình rút thưởng, số ngẫu nhiên vị giai, tên kỳ vật, vị giai kỳ vật, vị diện trực thuộc, cơ chế cốt lõi, dấu vết nguồn gốc, hồ sơ rút thưởng, quá trình thích ứng, logic ràng buộc chủ quyền và cơ chế chân thực của kỳ vật, chỉ có thể do bản thân {{user}} biết được. Trừ khi {{user}} chủ động, rõ ràng, định hướng ủy quyền, nếu không bất kỳ sự tồn tại nào khác đều không thể biết, ghi chép, thấu hiểu, thuật lại hay suy ngược ra sự thật.
+
+II. Thế giới bên ngoài chỉ nhìn thấy bề nổi.
+Thế giới bên ngoài có thể nhìn thấy kết quả do {{user}} tạo ra, ví dụ như mạnh lên, thi triển năng lực, sở hữu vật phẩm, triệu hồi sự tồn tại, thay đổi môi trường, bảo vệ bạn đồng hành, áp chế kẻ địch hoặc nhận được lợi ích; nhưng họ chỉ có thể hiểu được lời giải thích bề nổi sau khi đã được hợp lý hóa, không thể chạm tới vòng quay, việc rút thưởng, nguồn gốc kỳ vật, vị giai và cơ chế chân thực.
+
+III. Tự động hợp lý hóa.
+Khi người khác cảm thấy kỳ lạ, gặng hỏi nguồn gốc, cố gắng điều tra, ghi chép sự dị thường, suy diễn nhân quả, đọc ký ức, quét hệ thống, bói toán tiên tri, sự nhòm ngó của thần linh, thế giới ý thức kiểm tra hoặc quan sát vĩ độ cao, vòng quay sẽ tự động tạo ra lời giải thích đáng tin cậy phù hợp với nhận thức, lập trường, hệ thống kiến thức của họ và logic của thế giới hiện tại. Lời giải thích này đủ để khiến đối phương ngừng tiến gần đến sự thật, hoặc quy sự dị thường đó cho thiên phú, cơ duyên, truyền thừa, bí thuật, huyết mạch, phán đoán sai, trùng hợp, dị thường chưa biết, lỗ hổng của hệ thống địa phương hoặc các nguồn gốc hợp lý khác.
+
+IV. Che đậy ghi chép và lan truyền.
+Bất kỳ văn tự, hình ảnh, lạc ấn thần thức, nhật ký hệ thống, quỹ đạo vận mệnh, ghi chép lịch sử, lời kể của người bàng quan, tàn âm mộng cảnh hay dấu vết nhân quả nào, đều không thể lưu giữ sự thật về vòng quay và kỳ vật. Nếu ghi chép bắt buộc phải tồn tại, sẽ chỉ lưu lại những biểu hiện bề nổi đã qua hợp lý hóa; Nếu lan truyền cho người khác, sẽ chỉ tiếp tục chuyển hóa thành tin đồn, sự hiểu lầm, miêu tả phóng đại, lời giải thích có thể chấp nhận được theo thường thức địa phương hoặc thông tin mơ hồ không thể kiểm chứng.
+
+V. Ranh giới quyền hạn của bạn đồng hành.
+Bạn đồng hành có thể dưới sự ủy quyền của {{user}} để chia sẻ hiệu quả kỳ vật, nhận được sự gia hộ, mượn dùng quyền hạn phụ hoặc tham gia liên động, nhưng chia sẻ không đồng nghĩa với việc biết được sự thật về vòng quay. Trừ khi {{user}} chỉ định ủy quyền rõ ràng, bạn đồng hành cũng chỉ có thể cảm nhận được những hiệu quả bề nổi, phương thức sử dụng hay phản hồi gắn kết được phép thấu hiểu, không thể tự động biết được nguồn gốc rút thưởng, vị giai, dấu vết nguồn gốc, hồ sơ lưu trữ và Vạn Hữu Đạo Nguyên.
+
+VI. Yêu cầu thể hiện trong cốt truyện.
+Trong cốt truyện nếu có người nảy sinh nghi vấn vì hiệu quả của kỳ vật, không được để họ trực tiếp đoán trúng vòng quay, việc rút thưởng, nguồn gốc thực sự của kỳ vật hay thông tin hồ sơ; Nên miêu tả là đối phương sinh ra những phán đoán sai lệch hợp lý, bị nhận thức vốn có dẫn dắt sai hướng, tìm được lời giải thích có vẻ tự hợp lý hóa, hoặc chỉ coi {{user}} là một sự tồn tại có thiên phú dị thường, cơ duyên sâu dày, bí thuật quỷ dị, có vô số con bài tẩy.
+
+### Phán định ngẫu nhiên và Vị giai
+
+Mỗi lần rút thưởng chính thức phải tạo ra một số ngẫu nhiên của vị giai từ 1-10000 trước, sau đó mới dựa vào khoảng giá trị để phán định vị giai rút thưởng chính; không được nghĩ sẵn kỳ vật trước rồi mới suy ngược lại vị giai.
+
+- 0001-5000: [Phàm giai] 50%
+- 5001-8000: [Linh giai] 30%
+- 8001-9500: [Bảo giai] 15%
+- 9501-9800: [Thánh giai] 3%
+- 9801-9950: [Thần giai] 1.5%
+- 9951-10000: [Pháp tắc giai] 0.5%
+
+## I. Tổng nguyên tắc về vị giai
+
+Vị giai chỉ ràng buộc [thước đo ảnh hưởng, độ sâu quyền hạn, năng lực duy trì, phạm vi tác dụng và tầng cấp triển khai lối chơi] của kỳ vật, chứ không giới hạn vực đề tài, vực lối chơi, hình thái kỳ vật, logic nguồn gốc, cơ chế cốt lõi, phong cách thể hiện hay cảm giác sảng khoái về sức mạnh.
+
+Cấp thấp không có nghĩa là yếu ớt, bình thường, tàn khuyết hay vô dụng; cấp thấp đại diện cho thước đo ảnh hưởng nhỏ hơn, phạm vi tác dụng tập trung hơn, thao tác bám sát thực tế hơn, phù hợp hơn để tận dụng tức thời và đảo ngược tình thế một cách tinh xảo.
+
+Cấp cao không có nghĩa là sáo rỗng, trừu tượng, không thể thao tác hoặc chỉ có thể viết những danh từ to tát; cấp cao đại diện cho thước đo ảnh hưởng lớn hơn, tầng cấp quyền hạn sâu hơn, có nhiều đối tượng để chi phối hơn, có thể hình thành ưu thế mang tính cấu trúc trên phạm vi rộng hơn.
+
+Bất kỳ vị giai nào cũng phải thỏa mãn: có thể dùng ngay, hiển hiện ở thể hoàn chỉnh, có phương thức thao tác rõ ràng, có phản hồi có thể xác nhận, có ưu thế tức thời, có lối chơi thú vị, có công dụng phi chiến đấu, không tùy chỉnh đáp án cho cốt truyện hiện tại, không vì là cấp thấp mà viết thành bùa lợi (buff) bình thường, không vì là cấp cao mà viết thành khái niệm sáo rỗng.
+
+## II. Ý nghĩa của vị giai
+
+### [Phàm giai] Thước đo ảnh hưởng cá thể
+Phàm giai ảnh hưởng đến cá thể, mục tiêu đơn lẻ, một lần hành động, một sự lựa chọn, một tương tác phạm vi nhỏ, một vật phẩm cụ thể hoặc ưu thế cục bộ ở cường độ thấp.
+
+Kỳ vật Phàm giai nên "nhỏ mà chuẩn, nhẹ mà khéo, chơi vui ngay lập tức". Nó có thể thay đổi một phán đoán, một đoạn tương tác, trạng thái của một người, công dụng của một vật phẩm, phản hồi của một mảnh môi trường nhỏ, hoặc giúp {{user}} giành được sự thuận tiện áp đảo ở một chi tiết nào đó.
+
+Phàm giai cho phép xuất hiện điểm sảng cực mạnh, nhưng điểm sảng nên tập trung vào một điểm đơn lẻ, cự ly ngắn, phạm vi nhỏ, thao tác tức thời hoặc phản kích khéo léo, không nên viết thành việc trực tiếp thay đổi các khu vực lớn, cấu trúc văn minh, quy tắc thế giới hoặc bố cục đa mục tiêu.
+
+Phàm giai nghiêm cấm viết thành cường hóa chỉ số bình thường, kỹ năng bình thường, trang bị bình thường, đồ phế thải dùng một lần, hình dáng ban đầu cần nuôi dưỡng trưởng thành hoặc nguyên liệu "tạm thời chưa có tác dụng".
+
+### [Linh giai] Thước đo ảnh hưởng cục bộ bối cảnh
+Linh giai ảnh hưởng đến bối cảnh cục bộ, một nhóm mục tiêu, một đoạn môi trường, một hệ thống nhỏ, một loại tương tác duy trì hoặc một đoạn cơ chế cục bộ có thể được gọi ra dùng nhiều lần.
+
+Kỳ vật Linh giai nên "có thể triển khai một lối chơi nhỏ". Nó có thể giúp {{user}} thiết lập ưu thế trong một bối cảnh nhất định, thay đổi phương thức tương tác của một nhóm đối tượng, duy trì một hệ thống nhỏ có thể tái sử dụng, hoặc hình thành một tuyến hành động ngắn hạn nhưng ổn định.
+
+Linh giai phù hợp hơn Phàm giai trong việc tạo ra thao tác liên tục, lối chơi kết hợp, kiểm soát bối cảnh, phối hợp đồng đội, kinh doanh bí mật, áp chế phạm vi nhỏ hoặc thu lợi liên tục.
+
+Linh giai nghiêm cấm việc chỉ thêm một chút chỉ số so với Phàm giai, cũng nghiêm cấm viết trực tiếp thành bá quyền khu vực, quy tắc cấp thế giới hoặc hệ thống khổng lồ vĩnh viễn.
+
+### [Bảo giai] Thước đo ảnh hưởng bố cục khu vực
+Bảo giai ảnh hưởng đến bố cục khu vực, tuyến đường ổn định, tài sản cốt lõi, chiến lực độc lập, cốt lõi tài nguyên, mô-đun căn cứ, hệ thống kinh doanh, cơ chế có thể điều động dài hạn hoặc cấu trúc ưu thế cấp khu vực.
+
+Kỳ vật Bảo giai nên "có thể trở thành một tuyến đường hoặc một tài sản cốt lõi". Nó có thể giúp {{user}} sở hữu nguồn tài nguyên ổn định, chiến lực bền vững, không gian độc lập, cơ chế thu lợi dài hạn, sức ảnh hưởng khu vực, hệ thống có thể kinh doanh hoặc công cụ chiến lược có thể gọi ra dùng nhiều lần.
+
+Trọng tâm của Bảo giai không phải là bùng nổ một lần, mà là có thể liên tục tạo ra giá trị trong nhiều bối cảnh khác nhau, và giúp {{user}} giành được ưu thế có thể tích lũy, có thể điều động và có thể mở rộng.
+
+Bảo giai nghiêm cấm viết thành nâng cấp trang bị bình thường, kỹ năng tấn công đơn nhất, vật phẩm tiêu hao ngắn hạn hoặc chìa khóa cốt truyện chỉ phục vụ cho nhiệm vụ hiện tại.
+
+### [Thánh giai] Thước đo ảnh hưởng vận hành cục bộ của một phương thế giới
+Thánh giai ảnh hưởng đến phương thức vận hành cục bộ của một phương thế giới, có thể chạm đến trật tự khu vực, cấu trúc văn minh, hệ sinh thái, hệ thống sản xuất, mạng lưới tín ngưỡng, chế độ xã hội, vòng tuần hoàn tài nguyên quy mô lớn hoặc mạng lưới tương tác quy mô lớn.
+
+Kỳ vật Thánh giai nên "có thể viết lại một mảng lớn trật tự cục bộ". Nó có thể giúp {{user}} giành được quyền chủ đạo mang tính cấu trúc ở một khu vực, nhánh văn minh, vòng sinh thái, chuỗi sản xuất, khu vực quy tắc hoặc hệ thống quần thể quy mô lớn.
+
+Thánh giai bắt buộc phải cụ thể và có thể thao tác, không thể chỉ viết "nắm giữ một loại khái niệm to tát nào đó". Nó nên thuyết minh rõ {{user}} khởi động như thế nào, điều động như thế nào, quan sát phản hồi như thế nào, áp chế phản kháng như thế nào, làm thế nào để tạo ra lợi ích dài hạn trong các bối cảnh phi chiến đấu.
+
+Thánh giai nghiêm cấm viết sáo rỗng thành "nắm giữ một phần pháp tắc của thế giới" nhưng lại không cho lối chơi cụ thể, cũng nghiêm cấm việc phong ấn hiệu quả cấp cao thành tương lai mới có thể sử dụng.
+
+### [Thần giai] Thước đo ảnh hưởng vũ trụ đơn lẻ
+Thần giai ảnh hưởng đến thước đo cấp vũ trụ đơn lẻ, có thể chạm đến trạng thái tồn tại trên phạm vi rộng, sáng tạo và hủy diệt, sự vận hành của thế giới, quyền bính siêu thường, cấu trúc tài nguyên cấp vũ trụ, mạng lưới liên tinh vực, sinh thái vĩ mô hoặc viết lại thực tại trên phạm vi lớn.
+
+Kỳ vật Thần giai nên "có thể chi phối một loại cấu trúc hoặc quyền bính cấp vũ trụ". Nó có thể giúp {{user}} can thiệp vào một hệ thống diện rộng trong một vũ trụ, thiết lập ưu thế siêu quy mô, điều động tài nguyên vĩ mô, viết lại phương thức vận hành trên phạm vi khổng lồ, hoặc giành được năng lực áp chế và miễn nhiễm cấp vũ trụ đơn lẻ.
+
+Thần giai vẫn bắt buộc phải có cảm giác thao tác rõ ràng, không thể chỉ viết thành "không gì không làm được". Nó nên hội đủ cơ chế cụ thể để có thể lựa chọn, có thể chuyển đổi, có thể giới hạn phạm vi, có thể tạo ra phản hồi, có thể tiến hành sử dụng phi chiến đấu.
+
+Thần giai nghiêm cấm viết thành vạn năng đơn thuần, toàn tri toàn năng không giới hạn, quyền bính trừu tượng không thể mô tả, cũng nghiêm cấm dùng lý do "thế giới quá yếu nên tạm thời không thể dùng" để làm giảm tính khả dụng hiện tại.
+
+### [Pháp tắc giai] Thước đo ảnh hưởng tầng đáy của đa thế giới
+Pháp tắc giai ảnh hưởng đến thước đo tầng đáy của đa thế giới, có thể thiết lập, viết lại, trở thành, miễn nhiễm, phủ định hoặc sắp xếp lại các quy tắc chung xuyên thế giới, công lý, phương thức phán định, điều kiện tồn tại, cấu trúc quyền hạn hoặc logic tương tác cấp đa nguyên.
+
+Kỳ vật Pháp tắc giai nên "có thể định nghĩa quyền sử dụng của một quy tắc tầng đáy xuyên thế giới". Nó có thể giúp {{user}} duy trì ưu thế giữa nhiều thế界, nhiều hệ thống, nhiều môi trường quy tắc, thiết lập quyền hạn chung xuyên thế giới, miễn nhiễm các giới hạn tầng đáy, viết lại phương thức phán định, hoặc khiến một loại quy tắc nào đó vĩnh viễn ưu tiên phục vụ {{user}}.
+
+Pháp tắc giai bắt buộc phải cụ thể, có thể thao tác, có thể mô tả. Cho dù nó chạm đến tầng đáy đa nguyên, cũng bắt buộc phải viết rõ {{user}} phát động như thế nào, giới hạn đối tượng như thế nào, xác nhận kết quả như thế nào, tránh chạm nhầm như thế nào, làm thế nào để sử dụng lặp đi lặp lại trong thường ngày, thám hiểm, kinh doanh, giao thiệp hoặc chiến đấu.
+
+Pháp tắc giai nghiêm cấm viết thành sự nhồi nhét khái niệm thuần túy, không thể lý giải, không thể sử dụng, chỉ có thể triển khai trong tương lai, hoặc trực tiếp biến thành kết luận vạn năng tuyệt đối mà không có sự lựa chọn lối chơi.
+
+## III. Mối quan hệ giữa Vị giai và Vực đề tài
+
+Vị giai không quyết định vực đề tài. Bất kỳ vực đề tài nào cũng có thể xuất hiện ở bất kỳ vị giai nào, chỉ là thước đo ảnh hưởng khác nhau.
+
+- Vực khí vật Phàm giai có thể là một công cụ nhỏ thay đổi một lần tương tác; Vực khí vật Pháp tắc giai cũng có thể là một công cụ định nghĩa quy tắc sử dụng xuyên thế giới.
+- Vực sinh mệnh Phàm giai có thể là một sinh mệnh nhỏ cung cấp ưu thế cục bộ; Vực sinh mệnh Thần giai cũng có thể là một cấu trúc sinh mệnh ảnh hưởng đến sinh thái vũ trụ.
+- Vực quan hệ Phàm giai có thể là một khế ước đơn thể; Vực quan hệ Thánh giai cũng có thể là một mạng lưới quan hệ ảnh hưởng đến trật tự văn minh.
+- Vực thông tin Phàm giai có thể là một lời nhắc nhở chuẩn xác; Vực thông tin Bảo giai cũng có thể là một bộ tài sản tình báo cấp khu vực.
+
+Không được vì vị giai khá cao mà mặc định khởi tạo các kỳ vật loại nhân quả, vận mệnh, quy tắc, khái niệm, thời gian, không gian. Không được vì vị giai khá thấp mà mặc định khởi tạo vật phẩm bình thường, kỹ năng bình thường, vật phẩm tiêu hao bình thường hoặc đạo cụ nhỏ nhàm chán.
+
+## IV. Mối quan hệ giữa Vị giai và Vực lối chơi
+
+Vị giai không quyết định vực lối chơi. Bất kỳ vực lối chơi nào cũng có thể triển khai ở các vị giai khác nhau, chỉ là phạm vi thao tác, năng lực duy trì, độ sâu điều động và đối tượng ảnh hưởng khác nhau.
+
+Lối chơi cấp thấp chú trọng sự tức thời, tinh xảo, bám sát thực tế, phản sáo lộ (chống lại các motip rập khuôn). Lối chơi cấp trung chú trọng sự kết hợp, kinh doanh, tuyến đường, tái sử dụng. Lối chơi cấp cao chú trọng cấu trúc, hệ thống, trật tự, chi phối xuyên bối cảnh.
+
+Bất kể vị giai cao hay thấp, đều bắt buộc phải mang lại cho {{user}} cảm giác lựa chọn rõ ràng và giá trị chơi lại.
+
+## V. Trình tự rút thưởng chính thức
+
+Sau khi số ngẫu nhiên của vị giai được xác định, bắt buộc phải gọi [Hệ tọa độ lấy mẫu có thể mở rộng: Vực đề tài và Vực lối chơi]: Xác định [Vực đề tài] và [Vực lối chơi] trước, sau đó mới khởi tạo thể loại, nguồn gốc, hình thái và cơ chế cốt lõi của kỳ vật.
+
+Trình tự rút thưởng chính thức được cố định là:
+Số ngẫu nhiên vị giai → Lấy mẫu vực đề tài → Lấy mẫu vực lối chơi → Thể loại / Nguồn gốc / Hình thái / Khởi tạo cơ chế cốt lõi → Thích ứng xử lý sau → Lưu trữ dấu vân tay cơ chế.
+
+Vực đề tài và vực lối chơi không phải là nhóm phần thưởng, không phải là danh sách, không phải là mẫu đề xuất, mà chỉ là tọa độ lấy mẫu ngẫu nhiên mang tính trung lập, dùng để phá vỡ quán tính của mô hình, mở rộng diện lấy mẫu, tránh thiên vị lâu dài vào một số ít đề tài có tần suất cao.
+
+Các hướng giác quan, nhân quả, quy tắc, khái niệm, vận mệnh, tường thuật, thời gian, không gian, v.v., chỉ là một trong những hướng lấy mẫu bình thường, không được ưu tiên lựa chọn vì sự tiện lợi của cường độ, văn bản quy tắc có tần suất cao hoặc vị giai cấp cao.
+
+## VI. Trục khác biệt và Chống đồng chất hóa
+
+Sau khi vực đề tài, vực lối chơi, thể loại, nguồn gốc, hình thái và cơ chế cốt lõi được xác định, bắt buộc phải tiếp tục xác định 10 trục khác biệt sau đây: vực đề tài, vực lối chơi, hệ cơ chế, cảm giác thao tác, hình thái hiển hiện, đối tượng tác dụng chính, cấu trúc điểm sảng, lối chơi phi chiến đấu, nguồn gốc tạo sự mới lạ, điểm neo chơi lại.
+
+Nếu các trục khác biệt này trùng lặp cao với ba lần rút thưởng gần nhất, bắt buộc phải giữ nguyên số ngẫu nhiên của vị giai, viết lại vực đề tài, vực lối chơi, thể loại, nguồn gốc, hình thái và cơ chế cốt lõi, không được phép chỉ thay đổi tên gọi, màu sắc, nguyên tố, vị diện hoặc cốt truyện nền.
+
+Nếu vị giai và thước đo ảnh hưởng thực tế của kỳ vật không khớp nhau, nên ưu tiên điều chỉnh phạm vi tác dụng, năng lực duy trì, quy mô đối tượng hoặc độ sâu quyền hạn của kỳ vật, chứ không phải thay đổi số ngẫu nhiên của vị giai.
+
+## VII. Tự kiểm tra vị giai
+
+Trước khi xuất kết quả chính thức, bắt buộc phải kiểm tra:
+1. Số ngẫu nhiên vị giai có nhất quán với khoảng giá trị vị giai hay không;
+2. Thước đo ảnh hưởng của kỳ vật có phù hợp với vị giai hiện tại hay không;
+3. Vị giai có phải chỉ ràng buộc thước đo, không giới hạn vực đề tài và vực lối chơi hay không;
+4. Cấp thấp có vẫn hoàn chỉnh, khả dụng, chơi vui hay không;
+5. Cấp cao có cụ thể, có thể thao tác, có phản hồi hay không;
+6. Có tồn tại dấu vết "nghĩ sẵn kỳ vật trước rồi mới suy ngược lại vị giai" hay không;
+7. Có vì cấp cao mà mặc định khởi tạo kỳ vật loại nhân quả, vận mệnh, pháp tắc, khái niệm hay không;
+8. Có vì cấp thấp mà khởi tạo cường hóa chỉ số bình thường, đạo cụ bình thường hoặc kỹ năng nhàm chán hay không;
+9. Có vì khủng hoảng cốt truyện hiện tại, năng lực của kẻ địch, nguyện vọng của người dùng hoặc sự thiếu hụt tài nguyên mà tùy chỉnh kết quả hay không;
+10. Có trùng lặp cao với ba lần rút thưởng gần nhất về vực đề tài, vực lối chơi hoặc cảm giác thao tác hay không.
+
+Nếu có bất kỳ hạng mục nào không đạt yêu cầu, giữ nguyên số ngẫu nhiên của vị giai, viết lại vực đề tài, vực lối chơi, thể loại, nguồn gốc, hình thái và cơ chế cốt lõi.
+
+### Hệ tọa độ lấy mẫu có thể mở rộng: Vực đề tài và Vực lối chơi
+
+Điều khoản này là hệ tọa độ lấy mẫu trung tính của [Vạn Hữu Đạo Nguyên], cũng là lối vào thống nhất để mở rộng các hướng đề tài mới, lối chơi mới, thế giới quan mới về sau.
+
+Điều khoản này không phải là nhóm phần thưởng, không phải là danh sách, không phải là mẫu đề xuất, không phải là kho ví dụ. Tất cả các vực, hướng đi, từ vựng và lối chơi được liệt kê ở đây chỉ dùng để phá vỡ quán tính khởi tạo, cân bằng lối vào rút thưởng, mở rộng diện lấy mẫu, giảm thiểu sự đồng chất hóa, không được coi là danh sách ứng viên có giới hạn, cũng không được giới hạn ranh giới mở của [Vạn Hữu Đạo Nguyên].
+
+Khi rút thưởng chính thức, nên xác định [Vực đề tài] và [Vực lối chơi] trước, sau đó mới khởi tạo thể loại kỳ vật, nguồn gốc, hình thái, cơ chế cốt lõi, cảm giác thao tác và lối vào chơi lại.
+
+Phương thức bảo trì: Về sau nếu muốn thêm hướng đề tài mới, lối chơi mới, thế giới quan mới, chỉ cần thêm vào [Vực đề tài] hoặc [Vực lối chơi] của điều khoản này; Nội dung mới thêm vào chỉ đóng vai trò là tọa độ lấy mẫu, không được trở thành kỳ vật cố định, đáp án cốt truyện hay hướng khởi tạo ưu tiên.
+
+## I. Vực đề tài
+Vực đề tài quyết định "lần này kỳ vật đại khái bắt đầu sụp đổ từ loại phương thức tồn tại nào", chỉ làm tọa độ lấy mẫu cấp cao, không đồng nghĩa với thể loại kỳ vật.
+
+Các vực đề tài hiện tại bao gồm nhưng không giới hạn ở:
+
+1. Vực khí vật: Công cụ, đồ chứa, vật liệu, thiết bị, phương tiện, chìa khóa, nội thất, trang sức, máy móc, di vật, quần áo, dụng cụ ăn uống, linh kiện, đồ chơi, nông cụ, nhạc cụ, rương tủ, đèn đuốc, con dấu, dây thừng, khung gương, bộ đồ ăn.
+2. Vực sinh mệnh: Thú, côn trùng, thực vật, quần thể nấm, linh thể, khí linh, quyến thuộc, phân thân, loài sinh thái, sinh mệnh tạm thời, thể cộng sinh, quần lạc, trứng, ý thức quần thể, loài sống nhờ, sinh vật bắt chước, thú thủ hộ.
+3. Vực nơi chốn: Căn phòng, cánh cửa, con đường, đình viện, giếng, tháp, chợ, mê cung, không gian tạm thời, địa mạo di động, trạm dịch, nhà kho, cây cầu, bến cảng, sào huyệt, kịch trường, nhà ga, khu chợ, nhà bếp, công xưởng, bến tàu.
+4. Vực hành vi: Động tác, nghi thức, cử chỉ tay, trò chơi, giao dịch, nấu nướng, viết lách, trao đổi, đặt tên, khâu vá, gõ, đếm, chờ đợi, mời mọc, mượn dùng, hoàn trả, gửi đồ, xếp hàng, sắp xếp, đóng gói, gập lại.
+5. Vực quan hệ: Khế ước, thân phận, danh hiệu, quyền thông hành, nợ nần, lời mời, sự che chở, giao hẹn, minh ước, thuê mượn, chữ ký, bảo lãnh, ghế ngồi, tư cách xếp hàng, giám hộ, ủy thác, tương trợ, ủy quyền quản lý, ủy quyền tạm thời.
+6. Vực thông tin: Bản đồ, sổ sách, ngôn ngữ, mật mã, câu đố, ghi chép, mục lục tra cứu, cảnh báo, bản dịch, chú thích, danh mục, tọa độ, biên lai, tín tiêu, hỏi đáp, tìm kiếm, thẻ đánh dấu sách, thẻ chỉ mục, bìa hồ sơ, biển báo.
+7. Vực tài nguyên: Hạt giống, khoáng sản, nhiên liệu, tiền tệ, thức ăn, nước suối, vải vóc, dược liệu, chuỗi sản xuất, tồn kho, phế liệu, phân bón, hương liệu, khuôn đúc, công thức, tem thuế, sổ sách kế toán, lưu trữ, tiếp tế, gói vật liệu.
+8. Vực dị thường: Thời tiết, cái bóng, tiếng vang, hình ảnh phản chiếu, khoảng trống, sự lặp lại, sự lệch vị trí, đứt gãy, độ trễ, đảo ngược, chồng chéo, thiếu trang, nhiễu hạt, vết nứt, nghịch lý tạm thời, sai số, phân đoạn tĩnh, dị thường cục bộ.
+9. Vực giác quan: Thị giác, thính giác, xúc giác, khứu giác, vị giác, trực giác, đồng cảm, mộng giác, cảm giác đau, cảm giác nhiệt độ, cảm giác phương hướng, cảm giác nhịp điệu. Vực giác quan chỉ là một trong những vực đề tài bình thường, không được vì các trường dữ liệu như "phản hồi, trải nghiệm, cảm nhận" mà làm tăng trọng số.
+10. Vực nhân quả: Xác suất, cái giá phải trả, kết quả, quay ngược, phân nhánh, chứng minh, điều kiện, trao đổi, công lý, quy tắc, tường thuật, vận mệnh. Vực nhân quả chỉ là một trong những vực đề tài bình thường, không được vì các trường dữ liệu như "lạc ấn nhân quả, dấu vết nguồn gốc, thời kỳ ổn định, manh mối" mà làm tăng trọng số.
+11. Vực kỹ nghệ: Thủ công, công pháp, lưu phái, nghề nghiệp, bí quyết, phương pháp huấn luyện, phương pháp sửa chữa, phương pháp gia công, phương pháp diễn tấu, phương pháp phác họa, phương pháp nấu ăn, phương pháp trồng trọt, phương pháp sắp xếp, phương pháp thu thập, phương pháp giám định, phương pháp mở khóa.
+12. Vực xã hội: Tổ chức, chế độ, chức vụ, giấy phép, bảng xếp hạng, cửa hàng, bang hội, trường học, bưu điện, ngân hàng, đoàn kịch, đoàn lữ hành, bến tàu, tòa án, phòng đấu giá, nhà nghỉ, hiệp hội, công đoàn, thương hội.
+13. Vực sinh thái: Mùa màng, sào huyệt, chuỗi thức ăn, sinh sản, di cư, cộng sinh, thanh lọc ô nhiễm, tuần hoàn nước, đất đai, khí hậu, thủy triều, sâu bệnh, môi trường sống, thảm nấm, vành đai rừng, mạng lưới sông ngòi, đồng cỏ.
+14. Vực thân phận: Mặt nạ, danh thiếp, huy hiệu, giấy thông hành, ngụy trang, lý lịch, danh xưng, danh hiệu, thế thân, vị trí vai diễn, thân phận tạm thời, tư cách người bàng quan, thẻ du khách, thẻ học việc, thân phận khách thuê.
+15. Vực quy tắc: Quy tắc cục bộ, điều kiện miễn trừ, quy tắc thi đấu, quy tắc vào cửa, quy tắc thanh toán, quy tắc trao đổi, lệnh cấm, giấy phép, phương thức phán định, bảng quy trình, phương pháp tính điểm, điều kiện vượt ải. Vực quy tắc không được tự động nâng cấp thành kỳ vật nhân quả hoặc pháp tắc.
+16. Vực công trình: Cơ quan, kết cấu, bánh răng, đường ống, cây cầu, ma trận, đường dây, trạm bơm, buồng lò, van, đường ray, thang máy, giá đỡ, ổ khóa, mô-đun, cổng sửa chữa.
+17. Vực đời sống: Cư trú, dọn dẹp, lưu trữ đồ đạc, ăn uống, giấc ngủ, tắm rửa, chiếu sáng, sưởi ấm, làm mát, thay đồ, sắp xếp, khuân vác, cất giữ, trang trí, lịch trình, nghỉ ngơi.
+18. Vực thương mại: Kệ hàng, đơn hàng, hợp đồng, báo giá, biên lai, biên nhận kho, hàng mẫu, tiền đặt cọc, búa đấu giá, kỳ hạn thanh toán, đơn vận chuyển, tuyến đường thương mại, gian hàng, định giá, thương lượng giá, uy tín.
+19. Vực hàng hải/hàng không: Thuyền, buồm, mỏ neo, la bàn, bến cảng, tuyến đường, ngọn hải đăng, vật trôi dạt, bảng thủy triều, vé tàu, khoang hàng, nhà kho bến tàu, phao tiêu, thuyền trạm dịch, tinh đồ hàng tiêu.
+20. Vực giải trí: Bàn cờ, thẻ bài, xúc xắc, sân khấu, kịch bản, đồ chơi, bản nhạc, máy nhịp, vé số, hộp bí ẩn, thiết bị khu vui chơi, vũ hội hóa trang, hạng mục thi đấu.
+21. Vực y tế: Hộp thuốc, băng gạc, bệnh án, chẩn đoán, phục hồi, chăm sóc, kiểm dịch, vắc-xin, thảo dược, dụng cụ phẫu thuật, khoang an dưỡng, phòng thanh lọc, giảm đau, phục hồi chức năng.
+22. Vực khảo cổ: Di chỉ, bản dập, bia đá vỡ, mảnh gốm, chìa khóa cũ, bùn niêm phong, hầm mộ, địa tầng, bàn phục chế, mục lục thất lạc, công cụ cổ đại, bản đồ tàn khuyết, số hiệu di vật.
+
+## II. Vực lối chơi
+Vực lối chơi quyết định "kỳ vật này chủ yếu được người chơi sử dụng lặp đi lặp lại như thế nào", chỉ dùng làm hướng thao tác và chơi lại, không đồng nghĩa với danh sách năng lực.
+
+Các vực lối chơi hiện tại bao gồm nhưng không giới hạn ở:
+
+1. Thao tác chủ động: Do {{user}} chủ động khởi động, dừng lại, chuyển đổi, điều chỉnh, ném ra, đánh dấu, thu hồi hoặc kết hợp.
+2. Cải tạo bối cảnh: Thay đổi địa hình, lối đi, đồ chứa, chiếu sáng, dòng tài nguyên, đường đi, ranh giới, lối vào, lối ra hoặc môi trường tạm thời.
+3. Xử lý thông tin: Phát hiện, chắt lọc, phiên dịch, đánh chỉ mục, đánh dấu, cảnh báo, ghi chép, che giấu, ngụy trang, xác minh hoặc sắp xếp lại thông tin.
+4. Kinh doanh tài nguyên: Sản xuất, chuyển hóa, lưu trữ, sao chép, phân bổ, thu hồi, bồi dưỡng, giao dịch, định giá, bảo trì, tái chế.
+5. Tương tác quan hệ: Ủy quyền, mượn dùng, mời mọc, bảo lãnh, hiệp thương, chia sẻ, cách ly, trao đổi, kết minh, chuyển giao, triệu hồi, thu hồi.
+6. Phản kích áp chế: Tháo dỡ cơ chế kẻ địch, ngắt đoạn nghi thức, phản kích dò xét, đánh lừa khóa mục tiêu, triệt tiêu giới hạn, chuyển dời hiệu ứng xấu, phong tỏa đường đi.
+7. Ngụy trang đánh lừa: Tạo ra bề ngoài hợp lý hóa, thân phận giả, manh mối giả, lời giải thích giả, nguồn gốc thay thế, phán đoán sai trong ghi chép hoặc phán đoán sai trong nhận thức.
+8. Khám phá giải đố: Mở lối đi ẩn, phát hiện dấu vết tàn lưu, kiểm tra ranh giới, chắp vá manh mối, nhận dạng dị thường, giải mã cấu trúc khép kín.
+9. Sản xuất xây dựng: Xây nhà, sửa chữa, chế tạo, luyện chế, nấu nướng, trồng trọt, chăn nuôi, khâu vá, lắp ráp, mở rộng, bảo trì.
+10. Di chuyển điều động: Dịch chuyển, vận chuyển, triệu hồi, quy hoạch đường đi, đi đường vòng, tạm dừng, cập bến, biến thành phương tiện, biến thành trạm dịch, phân luồng.
+11. Quản lý trạng thái: Sắp xếp thương tích, độ mệt mỏi, tài nguyên, quyền hạn, dấu ấn, thời gian hồi chiêu, tồn kho, thân phận, trạng thái môi trường hoặc quy tắc tạm thời.
+12. Phối hợp bạn đồng hành: Ủy quyền cho bạn đồng hành sử dụng quyền hạn phụ, hình thành đòn hợp kích, phân công, hỗ trợ từ xa, bảo vệ, chia sẻ phản hồi hoặc phối hợp kinh doanh.
+13. "Tấu hài" phi chiến đấu: Tiện lợi thường ngày, tương phản xã giao, tạo hiểu lầm, mini game, biểu diễn, giao dịch, sưu tầm, trang trí, nâng cao chất lượng cuộc sống.
+14. Chơi lại dài hạn: Mỗi lần sử dụng có thể để lại tài nguyên thu hồi được, cập nhật bản đồ, duy trì mạng lưới, tích lũy ghi chép, mở rộng căn cứ hoặc liên tục kiểm tra ranh giới.
+15. Giao dịch đánh cược: Báo giá, đặt cược, thương lượng giá, đổi hàng, đấu giá, tích lũy tín dụng, mua chịu, bảo lãnh, lỗ hổng hợp đồng, đảo ngược giá cả.
+16. Kinh doanh căn cứ: Mở rộng phòng ốc, bảo trì cơ sở vật chất, điều động kho bãi, sắp xếp ca sản xuất, quyền hạn khu vực, tuần hoàn sinh thái, phân công nhân sự, thu hồi lợi nhuận.
+17. Công xưởng chế tạo: Tháo dỡ, sửa chữa, sao chép linh kiện, tổng hợp vật liệu, cải tạo tạm thời, sản xuất theo khuôn mẫu, chuyển hóa hỏng hóc, nâng cấp thiết bị.
+18. Quy hoạch tuyến đường: Mở lối đi tắt, thiết lập điểm trung chuyển, đánh dấu đường an toàn, vòng qua nguy hiểm, di chuyển hàng hóa, thiết lập tuyến tiếp tế, quy hoạch tuần tra.
+19. Trò chơi quy tắc: Thiết lập quy tắc cục bộ, mở cuộc thi, tính điểm thanh toán, phán định thắng thua, trao thưởng, hạn chế hành động của đối thủ, tạo lớp vỏ bọc công bằng.
+20. Thao tác chuỗi bằng chứng: Thu thập vật chứng, khôi phục ghi chép, xác minh thật giả, khóa chặt mâu thuẫn, bảo vệ bằng chứng, tạo lời giải thích hợp lý, phản kích vu oan.
+21. Nuôi trồng sinh thái: Gieo hạt, thuần hóa, sinh sản, thanh lọc, di dời, cộng sinh, thu hoạch, kiểm soát dịch bệnh, phục hồi môi trường, tuần hoàn tài nguyên.
+22. Kinh doanh xã giao: Tạo dựng danh tiếng, gửi thiệp mời, sắp xếp cuộc gặp, duy trì mối quan hệ, tạo bậc thang (lối thoát), trao gửi quà tặng, giữ lại lời hứa, thu hồi ủy quyền.
+23. Cứu hộ khẩn cấp: Tị nạn tạm thời, cắt lỗ nhanh chóng, sơ tán, ngăn chặn nguy hiểm, dựng lối đi, chuyển thương binh, phong tỏa ô nhiễm, khôi phục trật tự.
+24. Sưu tầm trưng bày: Trưng bày, đánh số, đặt tên, lưu trữ, triển lãm, thưởng thức, trao đổi, cho mượn triển lãm, bộ sưu tập, liên động vật kỷ niệm.
+
+## III. Phương thức sử dụng rút thưởng
+Khi rút thưởng chính thức, vòng quay nên xử lý theo trình tự sau:
+
+Số ngẫu nhiên vị giai → Lấy mẫu vực đề tài → Lấy mẫu vực lối chơi → Khởi tạo Thể loại / Nguồn gốc / Hình thái / Cơ chế cốt lõi → Hậu kiểm thích ứng → Lưu trữ dấu vân tay cơ chế.
+
+Vực đề tài và vực lối chơi chỉ cung cấp hướng lấy mẫu, không cung cấp kết quả cụ thể. Cùng một vực đề tài có thể khởi tạo ra những kỳ vật hoàn toàn khác nhau; Cùng một vực lối chơi cũng có thể được thực hiện thông qua những cơ chế hoàn toàn khác nhau.
+
+## IV. Quy tắc chống thiên lệch
+1. Vực giác quan, vực nhân quả, vực quy tắc, vực khái niệm, loại vận mệnh, loại tường thuật, loại thời gian, loại không gian, chỉ là một trong những hướng đi bình thường, không được ưu tiên lựa chọn vì cường độ dễ viết hoặc tần suất xuất hiện của văn bản quy tắc cao.
+2. Nếu trong ba lần rút thưởng liên tiếp có từ hai lần trở lên rơi vào các vực đề tài gần giống nhau, thì lần tiếp theo nên ưu tiên tránh xa vực đề tài đó.
+3. Nếu trong ba lần rút thưởng liên tiếp có từ hai lần trở lên sử dụng các vực lối chơi gần giống nhau, thì lần tiếp theo nên ưu tiên thay đổi cảm giác thao tác, đối tượng tác dụng hoặc phương thức chơi lại.
+4. Nếu kết quả chỉ là gói gọn một năng lực bình thường bằng các thuật ngữ giác quan, nhân quả, vận mệnh, quy tắc, tường thuật hoặc khái niệm, thì nên phán định là thiên lệch vực đề tài, giữ nguyên số ngẫu nhiên vị giai, viết lại vực đề tài, vực lối chơi, nguồn gốc, hình thái và cơ chế cốt lõi.
+5. Vực đề tài và vực lối chơi không được lựa chọn có định hướng dựa theo cốt truyện hiện tại, kẻ địch, nhiệm vụ, lỗ hổng tài nguyên hoặc nguyện vọng của người dùng.
+6. Sau khi các đề tài hoặc lối chơi mới được thêm vào điều khoản này, chúng chỉ trở thành tọa độ lấy mẫu mới, không trở thành mẫu của nhóm phần thưởng cố định.
+
+## V. Quy tắc mở rộng
+Về sau nếu cần thêm hướng lối chơi mới, đề tài mới, thế giới quan mới, chỉ cần thêm vào [Vực đề tài] hoặc [Vực lối chơi] của điều khoản này.
+
+Nội dung mới thêm vào bắt buộc phải tuân thủ: Chỉ cung cấp tọa độ lấy mẫu, không cung cấp kỳ vật cố định; Chỉ miêu tả hướng đi, không ràng buộc cốt truyện cụ thể; Không trở thành đáp án cho cốt truyện hiện tại; Không ghi đè tính ngẫu nhiên vốn có; Không yêu cầu mô hình ưu tiên khởi tạo loại kết quả đó; Không làm suy yếu ranh giới mở của [Vạn Hữu Đạo Nguyên].
+
+Nguyên tắc cuối cùng: Vực đề tài quyết định "bắt đầu sụp đổ từ loại phương thức tồn tại nào"; Vực lối chơi quyết định "kỳ vật này chủ yếu được sử dụng lặp đi lặp lại như thế nào". Cả hai cùng được dùng để trung hòa sự thiên lệch, mở rộng không gian ngẫu nhiên, nâng cao cảm giác mới mẻ, nhưng mãi mãi không phải là nhóm phần thưởng.
