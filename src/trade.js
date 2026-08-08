@@ -12,6 +12,7 @@ let theirLock = false;
 let myConfirm = false;
 let theirConfirm = false;
 let isConnected = false;
+let tradeCompleted = false;
 let theirUniques = {};
 let theirMutDescs = {};
 
@@ -100,6 +101,7 @@ function resetTradeState() {
     theirUniques = {};
     theirMutDescs = {};
     isConnected = false;
+    tradeCompleted = false;
 }
 
 function renderTradeMenu() {
@@ -184,7 +186,9 @@ function setupConnection() {
         handleNetData(data);
     });
     conn.on('close', () => {
-        All.toast('Đối tác đã ngắt kết nối!');
+        if (!tradeCompleted) {
+            All.toast('Đối tác đã ngắt kết nối!');
+        }
         closeTradeModal();
     });
     renderTradeRoom();
@@ -311,8 +315,9 @@ function executeTrade() {
         }
     }
     
+    tradeCompleted = true;
     All.save(true);
-    All.toast('Giao dịch thành công!');
+    All.toast('Hoàn tất giao dịch! Chúc vui vẻ!');
     closeTradeModal();
     All.renderBanner();
 }

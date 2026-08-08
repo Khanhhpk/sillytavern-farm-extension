@@ -14714,6 +14714,7 @@ function resetTradeState() {
   theirUniques = {};
   theirMutDescs = {};
   isConnected = false;
+  tradeCompleted = false;
 }
 function renderTradeMenu() {
   const body = $id("trade-body");
@@ -14785,7 +14786,9 @@ function setupConnection() {
     handleNetData(data);
   });
   conn.on("close", () => {
-    toast("\u0110\u1ED1i t\xE1c \u0111\xE3 ng\u1EAFt k\u1EBFt n\u1ED1i!");
+    if (!tradeCompleted) {
+      toast("\u0110\u1ED1i t\xE1c \u0111\xE3 ng\u1EAFt k\u1EBFt n\u1ED1i!");
+    }
     closeTradeModal();
   });
   renderTradeRoom();
@@ -14904,8 +14907,9 @@ function executeTrade() {
       ctx.S.mutDesc[mutCode + "@" + (CROPS[parts[0]] || { name: "" }).name] = theirMutDescs[id];
     }
   }
+  tradeCompleted = true;
   save(true);
-  toast("Giao d\u1ECBch th\xE0nh c\xF4ng!");
+  toast("Ho\xE0n t\u1EA5t giao d\u1ECBch! Ch\xFAc vui v\u1EBB!");
   closeTradeModal();
   renderBanner();
 }
@@ -15063,7 +15067,7 @@ function uiConfirmAdd() {
   renderTradeRoom();
   uiCloseAddItem();
 }
-var peer, conn, myItems, theirItems, myLock, theirLock, myConfirm, theirConfirm, isConnected, theirUniques, theirMutDescs, selectedTradeId, selectedTradeMax;
+var peer, conn, myItems, theirItems, myLock, theirLock, myConfirm, theirConfirm, isConnected, tradeCompleted, theirUniques, theirMutDescs, selectedTradeId, selectedTradeMax;
 var init_trade = __esm({
   "src/trade.js"() {
     init_store();
@@ -15079,6 +15083,7 @@ var init_trade = __esm({
     myConfirm = false;
     theirConfirm = false;
     isConnected = false;
+    tradeCompleted = false;
     theirUniques = {};
     theirMutDescs = {};
     selectedTradeId = null;
