@@ -125,14 +125,14 @@ Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối c�
     }
 
     const rarityGuidance = rarity === 'Huyền thoại' 
-      ? "Thước đo ảnh hưởng to lớn (quyết định trật tự, quy tắc, hệ sinh thái, hoặc thao túng cả phương thế giới). Dù quyền bính to lớn nhưng phải CỤ THỂ, thao tác được, không viết khái niệm sáo rỗng."
+      ? "[Đột phá Quy tắc] Vật phẩm độc nhất vô nhị với khả năng bẻ cong hoặc viết lại một quy tắc cụ thể của trò chơi/thế giới. Sức mạnh vĩ mô, hiệu ứng hình ảnh hoành tráng. Dù cực mạnh, nó vẫn phải tuân theo logic của thế giới, không biến người chơi thành thần toàn năng nhàm chán."
       : rarity === 'Sử thi' 
-      ? "Thước đo ảnh hưởng cục bộ bối cảnh (thay đổi một khu vực, một nhóm, tạo cơ chế thu lợi dài hạn hoặc ưu thế chiến lược). Có giá trị kết hợp và kinh doanh."
+      ? "[Tài sản Chiến lược] Đồ vật mang tính thay đổi lối chơi (Game-changer). Có sức mạnh lớn, đa dụng, hoặc tự động hóa một quy trình phức tạp. Tuy nhiên, để phát huy tối đa cần có sự tính toán của người chơi."
       : rarity === 'Hiếm'
-      ? "Thước đo ảnh hưởng cá thể (công cụ nhỏ thay đổi một lần tương tác). Yêu cầu nhỏ mà chuẩn, nhẹ mà khéo, lập tức tạo ra ưu thế tinh xảo và chơi vui ngay lập tức."
+      ? "[Cơ chế Đặc biệt] Vật phẩm bắt đầu có 'cơ chế hoạt động' riêng biệt. Có thể thay đổi một phần nhỏ cục diện, mang lại lợi ích rõ rệt nhưng sẽ có thời gian hồi chiêu (cooldown) hoặc điều kiện kích hoạt."
       : rarity === 'Thường'
-      ? "Thước đo tiện ích. Những công cụ nhỏ giúp ích cho đời sống hàng ngày hoặc tương tác nhỏ. Vui vẻ, tiện lợi."
-      : "Thước đo phế phẩm (Junk). Đồ vật tưởng chừng vô dụng, buồn cười, tấu hài, công dụng kỳ quặc nhưng đôi khi có thể dùng trong các tình huống oái ăm.";
+      ? "[Công cụ Cơ bản] Vật phẩm có ích nhưng công năng đơn giản, giới hạn rõ ràng. Thường là đồ tiêu hao, công cụ hỗ trợ canh tác, sinh hoạt hoặc tăng chỉ số nhẹ."
+      : "[Vật phẩm Tấu hài/Vô dụng] Những món đồ kỳ cục, hỏng hóc hoặc có công dụng cực kỳ vô thưởng vô phạt. Chúng tồn tại chủ yếu để gây cười, tạo tình huống trớ trêu trong tương tác đời thường.";
 
     const basePrice = rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : rarity === 'Hiếm' ? 2500 : rarity === 'Thường' ? 500 : 100;
 
