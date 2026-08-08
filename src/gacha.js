@@ -203,10 +203,11 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
       if (o && o.name && o.desc && Array.isArray(o.spriteMap)) {
         // Tự động sửa lỗi AI vẽ nhầm kích thước (cắt hoặc bù thêm '.')
         const fixedMap = [];
-        for (let i = 0; i < 32; i++) {
+        const size = Math.max(32, o.spriteMap.length);
+        for (let i = 0; i < size; i++) {
           let row = typeof o.spriteMap[i] === 'string' ? o.spriteMap[i] : '';
-          if (row.length < 32) row = row.padEnd(32, '.');
-          if (row.length > 32) row = row.substring(0, 32);
+          if (row.length < size) row = row.padEnd(size, '.');
+          if (row.length > size) row = row.substring(0, size);
           fixedMap.push(row);
         }
         o.spriteMap = fixedMap;

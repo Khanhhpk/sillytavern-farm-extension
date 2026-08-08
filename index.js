@@ -4097,10 +4097,11 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
       const o = JSON.parse(jtxt);
       if (o && o.name && o.desc && Array.isArray(o.spriteMap)) {
         const fixedMap = [];
-        for (let i = 0; i < 32; i++) {
+        const size = Math.max(32, o.spriteMap.length);
+        for (let i = 0; i < size; i++) {
           let row = typeof o.spriteMap[i] === "string" ? o.spriteMap[i] : "";
-          if (row.length < 32) row = row.padEnd(32, ".");
-          if (row.length > 32) row = row.substring(0, 32);
+          if (row.length < size) row = row.padEnd(size, ".");
+          if (row.length > size) row = row.substring(0, size);
           fixedMap.push(row);
         }
         o.spriteMap = fixedMap;
