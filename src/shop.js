@@ -406,6 +406,11 @@ export function openPanel(kind) {
         <span class="pick${ctx.S.theme !== 'sky' ? ' active' : ''}" data-settheme="sakura">🌸 Hồng anh đào</span>
         <span class="pick${ctx.S.theme === 'sky' ? ' active' : ''}" data-settheme="sky">☁️ Trời quang</span>
       </div>
+      <div class="shead">Đồng bộ hóa (Sync Save) qua mã (P2P)</div>
+      <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+        <span class="buy" onclick="FarmAll.openSyncHostModal()">Cấp Mã (Gửi Save)</span>
+        <span class="buy plain" onclick="FarmAll.openSyncJoinModal()">Nhập Mã (Nhận Save)</span>
+      </div>
       <div class="shead">API phụ (dùng cho sự kiện thế giới quan)</div>
       <div style="display:flex;flex-direction:column;gap:6px">
         <input class="inp" id="secUrl" placeholder="Địa chỉ API, ví dụ https://xx.com/v1" value="${esc(SEC.url)}">

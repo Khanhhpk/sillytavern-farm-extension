@@ -5114,6 +5114,11 @@ function openPanel(kind) {
         <span class="pick${ctx.S.theme !== "sky" ? " active" : ""}" data-settheme="sakura">\u{1F338} H\u1ED3ng anh \u0111\xE0o</span>
         <span class="pick${ctx.S.theme === "sky" ? " active" : ""}" data-settheme="sky">\u2601\uFE0F Tr\u1EDDi quang</span>
       </div>
+      <div class="shead">\u0110\u1ED3ng b\u1ED9 h\xF3a (Sync Save) qua m\xE3 (P2P)</div>
+      <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+        <span class="buy" onclick="FarmAll.openSyncHostModal()">C\u1EA5p M\xE3 (G\u1EEDi Save)</span>
+        <span class="buy plain" onclick="FarmAll.openSyncJoinModal()">Nh\u1EADp M\xE3 (Nh\u1EADn Save)</span>
+      </div>
       <div class="shead">API ph\u1EE5 (d\xF9ng cho s\u1EF1 ki\u1EC7n th\u1EBF gi\u1EDBi quan)</div>
       <div style="display:flex;flex-direction:column;gap:6px">
         <input class="inp" id="secUrl" placeholder="\u0110\u1ECBa ch\u1EC9 API, v\xED d\u1EE5 https://xx.com/v1" value="${esc(SEC.url)}">
@@ -14821,6 +14826,9 @@ function setupConnection() {
     }
     closeTradeModal();
   });
+  setTimeout(() => {
+    sendData({ type: "HELLO", playerId: ctx.S.playerId });
+  }, 500);
   renderTradeRoom();
 }
 function handleNetData(data) {
@@ -14854,6 +14862,12 @@ function handleNetData(data) {
     renderTradeRoom();
     if (myConfirm && theirConfirm) {
       executeTrade();
+    }
+  } else if (data.type === "HELLO") {
+    if (data.playerId === ctx.S.playerId) {
+      toast("Ph\xE1t hi\u1EC7n gian l\u1EADn: Kh\xF4ng th\u1EC3 giao d\u1ECBch v\u1EDBi ch\xEDnh m\xECnh (Tr\xF9ng ID Ng\u01B0\u1EDDi Ch\u01A1i)!");
+      if (conn) conn.close();
+      closeTradeModal();
     }
   }
 }
@@ -15130,6 +15144,153 @@ var init_trade = __esm({
   }
 });
 
+// src/sync.js
+function cleanupSync() {
+  if (syncConn) {
+    syncConn.close();
+    syncConn = null;
+  }
+  if (syncPeer) {
+    syncPeer.destroy();
+    syncPeer = null;
+  }
+}
+function openSyncHostModal() {
+  cleanupSync();
+  openModal("C\u1EA5p M\xE3 (G\u1EEDi Save)", `
+        <div style="display:flex; flex-direction:column; gap: 15px; padding: 10px; text-align: center;">
+            <div style="font-size: 14px; color: #d32f2f; font-weight: bold; background: #ffebee; padding: 10px; border-radius: 8px;">
+                C\u1EA2NH B\xC1O: B\u1EA1n s\u1EAFp T\u1EA0O m\xE3 \u0111\u1EC3 chuy\u1EC3n b\u1EA3n save n\xE0y \u0111i. Thi\u1EBFt b\u1ECB kh\xE1c khi nh\u1EADp m\xE3 n\xE0y s\u1EBD B\u1ECA \u0110\xC8 to\xE0n b\u1ED9 save b\u1EB1ng save hi\u1EC7n t\u1EA1i c\u1EE7a b\u1EA1n. C\u1EA9n th\u1EADn kh\xF4ng \u0111\u1EC3 l\u1ED9 m\xE3!
+            </div>
+            <div id="sync-host-status" style="font-size: 14px; color: #7a5c38; font-weight: bold; margin-top: 10px;">\u0110ang t\u1EA1o ph\xF2ng...</div>
+            <div id="sync-host-code" style="font-size: 20px; font-weight: bold; color: #e91e63; user-select: all; background: #fce4ec; padding: 10px; border-radius: 8px; border: 2px dashed #f06292; display: none;"></div>
+            <div class="buy plain" onclick="FarmAll.closeModal()" style="padding: 8px; margin-top: 10px; text-align:center;">\u0110\xF3ng</div>
+        </div>
+    `);
+  const roomId = "fsync-" + Math.random().toString(36).substr(2, 6);
+  syncPeer = new $416260bce337df90$export$ecd1fc136c422448(roomId);
+  syncPeer.on("open", (id) => {
+    const codeEl = $id("sync-host-code");
+    const statusEl = $id("sync-host-status");
+    if (codeEl) {
+      codeEl.textContent = id;
+      codeEl.style.display = "block";
+    }
+    if (statusEl) {
+      statusEl.textContent = "Ph\xF2ng \u0111\xE3 t\u1EA1o! G\u1EEDi m\xE3 n\xE0y cho m\xE1y c\u1EA7n nh\u1EADn save.";
+      statusEl.style.color = "#388e3c";
+    }
+  });
+  syncPeer.on("connection", (connection) => {
+    syncConn = connection;
+    const statusEl = $id("sync-host-status");
+    if (statusEl) {
+      statusEl.textContent = "M\xE1y kh\xE1c \u0111\xE3 k\u1EBFt n\u1ED1i! \u0110ang g\u1EEDi d\u1EEF li\u1EC7u...";
+      statusEl.style.color = "#1976d2";
+    }
+    syncConn.on("open", () => {
+      syncConn.send({ type: "FULL_SAVE", data: ctx.S });
+      if (statusEl) {
+        statusEl.textContent = "\u0110\xE3 g\u1EEDi save th\xE0nh c\xF4ng!";
+        statusEl.style.color = "#4caf50";
+      }
+      toast("G\u1EEDi save th\xE0nh c\xF4ng!");
+      setTimeout(() => {
+        cleanupSync();
+        closeModal();
+      }, 3e3);
+    });
+  });
+  syncPeer.on("error", (err) => {
+    const statusEl = $id("sync-host-status");
+    if (statusEl) {
+      statusEl.textContent = "L\u1ED7i: " + err.type;
+      statusEl.style.color = "#d32f2f";
+    }
+  });
+}
+function openSyncJoinModal() {
+  cleanupSync();
+  openModal("Nh\u1EADp M\xE3 (Nh\u1EADn Save)", `
+        <div style="display:flex; flex-direction:column; gap: 15px; padding: 10px; text-align: center;">
+            <div style="font-size: 14px; color: #d32f2f; font-weight: bold; background: #ffebee; padding: 10px; border-radius: 8px;">
+                C\u1EA2NH B\xC1O \u0110\u1ECE: Nh\u1EADp m\xE3 s\u1EBD GHI \u0110\xC8 X\xD3A S\u1EA0CH to\xE0n b\u1ED9 d\u1EEF li\u1EC7u hi\u1EC7n t\u1EA1i tr\xEAn m\xE1y n\xE0y (k\u1EC3 c\u1EA3 ID) b\u1EB1ng d\u1EEF li\u1EC7u m\u1EDBi. H\xE3y ch\u1EAFc ch\u1EAFn tr\u01B0\u1EDBc khi b\u1EA5m Nh\u1EADn!
+            </div>
+            <input type="text" id="sync-join-code" placeholder="Nh\u1EADp m\xE3 (VD: fsync-abcdef)" class="inp" style="text-align:center; font-size: 16px; font-weight:bold; letter-spacing: 1px;">
+            <div id="sync-join-status" style="font-size: 14px; color: #7a5c38; font-weight: bold;"></div>
+            <div style="display:flex; gap:10px; margin-top: 10px;">
+                <div class="buy" onclick="FarmAll.executeSyncJoin()" style="flex:1; text-align:center;">Nh\u1EADn Save</div>
+                <div class="buy plain" onclick="FarmAll.closeModal()" style="flex:1; text-align:center;">Hu\u1EF7</div>
+            </div>
+        </div>
+    `);
+}
+function executeSyncJoin() {
+  const codeEl = $id("sync-join-code");
+  const code = codeEl ? codeEl.value.trim() : "";
+  const statusEl = $id("sync-join-status");
+  if (!code) {
+    if (statusEl) {
+      statusEl.textContent = "Vui l\xF2ng nh\u1EADp m\xE3 ph\xF2ng!";
+      statusEl.style.color = "#d32f2f";
+    }
+    return;
+  }
+  if (statusEl) {
+    statusEl.textContent = "\u0110ang k\u1EBFt n\u1ED1i...";
+    statusEl.style.color = "#7a5c38";
+  }
+  cleanupSync();
+  syncPeer = new $416260bce337df90$export$ecd1fc136c422448();
+  syncPeer.on("open", () => {
+    syncConn = syncPeer.connect(code, { reliable: true });
+    syncConn.on("open", () => {
+      if (statusEl) {
+        statusEl.textContent = "\u0110\xE3 k\u1EBFt n\u1ED1i! \u0110ang t\u1EA3i save v\u1EC1...";
+        statusEl.style.color = "#1976d2";
+      }
+    });
+    syncConn.on("data", (data) => {
+      if (data && data.type === "FULL_SAVE" && data.data) {
+        if (statusEl) {
+          statusEl.textContent = "\u0110\xE3 nh\u1EADn save! \u0110ang \xE1p d\u1EE5ng...";
+          statusEl.style.color = "#4caf50";
+        }
+        if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};
+        ctx.extension_settings[extensionName][NS] = data.data;
+        loadState();
+        save(true);
+        closeModal();
+        renderAll();
+        toast("\u0110\u1ED3ng b\u1ED9 save th\xE0nh c\xF4ng r\u1EF1c r\u1EE1!");
+        cleanupSync();
+      }
+    });
+    syncConn.on("error", (err) => {
+      if (statusEl) {
+        statusEl.textContent = "L\u1ED7i k\u1EBFt n\u1ED1i!";
+        statusEl.style.color = "#d32f2f";
+      }
+    });
+  });
+  syncPeer.on("error", (err) => {
+    if (statusEl) {
+      statusEl.textContent = "L\u1ED7i: " + err.type;
+      statusEl.style.color = "#d32f2f";
+    }
+  });
+}
+var syncPeer, syncConn;
+var init_sync = __esm({
+  "src/sync.js"() {
+    init_store();
+    init_all();
+    init_bundler();
+    syncPeer = null;
+    syncConn = null;
+  }
+});
+
 // src/all.js
 var all_exports = {};
 __export(all_exports, {
@@ -15201,6 +15362,7 @@ __export(all_exports, {
   eventFresh: () => eventFresh,
   eventPending: () => eventPending,
   executeGachaRoll: () => executeGachaRoll,
+  executeSyncJoin: () => executeSyncJoin,
   extMenuBtn: () => extMenuBtn,
   extractJson: () => extractJson,
   fallbackEvent: () => fallbackEvent,
@@ -15270,6 +15432,8 @@ __export(all_exports, {
   openSandbox: () => openSandbox,
   openSellDlg: () => openSellDlg,
   openSellSeedDlg: () => openSellSeedDlg,
+  openSyncHostModal: () => openSyncHostModal,
+  openSyncJoinModal: () => openSyncJoinModal,
   openTakeout: () => openTakeout,
   openTradeModal: () => openTradeModal,
   openWitchDlg: () => openWitchDlg,
@@ -15394,6 +15558,7 @@ var init_all = __esm({
     init_bet();
     init_hero();
     init_trade();
+    init_sync();
   }
 });
 

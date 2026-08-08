@@ -191,6 +191,12 @@ function setupConnection() {
         }
         closeTradeModal();
     });
+    
+    // Anti-cheat check: send our playerId
+    setTimeout(() => {
+        sendData({ type: 'HELLO', playerId: ctx.S.playerId });
+    }, 500);
+    
     renderTradeRoom();
 }
 
@@ -225,6 +231,12 @@ function handleNetData(data) {
         renderTradeRoom();
         if (myConfirm && theirConfirm) {
             executeTrade();
+        }
+    } else if (data.type === 'HELLO') {
+        if (data.playerId === ctx.S.playerId) {
+            All.toast('Phát hiện gian lận: Không thể giao dịch với chính mình (Trùng ID Người Chơi)!');
+            if (conn) conn.close();
+            closeTradeModal();
         }
     }
 }
