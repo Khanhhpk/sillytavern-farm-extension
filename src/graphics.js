@@ -994,7 +994,7 @@ export function spriteSVG(name, px) {
       }
     }
   });
-  const out = `<img draggable="false" width="${px}" height="${px}" src="${canvas.toDataURL('image/png')}" style="display:block; image-rendering:pixelated;" />`;
+  const out = `<img draggable="false" width="${px}" height="${px}" src="${canvas.toDataURL('image/png')}" style="display:block; image-rendering:pixelated; object-fit:contain;" />`;
   spriteCache.set(key, out);
   return out;
 }

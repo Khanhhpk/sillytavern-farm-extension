@@ -7,6 +7,7 @@ import { toast, openBuyDlg } from './witch.js';
 import { renderStatus } from './render.js';
 import { openModal } from './shop.js';
 import { charName, CS, SEC, extractJson, collectWorldbook } from './events.js';
+import { GACHA_PROMPT } from './prompt.js';
 
 export const GACHA_NORM_PITY = 100;
 export const GACHA_SPEC_PITY = 50;
@@ -41,10 +42,10 @@ async function pMap(array, asyncFn, concurrency) {
 export function generateProcedural32x32Sprite(rarity) {
   const map = [];
   const borderChar = 'K';
-  const mainChar = rarity === 'Huyền thoại' ? 'C' : rarity === 'Sử thi' ? 'V' : 'B';
-  const subChar = rarity === 'Huyền thoại' ? 'Y' : rarity === 'Sử thi' ? 'v' : 'b';
+  const mainChar = rarity === 'Huyền thoại' ? 'C' : rarity === 'Sử thi' ? 'V' : rarity === 'Hiếm' ? 'B' : rarity === 'Thường' ? 'G' : 'D';
+  const subChar = rarity === 'Huyền thoại' ? 'Y' : rarity === 'Sử thi' ? 'v' : rarity === 'Hiếm' ? 'b' : rarity === 'Thường' ? 'g' : 'd';
   const highlightChar = 'W';
-  const accentChar = rarity === 'Huyền thoại' ? 'R' : rarity === 'Sử thi' ? 'F' : 'E';
+  const accentChar = rarity === 'Huyền thoại' ? 'R' : rarity === 'Sử thi' ? 'F' : rarity === 'Hiếm' ? 'E' : rarity === 'Thường' ? 'L' : 'D';
 
   const type = Math.floor(Math.random() * 4); 
 
@@ -109,38 +110,57 @@ export async function generateAIUniqueItemData(rarity) {
     if (CS.link) {
       const worldbook = await collectWorldbook();
       contextStr = `Trích xuất bối cảnh thế giới (Worldbook) & Lịch sử trò chuyện gần nhất:
-${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể, hãy tự do sáng tạo)'}
-Nếu thấy phù hợp, hãy thiết kế vật phẩm liên kết với bối cảnh này, nếu không thì tự do sáng tạo.`;
+${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể)'}
+Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối cảnh này, nếu không thì tự do sáng tạo. Tuy nhiên, KHÔNG ĐƯỢC tùy chỉnh kết quả thành "đáp án giải quyết khủng hoảng trước mắt". Kỳ vật phải duy trì tính độc lập ngẫu nhiên.`;
       
-      thinkingInstructions = `1. TÌM Ý TƯỞNG: Đọc kỹ bối cảnh thế giới được cung cấp. Chọn ra 1 yếu tố đặc trưng nhất (nhân vật, phép thuật, sự kiện, đồ vật...) để làm cảm hứng.
-2. THIẾT KẾ: Biến ý tưởng đó thành một vật phẩm mang thuộc tính đặc biệt. Phân tích màu sắc và hình dáng vật thể.
-3. VẼ PIXEL: Đếm chính xác số lượng ký tự trên mỗi dòng. Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!`;
+      thinkingInstructions = `1. TÌM Ý TƯỞNG: Đọc kỹ bối cảnh thế giới được cung cấp. Xác định Vực đề tài và Vực lối chơi.
+2. CƠ CHẾ: Căn cứ vào độ hiếm [${rarity}] để thiết lập cơ chế. Thao tác cụ thể, cực kỳ thú vị và phá vỡ sáo rỗng (anti-cliché).
+3. VẼ PIXEL: Khung pixel tối thiểu là 32x32. Bạn có thể mở rộng kích thước lớn hơn (ví dụ 40x40, 48x48), nhưng BẮT BUỘC phải là lưới HÌNH VUÔNG n x n (số dòng và số ký tự mỗi dòng phải bằng nhau).`;
     } else {
-      contextStr = `KHÔNG CÓ CHỦ ĐỀ CỐ ĐỊNH. Để đảm bảo tính ngẫu nhiên tuyệt đối, bạn PHẢI tự bốc thăm một chủ đề bất kỳ trước khi bắt đầu thiết kế. Mọi thứ trong vũ trụ đều có thể trở thành vật phẩm.`;
+      contextStr = `KHÔNG CÓ CHỦ ĐỀ CỐ ĐỊNH. Để đảm bảo tính ngẫu nhiên tuyệt đối, bạn PHẢI tự bốc thăm Vực đề tài và Vực lối chơi bất kỳ. Mọi thứ trong vũ trụ đều có thể trở thành kỳ vật.`;
       
-      thinkingInstructions = `1. BỐC THĂM CHỦ ĐỀ: Đầu tiên, hãy suy nghĩ ra 3 danh từ hoàn toàn ngẫu nhiên và không liên quan đến nhau. Chọn 1 trong số đó làm chủ đề chính.
-2. THIẾT KẾ: Biến danh từ vừa chọn thành một vật phẩm mang thuộc tính đặc biệt. Phân tích màu sắc và hình dáng vật thể.
-3. VẼ PIXEL: Đếm chính xác số lượng ký tự trên mỗi dòng. Khung canvas là 32x32, mỗi dòng bắt buộc dài đúng 32 ký tự, tổng cộng 32 dòng. Nếu thiếu/thừa ký tự, hình sẽ bị cắt méo!`;
+      thinkingInstructions = `1. BỐC THĂM CHỦ ĐỀ: Bốc thăm ngẫu nhiên Vực đề tài (Khí vật, sinh mệnh, quy tắc, không gian...) và Vực lối chơi (Xử lý thông tin, cải tạo bối cảnh, giao dịch đánh cược...).
+2. CƠ CHẾ: Căn cứ vào độ hiếm [${rarity}] để thiết lập cơ chế. Thao tác cụ thể, cực kỳ thú vị và phá vỡ sáo rỗng (anti-cliché).
+3. VẼ PIXEL: Khung pixel tối thiểu là 32x32. Bạn có thể mở rộng kích thước lớn hơn (ví dụ 40x40, 48x48), nhưng BẮT BUỘC phải là lưới HÌNH VUÔNG n x n (số dòng và số ký tự mỗi dòng phải bằng nhau).`;
     }
 
-    const sysPrompt = `Bạn là một AI thiết kế vật phẩm game nhập vai và chuyên gia Pixel Art (32x32).
-Hãy sáng tạo 1 VẬT PHẨM ĐỘC NHẤT phẩm chất [${rarity}].
+    const rarityGuidance = rarity === 'Huyền thoại' 
+      ? "Thước đo ảnh hưởng to lớn (quyết định trật tự, quy tắc, hệ sinh thái, hoặc thao túng cả phương thế giới). Dù quyền bính to lớn nhưng phải CỤ THỂ, thao tác được, không viết khái niệm sáo rỗng."
+      : rarity === 'Sử thi' 
+      ? "Thước đo ảnh hưởng cục bộ bối cảnh (thay đổi một khu vực, một nhóm, tạo cơ chế thu lợi dài hạn hoặc ưu thế chiến lược). Có giá trị kết hợp và kinh doanh."
+      : rarity === 'Hiếm'
+      ? "Thước đo ảnh hưởng cá thể (công cụ nhỏ thay đổi một lần tương tác). Yêu cầu nhỏ mà chuẩn, nhẹ mà khéo, lập tức tạo ra ưu thế tinh xảo và chơi vui ngay lập tức."
+      : rarity === 'Thường'
+      ? "Thước đo tiện ích. Những công cụ nhỏ giúp ích cho đời sống hàng ngày hoặc tương tác nhỏ. Vui vẻ, tiện lợi."
+      : "Thước đo phế phẩm (Junk). Đồ vật tưởng chừng vô dụng, buồn cười, tấu hài, công dụng kỳ quặc nhưng đôi khi có thể dùng trong các tình huống oái ăm.";
+
+    const basePrice = rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : rarity === 'Hiếm' ? 2500 : rarity === 'Thường' ? 500 : 100;
+
+    const sysPrompt = `Bạn là một AI thiết kế "Kỳ vật dị giới" (Otherworldly Artifact) và chuyên gia Pixel Art (n x n, tối thiểu 32x32).
+Hãy sáng tạo 1 KỲ VẬT ĐỘC NHẤT phẩm chất [${rarity}].
 ${contextStr}
 
-BẢNG MÀU PIXEL 32x32 CHO PHÉP (Ký tự: Mã màu Hex):
+--- QUY TẮC CỐT LÕI TỪ VẠN HỮU ĐẠO NGUYÊN ---
+${GACHA_PROMPT}
+--- KẾT THÚC QUY TẮC CỐT LÕI ---
+
+BẢNG MÀU PIXEL CHO PHÉP (Ký tự: Mã màu Hex):
 ${paletteStr}
 
+QUY TẮC BỔ SUNG:
+1. Cấp độ sức mạnh hiện tại: Phẩm chất [${rarity}] - ${rarityGuidance}
+2. Định giá hợp lý: Không được phá giá kinh tế game.
+
 HƯỚNG DẪN TƯ DUY (Bắt buộc phải có thẻ <thinking> trước khi xuất mã):
-Để vẽ pixel art chuẩn 32x32:
 ${thinkingInstructions}
 
 QUY TẮC ĐẦU RA BẮT BUỘC:
 Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json chứa cấu trúc:
 {
-  "name": "Tên vật phẩm (2~5 chữ, ấn tượng, sáng tạo)",
-  "desc": "Mô tả 1 câu về công dụng/hiệu ứng khi dùng trong cốt truyện (dưới 35 chữ)",
-  "price": Một số nguyên định giá G của vật phẩm (Gợi ý: quanh mức ${rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : 2500}G, có thể tự do tăng giảm tuỳ ý),
-  "spriteMap": [ mảng gồm ĐÚNG 32 chuỗi, mỗi chuỗi DÀI CHÍNH XÁC 32 ký tự chỉ dùng ký tự Bảng màu và dấu '.' cho điểm trong suốt ]
+  "name": "Tên kỳ vật (2~7 chữ, ấn tượng, gợi sự tò mò)",
+  "desc": "Mô tả ngắn gọn CƠ CHẾ và CÁCH SỬ DỤNG của kỳ vật (dưới 100 chữ). Phải rõ ràng, thú vị, độc lạ.",
+  "price": Số nguyên định giá. Giá tối thiểu: ${basePrice}G. NGHIÊM CẤM LẠM PHÁT, giá trị tối đa tuyệt đối KHÔNG ĐƯỢC VƯỢT QUÁ ${basePrice * 5}G,
+  "spriteMap": [ mảng các chuỗi. Nếu chọn kích thước n x n, mảng PHẢI CÓ ĐÚNG n chuỗi, và mỗi chuỗi DÀI CHÍNH XÁC n ký tự. Phải là hình vuông (min 32x32). Chỉ dùng ký tự Bảng màu và dấu '.' cho điểm trong suốt ]
 }`;
 
     const userPrompt = `Hãy sáng tạo 1 vật phẩm đặc biệt ngẫu nhiên phẩm chất ${rarity}.`;
@@ -183,17 +203,18 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
       if (o && o.name && o.desc && Array.isArray(o.spriteMap)) {
         // Tự động sửa lỗi AI vẽ nhầm kích thước (cắt hoặc bù thêm '.')
         const fixedMap = [];
-        for (let i = 0; i < 32; i++) {
+        const size = Math.max(32, o.spriteMap.length);
+        for (let i = 0; i < size; i++) {
           let row = typeof o.spriteMap[i] === 'string' ? o.spriteMap[i] : '';
-          if (row.length < 32) row = row.padEnd(32, '.');
-          if (row.length > 32) row = row.substring(0, 32);
+          if (row.length < size) row = row.padEnd(size, '.');
+          if (row.length > size) row = row.substring(0, size);
           fixedMap.push(row);
         }
         o.spriteMap = fixedMap;
         
         // Đảm bảo có giá để hiển thị, nếu AI thiếu thì fallback
         if (typeof o.price !== 'number') {
-           o.price = rarity === 'Sử thi' ? 8000 : (rarity === 'Huyền thoại' ? 20000 : 2500);
+           o.price = rarity === 'Sử thi' ? 8000 : (rarity === 'Huyền thoại' ? 20000 : (rarity === 'Hiếm' ? 2500 : (rarity === 'Thường' ? 500 : 100)));
         }
         return o;
       }
@@ -206,18 +227,24 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
 export async function generateUniqueItem(ticketType) {
   initGachaState();
   const roll = Math.random() * 100;
-  let rarity = 'Hiếm';
-  let color = '#4a90e2';
-  let sellPrice = 2500;
+  let rarity = 'Rác';
+  let color = '#9e9e9e';
+  let sellPrice = 100;
 
   if (ticketType === 'super') {
-    rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000;
+    if (roll < 30) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
+    else if (roll < 80) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
+    else { rarity = 'Hiếm'; color = '#4a90e2'; sellPrice = 2500; }
   } else if (ticketType === 'spec') {
-    if (roll < 20) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
-    else if (roll < 65) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
+    if (roll < 10) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
+    else if (roll < 40) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
+    else if (roll < 80) { rarity = 'Hiếm'; color = '#4a90e2'; sellPrice = 2500; }
+    else { rarity = 'Thường'; color = '#b0bec5'; sellPrice = 500; }
   } else {
-    if (roll < 5) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
-    else if (roll < 30) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
+    if (roll < 2) { rarity = 'Huyền thoại'; color = '#ff8000'; sellPrice = 20000; }
+    else if (roll < 10) { rarity = 'Sử thi'; color = '#a335ee'; sellPrice = 8000; }
+    else if (roll < 30) { rarity = 'Hiếm'; color = '#4a90e2'; sellPrice = 2500; }
+    else if (roll < 70) { rarity = 'Thường'; color = '#b0bec5'; sellPrice = 500; }
   }
 
   const timestamp = now();
@@ -324,7 +351,7 @@ export async function executeGachaRoll(ticketType, count, updateLoadingText) {
       name: item.name,
       rarity: item.rarity,
       color: item.color,
-      icon: spriteSVG(item.sp, 32),
+      icon: spriteSVG(item.sp, 48),
       desc: item.desc,
       spKey: item.sp,
       isPity: plan.isPity
@@ -427,7 +454,7 @@ export function openGachaModal() {
         <span class="buy" id="gachaRollNorm10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#4e903a; border:1px solid #3c702c; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Thường ×10</span>
         <span class="buy" id="gachaRollSpec1" style="padding:10px 0; font-size:13px; font-weight:bold; background:#a335ee; border:1px solid #8a2acc; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Đặc Biệt ×1</span>
         <span class="buy" id="gachaRollSpec10" style="padding:10px 0; font-size:13px; font-weight:bold; background:#8a2acc; border:1px solid #6a1aa3; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Đặc Biệt ×10</span>
-        <span class="buy" id="gachaRollSuper1" style="grid-column: 1 / -1; padding:10px 0; font-size:13px; font-weight:bold; background:linear-gradient(90deg, #ff8000, #ff4500); border:1px solid #cc3700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Siêu Cường ×1 (100% Huyền Thoại)</span>
+        <span class="buy" id="gachaRollSuper1" style="grid-column: 1 / -1; padding:10px 0; font-size:13px; font-weight:bold; background:linear-gradient(90deg, #ff8000, #ff4500); border:1px solid #cc3700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.3); text-align:center; border-radius:6px;">Quay Siêu Cường ×1 (100% Đồ Xịn)</span>
       </div>
 
       <!-- Result Overlay Animation (Lưới kết quả) -->

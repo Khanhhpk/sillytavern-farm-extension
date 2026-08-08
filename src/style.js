@@ -382,6 +382,8 @@ export const styleCSS = `
       80% { transform: translateY(-4px) scale(0.95); }
       100% { transform: translateY(0) scale(1); }
     }
+    .gacha-item-card.rarity-Rác { border-color: #9e9e9e !important; background: #f5f5f5 !important; }
+    .gacha-item-card.rarity-Thường { border-color: #b0bec5 !important; background: #eceff1 !important; }
     .gacha-item-card.rarity-Hiếm { border-color: #4a90e2 !important; background: #f0f7ff !important; }
     .gacha-item-card.rarity-Sử-thi { border-color: #a335ee !important; background: #faf0ff !important; }
     .gacha-item-card.rarity-Huyền-thoại { border-color: #ff8000 !important; background: #fff8f0 !important; box-shadow: 0 0 10px rgba(255,128,0,0.6) !important; }
