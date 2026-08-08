@@ -263,7 +263,7 @@ export async function generateUniqueItem({ rarity, color, sellPrice, ticketType 
     if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0, legend: 0 };
     if (ctx.S.shards.legend === undefined) ctx.S.shards.legend = 0;
     ctx.S.shards.legend++;
-    bonusDesc = '<br><span style="color:#ff8000; font-size:11px; font-weight:bold;">+1 Mảnh Huyền Thoại (Thưởng mở Sử thi)</span>';
+    bonusDesc = '+1 Mảnh Huyền Thoại (Thưởng mở Sử thi)';
   }
 
   ctx.S.uniques[key] = {
@@ -271,7 +271,7 @@ export async function generateUniqueItem({ rarity, color, sellPrice, ticketType 
     name: finalName,
     rarity,
     color,
-    desc: finalDesc + bonusDesc,
+    desc: finalDesc,
     sell: sellPrice,
     sp: spKey,
     spriteMap: finalSpriteMap
@@ -281,7 +281,7 @@ export async function generateUniqueItem({ rarity, color, sellPrice, ticketType 
   ctx.S.bag[key] = (ctx.S.bag[key] || 0) + 1;
   save();
 
-  return { key, name: finalName, rarity, color, desc: finalDesc + bonusDesc, sell: sellPrice, sp: spKey };
+  return { key, name: finalName, rarity, color, desc: finalDesc, bonusDesc, sell: sellPrice, sp: spKey };
 }
 
 // Thực hiện quay Gacha Bất đồng bộ
@@ -390,6 +390,7 @@ export async function executeGachaRoll(ticketType, count, updateLoadingText) {
       color: item.color,
       icon: spriteSVG(item.sp, 48),
       desc: item.desc,
+      bonusDesc: item.bonusDesc,
       spKey: item.sp,
       isPity: plan.isPity
     };
@@ -615,6 +616,7 @@ export function openGachaModal() {
         <div style="font-size:10px; font-weight:bold; color:${r.color}; margin-bottom:2px;">${r.rarity}${r.isPity ? ' ★Bảo hiểm' : ''}</div>
         <div style="margin:2px 0;">${r.icon}</div>
         <div style="font-size:11px; font-weight:bold; color:#3a2c22; margin-top:2px;">${r.name}</div>
+        ${r.bonusDesc ? `<div style="font-size:9px; color:#ff8000; font-weight:bold; margin-top:2px;">${r.bonusDesc}</div>` : ''}
       </div>
     `).join('');
 
@@ -711,7 +713,14 @@ export function openGachaModal() {
           scCard.style.boxShadow = `0 0 30px ${u.color}80`;
           scIcon.innerHTML = spriteSVG(u.spKey, 64);
           scName.textContent = u.name;
-          scDesc.innerHTML = u.desc;
+          scDesc.textContent = u.desc;
+          if (u.bonusDesc) {
+            const bonusEl = document.createElement('div');
+            bonusEl.style.cssText = 'font-size:11px; font-weight:bold; color:#ff8000; margin-top:8px; text-align:center;';
+            bonusEl.textContent = u.bonusDesc;
+            scDesc.appendChild(document.createElement('br'));
+            scDesc.appendChild(bonusEl);
+          }
           showcaseOverlay.style.display = 'flex';
           
           scCard.style.animation = 'none';
