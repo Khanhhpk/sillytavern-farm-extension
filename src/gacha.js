@@ -351,7 +351,7 @@ export async function executeGachaRoll(ticketType, count, updateLoadingText) {
       name: item.name,
       rarity: item.rarity,
       color: item.color,
-      icon: spriteSVG(item.sp, 32),
+      icon: spriteSVG(item.sp, 48),
       desc: item.desc,
       spKey: item.sp,
       isPity: plan.isPity
