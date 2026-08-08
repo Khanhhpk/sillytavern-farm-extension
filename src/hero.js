@@ -1513,8 +1513,18 @@ export function onHeroMove(e) {
   
   if (hGesture.moved) {
     const bar = All.$id('hero-bar');
-    bar.style.left = hGesture.ox + rawDx + 'px';
-    bar.style.top = hGesture.oy + rawDy + 'px';
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const rect = bar.getBoundingClientRect();
+    
+    let x = hGesture.ox + rawDx;
+    let y = hGesture.oy + rawDy;
+    
+    x = Math.max(0, Math.min(x, vw - rect.width));
+    y = Math.max(0, Math.min(y, vh - rect.height));
+    
+    bar.style.left = x + 'px';
+    bar.style.top = y + 'px';
     bar.style.right = 'auto'; 
     bar.style.bottom = 'auto';
   }
