@@ -64,7 +64,8 @@ export function loadState() {
     if (ctx.S.ferts['f2']) { ctx.S.ferts['shiny'] = (ctx.S.ferts['shiny'] || 0) + ctx.S.ferts['f2']; delete ctx.S.ferts['f2']; }
   }
   if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
-  if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
+  if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0, legend: 0 };
+  else if (ctx.S.shards.legend === undefined) ctx.S.shards.legend = 0;
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
   if (!ctx.S.uniques) ctx.S.uniques = {};

@@ -4140,7 +4140,7 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
   }
   return null;
 }
-async function generateUniqueItem({ rarity, color, sellPrice }) {
+async function generateUniqueItem({ rarity, color, sellPrice, ticketType }) {
   initGachaState();
   const timestamp = now();
   const randId = Math.floor(Math.random() * 1e4);
@@ -4165,21 +4165,28 @@ async function generateUniqueItem({ rarity, color, sellPrice }) {
     finalSpriteMap = generateProcedural32x32Sprite(rarity);
   }
   registerDynamicSprite(spKey, finalSpriteMap);
+  let bonusDesc = "";
+  if (rarity === "S\u1EED thi" && (ticketType === "norm" || ticketType === "spec")) {
+    if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0, legend: 0 };
+    if (ctx.S.shards.legend === void 0) ctx.S.shards.legend = 0;
+    ctx.S.shards.legend++;
+    bonusDesc = '<br><span style="color:#ff8000; font-size:11px; font-weight:bold;">+1 M\u1EA3nh Huy\u1EC1n Tho\u1EA1i (Th\u01B0\u1EDFng m\u1EDF S\u1EED thi)</span>';
+  }
   ctx.S.uniques[key] = {
     key,
     name: finalName,
     rarity,
     color,
-    desc: finalDesc,
+    desc: finalDesc + bonusDesc,
     sell: sellPrice,
     sp: spKey,
     spriteMap: finalSpriteMap
   };
   ctx.S.bag[key] = (ctx.S.bag[key] || 0) + 1;
   save();
-  return { key, name: finalName, rarity, color, desc: finalDesc, sell: sellPrice, sp: spKey };
+  return { key, name: finalName, rarity, color, desc: finalDesc + bonusDesc, sell: sellPrice, sp: spKey };
 }
-async function executeGachaRoll(ticketType, count, updateLoadingText) {
+async function executeGachaRoll(ticketType, count, updateLoadingText2) {
   initGachaState();
   const ticketKey = ticketType;
   const haveTickets = ctx.S.tickets[ticketKey] || 0;
@@ -4291,16 +4298,16 @@ async function executeGachaRoll(ticketType, count, updateLoadingText) {
         }
       }
     }
-    rollsPlan.push({ type: rewardType, isPity, preRolledRarity, preRolledColor, preRolledPrice });
+    rollsPlan.push({ type: rewardType, isPity, preRolledRarity, preRolledColor, preRolledPrice, ticketType });
   }
   const uniquePlans = rollsPlan.filter((r) => r.type === "unique");
   let uniqueCount = 0;
   const uniqueResults = await pMap(uniquePlans, async (plan) => {
     uniqueCount++;
-    if (updateLoadingText) {
-      updateLoadingText(uniquePlans.length > 1 ? `\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt... (${uniqueCount}/${uniquePlans.length})` : "\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt...");
+    if (updateLoadingText2) {
+      updateLoadingText2(uniquePlans.length > 1 ? `\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt... (${uniqueCount}/${uniquePlans.length})` : "\u0110ang t\u1EC9nh th\u1EE9c b\u1EA3o v\u1EADt...");
     }
-    const item = await generateUniqueItem({ rarity: plan.preRolledRarity, color: plan.preRolledColor, sellPrice: plan.preRolledPrice });
+    const item = await generateUniqueItem({ rarity: plan.preRolledRarity, color: plan.preRolledColor, sellPrice: plan.preRolledPrice, ticketType: plan.ticketType });
     return {
       type: "unique",
       name: item.name,
@@ -4368,7 +4375,7 @@ function openGachaModal() {
         <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
           <span class="buy" id="gachaBuyNormBtn" style="padding:4px 8px; font-size:11px;">+ V\xE9 Th\u01B0\u1EDDng (1000G)</span>
           <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 \u0110\u1EB7c bi\u1EC7t (5000G)</span>
-          <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 Si\xEAu c\u01B0\u1EDDng (100KG)</span>
+          <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ V\xE9 Si\xEAu c\u01B0\u1EDDng (250KG)</span>
         </div>
         <div style="margin-top:4px;">
           <span class="buy" id="gachaRatesBtn" style="padding:4px 12px; font-size:12px; background:#4a8098; border:1px solid #2a6078; color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:6px;">${spriteSVG("gachaRatesIcon", 18)} Xem T\u1EC9 L\u1EC7 Gachapon</span>
@@ -4403,6 +4410,14 @@ function openGachaModal() {
           <div style="background:#e0e0e0; height:8px; border-radius:4px; overflow:hidden;">
             <div id="gachaSpecPityBar" style="background:linear-gradient(90deg, #a335ee, #ff8000); height:100%; width:${Math.min(100, specPity / GACHA_SPEC_PITY * 100)}%; transition:width 0.3s;"></div>
           </div>
+        </div>
+
+        <!-- M\u1EA3nh Huy\u1EC1n Tho\u1EA1i -->
+        <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,128,0,0.1); padding:6px 8px; border-radius:6px; border:1px solid rgba(255,128,0,0.3); margin-top:4px;">
+          <div style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:bold; color:#cc5200;">
+            ${spriteSVG("legendShard", 16)} M\u1EA3nh Huy\u1EC1n Tho\u1EA1i: <span id="gachaLegendCount">${ctx.S.shards?.legend || 0}</span>/10
+          </div>
+          <span class="buy" id="gachaExchangeLegendBtn" style="padding:4px 10px; font-size:11px; background:${(ctx.S.shards?.legend || 0) >= 10 ? "linear-gradient(90deg, #ff8000, #ff4500)" : "#ccc"}; border:1px solid ${(ctx.S.shards?.legend || 0) >= 10 ? "#cc3700" : "#aaa"}; color:#fff; pointer-events:${(ctx.S.shards?.legend || 0) >= 10 ? "auto" : "none"};">\u0110\u1ED5i B\u1EA3o V\u1EADt</span>
         </div>
       </div>
 
@@ -4470,6 +4485,21 @@ function openGachaModal() {
     if (pSup >= GACHA_SUPER_PITY) supR = 100;
     const elSupR = $id("gachaSuperRateTxt");
     if (elSupR) elSupR.textContent = String(supR % 1 === 0 ? supR : supR.toFixed(2));
+    const legendCount = ctx.S.shards?.legend || 0;
+    const elLegCount = $id("gachaLegendCount");
+    if (elLegCount) elLegCount.textContent = String(legendCount);
+    const btnExLeg = $id("gachaExchangeLegendBtn");
+    if (btnExLeg) {
+      if (legendCount >= 10) {
+        btnExLeg.style.background = "linear-gradient(90deg, #ff8000, #ff4500)";
+        btnExLeg.style.borderColor = "#cc3700";
+        btnExLeg.style.pointerEvents = "auto";
+      } else {
+        btnExLeg.style.background = "#ccc";
+        btnExLeg.style.borderColor = "#aaa";
+        btnExLeg.style.pointerEvents = "none";
+      }
+    }
   };
   $id("gachaBuyNormBtn")?.addEventListener("click", () => {
     openBuyDlg("ticket", "norm", "gacha");
@@ -4516,7 +4546,7 @@ function openGachaModal() {
     const haveTickets = ctx.S.tickets?.[ticketType] || 0;
     if (haveTickets < count) {
       const missing = count - haveTickets;
-      const priceMap = { norm: 1e3, spec: 5e3, super: 1e5 };
+      const priceMap = { norm: 1e3, spec: 5e3, super: 25e4 };
       const ticketPrice = priceMap[ticketType] || 0;
       const cost = missing * ticketPrice;
       const tName = ticketType === "super" ? "Si\xEAu c\u01B0\u1EDDng" : ticketType === "spec" ? "\u0110\u1EB7c bi\u1EC7t" : "Th\u01B0\u1EDDng";
@@ -4603,6 +4633,25 @@ function openGachaModal() {
   $id("gachaRollSpec10")?.addEventListener("click", () => doRoll("spec", 10));
   $id("gachaRollSuper1")?.addEventListener("click", () => doRoll("super", 1));
   $id("gachaRollSuper10")?.addEventListener("click", () => doRoll("super", 10));
+  $id("gachaExchangeLegendBtn")?.addEventListener("click", () => doExchangeLegend());
+}
+async function doExchangeLegend() {
+  if (!ctx.S.shards || !ctx.S.shards.legend || ctx.S.shards.legend < 10) return;
+  ctx.S.shards.legend -= 10;
+  save();
+  $id("gachaLegendCount").innerText = ctx.S.shards.legend;
+  if (ctx.S.shards.legend < 10) {
+    const btn = $id("gachaExchangeLegendBtn");
+    if (btn) {
+      btn.style.background = "#ccc";
+      btn.style.borderColor = "#aaa";
+      btn.style.pointerEvents = "none";
+    }
+  }
+  if (updateLoadingText) updateLoadingText("\u0110ang \u0111\u1ED5i M\u1EA3nh Huy\u1EC1n Tho\u1EA1i...");
+  const item = await generateUniqueItem({ rarity: "Huy\u1EC1n tho\u1EA1i", color: "#ff8000", sellPrice: 2e4, ticketType: "exchange" });
+  const results = [{ type: "unique", name: item.name, rarity: item.rarity, color: item.color, sp: item.sp, count: 1 }];
+  showGachaResult(results);
 }
 function openGachaRatesModal() {
   const bodyHTML = `
@@ -5073,8 +5122,8 @@ function openPanel(kind) {
           <span class="buy${ctx.S.coins < 5e3 ? " off" : ""}" data-buyticket="spec">Mua</span></div>
         <div class="item"><span class="icon">${spriteSVG("ticketSuper", 32)}</span>
           <span class="info"><div class="name" style="color:#ff4500;">V\xE9 Quay Si\xEAu C\u01B0\u1EDDng</div><div class="meta">D\xF9ng quay 1 ph\xE1t 100% ra b\u1EA3o v\u1EADt AI (t\u1EEB Hi\u1EBFm \u0111\u1EBFn Huy\u1EC1n Tho\u1EA1i) \xB7 \u0110ang c\xF3 ${ctx.S.tickets?.super || 0}</div></span>
-          <span class="price">${spriteSVG("coin", 16)}100,000</span>
-          <span class="buy${ctx.S.coins < 1e5 ? " off" : ""}" data-buyticket="super" style="background:#ff4500; border:1px solid #cc3700; color:#fff;">Mua</span></div>`;
+          <span class="price">${spriteSVG("coin", 16)}250,000</span>
+          <span class="buy${ctx.S.coins < 25e4 ? " off" : ""}" data-buyticket="super" style="background:#ff4500; border:1px solid #cc3700; color:#fff;">Mua</span></div>`;
     } else {
       items = Object.keys(PASSES).map((k) => {
         const ps = PASSES[k];
@@ -5280,7 +5329,7 @@ function openPanel(kind) {
       return;
     }
     if (bagTab === "relic") {
-      const sh2 = ctx.S.shards || { prism: 0, star: 0 };
+      const sh2 = ctx.S.shards || { prism: 0, star: 0, legend: 0 };
       const normTk = ctx.S.tickets?.norm || 0;
       const specTk = ctx.S.tickets?.spec || 0;
       const ticketRows = (normTk > 0 ? `
@@ -6530,7 +6579,7 @@ function openPassDlg(k) {
 function openBuyDlg(kind, id, returnTo = "shop") {
   let def, price, name;
   if (kind === "ticket") {
-    price = id === "super" ? 1e5 : id === "norm" ? 1e3 : 5e3;
+    price = id === "super" ? 25e4 : id === "norm" ? 1e3 : 5e3;
     name = id === "super" ? "V\xE9 Quay Si\xEAu C\u01B0\u1EDDng" : id === "norm" ? "V\xE9 Quay Th\u01B0\u1EDDng" : "V\xE9 Quay \u0110\u1EB7c Bi\u1EC7t";
   } else {
     def = kind === "seed" ? CROPS[id] : FERTS[id];
@@ -7440,7 +7489,8 @@ function loadState() {
     }
   }
   if (!ctx.S.witch) ctx.S.witch = { nextAt: now(), leaveAt: 0, missed: 0, order: null };
-  if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0 };
+  if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0, legend: 0 };
+  else if (ctx.S.shards.legend === void 0) ctx.S.shards.legend = 0;
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
   if (!ctx.S.uniques) ctx.S.uniques = {};
@@ -15049,9 +15099,10 @@ function getItemName(id) {
   if (id === "coins") return "Ti\u1EC1n xu";
   if (id === "norm") return "V\xE9 Th\u01B0\u1EDDng";
   if (id === "spec") return "V\xE9 \u0110\u1EB7c Bi\u1EC7t";
-  if (id === "super") return "V\xE9 Si\xEAu C\u1EA5p";
-  if (id === "prism") return "M\u1EA3nh L\u0103ng K\xEDnh";
-  if (id === "star") return "M\u1EA3nh Sao";
+  if (id === "super") return "V\xE9 Si\xEAu C\u01B0\u1EDDng";
+  if (id === "prism") return "M\u1EA3nh l\u0103ng quang";
+  if (id === "star") return "M\u1EA3nh ng\xF4i sao";
+  if (id === "legend") return "M\u1EA3nh Huy\u1EC1n Tho\u1EA1i";
   if (id === "compost") return "Ph\xE2n H\u1EEFu C\u01A1";
   if (id === "shiny") return "Ph\xE2n B\xF3n B\u1EA1c";
   if (id.startsWith("unique@")) {
@@ -15072,6 +15123,7 @@ function getItemDesc(id) {
   if (id === "super") return "V\xE9 quay Gacha si\xEAu c\u1EA5p";
   if (id === "prism") return "D\xF9ng \u0111\u1EC3 n\xE2ng c\u1EA5p";
   if (id === "star") return "M\u1EA3nh sao qu\xFD hi\u1EBFm";
+  if (id === "legend") return "M\u1EA3nh huy\u1EC1n tho\u1EA1i qu\xFD hi\u1EBFm";
   if (id === "compost") return "Gi\u1EA3m 25% th\u1EDDi gian tr\u1ED3ng c\xE2y";
   if (id === "shiny") return "Nh\u1EADn th\xEAm 25% ti\u1EC1n xu khi thu ho\u1EA1ch";
   if (id.startsWith("unique@")) {
@@ -15086,8 +15138,14 @@ function getItemDesc(id) {
 }
 function getItemIcon(id) {
   if (id === "coins") return spriteSVG("coin", 20);
-  if (id === "norm" || id === "spec" || id === "super") return spriteSVG("tk_" + id, 20);
-  if (id === "prism" || id === "star") return spriteSVG("shard_" + id, 20);
+  if (id === "norm" || id === "spec" || id === "super") {
+    const tId = id.charAt(0).toUpperCase() + id.slice(1);
+    return spriteSVG("ticket" + tId, 20);
+  }
+  if (id === "prism" || id === "star" || id === "legend") {
+    const sId = id.charAt(0).toUpperCase() + id.slice(1);
+    return id === "legend" ? spriteSVG("legendShard", 20) : spriteSVG("shard" + sId, 20);
+  }
   if (id === "compost" || id === "shiny") return spriteSVG("fert_" + id, 20);
   if (id.startsWith("unique@")) {
     const item = ctx.S.uniques?.[id] || theirUniques[id] || { sp: "strawhat", color: "#4a90e2" };
@@ -15316,6 +15374,7 @@ function getInventoryCount(id) {
   if (id === "super") return ctx.S.tickets?.super || 0;
   if (id === "prism") return ctx.S.shards?.prism || 0;
   if (id === "star") return ctx.S.shards?.star || 0;
+  if (id === "legend") return ctx.S.shards?.legend || 0;
   if (id === "compost") return ctx.S.ferts?.compost || 0;
   if (id === "shiny") return ctx.S.ferts?.shiny || 0;
   if (ctx.S.bag && ctx.S.bag[id]) return ctx.S.bag[id];
@@ -15329,6 +15388,7 @@ function deductInventory(id, amount) {
   else if (id === "super") ctx.S.tickets.super -= amount;
   else if (id === "prism") ctx.S.shards.prism -= amount;
   else if (id === "star") ctx.S.shards.star -= amount;
+  else if (id === "legend") ctx.S.shards.legend -= amount;
   else if (id === "compost") ctx.S.ferts.compost -= amount;
   else if (id === "shiny") ctx.S.ferts.shiny -= amount;
   else if (ctx.S.bag && ctx.S.bag[id]) {
@@ -15346,6 +15406,7 @@ function addInventory(id, amount) {
   else if (id === "super") ctx.S.tickets.super += amount;
   else if (id === "prism") ctx.S.shards.prism += amount;
   else if (id === "star") ctx.S.shards.star += amount;
+  else if (id === "legend") ctx.S.shards.legend += amount;
   else if (id === "compost") {
     if (!ctx.S.ferts) ctx.S.ferts = {};
     ctx.S.ferts.compost = (ctx.S.ferts.compost || 0) + amount;
@@ -15495,7 +15556,7 @@ function uiOpenAddItem() {
   ["norm", "spec", "super"].forEach((k) => {
     if (ctx.S.tickets && ctx.S.tickets[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.tickets[k]})">${getItemIcon(k)} ${getItemName(k)} (C\xF3: ${ctx.S.tickets[k]})</div>`;
   });
-  ["prism", "star"].forEach((k) => {
+  ["prism", "star", "legend"].forEach((k) => {
     if (ctx.S.shards && ctx.S.shards[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.shards[k]})">${getItemIcon(k)} ${getItemName(k)} (C\xF3: ${ctx.S.shards[k]})</div>`;
   });
   let catFerts = "";

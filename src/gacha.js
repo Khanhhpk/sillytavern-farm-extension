@@ -227,7 +227,7 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
   return null;
 }
 
-export async function generateUniqueItem({ rarity, color, sellPrice }) {
+export async function generateUniqueItem({ rarity, color, sellPrice, ticketType }) {
   initGachaState();
 
   const timestamp = now();
@@ -258,12 +258,20 @@ export async function generateUniqueItem({ rarity, color, sellPrice }) {
 
   registerDynamicSprite(spKey, finalSpriteMap);
 
+  let bonusDesc = '';
+  if (rarity === 'Sử thi' && (ticketType === 'norm' || ticketType === 'spec')) {
+    if (!ctx.S.shards) ctx.S.shards = { prism: 0, star: 0, legend: 0 };
+    if (ctx.S.shards.legend === undefined) ctx.S.shards.legend = 0;
+    ctx.S.shards.legend++;
+    bonusDesc = '<br><span style="color:#ff8000; font-size:11px; font-weight:bold;">+1 Mảnh Huyền Thoại (Thưởng mở Sử thi)</span>';
+  }
+
   ctx.S.uniques[key] = {
     key,
     name: finalName,
     rarity,
     color,
-    desc: finalDesc,
+    desc: finalDesc + bonusDesc,
     sell: sellPrice,
     sp: spKey,
     spriteMap: finalSpriteMap
@@ -273,7 +281,7 @@ export async function generateUniqueItem({ rarity, color, sellPrice }) {
   ctx.S.bag[key] = (ctx.S.bag[key] || 0) + 1;
   save();
 
-  return { key, name: finalName, rarity, color, desc: finalDesc, sell: sellPrice, sp: spKey };
+  return { key, name: finalName, rarity, color, desc: finalDesc + bonusDesc, sell: sellPrice, sp: spKey };
 }
 
 // Thực hiện quay Gacha Bất đồng bộ
@@ -362,7 +370,7 @@ export async function executeGachaRoll(ticketType, count, updateLoadingText) {
       }
     }
 
-    rollsPlan.push({ type: rewardType, isPity, preRolledRarity, preRolledColor, preRolledPrice });
+    rollsPlan.push({ type: rewardType, isPity, preRolledRarity, preRolledColor, preRolledPrice, ticketType });
   }
 
   // Thu thập các unique items để chạy AI song song (Max concurrency 3)
@@ -374,7 +382,7 @@ export async function executeGachaRoll(ticketType, count, updateLoadingText) {
     if (updateLoadingText) {
       updateLoadingText(uniquePlans.length > 1 ? `Đang tỉnh thức bảo vật... (${uniqueCount}/${uniquePlans.length})` : 'Đang tỉnh thức bảo vật...');
     }
-    const item = await generateUniqueItem({ rarity: plan.preRolledRarity, color: plan.preRolledColor, sellPrice: plan.preRolledPrice });
+    const item = await generateUniqueItem({ rarity: plan.preRolledRarity, color: plan.preRolledColor, sellPrice: plan.preRolledPrice, ticketType: plan.ticketType });
     return {
       type: 'unique',
       name: item.name,
@@ -450,7 +458,7 @@ export function openGachaModal() {
         <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">
           <span class="buy" id="gachaBuyNormBtn" style="padding:4px 8px; font-size:11px;">+ Vé Thường (1000G)</span>
           <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé Đặc biệt (5000G)</span>
-          <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé Siêu cường (100KG)</span>
+          <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé Siêu cường (250KG)</span>
         </div>
         <div style="margin-top:4px;">
           <span class="buy" id="gachaRatesBtn" style="padding:4px 12px; font-size:12px; background:#4a8098; border:1px solid #2a6078; color:#fff; display:inline-flex; align-items:center; justify-content:center; gap:6px;">${spriteSVG('gachaRatesIcon', 18)} Xem Tỉ Lệ Gachapon</span>
@@ -485,6 +493,14 @@ export function openGachaModal() {
           <div style="background:#e0e0e0; height:8px; border-radius:4px; overflow:hidden;">
             <div id="gachaSpecPityBar" style="background:linear-gradient(90deg, #a335ee, #ff8000); height:100%; width:${Math.min(100, (specPity / GACHA_SPEC_PITY) * 100)}%; transition:width 0.3s;"></div>
           </div>
+        </div>
+
+        <!-- Mảnh Huyền Thoại -->
+        <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,128,0,0.1); padding:6px 8px; border-radius:6px; border:1px solid rgba(255,128,0,0.3); margin-top:4px;">
+          <div style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:bold; color:#cc5200;">
+            ${spriteSVG('legendShard', 16)} Mảnh Huyền Thoại: <span id="gachaLegendCount">${ctx.S.shards?.legend || 0}</span>/10
+          </div>
+          <span class="buy" id="gachaExchangeLegendBtn" style="padding:4px 10px; font-size:11px; background:${(ctx.S.shards?.legend || 0) >= 10 ? 'linear-gradient(90deg, #ff8000, #ff4500)' : '#ccc'}; border:1px solid ${(ctx.S.shards?.legend || 0) >= 10 ? '#cc3700' : '#aaa'}; color:#fff; pointer-events:${(ctx.S.shards?.legend || 0) >= 10 ? 'auto' : 'none'};">Đổi Bảo Vật</span>
         </div>
       </div>
 
@@ -547,6 +563,21 @@ export function openGachaModal() {
     if (pSup > 100) supR = 5 + (pSup - 100) * 0.95;
     if (pSup >= GACHA_SUPER_PITY) supR = 100;
     const elSupR = All.$id('gachaSuperRateTxt'); if (elSupR) elSupR.textContent = String(supR % 1 === 0 ? supR : supR.toFixed(2));
+    
+    const legendCount = ctx.S.shards?.legend || 0;
+    const elLegCount = All.$id('gachaLegendCount'); if (elLegCount) elLegCount.textContent = String(legendCount);
+    const btnExLeg = All.$id('gachaExchangeLegendBtn');
+    if (btnExLeg) {
+      if (legendCount >= 10) {
+        btnExLeg.style.background = 'linear-gradient(90deg, #ff8000, #ff4500)';
+        btnExLeg.style.borderColor = '#cc3700';
+        btnExLeg.style.pointerEvents = 'auto';
+      } else {
+        btnExLeg.style.background = '#ccc';
+        btnExLeg.style.borderColor = '#aaa';
+        btnExLeg.style.pointerEvents = 'none';
+      }
+    }
   };
 
   All.$id('gachaBuyNormBtn')?.addEventListener('click', () => {
@@ -606,7 +637,7 @@ export function openGachaModal() {
     
     if (haveTickets < count) {
       const missing = count - haveTickets;
-      const priceMap = { norm: 1000, spec: 5000, super: 100000 };
+      const priceMap = { norm: 1000, spec: 5000, super: 250000 };
       const ticketPrice = priceMap[ticketType] || 0;
       const cost = missing * ticketPrice;
       const tName = ticketType === 'super' ? 'Siêu cường' : (ticketType === 'spec' ? 'Đặc biệt' : 'Thường');
@@ -706,6 +737,30 @@ export function openGachaModal() {
   All.$id('gachaRollSpec10')?.addEventListener('click', () => doRoll('spec', 10));
   All.$id('gachaRollSuper1')?.addEventListener('click', () => doRoll('super', 1));
   All.$id('gachaRollSuper10')?.addEventListener('click', () => doRoll('super', 10));
+  All.$id('gachaExchangeLegendBtn')?.addEventListener('click', () => doExchangeLegend());
+}
+
+async function doExchangeLegend() {
+  if (!ctx.S.shards || !ctx.S.shards.legend || ctx.S.shards.legend < 10) return;
+  
+  ctx.S.shards.legend -= 10;
+  save();
+  
+  All.$id('gachaLegendCount').innerText = ctx.S.shards.legend;
+  if (ctx.S.shards.legend < 10) {
+    const btn = All.$id('gachaExchangeLegendBtn');
+    if (btn) {
+      btn.style.background = '#ccc';
+      btn.style.borderColor = '#aaa';
+      btn.style.pointerEvents = 'none';
+    }
+  }
+  
+  if (updateLoadingText) updateLoadingText('Đang đổi Mảnh Huyền Thoại...');
+  const item = await generateUniqueItem({ rarity: 'Huyền thoại', color: '#ff8000', sellPrice: 20000, ticketType: 'exchange' });
+  
+  const results = [{ type: 'unique', name: item.name, rarity: item.rarity, color: item.color, sp: item.sp, count: 1 }];
+  showGachaResult(results);
 }
 
 

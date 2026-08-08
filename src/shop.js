@@ -96,8 +96,8 @@ export function openPanel(kind) {
           <span class="buy${ctx.S.coins < 5000 ? ' off' : ''}" data-buyticket="spec">Mua</span></div>
         <div class="item"><span class="icon">${spriteSVG('ticketSuper', 32)}</span>
           <span class="info"><div class="name" style="color:#ff4500;">Vé Quay Siêu Cường</div><div class="meta">Dùng quay 1 phát 100% ra bảo vật AI (từ Hiếm đến Huyền Thoại) · Đang có ${ctx.S.tickets?.super || 0}</div></span>
-          <span class="price">${spriteSVG('coin', 16)}100,000</span>
-          <span class="buy${ctx.S.coins < 100000 ? ' off' : ''}" data-buyticket="super" style="background:#ff4500; border:1px solid #cc3700; color:#fff;">Mua</span></div>`;
+          <span class="price">${spriteSVG('coin', 16)}250,000</span>
+          <span class="buy${ctx.S.coins < 250000 ? ' off' : ''}" data-buyticket="super" style="background:#ff4500; border:1px solid #cc3700; color:#fff;">Mua</span></div>`;
     } else {
       items = Object.keys(PASSES).map(k => {
         const ps = PASSES[k];
@@ -278,7 +278,7 @@ export function openPanel(kind) {
       return;
     }
     if (bagTab === 'relic') {                            // v1.0: quà của bé tròn —— quầy riêng cho mảnh vỡ và hạt giống bí ẩn
-      const sh2 = ctx.S.shards || { prism: 0, star: 0 };
+      const sh2 = ctx.S.shards || { prism: 0, star: 0, legend: 0 };
       const normTk = ctx.S.tickets?.norm || 0;
       const specTk = ctx.S.tickets?.spec || 0;
       const ticketRows = (normTk > 0 ? `

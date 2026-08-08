@@ -23,9 +23,10 @@ function getItemName(id) {
     if (id === 'coins') return 'Tiền xu';
     if (id === 'norm') return 'Vé Thường';
     if (id === 'spec') return 'Vé Đặc Biệt';
-    if (id === 'super') return 'Vé Siêu Cấp';
-    if (id === 'prism') return 'Mảnh Lăng Kính';
-    if (id === 'star') return 'Mảnh Sao';
+    if (id === 'super') return 'Vé Siêu Cường';
+    if (id === 'prism') return 'Mảnh lăng quang';
+    if (id === 'star') return 'Mảnh ngôi sao';
+    if (id === 'legend') return 'Mảnh Huyền Thoại';
     if (id === 'compost') return 'Phân Hữu Cơ';
     if (id === 'shiny') return 'Phân Bón Bạc';
     if (id.startsWith('unique@')) {
@@ -47,6 +48,7 @@ function getItemDesc(id) {
     if (id === 'super') return 'Vé quay Gacha siêu cấp';
     if (id === 'prism') return 'Dùng để nâng cấp';
     if (id === 'star') return 'Mảnh sao quý hiếm';
+    if (id === 'legend') return 'Mảnh huyền thoại quý hiếm';
     if (id === 'compost') return 'Giảm 25% thời gian trồng cây';
     if (id === 'shiny') return 'Nhận thêm 25% tiền xu khi thu hoạch';
     if (id.startsWith('unique@')) {
@@ -62,8 +64,14 @@ function getItemDesc(id) {
 
 function getItemIcon(id) {
     if (id === 'coins') return All.spriteSVG('coin', 20);
-    if (id === 'norm' || id === 'spec' || id === 'super') return All.spriteSVG('tk_' + id, 20);
-    if (id === 'prism' || id === 'star') return All.spriteSVG('shard_' + id, 20);
+    if (id === 'norm' || id === 'spec' || id === 'super') {
+        const tId = id.charAt(0).toUpperCase() + id.slice(1);
+        return All.spriteSVG('ticket' + tId, 20);
+    }
+    if (id === 'prism' || id === 'star' || id === 'legend') {
+        const sId = id.charAt(0).toUpperCase() + id.slice(1);
+        return id === 'legend' ? All.spriteSVG('legendShard', 20) : All.spriteSVG('shard' + sId, 20);
+    }
     if (id === 'compost' || id === 'shiny') return All.spriteSVG('fert_' + id, 20);
     if (id.startsWith('unique@')) {
         const item = ctx.S.uniques?.[id] || theirUniques[id] || { sp: 'strawhat', color: '#4a90e2' };
@@ -315,6 +323,7 @@ function getInventoryCount(id) {
     if (id === 'super') return ctx.S.tickets?.super || 0;
     if (id === 'prism') return ctx.S.shards?.prism || 0;
     if (id === 'star') return ctx.S.shards?.star || 0;
+    if (id === 'legend') return ctx.S.shards?.legend || 0;
     if (id === 'compost') return ctx.S.ferts?.compost || 0;
     if (id === 'shiny') return ctx.S.ferts?.shiny || 0;
     
@@ -331,6 +340,7 @@ function deductInventory(id, amount) {
     else if (id === 'super') ctx.S.tickets.super -= amount;
     else if (id === 'prism') ctx.S.shards.prism -= amount;
     else if (id === 'star') ctx.S.shards.star -= amount;
+    else if (id === 'legend') ctx.S.shards.legend -= amount;
     else if (id === 'compost') ctx.S.ferts.compost -= amount;
     else if (id === 'shiny') ctx.S.ferts.shiny -= amount;
     else if (ctx.S.bag && ctx.S.bag[id]) {
@@ -349,6 +359,7 @@ function addInventory(id, amount) {
     else if (id === 'super') ctx.S.tickets.super += amount;
     else if (id === 'prism') ctx.S.shards.prism += amount;
     else if (id === 'star') ctx.S.shards.star += amount;
+    else if (id === 'legend') ctx.S.shards.legend += amount;
     else if (id === 'compost') { if(!ctx.S.ferts) ctx.S.ferts={}; ctx.S.ferts.compost = (ctx.S.ferts.compost || 0) + amount; }
     else if (id === 'shiny') { if(!ctx.S.ferts) ctx.S.ferts={}; ctx.S.ferts.shiny = (ctx.S.ferts.shiny || 0) + amount; }
     else if (CROPS && CROPS[id]) {
@@ -509,7 +520,7 @@ export function uiOpenAddItem() {
     
     let catTickets = '';
     ['norm', 'spec', 'super'].forEach(k => { if (ctx.S.tickets && ctx.S.tickets[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.tickets[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.tickets[k]})</div>`; });
-    ['prism', 'star'].forEach(k => { if (ctx.S.shards && ctx.S.shards[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.shards[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.shards[k]})</div>`; });
+    ['prism', 'star', 'legend'].forEach(k => { if (ctx.S.shards && ctx.S.shards[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.shards[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.shards[k]})</div>`; });
     
     let catFerts = '';
     ['compost', 'shiny'].forEach(k => { if (ctx.S.ferts && ctx.S.ferts[k] > 0) catFerts += `<div class="trade-pick" onclick="FarmAll.uiSelectAdd('${k}', ${ctx.S.ferts[k]})">${getItemIcon(k)} ${getItemName(k)} (Có: ${ctx.S.ferts[k]})</div>`; });
