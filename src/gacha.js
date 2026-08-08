@@ -415,6 +415,9 @@ export function openGachaModal() {
           <span class="buy" id="gachaBuySpecBtn" style="padding:4px 8px; font-size:11px; background:#8a5cc0; border:1px solid #6a4a9a; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé Đặc biệt (5000G)</span>
           <span class="buy" id="gachaBuySuperBtn" style="padding:4px 8px; font-size:11px; background:#ff4500; border:1px solid #cc3700; color:#fff; text-shadow:0 1px 1px rgba(0,0,0,0.3);">+ Vé Siêu cường (500KG)</span>
         </div>
+        <div style="margin-top:4px;">
+          <span class="buy" id="gachaRatesBtn" style="padding:4px 12px; font-size:11px; background:#4a8098; border:1px solid #2a6078; color:#fff;">📊 Xem Tỉ Lệ Gachapon</span>
+        </div>
       </div>
 
       <!-- Máy Gachapon & Slot -->
@@ -507,6 +510,10 @@ export function openGachaModal() {
 
   All.$id('gachaBuySuperBtn')?.addEventListener('click', () => {
     openBuyDlg('ticket', 'super', 'gacha');
+  });
+
+  All.$id('gachaRatesBtn')?.addEventListener('click', () => {
+    openGachaRatesModal();
   });
 
   const triggerGridResult = (ticketType, count, results) => {
@@ -650,3 +657,69 @@ export function openGachaModal() {
   All.$id('gachaRollSpec10')?.addEventListener('click', () => doRoll('spec', 10));
   All.$id('gachaRollSuper1')?.addEventListener('click', () => doRoll('super', 1));
 }
+
+
+export function openGachaRatesModal() {
+  const bodyHTML = \
+    <div style='padding:4px; text-align:center;'>
+      <h3 style='margin-top:0; color:#3a2c22; font-size:14px;'>Bảng Tỉ Lệ Rơi Đồ Gachapon</h3>
+      
+      <table style='width:100%; border-collapse:collapse; font-size:12px; margin-bottom:12px; background:#fff; border-radius:4px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.1);'>
+        <thead>
+          <tr style='background:#f0e6d2; color:#3a2c22; text-align:left;'>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Độ hiếm</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Thường</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Đặc Biệt</th>
+            <th style='padding:6px; border-bottom:1px solid #dfd3c3;'>Vé Siêu Cấp</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#ff8000;'>Huyền thoại</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>2%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>10%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>30%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#a335ee;'>Sử thi</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>8%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>30%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>50%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#4a90e2;'>Hiếm</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>20%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>20%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2; font-weight:bold; color:#b0bec5;'>Thường</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>40%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>20%</td>
+            <td style='padding:6px; border-bottom:1px solid #f0e6d2;'>0%</td>
+          </tr>
+          <tr>
+            <td style='padding:6px; font-weight:bold; color:#9e9e9e;'>Rác</td>
+            <td style='padding:6px;'>30%</td>
+            <td style='padding:6px;'>0%</td>
+            <td style='padding:6px;'>0%</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div style='font-size:11px; color:#555; text-align:left; background:#fafafa; padding:8px; border-radius:4px; border:1px dashed #ccc; margin-bottom:12px;'>
+        <div style='margin-bottom:4px;'><b>Bảo hiểm (Pity):</b></div>
+        <div>- Tích <b>${GACHA_NORM_PITY}</b> điểm Vé Thường sẽ chắc chắn trúng <b>Hiếm</b> trở lên.</div>
+        <div>- Tích <b>${GACHA_SPEC_PITY}</b> điểm Vé Đặc Biệt sẽ chắc chắn trúng <b>Sử thi</b> trở lên.</div>
+      </div>
+
+      <span class="buy" id="gachaRatesBackBtn" style="padding:6px 16px; font-size:12px; background:#4a7a26; color:#fff; cursor:pointer;">Quay Lại Gacha</span>
+    </div>
+  \;
+  openModal('Tỉ Lệ Gachapon', bodyHTML);
+  
+  All.$id('gachaRatesBackBtn')?.addEventListener('click', () => {
+    openGachaModal();
+  });
+}
+
