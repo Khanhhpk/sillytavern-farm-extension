@@ -39,7 +39,7 @@ function getItemIcon(id) {
 }
 
 export function openTradeModal() {
-    document.getElementById('trade-win').classList.add('open');
+    All.$id('trade-win').classList.add('open');
     resetTradeState();
     renderTradeMenu();
 }
@@ -50,7 +50,7 @@ export function closeTradeModal() {
         peer = null;
     }
     conn = null;
-    document.getElementById('trade-win').classList.remove('open');
+    All.$id('trade-win').classList.remove('open');
     uiCloseAddItem();
     resetTradeState();
 }
@@ -64,7 +64,7 @@ function resetTradeState() {
 }
 
 function renderTradeMenu() {
-    const body = document.getElementById('trade-body');
+    const body = All.$id('trade-body');
     body.innerHTML = `
         <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
             <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">Kết nối WebRTC P2P</div>
@@ -77,12 +77,12 @@ function renderTradeMenu() {
         </div>
     `;
 
-    document.getElementById('btn-trade-host').onclick = hostRoom;
-    document.getElementById('btn-trade-join').onclick = joinRoom;
+    All.$id('btn-trade-host').onclick = hostRoom;
+    All.$id('btn-trade-join').onclick = joinRoom;
 }
 
 function updateStatus(msg, color = '#7a5c38') {
-    const el = document.getElementById('trade-status');
+    const el = All.$id('trade-status');
     if (el) {
         el.innerText = msg;
         el.style.color = color;
@@ -96,7 +96,7 @@ function hostRoom() {
     peer = new Peer(roomId);
     peer.on('open', (id) => {
         updateStatus(`Phòng đã tạo! Mã của bạn: ${id}. Hãy gửi mã này cho đối tác.`, '#388e3c');
-        const body = document.getElementById('trade-body');
+        const body = All.$id('trade-body');
         body.innerHTML = `
             <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
                 <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">Đang chờ đối tác kết nối...</div>
@@ -118,7 +118,7 @@ function hostRoom() {
 
 function joinRoom() {
     // @ts-ignore
-    const code = document.getElementById('inp-trade-code').value.trim();
+    const code = All.$id('inp-trade-code').value.trim();
     if (!code) return updateStatus('Vui lòng nhập mã phòng!', '#d32f2f');
     
     updateStatus('Đang kết nối...', '#7a5c38');
@@ -269,7 +269,7 @@ export function uiToggleLock() {
 }
 
 function renderTradeRoom() {
-    const body = document.getElementById('trade-body');
+    const body = All.$id('trade-body');
     
     const myHTML = Object.entries(myItems).map(([id, amt]) => 
         `<div class="trade-item">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b> ${!myLock ? `<div class="close-x" style="width:18px;height:18px;line-height:12px;font-size:14px;" onclick="All.uiRemoveTradeItem('${id}')">×</div>` : ''}</div>`
@@ -308,7 +308,7 @@ export function uiRemoveTradeItem(id) {
 export function uiOpenAddItem() {
     if (myLock) return;
     
-    const pop = document.getElementById('trade-popup');
+    const pop = All.$id('trade-popup');
     pop.classList.add('open');
     
     let catCoins = '';
@@ -347,12 +347,12 @@ export function uiOpenAddItem() {
     if (catTickets) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">VÉ & MẢNH</div>` + catTickets;
     if (catGacha) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px;">ĐỒ GACHA</div>` + catGacha;
     
-    document.getElementById('trade-popup-list').innerHTML = html || '<div style="padding:10px;text-align:center;font-weight:bold;color:#a3763d;">Không có đồ để giao dịch</div>';
-    document.getElementById('trade-popup-act').style.display = 'none';
+    All.$id('trade-popup-list').innerHTML = html || '<div style="padding:10px;text-align:center;font-weight:bold;color:#a3763d;">Không có đồ để giao dịch</div>';
+    All.$id('trade-popup-act').style.display = 'none';
 }
 
 export function uiCloseAddItem() {
-    document.getElementById('trade-popup').classList.remove('open');
+    All.$id('trade-popup').classList.remove('open');
 }
 
 let selectedTradeId = null;

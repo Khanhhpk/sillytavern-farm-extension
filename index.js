@@ -449,6 +449,7 @@ var init_graphics = __esm({
       sun: ["................", ".......C........", "...C...C...C....", "....C.....C.....", "......CCC.......", ".....CCCCC......", "..CC.CCWCC.CC...", ".....CCCCC......", "......CCC.......", "....C.....C.....", "...C...C...C....", ".......C........", "................", "................", "................", "................"],
       flower: ["................", "................", "................", "....nnn.nnn.....", "...npppnpppn....", "...nppnCnppn....", "....nnCCCnn.....", "...nppnCnppn....", "...npppnpppn....", "....nnn.nnn.....", "................", "................", "................", "................", "................", "................"],
       shopIcon: ["................", "................", "................", "....fpf.fpf.....", "....fppffppf....", ".....ffFFff.....", "..qddddFFddddq..", "..qqqqqFFqqqqq..", "...qdddFFdddq...", "...qFFFFFFFFq...", "...qdddFFdddq...", "...qdddFFdddq...", "...qqqqqqqqqq...", "................", "................", "................"],
+      tradeIcon: ["................", "................", "................", "....FFFFFF......", "...FbbbbbbF.....", "..FbFFFFFFbF....", ".FbbF....FbbF...", ".FbbF....FbF....", ".FbbF.....FF....", "..FF.....FbbF...", "....FbF....FbbF...", "...FbbF....FbbF.", "....FbFFFFFFbF..", ".....FbbbbbbF...", "......FFFFFF....", "................"],
       bagIcon: ["................", "................", ".....ffff.......", "....f....f......", "...ffffffffff...", "..fddddddddddf..", "..fddddddddddf..", "..fFFFFFFFFFFf..", "..fFFFFCCFFFFf..", "..fFpFFCCFFFFf..", "..fFpFFFFFFFFf..", "..fFFFFFFFFFFf..", "...ffffffffff...", "................", "................", "................"],
       gearIcon: ["................", "................", "................", "................", "......MM........", "....MLLLLM......", "...MLLLLLLM.....", "..MMLLMMLLMM....", "..MMLLMMLLMM....", "...MLLLLLLM.....", "....MLLLLM......", "......MM........", "................", "................", "................", "................"],
       diceIcon: ["................", "................", "..KKKKKKKKKKKK..", "..KWWWWWWWWWWK..", "..KWWKKWWWWWWK..", "..KWWKKWWWWWWK..", "..KWWWWWWWWWWK..", "..KWWWWKKWWWWK..", "..KWWWWKKWWWWK..", "..KWWWWWWWWWWK..", "..KWWWWWWWKKWK..", "..KWWWWWWWKKWK..", "..KWWWWWWWWWWK..", "..KKKKKKKKKKKK..", "................", "................"],
@@ -2858,7 +2859,7 @@ function initUI() {
         <div class="btn" data-open="shop">${spriteSVG("shopIcon", 22)}C\u1EEDa h\xE0ng</div>
         <div class="btn" data-open="bag">${spriteSVG("bagIcon", 22)}Balo</div>
         <div class="btn" data-open="gacha">${spriteSVG("gachapon", 22)}Gachapon</div>
-        <div class="btn" data-open="trade">${spriteSVG("tradeIcon", 22) || "\u{1F91D}"}Trade</div>
+        <div class="btn" data-open="trade">${spriteSVG("tradeIcon", 22)}Trade</div>
         <div class="btn" data-open="cfg">${spriteSVG("gearIcon", 22)}C\xE0i \u0111\u1EB7t</div>
     </div>
     <div class="modal" id="modal">
@@ -14655,7 +14656,7 @@ function getItemIcon(id) {
   return "";
 }
 function openTradeModal() {
-  document.getElementById("trade-win").classList.add("open");
+  $id("trade-win").classList.add("open");
   resetTradeState();
   renderTradeMenu();
 }
@@ -14665,7 +14666,7 @@ function closeTradeModal() {
     peer = null;
   }
   conn = null;
-  document.getElementById("trade-win").classList.remove("open");
+  $id("trade-win").classList.remove("open");
   uiCloseAddItem();
   resetTradeState();
 }
@@ -14677,7 +14678,7 @@ function resetTradeState() {
   isConnected = false;
 }
 function renderTradeMenu() {
-  const body = document.getElementById("trade-body");
+  const body = $id("trade-body");
   body.innerHTML = `
         <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
             <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">K\u1EBFt n\u1ED1i WebRTC P2P</div>
@@ -14689,11 +14690,11 @@ function renderTradeMenu() {
             <div id="trade-status" style="font-size: 12px; color: #d32f2f; font-weight: bold; margin-top: 10px;"></div>
         </div>
     `;
-  document.getElementById("btn-trade-host").onclick = hostRoom;
-  document.getElementById("btn-trade-join").onclick = joinRoom;
+  $id("btn-trade-host").onclick = hostRoom;
+  $id("btn-trade-join").onclick = joinRoom;
 }
 function updateStatus(msg, color = "#7a5c38") {
-  const el = document.getElementById("trade-status");
+  const el = $id("trade-status");
   if (el) {
     el.innerText = msg;
     el.style.color = color;
@@ -14705,7 +14706,7 @@ function hostRoom() {
   peer = new $416260bce337df90$export$ecd1fc136c422448(roomId);
   peer.on("open", (id) => {
     updateStatus(`Ph\xF2ng \u0111\xE3 t\u1EA1o! M\xE3 c\u1EE7a b\u1EA1n: ${id}. H\xE3y g\u1EEDi m\xE3 n\xE0y cho \u0111\u1ED1i t\xE1c.`, "#388e3c");
-    const body = document.getElementById("trade-body");
+    const body = $id("trade-body");
     body.innerHTML = `
             <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
                 <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">\u0110ang ch\u1EDD \u0111\u1ED1i t\xE1c k\u1EBFt n\u1ED1i...</div>
@@ -14723,7 +14724,7 @@ function hostRoom() {
   });
 }
 function joinRoom() {
-  const code = document.getElementById("inp-trade-code").value.trim();
+  const code = $id("inp-trade-code").value.trim();
   if (!code) return updateStatus("Vui l\xF2ng nh\u1EADp m\xE3 ph\xF2ng!", "#d32f2f");
   updateStatus("\u0110ang k\u1EBFt n\u1ED1i...", "#7a5c38");
   peer = new $416260bce337df90$export$ecd1fc136c422448();
@@ -14841,7 +14842,7 @@ function executeTrade() {
   renderBanner();
 }
 function renderTradeRoom() {
-  const body = document.getElementById("trade-body");
+  const body = $id("trade-body");
   const myHTML = Object.entries(myItems).map(
     ([id, amt]) => `<div class="trade-item">${getItemIcon(id)} <span style="font-size:12px; font-weight:bold; color:#6b4f2e;">${getItemName(id)}</span> <b style="margin-left:auto; color:#a3763d;">x${amt}</b> ${!myLock ? `<div class="close-x" style="width:18px;height:18px;line-height:12px;font-size:14px;" onclick="All.uiRemoveTradeItem('${id}')">\xD7</div>` : ""}</div>`
   ).join("");
@@ -14867,7 +14868,7 @@ function renderTradeRoom() {
     `;
 }
 function uiCloseAddItem() {
-  document.getElementById("trade-popup").classList.remove("open");
+  $id("trade-popup").classList.remove("open");
 }
 var peer, conn, myItems, theirItems, myLock, theirLock, isConnected;
 var init_trade = __esm({
