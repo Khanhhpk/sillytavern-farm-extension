@@ -41,6 +41,13 @@ export function openSyncHostModal() {
     });
 
     syncPeer.on('connection', (connection) => {
+        if (syncConn) {
+            connection.on('open', () => {
+                connection.send({ type: 'ROOM_FULL' });
+                setTimeout(() => connection.close(), 500);
+            });
+            return;
+        }
         syncConn = connection;
         const statusEl = All.$id('sync-host-status');
         if (statusEl) {
@@ -111,6 +118,11 @@ export function executeSyncJoin() {
         });
         
         syncConn.on('data', (data) => {
+            if (data && data.type === 'ROOM_FULL') {
+                if (statusEl) { statusEl.textContent = 'Mã này đang bận (có người khác đang đồng bộ)!'; statusEl.style.color = '#d32f2f'; }
+                syncConn.close();
+                return;
+            }
             if (data && data.type === 'FULL_SAVE' && data.data) {
                 if (statusEl) { statusEl.textContent = 'Đã nhận save! Đang áp dụng...'; statusEl.style.color = '#4caf50'; }
                 

@@ -150,6 +150,13 @@ function hostRoom() {
     });
 
     peer.on('connection', (connection) => {
+        if (conn || isConnected) {
+            connection.on('open', () => {
+                connection.send({ type: 'ROOM_FULL' });
+                setTimeout(() => connection.close(), 500);
+            });
+            return;
+        }
         conn = connection;
         setupConnection();
     });
@@ -245,6 +252,10 @@ function handleNetData(data) {
     } else if (data.type === 'CHEAT_DETECTED') {
         cheatDetected = true;
         All.toast('Phát hiện gian lận: Không thể giao dịch với chính mình (Trùng ID Người Chơi)!');
+        if (conn) conn.close();
+        closeTradeModal();
+    } else if (data.type === 'ROOM_FULL') {
+        All.toast('Phòng giao dịch này đã đầy (đang có người khác giao dịch)!');
         if (conn) conn.close();
         closeTradeModal();
     }

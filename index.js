@@ -14791,6 +14791,13 @@ function hostRoom() {
         `;
   });
   peer.on("connection", (connection) => {
+    if (conn || isConnected) {
+      connection.on("open", () => {
+        connection.send({ type: "ROOM_FULL" });
+        setTimeout(() => connection.close(), 500);
+      });
+      return;
+    }
     conn = connection;
     setupConnection();
   });
@@ -14875,6 +14882,10 @@ function handleNetData(data) {
   } else if (data.type === "CHEAT_DETECTED") {
     cheatDetected = true;
     toast("Ph\xE1t hi\u1EC7n gian l\u1EADn: Kh\xF4ng th\u1EC3 giao d\u1ECBch v\u1EDBi ch\xEDnh m\xECnh (Tr\xF9ng ID Ng\u01B0\u1EDDi Ch\u01A1i)!");
+    if (conn) conn.close();
+    closeTradeModal();
+  } else if (data.type === "ROOM_FULL") {
+    toast("Ph\xF2ng giao d\u1ECBch n\xE0y \u0111\xE3 \u0111\u1EA7y (\u0111ang c\xF3 ng\u01B0\u1EDDi kh\xE1c giao d\u1ECBch)!");
     if (conn) conn.close();
     closeTradeModal();
   }
@@ -15191,6 +15202,13 @@ function openSyncHostModal() {
     }
   });
   syncPeer.on("connection", (connection) => {
+    if (syncConn) {
+      connection.on("open", () => {
+        connection.send({ type: "ROOM_FULL" });
+        setTimeout(() => connection.close(), 500);
+      });
+      return;
+    }
     syncConn = connection;
     const statusEl = $id("sync-host-status");
     if (statusEl) {
@@ -15260,6 +15278,14 @@ function executeSyncJoin() {
       }
     });
     syncConn.on("data", (data) => {
+      if (data && data.type === "ROOM_FULL") {
+        if (statusEl) {
+          statusEl.textContent = "M\xE3 n\xE0y \u0111ang b\u1EADn (c\xF3 ng\u01B0\u1EDDi kh\xE1c \u0111ang \u0111\u1ED3ng b\u1ED9)!";
+          statusEl.style.color = "#d32f2f";
+        }
+        syncConn.close();
+        return;
+      }
       if (data && data.type === "FULL_SAVE" && data.data) {
         if (statusEl) {
           statusEl.textContent = "\u0110\xE3 nh\u1EADn save! \u0110ang \xE1p d\u1EE5ng...";
