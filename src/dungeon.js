@@ -13,6 +13,7 @@ let projectiles = []; // Active projectiles
 
 let currentWave = 1;
 let totalGold = 0;
+let shopGold = 0;
 
 const PET_STATS = {
     slime: { name: 'Slime Xanh', desc: 'Chiến binh cân bằng, không có gì nổi bật.', hp: 130, atk: 12, range: 40, speed: 40, cd: 1 },
@@ -40,9 +41,9 @@ const ENEMY_TYPES = [
     { id: 'moonberry', name: 'Dâu Tây Gai', desc: 'Thích khách tập kích.', hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: 'assassin', sp: 'moonberry', gold: 5 },
     { id: 'chuncai', name: 'Rau Thuần', desc: 'Đeo bám dai dẳng.', hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: 'melee', gold: 6 },
     { id: 'lingjiao', name: 'Củ Ấu Giáp', desc: 'Cận chiến có giáp.', hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: 'melee', gold: 8 },
-    { id: 'pumpkin', name: 'Bí Ngô Khổng Lồ', desc: 'Tanker chậm chạp.', hp: 300, atk: 25, range: 50, speed: 15, cd: 2, ai: 'tank', gold: 15 },
+    { id: 'pumpkin', name: 'Bí Ngô Khổng Lồ', desc: 'Tanker chậm chạp.', hp: 250, atk: 20, range: 50, speed: 15, cd: 3, ai: 'tank', gold: 15 },
     { id: 'fangW', name: 'Hoa Bá Vương', desc: 'Pháp sư bắn từ xa.', hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: 'ranged', gold: 8 },
-    { id: 'starbush', name: 'Bụi Sao', desc: 'Xạ thủ 3 tia.', hp: 80, atk: 15, range: 140, speed: 25, cd: 1.5, ai: 'ranged', skill: 'multishot', gold: 10 },
+    { id: 'starbush', name: 'Bụi Sao', desc: 'Xạ thủ 3 tia.', hp: 80, atk: 8, range: 140, speed: 25, cd: 1.5, ai: 'ranged', skill: 'multishot', gold: 10 },
     { id: 'opalvine', name: 'Dây Leo Opal', desc: 'Trói chân đối thủ.', hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: 'ranged', skill: 'root', gold: 12 },
     { id: 'lianou', name: 'Củ Sen Khổng Lồ', desc: 'Ném bùn từ xa.', hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: 'ranged', gold: 20 },
     { id: 'dragoncry', name: 'Long Tinh', desc: 'Boss: Cực khỏe.', hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: 'tank', skill: 'cleave', elite: true, gold: 100 },
@@ -115,6 +116,7 @@ function initPlacementPhase() {
     projectiles = [];
     currentWave = 1;
     totalGold = 0;
+    shopGold = 0;
     
     const best = ctx.S.dungeonBest || { wave: 0, gold: 0 };
     const bestHtml = best.wave > 0 ? `<div style="color:#b08a5c; font-size:12px; text-align:center; margin-top:4px;">🏆 Kỷ lục: Wave ${best.wave} · ${best.gold} G</div>` : '';
@@ -412,6 +414,7 @@ function startCombat() {
     
     currentWave = 1;
     totalGold = 0;
+    shopGold = 0;
     fullTeam = [...team]; // Snapshot the current team
     
     startWave();
@@ -422,7 +425,7 @@ function updateHUD() {
     if (!hud) return;
     const isBoss = currentWave % 10 === 0;
     hud.style.display = 'block';
-    hud.innerHTML = `<span style="color:#ffd94d; font-weight:bold;">Wave ${currentWave}</span>${isBoss ? ' 👑' : ''} <span style="color:#a4dc8c; margin-left:10px;">${spriteSVG('coin', 12).replace('display:block','display:inline-block;vertical-align:middle')} ${totalGold} G</span>`;
+    hud.innerHTML = `<span style="color:#ffd94d; font-weight:bold;">Wave ${currentWave}</span>${isBoss ? ' 👑' : ''} <span style="color:#a4dc8c; margin-left:10px;" title="Vàng mang về">${spriteSVG('coin', 12).replace('display:block','display:inline-block;vertical-align:middle')} ${totalGold}</span> <span style="color:#e06578; margin-left:10px;" title="Vàng nâng cấp">🛠 ${shopGold}</span>`;
 }
 
 function startWave() {
@@ -456,7 +459,7 @@ function _doStartWave() {
     updateHUD();
     
     // Calculate enemies based on wave
-    let count = Math.min(40, 5 + Math.floor(currentWave * 2));
+    let count = Math.min(30, 3 + Math.floor(currentWave * 1.5));
     let spawnElite = currentWave % 3 === 0;
     let isBossWave = currentWave % 10 === 0;
     
@@ -531,8 +534,11 @@ function stopCombatLoop() {
 function combatLoop(time) {
     if (phase !== 'combat') return;
     
-    const dt = (time - lastTime) / 1000;
+    let dt = (time - lastTime) / 1000;
     lastTime = time;
+    
+    // Ngăn lỗi nhảy vọt vị trí khi chuyển tab (browser throttle requestAnimationFrame)
+    if (dt > 0.1) dt = 0.1;
     
     updateEntities(team, enemies, dt);
     updateEntities(enemies, team, dt);
@@ -581,8 +587,10 @@ function combatLoop(time) {
         if (e.hp <= 0) {
             e.el.remove();
             if (e.gold) {
-                totalGold += e.gold;
-                spawnDmg({x: e.x, y: e.y - 10}, `+${e.gold} G`, 'gold');
+                const homeG = Math.floor(e.gold * 0.6);
+                totalGold += homeG;
+                shopGold += e.gold;
+                spawnDmg({x: e.x, y: e.y - 10}, `+${e.gold} 🛠`, 'gold');
                 updateHUD();
             }
             return false;
@@ -811,18 +819,25 @@ function updateEntities(groupA, groupB, dt) {
                 });
             }
         } else if (a.skill === 'assassin' || a.ai === 'assassin') {
-            let maxDist = -1;
-            let validTargets = targetGroup.filter(b => b.hp > 0 && (b.hp - (b.incomingDmg || 0) > 0));
-            if (validTargets.length === 0) validTargets = targetGroup.filter(b => b.hp > 0);
-            validTargets.forEach(b => {
-                const dx = b.x - a.x;
-                const dy = b.y - a.y;
+            let validTargets = targetGroup.filter(b => b.hp > 0);
+            if (a.lockedTarget && validTargets.includes(a.lockedTarget)) {
+                const dx = a.lockedTarget.x - a.x;
+                const dy = a.lockedTarget.y - a.y;
                 const dist = Math.hypot(dx, dy);
-                if (dist > maxDist) {
-                    maxDist = dist;
-                    closest = { b, dx, dy, dist };
-                }
-            });
+                closest = { b: a.lockedTarget, dx, dy, dist };
+            } else {
+                let minMaxHp = Infinity;
+                validTargets.forEach(b => {
+                    if (b.maxHp < minMaxHp) {
+                        minMaxHp = b.maxHp;
+                        const dx = b.x - a.x;
+                        const dy = b.y - a.y;
+                        const dist = Math.hypot(dx, dy);
+                        closest = { b, dx, dy, dist };
+                    }
+                });
+                if (closest) a.lockedTarget = closest.b;
+            }
         } else {
             let validTargets = targetGroup.filter(b => b.hp > 0 && (b.hp - (b.incomingDmg || 0) > 0));
             if (validTargets.length === 0) validTargets = targetGroup.filter(b => b.hp > 0);
@@ -849,16 +864,67 @@ function updateEntities(groupA, groupB, dt) {
             
             let isRanged = a.range >= 80 || a.ai === 'ranged';
             let inRange = closest.dist <= a.range || (a.skill === 'heal' && closest.dist <= 10);
-            let tooClose = isRanged && closest.dist < a.range * 0.4 && closest.b.type !== a.type;
             
-            if (tooClose && !isRooted) {
+            let baseRange = a.range;
+            if (a.type === 'pet' && PET_STATS[a.id]) baseRange = PET_STATS[a.id].range;
+            if (a.type === 'enemy') {
+                const en = ENEMY_TYPES.find(e => e.id === a.id);
+                if (en) baseRange = en.range;
+            }
+            let tooClose = isRanged && closest.dist < baseRange * 0.4 && closest.b.type !== a.type;
+            
+            if (a.panic > 0) a.panic -= dt;
+            
+            if (a.panic > 0 && !isRooted) {
+                a.el.classList.add('walk');
+                const arenaRect = arena.getBoundingClientRect();
+                const speed = a.speed * speedMult * dt;
+                let cx = arenaRect.width / 2 - a.x;
+                let cy = arenaRect.height / 2 - a.y;
+                let dist = Math.hypot(cx, cy);
+                if (dist > 5) {
+                    a.x += (cx / dist) * speed;
+                    a.y += (cy / dist) * speed;
+                }
+                a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+            } else if (tooClose && !isRooted) {
                 // Kite
                 a.el.classList.add('walk');
-                const speed = a.speed * speedMult * dt;
-                a.x -= (closest.dx / closest.dist) * speed;
-                a.y -= (closest.dy / closest.dist) * speed;
-                
                 const arenaRect = arena.getBoundingClientRect();
+                const speed = a.speed * speedMult * dt;
+                
+                let kx = -(closest.dx / closest.dist);
+                let ky = -(closest.dy / closest.dist);
+                
+                let moveX = kx * speed;
+                let moveY = ky * speed;
+                
+                let nextX = a.x + moveX;
+                let nextY = a.y + moveY;
+                
+                let hitLeft = nextX < 20;
+                let hitRight = nextX > arenaRect.width - 20;
+                let hitTop = nextY < 20;
+                let hitBottom = nextY > arenaRect.height - 20;
+                
+                let hitX = hitLeft || hitRight;
+                let hitY = hitTop || hitBottom;
+                
+                if (hitX && hitY) {
+                    a.panic = 1.0;
+                } else if (hitX) {
+                    moveX = 0;
+                    moveY = (ky !== 0 ? Math.sign(ky) : (Math.random() < 0.5 ? 1 : -1)) * speed;
+                } else if (hitY) {
+                    moveY = 0;
+                    moveX = (kx !== 0 ? Math.sign(kx) : (Math.random() < 0.5 ? 1 : -1)) * speed;
+                }
+                
+                if (!(hitX && hitY)) {
+                    a.x += moveX;
+                    a.y += moveY;
+                }
+                
                 a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
                 a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
                 
@@ -1012,7 +1078,8 @@ function showWaveRewards() {
     // Calculate gold for this wave
     const isBoss = currentWave % 10 === 0;
     const waveGold = (120 + currentWave * 60) * (isBoss ? 3 : 1);
-    totalGold += waveGold;
+    totalGold += Math.floor(waveGold * 0.6);
+    shopGold += waveGold;
     
     const arena = All.$id('dg-arena');
     fullTeam.forEach(p => {
@@ -1071,7 +1138,7 @@ function showWaveRewards() {
             <div class="dg-shop-header">
                 <div class="dg-shop-header-left">
                     <div class="dg-shop-title">Chợ Đen - Wave ${currentWave}</div>
-                    <div class="dg-shop-gold">${spriteSVG('coin', 18).replace('display:block','display:inline-block;vertical-align:middle')} ${totalGold} G</div>
+                    <div class="dg-shop-gold">🛠 ${shopGold} Điểm Nâng Cấp</div>
                 </div>
                 <button id="dg-shop-next" class="dg-shop-next-btn">Tiếp Theo ➔</button>
             </div>
@@ -1093,9 +1160,9 @@ function showWaveRewards() {
                 { id: 'atk', name: 'ATK (+20%)', val: selectedPet.atk, lv: u.atk, cost: Math.floor(40 * Math.pow(1.3, u.atk)) },
                 { id: 'aspd', name: 'ATK SPD (+10%)', val: selectedPet.maxCd.toFixed(2)+'s', lv: u.aspd, cost: Math.floor(60 * Math.pow(1.4, u.aspd)) },
                 { id: 'spd', name: 'Move Speed (+10%)', val: selectedPet.speed, lv: u.spd, cost: Math.floor(30 * Math.pow(1.2, u.spd)) },
-                { id: 'critR', name: 'Crit Rate (+5%)', val: (selectedPet.critRate*100).toFixed(0)+'%', lv: u.critR, cost: Math.floor(50 * Math.pow(1.5, u.critR)) },
+                { id: 'critR', name: 'Crit Rate (+5%)', val: (selectedPet.critRate*100).toFixed(0)+'%', lv: u.critR, cost: Math.floor(50 * Math.pow(1.5, u.critR)), forceCanBuy: selectedPet.critRate < 0.59 },
                 { id: 'critD', name: 'Crit Dmg (+20%)', val: (selectedPet.critDmg*100).toFixed(0)+'%', lv: u.critD, cost: Math.floor(50 * Math.pow(1.4, u.critD)) },
-                { id: 'dodge', name: 'Né Tránh (+5%)', val: (selectedPet.dodge*100).toFixed(0)+'%', lv: u.dodge || 0, cost: Math.floor(60 * Math.pow(1.5, u.dodge || 0)) }
+                { id: 'dodge', name: 'Né Tránh (+5%)', val: (selectedPet.dodge*100).toFixed(0)+'%', lv: u.dodge || 0, cost: Math.floor(60 * Math.pow(1.5, u.dodge || 0)), forceCanBuy: selectedPet.dodge < 0.39 }
             ];
 
             if (PET_STATS[selectedPet.id] && PET_STATS[selectedPet.id].range > 60) {
@@ -1110,7 +1177,7 @@ function showWaveRewards() {
             shopHtml += `<div class="dg-shop-grid">`;
             stats.forEach(s => {
                 const cost = s.cost !== undefined ? s.cost : getCost(s.lv);
-                const canAfford = totalGold >= cost && (s.forceCanBuy !== undefined ? s.forceCanBuy : true);
+                const canAfford = shopGold >= cost && (s.forceCanBuy !== undefined ? s.forceCanBuy : true);
                 const lvText = s.lv !== '' ? ` <span style="color:#888;">(Lv ${s.lv})</span>` : '';
                 shopHtml += `
                 <div class="dg-shop-card">
@@ -1119,7 +1186,7 @@ function showWaveRewards() {
                         <div class="dg-shop-stat-val">${s.val}</div>
                     </div>
                     <button class="dg-btn-buy" data-stat="${s.id}" data-cost="${cost}" ${!canAfford?'disabled':''}>
-                        ${cost} G
+                        ${cost} 🛠
                     </button>
                 </div>`;
             });
@@ -1140,16 +1207,16 @@ function showWaveRewards() {
             el.onclick = () => {
                 const statId = el.dataset.stat;
                 const cost = parseInt(el.dataset.cost);
-                if (totalGold >= cost) {
-                    totalGold -= cost;
+                if (shopGold >= cost) {
+                    shopGold -= cost;
                     const p = selectedPet;
                     if (statId === 'hp') { p.maxHp = Math.round(p.maxHp * 1.2); p.hp = Math.round(p.hp * 1.2); p.upgrades.hp++; }
                     if (statId === 'atk') { p.atk = Math.round(p.atk * 1.2); p.upgrades.atk++; }
                     if (statId === 'aspd') { p.maxCd = Math.max(0.1, p.maxCd * 0.9); p.upgrades.aspd++; }
                     if (statId === 'spd') { p.speed = Math.round(p.speed * 1.1); p.upgrades.spd++; }
-                    if (statId === 'critR') { p.critRate = Math.min(1, p.critRate + 0.05); p.upgrades.critR++; }
+                    if (statId === 'critR') { p.critRate = Math.min(0.6, p.critRate + 0.05); p.upgrades.critR++; }
                     if (statId === 'critD') { p.critDmg = Math.round((p.critDmg + 0.2)*10)/10; p.upgrades.critD++; }
-                    if (statId === 'dodge') { p.dodge = Math.min(0.8, p.dodge + 0.05); p.upgrades.dodge = (p.upgrades.dodge || 0) + 1; }
+                    if (statId === 'dodge') { p.dodge = Math.min(0.4, p.dodge + 0.05); p.upgrades.dodge = (p.upgrades.dodge || 0) + 1; }
                     if (statId === 'range') { p.range = Math.round(p.range * 1.1); p.upgrades.range = (p.upgrades.range || 0) + 1; }
                     if (statId === 'heal_pet') { p.hp = p.maxHp; }
                     if (statId === 'heal_team') {

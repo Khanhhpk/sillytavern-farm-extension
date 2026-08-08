@@ -584,6 +584,7 @@ export function closeHeroMode() {
     clearInterval(heroLoop);
     heroLoop = null;
   }
+  window.removeEventListener('resize', placeHeroBar);
   runState = null;
   const orb = All.$id('orb');
   if (orb) orb.style.display = 'flex';
@@ -1512,8 +1513,18 @@ export function onHeroMove(e) {
   
   if (hGesture.moved) {
     const bar = All.$id('hero-bar');
-    bar.style.left = hGesture.ox + rawDx + 'px';
-    bar.style.top = hGesture.oy + rawDy + 'px';
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const rect = bar.getBoundingClientRect();
+    
+    let x = hGesture.ox + rawDx;
+    let y = hGesture.oy + rawDy;
+    
+    x = Math.max(0, Math.min(x, vw - rect.width));
+    y = Math.max(0, Math.min(y, vh - rect.height));
+    
+    bar.style.left = x + 'px';
+    bar.style.top = y + 'px';
     bar.style.right = 'auto'; 
     bar.style.bottom = 'auto';
   }
@@ -1553,8 +1564,21 @@ export function placeHeroBar() {
   
   const w = bar.offsetWidth || 320;
   const h = bar.offsetHeight || 60;
-  const x = Math.min(Math.max(fx * vw, 0), vw - w);
-  const y = Math.min(Math.max(fy * vh, 0), vh - h);
+  
+  let scale = 1;
+  const padding = 10; // small padding to not stick to edge exactly
+  if (vw < w + padding * 2) {
+    scale = (vw - padding * 2) / w;
+  }
+  
+  const scaledW = w * scale;
+  const scaledH = h * scale;
+  
+  const x = Math.min(Math.max(fx * vw, 0), vw - scaledW);
+  const y = Math.min(Math.max(fy * vh, 0), vh - scaledH);
+  
+  bar.style.transformOrigin = 'top left';
+  bar.style.transform = `scale(${scale})`;
   
   bar.style.left = x + 'px'; 
   bar.style.top = y + 'px';
@@ -1574,6 +1598,7 @@ export function initHero() {
     bar.addEventListener('pointerdown', onHeroDown);
     window.addEventListener('pointermove', onHeroMove);
     window.addEventListener('pointerup', onHeroUp);
+    window.addEventListener('resize', placeHeroBar);
     
     const closeBtn = All.$id('hero-close');
     if (closeBtn) closeBtn.addEventListener('click', closeHeroMode);
