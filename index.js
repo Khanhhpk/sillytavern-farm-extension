@@ -470,6 +470,24 @@ var init_graphics = __esm({
       slime: ["................", "................", "................", "................", ".....BBBBBB.....", "....BBBBBBBB....", "...BBWWBBBBBB...", "..BBWWBBBBBBBB..", "..BBBBBBBBBBBB..", "..BB33BBBB33BB..", ".BBBBBBBBBBBBBB.", ".BnBBBB33BBBBnB.", ".BBBBBBBBBBBBBB.", ".bBBBBBBBBBBBBb.", "..bbbbbbbbbbbb..", "................"],
       octo: ["................", "................", "................", ".....VVVVVV.....", "....VVVVVVVV....", "...VVWWVVVVVV...", "...VWWVVVVVVV...", "..VVVVVVVVVVVV..", "..VVKKVVVVKKVV..", "..VVVVVVVVVVVV..", "..VnVVVKKVVVnV..", "..VVVVVVVVVVVV..", "..VVVVVVVVVVVV..", "..VV.VV..VV.VV..", "..vv.vv..vv.vv..", "................"],
       coin: ["................", "................", "................", ".....UUUUU......", "....UCCCCCU.....", "...UCCWWCCCU....", "...UCWCCCCCU....", "...UCWCCCCCU....", "...UCCCCCCCU....", "...UCCCCCCCU....", "....UCCCCCU.....", ".....UUUUU......", "................", "................", "................", "................"],
+      achivStar: [
+        "................",
+        ".......U........",
+        "......UCU.......",
+        "......CWC.......",
+        ".UUUUUCCCUUUUU..",
+        "..UCCCCCCCCCU...",
+        "...UCCCCCCCU....",
+        "....UCCCCCU.....",
+        "...UCCC.CCCU....",
+        "..UCC.....CCU...",
+        ".UU.........UU..",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
       sun: ["................", ".......C........", "...C...C...C....", "....C.....C.....", "......CCC.......", ".....CCCCC......", "..CC.CCWCC.CC...", ".....CCCCC......", "......CCC.......", "....C.....C.....", "...C...C...C....", ".......C........", "................", "................", "................", "................"],
       flower: ["................", "................", "................", "....nnn.nnn.....", "...npppnpppn....", "...nppnCnppn....", "....nnCCCnn.....", "...nppnCnppn....", "...npppnpppn....", "....nnn.nnn.....", "................", "................", "................", "................", "................", "................"],
       shopIcon: ["................", "................", "................", "....fpf.fpf.....", "....fppffppf....", ".....ffFFff.....", "..qddddFFddddq..", "..qqqqqFFqqqqq..", "...qdddFFdddq...", "...qFFFFFFFFq...", "...qdddFFdddq...", "...qdddFFdddq...", "...qqqqqqqqqq...", "................", "................", "................"],
@@ -5130,7 +5148,9 @@ function openAchivModal() {
              <div style="font-weight:bold; font-size:15px; color:#fcd34d; text-shadow: 0 1px 2px #000;">
                  M\xE0y kh\xF4ng c\xF3 tr\xE1i tim con ng\u01B0\u1EDDi \xE0?
              </div>
-             <span style="font-size: 20px;">\u{1F31F}</span>
+             <div style="display:inline-block; vertical-align:middle; animation: pulse 2s infinite;">
+                 ${spriteSVG("achivStar", 24)}
+             </div>
           </summary>
           
           <div style="padding: 0 15px 15px 15px;">

@@ -58,7 +58,9 @@ export function openAchivModal() {
              <div style="font-weight:bold; font-size:15px; color:#fcd34d; text-shadow: 0 1px 2px #000;">
                  Mày không có trái tim con người à?
              </div>
-             <span style="font-size: 20px;">🌟</span>
+             <div style="display:inline-block; vertical-align:middle; animation: pulse 2s infinite;">
+                 ${spriteSVG('achivStar', 24)}
+             </div>
           </summary>
           
           <div style="padding: 0 15px 15px 15px;">
