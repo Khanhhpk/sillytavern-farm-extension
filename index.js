@@ -5904,7 +5904,7 @@ function toggleWin() {
       return;
     }
     if (ctx.S.blockedUntil && ctx.S.blockedUntil > Date.now()) {
-      toast("Tr\u1EDDi ph\u1EA1t ch\u01B0a tan, Thi\xEAn Ki\u1EBFp v\u1EABn c\xF2n... N\xF4ng Tr\u1EA1i \u0111\xF3ng c\u1EEDa!");
+      startLockedModal();
       return;
     }
     ctx.win.classList.add("open");
@@ -7603,6 +7603,7 @@ function startTribulationEvent(onComplete) {
       overlay.style.opacity = "0";
       setTimeout(() => {
         overlay.remove();
+        if (onComplete) onComplete();
       }, 500);
     }, 300);
   };
@@ -7626,6 +7627,32 @@ function startPoorTribulationNotice(onComplete) {
       if (onComplete) onComplete();
     }, 500);
   }, 3500);
+}
+function startLockedModal() {
+  if (ctx.ui.querySelector("#farm-locked-modal")) return;
+  const overlay = document.createElement("div");
+  overlay.className = "trib-overlay";
+  overlay.id = "farm-locked-modal";
+  overlay.style.position = "fixed";
+  overlay.style.pointerEvents = "auto";
+  const remaining = ctx.S.blockedUntil - Date.now();
+  const hours = Math.floor(remaining / (1e3 * 60 * 60));
+  const mins = Math.floor(remaining % (1e3 * 60 * 60) / (1e3 * 60));
+  overlay.innerHTML = `
+        <div class="trib-content" style="position: relative;">
+            <button id="btn-close-locked" style="position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; border-radius: 50%; background: #1c1c1c; border: 2px solid #ff3b3b; color: #ff3b3b; font-weight: bold; cursor: pointer; font-size: 16px; line-height: 26px; text-align: center; box-shadow: 0 0 10px rgba(255,0,0,0.5);">X</button>
+            <div class="trib-title">THI\xCAN PH\u1EA0T PHONG \u1EA4N</div>
+            <div class="trib-text" style="font-size: 16px;">
+                N\xF4ng tr\u1EA1i \u0111\xE3 b\u1ECB phong \u1EA5n b\u1EDFi s\u1EE9c m\u1EA1nh c\u1EE7a Thi\xEAn \u0110\u1EA1o do h\xE0nh vi ngoan c\u1ED1 ch\u1ED1ng \u0111\u1ED1i.<br><br>
+                Th\u1EDDi gian c\xF2n l\u1EA1i: <b style="color: #ff5e5e; font-size: 18px;">${hours} gi\u1EDD ${mins} ph\xFAt</b>
+            </div>
+        </div>
+    `;
+  ctx.ui.appendChild(overlay);
+  overlay.querySelector("#btn-close-locked").onclick = () => {
+    overlay.style.opacity = "0";
+    setTimeout(() => overlay.remove(), 500);
+  };
 }
 var esc, clampN, SEC_LS_KEY, SEC, CS, eventFresh, todayEvent, eventPending, renderTimeout, INJECT_ID, heartbeat;
 var init_events = __esm({
@@ -16756,6 +16783,7 @@ __export(all_exports, {
   shovel: () => shovel,
   sleepPet: () => sleepPet,
   spriteSVG: () => spriteSVG,
+  startLockedModal: () => startLockedModal,
   startPoorTribulationNotice: () => startPoorTribulationNotice,
   startTribulationEvent: () => startTribulationEvent,
   stopHop: () => stopHop,

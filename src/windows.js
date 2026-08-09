@@ -1,6 +1,6 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
-import { startTribulationEvent, startPoorTribulationNotice } from './events.js';
+import { startTribulationEvent, startPoorTribulationNotice, startLockedModal } from './events.js';
 
 import { layout } from './orb.js';
 import { settle } from './utils.js';
@@ -31,7 +31,7 @@ export function toggleWin() {
   try {
       if (ctx.win.classList.contains('open')) { closeWin(); return; }
       if (ctx.S.blockedUntil && ctx.S.blockedUntil > Date.now()) {
-          All.toast('Trời phạt chưa tan, Thiên Kiếp vẫn còn... Nông Trại đóng cửa!');
+          startLockedModal();
           return;
       }
       ctx.win.classList.add('open');

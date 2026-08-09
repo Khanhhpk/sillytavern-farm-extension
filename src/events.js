@@ -673,6 +673,7 @@ export function startTribulationEvent(onComplete) {
             overlay.style.opacity = '0';
             setTimeout(() => {
                 overlay.remove();
+                if (onComplete) onComplete();
             }, 500);
         }, 300);
     };
@@ -700,4 +701,36 @@ export function startPoorTribulationNotice(onComplete) {
             if (onComplete) onComplete();
         }, 500);
     }, 3500);
+}
+
+export function startLockedModal() {
+    if (ctx.ui.querySelector('#farm-locked-modal')) return;
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'trib-overlay';
+    overlay.id = 'farm-locked-modal';
+    // Make sure it covers the whole screen and is clickable
+    overlay.style.position = 'fixed';
+    overlay.style.pointerEvents = 'auto';
+    
+    const remaining = ctx.S.blockedUntil - Date.now();
+    const hours = Math.floor(remaining / (1000 * 60 * 60));
+    const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    
+    overlay.innerHTML = `
+        <div class="trib-content" style="position: relative;">
+            <button id="btn-close-locked" style="position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; border-radius: 50%; background: #1c1c1c; border: 2px solid #ff3b3b; color: #ff3b3b; font-weight: bold; cursor: pointer; font-size: 16px; line-height: 26px; text-align: center; box-shadow: 0 0 10px rgba(255,0,0,0.5);">X</button>
+            <div class="trib-title">THIÊN PHẠT PHONG ẤN</div>
+            <div class="trib-text" style="font-size: 16px;">
+                Nông trại đã bị phong ấn bởi sức mạnh của Thiên Đạo do hành vi ngoan cố chống đối.<br><br>
+                Thời gian còn lại: <b style="color: #ff5e5e; font-size: 18px;">${hours} giờ ${mins} phút</b>
+            </div>
+        </div>
+    `;
+    ctx.ui.appendChild(overlay);
+
+    overlay.querySelector('#btn-close-locked').onclick = () => {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 500);
+    };
 }
