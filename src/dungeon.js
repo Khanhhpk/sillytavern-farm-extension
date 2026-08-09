@@ -456,7 +456,7 @@ function _doStartWave() {
     phase = 'combat';
     enemies = [];
     projectiles = [];
-    fullTeam.forEach(p => { p.waveDmgDealt = 0; p.waveDmgTaken = 0; });
+    fullTeam.forEach(p => { p.waveDmgDealt = 0; p.waveDmgTaken = 0; p.waveHealDone = 0; });
     const arena = All.$id('dg-arena');
     const w = arena.clientWidth;
     const h = arena.clientHeight;
@@ -653,15 +653,19 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     const skill = skillOverride || attacker.skill;
     
     if (skill === 'heal') {
-        target.hp = Math.min(target.maxHp, target.hp + atk);
-        spawnDmg(target, atk, 'heal');
+        const amount = Math.min(target.maxHp - target.hp, atk);
+        target.hp += amount;
+        if (attacker && attacker.type === 'pet') attacker.waveHealDone = (attacker.waveHealDone || 0) + amount;
+        spawnDmg(target, amount, 'heal');
         return;
     }
     if (skill === 'aoe_heal') {
         myGroup.forEach(ally => {
             if (ally.hp > 0 && Math.hypot(ally.x - attacker.x, ally.y - attacker.y) <= attacker.range) {
-                ally.hp = Math.min(ally.maxHp, ally.hp + atk);
-                spawnDmg(ally, atk, 'heal');
+                const amount = Math.min(ally.maxHp - ally.hp, atk);
+                ally.hp += amount;
+                if (attacker && attacker.type === 'pet') attacker.waveHealDone = (attacker.waveHealDone || 0) + amount;
+                spawnDmg(ally, amount, 'heal');
             }
         });
         return;
@@ -711,8 +715,10 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     
     if (skill === 'lifesteal' && attacker) {
         const ls = Math.floor(finalDmg * 0.5);
-        attacker.hp = Math.min(attacker.maxHp, attacker.hp + ls);
-        spawnDmg(attacker, ls, 'heal');
+        const amount = Math.min(attacker.maxHp - attacker.hp, ls);
+        attacker.hp += amount;
+        if (attacker.type === 'pet') attacker.waveHealDone = (attacker.waveHealDone || 0) + amount;
+        spawnDmg(attacker, amount, 'heal');
     }
     
     if (!target.status) target.status = {};
@@ -1159,6 +1165,7 @@ function showWaveRewards() {
                 <div class="lv">LV ${totalLv}</div>
                 <div class="dmg-stats">
                     <span style="color:#ff6666">⚔️${formatNum(p.waveDmgDealt || 0)}</span>
+                    ${p.waveHealDone ? `<span style="color:#66ff66">✚️${formatNum(p.waveHealDone)}</span>` : ''}
                     <span style="color:#66ccff">🛡️${formatNum(p.waveDmgTaken || 0)}</span>
                 </div>
             </div>`;
