@@ -7577,7 +7577,7 @@ function startTribulationEvent(onComplete) {
             <button class="trib-btn trib-btn-def" id="btn-defy">Ch\u1ED1ng L\u1EA1i Thi\xEAn \u0110\u1EA1o (B\u1ECB kh\xF3a game 1 ng\xE0y)</button>
         </div>
     `;
-  document.body.appendChild(overlay);
+  ctx.ui.appendChild(overlay);
   const btnSubmit = overlay.querySelector("#btn-submit");
   const btnDefy = overlay.querySelector("#btn-defy");
   const lightning = overlay.querySelector("#trib-lightning");
@@ -7619,7 +7619,7 @@ function startPoorTribulationNotice(onComplete) {
             </div>
         </div>
     `;
-  document.body.appendChild(overlay);
+  ctx.ui.appendChild(overlay);
   setTimeout(() => {
     overlay.style.opacity = "0";
     setTimeout(() => {
