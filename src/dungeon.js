@@ -522,26 +522,32 @@ function _doStartWave() {
     
     lastTime = performance.now();
     if (!gameLoopId) {
-        gameLoopId = requestAnimationFrame(combatLoop);
+        gameLoopId = setTimeout(combatLoop, 16);
     }
 }
 
 function stopCombatLoop() {
-    if (gameLoopId) cancelAnimationFrame(gameLoopId);
+    if (gameLoopId) clearTimeout(gameLoopId);
     gameLoopId = null;
 }
 
-function combatLoop(time) {
+function combatLoop() {
     if (phase !== 'combat') return;
     
-    let dt = (time - lastTime) / 1000;
-    lastTime = time;
+    let now = performance.now();
+    let dt = (now - lastTime) / 1000;
+    lastTime = now;
     
-    // Ngăn lỗi nhảy vọt vị trí khi chuyển tab (browser throttle requestAnimationFrame)
-    if (dt > 0.1) dt = 0.1;
+    // Giới hạn dt tối đa để tránh treo khi chuyển tab quá lâu (giới hạn 1 giây)
+    if (dt > 1.0) dt = 1.0;
     
-    updateEntities(team, enemies, dt);
-    updateEntities(enemies, team, dt);
+    // Chạy ngầm nhiều bước nhỏ nếu dt lớn
+    let steps = 0;
+    while (dt > 0 && steps < 60) {
+        let stepDt = Math.min(dt, 0.016);
+        
+        updateEntities(team, enemies, stepDt);
+        updateEntities(enemies, team, stepDt);
     
     // Update projectiles
     const arena = All.$id('dg-arena');
@@ -553,7 +559,7 @@ function combatLoop(time) {
         
         const dx = p.tx - p.x;
         const dy = p.ty - p.y;
-        const dist = Math.hypot(dx, dy);
+        const dist = Math.hypot(dx, dy) || 0.01;
         
         if (dist < 10) {
             // Hit!
@@ -598,6 +604,14 @@ function combatLoop(time) {
         return true;
     });
     
+        if (enemies.length === 0 || team.length === 0) {
+            break;
+        }
+        
+        dt -= stepDt;
+        steps++;
+    }
+    
     if (enemies.length === 0) {
         showWaveRewards();
         return;
@@ -608,7 +622,7 @@ function combatLoop(time) {
         return;
     }
     
-    gameLoopId = requestAnimationFrame(combatLoop);
+    gameLoopId = setTimeout(combatLoop, 16);
 }
 
 function spawnDmg(target, amount, type) {
@@ -745,6 +759,7 @@ function updateEntities(groupA, groupB, dt) {
         
         // Status Effects
         if (!a.status) a.status = {};
+        if (a.skill === 'taunt') a.status.taunt = 3;
         let isStunned = false;
         let isRooted = false;
         let speedMult = 1;
@@ -799,7 +814,7 @@ function updateEntities(groupA, groupB, dt) {
             let minHpPct = 1.0;
             targetGroup.forEach(ally => {
                 if (ally.hp <= 0) return;
-                const dist = Math.hypot(ally.x - a.x, ally.y - a.y);
+                const dist = Math.hypot(ally.x - a.x, ally.y - a.y) || 0.01;
                 const hpPct = ally.hp / ally.maxHp;
                 if (hpPct < minHpPct && dist < a.range * 4) { 
                     minHpPct = hpPct;
@@ -811,7 +826,7 @@ function updateEntities(groupA, groupB, dt) {
                     if (ally === a || ally.hp <= 0) return;
                     const dx = ally.x - a.x;
                     const dy = ally.y - a.y;
-                    const dist = Math.hypot(dx, dy);
+                    const dist = Math.hypot(dx, dy) || 0.01;
                     if (dist < minDist) {
                         minDist = dist;
                         closest = { b: ally, dx, dy, dist };
@@ -823,7 +838,7 @@ function updateEntities(groupA, groupB, dt) {
             if (a.lockedTarget && validTargets.includes(a.lockedTarget)) {
                 const dx = a.lockedTarget.x - a.x;
                 const dy = a.lockedTarget.y - a.y;
-                const dist = Math.hypot(dx, dy);
+                const dist = Math.hypot(dx, dy) || 0.01;
                 closest = { b: a.lockedTarget, dx, dy, dist };
             } else {
                 let minMaxHp = Infinity;
@@ -832,7 +847,7 @@ function updateEntities(groupA, groupB, dt) {
                         minMaxHp = b.maxHp;
                         const dx = b.x - a.x;
                         const dy = b.y - a.y;
-                        const dist = Math.hypot(dx, dy);
+                        const dist = Math.hypot(dx, dy) || 0.01;
                         closest = { b, dx, dy, dist };
                     }
                 });
@@ -844,7 +859,7 @@ function updateEntities(groupA, groupB, dt) {
             validTargets.forEach(b => {
                 const dx = b.x - a.x;
                 const dy = b.y - a.y;
-                const dist = Math.hypot(dx, dy);
+                const dist = Math.hypot(dx, dy) || 0.01;
                 if (dist < minDist) {
                     minDist = dist;
                     closest = { b, dx, dy, dist };
@@ -961,8 +976,9 @@ function updateEntities(groupA, groupB, dt) {
                         a.frenzyStacks = Math.min(10, a.frenzyStacks + 1);
                         a.cd = a.maxCd / (atkSpdMult * (1 + a.frenzyStacks * 0.05));
                     }
+                    // Taunt is now handled continuously at the start of updateEntities
                     if (a.skill === 'taunt') {
-                        a.status.taunt = 3;
+                        // a.status.taunt = 3;
                     }
                     if (a.skill === 'buff_atk') {
                         groupA.forEach(ally => {

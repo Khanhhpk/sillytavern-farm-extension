@@ -49,14 +49,14 @@ export function loadState() {
 
   Object.keys(ctx.S.bag || {}).forEach(k => {
     const base = k.split('@')[0];
-    if (base === 'mysbG' || base === 'mysbW' || base === 'mysbM' || base === 'moonberry') {
+    if (base === 'mysbG' || base === 'mysbW' || base === 'mysbM') {
       const nk = k.replace(base, 'strawberry');
       ctx.S.bag[nk] = (ctx.S.bag[nk] || 0) + ctx.S.bag[k];
       delete ctx.S.bag[k];
     }
   });
   [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach(arr => (arr || []).forEach(p => {
-    if (p.crop && (p.crop.id === 'mysbG' || p.crop.id === 'mysbW' || p.crop.id === 'mysbM' || p.crop.id === 'moonberry')) p.crop.id = 'strawberry';
+    if (p.crop && (p.crop.id === 'mysbG' || p.crop.id === 'mysbW' || p.crop.id === 'mysbM')) p.crop.id = 'strawberry';
   }));
   
   if (ctx.S.ferts) {

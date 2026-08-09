@@ -7498,14 +7498,14 @@ function loadState() {
   });
   Object.keys(ctx.S.bag || {}).forEach((k) => {
     const base = k.split("@")[0];
-    if (base === "mysbG" || base === "mysbW" || base === "mysbM" || base === "moonberry") {
+    if (base === "mysbG" || base === "mysbW" || base === "mysbM") {
       const nk = k.replace(base, "strawberry");
       ctx.S.bag[nk] = (ctx.S.bag[nk] || 0) + ctx.S.bag[k];
       delete ctx.S.bag[k];
     }
   });
   [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach((arr) => (arr || []).forEach((p) => {
-    if (p.crop && (p.crop.id === "mysbG" || p.crop.id === "mysbW" || p.crop.id === "mysbM" || p.crop.id === "moonberry")) p.crop.id = "strawberry";
+    if (p.crop && (p.crop.id === "mysbG" || p.crop.id === "mysbW" || p.crop.id === "mysbM")) p.crop.id = "strawberry";
   }));
   if (ctx.S.ferts) {
     if (ctx.S.ferts["f1"]) {
@@ -8006,64 +8006,74 @@ function _doStartWave() {
   }
   lastTime = performance.now();
   if (!gameLoopId) {
-    gameLoopId = requestAnimationFrame(combatLoop);
+    gameLoopId = setTimeout(combatLoop, 16);
   }
 }
 function stopCombatLoop() {
-  if (gameLoopId) cancelAnimationFrame(gameLoopId);
+  if (gameLoopId) clearTimeout(gameLoopId);
   gameLoopId = null;
 }
-function combatLoop(time) {
+function combatLoop() {
   if (phase !== "combat") return;
-  let dt = (time - lastTime) / 1e3;
-  lastTime = time;
-  if (dt > 0.1) dt = 0.1;
-  updateEntities(team, enemies, dt);
-  updateEntities(enemies, team, dt);
-  const arena = $id("dg-arena");
-  projectiles = projectiles.filter((p) => {
-    if (!p.target || p.target.hp <= 0) {
-      p.el.remove();
-      return false;
-    }
-    const dx = p.tx - p.x;
-    const dy = p.ty - p.y;
-    const dist = Math.hypot(dx, dy);
-    if (dist < 10) {
-      applyEffect(p.from, p.target, p.fromGroup, p.toGroup, p.atk, p.skill);
-      p.el.remove();
-      return false;
-    } else {
-      const move = p.speed * dt;
-      p.x += dx / dist * move;
-      p.y += dy / dist * move;
-      p.tx = p.target.x;
-      p.ty = p.target.y - 16;
-      p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0)`;
-      return true;
-    }
-  });
-  team = team.filter((e) => {
-    if (e.hp <= 0) {
-      e.el.remove();
-      return false;
-    }
-    return true;
-  });
-  enemies = enemies.filter((e) => {
-    if (e.hp <= 0) {
-      e.el.remove();
-      if (e.gold) {
-        const homeG = Math.floor(e.gold * 0.6);
-        totalGold += homeG;
-        shopGold += e.gold;
-        spawnDmg({ x: e.x, y: e.y - 10 }, `+${e.gold} \u{1F6E0}`, "gold");
-        updateHUD();
+  let now2 = performance.now();
+  let dt = (now2 - lastTime) / 1e3;
+  lastTime = now2;
+  if (dt > 1) dt = 1;
+  let steps = 0;
+  while (dt > 0 && steps < 60) {
+    let stepDt = Math.min(dt, 0.016);
+    updateEntities(team, enemies, stepDt);
+    updateEntities(enemies, team, stepDt);
+    const arena = $id("dg-arena");
+    projectiles = projectiles.filter((p) => {
+      if (!p.target || p.target.hp <= 0) {
+        p.el.remove();
+        return false;
       }
-      return false;
+      const dx = p.tx - p.x;
+      const dy = p.ty - p.y;
+      const dist = Math.hypot(dx, dy) || 0.01;
+      if (dist < 10) {
+        applyEffect(p.from, p.target, p.fromGroup, p.toGroup, p.atk, p.skill);
+        p.el.remove();
+        return false;
+      } else {
+        const move = p.speed * dt;
+        p.x += dx / dist * move;
+        p.y += dy / dist * move;
+        p.tx = p.target.x;
+        p.ty = p.target.y - 16;
+        p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0)`;
+        return true;
+      }
+    });
+    team = team.filter((e) => {
+      if (e.hp <= 0) {
+        e.el.remove();
+        return false;
+      }
+      return true;
+    });
+    enemies = enemies.filter((e) => {
+      if (e.hp <= 0) {
+        e.el.remove();
+        if (e.gold) {
+          const homeG = Math.floor(e.gold * 0.6);
+          totalGold += homeG;
+          shopGold += e.gold;
+          spawnDmg({ x: e.x, y: e.y - 10 }, `+${e.gold} \u{1F6E0}`, "gold");
+          updateHUD();
+        }
+        return false;
+      }
+      return true;
+    });
+    if (enemies.length === 0 || team.length === 0) {
+      break;
     }
-    return true;
-  });
+    dt -= stepDt;
+    steps++;
+  }
   if (enemies.length === 0) {
     showWaveRewards();
     return;
@@ -8072,7 +8082,7 @@ function combatLoop(time) {
     endDungeon(false);
     return;
   }
-  gameLoopId = requestAnimationFrame(combatLoop);
+  gameLoopId = setTimeout(combatLoop, 16);
 }
 function spawnDmg(target, amount, type) {
   const isStr = typeof amount === "string";
@@ -8186,6 +8196,7 @@ function updateEntities(groupA, groupB, dt) {
     const cdFill = a.el.querySelector(".dg-cd-fill");
     if (cdFill) cdFill.style.width = cdPct + "%";
     if (!a.status) a.status = {};
+    if (a.skill === "taunt") a.status.taunt = 3;
     let isStunned = false;
     let isRooted = false;
     let speedMult = 1;
@@ -8233,7 +8244,7 @@ function updateEntities(groupA, groupB, dt) {
       let minHpPct = 1;
       targetGroup.forEach((ally) => {
         if (ally.hp <= 0) return;
-        const dist = Math.hypot(ally.x - a.x, ally.y - a.y);
+        const dist = Math.hypot(ally.x - a.x, ally.y - a.y) || 0.01;
         const hpPct = ally.hp / ally.maxHp;
         if (hpPct < minHpPct && dist < a.range * 4) {
           minHpPct = hpPct;
@@ -8245,7 +8256,7 @@ function updateEntities(groupA, groupB, dt) {
           if (ally === a || ally.hp <= 0) return;
           const dx = ally.x - a.x;
           const dy = ally.y - a.y;
-          const dist = Math.hypot(dx, dy);
+          const dist = Math.hypot(dx, dy) || 0.01;
           if (dist < minDist) {
             minDist = dist;
             closest = { b: ally, dx, dy, dist };
@@ -8257,7 +8268,7 @@ function updateEntities(groupA, groupB, dt) {
       if (a.lockedTarget && validTargets.includes(a.lockedTarget)) {
         const dx = a.lockedTarget.x - a.x;
         const dy = a.lockedTarget.y - a.y;
-        const dist = Math.hypot(dx, dy);
+        const dist = Math.hypot(dx, dy) || 0.01;
         closest = { b: a.lockedTarget, dx, dy, dist };
       } else {
         let minMaxHp = Infinity;
@@ -8266,7 +8277,7 @@ function updateEntities(groupA, groupB, dt) {
             minMaxHp = b.maxHp;
             const dx = b.x - a.x;
             const dy = b.y - a.y;
-            const dist = Math.hypot(dx, dy);
+            const dist = Math.hypot(dx, dy) || 0.01;
             closest = { b, dx, dy, dist };
           }
         });
@@ -8278,7 +8289,7 @@ function updateEntities(groupA, groupB, dt) {
       validTargets.forEach((b) => {
         const dx = b.x - a.x;
         const dy = b.y - a.y;
-        const dist = Math.hypot(dx, dy);
+        const dist = Math.hypot(dx, dy) || 0.01;
         if (dist < minDist) {
           minDist = dist;
           closest = { b, dx, dy, dist };
@@ -8373,7 +8384,6 @@ function updateEntities(groupA, groupB, dt) {
             a.cd = a.maxCd / (atkSpdMult * (1 + a.frenzyStacks * 0.05));
           }
           if (a.skill === "taunt") {
-            a.status.taunt = 3;
           }
           if (a.skill === "buff_atk") {
             groupA.forEach((ally) => {
