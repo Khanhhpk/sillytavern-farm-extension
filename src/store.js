@@ -18,26 +18,3 @@ export const setExtensionContext = (params) => {
     Object.assign(ctx, params);
 };
 
-if (typeof window !== 'undefined') {
-    window['resetNaoya'] = () => {
-        let s = ctx.S;
-        if (s.pets) s.pets = s.pets.filter(p => p !== 'naoyaSlime');
-        if (s.hero && s.hero.roster) delete s.hero.roster.naoyaSlime;
-        if (s.achiv && s.achiv.naoya) s.achiv.naoya.claimed = false;
-        if (typeof ctx.saveSettingsDebounced === 'function') ctx.saveSettingsDebounced();
-        console.log('✅ Đã reset Naoya thành công. Hãy F5 tải lại trang!');
-    };
-
-    window['completeNaoyaAchiv'] = () => {
-        let s = ctx.S;
-        if (!s.stats) s.stats = {};
-        s.stats.totalHarvests = Math.max(s.stats.totalHarvests || 0, 240);
-        s.stats.totalCrits = Math.max(s.stats.totalCrits || 0, 2400);
-        if (!s.hero) s.hero = {};
-        s.hero.maxStage = Math.max(s.hero.maxStage || 1, 24);
-        if (!s.achiv) s.achiv = { naoya: {} };
-        if (!s.achiv.naoya) s.achiv.naoya = {};
-        if (typeof ctx.saveSettingsDebounced === 'function') ctx.saveSettingsDebounced();
-        console.log('✅ Đã nạp đầy tiến độ thành tựu Naoya! Hãy mở Cửa hàng (Shop) lên kiểm tra lại nhé.');
-    };
-}
