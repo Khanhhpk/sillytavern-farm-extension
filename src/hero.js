@@ -105,7 +105,8 @@ export const PET_SKILLS = {
   naoyaSlime: {
       a1: { name: '24 Khung Hình', type: 'multi_strike', val: 24, cd: 8, duration: 1, desc: 'Tung 24 đòn chém liên tiếp (Mỗi đòn 50% ATK)' },
       a2: { name: 'Đứng Trên Tất Cả', type: 'atk_spd_self', val: 2.4, cd: 12, duration: 3, desc: 'Buff x2.4 Tốc Đánh trong 3s' },
-      p1: { name: 'Khinh Miệt Kẻ Yếu', type: 'execute', val: 0.24, desc: 'Tự động kiết liễu quái có HP < 24%' }
+      p1: { name: 'Khinh Miệt Kẻ Yếu', type: 'execute', val: 0.24, desc: 'Tự động kiết liễu quái có HP < 24%' },
+      p2: { name: 'Quy Tắc Khung Hình', type: 'combo_master', val: 4, desc: 'Cứ đòn đánh thứ 4 là Chí Mạng x3 Sát Thương' }
   },
   default: { 
     a1: { name: 'Cố Gắng', type: 'atk_up', val: 0.2, cd: 5, duration: 3, desc: 'Tăng 20% ATK' }, 

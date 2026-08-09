@@ -9291,7 +9291,8 @@ var init_hero = __esm({
       naoyaSlime: {
         a1: { name: "24 Khung H\xECnh", type: "multi_strike", val: 24, cd: 8, duration: 1, desc: "Tung 24 \u0111\xF2n ch\xE9m li\xEAn ti\u1EBFp (M\u1ED7i \u0111\xF2n 50% ATK)" },
         a2: { name: "\u0110\u1EE9ng Tr\xEAn T\u1EA5t C\u1EA3", type: "atk_spd_self", val: 2.4, cd: 12, duration: 3, desc: "Buff x2.4 T\u1ED1c \u0110\xE1nh trong 3s" },
-        p1: { name: "Khinh Mi\u1EC7t K\u1EBB Y\u1EBFu", type: "execute", val: 0.24, desc: "T\u1EF1 \u0111\u1ED9ng ki\u1EBFt li\u1EC5u qu\xE1i c\xF3 HP < 24%" }
+        p1: { name: "Khinh Mi\u1EC7t K\u1EBB Y\u1EBFu", type: "execute", val: 0.24, desc: "T\u1EF1 \u0111\u1ED9ng ki\u1EBFt li\u1EC5u qu\xE1i c\xF3 HP < 24%" },
+        p2: { name: "Quy T\u1EAFc Khung H\xECnh", type: "combo_master", val: 4, desc: "C\u1EE9 \u0111\xF2n \u0111\xE1nh th\u1EE9 4 l\xE0 Ch\xED M\u1EA1ng x3 S\xE1t Th\u01B0\u01A1ng" }
       },
       default: {
         a1: { name: "C\u1ED1 G\u1EAFng", type: "atk_up", val: 0.2, cd: 5, duration: 3, desc: "T\u0103ng 20% ATK" },
@@ -10078,42 +10079,44 @@ function updateEntities(groupA, groupB, dt) {
         const momentum = 1 / (a.maxCd || 1);
         const finalDmg = a.atk;
         const projectionDmg = Math.floor(finalDmg * momentum);
-        targetGroup.forEach((e) => {
-          if (e.hp > 0) {
-            if (e !== closest.b) {
-              e.hp -= projectionDmg;
-              spawnDmg(e, -projectionDmg);
-            } else {
-              const extraDmg = Math.max(0, projectionDmg - finalDmg);
-              if (extraDmg > 0) {
-                e.hp -= extraDmg;
-                spawnDmg(e, -extraDmg, "crit");
+        playNaoyaCutscene(a, a.el, closest.b.el, () => {
+          targetGroup.forEach((e) => {
+            if (e.hp > 0) {
+              if (e !== closest.b) {
+                e.hp -= projectionDmg;
+                spawnDmg(e, -projectionDmg);
+              } else {
+                const extraDmg = Math.max(0, projectionDmg - finalDmg);
+                if (extraDmg > 0) {
+                  e.hp -= extraDmg;
+                  spawnDmg(e, -extraDmg, "crit");
+                }
+              }
+              if (!e.status) e.status = {};
+              e.status.freeze = 1;
+              if (arena && a.el) {
+                const ghost = a.el.cloneNode(true);
+                ghost.className = "dg-entity projection-ghost";
+                ghost.style.position = "absolute";
+                ghost.style.left = e.x + "px";
+                ghost.style.top = e.y + "px";
+                ghost.style.zIndex = "1";
+                ghost.style.opacity = "0.5";
+                ghost.style.filter = "grayscale(1) contrast(1.5)";
+                ghost.style.pointerEvents = "none";
+                arena.appendChild(ghost);
+                setTimeout(() => ghost.remove(), 150);
               }
             }
-            if (!e.status) e.status = {};
-            e.status.freeze = 1;
-            if (arena && a.el) {
-              const ghost = a.el.cloneNode(true);
-              ghost.className = "dg-entity projection-ghost";
-              ghost.style.position = "absolute";
-              ghost.style.left = e.x + "px";
-              ghost.style.top = e.y + "px";
-              ghost.style.zIndex = "1";
-              ghost.style.opacity = "0.5";
-              ghost.style.filter = "grayscale(1) contrast(1.5)";
-              ghost.style.pointerEvents = "none";
-              arena.appendChild(ghost);
-              setTimeout(() => ghost.remove(), 150);
+          });
+          a.el.style.transition = "none";
+          a.el.style.transform = `translate3d(${closest.b.x - 16}px, ${closest.b.y - 16}px, 0) scale(1.1) skewX(-20deg)`;
+          setTimeout(() => {
+            if (a.el) {
+              a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
             }
-          }
+          }, 100);
         });
-        a.el.style.transition = "none";
-        a.el.style.transform = `translate3d(${closest.b.x - 16}px, ${closest.b.y - 16}px, 0) scale(1.1) skewX(-20deg)`;
-        setTimeout(() => {
-          if (a.el) {
-            a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-          }
-        }, 100);
         return;
       }
       if (closest.dx < -1 && a.type === "pet") a.el.classList.add("flip");

@@ -909,53 +909,55 @@ function updateEntities(groupA, groupB, dt) {
                 const finalDmg = a.atk;
                 const projectionDmg = Math.floor(finalDmg * momentum);
                 
-                targetGroup.forEach(e => {
-                    if (e.hp > 0) {
-                        // Áp dụng sát thương động năng
-                        if (e !== closest.b) {
-                            e.hp -= projectionDmg;
-                            spawnDmg(e, -projectionDmg);
-                        } else {
-                            const extraDmg = Math.max(0, projectionDmg - finalDmg);
-                            if (extraDmg > 0) {
-                                e.hp -= extraDmg;
-                                spawnDmg(e, -extraDmg, 'crit');
+                playNaoyaCutscene(a, a.el, closest.b.el, () => {
+                    targetGroup.forEach(e => {
+                        if (e.hp > 0) {
+                            // Áp dụng sát thương động năng
+                            if (e !== closest.b) {
+                                e.hp -= projectionDmg;
+                                spawnDmg(e, -projectionDmg);
+                            } else {
+                                const extraDmg = Math.max(0, projectionDmg - finalDmg);
+                                if (extraDmg > 0) {
+                                    e.hp -= extraDmg;
+                                    spawnDmg(e, -extraDmg, 'crit');
+                                }
+                            }
+
+                            // Hình phạt vi phạm quy tắc khung hình: Đóng băng 1 giây
+                            if (!e.status) e.status = {};
+                            e.status.freeze = 1;
+
+                            // Để lại tàn ảnh đen trắng (Afterimage) tại vị trí nạn nhân
+                            if (arena && a.el) {
+                                const ghost = a.el.cloneNode(true);
+                                ghost.className = 'dg-entity projection-ghost';
+                                ghost.style.position = 'absolute';
+                                ghost.style.left = e.x + 'px';
+                                ghost.style.top = e.y + 'px';
+                                ghost.style.zIndex = '1';
+                                ghost.style.opacity = '0.5';
+                                ghost.style.filter = 'grayscale(1) contrast(1.5)';
+                                ghost.style.pointerEvents = 'none';
+                                arena.appendChild(ghost);
+                                
+                                // Xóa tàn ảnh nhanh và gọn
+                                setTimeout(() => ghost.remove(), 150);
                             }
                         }
+                    });
 
-                        // Hình phạt vi phạm quy tắc khung hình: Đóng băng 1 giây
-                        if (!e.status) e.status = {};
-                        e.status.freeze = 1;
-
-                        // Để lại tàn ảnh đen trắng (Afterimage) tại vị trí nạn nhân
-                        if (arena && a.el) {
-                            const ghost = a.el.cloneNode(true);
-                            ghost.className = 'dg-entity projection-ghost';
-                            ghost.style.position = 'absolute';
-                            ghost.style.left = e.x + 'px';
-                            ghost.style.top = e.y + 'px';
-                            ghost.style.zIndex = '1';
-                            ghost.style.opacity = '0.5';
-                            ghost.style.filter = 'grayscale(1) contrast(1.5)';
-                            ghost.style.pointerEvents = 'none';
-                            arena.appendChild(ghost);
-                            
-                            // Xóa tàn ảnh nhanh và gọn
-                            setTimeout(() => ghost.remove(), 150);
+                    // Hoạt ảnh lướt của Naoya (Bỏ qua các khung hình di chuyển trung gian)
+                    a.el.style.transition = 'none';
+                    a.el.style.transform = `translate3d(${closest.b.x - 16}px, ${closest.b.y - 16}px, 0) scale(1.1) skewX(-20deg)`;
+                    
+                    // Trả về tư thế đứng thẳng
+                    setTimeout(() => {
+                        if (a.el) {
+                            a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
                         }
-                    }
+                    }, 100);
                 });
-
-                // Hoạt ảnh lướt của Naoya (Bỏ qua các khung hình di chuyển trung gian)
-                a.el.style.transition = 'none';
-                a.el.style.transform = `translate3d(${closest.b.x - 16}px, ${closest.b.y - 16}px, 0) scale(1.1) skewX(-20deg)`;
-                
-                // Trả về tư thế đứng thẳng
-                setTimeout(() => {
-                    if (a.el) {
-                        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-                    }
-                }, 100);
 
                 return;
             }
