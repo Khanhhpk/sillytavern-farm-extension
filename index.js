@@ -5985,6 +5985,11 @@ function initWindows() {
       save();
     });
   }
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && ctx.win && ctx.win.classList.contains("open")) {
+      renderDynamic();
+    }
+  });
 }
 var tick, wg, dragBar;
 var init_windows = __esm({

@@ -118,4 +118,10 @@ export function initWindows() {
       All.save();
     });
   }
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && ctx.win && ctx.win.classList.contains('open')) {
+      renderDynamic();
+    }
+  });
 }
