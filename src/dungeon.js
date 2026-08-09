@@ -1262,6 +1262,7 @@ function showWaveRewards(isLoaded = false) {
     stopCombatLoop();
     
     let bossDropHtml = '';
+    const arena = All.$id('dg-arena');
     
     if (!isLoaded) {
         projectiles.forEach(p => p.el.remove());
@@ -1273,7 +1274,6 @@ function showWaveRewards(isLoaded = false) {
         totalGold += Math.floor(waveGold * 0.3);
         shopGold += waveGold;
         
-        const arena = All.$id('dg-arena');
         fullTeam.forEach(p => {
             if (p.hp <= 0) {
                 p.hp = p.maxHp * 0.5; // Revive
