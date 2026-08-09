@@ -5898,38 +5898,43 @@ function placeDungeonWin() {
   dungeonWin.style.top = Math.min(Math.max(y, 0), vh - 60) + "px";
 }
 function toggleWin() {
-  if (ctx.win.classList.contains("open")) {
-    closeWin();
-    return;
-  }
-  if (ctx.S.blockedUntil && ctx.S.blockedUntil > Date.now()) {
-    toast("Tr\u1EDDi ph\u1EA1t ch\u01B0a tan, Thi\xEAn Ki\u1EBFp v\u1EABn c\xF2n... N\xF4ng Tr\u1EA1i \u0111\xF3ng c\u1EEDa!");
-    return;
-  }
-  if (ctx.S.needsTribulationCheck) {
-    startTribulationEvent(() => {
-      if (!ctx.S.blockedUntil || ctx.S.blockedUntil <= Date.now()) {
+  try {
+    if (ctx.win.classList.contains("open")) {
+      closeWin();
+      return;
+    }
+    if (ctx.S.blockedUntil && ctx.S.blockedUntil > Date.now()) {
+      toast("Tr\u1EDDi ph\u1EA1t ch\u01B0a tan, Thi\xEAn Ki\u1EBFp v\u1EABn c\xF2n... N\xF4ng Tr\u1EA1i \u0111\xF3ng c\u1EEDa!");
+      return;
+    }
+    if (ctx.S.needsTribulationCheck) {
+      startTribulationEvent(() => {
+        if (!ctx.S.blockedUntil || ctx.S.blockedUntil <= Date.now()) {
+          toggleWin();
+        }
+      });
+      return;
+    }
+    if (ctx.S.needsPoorTribulationNotice) {
+      startPoorTribulationNotice(() => {
         toggleWin();
-      }
-    });
-    return;
+      });
+      delete ctx.S.needsPoorTribulationNotice;
+      save(true);
+      return;
+    }
+    ctx.win.classList.add("open");
+    layout();
+    placeWin();
+    settle();
+    renderAll();
+    tick = window.setInterval(() => {
+      renderDynamic();
+    }, 1e3);
+  } catch (e) {
+    console.error("[Farm] toggleWin Error: ", e);
+    if (toast) toast("Error: " + e.message);
   }
-  if (ctx.S.needsPoorTribulationNotice) {
-    startPoorTribulationNotice(() => {
-      toggleWin();
-    });
-    delete ctx.S.needsPoorTribulationNotice;
-    save(true);
-    return;
-  }
-  ctx.win.classList.add("open");
-  layout();
-  placeWin();
-  settle();
-  renderAll();
-  tick = window.setInterval(() => {
-    renderDynamic();
-  }, 1e3);
 }
 function closeWin() {
   ctx.win.classList.remove("open");
@@ -5997,6 +6002,7 @@ var init_windows = __esm({
   "src/windows.js"() {
     init_store();
     init_all();
+    init_events();
     init_orb();
     init_utils();
     init_render();

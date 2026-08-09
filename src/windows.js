@@ -1,5 +1,6 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
+import { startTribulationEvent, startPoorTribulationNotice } from './events.js';
 
 import { layout } from './orb.js';
 import { settle } from './utils.js';
@@ -27,30 +28,35 @@ export function placeDungeonWin() {
   dungeonWin.style.top = Math.min(Math.max(y, 0), vh - 60) + 'px';
 }
 export function toggleWin() {
-  if (ctx.win.classList.contains('open')) { closeWin(); return; }
-  if (ctx.S.blockedUntil && ctx.S.blockedUntil > Date.now()) {
-      All.toast('Trời phạt chưa tan, Thiên Kiếp vẫn còn... Nông Trại đóng cửa!');
-      return;
+  try {
+      if (ctx.win.classList.contains('open')) { closeWin(); return; }
+      if (ctx.S.blockedUntil && ctx.S.blockedUntil > Date.now()) {
+          All.toast('Trời phạt chưa tan, Thiên Kiếp vẫn còn... Nông Trại đóng cửa!');
+          return;
+      }
+      if (ctx.S.needsTribulationCheck) {
+          startTribulationEvent(() => {
+              if (!ctx.S.blockedUntil || ctx.S.blockedUntil <= Date.now()) {
+                  toggleWin(); // Open again if they survived
+              }
+          });
+          return;
+      }
+      if (ctx.S.needsPoorTribulationNotice) {
+          startPoorTribulationNotice(() => {
+              toggleWin(); // Open after notice
+          });
+          delete ctx.S.needsPoorTribulationNotice;
+          save(true);
+          return;
+      }
+      ctx.win.classList.add('open');
+      layout(); placeWin(); settle(); renderAll();
+      tick = window.setInterval(() => { renderDynamic(); }, 1000);
+  } catch (e) {
+      console.error("[Farm] toggleWin Error: ", e);
+      if (All.toast) All.toast("Error: " + e.message);
   }
-  if (ctx.S.needsTribulationCheck) {
-      All.startTribulationEvent(() => {
-          if (!ctx.S.blockedUntil || ctx.S.blockedUntil <= Date.now()) {
-              toggleWin(); // Open again if they survived
-          }
-      });
-      return;
-  }
-  if (ctx.S.needsPoorTribulationNotice) {
-      All.startPoorTribulationNotice(() => {
-          toggleWin(); // Open after notice
-      });
-      delete ctx.S.needsPoorTribulationNotice;
-      save(true);
-      return;
-  }
-  ctx.win.classList.add('open');
-  layout(); placeWin(); settle(); renderAll();
-  tick = window.setInterval(() => { renderDynamic(); }, 1000);
 }
 export function closeWin() {
   ctx.win.classList.remove('open');
