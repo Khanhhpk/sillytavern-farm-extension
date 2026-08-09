@@ -8641,8 +8641,9 @@ function heroTick() {
             p.combo = (p.combo || 0) + 1;
             let isCrit = Math.random() < p.crit;
             if (passEq && pSkill[passEq] && pSkill[passEq].type === "combo_master" && p.combo % pSkill[passEq].val === 0) isCrit = true;
-            if (isCrit && ctx.S.achiv && !ctx.S.achiv.naoya.claimed) {
-              ctx.S.achiv.naoya.crits++;
+            if (isCrit) {
+              if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
+              ctx.S.stats.totalCrits = (ctx.S.stats.totalCrits || 0) + 1;
             }
             let dmgBase = Math.max(1, Math.floor(p.atk * atkMult * (0.8 + Math.random() * 0.4)));
             if (p.armorPen > 0) dmgBase = Math.floor(dmgBase * (1 + p.armorPen));
