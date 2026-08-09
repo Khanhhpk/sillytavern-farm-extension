@@ -52,6 +52,26 @@ var init_store = __esm({
     setExtensionContext = (params) => {
       Object.assign(ctx, params);
     };
+    if (typeof window !== "undefined") {
+      window["testTribulation"] = () => {
+        if (ctx.S) {
+          ctx.S.coins = 25e8;
+          ctx.S.needsTribulationCheck = true;
+          delete ctx.S.blockedUntil;
+          if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+          console.log("\u2705 \u0110\xE3 gi\u1EA3 l\u1EADp m\u1ED1c t\xE0i s\u1EA3n 2.5 T\u1EF7 v\xE0 \xE9p ch\u1EA1y s\u1EF1 ki\u1EC7n Thi\xEAn Ki\u1EBFp! H\xE3y b\u1EA5m v\xE0o qu\u1EA3 c\u1EA7u N\xF4ng Tr\u1EA1i \u0111\u1EC3 xem.");
+        } else {
+          console.log("\u274C N\xF4ng tr\u1EA1i ch\u01B0a \u0111\u01B0\u1EE3c t\u1EA3i (ctx.S null). H\xE3y m\u1EDF game m\u1ED9t l\u1EA7n tr\u01B0\u1EDBc.");
+        }
+      };
+      window["unlockTribulation"] = () => {
+        if (ctx.S) {
+          delete ctx.S.blockedUntil;
+          if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+          console.log("\u2705 \u0110\xE3 gi\u1EA3i tr\u1EEB phong \u1EA5n Thi\xEAn Ki\u1EBFp! B\u1EA1n c\xF3 th\u1EC3 v\xE0o l\u1EA1i N\xF4ng Tr\u1EA1i.");
+        }
+      };
+    }
   }
 });
 
