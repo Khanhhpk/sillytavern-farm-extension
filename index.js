@@ -7634,7 +7634,11 @@ function startLockedModal() {
   overlay.className = "trib-content";
   overlay.id = "farm-locked-modal";
   overlay.style.pointerEvents = "auto";
-  overlay.style.position = "relative";
+  overlay.style.position = "fixed";
+  overlay.style.top = "50%";
+  overlay.style.left = "50%";
+  overlay.style.transform = "translate(-50%, -50%)";
+  overlay.style.zIndex = "999999";
   const remaining = ctx.S.blockedUntil - Date.now();
   const hours = Math.floor(remaining / (1e3 * 60 * 60));
   const mins = Math.floor(remaining % (1e3 * 60 * 60) / (1e3 * 60));
