@@ -483,7 +483,7 @@ export function openHeroMode() {
   
   if (!heroLoop) {
     lastTick = Date.now();
-    heroLoop = setInterval(heroTick, 100); // Game loop 10fps
+    heroLoop = requestAnimationFrame(heroTick);
   }
   heroToast('Taskbar Hero đã xuất phát!');
 }
@@ -492,7 +492,7 @@ export function closeHeroMode() {
   const bar = All.$id('hero-bar');
   if (bar) bar.style.display = 'none';
   if (heroLoop) {
-    clearInterval(heroLoop);
+    cancelAnimationFrame(heroLoop);
     heroLoop = null;
   }
   window.removeEventListener('resize', placeHeroBar);
@@ -615,6 +615,9 @@ function renderMonstersUI() {
 }
 
 function heroTick() {
+  if (!heroLoop) return;
+  heroLoop = requestAnimationFrame(heroTick);
+
   const now = Date.now();
   const dt = now - lastTick;
   lastTick = now;

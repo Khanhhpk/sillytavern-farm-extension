@@ -8248,7 +8248,7 @@ function openHeroMode() {
   placeHeroBar();
   if (!heroLoop) {
     lastTick = Date.now();
-    heroLoop = setInterval(heroTick, 100);
+    heroLoop = requestAnimationFrame(heroTick);
   }
   heroToast("Taskbar Hero \u0111\xE3 xu\u1EA5t ph\xE1t!");
 }
@@ -8256,7 +8256,7 @@ function closeHeroMode() {
   const bar = $id("hero-bar");
   if (bar) bar.style.display = "none";
   if (heroLoop) {
-    clearInterval(heroLoop);
+    cancelAnimationFrame(heroLoop);
     heroLoop = null;
   }
   window.removeEventListener("resize", placeHeroBar);
@@ -8349,6 +8349,8 @@ function renderMonstersUI() {
   }).join("");
 }
 function heroTick() {
+  if (!heroLoop) return;
+  heroLoop = requestAnimationFrame(heroTick);
   const now2 = Date.now();
   const dt = now2 - lastTick;
   lastTick = now2;
