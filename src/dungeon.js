@@ -504,7 +504,7 @@ function _doStartWave() {
         
         // Scale hp and atk based on pure exponential wave
         let hpMultiplier = Math.pow(1.15, currentWave - 1);
-        let atkMultiplier = Math.pow(1.08, currentWave - 1);
+        let atkMultiplier = Math.pow(1.15, currentWave - 1);
         if (isBossWave) {
             hpMultiplier *= 1.5;
             atkMultiplier *= 1.2;
