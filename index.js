@@ -52,14 +52,28 @@ var init_store = __esm({
     setExtensionContext = (params) => {
       Object.assign(ctx, params);
     };
-    window.resetNaoya = () => {
-      let s = ctx.S;
-      if (s.pets) s.pets = s.pets.filter((p) => p !== "naoyaSlime");
-      if (s.hero && s.hero.roster) delete s.hero.roster.naoyaSlime;
-      if (s.achiv && s.achiv.naoya) s.achiv.naoya.claimed = false;
-      if (typeof ctx.saveSettingsDebounced === "function") ctx.saveSettingsDebounced();
-      console.log("\u2705 \u0110\xE3 reset Naoya th\xE0nh c\xF4ng. H\xE3y F5 t\u1EA3i l\u1EA1i trang!");
-    };
+    if (typeof window !== "undefined") {
+      window["resetNaoya"] = () => {
+        let s = ctx.S;
+        if (s.pets) s.pets = s.pets.filter((p) => p !== "naoyaSlime");
+        if (s.hero && s.hero.roster) delete s.hero.roster.naoyaSlime;
+        if (s.achiv && s.achiv.naoya) s.achiv.naoya.claimed = false;
+        if (typeof ctx.saveSettingsDebounced === "function") ctx.saveSettingsDebounced();
+        console.log("\u2705 \u0110\xE3 reset Naoya th\xE0nh c\xF4ng. H\xE3y F5 t\u1EA3i l\u1EA1i trang!");
+      };
+      window["completeNaoyaAchiv"] = () => {
+        let s = ctx.S;
+        if (!s.stats) s.stats = {};
+        s.stats.totalHarvests = Math.max(s.stats.totalHarvests || 0, 24);
+        s.stats.totalCrits = Math.max(s.stats.totalCrits || 0, 240);
+        if (!s.hero) s.hero = {};
+        s.hero.maxStage = Math.max(s.hero.maxStage || 1, 24);
+        if (!s.achiv) s.achiv = { naoya: {} };
+        if (!s.achiv.naoya) s.achiv.naoya = {};
+        if (typeof ctx.saveSettingsDebounced === "function") ctx.saveSettingsDebounced();
+        console.log("\u2705 \u0110\xE3 n\u1EA1p \u0111\u1EA7y ti\u1EBFn \u0111\u1ED9 th\xE0nh t\u1EF1u Naoya! H\xE3y m\u1EDF C\u1EEDa h\xE0ng (Shop) l\xEAn ki\u1EC3m tra l\u1EA1i nh\xE9.");
+      };
+    }
   }
 });
 
