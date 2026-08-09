@@ -220,14 +220,14 @@ function initPlacementPhase() {
             dragEl.innerHTML = petSVG(petId, 32);
             document.body.appendChild(dragEl); // append to body to avoid transform/overflow issues
             
-            dragEl.style.transform = `translate3d(${e.clientX - 16}px, ${e.clientY - 16}px, 0)`;
+            dragEl.style.transform = `translate3d(${e.clientX - 32}px, ${e.clientY - 32}px, 0)`;
             
             slot.setPointerCapture(e.pointerId);
         });
         
         slot.addEventListener('pointermove', (e) => {
             if (!draggingPet || !dragEl) return;
-            dragEl.style.transform = `translate3d(${e.clientX - 16}px, ${e.clientY - 16}px, 0)`;
+            dragEl.style.transform = `translate3d(${e.clientX - 32}px, ${e.clientY - 32}px, 0)`;
         });
         
         slot.addEventListener('pointerup', (e) => {
@@ -257,8 +257,8 @@ function initPlacementPhase() {
                     ${petSVG(pId, 32)}
                 `;
                 
-                let x = e.clientX - rect.left;
-                let y = e.clientY - rect.top;
+                let x = e.clientX - rect.left - 16;
+                let y = e.clientY - rect.top - 16;
                 if (x > rect.width - 16) x = rect.width - 16;
                 if (x < 16) x = 16;
                 if (y < 16) y = 16;
@@ -303,8 +303,8 @@ function initPlacementPhase() {
                         ev.clientY >= arect.top && ev.clientY <= arect.bottom) {
                         
                         el.style.position = 'absolute';
-                        let nx = ev.clientX - arect.left;
-                        let ny = ev.clientY - arect.top;
+                        let nx = ev.clientX - arect.left - 16;
+                        let ny = ev.clientY - arect.top - 16;
                         if (nx > arect.width - 16) nx = arect.width - 16;
                         if (nx < 16) nx = 16;
                         if (ny < 16) ny = 16;
