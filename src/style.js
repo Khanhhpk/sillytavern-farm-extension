@@ -438,6 +438,7 @@ export const styleCSS = `
     .dg-shop-pet:hover { background: #303038; }
     .dg-shop-pet.selected { border-color: #ffd94d; background: #353540; }
     .dg-shop-pet .lv { font-size: 11px; font-weight: bold; color: #888; margin-top: 4px; }
+    .dg-shop-pet .dmg-stats { display: flex; flex-direction: column; gap: 2px; font-size: 9px; line-height: 1; margin-top: 4px; text-align: left; background: rgba(0,0,0,0.3); padding: 3px; border-radius: 4px; }
     .dg-shop-pet.selected .lv { color: #ffd94d; }
     
     .dg-shop-right { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }

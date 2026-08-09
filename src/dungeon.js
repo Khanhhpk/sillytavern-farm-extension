@@ -456,6 +456,7 @@ function _doStartWave() {
     phase = 'combat';
     enemies = [];
     projectiles = [];
+    fullTeam.forEach(p => { p.waveDmgDealt = 0; p.waveDmgTaken = 0; });
     const arena = All.$id('dg-arena');
     const w = arena.clientWidth;
     const h = arena.clientHeight;
@@ -705,6 +706,9 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - finalDmg);
     spawnDmg(target, -finalDmg, isCrit ? 'crit' : '');
     
+    if (attacker && attacker.type === 'pet') attacker.waveDmgDealt = (attacker.waveDmgDealt || 0) + finalDmg;
+    if (target.type === 'pet') target.waveDmgTaken = (target.waveDmgTaken || 0) + finalDmg;
+    
     if (skill === 'lifesteal' && attacker) {
         const ls = Math.floor(finalDmg * 0.5);
         attacker.hp = Math.min(attacker.maxHp, attacker.hp + ls);
@@ -720,8 +724,11 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     if (skill === 'cleave' && attacker) {
         enemyGroup.forEach(e => {
             if (e !== target && e.hp > 0 && Math.hypot(e.x - target.x, e.y - target.y) <= 40) {
-                e.hp -= Math.floor(finalDmg * 0.5);
-                spawnDmg(e, -Math.floor(finalDmg * 0.5));
+                const splash = Math.floor(finalDmg * 0.5);
+                e.hp -= splash;
+                spawnDmg(e, -splash);
+                if (attacker.type === 'pet') attacker.waveDmgDealt = (attacker.waveDmgDealt || 0) + splash;
+                if (e.type === 'pet') e.waveDmgTaken = (e.waveDmgTaken || 0) + splash;
             }
         });
     }
@@ -736,6 +743,8 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
                 if (dot > 0.1 && dot < 2.0 && distToLine < 30) { 
                     e.hp -= finalDmg;
                     spawnDmg(e, -finalDmg);
+                    if (attacker.type === 'pet') attacker.waveDmgDealt = (attacker.waveDmgDealt || 0) + finalDmg;
+                    if (e.type === 'pet') e.waveDmgTaken = (e.waveDmgTaken || 0) + finalDmg;
                 }
             }
         });
@@ -1144,9 +1153,14 @@ function showWaveRewards() {
         fullTeam.forEach((p, idx) => {
             const isSel = idx === selectedIdx;
             const totalLv = Object.values(p.upgrades).reduce((a,b)=>a+b,0);
+            const formatNum = n => n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(1)+'K' : n;
             petsHtml += `<div class="dg-shop-pet ${isSel?'selected':''}" data-idx="${idx}">
                 ${petSVG(p.id, 40)}
                 <div class="lv">LV ${totalLv}</div>
+                <div class="dmg-stats">
+                    <span style="color:#ff6666">⚔️${formatNum(p.waveDmgDealt || 0)}</span>
+                    <span style="color:#66ccff">🛡️${formatNum(p.waveDmgTaken || 0)}</span>
+                </div>
             </div>`;
         });
         petsHtml += '</div>';
