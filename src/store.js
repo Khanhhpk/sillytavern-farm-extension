@@ -33,8 +33,8 @@ if (typeof window !== 'undefined') {
         if (!s.stats) s.stats = {};
         s.stats.totalHarvests = Math.max(s.stats.totalHarvests || 0, 240);
         s.stats.totalCrits = Math.max(s.stats.totalCrits || 0, 2400);
-        if (!s.dungeonBest) s.dungeonBest = { wave: 0, gold: 0 };
-        s.dungeonBest.wave = Math.max(s.dungeonBest.wave || 0, 24);
+        if (!s.hero) s.hero = {};
+        s.hero.maxStage = Math.max(s.hero.maxStage || 1, 24);
         if (!s.achiv) s.achiv = { naoya: {} };
         if (!s.achiv.naoya) s.achiv.naoya = {};
         if (typeof ctx.saveSettingsDebounced === 'function') ctx.saveSettingsDebounced();

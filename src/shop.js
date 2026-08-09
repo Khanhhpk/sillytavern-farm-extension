@@ -40,7 +40,7 @@ export function openAchivModal() {
   
   // Các Quest sau này cũng sẽ dùng chung cấu trúc y hệt thế này
   const q1 = Math.min(240, stats.totalHarvests);
-  const q2 = Math.min(24, ctx.S.dungeonBest?.wave || 0);
+  const q2 = Math.min(24, ctx.S.hero?.maxStage || 1);
   const q3 = Math.min(2400, stats.totalCrits);
   const done = q1 >= 240 && q2 >= 24 && q3 >= 2400;
 
@@ -73,7 +73,7 @@ export function openAchivModal() {
                       <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q1}/240</div>
                   </div>
                   
-                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. Đứng Trên Tất Cả: <span style="color:#aaa; font-weight:normal;">Chạm tới Wave 24 ở Dungeon</span></div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. Đứng Trên Tất Cả: <span style="color:#aaa; font-weight:normal;">Chạm tới Stage 24 ở Khám Phá</span></div>
                   <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #4a3461; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
                       <div style="background:linear-gradient(90deg, #7c3aed, #a78bfa); width:${(q2/24)*100}%; height:100%;"></div>
                       <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q2}/24</div>
