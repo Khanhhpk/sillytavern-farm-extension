@@ -8507,6 +8507,8 @@ function showWaveRewards() {
     p.el.querySelector(".dg-hp-fill").style.width = pct + "%";
     p.status = {};
     if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0, dodge: 0 };
+    const baseStat = PET_STATS[p.id] || PET_STATS.default;
+    p.maxCd = baseStat.cd * Math.pow(0.9, p.upgrades.aspd || 0);
     if (p.critRate === void 0) p.critRate = 0.05;
     if (p.critDmg === void 0) p.critDmg = 1.5;
     if (p.dodge === void 0) p.dodge = p.id === "ghostBlob" ? 0.15 : 0.05;
@@ -8564,9 +8566,11 @@ function showWaveRewards() {
     if (selectedPet) {
       const u = selectedPet.upgrades;
       const hpMissingPet = selectedPet.maxHp - selectedPet.hp;
-      const healPetCost = Math.max(10, Math.floor(hpMissingPet * 0.5));
+      const waveBaseGold = 120 + currentWave * 60;
+      const healPetCost = Math.max(10, Math.floor(waveBaseGold * 0.2 * (hpMissingPet / selectedPet.maxHp)));
+      const totalMaxHp = fullTeam.reduce((acc, member) => acc + member.maxHp, 0);
       const hpMissingTeam = fullTeam.reduce((acc, member) => acc + (member.maxHp - member.hp), 0);
-      const healTeamCost = Math.max(30, Math.floor(hpMissingTeam * 0.4));
+      const healTeamCost = Math.max(30, totalMaxHp > 0 ? Math.floor(waveBaseGold * 0.5 * (hpMissingTeam / totalMaxHp)) : 30);
       const stats = [
         { id: "hp", name: "Max HP (+20%)", val: selectedPet.maxHp, lv: u.hp, cost: Math.floor(40 * Math.pow(1.3, u.hp)) },
         { id: "atk", name: "ATK (+20%)", val: selectedPet.atk, lv: u.atk, cost: Math.floor(40 * Math.pow(1.3, u.atk)) },
