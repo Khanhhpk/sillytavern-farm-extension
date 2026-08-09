@@ -730,6 +730,10 @@ export function startLockedModal() {
     `;
     ctx.ui.appendChild(overlay);
 
+    // Tính toán tọa độ để đưa ra giữa màn hình
+    overlay.style.left = Math.max(10, (window.innerWidth - overlay.offsetWidth) / 2) + 'px';
+    overlay.style.top = Math.max(10, (window.innerHeight - overlay.offsetHeight) / 2) + 'px';
+
     overlay.querySelector('#btn-close-locked').onclick = () => {
         overlay.style.animation = 'none'; // reset
         overlay.style.opacity = '0';

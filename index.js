@@ -2205,7 +2205,6 @@ var init_style = __esm({
     .dungeon-win.open-anim { display: flex; animation: winPop 0.2s cubic-bezier(0.18,0.89,0.32,1.28) forwards; }
     
     .dialog-win { position: fixed; z-index: 99999; width: min(450px, 90vw); display: flex;
-      top: 50%; left: 50%; transform: translate(-50%, -50%);
       flex-direction: column; background: #f8efe0;
       background-image: repeating-linear-gradient(0deg, transparent 0 30px, rgba(170,130,80,.14) 30px 33px);
       border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
@@ -7659,6 +7658,8 @@ function startLockedModal() {
         </div>
     `;
   ctx.ui.appendChild(overlay);
+  overlay.style.left = Math.max(10, (window.innerWidth - overlay.offsetWidth) / 2) + "px";
+  overlay.style.top = Math.max(10, (window.innerHeight - overlay.offsetHeight) / 2) + "px";
   overlay.querySelector("#btn-close-locked").onclick = () => {
     overlay.style.animation = "none";
     overlay.style.opacity = "0";
