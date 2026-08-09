@@ -10153,8 +10153,10 @@ function updateEntities(groupA, groupB, dt) {
         const targetEls = validTargets.map((e) => e.el);
         validTargets.forEach((e) => {
           if (!e.status) e.status = {};
-          e.status.freeze = 1;
+          e.status.stun = 1.3;
         });
+        if (!a.status) a.status = {};
+        a.status.stun = 1.3;
         playNaoyaCutscene(a, a.el, targetEls, () => {
           validTargets.forEach((e) => {
             if (e.hp > 0) {
@@ -10183,13 +10185,6 @@ function updateEntities(groupA, groupB, dt) {
               }
             }
           });
-          a.el.style.transition = "none";
-          a.el.style.transform = `translate3d(${closest.b.x - 16}px, ${closest.b.y - 16}px, 0) scale(1.1) skewX(-20deg)`;
-          setTimeout(() => {
-            if (a.el) {
-              a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-            }
-          }, 100);
         });
         return;
       }
