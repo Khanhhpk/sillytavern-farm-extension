@@ -677,3 +677,27 @@ export function startTribulationEvent(onComplete) {
         }, 300);
     };
 }
+
+export function startPoorTribulationNotice(onComplete) {
+    const overlay = document.createElement('div');
+    overlay.className = 'trib-overlay';
+    overlay.innerHTML = `
+        <div class="trib-cloud" style="animation-duration: 3s; filter: blur(10px); opacity: 0.6;"></div>
+        <div class="trib-content" style="border-color: #666; background: linear-gradient(135deg, #1c1c1c, #2a2a2a); box-shadow: none;">
+            <div class="trib-text" style="font-size: 16px; font-weight: bold; color: #ccc;">
+                Thiên Đạo ngó qua nông trại của bạn rồi bỏ đi vì thấy quá nghèo...
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // Đám mây bay qua mờ nhạt, text hiện lên 3.5 giây rồi bay đi
+    setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.remove();
+            if (onComplete) onComplete();
+        }, 500);
+    }, 3500);
+}

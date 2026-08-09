@@ -64,6 +64,16 @@ var init_store = __esm({
           console.log("\u274C N\xF4ng tr\u1EA1i ch\u01B0a \u0111\u01B0\u1EE3c t\u1EA3i (ctx.S null). H\xE3y m\u1EDF game m\u1ED9t l\u1EA7n tr\u01B0\u1EDBc.");
         }
       };
+      window["testPoorTribulation"] = () => {
+        if (ctx.S) {
+          ctx.S.needsPoorTribulationNotice = true;
+          delete ctx.S.blockedUntil;
+          if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+          console.log("\u2705 \u0110\xE3 gi\u1EA3 l\u1EADp ng\u01B0\u1EDDi ngh\xE8o g\u1EB7p Thi\xEAn \u0110\u1EA1o! H\xE3y b\u1EA5m v\xE0o qu\u1EA3 c\u1EA7u N\xF4ng Tr\u1EA1i \u0111\u1EC3 xem.");
+        } else {
+          console.log("\u274C N\xF4ng tr\u1EA1i ch\u01B0a \u0111\u01B0\u1EE3c t\u1EA3i (ctx.S null). H\xE3y m\u1EDF game m\u1ED9t l\u1EA7n tr\u01B0\u1EDBc.");
+        }
+      };
       window["unlockTribulation"] = () => {
         if (ctx.S) {
           delete ctx.S.blockedUntil;
@@ -5905,11 +5915,12 @@ function toggleWin() {
     return;
   }
   if (ctx.S.needsPoorTribulationNotice) {
-    setTimeout(() => {
-      toast("Thi\xEAn \u0110\u1EA1o ng\xF3 qua n\xF4ng tr\u1EA1i c\u1EE7a b\u1EA1n r\u1ED3i b\u1ECF \u0111i v\xEC th\u1EA5y qu\xE1 ngh\xE8o...");
-    }, 500);
+    startPoorTribulationNotice(() => {
+      toggleWin();
+    });
     delete ctx.S.needsPoorTribulationNotice;
     save(true);
+    return;
   }
   ctx.win.classList.add("open");
   layout();
@@ -7590,6 +7601,26 @@ function startTribulationEvent(onComplete) {
       }, 500);
     }, 300);
   };
+}
+function startPoorTribulationNotice(onComplete) {
+  const overlay = document.createElement("div");
+  overlay.className = "trib-overlay";
+  overlay.innerHTML = `
+        <div class="trib-cloud" style="animation-duration: 3s; filter: blur(10px); opacity: 0.6;"></div>
+        <div class="trib-content" style="border-color: #666; background: linear-gradient(135deg, #1c1c1c, #2a2a2a); box-shadow: none;">
+            <div class="trib-text" style="font-size: 16px; font-weight: bold; color: #ccc;">
+                Thi\xEAn \u0110\u1EA1o ng\xF3 qua n\xF4ng tr\u1EA1i c\u1EE7a b\u1EA1n r\u1ED3i b\u1ECF \u0111i v\xEC th\u1EA5y qu\xE1 ngh\xE8o...
+            </div>
+        </div>
+    `;
+  document.body.appendChild(overlay);
+  setTimeout(() => {
+    overlay.style.opacity = "0";
+    setTimeout(() => {
+      overlay.remove();
+      if (onComplete) onComplete();
+    }, 500);
+  }, 3500);
 }
 var esc, clampN, SEC_LS_KEY, SEC, CS, eventFresh, todayEvent, eventPending, renderTimeout, INJECT_ID, heartbeat;
 var init_events = __esm({
@@ -16720,6 +16751,7 @@ __export(all_exports, {
   shovel: () => shovel,
   sleepPet: () => sleepPet,
   spriteSVG: () => spriteSVG,
+  startPoorTribulationNotice: () => startPoorTribulationNotice,
   startTribulationEvent: () => startTribulationEvent,
   stopHop: () => stopHop,
   takeoutNote: () => takeoutNote,

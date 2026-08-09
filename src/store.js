@@ -32,6 +32,17 @@ if (typeof window !== 'undefined') {
         }
     };
 
+    window['testPoorTribulation'] = () => {
+        if (ctx.S) {
+            ctx.S.needsPoorTribulationNotice = true;
+            delete ctx.S.blockedUntil;
+            if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+            console.log('✅ Đã giả lập người nghèo gặp Thiên Đạo! Hãy bấm vào quả cầu Nông Trại để xem.');
+        } else {
+            console.log('❌ Nông trại chưa được tải (ctx.S null). Hãy mở game một lần trước.');
+        }
+    };
+
     window['unlockTribulation'] = () => {
         if (ctx.S) {
             delete ctx.S.blockedUntil;

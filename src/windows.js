@@ -41,11 +41,12 @@ export function toggleWin() {
       return;
   }
   if (ctx.S.needsPoorTribulationNotice) {
-      setTimeout(() => {
-          All.toast('Thiên Đạo ngó qua nông trại của bạn rồi bỏ đi vì thấy quá nghèo...');
-      }, 500);
+      All.startPoorTribulationNotice(() => {
+          toggleWin(); // Open after notice
+      });
       delete ctx.S.needsPoorTribulationNotice;
       save(true);
+      return;
   }
   ctx.win.classList.add('open');
   layout(); placeWin(); settle(); renderAll();
