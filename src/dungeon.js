@@ -1199,15 +1199,15 @@ function showWaveRewards() {
             const stats = [
                 { id: 'hp', name: 'Max HP (+25%)', val: selectedPet.maxHp, lv: u.hp, cost: Math.floor(40 * Math.pow(1.4, u.hp)) },
                 { id: 'atk', name: 'ATK (+25%)', val: selectedPet.atk, lv: u.atk, cost: Math.floor(40 * Math.pow(1.4, u.atk)) },
-                { id: 'aspd', name: 'ATK SPD (+10%)', val: selectedPet.maxCd.toFixed(2)+'s', lv: u.aspd, cost: Math.floor(60 * Math.pow(1.4, u.aspd)) },
-                { id: 'spd', name: 'Move Speed (+10%)', val: selectedPet.speed, lv: u.spd, cost: Math.floor(30 * Math.pow(1.4, u.spd)) },
+                { id: 'aspd', name: 'ATK SPD (+10%)', val: selectedPet.maxCd.toFixed(2)+'s', lv: u.aspd, cost: Math.floor(60 * Math.pow(1.4, u.aspd)), forceCanBuy: selectedPet.maxCd > 0.11 },
+                { id: 'spd', name: 'Move Speed (+10%)', val: selectedPet.speed, lv: u.spd, cost: Math.floor(30 * Math.pow(1.4, u.spd)), forceCanBuy: selectedPet.speed < 150 },
                 { id: 'critR', name: 'Crit Rate (+5%)', val: (selectedPet.critRate*100).toFixed(0)+'%', lv: u.critR, cost: Math.floor(50 * Math.pow(1.4, u.critR)), forceCanBuy: selectedPet.critRate < 0.59 },
                 { id: 'critD', name: 'Crit Dmg (+20%)', val: (selectedPet.critDmg*100).toFixed(0)+'%', lv: u.critD, cost: Math.floor(50 * Math.pow(1.4, u.critD)) },
                 { id: 'dodge', name: 'Né Tránh (+5%)', val: (selectedPet.dodge*100).toFixed(0)+'%', lv: u.dodge || 0, cost: Math.floor(60 * Math.pow(1.4, u.dodge || 0)), forceCanBuy: selectedPet.dodge < 0.39 }
             ];
 
             if (PET_STATS[selectedPet.id] && PET_STATS[selectedPet.id].range > 60) {
-                stats.push({ id: 'range', name: 'Tầm Đánh (+10%)', val: Math.round(selectedPet.range), lv: u.range || 0, cost: Math.floor(40 * Math.pow(1.2, u.range || 0)) });
+                stats.push({ id: 'range', name: 'Tầm Đánh (+10%)', val: Math.round(selectedPet.range), lv: u.range || 0, cost: Math.floor(40 * Math.pow(1.2, u.range || 0)), forceCanBuy: selectedPet.range < 400 });
             }
 
             stats.push(
