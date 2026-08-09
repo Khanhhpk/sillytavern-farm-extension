@@ -66,8 +66,8 @@ var init_store = __esm({
         if (!s.stats) s.stats = {};
         s.stats.totalHarvests = Math.max(s.stats.totalHarvests || 0, 240);
         s.stats.totalCrits = Math.max(s.stats.totalCrits || 0, 2400);
-        if (!s.hero) s.hero = {};
-        s.hero.maxStage = Math.max(s.hero.maxStage || 1, 24);
+        if (!s.dungeonBest) s.dungeonBest = { wave: 0, gold: 0 };
+        s.dungeonBest.wave = Math.max(s.dungeonBest.wave || 0, 24);
         if (!s.achiv) s.achiv = { naoya: {} };
         if (!s.achiv.naoya) s.achiv.naoya = {};
         if (typeof ctx.saveSettingsDebounced === "function") ctx.saveSettingsDebounced();
@@ -5116,7 +5116,7 @@ function openAchivModal() {
   const stats = ctx.S.stats;
   const n = ctx.S.achiv.naoya;
   const q1 = Math.min(240, stats.totalHarvests);
-  const q2 = Math.min(24, ctx.S.hero?.maxStage || 1);
+  const q2 = Math.min(24, ctx.S.dungeonBest?.wave || 0);
   const q3 = Math.min(2400, stats.totalCrits);
   const done = q1 >= 240 && q2 >= 24 && q3 >= 2400;
   const btn = n.claimed ? `<div class="buy off" style="text-align:center; padding:10px;">\u0110\xE3 \u0110\xE1nh Th\u1EE9c Naoya Slime</div>` : done ? `<div class="buy" id="claimNaoya" style="text-align:center; padding:10px; font-size:14px; background:#fcd34d; color:#27272a; border-color:#d97706; box-shadow: 0 4px 10px rgba(252,211,77,0.4);">\u2726 \u0110\xD3N K\u1EBA KI\xCAU NG\u1EA0O V\u1EC0 NH\xC0 \u2726</div>` : `<div class="buy off" style="text-align:center; padding:10px;">Ch\u01B0a \u0110\u1EE7 \u0110i\u1EC1u Ki\u1EC7n</div>`;
@@ -5145,7 +5145,7 @@ function openAchivModal() {
                       <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q1}/240</div>
                   </div>
                   
-                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. \u0110\u1EE9ng Tr\xEAn T\u1EA5t C\u1EA3: <span style="color:#aaa; font-weight:normal;">Ch\u1EA1m t\u1EDBi Stage 24 \u1EDF H\u1EA7m ng\u1EE5c</span></div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. \u0110\u1EE9ng Tr\xEAn T\u1EA5t C\u1EA3: <span style="color:#aaa; font-weight:normal;">Ch\u1EA1m t\u1EDBi Wave 24 \u1EDF H\u1EA7m ng\u1EE5c</span></div>
                   <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #4a3461; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
                       <div style="background:linear-gradient(90deg, #7c3aed, #a78bfa); width:${q2 / 24 * 100}%; height:100%;"></div>
                       <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q2}/24</div>
@@ -8641,10 +8641,6 @@ function heroTick() {
             p.combo = (p.combo || 0) + 1;
             let isCrit = Math.random() < p.crit;
             if (passEq && pSkill[passEq] && pSkill[passEq].type === "combo_master" && p.combo % pSkill[passEq].val === 0) isCrit = true;
-            if (isCrit) {
-              if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
-              ctx.S.stats.totalCrits = (ctx.S.stats.totalCrits || 0) + 1;
-            }
             let dmgBase = Math.max(1, Math.floor(p.atk * atkMult * (0.8 + Math.random() * 0.4)));
             if (p.armorPen > 0) dmgBase = Math.floor(dmgBase * (1 + p.armorPen));
             if (passEq && pSkill[passEq]) {
