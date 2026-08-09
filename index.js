@@ -47971,9 +47971,11 @@ async function loadFleaList() {
       let itemName = data.itemId;
       let icon = "";
       if (data.itemType === "bag") {
-        const c2 = CROPS[data.itemId];
-        itemName = c2 ? c2.name : data.itemId;
-        icon = c2 ? c2.icon : "\u{1F4E6}";
+        const baseId = data.itemId.includes("@") ? data.itemId.split("@")[1] : data.itemId;
+        const c2 = CROPS[baseId];
+        const prefix = data.itemId.includes("@") ? `[\u0110\u1ED9t bi\u1EBFn ${data.itemId.split("@")[0]}] ` : "";
+        itemName = c2 ? prefix + c2.name : data.itemId;
+        icon = c2 ? c2.icon || "\u{1F4E6}" : "\u{1F4E6}";
       } else if (data.itemType === "seeds") {
         const c2 = CROPS[data.itemId];
         itemName = c2 ? `H\u1EA1t ${c2.name}` : data.itemId;
@@ -47982,6 +47984,13 @@ async function loadFleaList() {
         const f = FERTS[data.itemId];
         itemName = f ? f.name : data.itemId;
         icon = "\u{1F9EA}";
+      } else if (data.itemType === "uniques") {
+        itemName = data.itemData ? data.itemData.name : "B\u1EA3o v\u1EADt";
+        icon = "\u2728";
+      } else if (data.itemType === "shards") {
+        const shardNames = { prism: "M\u1EA3nh l\u0103ng quang", star: "M\u1EA3nh ng\xF4i sao", legend: "M\u1EA3nh huy\u1EC1n tho\u1EA1i" };
+        itemName = shardNames[data.itemId] || "M\u1EA3nh";
+        icon = "\u{1F48E}";
       }
       html += `
                 <div class="flea-item ${isMine ? "mine" : ""}">
@@ -48052,12 +48061,12 @@ async function cancelItem(docId) {
     const docSnap = await getDoc2(docRef);
     if (!docSnap.exists()) return;
     const data = docSnap.data();
-    if (data.itemType === "bag") {
-      ctx.S.bag[data.itemId] = (ctx.S.bag[data.itemId] || 0) + data.amount;
-    } else if (data.itemType === "seeds") {
-      ctx.S.seeds[data.itemId] = (ctx.S.seeds[data.itemId] || 0) + data.amount;
-    } else if (data.itemType === "ferts") {
-      ctx.S.ferts[data.itemId] = (ctx.S.ferts[data.itemId] || 0) + data.amount;
+    if (data.itemType === "uniques") {
+      if (!ctx.S.uniques) ctx.S.uniques = {};
+      ctx.S.uniques[data.itemId] = data.itemData;
+    } else {
+      if (!ctx.S[data.itemType]) ctx.S[data.itemType] = {};
+      ctx.S[data.itemType][data.itemId] = (ctx.S[data.itemType][data.itemId] || 0) + data.amount;
     }
     save();
     await deleteDoc(docRef);
@@ -48071,8 +48080,10 @@ function renderPostItem() {
   let options = "";
   Object.keys(ctx.S.bag).forEach((id) => {
     if (ctx.S.bag[id] > 0) {
-      const c2 = CROPS[id];
-      options += `<option value="bag|${id}">N\xF4ng s\u1EA3n: ${c2 ? c2.name : id} (C\xF2n: ${ctx.S.bag[id]})</option>`;
+      const baseId = id.includes("@") ? id.split("@")[1] : id;
+      const c2 = CROPS[baseId];
+      const prefix = id.includes("@") ? `[\u0110\u1ED9t bi\u1EBFn ${id.split("@")[0]}] ` : "";
+      options += `<option value="bag|${id}">N\xF4ng s\u1EA3n: ${prefix}${c2 ? c2.name : id} (C\xF2n: ${ctx.S.bag[id]})</option>`;
     }
   });
   Object.keys(ctx.S.seeds).forEach((id) => {
@@ -48087,6 +48098,20 @@ function renderPostItem() {
       options += `<option value="ferts|${id}">Ph\xE2n b\xF3n: ${f ? f.name : id} (C\xF2n: ${ctx.S.ferts[id]})</option>`;
     }
   });
+  if (ctx.S.shards) {
+    Object.keys(ctx.S.shards).forEach((id) => {
+      if (ctx.S.shards[id] > 0) {
+        const shardNames = { prism: "l\u0103ng quang", star: "ng\xF4i sao", legend: "huy\u1EC1n tho\u1EA1i" };
+        options += `<option value="shards|${id}">M\u1EA3nh ${shardNames[id] || id} (C\xF2n: ${ctx.S.shards[id]})</option>`;
+      }
+    });
+  }
+  if (ctx.S.uniques) {
+    Object.keys(ctx.S.uniques).forEach((id) => {
+      const u2 = ctx.S.uniques[id];
+      options += `<option value="uniques|${id}">B\u1EA3o v\u1EADt: ${u2.name}</option>`;
+    });
+  }
   $id("trade-body").innerHTML = `
         <div class="flea-header">
             <h3>\u0110\u0103ng B\xE1n</h3>
@@ -48116,27 +48141,46 @@ function renderPostItem() {
     const price = parseInt($id("flea-post-price").value);
     if (isNaN(amount) || amount <= 0) return toast("S\u1ED1 l\u01B0\u1EE3ng kh\xF4ng h\u1EE3p l\u1EC7");
     if (isNaN(price) || price < 0) return toast("Gi\xE1 kh\xF4ng h\u1EE3p l\u1EC7");
-    const currentAmount = ctx.S[itemType][itemId] || 0;
+    let currentAmount = 0;
+    if (itemType === "uniques") currentAmount = ctx.S.uniques && ctx.S.uniques[itemId] ? 1 : 0;
+    else currentAmount = ctx.S[itemType] && ctx.S[itemType][itemId] ? ctx.S[itemType][itemId] : 0;
     if (amount > currentAmount) {
       return toast("B\u1EA1n kh\xF4ng c\xF3 \u0111\u1EE7 s\u1ED1 l\u01B0\u1EE3ng n\xE0y!");
     }
-    ctx.S[itemType][itemId] -= amount;
-    if (ctx.S[itemType][itemId] <= 0) delete ctx.S[itemType][itemId];
+    if (itemType === "uniques" && amount > 1) {
+      return toast("Ch\u1EC9 \u0111\u01B0\u1EE3c b\xE1n 1 B\u1EA3o v\u1EADt m\u1ED9t l\xFAc!");
+    }
+    let itemData = null;
+    if (itemType === "uniques") {
+      itemData = ctx.S.uniques[itemId];
+      delete ctx.S.uniques[itemId];
+    } else {
+      ctx.S[itemType][itemId] -= amount;
+      if (ctx.S[itemType][itemId] <= 0) delete ctx.S[itemType][itemId];
+    }
     save();
     try {
-      await addDoc(collection(db, "flea_market"), {
+      const docData = {
         sellerId: ctx.S.playerId,
+        sellerName: ctx.S.username || "V\xF4 Danh",
         itemType,
         itemId,
         amount,
         price,
         status: "active",
         createdAt: Date.now()
-      });
+      };
+      if (itemData) docData.itemData = itemData;
+      await addDoc(collection(db, "flea_market"), docData);
       toast("\u0110\xE3 \u0111\u0103ng b\xE1n th\xE0nh c\xF4ng!");
       renderFleaMarket();
     } catch (e2) {
-      ctx.S[itemType][itemId] = (ctx.S[itemType][itemId] || 0) + amount;
+      if (itemType === "uniques") {
+        if (!ctx.S.uniques) ctx.S.uniques = {};
+        ctx.S.uniques[itemId] = itemData;
+      } else {
+        ctx.S[itemType][itemId] = (ctx.S[itemType][itemId] || 0) + amount;
+      }
       save();
       toast("L\u1ED7i khi \u0111\u0103ng b\xE1n: " + e2.message);
     }

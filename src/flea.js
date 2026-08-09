@@ -72,9 +72,11 @@ async function loadFleaList() {
             let itemName = data.itemId;
             let icon = '';
             if (data.itemType === 'bag') {
-                const c = CROPS[data.itemId];
-                itemName = c ? c.name : data.itemId;
-                icon = c ? c.icon : '📦';
+                const baseId = data.itemId.includes('@') ? data.itemId.split('@')[1] : data.itemId;
+                const c = CROPS[baseId];
+                const prefix = data.itemId.includes('@') ? `[Đột biến ${data.itemId.split('@')[0]}] ` : '';
+                itemName = c ? prefix + c.name : data.itemId;
+                icon = c ? c.icon || '📦' : '📦';
             } else if (data.itemType === 'seeds') {
                 const c = CROPS[data.itemId];
                 itemName = c ? `Hạt ${c.name}` : data.itemId;
@@ -83,6 +85,13 @@ async function loadFleaList() {
                 const f = FERTS[data.itemId];
                 itemName = f ? f.name : data.itemId;
                 icon = '🧪';
+            } else if (data.itemType === 'uniques') {
+                itemName = data.itemData ? data.itemData.name : 'Bảo vật';
+                icon = '✨';
+            } else if (data.itemType === 'shards') {
+                const shardNames = { prism: 'Mảnh lăng quang', star: 'Mảnh ngôi sao', legend: 'Mảnh huyền thoại' };
+                itemName = shardNames[data.itemId] || 'Mảnh';
+                icon = '💎';
             }
 
             html += `
@@ -178,15 +187,15 @@ async function cancelItem(docId) {
         const data = docSnap.data();
         
         // Hoàn trả đồ
-        if (data.itemType === 'bag') {
-            ctx.S.bag[data.itemId] = (ctx.S.bag[data.itemId] || 0) + data.amount;
-        } else if (data.itemType === 'seeds') {
-            ctx.S.seeds[data.itemId] = (ctx.S.seeds[data.itemId] || 0) + data.amount;
-        } else if (data.itemType === 'ferts') {
-            ctx.S.ferts[data.itemId] = (ctx.S.ferts[data.itemId] || 0) + data.amount;
+        if (data.itemType === 'uniques') {
+            if (!ctx.S.uniques) ctx.S.uniques = {};
+            ctx.S.uniques[data.itemId] = data.itemData;
+        } else {
+            if (!ctx.S[data.itemType]) ctx.S[data.itemType] = {};
+            ctx.S[data.itemType][data.itemId] = (ctx.S[data.itemType][data.itemId] || 0) + data.amount;
         }
-        All.save();
         
+        All.save();
         await deleteDoc(docRef);
         All.toast("Đã gỡ món hàng xuống");
         loadFleaList();
@@ -201,8 +210,10 @@ function renderPostItem() {
     // Nông sản
     Object.keys(ctx.S.bag).forEach(id => {
         if (ctx.S.bag[id] > 0) {
-            const c = CROPS[id];
-            options += `<option value="bag|${id}">Nông sản: ${c ? c.name : id} (Còn: ${ctx.S.bag[id]})</option>`;
+            const baseId = id.includes('@') ? id.split('@')[1] : id;
+            const c = CROPS[baseId];
+            const prefix = id.includes('@') ? `[Đột biến ${id.split('@')[0]}] ` : '';
+            options += `<option value="bag|${id}">Nông sản: ${prefix}${c ? c.name : id} (Còn: ${ctx.S.bag[id]})</option>`;
         }
     });
     // Hạt giống
@@ -219,6 +230,22 @@ function renderPostItem() {
             options += `<option value="ferts|${id}">Phân bón: ${f ? f.name : id} (Còn: ${ctx.S.ferts[id]})</option>`;
         }
     });
+    // Mảnh
+    if (ctx.S.shards) {
+        Object.keys(ctx.S.shards).forEach(id => {
+            if (ctx.S.shards[id] > 0) {
+                const shardNames = { prism: 'lăng quang', star: 'ngôi sao', legend: 'huyền thoại' };
+                options += `<option value="shards|${id}">Mảnh ${shardNames[id] || id} (Còn: ${ctx.S.shards[id]})</option>`;
+            }
+        });
+    }
+    // Bảo vật
+    if (ctx.S.uniques) {
+        Object.keys(ctx.S.uniques).forEach(id => {
+            const u = ctx.S.uniques[id];
+            options += `<option value="uniques|${id}">Bảo vật: ${u.name}</option>`;
+        });
+    }
 
     All.$id('trade-body').innerHTML = `
         <div class="flea-header">
@@ -255,32 +282,53 @@ function renderPostItem() {
         if (isNaN(price) || price < 0) return All.toast("Giá không hợp lệ");
         
         // Kiểm tra số lượng có đủ không
-        const currentAmount = ctx.S[itemType][itemId] || 0;
+        let currentAmount = 0;
+        if (itemType === 'uniques') currentAmount = (ctx.S.uniques && ctx.S.uniques[itemId]) ? 1 : 0;
+        else currentAmount = (ctx.S[itemType] && ctx.S[itemType][itemId]) ? ctx.S[itemType][itemId] : 0;
+        
         if (amount > currentAmount) {
             return All.toast("Bạn không có đủ số lượng này!");
         }
         
-        // Trừ kho trước
-        ctx.S[itemType][itemId] -= amount;
-        if (ctx.S[itemType][itemId] <= 0) delete ctx.S[itemType][itemId];
+        if (itemType === 'uniques' && amount > 1) {
+            return All.toast("Chỉ được bán 1 Bảo vật một lúc!");
+        }
+        
+        let itemData = null;
+        // Trừ đồ trong kho
+        if (itemType === 'uniques') {
+            itemData = ctx.S.uniques[itemId];
+            delete ctx.S.uniques[itemId];
+        } else {
+            ctx.S[itemType][itemId] -= amount;
+            if (ctx.S[itemType][itemId] <= 0) delete ctx.S[itemType][itemId];
+        }
         All.save();
         
         // Gửi lên Firebase
         try {
-            await addDoc(collection(db, "flea_market"), {
+            const docData = {
                 sellerId: ctx.S.playerId,
+                sellerName: ctx.S.username || "Vô Danh",
                 itemType: itemType,
                 itemId: itemId,
                 amount: amount,
                 price: price,
                 status: 'active',
                 createdAt: Date.now()
-            });
+            };
+            if (itemData) docData.itemData = itemData;
+            await addDoc(collection(db, "flea_market"), docData);
             All.toast("Đã đăng bán thành công!");
             renderFleaMarket();
         } catch (e) {
             // Hoàn lại kho nếu lỗi
-            ctx.S[itemType][itemId] = (ctx.S[itemType][itemId] || 0) + amount;
+            if (itemType === 'uniques') {
+                if (!ctx.S.uniques) ctx.S.uniques = {};
+                ctx.S.uniques[itemId] = itemData;
+            } else {
+                ctx.S[itemType][itemId] = (ctx.S[itemType][itemId] || 0) + amount;
+            }
             All.save();
             All.toast("Lỗi khi đăng bán: " + e.message);
         }
