@@ -559,7 +559,7 @@ function combatLoop() {
         
         const dx = p.tx - p.x;
         const dy = p.ty - p.y;
-        const dist = Math.hypot(dx, dy) || 0.01;
+        const dist = Math.max(0.1, Math.hypot(dx, dy));
         
         if (dist < 10) {
             // Hit!
@@ -814,7 +814,7 @@ function updateEntities(groupA, groupB, dt) {
             let minHpPct = 1.0;
             targetGroup.forEach(ally => {
                 if (ally.hp <= 0) return;
-                const dist = Math.hypot(ally.x - a.x, ally.y - a.y) || 0.01;
+                const dist = Math.max(0.1, Math.hypot(ally.x - a.x, ally.y - a.y));
                 const hpPct = ally.hp / ally.maxHp;
                 if (hpPct < minHpPct && dist < a.range * 4) { 
                     minHpPct = hpPct;
@@ -826,7 +826,7 @@ function updateEntities(groupA, groupB, dt) {
                     if (ally === a || ally.hp <= 0) return;
                     const dx = ally.x - a.x;
                     const dy = ally.y - a.y;
-                    const dist = Math.hypot(dx, dy) || 0.01;
+                    const dist = Math.max(0.1, Math.hypot(dx, dy));
                     if (dist < minDist) {
                         minDist = dist;
                         closest = { b: ally, dx, dy, dist };
@@ -838,7 +838,7 @@ function updateEntities(groupA, groupB, dt) {
             if (a.lockedTarget && validTargets.includes(a.lockedTarget)) {
                 const dx = a.lockedTarget.x - a.x;
                 const dy = a.lockedTarget.y - a.y;
-                const dist = Math.hypot(dx, dy) || 0.01;
+                const dist = Math.max(0.1, Math.hypot(dx, dy));
                 closest = { b: a.lockedTarget, dx, dy, dist };
             } else {
                 let minMaxHp = Infinity;
@@ -847,7 +847,7 @@ function updateEntities(groupA, groupB, dt) {
                         minMaxHp = b.maxHp;
                         const dx = b.x - a.x;
                         const dy = b.y - a.y;
-                        const dist = Math.hypot(dx, dy) || 0.01;
+                        const dist = Math.max(0.1, Math.hypot(dx, dy));
                         closest = { b, dx, dy, dist };
                     }
                 });
@@ -859,7 +859,7 @@ function updateEntities(groupA, groupB, dt) {
             validTargets.forEach(b => {
                 const dx = b.x - a.x;
                 const dy = b.y - a.y;
-                const dist = Math.hypot(dx, dy) || 0.01;
+                const dist = Math.max(0.1, Math.hypot(dx, dy));
                 if (dist < minDist) {
                     minDist = dist;
                     closest = { b, dx, dy, dist };
@@ -870,12 +870,12 @@ function updateEntities(groupA, groupB, dt) {
         a.el.classList.remove('walk');
         
         if (closest) {
-            // Face target
-            if (closest.dx < 0 && a.type === 'pet') a.el.classList.add('flip');
-            else if (closest.dx >= 0 && a.type === 'pet') a.el.classList.remove('flip');
+            // Face target (with deadzone to prevent flip jitter)
+            if (closest.dx < -1 && a.type === 'pet') a.el.classList.add('flip');
+            else if (closest.dx > 1 && a.type === 'pet') a.el.classList.remove('flip');
             
-            if (closest.dx > 0 && a.type === 'enemy') a.el.classList.add('flip');
-            else if (closest.dx <= 0 && a.type === 'enemy') a.el.classList.remove('flip');
+            if (closest.dx > 1 && a.type === 'enemy') a.el.classList.add('flip');
+            else if (closest.dx < -1 && a.type === 'enemy') a.el.classList.remove('flip');
             
             let isRanged = a.range >= 80 || a.ai === 'ranged';
             let inRange = closest.dist <= a.range || (a.skill === 'heal' && closest.dist <= 10);
