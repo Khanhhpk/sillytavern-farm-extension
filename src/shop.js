@@ -39,10 +39,10 @@ export function openAchivModal() {
   const n = ctx.S.achiv.naoya;
   
   // Các Quest sau này cũng sẽ dùng chung cấu trúc y hệt thế này
-  const q1 = Math.min(24, stats.totalHarvests);
+  const q1 = Math.min(240, stats.totalHarvests);
   const q2 = Math.min(24, ctx.S.hero?.maxStage || 1);
-  const q3 = Math.min(240, stats.totalCrits);
-  const done = q1 >= 24 && q2 >= 24 && q3 >= 240;
+  const q3 = Math.min(2400, stats.totalCrits);
+  const done = q1 >= 240 && q2 >= 24 && q3 >= 2400;
 
   const btn = n.claimed ? `<div class="buy off" style="text-align:center; padding:10px;">Đã Đánh Thức Naoya Slime</div>` :
               done ? `<div class="buy" id="claimNaoya" style="text-align:center; padding:10px; font-size:14px; background:#fcd34d; color:#27272a; border-color:#d97706; box-shadow: 0 4px 10px rgba(252,211,77,0.4);">✦ ĐÓN KẺ KIÊU NGẠO VỀ NHÀ ✦</div>` :
@@ -67,17 +67,23 @@ export function openAchivModal() {
               </div>
               
               <div style="margin-top: 10px;">
-                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">1. Sự Tàn Úa: <span style="color:#aaa; font-weight:normal;">Thu hoạch 24 Nông sản bất kỳ</span></div>
-                  <div style="background:#111; height:10px; border-radius:5px; margin-bottom:8px; overflow:hidden; border:1px solid #000;"><div style="background:linear-gradient(90deg, #4a3461, #8a6bc8); height:100%; width:${(q1/24)*100}%; transition: 0.5s;"></div></div>
-                  <div style="text-align:right; font-size:10px; margin-top:-6px; margin-bottom:15px; color:#aaa;">${q1}/24</div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">1. Sự Tàn Úa: <span style="color:#aaa; font-weight:normal;">Thu hoạch 240 Nông sản bất kỳ</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #4a3461; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #7c3aed, #a78bfa); width:${(q1/240)*100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q1}/240</div>
+                  </div>
                   
                   <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. Đứng Trên Tất Cả: <span style="color:#aaa; font-weight:normal;">Chạm tới Stage 24 ở Hầm ngục</span></div>
-                  <div style="background:#111; height:10px; border-radius:5px; margin-bottom:8px; overflow:hidden; border:1px solid #000;"><div style="background:linear-gradient(90deg, #4a3461, #8a6bc8); height:100%; width:${(q2/24)*100}%; transition: 0.5s;"></div></div>
-                  <div style="text-align:right; font-size:10px; margin-top:-6px; margin-bottom:15px; color:#aaa;">${q2}/24</div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #4a3461; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #7c3aed, #a78bfa); width:${(q2/24)*100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q2}/24</div>
+                  </div>
                   
-                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">3. Kẻ Cuồng Tốc Độ: <span style="color:#aaa; font-weight:normal;">Gây 240 đòn Chí Mạng (Crit) ở Hầm ngục</span></div>
-                  <div style="background:#111; height:10px; border-radius:5px; margin-bottom:8px; overflow:hidden; border:1px solid #000;"><div style="background:linear-gradient(90deg, #4a3461, #8a6bc8); height:100%; width:${(q3/240)*100}%; transition: 0.5s;"></div></div>
-                  <div style="text-align:right; font-size:10px; margin-top:-6px; color:#aaa;">${q3}/240</div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">3. Kẻ Cuồng Tốc Độ: <span style="color:#aaa; font-weight:normal;">Gây 2400 đòn Chí Mạng (Crit) ở Hầm ngục</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #4a3461; height:10px; position:relative; margin-bottom:16px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #7c3aed, #a78bfa); width:${(q3/2400)*100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q3}/2400</div>
+                  </div>
               </div>
 
               <div style="margin-top:10px;">${btn}</div>
