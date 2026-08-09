@@ -9431,8 +9431,8 @@ function openDungeonView() {
                 <h2 style="color:#d9ba8a; margin-bottom:20px;">H\u1EA7m Ng\u1EE5c \u0110ang Dang D\u1EDF</h2>
                 <div style="margin-bottom:30px; font-size:16px;">B\u1EA1n c\xF3 m\u1ED9t l\u01B0\u1EE3t ch\u01A1i \u0111ang dang d\u1EDF \u1EDF \u1EA2i ${ctx.S.dungeonSave.currentWave}. B\u1EA1n mu\u1ED1n ti\u1EBFp t\u1EE5c hay ch\u01A1i m\u1EDBi?</div>
                 <div style="display:flex; gap:20px;">
-                    <div class="buy plain" id="dg-load-new" style="background:#e06578; color:white; width:120px;">Ch\u01A1i M\u1EDBi</div>
-                    <div class="buy" id="dg-load-continue" style="width:120px;">Ti\u1EBFp T\u1EE5c</div>
+                    <div class="buy plain" id="dg-load-new" style="background:#e06578; color:white; width:120px; text-align:center; display:flex; justify-content:center; align-items:center; border-color:#c25566; box-shadow:inset 0 -3px 0 #c25566, 0 3px 0 #a34a52;">Ch\u01A1i M\u1EDBi</div>
+                    <div class="buy" id="dg-load-continue" style="width:120px; text-align:center; display:flex; justify-content:center; align-items:center;">Ti\u1EBFp T\u1EE5c</div>
                 </div>
             </div>
         `;

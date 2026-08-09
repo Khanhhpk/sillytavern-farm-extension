@@ -84,8 +84,8 @@ export function openDungeonView() {
                 <h2 style="color:#d9ba8a; margin-bottom:20px;">Hầm Ngục Đang Dang Dở</h2>
                 <div style="margin-bottom:30px; font-size:16px;">Bạn có một lượt chơi đang dang dở ở Ải ${ctx.S.dungeonSave.currentWave}. Bạn muốn tiếp tục hay chơi mới?</div>
                 <div style="display:flex; gap:20px;">
-                    <div class="buy plain" id="dg-load-new" style="background:#e06578; color:white; width:120px;">Chơi Mới</div>
-                    <div class="buy" id="dg-load-continue" style="width:120px;">Tiếp Tục</div>
+                    <div class="buy plain" id="dg-load-new" style="background:#e06578; color:white; width:120px; text-align:center; display:flex; justify-content:center; align-items:center; border-color:#c25566; box-shadow:inset 0 -3px 0 #c25566, 0 3px 0 #a34a52;">Chơi Mới</div>
+                    <div class="buy" id="dg-load-continue" style="width:120px; text-align:center; display:flex; justify-content:center; align-items:center;">Tiếp Tục</div>
                 </div>
             </div>
         `;
