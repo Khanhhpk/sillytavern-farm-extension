@@ -8566,11 +8566,9 @@ function showWaveRewards() {
     if (selectedPet) {
       const u = selectedPet.upgrades;
       const hpMissingPet = selectedPet.maxHp - selectedPet.hp;
-      const waveBaseGold = 120 + currentWave * 60;
-      const healPetCost = Math.max(10, Math.floor(waveBaseGold * 0.2 * (hpMissingPet / selectedPet.maxHp)));
-      const totalMaxHp = fullTeam.reduce((acc, member) => acc + member.maxHp, 0);
+      const healPetCost = Math.max(10, Math.floor(hpMissingPet * 0.5));
       const hpMissingTeam = fullTeam.reduce((acc, member) => acc + (member.maxHp - member.hp), 0);
-      const healTeamCost = Math.max(30, totalMaxHp > 0 ? Math.floor(waveBaseGold * 0.5 * (hpMissingTeam / totalMaxHp)) : 30);
+      const healTeamCost = Math.max(30, Math.floor(hpMissingTeam * 0.4));
       const stats = [
         { id: "hp", name: "Max HP (+20%)", val: selectedPet.maxHp, lv: u.hp, cost: Math.floor(40 * Math.pow(1.3, u.hp)) },
         { id: "atk", name: "ATK (+20%)", val: selectedPet.atk, lv: u.atk, cost: Math.floor(40 * Math.pow(1.3, u.atk)) },
