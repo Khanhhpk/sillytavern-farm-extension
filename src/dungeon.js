@@ -78,9 +78,29 @@ export function openDungeonView() {
         };
     }
     
-    initPlacementPhase();
+    if (ctx.S.dungeonSave) {
+        All.dungeonView.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:white;">
+                <h2 style="color:#d9ba8a; margin-bottom:20px;">Hầm Ngục Đang Dang Dở</h2>
+                <div style="margin-bottom:30px; font-size:16px;">Bạn có một lượt chơi đang dang dở ở Ải ${ctx.S.dungeonSave.currentWave}. Bạn muốn tiếp tục hay chơi mới?</div>
+                <div style="display:flex; gap:20px;">
+                    <div class="buy plain" id="dg-load-new" style="background:#e06578; color:white; width:120px;">Chơi Mới</div>
+                    <div class="buy" id="dg-load-continue" style="width:120px;">Tiếp Tục</div>
+                </div>
+            </div>
+        `;
+        All.$id('dg-load-new').onclick = () => {
+            delete ctx.S.dungeonSave;
+            All.save();
+            initPlacementPhase();
+        };
+        All.$id('dg-load-continue').onclick = () => {
+            loadDungeonState(ctx.S.dungeonSave);
+        };
+    } else {
+        initPlacementPhase();
+    }
 }
-
 export function closeDungeonView() {
     if (!isDungeonOpen) return;
     isDungeonOpen = false;
@@ -112,6 +132,65 @@ export function closeDungeonView() {
     All.renderPager();
     All.renderPlots();
     All.renderToolbar();
+}
+
+function loadDungeonState(saveData) {
+    currentWave = saveData.currentWave;
+    totalGold = saveData.totalGold;
+    shopGold = saveData.shopGold;
+    
+    const best = ctx.S.dungeonBest || { wave: 0, gold: 0 };
+    const bestHtml = best.wave > 0 ? `<div style="color:#b08a5c; font-size:12px; text-align:center; margin-top:4px;">🏆 Kỷ lục: Wave ${best.wave} · ${best.gold} G</div>` : '';
+
+    All.dungeonView.innerHTML = `
+        <div class="dg-arena" id="dg-arena">
+            <div class="dg-hud" id="dg-hud" style="display:none;"></div>
+            <div class="dg-info-panel" id="dg-info-panel" style="display:none;">
+                <div class="dg-info-close" id="dg-info-close">×</div>
+                <h3>Chỉ Số Thú Cưng</h3>
+                <div class="dg-info-list" id="dg-info-list"></div>
+            </div>
+            <div class="dg-info-panel" id="dg-codex-panel" style="display:none; border-left-color:#e06578;">
+                <div class="dg-info-close" id="dg-codex-close">×</div>
+                <h3 style="color:#e06578;">Từ Điển Quái</h3>
+                <div class="dg-info-list" id="dg-codex-list"></div>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:center; margin-top: 5px; flex-wrap:wrap;">
+            <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px; display:none;">Thoát</div>
+            <div class="buy plain" id="dg-surrender-btn" style="margin-left: 10px; background: #e06578; color: white;">Kết Thúc Sớm</div>
+        </div>
+        ${bestHtml}
+    `;
+
+    const leaveBtn = All.$id('dg-leave-btn');
+    if (leaveBtn) leaveBtn.addEventListener('click', closeDungeonView);
+    const surrBtn = All.$id('dg-surrender-btn');
+    if (surrBtn) surrBtn.addEventListener('click', () => endDungeon(false));
+    
+    All.$id('dg-info-close').onclick = () => All.$id('dg-info-panel').style.display = 'none';
+    All.$id('dg-codex-close').onclick = () => All.$id('dg-codex-panel').style.display = 'none';
+
+    const arena = All.$id('dg-arena');
+    fullTeam = saveData.fullTeam.map(savedP => {
+        const el = document.createElement('div');
+        el.className = 'dg-entity pet';
+        el.innerHTML = `
+            <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+            ${petSVG(savedP.id, 32)}
+        `;
+        el.style.transform = `translate3d(${savedP.x - 16}px, ${savedP.y - 16}px, 0)`;
+        arena.appendChild(el);
+        return { ...savedP, el: el };
+    });
+    team = [...fullTeam];
+    
+    const isBoss = currentWave % 10 === 0;
+    const hud = All.$id('dg-hud');
+    hud.style.display = 'block';
+    hud.innerHTML = `<span style="color:#ffd94d; font-weight:bold;">Wave ${currentWave}</span>${isBoss ? ' 👑' : ''} <span style="color:#a4dc8c; margin-left:10px;" title="Vàng mang về">${spriteSVG('coin', 12).replace('display:block','display:inline-block;vertical-align:middle')} ${totalGold}</span> <span style="color:#e06578; margin-left:10px;" title="Vàng nâng cấp">🛠 ${shopGold}</span>`;
+
+    showWaveRewards(true);
 }
 
 function initPlacementPhase() {
@@ -1126,6 +1205,9 @@ function endDungeon(isWin) {
     phase = 'end';
     stopCombatLoop();
     
+    delete ctx.S.dungeonSave;
+    All.save();
+    
     projectiles.forEach(p => p.el.remove());
     projectiles = [];
     
@@ -1175,48 +1257,71 @@ function endDungeon(isWin) {
     });
 }
 
-function showWaveRewards() {
+function showWaveRewards(isLoaded = false) {
     phase = 'end'; // pause combat
     stopCombatLoop();
-    projectiles.forEach(p => p.el.remove());
-    projectiles = [];
-    
-    // Calculate gold for this wave
-    const isBoss = currentWave % 10 === 0;
-    const waveGold = Math.round(500 * Math.pow(1.2, currentWave - 1)) * (isBoss ? 3 : 1);
-    totalGold += Math.floor(waveGold * 0.3);
-    shopGold += waveGold;
-    
-    const arena = All.$id('dg-arena');
-    fullTeam.forEach(p => {
-        if (p.hp <= 0) {
-            p.hp = p.maxHp * 0.5; // Revive
-            arena.appendChild(p.el);
-        } else {
-            p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2); // Heal living by 20%
-        }
-        const pct = Math.max(0, p.hp / p.maxHp) * 100;
-        p.el.querySelector('.dg-hp-fill').style.width = pct + '%';
-        p.status = {};
-        if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0, dodge: 0 };
-        const baseStat = PET_STATS[p.id] || PET_STATS.default;
-        p.maxCd = baseStat.cd * Math.pow(0.9, p.upgrades.aspd || 0);
-        if (p.critRate === undefined) p.critRate = 0.05;
-        if (p.critDmg === undefined) p.critDmg = 1.5;
-        if (p.dodge === undefined) p.dodge = p.id === 'ghostBlob' ? 0.15 : 0.05;
-    });
-    team = [...fullTeam];
     
     let bossDropHtml = '';
-    if (isBoss) {
-        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
-        const r = Math.random();
-        let dropText = '';
-        if (r < 0.01) { ctx.S.tickets.super = (ctx.S.tickets.super || 0) + 1; dropText = '1 Vé Siêu Cường'; }
-        else if (r < 0.40) { ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 2; dropText = '2 Vé Đặc Biệt'; }
-        else { ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 3; dropText = '3 Vé Thường'; }
-        bossDropHtml = `<div style="color:#4caf50; margin-bottom:15px; font-weight:bold; font-size:16px;">✨ Rơi ra từ Boss: ${dropText}! ✨</div>`;
+    
+    if (!isLoaded) {
+        projectiles.forEach(p => p.el.remove());
+        projectiles = [];
+        
+        // Calculate gold for this wave
+        const isBoss = currentWave % 10 === 0;
+        const waveGold = Math.round(500 * Math.pow(1.2, currentWave - 1)) * (isBoss ? 3 : 1);
+        totalGold += Math.floor(waveGold * 0.3);
+        shopGold += waveGold;
+        
+        const arena = All.$id('dg-arena');
+        fullTeam.forEach(p => {
+            if (p.hp <= 0) {
+                p.hp = p.maxHp * 0.5; // Revive
+                arena.appendChild(p.el);
+            } else {
+                p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2); // Heal living by 20%
+            }
+            const pct = Math.max(0, p.hp / p.maxHp) * 100;
+            p.el.querySelector('.dg-hp-fill').style.width = pct + '%';
+            p.status = {};
+            if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0, dodge: 0 };
+            const baseStat = PET_STATS[p.id] || PET_STATS.default;
+            p.maxCd = baseStat.cd * Math.pow(0.9, p.upgrades.aspd || 0);
+            if (p.critRate === undefined) p.critRate = 0.05;
+            if (p.critDmg === undefined) p.critDmg = 1.5;
+            if (p.dodge === undefined) p.dodge = p.id === 'ghostBlob' ? 0.15 : 0.05;
+        });
+        team = [...fullTeam];
+        
+        if (isBoss) {
+            if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+            const r = Math.random();
+            let dropText = '';
+            if (r < 0.01) { ctx.S.tickets.super = (ctx.S.tickets.super || 0) + 1; dropText = '1 Vé Siêu Cường'; }
+            else if (r < 0.40) { ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 2; dropText = '2 Vé Đặc Biệt'; }
+            else { ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 3; dropText = '3 Vé Thường'; }
+            bossDropHtml = `<div style="color:#4caf50; margin-bottom:15px; font-weight:bold; font-size:16px;">✨ Rơi ra từ Boss: ${dropText}! ✨</div>`;
+        }
+        
+        ctx.S.dungeonSave = {
+            currentWave,
+            totalGold,
+            shopGold,
+            bossDropHtml,
+            fullTeam: fullTeam.map(p => ({
+                id: p.id, x: p.x, y: p.y, hp: p.hp, maxHp: p.maxHp, atk: p.atk,
+                speed: p.speed, critRate: p.critRate, critDmg: p.critDmg, dodge: p.dodge, range: p.range,
+                maxCd: p.maxCd, upgrades: { ...p.upgrades }
+            }))
+        };
         All.save();
+    } else {
+        bossDropHtml = ctx.S.dungeonSave.bossDropHtml || '';
+        // Cập nhật thanh máu cho fullTeam
+        fullTeam.forEach(p => {
+            const pct = Math.max(0, p.hp / p.maxHp) * 100;
+            p.el.querySelector('.dg-hp-fill').style.width = pct + '%';
+        });
     }
 
     const overlay = document.createElement('div');
