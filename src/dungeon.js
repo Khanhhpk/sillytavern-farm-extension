@@ -177,11 +177,23 @@ function loadDungeonState(saveData) {
         el.className = 'dg-entity pet';
         el.innerHTML = `
             <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+            <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+            <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
             ${petSVG(savedP.id, 32)}
         `;
         el.style.transform = `translate3d(${savedP.x - 16}px, ${savedP.y - 16}px, 0)`;
         arena.appendChild(el);
-        return { ...savedP, el: el };
+        const stat = PET_STATS[savedP.id] || PET_STATS.default;
+        return { 
+            ...savedP, 
+            el: el,
+            type: 'pet',
+            skill: savedP.skill || stat.skill,
+            ai: savedP.ai || stat.ai,
+            cd: savedP.cd || 0,
+            skillCd: savedP.skillCd || 0,
+            maxSkillCd: savedP.maxSkillCd || stat.maxSkillCd || 0
+        };
     });
     team = [...fullTeam];
     
@@ -1311,7 +1323,8 @@ function showWaveRewards(isLoaded = false) {
             fullTeam: fullTeam.map(p => ({
                 id: p.id, x: p.x, y: p.y, hp: p.hp, maxHp: p.maxHp, atk: p.atk,
                 speed: p.speed, critRate: p.critRate, critDmg: p.critDmg, dodge: p.dodge, range: p.range,
-                maxCd: p.maxCd, upgrades: { ...p.upgrades }
+                maxCd: p.maxCd, upgrades: { ...p.upgrades },
+                type: p.type, skill: p.skill, ai: p.ai, cd: p.cd, skillCd: p.skillCd, maxSkillCd: p.maxSkillCd
             }))
         };
         All.save();

@@ -9507,11 +9507,23 @@ function loadDungeonState(saveData) {
     el.className = "dg-entity pet";
     el.innerHTML = `
             <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+            <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+            <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
             ${petSVG(savedP.id, 32)}
         `;
     el.style.transform = `translate3d(${savedP.x - 16}px, ${savedP.y - 16}px, 0)`;
     arena.appendChild(el);
-    return { ...savedP, el };
+    const stat = PET_STATS2[savedP.id] || PET_STATS2.default;
+    return {
+      ...savedP,
+      el,
+      type: "pet",
+      skill: savedP.skill || stat.skill,
+      ai: savedP.ai || stat.ai,
+      cd: savedP.cd || 0,
+      skillCd: savedP.skillCd || 0,
+      maxSkillCd: savedP.maxSkillCd || stat.maxSkillCd || 0
+    };
   });
   team = [...fullTeam];
   const isBoss = currentWave % 10 === 0;
@@ -10517,7 +10529,13 @@ function showWaveRewards(isLoaded = false) {
         dodge: p.dodge,
         range: p.range,
         maxCd: p.maxCd,
-        upgrades: { ...p.upgrades }
+        upgrades: { ...p.upgrades },
+        type: p.type,
+        skill: p.skill,
+        ai: p.ai,
+        cd: p.cd,
+        skillCd: p.skillCd,
+        maxSkillCd: p.maxSkillCd
       }))
     };
     save();
