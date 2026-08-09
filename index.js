@@ -2493,9 +2493,9 @@ var init_style = __esm({
     .dg-slot img { width: 80% !important; height: 80% !important; object-fit: contain; pointer-events: none; }
     .dg-slot:hover { border-color: #d9ba8a; background: rgba(255,255,255,.2); }
     .dg-slot.placed { opacity: 0.4; pointer-events: none; }
-    .dg-entity { position: absolute; left: 0; top: 0; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; will-change: transform; transition: none !important; }
+    .dg-entity { position: absolute; left: 0; top: 0; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; will-change: transform; transition: none !important; cursor: default; }
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
-    .dg-entity.flip img { transform: scaleX(-1); }
+    .dg-entity.flip img, .dg-entity.flip svg { transform: scaleX(-1); }
     @media (max-width: 640px) {
       #win, .dungeon-win { left: 0 !important; top: 0 !important; width: 100vw; height: 100vh; height: 100dvh; max-height: none; border: none; border-radius: 0; outline: none; }
       .dungeon-view { padding: 4px; }
@@ -7764,8 +7764,8 @@ function initPlacementPhase() {
                     <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
                     ${petSVG(pId, 32)}
                 `;
-        let x = e.clientX - rect.left - 16;
-        let y = e.clientY - rect.top - 16;
+        let x = e.clientX - rect.left;
+        let y = e.clientY - rect.top;
         if (x > rect.width - 16) x = rect.width - 16;
         if (x < 16) x = 16;
         if (y < 16) y = 16;
@@ -7797,7 +7797,7 @@ function initPlacementPhase() {
           isPlacedDragging = true;
           el.style.zIndex = "100000";
           const arect = arena.getBoundingClientRect();
-          el.style.transform = `translate3d(${ev.clientX - arect.left - 32}px, ${ev.clientY - arect.top - 32}px, 0)`;
+          el.style.transform = `translate3d(${ev.clientX - arect.left - 16}px, ${ev.clientY - arect.top - 16}px, 0)`;
           el.setPointerCapture(ev.pointerId);
         });
         el.addEventListener("pointermove", (ev) => {
@@ -7813,8 +7813,8 @@ function initPlacementPhase() {
           const arect = arena.getBoundingClientRect();
           if (ev.clientX >= arect.left && ev.clientX <= arect.right && ev.clientY >= arect.top && ev.clientY <= arect.bottom) {
             el.style.position = "absolute";
-            let nx = ev.clientX - arect.left - 16;
-            let ny = ev.clientY - arect.top - 16;
+            let nx = ev.clientX - arect.left;
+            let ny = ev.clientY - arect.top;
             if (nx > arect.width - 16) nx = arect.width - 16;
             if (nx < 16) nx = 16;
             if (ny < 16) ny = 16;

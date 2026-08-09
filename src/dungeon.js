@@ -257,8 +257,8 @@ function initPlacementPhase() {
                     ${petSVG(pId, 32)}
                 `;
                 
-                let x = e.clientX - rect.left - 16;
-                let y = e.clientY - rect.top - 16;
+                let x = e.clientX - rect.left;
+                let y = e.clientY - rect.top;
                 if (x > rect.width - 16) x = rect.width - 16;
                 if (x < 16) x = 16;
                 if (y < 16) y = 16;
@@ -284,7 +284,7 @@ function initPlacementPhase() {
                     isPlacedDragging = true;
                     el.style.zIndex = '100000';
                     const arect = arena.getBoundingClientRect();
-                    el.style.transform = `translate3d(${ev.clientX - arect.left - 32}px, ${ev.clientY - arect.top - 32}px, 0)`;
+                    el.style.transform = `translate3d(${ev.clientX - arect.left - 16}px, ${ev.clientY - arect.top - 16}px, 0)`;
                     el.setPointerCapture(ev.pointerId);
                 });
                 el.addEventListener('pointermove', (ev) => {
@@ -303,8 +303,8 @@ function initPlacementPhase() {
                         ev.clientY >= arect.top && ev.clientY <= arect.bottom) {
                         
                         el.style.position = 'absolute';
-                        let nx = ev.clientX - arect.left - 16;
-                        let ny = ev.clientY - arect.top - 16;
+                        let nx = ev.clientX - arect.left;
+                        let ny = ev.clientY - arect.top;
                         if (nx > arect.width - 16) nx = arect.width - 16;
                         if (nx < 16) nx = 16;
                         if (ny < 16) ny = 16;
