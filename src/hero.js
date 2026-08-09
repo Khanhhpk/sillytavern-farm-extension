@@ -985,6 +985,7 @@ function heroTick() {
               }
             } else if (aSk.type === 'atk_spd_self') {
                p.spdBuff = aSk.val; 
+               p.spdBuffTimer = aSk.duration;
                setTimeout(() => showFloatDamage('SPD UP', pEl, '#ffff00'), 0);
             } else if (aSk.type === 'charm') {
                tMob.atkDebuff = aSk.val;
@@ -1126,7 +1127,6 @@ function heroTick() {
 
       let rtSpdMult = 1.0;
       if (p.spdBuff) rtSpdMult *= p.spdBuff;
-      if (p.skillActiveTime > 0 && data.active_eq && pSkill[data.active_eq] && pSkill[data.active_eq].type === 'atk_spd_self') rtSpdMult *= pSkill[data.active_eq].val;
       
       // Đòn đánh thường
       p.cd -= (dt / 1000) * rtSpdMult;
@@ -1156,7 +1156,11 @@ function heroTick() {
             
             p.combo = (p.combo || 0) + 1;
             let isCrit = Math.random() < p.crit;
-            if (passEq && pSkill[passEq] && pSkill[passEq].type === 'combo_master' && p.combo % pSkill[passEq].val === 0) isCrit = true;
+            let currentCritDmg = p.critDmg;
+            if (passEq && pSkill[passEq] && pSkill[passEq].type === 'combo_master' && p.combo % pSkill[passEq].val === 0) {
+                isCrit = true;
+                if (p.id === 'naoyaSlime') currentCritDmg = 3;
+            }
             
             let dmgBase = Math.max(1, Math.floor(p.atk * atkMult * (0.8 + Math.random() * 0.4)));
             if (p.armorPen > 0) dmgBase = Math.floor(dmgBase * (1 + p.armorPen));
@@ -1169,14 +1173,16 @@ function heroTick() {
                 }
             }
             
-            let dmg = isCrit ? Math.floor(dmgBase * p.critDmg) : dmgBase;
+            let dmg = isCrit ? Math.floor(dmgBase * currentCritDmg) : dmgBase;
             
             if (passEq && pSkill[passEq] && pSkill[passEq].type === 'splash_dmg') {
                 dmg = Math.floor(dmg * (1 + pSkill[passEq].val));
             }
             
             if (passEq && pSkill[passEq] && pSkill[passEq].type === 'execute') {
-                if (tMob.hp / tMob.maxHp <= 0.2 && Math.random() < pSkill[passEq].val) {
+                const threshold = p.id === 'naoyaSlime' ? pSkill[passEq].val : 0.2;
+                const chance = p.id === 'naoyaSlime' ? 1.0 : pSkill[passEq].val;
+                if (tMob.hp / tMob.maxHp <= threshold && Math.random() < chance) {
                     dmg = tMob.hp;
                     if (mobEl) setTimeout(() => showFloatDamage('EXECUTE', mobEl, '#ff0000'), 150);
                 }
