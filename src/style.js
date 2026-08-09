@@ -38,6 +38,13 @@ export const styleCSS = `
       border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
       box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }
     .dungeon-win.open-anim { display: flex; animation: winPop 0.2s cubic-bezier(0.18,0.89,0.32,1.28) forwards; }
+    
+    .dialog-win { position: fixed; z-index: 99999; width: min(450px, 90vw); display: flex;
+      flex-direction: column; background: #f8efe0;
+      background-image: repeating-linear-gradient(0deg, transparent 0 30px, rgba(170,130,80,.14) 30px 33px);
+      border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
+      box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); animation: winPop 0.2s cubic-bezier(0.18,0.89,0.32,1.28) forwards; overflow: hidden; }
+    .dialog-content { padding: 20px 25px; text-align: center; color: #7a5c38; font-size: 15px; font-weight: bold; line-height: 1.6; }
     .titlebar { background: var(--sky); border-bottom: 4px solid var(--skyLine); padding: 9px 14px;
       display: flex; align-items: center; gap: 8px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.5);
       cursor: move; touch-action: none; user-select: none; flex: none; }
@@ -693,4 +700,22 @@ export const styleCSS = `
     @media (max-width: 640px) {
         .trade-split { flex-direction: column; }
     }
+    
+    /* Thiên Kiếp (Tribulation) */
+    .trib-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; transition: opacity 0.5s; border-radius: 6px; }
+    .trib-cloud { position: absolute; top: 10%; width: 200vw; height: 30vh; background: radial-gradient(ellipse at center, rgba(30,30,40,0.9) 0%, rgba(10,10,15,0) 70%); filter: blur(20px); animation: tribCloudMove 10s linear infinite; pointer-events: none; z-index: 1; }
+    @keyframes tribCloudMove { 0% { transform: translateX(-100vw); } 100% { transform: translateX(100vw); } }
+    .trib-lightning { position: absolute; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 2; }
+    .trib-lightning.strike { animation: tribStrike 1.5s ease-out; }
+    @keyframes tribStrike { 0%, 10%, 20% { opacity: 0; } 5%, 15% { opacity: 0.9; } 25% { opacity: 1; } 100% { opacity: 0; } }
+    .trib-content { position: relative; z-index: 10; background: linear-gradient(135deg, #1c1c1c, #3a0000); border: 3px solid #ff3b3b; border-radius: 12px; padding: 25px; text-align: center; color: #fff; max-width: 90vw; width: 400px; box-shadow: 0 0 30px rgba(255,59,59,0.4), inset 0 0 15px rgba(255,0,0,0.2); animation: tribPop 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+    @keyframes tribPop { 0% { opacity: 0; transform: scale(0.8) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+    .trib-title { font-size: 22px; font-weight: bold; color: #ff5e5e; margin-bottom: 10px; text-shadow: 0 0 10px #ff0000; letter-spacing: 2px; }
+    .trib-text { font-size: 14px; line-height: 1.6; color: #e0e0e0; margin-bottom: 20px; }
+    .trib-btn { display: block; width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .trib-btn-sub { background: linear-gradient(#d38b24, #a36510); color: #fff; box-shadow: 0 4px 0 #7a4a0a; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+    .trib-btn-sub:active { transform: translateY(4px); box-shadow: 0 0 0 #7a4a0a; }
+    .trib-btn-def { background: linear-gradient(#4a3461, #2a1a40); color: #c4a0e8; border: 1px solid #7a4aaa; }
+    .trib-btn-def:hover { background: linear-gradient(#5a4070, #3a2550); }
+    .trib-btn-def:active { transform: translateY(2px); }
 `;

@@ -1,6 +1,6 @@
 {
   "name": "sillytavern-farm-extension",
-  "version": "1.1.0",
+  "version": "5.0.0",
   "description": "Nông Trại Tiện Ích",
   "main": "index.js",
   "type": "module",

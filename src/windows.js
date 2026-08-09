@@ -1,5 +1,6 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
+import { startTribulationEvent, startPoorTribulationNotice, startLockedModal } from './events.js';
 
 import { layout } from './orb.js';
 import { settle } from './utils.js';
@@ -27,10 +28,36 @@ export function placeDungeonWin() {
   dungeonWin.style.top = Math.min(Math.max(y, 0), vh - 60) + 'px';
 }
 export function toggleWin() {
-  if (ctx.win.classList.contains('open')) { closeWin(); return; }
-  ctx.win.classList.add('open');
-  layout(); placeWin(); settle(); renderAll();
-  tick = window.setInterval(() => { renderDynamic(); }, 1000);
+  try {
+      if (ctx.win.classList.contains('open')) { closeWin(); return; }
+      if (ctx.S.blockedUntil && ctx.S.blockedUntil > Date.now()) {
+          startLockedModal();
+          return;
+      }
+      ctx.win.classList.add('open');
+      layout(); placeWin(); settle(); renderAll();
+      tick = window.setInterval(() => { renderDynamic(); }, 1000);
+
+      if (ctx.S.needsTribulationCheck) {
+          startTribulationEvent(() => {
+              if (ctx.S.blockedUntil && ctx.S.blockedUntil > Date.now()) {
+                  closeWin(); // Đóng lại nếu bị khóa
+              }
+          });
+          return;
+      }
+      if (ctx.S.needsPoorTribulationNotice) {
+          startPoorTribulationNotice(() => {
+              // Bảng đã mở sẵn, chạy xong thì thôi
+          });
+          delete ctx.S.needsPoorTribulationNotice;
+          save(true);
+          return;
+      }
+  } catch (e) {
+      console.error("[Farm] toggleWin Error: ", e);
+      if (All.toast) All.toast("Error: " + e.message);
+  }
 }
 export function closeWin() {
   ctx.win.classList.remove('open');

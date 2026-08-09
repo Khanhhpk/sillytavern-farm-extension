@@ -623,3 +623,121 @@ export function initEvents() {
     }
   } catch (e) { console.warn('[Farm] Lỗi khi đăng ký sự kiện CHAT_CHANGED:', e); }
 }
+
+export function startTribulationEvent(onComplete) {
+    const overlay = document.createElement('div');
+    overlay.className = 'trib-overlay';
+    overlay.innerHTML = `
+        <div class="trib-cloud"></div>
+        <div class="trib-lightning" id="trib-lightning"></div>
+        <div class="trib-content">
+            <div class="trib-title">THIÊN KIẾP GIÁNG LÂM</div>
+            <div class="trib-text">
+                Thiên Đạo phát hiện lượng tài sản của ngươi quá lớn, đe dọa đến sự cân bằng của Đa Vũ Trụ!<br><br>
+                Sấm sét đang cuộn trào... Hãy đưa ra quyết định của ngươi!
+            </div>
+            <button class="trib-btn trib-btn-sub" id="btn-submit">Cống Nạp Thiên Đạo (Trừ số Tỷ, giữ số lẻ)</button>
+            <button class="trib-btn trib-btn-def" id="btn-defy">Chống Lại Thiên Đạo (Bị khóa game 1 ngày)</button>
+        </div>
+    `;
+
+    ctx.win.appendChild(overlay);
+
+    const btnSubmit = overlay.querySelector('#btn-submit');
+    const btnDefy = overlay.querySelector('#btn-defy');
+    const lightning = overlay.querySelector('#trib-lightning');
+
+    btnSubmit.onclick = () => {
+        // Trừ toàn bộ số hàng tỷ
+        const billions = Math.floor(ctx.S.coins / 1e9);
+        if (billions > 0) {
+            ctx.S.coins -= billions * 1e9;
+        }
+        delete ctx.S.needsTribulationCheck;
+        save(true);
+        toast('Ngươi đã cống nạp tài sản. Thiên Đạo tạm thời nguôi giận!');
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.remove();
+            if (onComplete) onComplete();
+        }, 500);
+    };
+
+    btnDefy.onclick = () => {
+        // Sét đánh
+        lightning.classList.add('strike');
+        setTimeout(() => {
+            ctx.S.blockedUntil = Date.now() + 24 * 60 * 60 * 1000;
+            delete ctx.S.needsTribulationCheck;
+            save(true);
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.remove();
+                if (onComplete) onComplete();
+            }, 500);
+        }, 300);
+    };
+}
+
+export function startPoorTribulationNotice(onComplete) {
+    const overlay = document.createElement('div');
+    overlay.className = 'trib-overlay';
+    overlay.innerHTML = `
+        <div class="trib-cloud" style="animation-duration: 3s; filter: blur(10px); opacity: 0.6;"></div>
+        <div class="trib-content" style="border-color: #666; background: linear-gradient(135deg, #1c1c1c, #2a2a2a); box-shadow: none;">
+            <div class="trib-text" style="font-size: 16px; font-weight: bold; color: #ccc;">
+                Thiên Đạo ngó qua nông trại của bạn rồi bỏ đi vì thấy quá nghèo...
+            </div>
+        </div>
+    `;
+    
+    ctx.win.appendChild(overlay);
+    
+    // Đám mây bay qua mờ nhạt, text hiện lên 3.5 giây rồi bay đi
+    setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.remove();
+            if (onComplete) onComplete();
+        }, 500);
+    }, 3500);
+}
+
+export function startLockedModal() {
+    if (ctx.ui.querySelector('#farm-locked-modal')) return;
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'dialog-win';
+    overlay.id = 'farm-locked-modal';
+    overlay.style.pointerEvents = 'auto';
+    
+    const remaining = ctx.S.blockedUntil - Date.now();
+    const hours = Math.floor(remaining / (1000 * 60 * 60));
+    const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    
+    overlay.innerHTML = `
+        <div class="titlebar" style="justify-content: space-between; border-radius: 6px 6px 0 0;">
+            <h1 style="margin: 0; display: flex; align-items: center; gap: 7px; color: #7a5c38; font-size: 15px; letter-spacing: 1px;">
+                ⚠️ THIÊN PHẠT PHONG ẤN
+            </h1>
+            <div class="close-x" id="btn-close-locked">×</div>
+        </div>
+        <div class="dialog-content">
+            Nông trại đã bị phong ấn bởi sức mạnh của Thiên Đạo do hành vi ngoan cố chống đối.<br><br>
+            Thời gian còn lại:<br>
+            <b style="color: #d34a4a; font-size: 20px; display: block; margin-top: 8px;">${hours} giờ ${mins} phút</b>
+        </div>
+    `;
+    ctx.ui.appendChild(overlay);
+
+    // Tính toán tọa độ để đưa ra giữa màn hình
+    overlay.style.left = Math.max(10, (window.innerWidth - overlay.offsetWidth) / 2) + 'px';
+    overlay.style.top = Math.max(10, (window.innerHeight - overlay.offsetHeight) / 2) + 'px';
+
+    overlay.querySelector('#btn-close-locked').onclick = () => {
+        overlay.style.animation = 'none'; // reset
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.2s';
+        setTimeout(() => overlay.remove(), 200);
+    };
+}

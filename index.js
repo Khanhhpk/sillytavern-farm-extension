@@ -52,6 +52,36 @@ var init_store = __esm({
     setExtensionContext = (params) => {
       Object.assign(ctx, params);
     };
+    if (typeof window !== "undefined") {
+      window["testTribulation"] = () => {
+        if (ctx.S) {
+          ctx.S.coins = 25e8;
+          ctx.S.needsTribulationCheck = true;
+          delete ctx.S.blockedUntil;
+          if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+          console.log("\u2705 \u0110\xE3 gi\u1EA3 l\u1EADp m\u1ED1c t\xE0i s\u1EA3n 2.5 T\u1EF7 v\xE0 \xE9p ch\u1EA1y s\u1EF1 ki\u1EC7n Thi\xEAn Ki\u1EBFp! H\xE3y b\u1EA5m v\xE0o qu\u1EA3 c\u1EA7u N\xF4ng Tr\u1EA1i \u0111\u1EC3 xem.");
+        } else {
+          console.log("\u274C N\xF4ng tr\u1EA1i ch\u01B0a \u0111\u01B0\u1EE3c t\u1EA3i (ctx.S null). H\xE3y m\u1EDF game m\u1ED9t l\u1EA7n tr\u01B0\u1EDBc.");
+        }
+      };
+      window["testPoorTribulation"] = () => {
+        if (ctx.S) {
+          ctx.S.needsPoorTribulationNotice = true;
+          delete ctx.S.blockedUntil;
+          if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+          console.log("\u2705 \u0110\xE3 gi\u1EA3 l\u1EADp ng\u01B0\u1EDDi ngh\xE8o g\u1EB7p Thi\xEAn \u0110\u1EA1o! H\xE3y b\u1EA5m v\xE0o qu\u1EA3 c\u1EA7u N\xF4ng Tr\u1EA1i \u0111\u1EC3 xem.");
+        } else {
+          console.log("\u274C N\xF4ng tr\u1EA1i ch\u01B0a \u0111\u01B0\u1EE3c t\u1EA3i (ctx.S null). H\xE3y m\u1EDF game m\u1ED9t l\u1EA7n tr\u01B0\u1EDBc.");
+        }
+      };
+      window["unlockTribulation"] = () => {
+        if (ctx.S) {
+          delete ctx.S.blockedUntil;
+          if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+          console.log("\u2705 \u0110\xE3 gi\u1EA3i tr\u1EEB phong \u1EA5n Thi\xEAn Ki\u1EBFp! B\u1EA1n c\xF3 th\u1EC3 v\xE0o l\u1EA1i N\xF4ng Tr\u1EA1i.");
+        }
+      };
+    }
   }
 });
 
@@ -2173,6 +2203,13 @@ var init_style = __esm({
       border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
       box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }
     .dungeon-win.open-anim { display: flex; animation: winPop 0.2s cubic-bezier(0.18,0.89,0.32,1.28) forwards; }
+    
+    .dialog-win { position: fixed; z-index: 99999; width: min(450px, 90vw); display: flex;
+      flex-direction: column; background: #f8efe0;
+      background-image: repeating-linear-gradient(0deg, transparent 0 30px, rgba(170,130,80,.14) 30px 33px);
+      border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
+      box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); animation: winPop 0.2s cubic-bezier(0.18,0.89,0.32,1.28) forwards; overflow: hidden; }
+    .dialog-content { padding: 20px 25px; text-align: center; color: #7a5c38; font-size: 15px; font-weight: bold; line-height: 1.6; }
     .titlebar { background: var(--sky); border-bottom: 4px solid var(--skyLine); padding: 9px 14px;
       display: flex; align-items: center; gap: 8px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.5);
       cursor: move; touch-action: none; user-select: none; flex: none; }
@@ -2828,6 +2865,24 @@ var init_style = __esm({
     @media (max-width: 640px) {
         .trade-split { flex-direction: column; }
     }
+    
+    /* Thi\xEAn Ki\u1EBFp (Tribulation) */
+    .trib-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; transition: opacity 0.5s; border-radius: 6px; }
+    .trib-cloud { position: absolute; top: 10%; width: 200vw; height: 30vh; background: radial-gradient(ellipse at center, rgba(30,30,40,0.9) 0%, rgba(10,10,15,0) 70%); filter: blur(20px); animation: tribCloudMove 10s linear infinite; pointer-events: none; z-index: 1; }
+    @keyframes tribCloudMove { 0% { transform: translateX(-100vw); } 100% { transform: translateX(100vw); } }
+    .trib-lightning { position: absolute; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 2; }
+    .trib-lightning.strike { animation: tribStrike 1.5s ease-out; }
+    @keyframes tribStrike { 0%, 10%, 20% { opacity: 0; } 5%, 15% { opacity: 0.9; } 25% { opacity: 1; } 100% { opacity: 0; } }
+    .trib-content { position: relative; z-index: 10; background: linear-gradient(135deg, #1c1c1c, #3a0000); border: 3px solid #ff3b3b; border-radius: 12px; padding: 25px; text-align: center; color: #fff; max-width: 90vw; width: 400px; box-shadow: 0 0 30px rgba(255,59,59,0.4), inset 0 0 15px rgba(255,0,0,0.2); animation: tribPop 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+    @keyframes tribPop { 0% { opacity: 0; transform: scale(0.8) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+    .trib-title { font-size: 22px; font-weight: bold; color: #ff5e5e; margin-bottom: 10px; text-shadow: 0 0 10px #ff0000; letter-spacing: 2px; }
+    .trib-text { font-size: 14px; line-height: 1.6; color: #e0e0e0; margin-bottom: 20px; }
+    .trib-btn { display: block; width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .trib-btn-sub { background: linear-gradient(#d38b24, #a36510); color: #fff; box-shadow: 0 4px 0 #7a4a0a; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+    .trib-btn-sub:active { transform: translateY(4px); box-shadow: 0 0 0 #7a4a0a; }
+    .trib-btn-def { background: linear-gradient(#4a3461, #2a1a40); color: #c4a0e8; border: 1px solid #7a4aaa; }
+    .trib-btn-def:hover { background: linear-gradient(#5a4070, #3a2550); }
+    .trib-btn-def:active { transform: translateY(2px); }
 `;
   }
 });
@@ -5207,7 +5262,7 @@ function openPanel(kind) {
           <span class="price">${spriteSVG("coin", 16)}${f.price}</span>
           <span class="buy${ctx.S.coins < f.price ? " off" : ""}" data-buyfert="${id}">Mua</span></div>`).join("");
     } else if (shopTab === "pet") {
-      items = Object.keys(PETS).map((id) => {
+      items = Object.keys(PETS).filter((id) => !PETS[id].hidden).map((id) => {
         const pd = PETS[id];
         const owned = ctx.S.pets.indexOf(id) >= 0;
         const unlocked = pageUnlocked(pd.page);
@@ -5850,18 +5905,42 @@ function placeDungeonWin() {
   dungeonWin.style.top = Math.min(Math.max(y, 0), vh - 60) + "px";
 }
 function toggleWin() {
-  if (ctx.win.classList.contains("open")) {
-    closeWin();
-    return;
+  try {
+    if (ctx.win.classList.contains("open")) {
+      closeWin();
+      return;
+    }
+    if (ctx.S.blockedUntil && ctx.S.blockedUntil > Date.now()) {
+      startLockedModal();
+      return;
+    }
+    ctx.win.classList.add("open");
+    layout();
+    placeWin();
+    settle();
+    renderAll();
+    tick = window.setInterval(() => {
+      renderDynamic();
+    }, 1e3);
+    if (ctx.S.needsTribulationCheck) {
+      startTribulationEvent(() => {
+        if (ctx.S.blockedUntil && ctx.S.blockedUntil > Date.now()) {
+          closeWin();
+        }
+      });
+      return;
+    }
+    if (ctx.S.needsPoorTribulationNotice) {
+      startPoorTribulationNotice(() => {
+      });
+      delete ctx.S.needsPoorTribulationNotice;
+      save(true);
+      return;
+    }
+  } catch (e) {
+    console.error("[Farm] toggleWin Error: ", e);
+    if (toast) toast("Error: " + e.message);
   }
-  ctx.win.classList.add("open");
-  layout();
-  placeWin();
-  settle();
-  renderAll();
-  tick = window.setInterval(() => {
-    renderDynamic();
-  }, 1e3);
 }
 function closeWin() {
   ctx.win.classList.remove("open");
@@ -5929,6 +6008,7 @@ var init_windows = __esm({
   "src/windows.js"() {
     init_store();
     init_all();
+    init_events();
     init_orb();
     init_utils();
     init_render();
@@ -7487,6 +7567,106 @@ function initEvents() {
     console.warn("[Farm] L\u1ED7i khi \u0111\u0103ng k\xFD s\u1EF1 ki\u1EC7n CHAT_CHANGED:", e);
   }
 }
+function startTribulationEvent(onComplete) {
+  const overlay = document.createElement("div");
+  overlay.className = "trib-overlay";
+  overlay.innerHTML = `
+        <div class="trib-cloud"></div>
+        <div class="trib-lightning" id="trib-lightning"></div>
+        <div class="trib-content">
+            <div class="trib-title">THI\xCAN KI\u1EBEP GI\xC1NG L\xC2M</div>
+            <div class="trib-text">
+                Thi\xEAn \u0110\u1EA1o ph\xE1t hi\u1EC7n l\u01B0\u1EE3ng t\xE0i s\u1EA3n c\u1EE7a ng\u01B0\u01A1i qu\xE1 l\u1EDBn, \u0111e d\u1ECDa \u0111\u1EBFn s\u1EF1 c\xE2n b\u1EB1ng c\u1EE7a \u0110a V\u0169 Tr\u1EE5!<br><br>
+                S\u1EA5m s\xE9t \u0111ang cu\u1ED9n tr\xE0o... H\xE3y \u0111\u01B0a ra quy\u1EBFt \u0111\u1ECBnh c\u1EE7a ng\u01B0\u01A1i!
+            </div>
+            <button class="trib-btn trib-btn-sub" id="btn-submit">C\u1ED1ng N\u1EA1p Thi\xEAn \u0110\u1EA1o (Tr\u1EEB s\u1ED1 T\u1EF7, gi\u1EEF s\u1ED1 l\u1EBB)</button>
+            <button class="trib-btn trib-btn-def" id="btn-defy">Ch\u1ED1ng L\u1EA1i Thi\xEAn \u0110\u1EA1o (B\u1ECB kh\xF3a game 1 ng\xE0y)</button>
+        </div>
+    `;
+  ctx.win.appendChild(overlay);
+  const btnSubmit = overlay.querySelector("#btn-submit");
+  const btnDefy = overlay.querySelector("#btn-defy");
+  const lightning = overlay.querySelector("#trib-lightning");
+  btnSubmit.onclick = () => {
+    const billions = Math.floor(ctx.S.coins / 1e9);
+    if (billions > 0) {
+      ctx.S.coins -= billions * 1e9;
+    }
+    delete ctx.S.needsTribulationCheck;
+    save(true);
+    toast("Ng\u01B0\u01A1i \u0111\xE3 c\u1ED1ng n\u1EA1p t\xE0i s\u1EA3n. Thi\xEAn \u0110\u1EA1o t\u1EA1m th\u1EDDi ngu\xF4i gi\u1EADn!");
+    overlay.style.opacity = "0";
+    setTimeout(() => {
+      overlay.remove();
+      if (onComplete) onComplete();
+    }, 500);
+  };
+  btnDefy.onclick = () => {
+    lightning.classList.add("strike");
+    setTimeout(() => {
+      ctx.S.blockedUntil = Date.now() + 24 * 60 * 60 * 1e3;
+      delete ctx.S.needsTribulationCheck;
+      save(true);
+      overlay.style.opacity = "0";
+      setTimeout(() => {
+        overlay.remove();
+        if (onComplete) onComplete();
+      }, 500);
+    }, 300);
+  };
+}
+function startPoorTribulationNotice(onComplete) {
+  const overlay = document.createElement("div");
+  overlay.className = "trib-overlay";
+  overlay.innerHTML = `
+        <div class="trib-cloud" style="animation-duration: 3s; filter: blur(10px); opacity: 0.6;"></div>
+        <div class="trib-content" style="border-color: #666; background: linear-gradient(135deg, #1c1c1c, #2a2a2a); box-shadow: none;">
+            <div class="trib-text" style="font-size: 16px; font-weight: bold; color: #ccc;">
+                Thi\xEAn \u0110\u1EA1o ng\xF3 qua n\xF4ng tr\u1EA1i c\u1EE7a b\u1EA1n r\u1ED3i b\u1ECF \u0111i v\xEC th\u1EA5y qu\xE1 ngh\xE8o...
+            </div>
+        </div>
+    `;
+  ctx.win.appendChild(overlay);
+  setTimeout(() => {
+    overlay.style.opacity = "0";
+    setTimeout(() => {
+      overlay.remove();
+      if (onComplete) onComplete();
+    }, 500);
+  }, 3500);
+}
+function startLockedModal() {
+  if (ctx.ui.querySelector("#farm-locked-modal")) return;
+  const overlay = document.createElement("div");
+  overlay.className = "dialog-win";
+  overlay.id = "farm-locked-modal";
+  overlay.style.pointerEvents = "auto";
+  const remaining = ctx.S.blockedUntil - Date.now();
+  const hours = Math.floor(remaining / (1e3 * 60 * 60));
+  const mins = Math.floor(remaining % (1e3 * 60 * 60) / (1e3 * 60));
+  overlay.innerHTML = `
+        <div class="titlebar" style="justify-content: space-between; border-radius: 6px 6px 0 0;">
+            <h1 style="margin: 0; display: flex; align-items: center; gap: 7px; color: #7a5c38; font-size: 15px; letter-spacing: 1px;">
+                \u26A0\uFE0F THI\xCAN PH\u1EA0T PHONG \u1EA4N
+            </h1>
+            <div class="close-x" id="btn-close-locked">\xD7</div>
+        </div>
+        <div class="dialog-content">
+            N\xF4ng tr\u1EA1i \u0111\xE3 b\u1ECB phong \u1EA5n b\u1EDFi s\u1EE9c m\u1EA1nh c\u1EE7a Thi\xEAn \u0110\u1EA1o do h\xE0nh vi ngoan c\u1ED1 ch\u1ED1ng \u0111\u1ED1i.<br><br>
+            Th\u1EDDi gian c\xF2n l\u1EA1i:<br>
+            <b style="color: #d34a4a; font-size: 20px; display: block; margin-top: 8px;">${hours} gi\u1EDD ${mins} ph\xFAt</b>
+        </div>
+    `;
+  ctx.ui.appendChild(overlay);
+  overlay.style.left = Math.max(10, (window.innerWidth - overlay.offsetWidth) / 2) + "px";
+  overlay.style.top = Math.max(10, (window.innerHeight - overlay.offsetHeight) / 2) + "px";
+  overlay.querySelector("#btn-close-locked").onclick = () => {
+    overlay.style.animation = "none";
+    overlay.style.opacity = "0";
+    overlay.style.transition = "opacity 0.2s";
+    setTimeout(() => overlay.remove(), 200);
+  };
+}
 var esc, clampN, SEC_LS_KEY, SEC, CS, eventFresh, todayEvent, eventPending, renderTimeout, INJECT_ID, heartbeat;
 var init_events = __esm({
   "src/events.js"() {
@@ -7552,7 +7732,7 @@ __export(state_exports, {
 });
 function freshState() {
   return {
-    version: 1,
+    version: 2,
     playerId: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).substr(2, 9),
     coins: TEST_MODE ? 9999 : 999,
     totalSales: 0,
@@ -7585,7 +7765,15 @@ function loadState() {
     ctx.extension_settings[extensionName] = {};
   }
   const g = ctx.extension_settings[extensionName] || {};
-  ctx.S = g[NS] && g[NS].version === 1 ? g[NS] : freshState();
+  if (g[NS] && g[NS].version === 1) {
+    g[NS].version = 2;
+    if (g[NS].coins >= 1e9) {
+      g[NS].needsTribulationCheck = true;
+    } else {
+      g[NS].needsPoorTribulationNotice = true;
+    }
+  }
+  ctx.S = g[NS] && g[NS].version === 2 ? g[NS] : freshState();
   if (!ctx.S.playerId) ctx.S.playerId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).substr(2, 9);
   if (!ctx.S.petPoke) ctx.S.petPoke = {};
   if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
@@ -7609,6 +7797,12 @@ function loadState() {
       delete ctx.S.jobCfg[k];
     }
   });
+  if (ctx.S.pets && ctx.S.pets.includes("naoyaSlime")) {
+    if (!ctx.S.achiv || !ctx.S.achiv.naoya || !ctx.S.achiv.naoya.claimed) {
+      ctx.S.pets = ctx.S.pets.filter((p) => p !== "naoyaSlime");
+      if (ctx.S.petsOut) ctx.S.petsOut = ctx.S.petsOut.filter((p) => p !== "naoyaSlime");
+    }
+  }
   Object.keys(ctx.S.bag || {}).forEach((k) => {
     const base = k.split("@")[0];
     if (base === "mysbG" || base === "mysbW" || base === "mysbM") {
@@ -16608,6 +16802,9 @@ __export(all_exports, {
   shovel: () => shovel,
   sleepPet: () => sleepPet,
   spriteSVG: () => spriteSVG,
+  startLockedModal: () => startLockedModal,
+  startPoorTribulationNotice: () => startPoorTribulationNotice,
+  startTribulationEvent: () => startTribulationEvent,
   stopHop: () => stopHop,
   takeoutNote: () => takeoutNote,
   testMode: () => testMode,
