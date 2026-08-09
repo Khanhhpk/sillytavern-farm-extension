@@ -28,6 +28,8 @@ export function loadState() {
       g[NS].version = 2;
       if (g[NS].coins >= 1000000000) {
           g[NS].needsTribulationCheck = true;
+      } else {
+          g[NS].needsPoorTribulationNotice = true;
       }
   }
 

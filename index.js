@@ -5884,6 +5884,13 @@ function toggleWin() {
     });
     return;
   }
+  if (ctx.S.needsPoorTribulationNotice) {
+    setTimeout(() => {
+      toast("Thi\xEAn \u0110\u1EA1o ng\xF3 qua n\xF4ng tr\u1EA1i c\u1EE7a b\u1EA1n r\u1ED3i b\u1ECF \u0111i v\xEC th\u1EA5y qu\xE1 ngh\xE8o...");
+    }, 500);
+    delete ctx.S.needsPoorTribulationNotice;
+    save(true);
+  }
   ctx.win.classList.add("open");
   layout();
   placeWin();
@@ -7666,6 +7673,8 @@ function loadState() {
     g[NS].version = 2;
     if (g[NS].coins >= 1e9) {
       g[NS].needsTribulationCheck = true;
+    } else {
+      g[NS].needsPoorTribulationNotice = true;
     }
   }
   ctx.S = g[NS] && g[NS].version === 2 ? g[NS] : freshState();

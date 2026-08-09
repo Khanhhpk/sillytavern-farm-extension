@@ -40,6 +40,13 @@ export function toggleWin() {
       });
       return;
   }
+  if (ctx.S.needsPoorTribulationNotice) {
+      setTimeout(() => {
+          All.toast('Thiên Đạo ngó qua nông trại của bạn rồi bỏ đi vì thấy quá nghèo...');
+      }, 500);
+      delete ctx.S.needsPoorTribulationNotice;
+      save(true);
+  }
   ctx.win.classList.add('open');
   layout(); placeWin(); settle(); renderAll();
   tick = window.setInterval(() => { renderDynamic(); }, 1000);
