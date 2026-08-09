@@ -34,6 +34,7 @@ export function loadState() {
   if (!ctx.S.theme) ctx.S.theme = 'sakura';
   if (!ctx.S.page) ctx.S.page = 1;
   if (ctx.S.dragPet === undefined) ctx.S.dragPet = false;
+  if (!ctx.S.achiv) ctx.S.achiv = { naoya: { radishes: 0, crits: 0, claimed: false } };
   ctx.S.view = 'farm';   // Luôn mặc định về nông trại khi khởi động
   const petRenameMap = { 'bunny': 'jellyfish', 'slimeNight': 'peach_soda', 'batBlob': 'mystery_blob' };
   if (ctx.S.pets) ctx.S.pets = ctx.S.pets.map(p => petRenameMap[p] || p);
@@ -49,14 +50,14 @@ export function loadState() {
 
   Object.keys(ctx.S.bag || {}).forEach(k => {
     const base = k.split('@')[0];
-    if (base === 'mysbG' || base === 'mysbW' || base === 'mysbM' || base === 'moonberry') {
+    if (base === 'mysbG' || base === 'mysbW' || base === 'mysbM') {
       const nk = k.replace(base, 'strawberry');
       ctx.S.bag[nk] = (ctx.S.bag[nk] || 0) + ctx.S.bag[k];
       delete ctx.S.bag[k];
     }
   });
   [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach(arr => (arr || []).forEach(p => {
-    if (p.crop && (p.crop.id === 'mysbG' || p.crop.id === 'mysbW' || p.crop.id === 'mysbM' || p.crop.id === 'moonberry')) p.crop.id = 'strawberry';
+    if (p.crop && (p.crop.id === 'mysbG' || p.crop.id === 'mysbW' || p.crop.id === 'mysbM')) p.crop.id = 'strawberry';
   }));
   
   if (ctx.S.ferts) {

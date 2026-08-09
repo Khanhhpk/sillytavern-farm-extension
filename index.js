@@ -448,6 +448,24 @@ var init_graphics = __esm({
       slime: ["................", "................", "................", "................", ".....BBBBBB.....", "....BBBBBBBB....", "...BBWWBBBBBB...", "..BBWWBBBBBBBB..", "..BBBBBBBBBBBB..", "..BB33BBBB33BB..", ".BBBBBBBBBBBBBB.", ".BnBBBB33BBBBnB.", ".BBBBBBBBBBBBBB.", ".bBBBBBBBBBBBBb.", "..bbbbbbbbbbbb..", "................"],
       octo: ["................", "................", "................", ".....VVVVVV.....", "....VVVVVVVV....", "...VVWWVVVVVV...", "...VWWVVVVVVV...", "..VVVVVVVVVVVV..", "..VVKKVVVVKKVV..", "..VVVVVVVVVVVV..", "..VnVVVKKVVVnV..", "..VVVVVVVVVVVV..", "..VVVVVVVVVVVV..", "..VV.VV..VV.VV..", "..vv.vv..vv.vv..", "................"],
       coin: ["................", "................", "................", ".....UUUUU......", "....UCCCCCU.....", "...UCCWWCCCU....", "...UCWCCCCCU....", "...UCWCCCCCU....", "...UCCCCCCCU....", "...UCCCCCCCU....", "....UCCCCCU.....", ".....UUUUU......", "................", "................", "................", "................"],
+      achivStar: [
+        "................",
+        ".......U........",
+        "......UCU.......",
+        "......CWC.......",
+        ".UUUUUCCCUUUUU..",
+        "..UCCCCCCCCCU...",
+        "...UCCCCCCCU....",
+        "....UCCCCCU.....",
+        "...UCCC.CCCU....",
+        "..UCC.....CCU...",
+        ".UU.........UU..",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
       sun: ["................", ".......C........", "...C...C...C....", "....C.....C.....", "......CCC.......", ".....CCCCC......", "..CC.CCWCC.CC...", ".....CCCCC......", "......CCC.......", "....C.....C.....", "...C...C...C....", ".......C........", "................", "................", "................", "................"],
       flower: ["................", "................", "................", "....nnn.nnn.....", "...npppnpppn....", "...nppnCnppn....", "....nnCCCnn.....", "...nppnCnppn....", "...npppnpppn....", "....nnn.nnn.....", "................", "................", "................", "................", "................", "................"],
       shopIcon: ["................", "................", "................", "....fpf.fpf.....", "....fppffppf....", ".....ffFFff.....", "..qddddFFddddq..", "..qqqqqFFqqqqq..", "...qdddFFdddq...", "...qFFFFFFFFq...", "...qdddFFdddq...", "...qdddFFdddq...", "...qqqqqqqqqq...", "................", "................", "................"],
@@ -1439,6 +1457,24 @@ var init_graphics = __esm({
         "................",
         "................",
         "................"
+      ],
+      naoyaSlime: [
+        "................",
+        "................",
+        "................",
+        "................",
+        ".....yyyyyy.....",
+        "....yYYYYYYy....",
+        "...yYWWYYYYYy...",
+        "..yYYWWYYYYYYy..",
+        "..yYKKKYYKKKYy..",
+        "..yYWKKYYWKKYy..",
+        ".yYYYYYYYYYYYYy.",
+        ".yYYYYYYYYKYYYy.",
+        ".yYYYYYYKKYYYYy.",
+        ".yYYYYYYYYYYYYy.",
+        "..yyyyyyyyyyyy..",
+        "................"
       ]
     };
     petLinear = (x1, y1, x2, y2, stops) => ({ type: "linear", x1, y1, x2, y2, stops });
@@ -1488,7 +1524,8 @@ var init_graphics = __esm({
       starBell: { name: "B\xE9 chu\xF4ng sao", page: 3, price: 8e3, cry: ["Leng keng~", "\u2606!", "(l\u1EAFc l\u1EAFc nh\u1EB9)"], desc: "Lo\u1EA1i s\u1EA3n xu\u1EA5t \xB7 t\xECm kho b\xE1u rung r\u01A1i m\u1EA3nh ng\xF4i sao (tri\u1EC7u h\u1ED3i \u0111\u01B0\u1EE3c ph\xF9 thu\u1EF7 tr\xF2n)" },
       /* —— Át chủ bài (page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
       peach_soda: { name: "B\xE9 soda \u0111\xE0o", page: 1, price: 9999, cry: ["B\u1ED1p\u2014\u2014!", "(n\u1ED5i m\u1ED9t bong b\xF3ng nh\u1ECF)", "X\xEC~", "(v\u1ECB ng\xF2n ng\u1ECDt)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 tinh linh soda v\u1ECB \u0111\xE0o \xB7 d\u1EC5 th\u01B0\u01A1ng qu\xE1 m\u1EE9c n\xEAn \u0111\u1EAFt nh\u1EA5t" },
-      penguin: { name: "Chim c\xE1nh c\u1EE5t", page: 1, price: 1e5, cry: ["Pingu!", "N\xFAp n\xFAp~", "Tr\u01B0\u1EE3t tuy\u1EBFt n\xE0o!", "C\xE1nh c\u1EE5t!"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 AFK m\u1ED7i 1 ti\u1EBFng mang v\u1EC1 1 v\xE9 gacha ng\u1EABu nhi\xEAn (70% v\xE9 th\u01B0\u1EDDng, 30% v\xE9 \u0111\u1EB7c bi\u1EC7t)" }
+      penguin: { name: "Chim c\xE1nh c\u1EE5t", page: 1, price: 1e5, cry: ["Pingu!", "N\xFAp n\xFAp~", "Tr\u01B0\u1EE3t tuy\u1EBFt n\xE0o!", "C\xE1nh c\u1EE5t!"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 AFK m\u1ED7i 1 ti\u1EBFng mang v\u1EC1 1 v\xE9 gacha ng\u1EABu nhi\xEAn (70% v\xE9 th\u01B0\u1EDDng, 30% v\xE9 \u0111\u1EB7c bi\u1EC7t)" },
+      naoyaSlime: { name: "Naoya", page: 1, hidden: true, price: 0, cry: ["R\xE1c r\u01B0\u1EDFi!", "L\u0169 y\u1EBFu k\xE9m...", "B\u1EA9n h\u1EBFt c\u1EA3 ng\u01B0\u1EDDi!", "(l\u01B0\u1EDDm khinh b\u1EC9)"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t (Th\xE0nh t\u1EF1u) \xB7 K\u1EBB t\u1EF1 x\u01B0ng l\xE0 thi\xEAn t\xE0i nh\u01B0ng l\u1EA1i b\u1ECB k\u1EB9t trong h\xECnh h\xE0i Slime tr\xF2n vo n\xFAng n\xEDnh." }
     };
     PASSES = {
       water: { name: "V\xE9 v\xF9ng n\u01B0\u1EDBc", price: 6e3, desc: "M\u1EDF kho\xE1 ru\u1ED9ng v\xF9ng n\u01B0\u1EDBc (trang 2) + quy\u1EC1n mua b\xE9 tr\xF2n trang 2 v\xE0 h\u1EA1t gi\u1ED1ng thu\u1EF7 sinh, t\u1EB7ng k\xE8m \xF4 ru\u1ED9ng n\u1ED5i \u0111\u1EA7u ti\xEAn" },
@@ -2493,9 +2530,9 @@ var init_style = __esm({
     .dg-slot img { width: 80% !important; height: 80% !important; object-fit: contain; pointer-events: none; }
     .dg-slot:hover { border-color: #d9ba8a; background: rgba(255,255,255,.2); }
     .dg-slot.placed { opacity: 0.4; pointer-events: none; }
-    .dg-entity { position: absolute; left: 0; top: 0; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; will-change: transform; }
+    .dg-entity { position: absolute; left: 0; top: 0; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; will-change: transform; transition: none !important; cursor: default; }
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
-    .dg-entity.flip img { transform: scaleX(-1); }
+    .dg-entity.flip img, .dg-entity.flip svg { transform: scaleX(-1); }
     @media (max-width: 640px) {
       #win, .dungeon-win { left: 0 !important; top: 0 !important; width: 100vw; height: 100vh; height: 100dvh; max-height: none; border: none; border-radius: 0; outline: none; }
       .dungeon-view { padding: 4px; }
@@ -2536,6 +2573,7 @@ var init_style = __esm({
     .dg-shop-pet:hover { background: #303038; }
     .dg-shop-pet.selected { border-color: #ffd94d; background: #353540; }
     .dg-shop-pet .lv { font-size: 11px; font-weight: bold; color: #888; margin-top: 4px; }
+    .dg-shop-pet .dmg-stats { display: flex; flex-direction: column; gap: 2px; font-size: 9px; line-height: 1; margin-top: 4px; text-align: left; background: rgba(0,0,0,0.3); padding: 3px; border-radius: 4px; }
     .dg-shop-pet.selected .lv { color: #ffd94d; }
     
     .dg-shop-right { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
@@ -3218,6 +3256,8 @@ function harvest(pi, quiet) {
   const c = curPlots()[pi].crop;
   if (!c || now() < c.matureAt) return null;
   rollMutation(c, pi);
+  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
+  ctx.S.stats.totalHarvests = (ctx.S.stats.totalHarvests || 0) + 1;
   const def = CROPS[c.id];
   let n = 1;
   const dev = todayEvent();
@@ -5066,6 +5106,71 @@ function closeModal() {
   setPendingPick(null);
   bagSellMode = false;
 }
+function openAchivModal() {
+  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
+  if (!ctx.S.achiv) ctx.S.achiv = { naoya: { claimed: false } };
+  const stats = ctx.S.stats;
+  const n = ctx.S.achiv.naoya;
+  const q1 = Math.min(240, stats.totalHarvests);
+  const q2 = Math.min(24, ctx.S.hero?.maxStage || 1);
+  const q3 = Math.min(2400, stats.totalCrits);
+  const done = q1 >= 240 && q2 >= 24 && q3 >= 2400;
+  const btn = n.claimed ? `<div class="buy off" style="text-align:center; padding:10px;">\u0110\xE3 \u0110\xE1nh Th\u1EE9c Naoya Slime</div>` : done ? `<div class="buy" id="claimNaoya" style="text-align:center; padding:10px; font-size:14px; background:#fcd34d; color:#27272a; border-color:#d97706; box-shadow: 0 4px 10px rgba(252,211,77,0.4);">\u2726 \u0110\xD3N K\u1EBA KI\xCAU NG\u1EA0O V\u1EC0 NH\xC0 \u2726</div>` : `<div class="buy off" style="text-align:center; padding:10px;">Ch\u01B0a \u0110\u1EE7 \u0110i\u1EC1u Ki\u1EC7n</div>`;
+  openModal("Th\xE1nh Ph\u1EA3 Th\xE0nh T\u1EF1u", `
+      <div class="note" style="margin-bottom:12px;">C\xE1c Spec Pet (Th\u1EA7n Th\xFA \u0110\u1ED9c Nh\u1EA5t) kh\xF4ng th\u1EC3 d\xF9ng V\xE0ng v\u1EA5y b\u1EA9n. B\u1EA1n ph\u1EA3i ch\u1EE9ng minh th\u1EF1c l\u1EF1c qua Th\xE0nh T\u1EF1u.</div>
+      
+      <!-- B\u1ECCC TO\xC0N B\u1ED8 B\u1EB0NG DETAILS \u0110\u1EC2 C\xD3 TH\u1EC2 THU G\u1ECCN TO\xC0N T\u1EACP -->
+      <details style="background:#2c2538; border:2px solid #bd923b; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" open>
+          
+          <summary style="display:flex; justify-content:space-between; align-items:center; padding:15px; cursor:pointer; outline:none;">
+             <div style="font-weight:bold; font-size:15px; color:#fcd34d; text-shadow: 0 1px 2px #000;">
+                 M\xE0y kh\xF4ng c\xF3 tr\xE1i tim con ng\u01B0\u1EDDi \xE0?
+             </div>
+             <div style="display:inline-block; vertical-align:middle; animation: pulse 2s infinite;">
+                 ${spriteSVG("achivStar", 24)}
+             </div>
+          </summary>
+          
+          <div style="padding: 0 15px 15px 15px;">
+              <div style="font-size:12px; color:#d0ce70; margin-bottom:14px; font-style:italic; border-bottom: 1px solid #4a3461; padding-bottom: 10px;">
+                  "\u0110\xE1nh th\u1EE9c Slime Thi\u1EBFu Gia (Naoya) - K\u1EBB c\u0103m gh\xE9t s\u1EF1 ch\u1EADm ch\u1EA1p v\xE0 y\u1EBFu k\xE9m."
+              </div>
+              
+              <div style="margin-top: 10px;">
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">1. S\u1EF1 T\xE0n \xDAa: <span style="color:#aaa; font-weight:normal;">Thu ho\u1EA1ch 240 N\xF4ng s\u1EA3n b\u1EA5t k\u1EF3</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #4a3461; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #7c3aed, #a78bfa); width:${q1 / 240 * 100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q1}/240</div>
+                  </div>
+                  
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. \u0110\u1EE9ng Tr\xEAn T\u1EA5t C\u1EA3: <span style="color:#aaa; font-weight:normal;">Ch\u1EA1m t\u1EDBi Stage 24 \u1EDF Th\xE1m Hi\u1EC3m</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #4a3461; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #7c3aed, #a78bfa); width:${q2 / 24 * 100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q2}/24</div>
+                  </div>
+                  
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">3. K\u1EBB Cu\u1ED3ng T\u1ED1c \u0110\u1ED9: <span style="color:#aaa; font-weight:normal;">G\xE2y 2400 \u0111\xF2n Ch\xED M\u1EA1ng (Crit) \u1EDF Dungeon</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #4a3461; height:10px; position:relative; margin-bottom:16px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #7c3aed, #a78bfa); width:${q3 / 2400 * 100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q3}/2400</div>
+                  </div>
+              </div>
+
+              <div style="margin-top:10px;">${btn}</div>
+          </div>
+      </details>
+  `);
+  const claimBtn = $id("claimNaoya");
+  if (claimBtn) claimBtn.addEventListener("click", () => {
+    ctx.S.achiv.naoya.claimed = true;
+    if (!ctx.S.pets.includes("naoyaSlime")) {
+      ctx.S.pets.push("naoyaSlime");
+      toast("\u2726 B\xD9M! Naoya \u0111\xE3 khinh b\u1EC9 b\u01B0\u1EDBc v\xE0o Balo c\u1EE7a b\u1EA1n!");
+    }
+    save();
+    openAchivModal();
+  });
+}
 function openPanel(kind) {
   if (kind === "gacha") {
     return openGachaModal();
@@ -5591,6 +5696,7 @@ function openPanel(kind) {
       if (code === "0209") {
         if (!testMode) {
           setTestMode(true);
+          ctx.S = JSON.parse(JSON.stringify(ctx.S));
           Object.keys(PETS).forEach((id) => {
             if (!ctx.S.hero) ctx.S.hero = {};
             if (!ctx.S.hero.roster) ctx.S.hero.roster = {};
@@ -6032,6 +6138,10 @@ function renderPlots() {
             ${spriteSVG("threeSlimesWalking", 64)}
             <div class="feature-name">Th\xE1m Hi\u1EC3m</div>
           </div>
+          <div class="explore-slot" id="eslot-achiv" style="background: rgba(60, 40, 20, 0.8); border-color: #f2c231; box-shadow: 0 4px 0 #8a6a1c, inset 0 0 0 3px rgba(242,194,49,0.4);">
+            ${spriteSVG("achivStar", 48)}
+            <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Th\xE0nh T\u1EF1u</div>
+          </div>
         `;
         const dBtn = $id("eslot-dungeon");
         if (dBtn) dBtn.addEventListener("click", () => openPanel("dungeon"));
@@ -6039,6 +6149,8 @@ function renderPlots() {
         if (bBtn) bBtn.addEventListener("click", () => openPanel("bet"));
         const hBtn = $id("eslot-hero");
         if (hBtn) hBtn.addEventListener("click", () => openHeroPanel());
+        const aBtn = $id("eslot-achiv");
+        if (aBtn) aBtn.addEventListener("click", () => openAchivModal());
       }
     }
     return;
@@ -7485,6 +7597,7 @@ function loadState() {
   if (!ctx.S.theme) ctx.S.theme = "sakura";
   if (!ctx.S.page) ctx.S.page = 1;
   if (ctx.S.dragPet === void 0) ctx.S.dragPet = false;
+  if (!ctx.S.achiv) ctx.S.achiv = { naoya: { radishes: 0, crits: 0, claimed: false } };
   ctx.S.view = "farm";
   const petRenameMap = { "bunny": "jellyfish", "slimeNight": "peach_soda", "batBlob": "mystery_blob" };
   if (ctx.S.pets) ctx.S.pets = ctx.S.pets.map((p) => petRenameMap[p] || p);
@@ -7498,14 +7611,14 @@ function loadState() {
   });
   Object.keys(ctx.S.bag || {}).forEach((k) => {
     const base = k.split("@")[0];
-    if (base === "mysbG" || base === "mysbW" || base === "mysbM" || base === "moonberry") {
+    if (base === "mysbG" || base === "mysbW" || base === "mysbM") {
       const nk = k.replace(base, "strawberry");
       ctx.S.bag[nk] = (ctx.S.bag[nk] || 0) + ctx.S.bag[k];
       delete ctx.S.bag[k];
     }
   });
   [ctx.S.plots, ctx.S.plots2, ctx.S.plots3].forEach((arr) => (arr || []).forEach((p) => {
-    if (p.crop && (p.crop.id === "mysbG" || p.crop.id === "mysbW" || p.crop.id === "mysbM" || p.crop.id === "moonberry")) p.crop.id = "strawberry";
+    if (p.crop && (p.crop.id === "mysbG" || p.crop.id === "mysbW" || p.crop.id === "mysbM")) p.crop.id = "strawberry";
   }));
   if (ctx.S.ferts) {
     if (ctx.S.ferts["f1"]) {
@@ -7591,1271 +7704,6 @@ var init_state = __esm({
   }
 });
 
-// src/dungeon.js
-function openDungeonView() {
-  isDungeonOpen = true;
-  closeWin();
-  const dungeonWin = $id("dungeon-win");
-  if (dungeonWin) {
-    dungeonWin.style.display = "flex";
-    placeDungeonWin();
-    dungeonWin.classList.remove("open-anim");
-    void dungeonWin.offsetWidth;
-    dungeonWin.classList.add("open-anim");
-  }
-  dungeonView.style.display = "flex";
-  const closeBtn = $id("dungeon-close");
-  if (closeBtn) {
-    closeBtn.onclick = () => {
-      closeDungeonView();
-    };
-  }
-  initPlacementPhase();
-}
-function closeDungeonView() {
-  if (!isDungeonOpen) return;
-  isDungeonOpen = false;
-  stopCombatLoop();
-  const dungeonWin = $id("dungeon-win");
-  if (dungeonWin) {
-    dungeonWin.style.display = "none";
-    dungeonWin.classList.remove("open-anim");
-  }
-  dungeonView.style.display = "none";
-  dungeonView.innerHTML = "";
-  $id("win").classList.add("open");
-  $id("viewToggle").style.display = "";
-  applyPageSkin();
-  applyViewState();
-  renderPager();
-  renderPlots();
-  renderToolbar();
-}
-function initPlacementPhase() {
-  phase = "placement";
-  team = [];
-  enemies = [];
-  projectiles = [];
-  currentWave = 1;
-  totalGold = 0;
-  shopGold = 0;
-  const best = ctx.S.dungeonBest || { wave: 0, gold: 0 };
-  const bestHtml = best.wave > 0 ? `<div style="color:#b08a5c; font-size:12px; text-align:center; margin-top:4px;">\u{1F3C6} K\u1EF7 l\u1EE5c: Wave ${best.wave} \xB7 ${best.gold} G</div>` : "";
-  dungeonView.innerHTML = `
-        <div class="dg-arena" id="dg-arena">
-            <div class="dg-hud" id="dg-hud" style="display:none;"></div>
-            <div class="dg-info-panel" id="dg-info-panel" style="display:none;">
-                <div class="dg-info-close" id="dg-info-close">\xD7</div>
-                <h3>Ch\u1EC9 S\u1ED1 Th\xFA C\u01B0ng</h3>
-                <div class="dg-info-list" id="dg-info-list"></div>
-            </div>
-            <div class="dg-info-panel" id="dg-codex-panel" style="display:none; border-left-color:#e06578;">
-                <div class="dg-info-close" id="dg-codex-close">\xD7</div>
-                <h3 style="color:#e06578;">T\u1EEB \u0110i\u1EC3n Qu\xE1i</h3>
-                <div class="dg-info-list" id="dg-codex-list"></div>
-            </div>
-        </div>
-        <div style="display:flex; justify-content:center; margin-top: 5px; flex-wrap:wrap;">
-            <div class="buy" id="dg-start-btn">B\u1EAFt \u0110\u1EA7u Tr\u1EADn Chi\u1EBFn</div>
-            <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px;">Tho\xE1t</div>
-            <div class="buy plain" id="dg-surrender-btn" style="margin-left: 10px; display:none; background: #e06578; color: white;">K\u1EBFt Th\xFAc S\u1EDBm</div>
-            <div class="buy plain" id="dg-info-btn" style="margin-left: 10px; width: 32px; padding: 0; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:black;" title="Th\xF4ng tin Th\xFA c\u01B0ng">?</div>
-            <div class="buy plain" id="dg-codex-btn" style="margin-left: 10px; padding: 0 10px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:#e06578;" title="T\u1EEB \u0111i\u1EC3n qu\xE1i">Qu\xE1i V\u1EADt</div>
-        </div>
-        ${bestHtml}
-        <div class="dg-dock" id="dg-dock"></div>
-    `;
-  const arena = $id("dg-arena");
-  const dock = $id("dg-dock");
-  dock.innerHTML = `
-        <div id="dg-nav-left" style="font-size: 24px; font-weight: bold; color: #d9ba8a; cursor: pointer; user-select: none; padding: 0 5px; touch-action: manipulation; opacity: 0.3;">\u25C0</div>
-        <div style="flex:1; overflow:hidden; height: 100%; display: flex; align-items: center; position: relative;">
-            <div id="dg-slots-container" style="display: flex; gap: 10px; transition: transform 0.3s ease; position: absolute; left: 0;"></div>
-        </div>
-        <div id="dg-nav-right" style="font-size: 24px; font-weight: bold; color: #d9ba8a; cursor: pointer; user-select: none; padding: 0 5px; touch-action: manipulation;">\u25B6</div>
-    `;
-  const slotsContainer = $id("dg-slots-container");
-  const navLeft = $id("dg-nav-left");
-  const navRight = $id("dg-nav-right");
-  const dockWrapper = navLeft.nextElementSibling;
-  let dockPage = 0;
-  function updateDockNav() {
-    if (!dockWrapper) return;
-    const w = dockWrapper.clientWidth || 250;
-    const itemsPerPage = Math.max(1, Math.floor(w / 54));
-    const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
-    if (dockPage > maxPage) dockPage = maxPage;
-    navLeft.style.opacity = dockPage > 0 ? "1" : "0.3";
-    navRight.style.opacity = dockPage < maxPage ? "1" : "0.3";
-    const offset = dockPage * itemsPerPage * 54;
-    slotsContainer.style.transform = `translateX(-${offset}px)`;
-  }
-  navLeft.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    if (dockPage > 0) {
-      dockPage--;
-      updateDockNav();
-    }
-  });
-  navRight.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    const w = dockWrapper.clientWidth || 250;
-    const itemsPerPage = Math.max(1, Math.floor(w / 54));
-    const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
-    if (dockPage < maxPage) {
-      dockPage++;
-      updateDockNav();
-    }
-  });
-  if (window.ResizeObserver) {
-    new ResizeObserver(() => updateDockNav()).observe(dockWrapper);
-  } else {
-    updateDockNav();
-  }
-  let draggingPet = null;
-  let dragEl = null;
-  ctx.S.pets.forEach((petId) => {
-    const slot = document.createElement("div");
-    slot.className = "dg-slot";
-    slot.innerHTML = petSVG(petId, 32);
-    slot.dataset.pet = petId;
-    slot.addEventListener("pointerdown", (e) => {
-      e.preventDefault();
-      if (phase !== "placement") return;
-      if (team.length >= 4) {
-        toast("T\u1ED1i \u0111a 4 th\xE0nh vi\xEAn!");
-        return;
-      }
-      if (slot.classList.contains("placed")) return;
-      draggingPet = { id: petId, slot };
-      dragEl = document.createElement("div");
-      dragEl.className = "dg-entity pet";
-      dragEl.style.pointerEvents = "none";
-      dragEl.style.position = "fixed";
-      dragEl.style.left = "0";
-      dragEl.style.top = "0";
-      dragEl.style.zIndex = "100000";
-      dragEl.innerHTML = petSVG(petId, 32);
-      document.body.appendChild(dragEl);
-      dragEl.style.transform = `translate3d(${e.clientX - 16}px, ${e.clientY - 16}px, 0)`;
-      slot.setPointerCapture(e.pointerId);
-    });
-    slot.addEventListener("pointermove", (e) => {
-      if (!draggingPet || !dragEl) return;
-      dragEl.style.transform = `translate3d(${e.clientX - 16}px, ${e.clientY - 16}px, 0)`;
-    });
-    slot.addEventListener("pointerup", (e) => {
-      if (!draggingPet || !dragEl) return;
-      const pId = draggingPet.id;
-      const currentSlot = draggingPet.slot;
-      dragEl.remove();
-      dragEl = null;
-      draggingPet = null;
-      currentSlot.releasePointerCapture(e.pointerId);
-      const rect = arena.getBoundingClientRect();
-      if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
-        currentSlot.classList.add("placed");
-        const stat = PET_STATS[pId] || PET_STATS.default;
-        const el = document.createElement("div");
-        el.className = "dg-entity pet";
-        el.innerHTML = `
-                    <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
-                    <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
-                    <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
-                    ${petSVG(pId, 32)}
-                `;
-        let x = e.clientX - rect.left - 16;
-        let y = e.clientY - rect.top - 16;
-        if (x > rect.width - 16) x = rect.width - 16;
-        if (x < 16) x = 16;
-        if (y < 16) y = 16;
-        if (y > rect.height - 16) y = rect.height - 16;
-        el.style.position = "absolute";
-        el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
-        arena.appendChild(el);
-        const memberObj = {
-          id: pId,
-          x,
-          y,
-          hp: stat.hp,
-          maxHp: stat.hp,
-          atk: stat.atk,
-          range: stat.range,
-          speed: stat.speed,
-          cd: 0,
-          maxCd: stat.cd,
-          el,
-          type: "pet",
-          skill: stat.skill,
-          dockSlot: currentSlot
-        };
-        team.push(memberObj);
-        let isPlacedDragging = false;
-        el.addEventListener("pointerdown", (ev) => {
-          ev.preventDefault();
-          if (phase !== "placement") return;
-          isPlacedDragging = true;
-          el.style.zIndex = "100000";
-          const arect = arena.getBoundingClientRect();
-          el.style.transform = `translate3d(${ev.clientX - arect.left - 32}px, ${ev.clientY - arect.top - 32}px, 0)`;
-          el.setPointerCapture(ev.pointerId);
-        });
-        el.addEventListener("pointermove", (ev) => {
-          if (!isPlacedDragging) return;
-          const arect = arena.getBoundingClientRect();
-          el.style.transform = `translate3d(${ev.clientX - arect.left - 32}px, ${ev.clientY - arect.top - 32}px, 0)`;
-        });
-        el.addEventListener("pointerup", (ev) => {
-          if (!isPlacedDragging) return;
-          isPlacedDragging = false;
-          el.releasePointerCapture(ev.pointerId);
-          el.style.zIndex = "";
-          const arect = arena.getBoundingClientRect();
-          if (ev.clientX >= arect.left && ev.clientX <= arect.right && ev.clientY >= arect.top && ev.clientY <= arect.bottom) {
-            el.style.position = "absolute";
-            let nx = ev.clientX - arect.left - 16;
-            let ny = ev.clientY - arect.top - 16;
-            if (nx > arect.width - 16) nx = arect.width - 16;
-            if (nx < 16) nx = 16;
-            if (ny < 16) ny = 16;
-            if (ny > arect.height - 16) ny = arect.height - 16;
-            el.style.transform = `translate3d(${nx - 16}px, ${ny - 16}px, 0)`;
-            memberObj.x = nx;
-            memberObj.y = ny;
-          } else {
-            el.remove();
-            const idx = team.indexOf(memberObj);
-            if (idx !== -1) team.splice(idx, 1);
-            currentSlot.classList.remove("placed");
-          }
-        });
-      }
-    });
-    slotsContainer.appendChild(slot);
-  });
-  const infoBtn = $id("dg-info-btn");
-  const infoPanel = $id("dg-info-panel");
-  const infoList = $id("dg-info-list");
-  const infoClose = $id("dg-info-close");
-  const codexBtn = $id("dg-codex-btn");
-  const codexPanel = $id("dg-codex-panel");
-  const codexList = $id("dg-codex-list");
-  const codexClose = $id("dg-codex-close");
-  infoBtn.addEventListener("click", () => {
-    if (infoPanel.style.display === "flex") {
-      infoPanel.style.display = "none";
-      return;
-    }
-    codexPanel.style.display = "none";
-    infoList.innerHTML = "";
-    ctx.S.pets.forEach((petId) => {
-      const stat = PET_STATS[petId] || PET_STATS.default;
-      infoList.innerHTML += `
-                <div class="dg-info-item">
-                    <div class="dg-info-item-icon">${petSVG(petId, 32)}</div>
-                    <div class="dg-info-item-desc">
-                        <b>${stat.name}</b>
-                        HP: ${stat.hp} | ATK: ${stat.atk}<br/>
-                        T\u1EA7m \u0111\xE1nh: ${stat.range} | T\u1ED1c \u0111\xE1nh: ${stat.cd}s<br/>
-                        <span style="color:#b08a5c;">${stat.desc}</span>
-                    </div>
-                </div>
-            `;
-    });
-    infoPanel.style.display = "flex";
-  });
-  codexBtn.addEventListener("click", () => {
-    if (codexPanel.style.display === "flex") {
-      codexPanel.style.display = "none";
-      return;
-    }
-    infoPanel.style.display = "none";
-    codexList.innerHTML = "";
-    ENEMY_TYPES.forEach((stat) => {
-      codexList.innerHTML += `
-                <div class="dg-info-item" style="border-left: 2px solid #e06578;">
-                    <div class="dg-info-item-icon">${spriteSVG(stat.sp || stat.id, 32)}</div>
-                    <div class="dg-info-item-desc">
-                        <b style="color:#e06578;">${stat.name}</b>
-                        HP: ${stat.hp} | ATK: ${stat.atk}<br/>
-                        T\u1EA7m \u0111\xE1nh: ${stat.range} | T\u1ED1c \u0111\xE1nh: ${stat.cd}s<br/>
-                        <span style="color:#b08a5c;">${stat.desc}</span>
-                    </div>
-                </div>
-            `;
-    });
-    codexPanel.style.display = "flex";
-  });
-  infoClose.addEventListener("click", () => {
-    infoPanel.style.display = "none";
-  });
-  codexClose.addEventListener("click", () => {
-    codexPanel.style.display = "none";
-  });
-  $id("dg-start-btn").addEventListener("click", () => {
-    if (team.length === 0) return toast("Ch\u01B0a ch\u1ECDn \u0111\u1ED9i h\xECnh!");
-    startCombat();
-  });
-  $id("dg-leave-btn").addEventListener("click", () => {
-    closeDungeonView();
-  });
-  $id("dg-surrender-btn").addEventListener("click", () => {
-    endDungeon(false);
-  });
-}
-function startCombat() {
-  phase = "combat";
-  $id("dg-dock").style.display = "none";
-  $id("dg-start-btn").style.display = "none";
-  $id("dg-leave-btn").style.display = "none";
-  $id("dg-surrender-btn").style.display = "block";
-  currentWave = 1;
-  totalGold = 0;
-  shopGold = 0;
-  fullTeam = [...team];
-  startWave();
-}
-function updateHUD() {
-  const hud = $id("dg-hud");
-  if (!hud) return;
-  const isBoss = currentWave % 10 === 0;
-  hud.style.display = "block";
-  hud.innerHTML = `<span style="color:#ffd94d; font-weight:bold;">Wave ${currentWave}</span>${isBoss ? " \u{1F451}" : ""} <span style="color:#a4dc8c; margin-left:10px;" title="V\xE0ng mang v\u1EC1">${spriteSVG("coin", 12).replace("display:block", "display:inline-block;vertical-align:middle")} ${totalGold}</span> <span style="color:#e06578; margin-left:10px;" title="V\xE0ng n\xE2ng c\u1EA5p">\u{1F6E0} ${shopGold}</span>`;
-}
-function startWave() {
-  const isBossWave = currentWave % 10 === 0;
-  if (isBossWave) {
-    phase = "end";
-    const arena = $id("dg-arena");
-    const banner = document.createElement("div");
-    banner.className = "dg-boss-banner";
-    banner.innerHTML = "\u26A0 BOSS WAVE \u26A0";
-    arena.appendChild(banner);
-    setTimeout(() => {
-      banner.remove();
-      _doStartWave();
-    }, 2e3);
-  } else {
-    _doStartWave();
-  }
-}
-function _doStartWave() {
-  phase = "combat";
-  enemies = [];
-  projectiles = [];
-  const arena = $id("dg-arena");
-  const w = arena.clientWidth;
-  const h = arena.clientHeight;
-  updateHUD();
-  let count = Math.min(30, 3 + Math.floor(currentWave * 1.5));
-  let spawnElite = currentWave % 3 === 0;
-  let isBossWave = currentWave % 10 === 0;
-  if (isBossWave) {
-    count = Math.max(3, Math.floor(count / 2));
-  }
-  let stressed = Math.floor(currentWave / 5) * 0.5;
-  for (let i = 0; i < count; i++) {
-    let type;
-    if (spawnElite && i === 0 || isBossWave && i === 0) {
-      const elites = ENEMY_TYPES.filter((e) => e.elite);
-      type = elites.length > 0 ? elites[Math.floor(Math.random() * elites.length)] : ENEMY_TYPES[ENEMY_TYPES.length - 1];
-    } else {
-      const normals = ENEMY_TYPES.filter((e) => !e.elite);
-      type = normals[Math.floor(Math.random() * normals.length)];
-    }
-    const el = document.createElement("div");
-    el.className = "dg-entity enemy flip";
-    el.innerHTML = `
-            <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
-            <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
-            <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
-            ${spriteSVG(type.sp || type.id, 32)}
-        `;
-    const x = 20 + Math.random() * (w - 60);
-    const y = 40 + Math.random() * (h - 80);
-    el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
-    arena.appendChild(el);
-    let hpMultiplier = 1 + (currentWave - 1) * 0.06 + stressed * 0.12;
-    let atkMultiplier = 1 + (currentWave - 1) * 0.03 + stressed * 0.08;
-    if (currentWave > 5) {
-      const extra = currentWave - 5;
-      hpMultiplier *= Math.pow(1.03, extra);
-      atkMultiplier *= Math.pow(1.01, extra);
-    }
-    if (isBossWave) {
-      hpMultiplier *= 1.5;
-      atkMultiplier *= 1.2;
-    }
-    enemies.push({
-      id: type.id,
-      x,
-      y,
-      hp: Math.round(type.hp * hpMultiplier),
-      maxHp: Math.round(type.hp * hpMultiplier),
-      atk: Math.round(type.atk * atkMultiplier),
-      range: type.range,
-      speed: type.speed,
-      cd: 0,
-      maxCd: type.cd,
-      el,
-      type: "enemy",
-      skill: type.skill,
-      ai: type.ai,
-      gold: Math.round((type.gold || 5) * (1 + currentWave * 0.15))
-    });
-  }
-  lastTime = performance.now();
-  if (!gameLoopId) {
-    gameLoopId = requestAnimationFrame(combatLoop);
-  }
-}
-function stopCombatLoop() {
-  if (gameLoopId) cancelAnimationFrame(gameLoopId);
-  gameLoopId = null;
-}
-function combatLoop(time) {
-  if (phase !== "combat") return;
-  let dt = (time - lastTime) / 1e3;
-  lastTime = time;
-  if (dt > 0.1) dt = 0.1;
-  updateEntities(team, enemies, dt);
-  updateEntities(enemies, team, dt);
-  const arena = $id("dg-arena");
-  projectiles = projectiles.filter((p) => {
-    if (!p.target || p.target.hp <= 0) {
-      p.el.remove();
-      return false;
-    }
-    const dx = p.tx - p.x;
-    const dy = p.ty - p.y;
-    const dist = Math.hypot(dx, dy);
-    if (dist < 10) {
-      applyEffect(p.from, p.target, p.fromGroup, p.toGroup, p.atk, p.skill);
-      p.el.remove();
-      return false;
-    } else {
-      const move = p.speed * dt;
-      p.x += dx / dist * move;
-      p.y += dy / dist * move;
-      p.tx = p.target.x;
-      p.ty = p.target.y - 16;
-      p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0)`;
-      return true;
-    }
-  });
-  team = team.filter((e) => {
-    if (e.hp <= 0) {
-      e.el.remove();
-      return false;
-    }
-    return true;
-  });
-  enemies = enemies.filter((e) => {
-    if (e.hp <= 0) {
-      e.el.remove();
-      if (e.gold) {
-        const homeG = Math.floor(e.gold * 0.6);
-        totalGold += homeG;
-        shopGold += e.gold;
-        spawnDmg({ x: e.x, y: e.y - 10 }, `+${e.gold} \u{1F6E0}`, "gold");
-        updateHUD();
-      }
-      return false;
-    }
-    return true;
-  });
-  if (enemies.length === 0) {
-    showWaveRewards();
-    return;
-  }
-  if (team.length === 0) {
-    endDungeon(false);
-    return;
-  }
-  gameLoopId = requestAnimationFrame(combatLoop);
-}
-function spawnDmg(target, amount, type) {
-  const isStr = typeof amount === "string";
-  if (!isStr) amount = Math.round(amount);
-  const arena = $id("dg-arena");
-  const dmg = document.createElement("div");
-  dmg.className = "dg-dmg" + (type ? " " + type : "");
-  dmg.textContent = type === "miss" ? "MISS!" : isStr ? amount : (amount > 0 ? "+" : "") + amount;
-  if (type === "gold") {
-    dmg.style.color = "#ffd94d";
-    dmg.style.fontWeight = "bold";
-  }
-  dmg.style.left = target.x + "px";
-  dmg.style.top = target.y - 8 + "px";
-  arena.appendChild(dmg);
-  setTimeout(() => dmg.remove(), 800);
-  if (target.el && target.maxHp) {
-    const pct = Math.max(0, target.hp / target.maxHp) * 100;
-    const fill = target.el.querySelector(".dg-hp-fill");
-    if (fill) fill.style.width = pct + "%";
-  }
-}
-function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOverride) {
-  const atk = Math.round(overrideAtk || attacker.atk);
-  const skill = skillOverride || attacker.skill;
-  if (skill === "heal") {
-    target.hp = Math.min(target.maxHp, target.hp + atk);
-    spawnDmg(target, atk, "heal");
-    return;
-  }
-  if (skill === "aoe_heal") {
-    myGroup.forEach((ally) => {
-      if (ally.hp > 0 && Math.hypot(ally.x - attacker.x, ally.y - attacker.y) <= attacker.range) {
-        ally.hp = Math.min(ally.maxHp, ally.hp + atk);
-        spawnDmg(ally, atk, "heal");
-      }
-    });
-    return;
-  }
-  if (target.type === "pet") {
-    const dodgeChance = target.dodge !== void 0 ? target.dodge : target.id === "ghostBlob" ? 0.15 : 0.05;
-    if (Math.random() < dodgeChance) {
-      spawnDmg(target, 0, "miss");
-      target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - atk);
-      return;
-    }
-  }
-  let finalDmg = atk;
-  let isCrit = false;
-  if (attacker) {
-    if (attacker.status && attacker.status.buff_atk > 0) {
-      finalDmg = Math.round(finalDmg * 1.2);
-    }
-    const critChance = attacker.critRate || (attacker.type === "pet" ? 0.05 : 0);
-    if (Math.random() < critChance) {
-      finalDmg = Math.round(finalDmg * (attacker.critDmg || 1.5));
-      isCrit = true;
-    }
-  }
-  if (target.armor && target.armor > 0) {
-    finalDmg = Math.round(finalDmg * (1 - target.armor));
-  }
-  if (skill === "sniper" && attacker) {
-    const dist = Math.hypot(target.x - attacker.x, target.y - attacker.y);
-    finalDmg += Math.floor(dist * 0.2);
-  }
-  target.hp -= finalDmg;
-  target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - finalDmg);
-  spawnDmg(target, -finalDmg, isCrit ? "crit" : "");
-  if (skill === "lifesteal" && attacker) {
-    const ls = Math.floor(finalDmg * 0.5);
-    attacker.hp = Math.min(attacker.maxHp, attacker.hp + ls);
-    spawnDmg(attacker, ls, "heal");
-  }
-  if (!target.status) target.status = {};
-  if (skill === "stun" && Math.random() < 0.2) target.status.stun = 1;
-  if (skill === "poison") target.status.poison = 3;
-  if (skill === "freeze") target.status.freeze = 3;
-  if (skill === "root" && Math.random() < 0.25) target.status.root = 2;
-  if (skill === "cleave" && attacker) {
-    enemyGroup.forEach((e) => {
-      if (e !== target && e.hp > 0 && Math.hypot(e.x - target.x, e.y - target.y) <= 40) {
-        e.hp -= Math.floor(finalDmg * 0.5);
-        spawnDmg(e, -Math.floor(finalDmg * 0.5));
-      }
-    });
-  }
-  if (skill === "pierce" && attacker) {
-    enemyGroup.forEach((e) => {
-      if (e !== target && e.hp > 0) {
-        const distToTarget = Math.hypot(target.x - attacker.x, target.y - attacker.y);
-        const dot = ((e.x - attacker.x) * (target.x - attacker.x) + (e.y - attacker.y) * (target.y - attacker.y)) / (distToTarget * distToTarget);
-        const cross = Math.abs((target.x - attacker.x) * (attacker.y - e.y) - (attacker.x - e.x) * (target.y - attacker.y));
-        const distToLine = cross / distToTarget;
-        if (dot > 0.1 && dot < 2 && distToLine < 30) {
-          e.hp -= finalDmg;
-          spawnDmg(e, -finalDmg);
-        }
-      }
-    });
-  }
-}
-function updateEntities(groupA, groupB, dt) {
-  const arena = $id("dg-arena");
-  groupA.forEach((a) => {
-    if (a.hp <= 0) return;
-    if (a.cd > 0) {
-      a.cd -= dt;
-    }
-    const cdPct = Math.max(0, Math.min(100, (1 - Math.max(0, a.cd) / a.maxCd) * 100));
-    const cdFill = a.el.querySelector(".dg-cd-fill");
-    if (cdFill) cdFill.style.width = cdPct + "%";
-    if (!a.status) a.status = {};
-    let isStunned = false;
-    let isRooted = false;
-    let speedMult = 1;
-    let atkSpdMult = 1;
-    for (let eff in a.status) {
-      if (a.status[eff] > 0) {
-        a.status[eff] -= dt;
-        if (eff === "stun") isStunned = true;
-        if (eff === "root") isRooted = true;
-        if (eff === "freeze") {
-          speedMult *= 0.5;
-          atkSpdMult *= 0.5;
-        }
-        if (eff === "poison" && Math.random() < dt) {
-          a.hp -= 2;
-          spawnDmg(a, -2);
-        }
-      }
-    }
-    let statusHtml = "";
-    if (a.status.stun > 0) statusHtml += '<div class="dg-status-icon dg-status-stun"></div>';
-    if (a.status.poison > 0) statusHtml += '<div class="dg-status-icon dg-status-poison"></div>';
-    if (a.status.freeze > 0) statusHtml += '<div class="dg-status-icon dg-status-freeze"></div>';
-    if (a.status.root > 0) statusHtml += '<div class="dg-status-icon dg-status-root"></div>';
-    if (a.status.taunt > 0) statusHtml += '<div class="dg-status-icon dg-status-taunt"></div>';
-    if (a.status.buff_atk > 0) statusHtml += '<div class="dg-status-icon dg-status-buff"></div>';
-    let statusDiv = a.el.querySelector(".dg-status");
-    if (!statusDiv) {
-      statusDiv = document.createElement("div");
-      statusDiv.className = "dg-status";
-      a.el.appendChild(statusDiv);
-      a._lastStatusHtml = "";
-    }
-    if (a._lastStatusHtml !== statusHtml) {
-      statusDiv.innerHTML = statusHtml;
-      a._lastStatusHtml = statusHtml;
-    }
-    if (isStunned) return;
-    let closest = null;
-    let minDist = Infinity;
-    let taunters = groupB.filter((b) => b.hp > 0 && b.status && b.status.taunt > 0);
-    let targetGroup = taunters.length > 0 ? taunters : groupB;
-    if (a.skill === "heal" || a.skill === "aoe_heal") {
-      targetGroup = groupA;
-      let minHpPct = 1;
-      targetGroup.forEach((ally) => {
-        if (ally.hp <= 0) return;
-        const dist = Math.hypot(ally.x - a.x, ally.y - a.y);
-        const hpPct = ally.hp / ally.maxHp;
-        if (hpPct < minHpPct && dist < a.range * 4) {
-          minHpPct = hpPct;
-          closest = { b: ally, dx: ally.x - a.x, dy: ally.y - a.y, dist };
-        }
-      });
-      if (!closest) {
-        targetGroup.forEach((ally) => {
-          if (ally === a || ally.hp <= 0) return;
-          const dx = ally.x - a.x;
-          const dy = ally.y - a.y;
-          const dist = Math.hypot(dx, dy);
-          if (dist < minDist) {
-            minDist = dist;
-            closest = { b: ally, dx, dy, dist };
-          }
-        });
-      }
-    } else if (a.skill === "assassin" || a.ai === "assassin") {
-      let validTargets = targetGroup.filter((b) => b.hp > 0);
-      if (a.lockedTarget && validTargets.includes(a.lockedTarget)) {
-        const dx = a.lockedTarget.x - a.x;
-        const dy = a.lockedTarget.y - a.y;
-        const dist = Math.hypot(dx, dy);
-        closest = { b: a.lockedTarget, dx, dy, dist };
-      } else {
-        let minMaxHp = Infinity;
-        validTargets.forEach((b) => {
-          if (b.maxHp < minMaxHp) {
-            minMaxHp = b.maxHp;
-            const dx = b.x - a.x;
-            const dy = b.y - a.y;
-            const dist = Math.hypot(dx, dy);
-            closest = { b, dx, dy, dist };
-          }
-        });
-        if (closest) a.lockedTarget = closest.b;
-      }
-    } else {
-      let validTargets = targetGroup.filter((b) => b.hp > 0 && b.hp - (b.incomingDmg || 0) > 0);
-      if (validTargets.length === 0) validTargets = targetGroup.filter((b) => b.hp > 0);
-      validTargets.forEach((b) => {
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < minDist) {
-          minDist = dist;
-          closest = { b, dx, dy, dist };
-        }
-      });
-    }
-    a.el.classList.remove("walk");
-    if (closest) {
-      if (closest.dx < 0 && a.type === "pet") a.el.classList.add("flip");
-      else if (closest.dx >= 0 && a.type === "pet") a.el.classList.remove("flip");
-      if (closest.dx > 0 && a.type === "enemy") a.el.classList.add("flip");
-      else if (closest.dx <= 0 && a.type === "enemy") a.el.classList.remove("flip");
-      let isRanged = a.range >= 80 || a.ai === "ranged";
-      let inRange = closest.dist <= a.range || a.skill === "heal" && closest.dist <= 10;
-      let baseRange = a.range;
-      if (a.type === "pet" && PET_STATS[a.id]) baseRange = PET_STATS[a.id].range;
-      if (a.type === "enemy") {
-        const en = ENEMY_TYPES.find((e) => e.id === a.id);
-        if (en) baseRange = en.range;
-      }
-      let tooClose = isRanged && closest.dist < baseRange * 0.4 && closest.b.type !== a.type;
-      if (a.panic > 0) a.panic -= dt;
-      if (a.panic > 0 && !isRooted) {
-        a.el.classList.add("walk");
-        const arenaRect = arena.getBoundingClientRect();
-        const speed = a.speed * speedMult * dt;
-        let cx = arenaRect.width / 2 - a.x;
-        let cy = arenaRect.height / 2 - a.y;
-        let dist = Math.hypot(cx, cy);
-        if (dist > 5) {
-          a.x += cx / dist * speed;
-          a.y += cy / dist * speed;
-        }
-        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-      } else if (tooClose && !isRooted) {
-        a.el.classList.add("walk");
-        const arenaRect = arena.getBoundingClientRect();
-        const speed = a.speed * speedMult * dt;
-        let kx = -(closest.dx / closest.dist);
-        let ky = -(closest.dy / closest.dist);
-        let moveX = kx * speed;
-        let moveY = ky * speed;
-        let nextX = a.x + moveX;
-        let nextY = a.y + moveY;
-        let hitLeft = nextX < 20;
-        let hitRight = nextX > arenaRect.width - 20;
-        let hitTop = nextY < 20;
-        let hitBottom = nextY > arenaRect.height - 20;
-        let hitX = hitLeft || hitRight;
-        let hitY = hitTop || hitBottom;
-        if (hitX && hitY) {
-          a.panic = 1;
-        } else if (hitX) {
-          moveX = 0;
-          moveY = (ky !== 0 ? Math.sign(ky) : Math.random() < 0.5 ? 1 : -1) * speed;
-        } else if (hitY) {
-          moveY = 0;
-          moveX = (kx !== 0 ? Math.sign(kx) : Math.random() < 0.5 ? 1 : -1) * speed;
-        }
-        if (!(hitX && hitY)) {
-          a.x += moveX;
-          a.y += moveY;
-        }
-        a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
-        a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
-        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-      } else if (!inRange && !isRooted) {
-        a.el.classList.add("walk");
-        const speed = a.speed * speedMult * dt;
-        if ((a.skill === "assassin" || a.ai === "assassin") && closest.dist > 150) {
-          a.x = closest.b.x + (closest.dx > 0 ? -30 : 30);
-          a.y = closest.b.y;
-        } else {
-          a.x += closest.dx / closest.dist * speed;
-          a.y += closest.dy / closest.dist * speed;
-        }
-        const arenaRect = arena.getBoundingClientRect();
-        a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
-        a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
-        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-      }
-      if (inRange) {
-        if (a.cd <= 0) {
-          a.cd = a.maxCd / atkSpdMult;
-          a.el.classList.add("attack");
-          setTimeout(() => {
-            if (a.el) a.el.classList.remove("attack");
-          }, 200);
-          if (a.skill === "frenzy") {
-            if (!a.frenzyStacks) a.frenzyStacks = 0;
-            a.frenzyStacks = Math.min(10, a.frenzyStacks + 1);
-            a.cd = a.maxCd / (atkSpdMult * (1 + a.frenzyStacks * 0.05));
-          }
-          if (a.skill === "taunt") {
-            a.status.taunt = 3;
-          }
-          if (a.skill === "buff_atk") {
-            groupA.forEach((ally) => {
-              if (ally.hp > 0 && Math.hypot(ally.x - a.x, ally.y - a.y) < 100) {
-                if (!ally.status) ally.status = {};
-                ally.status.buff_atk = 2;
-              }
-            });
-          }
-          if (isRanged && a.skill !== "heal" && a.skill !== "aoe_heal") {
-            closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
-            let p = {
-              x: a.x,
-              y: a.y - 16,
-              tx: closest.b.x,
-              ty: closest.b.y - 16,
-              target: closest.b,
-              atk: a.atk,
-              skill: a.skill,
-              from: a,
-              fromGroup: groupA,
-              toGroup: targetGroup,
-              speed: 300,
-              el: document.createElement("div")
-            };
-            p.el.className = "dg-projectile";
-            p.el.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#f0d" /></svg>';
-            p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0)`;
-            arena.appendChild(p.el);
-            if (a.skill === "multishot") {
-              projectiles.push(p);
-              let target2 = targetGroup[Math.floor(Math.random() * targetGroup.length)];
-              let target3 = targetGroup[Math.floor(Math.random() * targetGroup.length)];
-              if (target2 && target2 !== p.target) {
-                target2.incomingDmg = (target2.incomingDmg || 0) + a.atk * 0.5;
-                let p2 = { ...p, tx: target2.x, ty: target2.y - 16, target: target2, atk: a.atk * 0.5, el: p.el.cloneNode(true) };
-                arena.appendChild(p2.el);
-                projectiles.push(p2);
-              }
-              if (target3 && target3 !== p.target && target3 !== target2) {
-                target3.incomingDmg = (target3.incomingDmg || 0) + a.atk * 0.5;
-                let p3 = { ...p, tx: target3.x, ty: target3.y - 16, target: target3, atk: a.atk * 0.5, el: p.el.cloneNode(true) };
-                arena.appendChild(p3.el);
-                projectiles.push(p3);
-              }
-            } else {
-              projectiles.push(p);
-            }
-          } else {
-            closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
-            applyEffect(a, closest.b, groupA, targetGroup);
-          }
-        }
-      }
-    }
-  });
-}
-function endDungeon(isWin) {
-  phase = "end";
-  stopCombatLoop();
-  projectiles.forEach((p) => p.el.remove());
-  projectiles = [];
-  const surrenderBtn = $id("dg-surrender-btn");
-  if (surrenderBtn) surrenderBtn.style.display = "none";
-  const arena = $id("dg-arena");
-  const overlay = document.createElement("div");
-  overlay.className = "dg-overlay";
-  ctx.S.coins += totalGold;
-  if (!ctx.S.dungeonBest) ctx.S.dungeonBest = { wave: 0, gold: 0 };
-  let isNewRecord = false;
-  if (currentWave > ctx.S.dungeonBest.wave) {
-    ctx.S.dungeonBest.wave = currentWave;
-    ctx.S.dungeonBest.gold = totalGold;
-    isNewRecord = true;
-  } else if (currentWave === ctx.S.dungeonBest.wave && totalGold > ctx.S.dungeonBest.gold) {
-    ctx.S.dungeonBest.gold = totalGold;
-    isNewRecord = true;
-  }
-  save();
-  renderStatus();
-  let rewardText = `<div style="color:white; font-size: 16px;">Ph\u1EA7n th\u01B0\u1EDFng: ${spriteSVG("coin", 16).replace("display:block", "display:inline-block; vertical-align:middle; margin-top:-2px")} ${totalGold} G<br/>S\u1ED1ng s\xF3t \u0111\u1EBFn Wave ${currentWave}</div>`;
-  const recordHtml = isNewRecord ? '<div class="dg-new-record">\u{1F3C6} K\u1EF6 L\u1EE4C M\u1EDAI! \u{1F3C6}</div>' : `<div style="color:#b08a5c; font-size:13px;">K\u1EF7 l\u1EE5c: Wave ${ctx.S.dungeonBest.wave} \xB7 ${ctx.S.dungeonBest.gold} G</div>`;
-  overlay.innerHTML = `
-        <div class="dg-title">Game Over</div>
-        ${rewardText}
-        ${recordHtml}
-        <div style="display:flex; justify-content:center; gap: 10px; margin-top: 15px; margin-bottom: auto;">
-            <div class="buy" id="dg-restart-btn">Ch\u01A1i L\u1EA1i</div>
-            <div class="buy plain" id="dg-finish-btn">Tho\xE1t</div>
-        </div>
-    `;
-  arena.appendChild(overlay);
-  overlay.querySelector("#dg-restart-btn").addEventListener("click", () => {
-    initPlacementPhase();
-  });
-  overlay.querySelector("#dg-finish-btn").addEventListener("click", () => {
-    closeDungeonView();
-  });
-}
-function showWaveRewards() {
-  phase = "end";
-  stopCombatLoop();
-  projectiles.forEach((p) => p.el.remove());
-  projectiles = [];
-  const isBoss = currentWave % 10 === 0;
-  const waveGold = (120 + currentWave * 60) * (isBoss ? 3 : 1);
-  totalGold += Math.floor(waveGold * 0.6);
-  shopGold += waveGold;
-  const arena = $id("dg-arena");
-  fullTeam.forEach((p) => {
-    if (p.hp <= 0) {
-      p.hp = p.maxHp * 0.5;
-      arena.appendChild(p.el);
-    } else {
-      p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2);
-    }
-    const pct = Math.max(0, p.hp / p.maxHp) * 100;
-    p.el.querySelector(".dg-hp-fill").style.width = pct + "%";
-    p.status = {};
-    if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0, dodge: 0 };
-    if (p.critRate === void 0) p.critRate = 0.05;
-    if (p.critDmg === void 0) p.critDmg = 1.5;
-    if (p.dodge === void 0) p.dodge = p.id === "ghostBlob" ? 0.15 : 0.05;
-  });
-  team = [...fullTeam];
-  let bossDropHtml = "";
-  if (isBoss) {
-    if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
-    const r = Math.random();
-    let dropText = "";
-    if (r < 0.01) {
-      ctx.S.tickets.super = (ctx.S.tickets.super || 0) + 1;
-      dropText = "1 V\xE9 Si\xEAu C\u01B0\u1EDDng";
-    } else if (r < 0.4) {
-      ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 2;
-      dropText = "2 V\xE9 \u0110\u1EB7c Bi\u1EC7t";
-    } else {
-      ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 3;
-      dropText = "3 V\xE9 Th\u01B0\u1EDDng";
-    }
-    bossDropHtml = `<div style="color:#4caf50; margin-bottom:15px; font-weight:bold; font-size:16px;">\u2728 R\u01A1i ra t\u1EEB Boss: ${dropText}! \u2728</div>`;
-    save();
-  }
-  const overlay = document.createElement("div");
-  overlay.className = "dg-overlay";
-  overlay.style.alignItems = "stretch";
-  overlay.style.padding = "20px";
-  overlay.style.boxSizing = "border-box";
-  overlay.style.background = "rgba(0,0,0,0.9)";
-  const getCost = (lv) => Math.floor(50 * Math.pow(1.5, lv));
-  const renderShop = (selectedIdx) => {
-    const selectedPet = fullTeam[selectedIdx];
-    let petsHtml = '<div class="dg-shop-left">';
-    fullTeam.forEach((p, idx) => {
-      const isSel = idx === selectedIdx;
-      const totalLv = Object.values(p.upgrades).reduce((a, b) => a + b, 0);
-      petsHtml += `<div class="dg-shop-pet ${isSel ? "selected" : ""}" data-idx="${idx}">
-                ${petSVG(p.id, 40)}
-                <div class="lv">LV ${totalLv}</div>
-            </div>`;
-    });
-    petsHtml += "</div>";
-    let headerHtml = `
-            <div class="dg-shop-header">
-                <div class="dg-shop-header-left">
-                    <div class="dg-shop-title">Ch\u1EE3 \u0110en - Wave ${currentWave}</div>
-                    <div class="dg-shop-gold">\u{1F6E0} ${shopGold} \u0110i\u1EC3m N\xE2ng C\u1EA5p</div>
-                </div>
-                <button id="dg-shop-next" class="dg-shop-next-btn">Ti\u1EBFp Theo \u2794</button>
-            </div>
-        `;
-    let shopHtml = `<div class="dg-shop-right">
-            ${bossDropHtml}
-        `;
-    if (selectedPet) {
-      const u = selectedPet.upgrades;
-      const hpMissingPet = selectedPet.maxHp - selectedPet.hp;
-      const healPetCost = Math.max(10, Math.floor(hpMissingPet * 0.5));
-      const hpMissingTeam = fullTeam.reduce((acc, member) => acc + (member.maxHp - member.hp), 0);
-      const healTeamCost = Math.max(30, Math.floor(hpMissingTeam * 0.4));
-      const stats = [
-        { id: "hp", name: "Max HP (+20%)", val: selectedPet.maxHp, lv: u.hp, cost: Math.floor(40 * Math.pow(1.3, u.hp)) },
-        { id: "atk", name: "ATK (+20%)", val: selectedPet.atk, lv: u.atk, cost: Math.floor(40 * Math.pow(1.3, u.atk)) },
-        { id: "aspd", name: "ATK SPD (+10%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u.aspd, cost: Math.floor(60 * Math.pow(1.4, u.aspd)) },
-        { id: "spd", name: "Move Speed (+10%)", val: selectedPet.speed, lv: u.spd, cost: Math.floor(30 * Math.pow(1.2, u.spd)) },
-        { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u.critR, cost: Math.floor(50 * Math.pow(1.5, u.critR)), forceCanBuy: selectedPet.critRate < 0.59 },
-        { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u.critD, cost: Math.floor(50 * Math.pow(1.4, u.critD)) },
-        { id: "dodge", name: "N\xE9 Tr\xE1nh (+5%)", val: (selectedPet.dodge * 100).toFixed(0) + "%", lv: u.dodge || 0, cost: Math.floor(60 * Math.pow(1.5, u.dodge || 0)), forceCanBuy: selectedPet.dodge < 0.39 }
-      ];
-      if (PET_STATS[selectedPet.id] && PET_STATS[selectedPet.id].range > 60) {
-        stats.push({ id: "range", name: "T\u1EA7m \u0110\xE1nh (+10%)", val: Math.round(selectedPet.range), lv: u.range || 0, cost: Math.floor(40 * Math.pow(1.2, u.range || 0)) });
-      }
-      stats.push(
-        { id: "heal_pet", name: "H\u1ED3i M\xE1u (Full)", val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: "", cost: healPetCost, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
-        { id: "heal_team", name: "H\u1ED3i M\xE1u Team (Full)", val: "T\u1EA5t c\u1EA3", lv: "", cost: healTeamCost, forceCanBuy: hpMissingTeam > 0 }
-      );
-      shopHtml += `<div class="dg-shop-grid">`;
-      stats.forEach((s) => {
-        const cost = s.cost !== void 0 ? s.cost : getCost(s.lv);
-        const canAfford = shopGold >= cost && (s.forceCanBuy !== void 0 ? s.forceCanBuy : true);
-        const lvText = s.lv !== "" ? ` <span style="color:#888;">(Lv ${s.lv})</span>` : "";
-        shopHtml += `
-                <div class="dg-shop-card">
-                    <div>
-                        <div class="dg-shop-stat-name">${s.name}${lvText}</div>
-                        <div class="dg-shop-stat-val">${s.val}</div>
-                    </div>
-                    <button class="dg-btn-buy" data-stat="${s.id}" data-cost="${cost}" ${!canAfford ? "disabled" : ""}>
-                        ${cost} \u{1F6E0}
-                    </button>
-                </div>`;
-      });
-      shopHtml += `</div>`;
-    } else {
-      shopHtml += `<div style="color:#aaa; text-align:center; flex:1; display:flex; align-items:center; justify-content:center;">Ch\u1ECDn m\u1ED9t Pet b\xEAn tr\xE1i \u0111\u1EC3 n\xE2ng c\u1EA5p.</div>`;
-    }
-    shopHtml += `</div>`;
-    overlay.innerHTML = `<div class="dg-shop-box">${headerHtml}<div class="dg-shop-content">${petsHtml}${shopHtml}</div></div>`;
-    overlay.querySelectorAll(".dg-shop-pet").forEach((el) => {
-      el.onclick = () => renderShop(parseInt(el.dataset.idx));
-    });
-    overlay.querySelectorAll(".dg-btn-buy").forEach((el) => {
-      el.onclick = () => {
-        const statId = el.dataset.stat;
-        const cost = parseInt(el.dataset.cost);
-        if (shopGold >= cost) {
-          shopGold -= cost;
-          const p = selectedPet;
-          if (statId === "hp") {
-            p.maxHp = Math.round(p.maxHp * 1.2);
-            p.hp = Math.round(p.hp * 1.2);
-            p.upgrades.hp++;
-          }
-          if (statId === "atk") {
-            p.atk = Math.round(p.atk * 1.2);
-            p.upgrades.atk++;
-          }
-          if (statId === "aspd") {
-            p.maxCd = Math.max(0.1, p.maxCd * 0.9);
-            p.upgrades.aspd++;
-          }
-          if (statId === "spd") {
-            p.speed = Math.round(p.speed * 1.1);
-            p.upgrades.spd++;
-          }
-          if (statId === "critR") {
-            p.critRate = Math.min(0.6, p.critRate + 0.05);
-            p.upgrades.critR++;
-          }
-          if (statId === "critD") {
-            p.critDmg = Math.round((p.critDmg + 0.2) * 10) / 10;
-            p.upgrades.critD++;
-          }
-          if (statId === "dodge") {
-            p.dodge = Math.min(0.4, p.dodge + 0.05);
-            p.upgrades.dodge = (p.upgrades.dodge || 0) + 1;
-          }
-          if (statId === "range") {
-            p.range = Math.round(p.range * 1.1);
-            p.upgrades.range = (p.upgrades.range || 0) + 1;
-          }
-          if (statId === "heal_pet") {
-            p.hp = p.maxHp;
-          }
-          if (statId === "heal_team") {
-            fullTeam.forEach((member) => {
-              member.hp = member.maxHp;
-            });
-          }
-          renderShop(selectedIdx);
-        }
-      };
-    });
-    const nextBtn = overlay.querySelector("#dg-shop-next");
-    nextBtn.onclick = () => {
-      nextWaveSequence(overlay);
-    };
-  };
-  arena.appendChild(overlay);
-  renderShop(0);
-}
-function nextWaveSequence(overlay) {
-  overlay.remove();
-  currentWave++;
-  fullTeam.forEach((p) => {
-    const pct = Math.max(0, Math.min(100, p.hp / p.maxHp * 100));
-    p.el.querySelector(".dg-hp-fill").style.width = pct + "%";
-  });
-  startWave();
-}
-var isDungeonOpen, phase, gameLoopId, lastTime, team, enemies, projectiles, currentWave, totalGold, shopGold, PET_STATS, ENEMY_TYPES, fullTeam;
-var init_dungeon = __esm({
-  "src/dungeon.js"() {
-    init_store();
-    init_all();
-    init_graphics();
-    isDungeonOpen = false;
-    phase = "placement";
-    gameLoopId = null;
-    lastTime = 0;
-    team = [];
-    enemies = [];
-    projectiles = [];
-    currentWave = 1;
-    totalGold = 0;
-    shopGold = 0;
-    PET_STATS = {
-      slime: { name: "Slime Xanh", desc: "Chi\u1EBFn binh c\xE2n b\u1EB1ng, kh\xF4ng c\xF3 g\xEC n\u1ED5i b\u1EADt.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 },
-      octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "\u0110\xE1nh nhanh th\u1EAFng nhanh. \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao.", hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
-      slimePink: { name: "Slime H\u1ED3ng", desc: "H\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu cho \u0111\u1ED3ng minh y\u1EBFu nh\u1EA5t.", hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: "heal" },
-      peach_soda: { name: "Soda \u0110\xE0o", desc: "\u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.", hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
-      octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "20% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.", hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: "stun" },
-      jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "X\u1EA1 th\u1EE7: B\u1EAFn c\xE0ng xa s\xE1t th\u01B0\u01A1ng c\xE0ng l\u1EDBn.", hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: "sniper" },
-      mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "H\u1ED3i m\xE1u cho b\u1EA3n th\xE2n b\u1EB1ng 50% s\xE1t th\u01B0\u01A1ng g\xE2y ra.", hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: "lifesteal" },
-      ghostBlob: { name: "Ma Tr\u1EAFng", desc: "S\xE1t th\u1EE7: Lu\xF4n nh\u1EAFm v\xE0o k\u1EBB th\xF9 xa nh\u1EA5t.", hp: 80, atk: 45, range: 40, speed: 100, cd: 1.2, skill: "assassin" },
-      impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "\u0110\xE1nh lan: G\xE2y s\xE1t th\u01B0\u01A1ng AoE xung quanh m\u1EE5c ti\xEAu.", hp: 70, atk: 50, range: 40, speed: 60, cd: 1, skill: "cleave" },
-      angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "H\u1ED3i m\xE1u di\u1EC7n r\u1ED9ng cho c\xE1c \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 140, atk: 12, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal" },
-      starBell: { name: "Chu\xF4ng Sao", desc: "T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: "buff_atk" },
-      cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "Khi\xEAu kh\xEDch: Bu\u1ED9c k\u1EBB \u0111\u1ECBch t\u1EA5n c\xF4ng m\xECnh.", hp: 250, atk: 10, range: 40, speed: 30, cd: 2, skill: "taunt" },
-      dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "25% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.", hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: "root" },
-      prismBlob: { name: "L\u0103ng K\xEDnh", desc: "B\u1EAFn 3 tia s\xE1ng c\xF9ng l\xFAc (s\xE1t th\u01B0\u01A1ng chia n\u1EEDa).", hp: 100, atk: 25, range: 140, speed: 40, cd: 1.4, skill: "multishot" },
-      penguin: { name: "C\xE1nh C\u1EE5t", desc: "\u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze" },
-      default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
-    };
-    ENEMY_TYPES = [
-      { id: "douya", name: "M\u1EA7m Non", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 40, atk: 8, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout", gold: 2 },
-      { id: "tomato", name: "C\xE0 Chua Tr\xF2n", desc: "C\u1EADn chi\u1EBFn c\u01A1 b\u1EA3n.", hp: 80, atk: 12, range: 40, speed: 30, cd: 1, ai: "melee", gold: 4 },
-      { id: "radish", name: "C\u1EE7 C\u1EA3i T\u1ED1c \u0110\u1ED9", desc: "Ch\u1EA1y c\u1EF1c nhanh.", hp: 50, atk: 8, range: 30, speed: 70, cd: 0.5, ai: "melee", gold: 3 },
-      { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 60, atk: 20, range: 40, speed: 60, cd: 1, ai: "assassin", sp: "moonberry", gold: 5 },
-      { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 120, atk: 10, range: 40, speed: 25, cd: 1.2, ai: "melee", gold: 6 },
-      { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 150, atk: 14, range: 40, speed: 20, cd: 1.5, ai: "melee", gold: 8 },
-      { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 250, atk: 20, range: 50, speed: 15, cd: 3, ai: "tank", gold: 15 },
-      { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 70, atk: 18, range: 120, speed: 20, cd: 1.5, ai: "ranged", gold: 8 },
-      { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 80, atk: 8, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot", gold: 10 },
-      { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 110, atk: 12, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root", gold: 12 },
-      { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 250, atk: 15, range: 100, speed: 15, cd: 2, ai: "ranged", gold: 20 },
-      { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 600, atk: 40, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true, gold: 100 },
-      { id: "pumpkin", name: "Vua B\xED Ng\xF4", desc: "Boss: Tank AoE slam.", hp: 800, atk: 35, range: 50, speed: 15, cd: 2.5, ai: "tank", skill: "cleave", elite: true, sp: "pumpkin", gold: 150 },
-      { id: "fangW", name: "Ph\xF9 Th\u1EE7y Hoa", desc: "Boss: Ph\xE1o \u0111\xE0i b\u1EAFn xa.", hp: 400, atk: 45, range: 160, speed: 18, cd: 1.8, ai: "ranged", skill: "multishot", elite: true, sp: "fangW", gold: 120 }
-    ];
-    fullTeam = [];
-  }
-});
-
-// src/destroy.js
-function resetDestroyed() {
-  destroyed = false;
-}
-function destroy() {
-  if (destroyed) return;
-  destroyed = true;
-  try {
-    if (tick) window.clearInterval(tick);
-  } catch (e) {
-  }
-  try {
-    window.clearInterval(heartbeat);
-  } catch (e) {
-  }
-  try {
-    window.clearInterval(wander);
-  } catch (e) {
-  }
-  try {
-    Object.keys(petHopT).forEach((k) => window.clearTimeout(petHopT[k]));
-  } catch (e) {
-  }
-  try {
-    Object.keys(petSleepT).forEach((k) => window.clearTimeout(petSleepT[k]));
-  } catch (e) {
-  }
-  try {
-    endScene();
-  } catch (e) {
-  }
-  try {
-    if (ctx.saveTimer) {
-      clearTimeout(ctx.saveTimer);
-      save(true);
-    }
-  } catch (e) {
-  }
-  try {
-    if (toastTimer) window.clearTimeout(toastTimer);
-  } catch (e) {
-  }
-  try {
-    if (resizeTimer) window.clearTimeout(resizeTimer);
-  } catch (e) {
-  }
-  try {
-    if (renderTimeout) window.clearTimeout(renderTimeout);
-  } catch (e) {
-  }
-  while (disposers.length) {
-    try {
-      disposers.pop()();
-    } catch (e) {
-    }
-  }
-  try {
-    setInjection("");
-  } catch (e) {
-  }
-  try {
-    root.remove();
-  } catch (e) {
-  }
-  try {
-    if (extMenuBtn) extMenuBtn.remove();
-  } catch (e) {
-  }
-  try {
-    delete window[RUNTIME_KEY];
-  } catch (e) {
-  }
-}
-function setupExtButton() {
-  if (extMenuBtn) {
-    try {
-      extMenuBtn.remove();
-    } catch (e) {
-    }
-  }
-  const extMenu = document.querySelector("#extensionsMenu");
-  if (!extMenu) {
-    window.setTimeout(setupExtButton, 500);
-    return;
-  }
-  extMenuBtn = document.createElement("div");
-  extMenuBtn.id = "farm-wand-btn";
-  extMenuBtn.className = "list-group-item flex-container flexGap5 interactable";
-  extMenuBtn.tabIndex = 0;
-  extMenuBtn.innerHTML = '<div class="fa-fw fa-solid fa-leaf extensionsMenuExtensionButton"></div> N\xF4ng Tr\u1EA1i';
-  extMenuBtn.style.cursor = "pointer";
-  extMenuBtn.addEventListener("click", toggleWin);
-  extMenu.appendChild(extMenuBtn);
-}
-function setupSlashCommand() {
-  (async function() {
-    try {
-      let scp, SlashCommand;
-      try {
-        scp = (await import("../../../slash-commands/SlashCommandParser.js")).SlashCommandParser;
-        SlashCommand = (await import("../../../slash-commands/SlashCommand.js")).SlashCommand;
-      } catch (err) {
-      }
-      scp = scp || window.SlashCommandParser || globalThis.SlashCommandParser;
-      SlashCommand = SlashCommand || window.SlashCommand || globalThis.SlashCommand;
-      if (scp && SlashCommand && SlashCommand.fromProps) {
-        scp.addCommandObject(SlashCommand.fromProps({
-          name: "farm",
-          callback: async () => {
-            toggleWin();
-            return "";
-          },
-          helpString: "M\u1EDF/\u0110\xF3ng giao di\u1EC7n N\xF4ng tr\u1EA1i (SillyTavern Farm)"
-        }));
-      }
-    } catch (e) {
-      console.error("[Farm] L\u1ED7i \u0111\u0103ng k\xFD l\u1EC7nh /farm:", e);
-    }
-  })();
-}
-var destroyed, extMenuBtn;
-var init_destroy = __esm({
-  "src/destroy.js"() {
-    init_store();
-    init_all();
-    init_windows();
-    init_events();
-    init_pets();
-    init_state();
-    init_witch();
-    init_orb();
-    init_ui();
-    init_store();
-    destroyed = false;
-    extMenuBtn = null;
-  }
-});
-
 // src/hero.js
 function initHeroState() {
   if (!ctx.S.hero) {
@@ -8896,7 +7744,7 @@ function getPetStats(pId) {
   const enhHp = data.enhHp || 0;
   const enhAtk = data.enhAtk || 0;
   const enhSpd = data.enhSpd || 0;
-  const st = PET_STATS2[pId] || PET_STATS2.default;
+  const st = PET_STATS[pId] || PET_STATS.default;
   return {
     level: data.level,
     exp: data.exp || 0,
@@ -9421,7 +8269,7 @@ function heroTick() {
       if (!runState || !runState.monsters) return;
       let totalGold2 = 0;
       runState.monsters.forEach((m) => {
-        totalGold2 += Math.floor((runState.stage * 30 + 100) * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
+        totalGold2 += Math.floor((runState.stage * 30 + 100) * 0.6 * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
       });
       let pGoldMult = 1;
       runState.pets.forEach((p) => {
@@ -9581,16 +8429,36 @@ function heroTick() {
               setTimeout(() => showFloatDamage("-" + dmg, mobEl, "#ff5555"), 150);
               spawnSkillEffect(pEl, mobEl, aSk.type);
             } else if (aSk.type === "multi_strike") {
-              for (let i = 0; i < aSk.val; i++) {
-                setTimeout(() => {
-                  if (tMob.hp > 0) {
-                    tMob.hp -= p.atk;
-                    spawnAttackEffect(p.id, pEl, mobEl, false, false);
+              if (p.id === "naoyaSlime") {
+                runState.isTransitioning = true;
+                playNaoyaCutscene(p, pEl, mobEl, () => {
+                  let totalDmg = 0;
+                  for (let i = 0; i < aSk.val; i++) {
+                    if (tMob.hp > 0) {
+                      tMob.hp -= p.atk * 0.5;
+                      totalDmg += p.atk * 0.5;
+                    }
                   }
-                }, i * 150);
+                  setTimeout(() => showFloatDamage("-" + Math.floor(totalDmg), mobEl, "#ff0000"), 0);
+                  const isDead = tMob.hp <= 0;
+                  const quotesAlive = ["R\xE1c r\u01B0\u1EDFi!", "Ch\u1EADm qu\xE1 \u0111\u1EA5y!", "Bi\u1EBFt th\xE2n bi\u1EBFt ph\u1EADn \u0111i!"];
+                  const quote = isDead ? "M\xE0y kh\xF4ng ph\u1EA3i Toji." : quotesAlive[Math.floor(Math.random() * quotesAlive.length)];
+                  setTimeout(() => showFloatDamage("\u{1F4AC} " + quote, pEl, "#fcd34d"), 300);
+                  runState.isTransitioning = false;
+                });
+              } else {
+                for (let i = 0; i < aSk.val; i++) {
+                  setTimeout(() => {
+                    if (tMob.hp > 0) {
+                      tMob.hp -= p.atk;
+                      spawnAttackEffect(p.id, pEl, mobEl, false, false);
+                    }
+                  }, i * 150);
+                }
               }
             } else if (aSk.type === "atk_spd_self") {
               p.spdBuff = aSk.val;
+              p.spdBuffTimer = aSk.duration;
               setTimeout(() => showFloatDamage("SPD UP", pEl, "#ffff00"), 0);
             } else if (aSk.type === "charm") {
               tMob.atkDebuff = aSk.val;
@@ -9748,7 +8616,6 @@ function heroTick() {
       }
       let rtSpdMult = 1;
       if (p.spdBuff) rtSpdMult *= p.spdBuff;
-      if (p.skillActiveTime > 0 && data.active_eq && pSkill[data.active_eq] && pSkill[data.active_eq].type === "atk_spd_self") rtSpdMult *= pSkill[data.active_eq].val;
       p.cd -= dt / 1e3 * rtSpdMult;
       const cdBar = $id("cd-pet-" + pIdx);
       if (cdBar) cdBar.style.width = Math.min(100, Math.max(0, (p.maxCd - p.cd) / p.maxCd * 100)) + "%";
@@ -9772,7 +8639,11 @@ function heroTick() {
             const mobEl = $id("hmob-" + tMob.idx);
             p.combo = (p.combo || 0) + 1;
             let isCrit = Math.random() < p.crit;
-            if (passEq && pSkill[passEq] && pSkill[passEq].type === "combo_master" && p.combo % pSkill[passEq].val === 0) isCrit = true;
+            let currentCritDmg = p.critDmg;
+            if (passEq && pSkill[passEq] && pSkill[passEq].type === "combo_master" && p.combo % pSkill[passEq].val === 0) {
+              isCrit = true;
+              if (p.id === "naoyaSlime") currentCritDmg = 3;
+            }
             let dmgBase = Math.max(1, Math.floor(p.atk * atkMult * (0.8 + Math.random() * 0.4)));
             if (p.armorPen > 0) dmgBase = Math.floor(dmgBase * (1 + p.armorPen));
             if (passEq && pSkill[passEq]) {
@@ -9782,12 +8653,14 @@ function heroTick() {
                 tMob["fs_" + p.id] = true;
               }
             }
-            let dmg = isCrit ? Math.floor(dmgBase * p.critDmg) : dmgBase;
+            let dmg = isCrit ? Math.floor(dmgBase * currentCritDmg) : dmgBase;
             if (passEq && pSkill[passEq] && pSkill[passEq].type === "splash_dmg") {
               dmg = Math.floor(dmg * (1 + pSkill[passEq].val));
             }
             if (passEq && pSkill[passEq] && pSkill[passEq].type === "execute") {
-              if (tMob.hp / tMob.maxHp <= 0.2 && Math.random() < pSkill[passEq].val) {
+              const threshold = p.id === "naoyaSlime" ? pSkill[passEq].val : 0.2;
+              const chance = p.id === "naoyaSlime" ? 1 : pSkill[passEq].val;
+              if (tMob.hp / tMob.maxHp <= threshold && Math.random() < chance) {
                 dmg = tMob.hp;
                 if (mobEl) setTimeout(() => showFloatDamage("EXECUTE", mobEl, "#ff0000"), 150);
               }
@@ -9801,18 +8674,21 @@ function heroTick() {
             if (passEq && pSkill[passEq] && pSkill[passEq].type === "initial_burst" && runState.waveTime <= 3) {
               dmg = Math.floor(dmg * pSkill[passEq].val);
             }
-            tMob.hp -= dmg;
-            if (p.lifesteal > 0) {
-              const heal = Math.floor(dmg * p.lifesteal);
-              if (heal > 0) {
-                p.hp = Math.min(p.maxHp, p.hp + heal);
-                setTimeout(() => showFloatDamage("+" + heal, pEl, "#a4dc8c"), 150);
-                const hpPet = $id("hp-pet-" + pIdx);
-                if (hpPet) setTimeout(() => {
-                  hpPet.style.width = p.hp / p.maxHp * 100 + "%";
-                }, 150);
+            const doDamage = () => {
+              tMob.hp -= dmg;
+              if (p.lifesteal > 0) {
+                const heal = Math.floor(dmg * p.lifesteal);
+                if (heal > 0) {
+                  p.hp = Math.min(p.maxHp, p.hp + heal);
+                  setTimeout(() => showFloatDamage("+" + heal, pEl, "#a4dc8c"), 150);
+                  const hpPet = $id("hp-pet-" + pIdx);
+                  if (hpPet) setTimeout(() => {
+                    hpPet.style.width = p.hp / p.maxHp * 100 + "%";
+                  }, 150);
+                }
               }
-            }
+            };
+            doDamage();
             if (pEl) {
               pEl.classList.remove("idle");
               pEl.classList.add("attack");
@@ -10066,7 +8942,7 @@ function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
     animType = "projectile";
     spriteId = "fireball";
   } else {
-    const meleeSlash = ["octo", "ghostBlob", "impBlob"];
+    const meleeSlash = ["octo", "ghostBlob", "impBlob", "naoyaSlime"];
     const meleeSmash = ["slime", "octoCream"];
     const meleeBite = ["slimePink"];
     if (meleeSlash.includes(pId)) {
@@ -10264,7 +9140,103 @@ function initHero() {
     if (cashOutBtn) cashOutBtn.addEventListener("click", cashOutHero);
   }
 }
-var heroLoop, lastTick, PET_SKILLS, PET_STATS2, runState, hToastTimer, hGesture;
+function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
+  if (!attackerEl || !targetEls) return onComplete && onComplete();
+  const targets = Array.isArray(targetEls) ? targetEls : [targetEls];
+  if (targets.length === 0) return onComplete && onComplete();
+  const scene2 = targets[0].closest(".hero-scene") || targets[0].closest("#dg-arena");
+  if (!scene2) return onComplete && onComplete();
+  const overlay = document.createElement("div");
+  overlay.style.cssText = "position:absolute; inset:0; z-index:20; opacity:0; transition:opacity 0.3s; background:radial-gradient(circle, transparent 20%, rgba(50,0,0,0.7) 100%); backdrop-filter:grayscale(1) contrast(1.2);";
+  const topBar = document.createElement("div");
+  const botBar = document.createElement("div");
+  const barStyle = "position:absolute; left:0; right:0; height:18%; background:#000; z-index:21; transition:transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);";
+  topBar.style.cssText = barStyle + "top:0; transform:translateY(-100%);";
+  botBar.style.cssText = barStyle + "bottom:0; transform:translateY(100%);";
+  scene2.appendChild(overlay);
+  scene2.appendChild(topBar);
+  scene2.appendChild(botBar);
+  setTimeout(() => {
+    overlay.style.opacity = "1";
+    topBar.style.transform = "translateY(0)";
+    botBar.style.transform = "translateY(0)";
+  }, 10);
+  const origTransform = attackerEl.style.transform;
+  const oldAz = attackerEl.style.zIndex;
+  attackerEl.style.zIndex = "25";
+  const targetOriginals = targets.map((tEl) => ({
+    el: tEl,
+    origTransform: tEl.style.transform,
+    oldTz: tEl.style.zIndex
+  }));
+  targetOriginals.forEach((t) => t.el.style.zIndex = "22");
+  const sRect = scene2.getBoundingClientRect();
+  const targetCoords = targets.map((tEl) => {
+    const tRect = tEl.getBoundingClientRect();
+    return {
+      tx: tRect.left - sRect.left + tRect.width / 2,
+      ty: tRect.top - sRect.top + tRect.height / 2
+    };
+  });
+  let frame = 0;
+  const maxFrames = 24;
+  attackerEl.style.transition = "none";
+  const interval = setInterval(() => {
+    frame++;
+    const randIdx = Math.floor(Math.random() * targetCoords.length);
+    const { tx, ty } = targetCoords[randIdx];
+    const currentTargetEl = targets[randIdx];
+    const origT = targetOriginals[randIdx].origTransform;
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 25 + Math.random() * 40;
+    const px = tx + Math.cos(angle) * radius - 16;
+    const py = ty + Math.sin(angle) * radius - 16;
+    attackerEl.style.transform = `translate3d(${px}px, ${py}px, 0) scale(1.3) skewX(${(Math.random() - 0.5) * 30}deg)`;
+    const ghost = attackerEl.cloneNode(true);
+    ghost.className = "projection-ghost";
+    ghost.style.position = "absolute";
+    ghost.style.zIndex = "24";
+    ghost.style.opacity = "0.6";
+    ghost.style.filter = "grayscale(1) brightness(1.5)";
+    ghost.style.pointerEvents = "none";
+    scene2.appendChild(ghost);
+    setTimeout(() => ghost.remove(), 100);
+    currentTargetEl.style.transform = origT + ` translate(${(Math.random() - 0.5) * 10}px, ${(Math.random() - 0.5) * 10}px)`;
+    if (frame >= maxFrames) {
+      clearInterval(interval);
+      const boom = document.createElement("div");
+      boom.style.cssText = `position:absolute; left:${tx}px; top:${ty}px; width:0; height:0; background:#fff; box-shadow:0 0 100px 50px #fff; border-radius:50%; z-index:26; transform:translate(-50%, -50%); transition:width 0.1s, height 0.1s, opacity 0.3s; opacity:1;`;
+      scene2.appendChild(boom);
+      setTimeout(() => {
+        boom.style.width = "200px";
+        boom.style.height = "200px";
+        boom.style.opacity = "0";
+      }, 10);
+      setTimeout(() => boom.remove(), 350);
+      overlay.style.opacity = "0";
+      topBar.style.transform = "translateY(-100%)";
+      botBar.style.transform = "translateY(100%)";
+      setTimeout(() => {
+        overlay.remove();
+        topBar.remove();
+        botBar.remove();
+      }, 300);
+      attackerEl.style.transition = "transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1)";
+      attackerEl.style.transform = origTransform;
+      targetOriginals.forEach((t) => {
+        t.el.style.transform = t.origTransform;
+      });
+      setTimeout(() => {
+        attackerEl.style.zIndex = oldAz;
+        targetOriginals.forEach((t) => {
+          t.el.style.zIndex = t.oldTz;
+        });
+      }, 300);
+      if (onComplete) onComplete();
+    }
+  }, 40);
+}
+var heroLoop, lastTick, PET_SKILLS, PET_STATS, runState, hToastTimer, hGesture;
 var init_hero = __esm({
   "src/hero.js"() {
     init_store();
@@ -10366,12 +9338,18 @@ var init_hero = __esm({
         p1: { name: "M\u1ECF V\xE0ng", type: "gold_drop", val: 2, desc: "Nh\xE2n \u0111\xF4i V\xE0ng r\u1EDBt ra t\u1EEB qu\xE1i" },
         p2: { name: "Nh\u1EB7t Nh\u1EA1nh", type: "scavenger", val: 0.05, desc: "Khi \u0111\u1EA7y m\xE1u, \u0111\xE1nh c\xF3 5% r\u01A1i 1 V\xE0ng" }
       },
+      naoyaSlime: {
+        a1: { name: "24 Khung H\xECnh", type: "multi_strike", val: 24, cd: 8, duration: 1, desc: "Tung 24 \u0111\xF2n ch\xE9m li\xEAn ti\u1EBFp (M\u1ED7i \u0111\xF2n 50% ATK)" },
+        a2: { name: "\u0110\u1EE9ng Tr\xEAn T\u1EA5t C\u1EA3", type: "atk_spd_self", val: 2.4, cd: 12, duration: 3, desc: "Buff x2.4 T\u1ED1c \u0110\xE1nh trong 3s" },
+        p1: { name: "Khinh Mi\u1EC7t K\u1EBB Y\u1EBFu", type: "execute", val: 0.24, desc: "T\u1EF1 \u0111\u1ED9ng ki\u1EBFt li\u1EC5u qu\xE1i c\xF3 HP < 24%" },
+        p2: { name: "Quy T\u1EAFc Khung H\xECnh", type: "combo_master", val: 4, desc: "C\u1EE9 \u0111\xF2n \u0111\xE1nh th\u1EE9 4 l\xE0 Ch\xED M\u1EA1ng x3 S\xE1t Th\u01B0\u01A1ng" }
+      },
       default: {
         a1: { name: "C\u1ED1 G\u1EAFng", type: "atk_up", val: 0.2, cd: 5, duration: 3, desc: "T\u0103ng 20% ATK" },
         p1: { name: "L\u1EA1c Quan", type: "crit_rate", val: 0.2, desc: "T\u1EC9 l\u1EC7 B\u1EA1o k\xEDch +20%" }
       }
     };
-    PET_STATS2 = {
+    PET_STATS = {
       slime: { baseHp: 150, hpPerLv: 25, baseAtk: 8, atkPerLv: 2, baseSpd: 1 },
       octo: { baseHp: 80, hpPerLv: 15, baseAtk: 15, atkPerLv: 4, baseSpd: 1.5 },
       slimePink: { baseHp: 100, hpPerLv: 18, baseAtk: 12, atkPerLv: 3.5, baseSpd: 1 },
@@ -10387,6 +9365,7 @@ var init_hero = __esm({
       starBell: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1 },
       peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
       penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5, baseSpd: 1 },
+      naoyaSlime: { baseHp: 80, hpPerLv: 10, baseAtk: 24, atkPerLv: 6, baseSpd: 2.4 },
       default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1 }
     };
     runState = null;
@@ -10403,6 +9382,1495 @@ var init_hero = __esm({
       });
     };
     hGesture = null;
+  }
+});
+
+// src/dungeon.js
+function openDungeonView() {
+  isDungeonOpen = true;
+  closeWin();
+  const dungeonWin = $id("dungeon-win");
+  if (dungeonWin) {
+    dungeonWin.style.display = "flex";
+    placeDungeonWin();
+    dungeonWin.classList.remove("open-anim");
+    void dungeonWin.offsetWidth;
+    dungeonWin.classList.add("open-anim");
+  }
+  dungeonView.style.display = "flex";
+  const closeBtn = $id("dungeon-close");
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      closeDungeonView();
+    };
+  }
+  if (ctx.S.dungeonSave) {
+    dungeonView.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:white;">
+                <h2 style="color:#d9ba8a; margin-bottom:20px;">H\u1EA7m Ng\u1EE5c \u0110ang Dang D\u1EDF</h2>
+                <div style="margin-bottom:30px; font-size:16px;">B\u1EA1n c\xF3 m\u1ED9t l\u01B0\u1EE3t ch\u01A1i \u0111ang dang d\u1EDF \u1EDF \u1EA2i ${ctx.S.dungeonSave.currentWave}. B\u1EA1n mu\u1ED1n ti\u1EBFp t\u1EE5c hay ch\u01A1i m\u1EDBi?</div>
+                <div style="display:flex; gap:20px;">
+                    <div class="buy plain" id="dg-load-new" style="background:#e06578; color:white; width:120px; text-align:center; display:flex; justify-content:center; align-items:center; border-color:#c25566; box-shadow:inset 0 -3px 0 #c25566, 0 3px 0 #a34a52;">Ch\u01A1i M\u1EDBi</div>
+                    <div class="buy" id="dg-load-continue" style="width:120px; text-align:center; display:flex; justify-content:center; align-items:center;">Ti\u1EBFp T\u1EE5c</div>
+                </div>
+            </div>
+        `;
+    $id("dg-load-new").onclick = () => {
+      delete ctx.S.dungeonSave;
+      save();
+      initPlacementPhase();
+    };
+    $id("dg-load-continue").onclick = () => {
+      loadDungeonState(ctx.S.dungeonSave);
+    };
+  } else {
+    initPlacementPhase();
+  }
+}
+function closeDungeonView() {
+  if (!isDungeonOpen) return;
+  isDungeonOpen = false;
+  stopCombatLoop();
+  const dragEl = document.getElementById("dg-drag-el");
+  if (dragEl) dragEl.remove();
+  const dungeonWin = $id("dungeon-win");
+  if (dungeonWin) {
+    dungeonWin.style.display = "none";
+    dungeonWin.classList.remove("open-anim");
+  }
+  dungeonView.style.display = "none";
+  dungeonView.innerHTML = "";
+  $id("win").classList.add("open");
+  $id("viewToggle").style.display = "";
+  applyPageSkin();
+  applyViewState();
+  renderPager();
+  renderPlots();
+  renderToolbar();
+}
+function loadDungeonState(saveData) {
+  currentWave = saveData.currentWave;
+  totalGold = saveData.totalGold;
+  shopGold = saveData.shopGold;
+  const best = ctx.S.dungeonBest || { wave: 0, gold: 0 };
+  const bestHtml = best.wave > 0 ? `<div style="color:#b08a5c; font-size:12px; text-align:center; margin-top:4px;">\u{1F3C6} K\u1EF7 l\u1EE5c: Wave ${best.wave} \xB7 ${best.gold} G</div>` : "";
+  dungeonView.innerHTML = `
+        <div class="dg-arena" id="dg-arena">
+            <div class="dg-hud" id="dg-hud" style="display:none;"></div>
+            <div class="dg-info-panel" id="dg-info-panel" style="display:none;">
+                <div class="dg-info-close" id="dg-info-close">\xD7</div>
+                <h3>Ch\u1EC9 S\u1ED1 Th\xFA C\u01B0ng</h3>
+                <div class="dg-info-list" id="dg-info-list"></div>
+            </div>
+            <div class="dg-info-panel" id="dg-codex-panel" style="display:none; border-left-color:#e06578;">
+                <div class="dg-info-close" id="dg-codex-close">\xD7</div>
+                <h3 style="color:#e06578;">T\u1EEB \u0110i\u1EC3n Qu\xE1i</h3>
+                <div class="dg-info-list" id="dg-codex-list"></div>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:center; margin-top: 5px; flex-wrap:wrap;">
+            <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px; display:none;">Tho\xE1t</div>
+            <div class="buy plain" id="dg-surrender-btn" style="margin-left: 10px; background: #e06578; color: white;">K\u1EBFt Th\xFAc S\u1EDBm</div>
+        </div>
+        ${bestHtml}
+    `;
+  const leaveBtn = $id("dg-leave-btn");
+  if (leaveBtn) leaveBtn.addEventListener("click", closeDungeonView);
+  const surrBtn = $id("dg-surrender-btn");
+  if (surrBtn) surrBtn.addEventListener("click", () => endDungeon(false));
+  $id("dg-info-close").onclick = () => $id("dg-info-panel").style.display = "none";
+  $id("dg-codex-close").onclick = () => $id("dg-codex-panel").style.display = "none";
+  const arena = $id("dg-arena");
+  fullTeam = saveData.fullTeam.map((savedP) => {
+    const el = document.createElement("div");
+    el.className = "dg-entity pet";
+    el.innerHTML = `
+            <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+            <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+            <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+            ${petSVG(savedP.id, 32)}
+        `;
+    el.style.transform = `translate3d(${savedP.x - 16}px, ${savedP.y - 16}px, 0)`;
+    arena.appendChild(el);
+    const stat = PET_STATS2[savedP.id] || PET_STATS2.default;
+    return {
+      ...savedP,
+      el,
+      type: "pet",
+      skill: savedP.skill || stat.skill,
+      ai: savedP.ai || stat.ai,
+      cd: savedP.cd || 0,
+      skillCd: savedP.skillCd || 0,
+      maxSkillCd: savedP.maxSkillCd || stat.maxSkillCd || 0
+    };
+  });
+  team = [...fullTeam];
+  const isBoss = currentWave % 10 === 0;
+  const hud = $id("dg-hud");
+  hud.style.display = "block";
+  hud.innerHTML = `<span style="color:#ffd94d; font-weight:bold;">Wave ${currentWave}</span>${isBoss ? " \u{1F451}" : ""} <span style="color:#a4dc8c; margin-left:10px;" title="V\xE0ng mang v\u1EC1">${spriteSVG("coin", 12).replace("display:block", "display:inline-block;vertical-align:middle")} ${totalGold}</span> <span style="color:#e06578; margin-left:10px;" title="V\xE0ng n\xE2ng c\u1EA5p">\u{1F6E0} ${shopGold}</span>`;
+  showWaveRewards(true);
+}
+function initPlacementPhase() {
+  phase = "placement";
+  team = [];
+  enemies = [];
+  projectiles = [];
+  currentWave = 1;
+  totalGold = 0;
+  shopGold = 0;
+  const best = ctx.S.dungeonBest || { wave: 0, gold: 0 };
+  const bestHtml = best.wave > 0 ? `<div style="color:#b08a5c; font-size:12px; text-align:center; margin-top:4px;">\u{1F3C6} K\u1EF7 l\u1EE5c: Wave ${best.wave} \xB7 ${best.gold} G</div>` : "";
+  dungeonView.innerHTML = `
+        <div class="dg-arena" id="dg-arena">
+            <div class="dg-hud" id="dg-hud" style="display:none;"></div>
+            <div class="dg-info-panel" id="dg-info-panel" style="display:none;">
+                <div class="dg-info-close" id="dg-info-close">\xD7</div>
+                <h3>Ch\u1EC9 S\u1ED1 Th\xFA C\u01B0ng</h3>
+                <div class="dg-info-list" id="dg-info-list"></div>
+            </div>
+            <div class="dg-info-panel" id="dg-codex-panel" style="display:none; border-left-color:#e06578;">
+                <div class="dg-info-close" id="dg-codex-close">\xD7</div>
+                <h3 style="color:#e06578;">T\u1EEB \u0110i\u1EC3n Qu\xE1i</h3>
+                <div class="dg-info-list" id="dg-codex-list"></div>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:center; margin-top: 5px; flex-wrap:wrap;">
+            <div class="buy" id="dg-start-btn">B\u1EAFt \u0110\u1EA7u Tr\u1EADn Chi\u1EBFn</div>
+            <div class="buy plain" id="dg-leave-btn" style="margin-left: 10px;">Tho\xE1t</div>
+            <div class="buy plain" id="dg-surrender-btn" style="margin-left: 10px; display:none; background: #e06578; color: white;">K\u1EBFt Th\xFAc S\u1EDBm</div>
+            <div class="buy plain" id="dg-info-btn" style="margin-left: 10px; width: 32px; padding: 0; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:black;" title="Th\xF4ng tin Th\xFA c\u01B0ng">?</div>
+            <div class="buy plain" id="dg-codex-btn" style="margin-left: 10px; padding: 0 10px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; color:#e06578;" title="T\u1EEB \u0111i\u1EC3n qu\xE1i">Qu\xE1i V\u1EADt</div>
+        </div>
+        ${bestHtml}
+        <div class="dg-dock" id="dg-dock"></div>
+    `;
+  const arena = $id("dg-arena");
+  const dock = $id("dg-dock");
+  dock.innerHTML = `
+        <div id="dg-nav-left" style="font-size: 24px; font-weight: bold; color: #d9ba8a; cursor: pointer; user-select: none; padding: 0 5px; touch-action: manipulation; opacity: 0.3;">\u25C0</div>
+        <div style="flex:1; overflow:hidden; height: 100%; display: flex; align-items: center; position: relative;">
+            <div id="dg-slots-container" style="display: flex; gap: 10px; transition: transform 0.3s ease; position: absolute; left: 0;"></div>
+        </div>
+        <div id="dg-nav-right" style="font-size: 24px; font-weight: bold; color: #d9ba8a; cursor: pointer; user-select: none; padding: 0 5px; touch-action: manipulation;">\u25B6</div>
+    `;
+  const slotsContainer = $id("dg-slots-container");
+  const navLeft = $id("dg-nav-left");
+  const navRight = $id("dg-nav-right");
+  const dockWrapper = navLeft.nextElementSibling;
+  let dockPage = 0;
+  function updateDockNav() {
+    if (!dockWrapper) return;
+    const w = dockWrapper.clientWidth || 250;
+    const itemsPerPage = Math.max(1, Math.floor(w / 54));
+    const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
+    if (dockPage > maxPage) dockPage = maxPage;
+    navLeft.style.opacity = dockPage > 0 ? "1" : "0.3";
+    navRight.style.opacity = dockPage < maxPage ? "1" : "0.3";
+    const offset = dockPage * itemsPerPage * 54;
+    slotsContainer.style.transform = `translateX(-${offset}px)`;
+  }
+  navLeft.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (dockPage > 0) {
+      dockPage--;
+      updateDockNav();
+    }
+  });
+  navRight.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    const w = dockWrapper.clientWidth || 250;
+    const itemsPerPage = Math.max(1, Math.floor(w / 54));
+    const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
+    if (dockPage < maxPage) {
+      dockPage++;
+      updateDockNav();
+    }
+  });
+  if (window.ResizeObserver) {
+    new ResizeObserver(() => updateDockNav()).observe(dockWrapper);
+  } else {
+    updateDockNav();
+  }
+  let draggingPet = null;
+  let dragEl = null;
+  ctx.S.pets.forEach((petId) => {
+    const slot = document.createElement("div");
+    slot.className = "dg-slot";
+    slot.innerHTML = petSVG(petId, 32);
+    slot.dataset.pet = petId;
+    slot.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      if (phase !== "placement") return;
+      if (team.length >= 4) {
+        toast("T\u1ED1i \u0111a 4 th\xE0nh vi\xEAn!");
+        return;
+      }
+      if (slot.classList.contains("placed")) return;
+      draggingPet = { id: petId, slot };
+      dragEl = document.createElement("div");
+      dragEl.id = "dg-drag-el";
+      dragEl.className = "dg-entity pet";
+      dragEl.style.pointerEvents = "none";
+      dragEl.style.position = "fixed";
+      dragEl.style.left = "0";
+      dragEl.style.top = "0";
+      dragEl.style.zIndex = "100000";
+      dragEl.innerHTML = petSVG(petId, 32);
+      document.body.appendChild(dragEl);
+      dragEl.style.transform = `translate3d(${e.clientX - 32}px, ${e.clientY - 32}px, 0)`;
+      slot.setPointerCapture(e.pointerId);
+    });
+    slot.addEventListener("pointermove", (e) => {
+      if (!draggingPet || !dragEl) return;
+      dragEl.style.transform = `translate3d(${e.clientX - 32}px, ${e.clientY - 32}px, 0)`;
+    });
+    slot.addEventListener("pointerup", (e) => {
+      if (!draggingPet || !dragEl) return;
+      const pId = draggingPet.id;
+      const currentSlot = draggingPet.slot;
+      dragEl.remove();
+      dragEl = null;
+      draggingPet = null;
+      currentSlot.releasePointerCapture(e.pointerId);
+      const rect = arena.getBoundingClientRect();
+      if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+        currentSlot.classList.add("placed");
+        const stat = PET_STATS2[pId] || PET_STATS2.default;
+        const el = document.createElement("div");
+        el.className = "dg-entity pet";
+        el.innerHTML = `
+                    <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                    <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+                    <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                    ${petSVG(pId, 32)}
+                `;
+        let x = e.clientX - rect.left - 16;
+        let y = e.clientY - rect.top - 16;
+        if (x > rect.width - 16) x = rect.width - 16;
+        if (x < 16) x = 16;
+        if (y < 16) y = 16;
+        if (y > rect.height - 16) y = rect.height - 16;
+        el.style.position = "absolute";
+        el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
+        arena.appendChild(el);
+        const memberObj = {
+          id: pId,
+          x,
+          y,
+          hp: stat.hp,
+          maxHp: stat.hp,
+          atk: stat.atk,
+          range: stat.range,
+          speed: stat.speed,
+          cd: 0,
+          maxCd: stat.cd,
+          skillCd: stat.maxSkillCd || 0,
+          maxSkillCd: stat.maxSkillCd || 0,
+          el,
+          type: "pet",
+          skill: stat.skill,
+          dockSlot: currentSlot
+        };
+        team.push(memberObj);
+        let isPlacedDragging = false;
+        el.addEventListener("pointerdown", (ev) => {
+          ev.preventDefault();
+          if (phase !== "placement") return;
+          isPlacedDragging = true;
+          el.style.zIndex = "100000";
+          const arect = arena.getBoundingClientRect();
+          el.style.transform = `translate3d(${ev.clientX - arect.left - 16}px, ${ev.clientY - arect.top - 16}px, 0)`;
+          el.setPointerCapture(ev.pointerId);
+        });
+        el.addEventListener("pointermove", (ev) => {
+          if (!isPlacedDragging) return;
+          const arect = arena.getBoundingClientRect();
+          el.style.transform = `translate3d(${ev.clientX - arect.left - 32}px, ${ev.clientY - arect.top - 32}px, 0)`;
+        });
+        el.addEventListener("pointerup", (ev) => {
+          if (!isPlacedDragging) return;
+          isPlacedDragging = false;
+          el.releasePointerCapture(ev.pointerId);
+          el.style.zIndex = "";
+          const arect = arena.getBoundingClientRect();
+          if (ev.clientX >= arect.left && ev.clientX <= arect.right && ev.clientY >= arect.top && ev.clientY <= arect.bottom) {
+            el.style.position = "absolute";
+            let nx = ev.clientX - arect.left - 16;
+            let ny = ev.clientY - arect.top - 16;
+            if (nx > arect.width - 16) nx = arect.width - 16;
+            if (nx < 16) nx = 16;
+            if (ny < 16) ny = 16;
+            if (ny > arect.height - 16) ny = arect.height - 16;
+            el.style.transform = `translate3d(${nx - 16}px, ${ny - 16}px, 0)`;
+            memberObj.x = nx;
+            memberObj.y = ny;
+          } else {
+            el.remove();
+            const idx = team.indexOf(memberObj);
+            if (idx !== -1) team.splice(idx, 1);
+            currentSlot.classList.remove("placed");
+          }
+        });
+      }
+    });
+    slotsContainer.appendChild(slot);
+  });
+  const infoBtn = $id("dg-info-btn");
+  const infoPanel = $id("dg-info-panel");
+  const infoList = $id("dg-info-list");
+  const infoClose = $id("dg-info-close");
+  const codexBtn = $id("dg-codex-btn");
+  const codexPanel = $id("dg-codex-panel");
+  const codexList = $id("dg-codex-list");
+  const codexClose = $id("dg-codex-close");
+  infoBtn.addEventListener("click", () => {
+    if (infoPanel.style.display === "flex") {
+      infoPanel.style.display = "none";
+      return;
+    }
+    codexPanel.style.display = "none";
+    infoList.innerHTML = "";
+    ctx.S.pets.forEach((petId) => {
+      const stat = PET_STATS2[petId] || PET_STATS2.default;
+      infoList.innerHTML += `
+                <div class="dg-info-item">
+                    <div class="dg-info-item-icon">${petSVG(petId, 32)}</div>
+                    <div class="dg-info-item-desc">
+                        <b>${stat.name}</b>
+                        HP: ${stat.hp} | ATK: ${stat.atk}<br/>
+                        T\u1EA7m \u0111\xE1nh: ${stat.range} | T\u1ED1c \u0111\xE1nh: ${stat.cd}s<br/>
+                        <span style="color:#b08a5c;">${stat.desc}</span>
+                    </div>
+                </div>
+            `;
+    });
+    infoPanel.style.display = "flex";
+  });
+  codexBtn.addEventListener("click", () => {
+    if (codexPanel.style.display === "flex") {
+      codexPanel.style.display = "none";
+      return;
+    }
+    infoPanel.style.display = "none";
+    codexList.innerHTML = "";
+    ENEMY_TYPES.forEach((stat) => {
+      codexList.innerHTML += `
+                <div class="dg-info-item" style="border-left: 2px solid #e06578;">
+                    <div class="dg-info-item-icon">${spriteSVG(stat.sp || stat.id, 32)}</div>
+                    <div class="dg-info-item-desc">
+                        <b style="color:#e06578;">${stat.name}</b>
+                        HP: ${stat.hp} | ATK: ${stat.atk}<br/>
+                        T\u1EA7m \u0111\xE1nh: ${stat.range} | T\u1ED1c \u0111\xE1nh: ${stat.cd}s<br/>
+                        <span style="color:#b08a5c;">${stat.desc}</span>
+                    </div>
+                </div>
+            `;
+    });
+    codexPanel.style.display = "flex";
+  });
+  infoClose.addEventListener("click", () => {
+    infoPanel.style.display = "none";
+  });
+  codexClose.addEventListener("click", () => {
+    codexPanel.style.display = "none";
+  });
+  $id("dg-start-btn").addEventListener("click", () => {
+    if (team.length === 0) return toast("Ch\u01B0a ch\u1ECDn \u0111\u1ED9i h\xECnh!");
+    startCombat();
+  });
+  $id("dg-leave-btn").addEventListener("click", () => {
+    closeDungeonView();
+  });
+  $id("dg-surrender-btn").addEventListener("click", () => {
+    endDungeon(false);
+  });
+}
+function startCombat() {
+  phase = "combat";
+  $id("dg-dock").style.display = "none";
+  $id("dg-start-btn").style.display = "none";
+  $id("dg-leave-btn").style.display = "none";
+  $id("dg-surrender-btn").style.display = "block";
+  currentWave = 1;
+  totalGold = 0;
+  shopGold = 0;
+  fullTeam = [...team];
+  startWave();
+}
+function updateHUD() {
+  const hud = $id("dg-hud");
+  if (!hud) return;
+  const isBoss = currentWave % 10 === 0;
+  hud.style.display = "block";
+  hud.innerHTML = `<span style="color:#ffd94d; font-weight:bold;">Wave ${currentWave}</span>${isBoss ? " \u{1F451}" : ""} <span style="color:#a4dc8c; margin-left:10px;" title="V\xE0ng mang v\u1EC1">${spriteSVG("coin", 12).replace("display:block", "display:inline-block;vertical-align:middle")} ${totalGold}</span> <span style="color:#e06578; margin-left:10px;" title="V\xE0ng n\xE2ng c\u1EA5p">\u{1F6E0} ${shopGold}</span>`;
+}
+function startWave() {
+  const isBossWave = currentWave % 10 === 0;
+  if (isBossWave) {
+    phase = "end";
+    const arena = $id("dg-arena");
+    const banner = document.createElement("div");
+    banner.className = "dg-boss-banner";
+    banner.innerHTML = "\u26A0 BOSS WAVE \u26A0";
+    arena.appendChild(banner);
+    setTimeout(() => {
+      banner.remove();
+      _doStartWave();
+    }, 2e3);
+  } else {
+    _doStartWave();
+  }
+}
+function _doStartWave() {
+  phase = "combat";
+  enemies = [];
+  projectiles = [];
+  fullTeam.forEach((p) => {
+    p.waveDmgDealt = 0;
+    p.waveDmgTaken = 0;
+    p.waveHealDone = 0;
+  });
+  const arena = $id("dg-arena");
+  const w = arena.clientWidth;
+  const h = arena.clientHeight;
+  updateHUD();
+  let count = Math.min(40, 4 + Math.floor(currentWave * 1.5));
+  let spawnElite = currentWave % 3 === 0;
+  let isBossWave = currentWave % 10 === 0;
+  if (isBossWave) {
+    count = Math.max(3, Math.floor(count / 2));
+  }
+  let stressed = Math.floor(currentWave / 5) * 0.5;
+  for (let i = 0; i < count; i++) {
+    let type;
+    if (spawnElite && i === 0 || isBossWave && i === 0) {
+      const elites = ENEMY_TYPES.filter((e) => e.elite);
+      type = elites.length > 0 ? elites[Math.floor(Math.random() * elites.length)] : ENEMY_TYPES[ENEMY_TYPES.length - 1];
+    } else {
+      const normals = ENEMY_TYPES.filter((e) => !e.elite);
+      type = normals[Math.floor(Math.random() * normals.length)];
+    }
+    const el = document.createElement("div");
+    el.className = "dg-entity enemy flip";
+    el.innerHTML = `
+            <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+            <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+            <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+            ${spriteSVG(type.sp || type.id, 32)}
+        `;
+    const x = 20 + Math.random() * (w - 60);
+    const y = 40 + Math.random() * (h - 80);
+    el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
+    arena.appendChild(el);
+    let hpMultiplier = Math.pow(1.15, currentWave - 1);
+    let atkMultiplier = Math.pow(1.2, currentWave - 1);
+    if (isBossWave) {
+      hpMultiplier *= 1.5;
+      atkMultiplier *= 1.2;
+    }
+    enemies.push({
+      id: type.id,
+      x,
+      y,
+      hp: Math.round(type.hp * hpMultiplier),
+      maxHp: Math.round(type.hp * hpMultiplier),
+      atk: Math.round(type.atk * atkMultiplier),
+      range: type.range,
+      speed: type.speed,
+      cd: 0,
+      maxCd: type.cd,
+      skillCd: type.maxSkillCd || 0,
+      maxSkillCd: type.maxSkillCd || 0,
+      el,
+      type: "enemy",
+      skill: type.skill,
+      ai: type.ai,
+      gold: Math.round((type.gold || 5) * 2 * Math.pow(1.15, currentWave - 1))
+    });
+  }
+  lastTime = performance.now();
+  if (!gameLoopId) {
+    gameLoopId = setTimeout(combatLoop, 16);
+  }
+}
+function stopCombatLoop() {
+  if (gameLoopId) clearTimeout(gameLoopId);
+  gameLoopId = null;
+}
+function combatLoop() {
+  if (phase !== "combat") return;
+  let now2 = performance.now();
+  let dt = (now2 - lastTime) / 1e3;
+  lastTime = now2;
+  if (dt > 1) dt = 1;
+  let steps = 0;
+  while (dt > 0 && steps < 60) {
+    let stepDt = Math.min(dt, 0.016);
+    updateEntities(team, enemies, stepDt);
+    updateEntities(enemies, team, stepDt);
+    const arena = $id("dg-arena");
+    projectiles = projectiles.filter((p) => {
+      if (!p.target || p.target.hp <= 0) {
+        p.el.remove();
+        return false;
+      }
+      const dx = p.tx - p.x;
+      const dy = p.ty - p.y;
+      const dist = Math.max(0.1, Math.hypot(dx, dy));
+      if (dist < 10) {
+        applyEffect(p.from, p.target, p.fromGroup, p.toGroup, p.atk, p.skill);
+        p.el.remove();
+        return false;
+      } else {
+        const move = p.speed * stepDt;
+        p.x += dx / dist * move;
+        p.y += dy / dist * move;
+        p.tx = p.target.x;
+        p.ty = p.target.y - 16;
+        p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0)`;
+        return true;
+      }
+    });
+    team = team.filter((e) => {
+      if (e.hp <= 0) {
+        e.el.remove();
+        return false;
+      }
+      return true;
+    });
+    enemies = enemies.filter((e) => {
+      if (e.hp <= 0) {
+        e.el.remove();
+        if (e.gold) {
+          const homeG = Math.floor(e.gold * 0.3);
+          totalGold += homeG;
+          shopGold += e.gold;
+          spawnDmg({ x: e.x, y: e.y - 10 }, `+${e.gold} \u{1F6E0}`, "gold");
+          updateHUD();
+        }
+        return false;
+      }
+      return true;
+    });
+    if (enemies.length === 0 || team.length === 0) {
+      break;
+    }
+    dt -= stepDt;
+    steps++;
+  }
+  if (enemies.length === 0) {
+    showWaveRewards();
+    return;
+  }
+  if (team.length === 0) {
+    endDungeon(false);
+    return;
+  }
+  gameLoopId = setTimeout(combatLoop, 16);
+}
+function spawnDmg(target, amount, type) {
+  const isStr = typeof amount === "string";
+  if (!isStr) amount = Math.round(amount);
+  const arena = $id("dg-arena");
+  const dmg = document.createElement("div");
+  dmg.className = "dg-dmg" + (type ? " " + type : "");
+  dmg.textContent = type === "miss" ? "MISS!" : isStr ? amount : (amount > 0 ? "+" : "") + amount;
+  if (type === "gold") {
+    dmg.style.color = "#ffd94d";
+    dmg.style.fontWeight = "bold";
+  }
+  dmg.style.left = target.x + "px";
+  dmg.style.top = target.y - 8 + "px";
+  arena.appendChild(dmg);
+  setTimeout(() => dmg.remove(), 800);
+  if (target.el && target.maxHp) {
+    const pct = Math.max(0, target.hp / target.maxHp) * 100;
+    const fill = target.el.querySelector(".dg-hp-fill");
+    if (fill) fill.style.width = pct + "%";
+  }
+}
+function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOverride) {
+  const atk = Math.round(overrideAtk || attacker.atk);
+  const skill = skillOverride || attacker.skill;
+  if (skill === "heal") {
+    const amount = Math.min(target.maxHp - target.hp, atk);
+    target.hp += amount;
+    if (attacker && attacker.type === "pet") attacker.waveHealDone = (attacker.waveHealDone || 0) + amount;
+    spawnDmg(target, amount, "heal");
+    return;
+  }
+  if (skill === "aoe_heal") {
+    myGroup.forEach((ally) => {
+      if (ally.hp > 0 && Math.hypot(ally.x - attacker.x, ally.y - attacker.y) <= attacker.range) {
+        const amount = Math.min(ally.maxHp - ally.hp, atk);
+        ally.hp += amount;
+        if (attacker && attacker.type === "pet") attacker.waveHealDone = (attacker.waveHealDone || 0) + amount;
+        spawnDmg(ally, amount, "heal");
+      }
+    });
+    return;
+  }
+  if (target.type === "pet") {
+    const dodgeChance = target.dodge !== void 0 ? target.dodge : target.id === "ghostBlob" ? 0.15 : 0.05;
+    if (Math.random() < dodgeChance) {
+      spawnDmg(target, 0, "miss");
+      target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - atk);
+      return;
+    }
+  }
+  let finalDmg = atk;
+  let isCrit = false;
+  if (attacker) {
+    if (attacker.status && attacker.status.buff_atk > 0) {
+      finalDmg = Math.round(finalDmg * 1.2);
+    }
+    const critChance = attacker.critRate || (attacker.type === "pet" ? 0.05 : 0);
+    if (Math.random() < critChance) {
+      finalDmg = Math.round(finalDmg * (attacker.critDmg || 1.5));
+      isCrit = true;
+      if (attacker.type === "pet") {
+        if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
+        ctx.S.stats.totalCrits = (ctx.S.stats.totalCrits || 0) + 1;
+      }
+    }
+  }
+  if (target.armor && target.armor > 0) {
+    finalDmg = Math.round(finalDmg * (1 - target.armor));
+  }
+  if (skill === "sniper" && attacker) {
+    const dist = Math.hypot(target.x - attacker.x, target.y - attacker.y);
+    finalDmg += Math.floor(dist * 0.2);
+  }
+  target.hp -= finalDmg;
+  target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - finalDmg);
+  spawnDmg(target, -finalDmg, isCrit ? "crit" : "");
+  if (attacker && attacker.type === "pet") attacker.waveDmgDealt = (attacker.waveDmgDealt || 0) + finalDmg;
+  if (target.type === "pet") target.waveDmgTaken = (target.waveDmgTaken || 0) + finalDmg;
+  if (skill === "lifesteal" && attacker) {
+    const ls = Math.floor(finalDmg * 0.5);
+    const amount = Math.min(attacker.maxHp - attacker.hp, ls);
+    attacker.hp += amount;
+    if (attacker.type === "pet") attacker.waveHealDone = (attacker.waveHealDone || 0) + amount;
+    spawnDmg(attacker, amount, "heal");
+  }
+  if (!target.status) target.status = {};
+  if (skill === "stun" && Math.random() < 0.2) target.status.stun = 1;
+  if (skill === "poison") target.status.poison = 3;
+  if (skill === "freeze") target.status.freeze = 3;
+  if (skill === "root" && Math.random() < 0.25) target.status.root = 2;
+  if (skill === "cleave" && attacker) {
+    enemyGroup.forEach((e) => {
+      if (e !== target && e.hp > 0 && Math.hypot(e.x - target.x, e.y - target.y) <= 40) {
+        const splash = Math.floor(finalDmg * 0.5);
+        e.hp -= splash;
+        spawnDmg(e, -splash);
+        if (attacker.type === "pet") attacker.waveDmgDealt = (attacker.waveDmgDealt || 0) + splash;
+        if (e.type === "pet") e.waveDmgTaken = (e.waveDmgTaken || 0) + splash;
+      }
+    });
+  }
+  if (skill === "pierce" && attacker) {
+    enemyGroup.forEach((e) => {
+      if (e !== target && e.hp > 0) {
+        const distToTarget = Math.hypot(target.x - attacker.x, target.y - attacker.y);
+        const dot = ((e.x - attacker.x) * (target.x - attacker.x) + (e.y - attacker.y) * (target.y - attacker.y)) / (distToTarget * distToTarget);
+        const cross = Math.abs((target.x - attacker.x) * (attacker.y - e.y) - (attacker.x - e.x) * (target.y - attacker.y));
+        const distToLine = cross / distToTarget;
+        if (dot > 0.1 && dot < 2 && distToLine < 30) {
+          e.hp -= finalDmg;
+          spawnDmg(e, -finalDmg);
+          if (attacker.type === "pet") attacker.waveDmgDealt = (attacker.waveDmgDealt || 0) + finalDmg;
+          if (e.type === "pet") e.waveDmgTaken = (e.waveDmgTaken || 0) + finalDmg;
+        }
+      }
+    });
+  }
+}
+function updateEntities(groupA, groupB, dt) {
+  const arena = $id("dg-arena");
+  groupA.forEach((a) => {
+    if (a.hp <= 0) return;
+    if (a.cd > 0) {
+      a.cd -= dt;
+    }
+    const cdPct = Math.max(0, Math.min(100, (1 - Math.max(0, a.cd) / a.maxCd) * 100));
+    const cdFill = a.el.querySelector(".dg-cd-fill");
+    if (cdFill) cdFill.style.width = cdPct + "%";
+    if (a.maxSkillCd > 0) {
+      if (a.skillCd > 0) a.skillCd -= dt;
+      const skillCdBar = a.el.querySelector(".dg-skill-cd-bar");
+      if (skillCdBar) {
+        skillCdBar.style.display = "block";
+        const skillCdFill = skillCdBar.querySelector(".dg-skill-cd-fill");
+        if (skillCdFill) {
+          const skillCdPct = Math.max(0, Math.min(100, (1 - Math.max(0, a.skillCd) / a.maxSkillCd) * 100));
+          skillCdFill.style.width = skillCdPct + "%";
+        }
+      }
+    }
+    if (!a.status) a.status = {};
+    if (a.skill === "taunt") a.status.taunt = 3;
+    let isStunned = false;
+    let isRooted = false;
+    let speedMult = 1;
+    let atkSpdMult = 1;
+    for (let eff in a.status) {
+      if (a.status[eff] > 0) {
+        a.status[eff] -= dt;
+        if (eff === "stun") isStunned = true;
+        if (eff === "root") isRooted = true;
+        if (eff === "freeze") {
+          speedMult *= 0.5;
+          atkSpdMult *= 0.5;
+        }
+        if (eff === "poison" && Math.random() < dt) {
+          a.hp -= 2;
+          spawnDmg(a, -2);
+        }
+      }
+    }
+    let statusHtml = "";
+    if (a.status.stun > 0) statusHtml += '<div class="dg-status-icon dg-status-stun"></div>';
+    if (a.status.poison > 0) statusHtml += '<div class="dg-status-icon dg-status-poison"></div>';
+    if (a.status.freeze > 0) statusHtml += '<div class="dg-status-icon dg-status-freeze"></div>';
+    if (a.status.root > 0) statusHtml += '<div class="dg-status-icon dg-status-root"></div>';
+    if (a.status.taunt > 0) statusHtml += '<div class="dg-status-icon dg-status-taunt"></div>';
+    if (a.status.buff_atk > 0) statusHtml += '<div class="dg-status-icon dg-status-buff"></div>';
+    let statusDiv = a.el.querySelector(".dg-status");
+    if (!statusDiv) {
+      statusDiv = document.createElement("div");
+      statusDiv.className = "dg-status";
+      a.el.appendChild(statusDiv);
+      a._lastStatusHtml = "";
+    }
+    if (a._lastStatusHtml !== statusHtml) {
+      statusDiv.innerHTML = statusHtml;
+      a._lastStatusHtml = statusHtml;
+    }
+    if (isStunned) return;
+    let closest = null;
+    let minDist = Infinity;
+    let taunters = groupB.filter((b) => b.hp > 0 && b.status && b.status.taunt > 0);
+    let targetGroup = taunters.length > 0 ? taunters : groupB;
+    if (a.skill === "heal" || a.skill === "aoe_heal") {
+      targetGroup = groupA;
+      let minHpPct = 1;
+      targetGroup.forEach((ally) => {
+        if (ally.hp <= 0) return;
+        const dist = Math.max(0.1, Math.hypot(ally.x - a.x, ally.y - a.y));
+        const hpPct = ally.hp / ally.maxHp;
+        if (hpPct < minHpPct && dist < a.range * 4) {
+          minHpPct = hpPct;
+          closest = { b: ally, dx: ally.x - a.x, dy: ally.y - a.y, dist };
+        }
+      });
+      if (!closest) {
+        targetGroup.forEach((ally) => {
+          if (ally === a || ally.hp <= 0) return;
+          const dx = ally.x - a.x;
+          const dy = ally.y - a.y;
+          const dist = Math.max(0.1, Math.hypot(dx, dy));
+          if (dist < minDist) {
+            minDist = dist;
+            closest = { b: ally, dx, dy, dist };
+          }
+        });
+      }
+    } else if (a.skill === "assassin" || a.ai === "assassin") {
+      let validTargets = targetGroup.filter((b) => b.hp > 0);
+      if (a.lockedTarget && validTargets.includes(a.lockedTarget)) {
+        const dx = a.lockedTarget.x - a.x;
+        const dy = a.lockedTarget.y - a.y;
+        const dist = Math.max(0.1, Math.hypot(dx, dy));
+        closest = { b: a.lockedTarget, dx, dy, dist };
+      } else {
+        let minMaxHp = Infinity;
+        validTargets.forEach((b) => {
+          if (b.maxHp < minMaxHp) {
+            minMaxHp = b.maxHp;
+            const dx = b.x - a.x;
+            const dy = b.y - a.y;
+            const dist = Math.max(0.1, Math.hypot(dx, dy));
+            closest = { b, dx, dy, dist };
+          }
+        });
+        if (closest) a.lockedTarget = closest.b;
+      }
+    } else {
+      let validTargets = targetGroup.filter((b) => b.hp > 0 && b.hp - (b.incomingDmg || 0) > 0);
+      if (validTargets.length === 0) validTargets = targetGroup.filter((b) => b.hp > 0);
+      validTargets.forEach((b) => {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const dist = Math.max(0.1, Math.hypot(dx, dy));
+        if (dist < minDist) {
+          minDist = dist;
+          closest = { b, dx, dy, dist };
+        }
+      });
+    }
+    a.el.classList.remove("walk");
+    if (closest) {
+      if (a.maxSkillCd > 0 && a.skillCd <= 0 && a.skill === "projection_sorcery") {
+        a.skillCd = a.maxSkillCd;
+        const momentum = 1 / (a.maxCd || 1);
+        const finalDmg = a.atk;
+        const projectionDmg = Math.floor(finalDmg * momentum);
+        const validTargets = targetGroup.filter((e) => e.hp > 0 && e.el);
+        if (validTargets.length === 0) return;
+        const targetEls = validTargets.map((e) => e.el);
+        validTargets.forEach((e) => {
+          if (!e.status) e.status = {};
+          e.status.stun = 1.3;
+        });
+        if (!a.status) a.status = {};
+        a.status.stun = 1.3;
+        playNaoyaCutscene(a, a.el, targetEls, () => {
+          validTargets.forEach((e) => {
+            if (e.hp > 0) {
+              if (e !== closest.b) {
+                e.hp -= projectionDmg;
+                spawnDmg(e, -projectionDmg);
+              } else {
+                const extraDmg = Math.max(0, projectionDmg - finalDmg);
+                if (extraDmg > 0) {
+                  e.hp -= extraDmg;
+                  spawnDmg(e, -extraDmg, "crit");
+                }
+              }
+              if (arena && a.el) {
+                const ghost = a.el.cloneNode(true);
+                ghost.className = "dg-entity projection-ghost";
+                ghost.style.position = "absolute";
+                ghost.style.left = e.x + "px";
+                ghost.style.top = e.y + "px";
+                ghost.style.zIndex = "1";
+                ghost.style.opacity = "0.5";
+                ghost.style.filter = "grayscale(1) contrast(1.5)";
+                ghost.style.pointerEvents = "none";
+                arena.appendChild(ghost);
+                setTimeout(() => ghost.remove(), 150);
+              }
+            }
+          });
+        });
+        return;
+      }
+      if (closest.dx < -1 && a.type === "pet") a.el.classList.add("flip");
+      else if (closest.dx > 1 && a.type === "pet") a.el.classList.remove("flip");
+      if (closest.dx > 1 && a.type === "enemy") a.el.classList.add("flip");
+      else if (closest.dx < -1 && a.type === "enemy") a.el.classList.remove("flip");
+      let isRanged = a.range >= 80 || a.ai === "ranged";
+      let inRange = closest.dist <= a.range || a.skill === "heal" && closest.dist <= 10;
+      let baseRange = a.range;
+      if (a.type === "pet" && PET_STATS2[a.id]) baseRange = PET_STATS2[a.id].range;
+      if (a.type === "enemy") {
+        const en = ENEMY_TYPES.find((e) => e.id === a.id);
+        if (en) baseRange = en.range;
+      }
+      let tooClose = isRanged && closest.dist < baseRange * 0.4 && closest.b.type !== a.type;
+      if (a.panic > 0) a.panic -= dt;
+      if (a.panic > 0 && !isRooted) {
+        a.el.classList.add("walk");
+        const arenaRect = arena.getBoundingClientRect();
+        const speed = a.speed * speedMult * dt;
+        let cx = arenaRect.width / 2 - a.x;
+        let cy = arenaRect.height / 2 - a.y;
+        let dist = Math.hypot(cx, cy);
+        if (dist > 5) {
+          a.x += cx / dist * speed;
+          a.y += cy / dist * speed;
+        }
+        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+      } else if (tooClose && !isRooted) {
+        a.el.classList.add("walk");
+        const arenaRect = arena.getBoundingClientRect();
+        const speed = a.speed * speedMult * dt;
+        let kx = -(closest.dx / closest.dist);
+        let ky = -(closest.dy / closest.dist);
+        let moveX = kx * speed;
+        let moveY = ky * speed;
+        let nextX = a.x + moveX;
+        let nextY = a.y + moveY;
+        let hitLeft = nextX < 20;
+        let hitRight = nextX > arenaRect.width - 20;
+        let hitTop = nextY < 20;
+        let hitBottom = nextY > arenaRect.height - 20;
+        let hitX = hitLeft || hitRight;
+        let hitY = hitTop || hitBottom;
+        if (hitX && hitY) {
+          a.panic = 1;
+        } else if (hitX) {
+          moveX = 0;
+          moveY = (ky !== 0 ? Math.sign(ky) : Math.random() < 0.5 ? 1 : -1) * speed;
+        } else if (hitY) {
+          moveY = 0;
+          moveX = (kx !== 0 ? Math.sign(kx) : Math.random() < 0.5 ? 1 : -1) * speed;
+        }
+        if (!(hitX && hitY)) {
+          a.x += moveX;
+          a.y += moveY;
+        }
+        a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
+        a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
+        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+      } else if (!inRange && !isRooted) {
+        a.el.classList.add("walk");
+        const speed = a.speed * speedMult * dt;
+        if ((a.skill === "assassin" || a.ai === "assassin") && closest.dist > 150) {
+          a.x = closest.b.x + (closest.dx > 0 ? -30 : 30);
+          a.y = closest.b.y;
+        } else {
+          a.x += closest.dx / closest.dist * speed;
+          a.y += closest.dy / closest.dist * speed;
+        }
+        const arenaRect = arena.getBoundingClientRect();
+        a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
+        a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
+        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+      }
+      if (inRange) {
+        if (a.cd <= 0) {
+          a.cd = a.maxCd / atkSpdMult;
+          a.el.classList.add("attack");
+          setTimeout(() => {
+            if (a.el) a.el.classList.remove("attack");
+          }, 200);
+          if (a.skill === "frenzy") {
+            if (!a.frenzyStacks) a.frenzyStacks = 0;
+            a.frenzyStacks = Math.min(10, a.frenzyStacks + 1);
+            a.cd = a.maxCd / (atkSpdMult * (1 + a.frenzyStacks * 0.05));
+          }
+          if (a.skill === "taunt") {
+          }
+          if (a.skill === "buff_atk") {
+            groupA.forEach((ally) => {
+              if (ally.hp > 0 && Math.hypot(ally.x - a.x, ally.y - a.y) < 100) {
+                if (!ally.status) ally.status = {};
+                ally.status.buff_atk = 2;
+              }
+            });
+          }
+          if (isRanged && a.skill !== "heal" && a.skill !== "aoe_heal") {
+            closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
+            let p = {
+              x: a.x,
+              y: a.y - 16,
+              tx: closest.b.x,
+              ty: closest.b.y - 16,
+              target: closest.b,
+              atk: a.atk,
+              skill: a.skill,
+              from: a,
+              fromGroup: groupA,
+              toGroup: targetGroup,
+              speed: 300,
+              el: document.createElement("div")
+            };
+            p.el.className = "dg-projectile";
+            p.el.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#f0d" /></svg>';
+            p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0)`;
+            arena.appendChild(p.el);
+            if (a.skill === "multishot") {
+              projectiles.push(p);
+              let target2 = targetGroup[Math.floor(Math.random() * targetGroup.length)];
+              let target3 = targetGroup[Math.floor(Math.random() * targetGroup.length)];
+              if (target2 && target2 !== p.target) {
+                target2.incomingDmg = (target2.incomingDmg || 0) + a.atk * 0.5;
+                let p2 = { ...p, tx: target2.x, ty: target2.y - 16, target: target2, atk: a.atk * 0.5, el: p.el.cloneNode(true) };
+                arena.appendChild(p2.el);
+                projectiles.push(p2);
+              }
+              if (target3 && target3 !== p.target && target3 !== target2) {
+                target3.incomingDmg = (target3.incomingDmg || 0) + a.atk * 0.5;
+                let p3 = { ...p, tx: target3.x, ty: target3.y - 16, target: target3, atk: a.atk * 0.5, el: p.el.cloneNode(true) };
+                arena.appendChild(p3.el);
+                projectiles.push(p3);
+              }
+            } else {
+              projectiles.push(p);
+            }
+          } else {
+            closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
+            applyEffect(a, closest.b, groupA, targetGroup);
+          }
+        }
+      }
+    }
+  });
+}
+function endDungeon(isWin) {
+  phase = "end";
+  stopCombatLoop();
+  delete ctx.S.dungeonSave;
+  save();
+  projectiles.forEach((p) => p.el.remove());
+  projectiles = [];
+  const surrenderBtn = $id("dg-surrender-btn");
+  if (surrenderBtn) surrenderBtn.style.display = "none";
+  const arena = $id("dg-arena");
+  const overlay = document.createElement("div");
+  overlay.className = "dg-overlay";
+  ctx.S.coins += totalGold;
+  if (!ctx.S.dungeonBest) ctx.S.dungeonBest = { wave: 0, gold: 0 };
+  let isNewRecord = false;
+  if (currentWave > ctx.S.dungeonBest.wave) {
+    ctx.S.dungeonBest.wave = currentWave;
+    ctx.S.dungeonBest.gold = totalGold;
+    isNewRecord = true;
+  } else if (currentWave === ctx.S.dungeonBest.wave && totalGold > ctx.S.dungeonBest.gold) {
+    ctx.S.dungeonBest.gold = totalGold;
+    isNewRecord = true;
+  }
+  save();
+  renderStatus();
+  let rewardText = `<div style="color:white; font-size: 16px;">Ph\u1EA7n th\u01B0\u1EDFng: ${spriteSVG("coin", 16).replace("display:block", "display:inline-block; vertical-align:middle; margin-top:-2px")} ${totalGold} G<br/>S\u1ED1ng s\xF3t \u0111\u1EBFn Wave ${currentWave}</div>`;
+  const recordHtml = isNewRecord ? '<div class="dg-new-record">\u{1F3C6} K\u1EF6 L\u1EE4C M\u1EDAI! \u{1F3C6}</div>' : `<div style="color:#b08a5c; font-size:13px;">K\u1EF7 l\u1EE5c: Wave ${ctx.S.dungeonBest.wave} \xB7 ${ctx.S.dungeonBest.gold} G</div>`;
+  overlay.innerHTML = `
+        <div class="dg-title">Game Over</div>
+        ${rewardText}
+        ${recordHtml}
+        <div style="display:flex; justify-content:center; gap: 10px; margin-top: 15px; margin-bottom: auto;">
+            <div class="buy" id="dg-restart-btn">Ch\u01A1i L\u1EA1i</div>
+            <div class="buy plain" id="dg-finish-btn">Tho\xE1t</div>
+        </div>
+    `;
+  arena.appendChild(overlay);
+  overlay.querySelector("#dg-restart-btn").addEventListener("click", () => {
+    initPlacementPhase();
+  });
+  overlay.querySelector("#dg-finish-btn").addEventListener("click", () => {
+    closeDungeonView();
+  });
+}
+function showWaveRewards(isLoaded = false) {
+  phase = "end";
+  stopCombatLoop();
+  let bossDropHtml = "";
+  const arena = $id("dg-arena");
+  if (!isLoaded) {
+    projectiles.forEach((p) => p.el.remove());
+    projectiles = [];
+    const isBoss = currentWave % 10 === 0;
+    const waveGold = Math.round(500 * Math.pow(1.2, currentWave - 1)) * (isBoss ? 3 : 1);
+    totalGold += Math.floor(waveGold * 0.3);
+    shopGold += waveGold;
+    fullTeam.forEach((p) => {
+      if (p.hp <= 0) {
+        p.hp = p.maxHp * 0.5;
+        arena.appendChild(p.el);
+      } else {
+        p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2);
+      }
+      const pct = Math.max(0, p.hp / p.maxHp) * 100;
+      p.el.querySelector(".dg-hp-fill").style.width = pct + "%";
+      p.status = {};
+      if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0, dodge: 0 };
+      const baseStat = PET_STATS2[p.id] || PET_STATS2.default;
+      p.maxCd = baseStat.cd * Math.pow(0.9, p.upgrades.aspd || 0);
+      if (p.critRate === void 0) p.critRate = 0.05;
+      if (p.critDmg === void 0) p.critDmg = 1.5;
+      if (p.dodge === void 0) p.dodge = p.id === "ghostBlob" ? 0.15 : 0.05;
+    });
+    team = [...fullTeam];
+    if (isBoss) {
+      if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+      const r = Math.random();
+      let dropText = "";
+      if (r < 0.01) {
+        ctx.S.tickets.super = (ctx.S.tickets.super || 0) + 1;
+        dropText = "1 V\xE9 Si\xEAu C\u01B0\u1EDDng";
+      } else if (r < 0.4) {
+        ctx.S.tickets.spec = (ctx.S.tickets.spec || 0) + 2;
+        dropText = "2 V\xE9 \u0110\u1EB7c Bi\u1EC7t";
+      } else {
+        ctx.S.tickets.norm = (ctx.S.tickets.norm || 0) + 3;
+        dropText = "3 V\xE9 Th\u01B0\u1EDDng";
+      }
+      bossDropHtml = `<div style="color:#4caf50; margin-bottom:15px; font-weight:bold; font-size:16px;">\u2728 R\u01A1i ra t\u1EEB Boss: ${dropText}! \u2728</div>`;
+    }
+    ctx.S.dungeonSave = {
+      currentWave,
+      totalGold,
+      shopGold,
+      bossDropHtml,
+      fullTeam: fullTeam.map((p) => ({
+        id: p.id,
+        x: p.x,
+        y: p.y,
+        hp: p.hp,
+        maxHp: p.maxHp,
+        atk: p.atk,
+        speed: p.speed,
+        critRate: p.critRate,
+        critDmg: p.critDmg,
+        dodge: p.dodge,
+        range: p.range,
+        maxCd: p.maxCd,
+        upgrades: { ...p.upgrades },
+        type: p.type,
+        skill: p.skill,
+        ai: p.ai,
+        cd: p.cd,
+        skillCd: p.skillCd,
+        maxSkillCd: p.maxSkillCd
+      }))
+    };
+    save();
+  } else {
+    bossDropHtml = ctx.S.dungeonSave.bossDropHtml || "";
+    fullTeam.forEach((p) => {
+      const pct = Math.max(0, p.hp / p.maxHp) * 100;
+      p.el.querySelector(".dg-hp-fill").style.width = pct + "%";
+    });
+  }
+  const overlay = document.createElement("div");
+  overlay.className = "dg-overlay";
+  overlay.style.alignItems = "stretch";
+  overlay.style.padding = "20px";
+  overlay.style.boxSizing = "border-box";
+  overlay.style.background = "rgba(0,0,0,0.9)";
+  const getCost = (lv) => Math.floor(50 * Math.pow(1.4, lv));
+  const renderShop = (selectedIdx) => {
+    const selectedPet = fullTeam[selectedIdx];
+    let petsHtml = '<div class="dg-shop-left">';
+    fullTeam.forEach((p, idx) => {
+      const isSel = idx === selectedIdx;
+      const totalLv = Object.values(p.upgrades).reduce((a, b) => a + b, 0);
+      const formatNum = (n) => n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "K" : Math.round(n);
+      petsHtml += `<div class="dg-shop-pet ${isSel ? "selected" : ""}" data-idx="${idx}">
+                ${petSVG(p.id, 40)}
+                <div class="lv">LV ${totalLv}</div>
+                <div class="dmg-stats">
+                    <span style="color:#ff6666">\u2694\uFE0F${formatNum(p.waveDmgDealt || 0)}</span>
+                    ${p.waveHealDone ? `<span style="color:#66ff66">\u271A\uFE0F${formatNum(p.waveHealDone)}</span>` : ""}
+                    <span style="color:#66ccff">\u{1F6E1}\uFE0F${formatNum(p.waveDmgTaken || 0)}</span>
+                </div>
+            </div>`;
+    });
+    petsHtml += "</div>";
+    let headerHtml = `
+            <div class="dg-shop-header">
+                <div class="dg-shop-header-left">
+                    <div class="dg-shop-title">Ch\u1EE3 \u0110en - Wave ${currentWave}</div>
+                    <div class="dg-shop-gold">\u{1F6E0} ${shopGold} \u0110i\u1EC3m N\xE2ng C\u1EA5p</div>
+                </div>
+                <button id="dg-shop-next" class="dg-shop-next-btn">Ti\u1EBFp Theo \u2794</button>
+            </div>
+        `;
+    let shopHtml = `<div class="dg-shop-right">
+            ${bossDropHtml}
+        `;
+    if (selectedPet) {
+      const u = selectedPet.upgrades;
+      const hpMissingPet = selectedPet.maxHp - selectedPet.hp;
+      const waveBaseGold = Math.round(500 * Math.pow(1.2, currentWave - 1));
+      const healPetCost = Math.max(10, Math.floor(waveBaseGold * 0.2 * (hpMissingPet / selectedPet.maxHp)));
+      const totalMaxHp = fullTeam.reduce((acc, member) => acc + member.maxHp, 0);
+      const hpMissingTeam = fullTeam.reduce((acc, member) => acc + (member.maxHp - member.hp), 0);
+      const healTeamCost = Math.max(30, totalMaxHp > 0 ? Math.floor(waveBaseGold * 0.5 * (hpMissingTeam / totalMaxHp)) : 30);
+      const stats = [
+        { id: "hp", name: "Max HP (+25%)", val: selectedPet.maxHp, lv: u.hp, cost: Math.floor(40 * Math.pow(1.4, u.hp)) },
+        { id: "atk", name: "ATK (+25%)", val: selectedPet.atk, lv: u.atk, cost: Math.floor(40 * Math.pow(1.4, u.atk)) },
+        { id: "aspd", name: "ATK SPD (+10%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u.aspd, cost: Math.floor(60 * Math.pow(1.4, u.aspd)), forceCanBuy: selectedPet.maxCd > 0.11 },
+        { id: "spd", name: "Move Speed (+10%)", val: selectedPet.speed, lv: u.spd, cost: Math.floor(30 * Math.pow(1.4, u.spd)), forceCanBuy: selectedPet.speed < 150 },
+        { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u.critR, cost: Math.floor(50 * Math.pow(1.4, u.critR)), forceCanBuy: selectedPet.critRate < 0.59 },
+        { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u.critD, cost: Math.floor(50 * Math.pow(1.4, u.critD)) },
+        { id: "dodge", name: "N\xE9 Tr\xE1nh (+5%)", val: (selectedPet.dodge * 100).toFixed(0) + "%", lv: u.dodge || 0, cost: Math.floor(60 * Math.pow(1.4, u.dodge || 0)), forceCanBuy: selectedPet.dodge < 0.39 }
+      ];
+      if (PET_STATS2[selectedPet.id] && PET_STATS2[selectedPet.id].range > 60) {
+        stats.push({ id: "range", name: "T\u1EA7m \u0110\xE1nh (+10%)", val: Math.round(selectedPet.range), lv: u.range || 0, cost: Math.floor(40 * Math.pow(1.2, u.range || 0)), forceCanBuy: selectedPet.range < 400 });
+      }
+      stats.push(
+        { id: "heal_pet", name: "H\u1ED3i M\xE1u (Full)", val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: "", cost: healPetCost, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
+        { id: "heal_team", name: "H\u1ED3i M\xE1u Team (Full)", val: "T\u1EA5t c\u1EA3", lv: "", cost: healTeamCost, forceCanBuy: hpMissingTeam > 0 }
+      );
+      shopHtml += `<div class="dg-shop-grid">`;
+      stats.forEach((s) => {
+        const cost = s.cost !== void 0 ? s.cost : getCost(s.lv);
+        const canAfford = shopGold >= cost && (s.forceCanBuy !== void 0 ? s.forceCanBuy : true);
+        const lvText = s.lv !== "" ? ` <span style="color:#888;">(Lv ${s.lv})</span>` : "";
+        shopHtml += `
+                <div class="dg-shop-card">
+                    <div>
+                        <div class="dg-shop-stat-name">${s.name}${lvText}</div>
+                        <div class="dg-shop-stat-val">${s.val}</div>
+                    </div>
+                    <button class="dg-btn-buy" data-stat="${s.id}" data-cost="${cost}" ${!canAfford ? "disabled" : ""}>
+                        ${cost} \u{1F6E0}
+                    </button>
+                </div>`;
+      });
+      shopHtml += `</div>`;
+    } else {
+      shopHtml += `<div style="color:#aaa; text-align:center; flex:1; display:flex; align-items:center; justify-content:center;">Ch\u1ECDn m\u1ED9t Pet b\xEAn tr\xE1i \u0111\u1EC3 n\xE2ng c\u1EA5p.</div>`;
+    }
+    shopHtml += `</div>`;
+    overlay.innerHTML = `<div class="dg-shop-box">${headerHtml}<div class="dg-shop-content">${petsHtml}${shopHtml}</div></div>`;
+    overlay.querySelectorAll(".dg-shop-pet").forEach((el) => {
+      el.onclick = () => renderShop(parseInt(el.dataset.idx));
+    });
+    overlay.querySelectorAll(".dg-btn-buy").forEach((el) => {
+      el.onclick = () => {
+        const statId = el.dataset.stat;
+        const cost = parseInt(el.dataset.cost);
+        if (shopGold >= cost) {
+          shopGold -= cost;
+          const p = selectedPet;
+          if (statId === "hp") {
+            p.maxHp = Math.round(p.maxHp * 1.25);
+            p.hp = Math.round(p.hp * 1.25);
+            p.upgrades.hp++;
+          }
+          if (statId === "atk") {
+            p.atk = Math.round(p.atk * 1.25);
+            p.upgrades.atk++;
+          }
+          if (statId === "aspd") {
+            p.maxCd = Math.max(0.1, p.maxCd * 0.9);
+            p.upgrades.aspd++;
+          }
+          if (statId === "spd") {
+            p.speed = Math.round(p.speed * 1.1);
+            p.upgrades.spd++;
+          }
+          if (statId === "critR") {
+            p.critRate = Math.min(0.6, p.critRate + 0.05);
+            p.upgrades.critR++;
+          }
+          if (statId === "critD") {
+            p.critDmg = Math.round((p.critDmg + 0.2) * 10) / 10;
+            p.upgrades.critD++;
+          }
+          if (statId === "dodge") {
+            p.dodge = Math.min(0.4, p.dodge + 0.05);
+            p.upgrades.dodge = (p.upgrades.dodge || 0) + 1;
+          }
+          if (statId === "range") {
+            p.range = Math.round(p.range * 1.1);
+            p.upgrades.range = (p.upgrades.range || 0) + 1;
+          }
+          if (statId === "heal_pet") {
+            p.hp = p.maxHp;
+          }
+          if (statId === "heal_team") {
+            fullTeam.forEach((member) => {
+              member.hp = member.maxHp;
+            });
+          }
+          renderShop(selectedIdx);
+        }
+      };
+    });
+    const nextBtn = overlay.querySelector("#dg-shop-next");
+    nextBtn.onclick = () => {
+      nextWaveSequence(overlay);
+    };
+  };
+  arena.appendChild(overlay);
+  renderShop(0);
+}
+function nextWaveSequence(overlay) {
+  overlay.remove();
+  currentWave++;
+  fullTeam.forEach((p) => {
+    const pct = Math.max(0, Math.min(100, p.hp / p.maxHp * 100));
+    p.el.querySelector(".dg-hp-fill").style.width = pct + "%";
+  });
+  startWave();
+}
+var isDungeonOpen, phase, gameLoopId, lastTime, team, enemies, projectiles, currentWave, totalGold, shopGold, PET_STATS2, ENEMY_TYPES, fullTeam;
+var init_dungeon = __esm({
+  "src/dungeon.js"() {
+    init_store();
+    init_all();
+    init_graphics();
+    init_hero();
+    isDungeonOpen = false;
+    phase = "placement";
+    gameLoopId = null;
+    lastTime = 0;
+    team = [];
+    enemies = [];
+    projectiles = [];
+    currentWave = 1;
+    totalGold = 0;
+    shopGold = 0;
+    PET_STATS2 = {
+      slime: { name: "Slime Xanh", desc: "Chi\u1EBFn binh c\xE2n b\u1EB1ng, kh\xF4ng c\xF3 g\xEC n\u1ED5i b\u1EADt.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 },
+      octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "\u0110\xE1nh nhanh th\u1EAFng nhanh. \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao.", hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
+      slimePink: { name: "Slime H\u1ED3ng", desc: "H\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu cho \u0111\u1ED3ng minh y\u1EBFu nh\u1EA5t.", hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: "heal" },
+      peach_soda: { name: "Soda \u0110\xE0o", desc: "\u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.", hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
+      octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "20% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.", hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: "stun" },
+      jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "X\u1EA1 th\u1EE7: B\u1EAFn c\xE0ng xa s\xE1t th\u01B0\u01A1ng c\xE0ng l\u1EDBn.", hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: "sniper" },
+      mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "H\u1ED3i m\xE1u cho b\u1EA3n th\xE2n b\u1EB1ng 50% s\xE1t th\u01B0\u01A1ng g\xE2y ra.", hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: "lifesteal" },
+      ghostBlob: { name: "Ma Tr\u1EAFng", desc: "S\xE1t th\u1EE7: Lu\xF4n nh\u1EAFm v\xE0o k\u1EBB th\xF9 xa nh\u1EA5t.", hp: 80, atk: 45, range: 40, speed: 100, cd: 1.2, skill: "assassin" },
+      impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "\u0110\xE1nh lan: G\xE2y s\xE1t th\u01B0\u01A1ng AoE xung quanh m\u1EE5c ti\xEAu.", hp: 70, atk: 50, range: 40, speed: 60, cd: 1, skill: "cleave" },
+      angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "H\u1ED3i m\xE1u di\u1EC7n r\u1ED9ng cho c\xE1c \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 140, atk: 12, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal" },
+      starBell: { name: "Chu\xF4ng Sao", desc: "T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: "buff_atk" },
+      cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "Khi\xEAu kh\xEDch: Bu\u1ED9c k\u1EBB \u0111\u1ECBch t\u1EA5n c\xF4ng m\xECnh.", hp: 250, atk: 10, range: 40, speed: 30, cd: 2, skill: "taunt" },
+      dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "25% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.", hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: "root" },
+      prismBlob: { name: "L\u0103ng K\xEDnh", desc: "B\u1EAFn 3 tia s\xE1ng c\xF9ng l\xFAc (s\xE1t th\u01B0\u01A1ng chia n\u1EEDa).", hp: 100, atk: 25, range: 140, speed: 40, cd: 1.4, skill: "multishot" },
+      penguin: { name: "C\xE1nh C\u1EE5t", desc: "\u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze" },
+      naoyaSlime: { name: "Naoya", desc: "K\u1EF9 n\u0103ng ch\u1EE7 \u0111\u1ED9ng (10s): \u0110\u1EA7u X\u1EA1 Ch\xFA Ph\xE1p - L\u01B0\u1EDBt 24 khung h\xECnh c\xF4ng k\xEDch to\xE0n map v\xE0 \u0111\xF3ng b\u0103ng qu\xE1i 1s.", hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: "projection_sorcery", maxSkillCd: 10 },
+      default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
+    };
+    ENEMY_TYPES = [
+      { id: "douya", name: "M\u1EA7m Non", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 50, atk: 12, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout", gold: 2 },
+      { id: "tomato", name: "C\xE0 Chua Tr\xF2n", desc: "C\u1EADn chi\u1EBFn c\u01A1 b\u1EA3n.", hp: 100, atk: 18, range: 40, speed: 30, cd: 1, ai: "melee", gold: 4 },
+      { id: "radish", name: "C\u1EE7 C\u1EA3i T\u1ED1c \u0110\u1ED9", desc: "Ch\u1EA1y c\u1EF1c nhanh.", hp: 60, atk: 12, range: 30, speed: 70, cd: 0.5, ai: "melee", gold: 3 },
+      { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 70, atk: 30, range: 40, speed: 60, cd: 1, ai: "assassin", sp: "moonberry", gold: 5 },
+      { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 150, atk: 15, range: 40, speed: 25, cd: 1.2, ai: "melee", gold: 6 },
+      { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 180, atk: 20, range: 40, speed: 20, cd: 1.5, ai: "melee", gold: 8 },
+      { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 30, range: 50, speed: 15, cd: 3, ai: "tank", gold: 15 },
+      { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 80, atk: 25, range: 120, speed: 20, cd: 1.5, ai: "ranged", gold: 8 },
+      { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 100, atk: 12, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot", gold: 10 },
+      { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 130, atk: 18, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root", gold: 12 },
+      { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 300, atk: 25, range: 100, speed: 15, cd: 2, ai: "ranged", gold: 20 },
+      { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 700, atk: 60, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true, gold: 100 },
+      { id: "pumpkin", name: "Vua B\xED Ng\xF4", desc: "Boss: Tank AoE slam.", hp: 1e3, atk: 50, range: 50, speed: 15, cd: 2.5, ai: "tank", skill: "cleave", elite: true, sp: "pumpkin", gold: 150 },
+      { id: "fangW", name: "Ph\xF9 Th\u1EE7y Hoa", desc: "Boss: Ph\xE1o \u0111\xE0i b\u1EAFn xa.", hp: 500, atk: 70, range: 160, speed: 18, cd: 1.8, ai: "ranged", skill: "multishot", elite: true, sp: "fangW", gold: 120 }
+    ];
+    fullTeam = [];
+  }
+});
+
+// src/destroy.js
+function resetDestroyed() {
+  destroyed = false;
+}
+function destroy() {
+  if (destroyed) return;
+  destroyed = true;
+  try {
+    if (tick) window.clearInterval(tick);
+  } catch (e) {
+  }
+  try {
+    window.clearInterval(heartbeat);
+  } catch (e) {
+  }
+  try {
+    window.clearInterval(wander);
+  } catch (e) {
+  }
+  try {
+    Object.keys(petHopT).forEach((k) => window.clearTimeout(petHopT[k]));
+  } catch (e) {
+  }
+  try {
+    Object.keys(petSleepT).forEach((k) => window.clearTimeout(petSleepT[k]));
+  } catch (e) {
+  }
+  try {
+    endScene();
+  } catch (e) {
+  }
+  try {
+    if (ctx.saveTimer) {
+      clearTimeout(ctx.saveTimer);
+      save(true);
+    }
+  } catch (e) {
+  }
+  try {
+    if (toastTimer) window.clearTimeout(toastTimer);
+  } catch (e) {
+  }
+  try {
+    if (resizeTimer) window.clearTimeout(resizeTimer);
+  } catch (e) {
+  }
+  try {
+    if (renderTimeout) window.clearTimeout(renderTimeout);
+  } catch (e) {
+  }
+  while (disposers.length) {
+    try {
+      disposers.pop()();
+    } catch (e) {
+    }
+  }
+  try {
+    setInjection("");
+  } catch (e) {
+  }
+  try {
+    root.remove();
+  } catch (e) {
+  }
+  try {
+    if (extMenuBtn) extMenuBtn.remove();
+  } catch (e) {
+  }
+  try {
+    delete window[RUNTIME_KEY];
+  } catch (e) {
+  }
+}
+function setupExtButton() {
+  if (extMenuBtn) {
+    try {
+      extMenuBtn.remove();
+    } catch (e) {
+    }
+  }
+  const extMenu = document.querySelector("#extensionsMenu");
+  if (!extMenu) {
+    window.setTimeout(setupExtButton, 500);
+    return;
+  }
+  extMenuBtn = document.createElement("div");
+  extMenuBtn.id = "farm-wand-btn";
+  extMenuBtn.className = "list-group-item flex-container flexGap5 interactable";
+  extMenuBtn.tabIndex = 0;
+  extMenuBtn.innerHTML = '<div class="fa-fw fa-solid fa-leaf extensionsMenuExtensionButton"></div> N\xF4ng Tr\u1EA1i';
+  extMenuBtn.style.cursor = "pointer";
+  extMenuBtn.addEventListener("click", toggleWin);
+  extMenu.appendChild(extMenuBtn);
+}
+function setupSlashCommand() {
+  (async function() {
+    try {
+      let scp, SlashCommand;
+      try {
+        scp = (await import("../../../slash-commands/SlashCommandParser.js")).SlashCommandParser;
+        SlashCommand = (await import("../../../slash-commands/SlashCommand.js")).SlashCommand;
+      } catch (err) {
+      }
+      scp = scp || window.SlashCommandParser || globalThis.SlashCommandParser;
+      SlashCommand = SlashCommand || window.SlashCommand || globalThis.SlashCommand;
+      if (scp && SlashCommand && SlashCommand.fromProps) {
+        scp.addCommandObject(SlashCommand.fromProps({
+          name: "farm",
+          callback: async () => {
+            toggleWin();
+            return "";
+          },
+          helpString: "M\u1EDF/\u0110\xF3ng giao di\u1EC7n N\xF4ng tr\u1EA1i (SillyTavern Farm)"
+        }));
+      }
+    } catch (e) {
+      console.error("[Farm] L\u1ED7i \u0111\u0103ng k\xFD l\u1EC7nh /farm:", e);
+    }
+  })();
+}
+var destroyed, extMenuBtn;
+var init_destroy = __esm({
+  "src/destroy.js"() {
+    init_store();
+    init_all();
+    init_windows();
+    init_events();
+    init_pets();
+    init_state();
+    init_witch();
+    init_orb();
+    init_ui();
+    init_store();
+    destroyed = false;
+    extMenuBtn = null;
   }
 });
 
@@ -15943,7 +16411,7 @@ __export(all_exports, {
   PETS: () => PETS,
   PET_P: () => PET_P,
   PET_SKILLS: () => PET_SKILLS,
-  PET_STATS: () => PET_STATS2,
+  PET_STATS: () => PET_STATS,
   SEC: () => SEC,
   SEC_LS_KEY: () => SEC_LS_KEY,
   SPRITE_PX: () => SPRITE_PX,
@@ -16052,6 +16520,7 @@ __export(all_exports, {
   onOrbMove: () => onOrbMove,
   onOrbUp: () => onOrbUp,
   onResize: () => onResize,
+  openAchivModal: () => openAchivModal,
   openBetModal: () => openBetModal,
   openBuyDlg: () => openBuyDlg,
   openDungeonView: () => openDungeonView,
@@ -16094,6 +16563,7 @@ __export(all_exports, {
   placePet: () => placePet,
   placeWin: () => placeWin,
   plant: () => plant,
+  playNaoyaCutscene: () => playNaoyaCutscene,
   plotEmote: () => plotEmote,
   plotHTML: () => plotHTML,
   registerDynamicSprite: () => registerDynamicSprite,

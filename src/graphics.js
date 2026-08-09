@@ -44,6 +44,24 @@ const SPR = {
   slime: ["................", "................", "................", "................", ".....BBBBBB.....", "....BBBBBBBB....", "...BBWWBBBBBB...", "..BBWWBBBBBBBB..", "..BBBBBBBBBBBB..", "..BB33BBBB33BB..", ".BBBBBBBBBBBBBB.", ".BnBBBB33BBBBnB.", ".BBBBBBBBBBBBBB.", ".bBBBBBBBBBBBBb.", "..bbbbbbbbbbbb..", "................"],
   octo: ["................", "................", "................", ".....VVVVVV.....", "....VVVVVVVV....", "...VVWWVVVVVV...", "...VWWVVVVVVV...", "..VVVVVVVVVVVV..", "..VVKKVVVVKKVV..", "..VVVVVVVVVVVV..", "..VnVVVKKVVVnV..", "..VVVVVVVVVVVV..", "..VVVVVVVVVVVV..", "..VV.VV..VV.VV..", "..vv.vv..vv.vv..", "................"],
   coin: ["................", "................", "................", ".....UUUUU......", "....UCCCCCU.....", "...UCCWWCCCU....", "...UCWCCCCCU....", "...UCWCCCCCU....", "...UCCCCCCCU....", "...UCCCCCCCU....", "....UCCCCCU.....", ".....UUUUU......", "................", "................", "................", "................"],
+  achivStar: [
+    "................",
+    ".......U........",
+    "......UCU.......",
+    "......CWC.......",
+    ".UUUUUCCCUUUUU..",
+    "..UCCCCCCCCCU...",
+    "...UCCCCCCCU....",
+    "....UCCCCCU.....",
+    "...UCCC.CCCU....",
+    "..UCC.....CCU...",
+    ".UU.........UU..",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................"
+  ],
   sun: ["................", ".......C........", "...C...C...C....", "....C.....C.....", "......CCC.......", ".....CCCCC......", "..CC.CCWCC.CC...", ".....CCCCC......", "......CCC.......", "....C.....C.....", "...C...C...C....", ".......C........", "................", "................", "................", "................"],
   flower: ["................", "................", "................", "....nnn.nnn.....", "...npppnpppn....", "...nppnCnppn....", "....nnCCCnn.....", "...nppnCnppn....", "...npppnpppn....", "....nnn.nnn.....", "................", "................", "................", "................", "................", "................"],
   shopIcon: ["................", "................", "................", "....fpf.fpf.....", "....fppffppf....", ".....ffFFff.....", "..qddddFFddddq..", "..qqqqqFFqqqqq..", "...qdddFFdddq...", "...qFFFFFFFFq...", "...qdddFFdddq...", "...qdddFFdddq...", "...qqqqqqqqqq...", "................", "................", "................"],
@@ -792,7 +810,12 @@ const PET_SPR = {
     "................", "................", ".....333333.....", "....33WWWW33....",
     "...33WWWWWW33...", "...3WKKWWKKW3...", "..33WnWooWnW33..", "..33WWWWWWWW33..",
     "..33WWWWWWWW33..", "...33WWWWWW33...", "....33333333....", ".....oo..oo.....",
-    "................", "................", "................", "................"]
+    "................", "................", "................", "................"],
+  naoyaSlime: [
+    "................", "................", "................", "................",
+    ".....yyyyyy.....", "....yYYYYYYy....", "...yYWWYYYYYy...", "..yYYWWYYYYYYy..",
+    "..yYKKKYYKKKYy..", "..yYWKKYYWKKYy..", ".yYYYYYYYYYYYYy.", ".yYYYYYYYYKYYYy.",
+    ".yYYYYYYKKYYYYy.", ".yYYYYYYYYYYYYy.", "..yyyyyyyyyyyy..", "................"]
 };
 /* ===== v0.8c (#43): hệ thống da chuyển sắc (bộ sưu tập codex 0718) —— màu phủ theo từng sprite, giá trị có thể là màu đơn hoặc gradient tuyến tính ===== */
 const petLinear = (x1, y1, x2, y2, stops) => ({ type: 'linear', x1, y1, x2, y2, stops });
@@ -870,6 +893,7 @@ export const PETS = {
   /* —— Át chủ bài (page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
   peach_soda: { name: 'Bé soda đào', page: 1, price: 9999, cry: ['Bốp——!', '(nổi một bong bóng nhỏ)', 'Xì~', '(vị ngòn ngọt)'], desc: 'Loại tìm kho báu · tinh linh soda vị đào · dễ thương quá mức nên đắt nhất' },
   penguin: { name: 'Chim cánh cụt', page: 1, price: 100000, cry: ['Pingu!', 'Núp núp~', 'Trượt tuyết nào!', 'Cánh cụt!'], desc: 'Loại đặc biệt · AFK mỗi 1 tiếng mang về 1 vé gacha ngẫu nhiên (70% vé thường, 30% vé đặc biệt)' },
+  naoyaSlime: { name: 'Naoya', page: 1, hidden: true, price: 0, cry: ['Rác rưởi!', 'Lũ yếu kém...', 'Bẩn hết cả người!', '(lườm khinh bỉ)'], desc: 'Loại đặc biệt (Thành tựu) · Kẻ tự xưng là thiên tài nhưng lại bị kẹt trong hình hài Slime tròn vo núng nính.' }
 };
 export const PASSES = {
   water: { name: 'Vé vùng nước', price: 6000, desc: 'Mở khoá ruộng vùng nước (trang 2) + quyền mua bé tròn trang 2 và hạt giống thuỷ sinh, tặng kèm ô ruộng nổi đầu tiên' },

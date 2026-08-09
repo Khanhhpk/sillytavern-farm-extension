@@ -102,6 +102,12 @@ export const PET_SKILLS = {
     p1: { name: 'Mỏ Vàng', type: 'gold_drop', val: 2.0, desc: 'Nhân đôi Vàng rớt ra từ quái' },
     p2: { name: 'Nhặt Nhạnh', type: 'scavenger', val: 0.05, desc: 'Khi đầy máu, đánh có 5% rơi 1 Vàng' }
   },
+  naoyaSlime: {
+      a1: { name: '24 Khung Hình', type: 'multi_strike', val: 24, cd: 8, duration: 1, desc: 'Tung 24 đòn chém liên tiếp (Mỗi đòn 50% ATK)' },
+      a2: { name: 'Đứng Trên Tất Cả', type: 'atk_spd_self', val: 2.4, cd: 12, duration: 3, desc: 'Buff x2.4 Tốc Đánh trong 3s' },
+      p1: { name: 'Khinh Miệt Kẻ Yếu', type: 'execute', val: 0.24, desc: 'Tự động kiết liễu quái có HP < 24%' },
+      p2: { name: 'Quy Tắc Khung Hình', type: 'combo_master', val: 4, desc: 'Cứ đòn đánh thứ 4 là Chí Mạng x3 Sát Thương' }
+  },
   default: { 
     a1: { name: 'Cố Gắng', type: 'atk_up', val: 0.2, cd: 5, duration: 3, desc: 'Tăng 20% ATK' }, 
     p1: { name: 'Lạc Quan', type: 'crit_rate', val: 0.2, desc: 'Tỉ lệ Bạo kích +20%' } 
@@ -124,6 +130,7 @@ export const PET_STATS = {
   starBell: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1.0 },
   peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
   penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5, baseSpd: 1.0 },
+  naoyaSlime: { baseHp: 80, hpPerLv: 10, baseAtk: 24, atkPerLv: 6, baseSpd: 2.4 },
   default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1.0 }
 };
 
@@ -771,7 +778,7 @@ function heroTick() {
       
       let totalGold = 0;
       runState.monsters.forEach(m => {
-         totalGold += Math.floor((runState.stage * 30 + 100) * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
+         totalGold += Math.floor((runState.stage * 30 + 100) * 0.6 * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
       });
       
       let pGoldMult = 1.0;
@@ -940,16 +947,45 @@ function heroTick() {
               setTimeout(() => showFloatDamage('-' + dmg, mobEl, '#ff5555'), 150);
               spawnSkillEffect(pEl, mobEl, aSk.type);
             } else if (aSk.type === 'multi_strike') {
-              for(let i=0; i<aSk.val; i++) {
-                setTimeout(() => {
-                    if (tMob.hp > 0) {
-                        tMob.hp -= p.atk;
-                        spawnAttackEffect(p.id, pEl, mobEl, false, false);
-                    }
-                }, i * 150);
+              if (p.id === 'naoyaSlime') {
+                  // [Tawa Hook]: Kích hoạt Cutscene Điện ảnh
+                  runState.isTransitioning = true; // Đóng băng thời gian
+                  playNaoyaCutscene(p, pEl, mobEl, () => {
+                      // Đợi chém xong mới xả sát thương tổng cộng dồn
+                      let totalDmg = 0;
+                      for(let i = 0; i < aSk.val; i++) {
+                          if (tMob.hp > 0) {
+                              tMob.hp -= p.atk * 0.5;
+                              totalDmg += p.atk * 0.5;
+                          }
+                      }
+                      setTimeout(() => showFloatDamage('-' + Math.floor(totalDmg), mobEl, '#ff0000'), 0);
+                      
+                      // --- HỆ THỐNG GIAO TIẾP (NAOYA DIALOGUE) ---
+                      const isDead = tMob.hp <= 0;
+                      const quotesAlive = ["Rác rưởi!", "Chậm quá đấy!", "Biết thân biết phận đi!"];
+                      const quote = isDead 
+                          ? "Mày không phải Toji." 
+                          : quotesAlive[Math.floor(Math.random() * quotesAlive.length)];
+                      
+                      // Hiện Bong bóng thoại cho Naoya
+                      setTimeout(() => showFloatDamage('💬 ' + quote, pEl, '#fcd34d'), 300);
+
+                      runState.isTransitioning = false; // Mở lại trận đấu
+                  });
+              } else {
+                  for(let i=0; i<aSk.val; i++) {
+                    setTimeout(() => {
+                        if (tMob.hp > 0) {
+                            tMob.hp -= p.atk;
+                            spawnAttackEffect(p.id, pEl, mobEl, false, false);
+                        }
+                    }, i * 150);
+                  }
               }
             } else if (aSk.type === 'atk_spd_self') {
                p.spdBuff = aSk.val; 
+               p.spdBuffTimer = aSk.duration;
                setTimeout(() => showFloatDamage('SPD UP', pEl, '#ffff00'), 0);
             } else if (aSk.type === 'charm') {
                tMob.atkDebuff = aSk.val;
@@ -1091,7 +1127,6 @@ function heroTick() {
 
       let rtSpdMult = 1.0;
       if (p.spdBuff) rtSpdMult *= p.spdBuff;
-      if (p.skillActiveTime > 0 && data.active_eq && pSkill[data.active_eq] && pSkill[data.active_eq].type === 'atk_spd_self') rtSpdMult *= pSkill[data.active_eq].val;
       
       // Đòn đánh thường
       p.cd -= (dt / 1000) * rtSpdMult;
@@ -1121,7 +1156,11 @@ function heroTick() {
             
             p.combo = (p.combo || 0) + 1;
             let isCrit = Math.random() < p.crit;
-            if (passEq && pSkill[passEq] && pSkill[passEq].type === 'combo_master' && p.combo % pSkill[passEq].val === 0) isCrit = true;
+            let currentCritDmg = p.critDmg;
+            if (passEq && pSkill[passEq] && pSkill[passEq].type === 'combo_master' && p.combo % pSkill[passEq].val === 0) {
+                isCrit = true;
+                if (p.id === 'naoyaSlime') currentCritDmg = 3;
+            }
             
             let dmgBase = Math.max(1, Math.floor(p.atk * atkMult * (0.8 + Math.random() * 0.4)));
             if (p.armorPen > 0) dmgBase = Math.floor(dmgBase * (1 + p.armorPen));
@@ -1134,14 +1173,16 @@ function heroTick() {
                 }
             }
             
-            let dmg = isCrit ? Math.floor(dmgBase * p.critDmg) : dmgBase;
+            let dmg = isCrit ? Math.floor(dmgBase * currentCritDmg) : dmgBase;
             
             if (passEq && pSkill[passEq] && pSkill[passEq].type === 'splash_dmg') {
                 dmg = Math.floor(dmg * (1 + pSkill[passEq].val));
             }
             
             if (passEq && pSkill[passEq] && pSkill[passEq].type === 'execute') {
-                if (tMob.hp / tMob.maxHp <= 0.2 && Math.random() < pSkill[passEq].val) {
+                const threshold = p.id === 'naoyaSlime' ? pSkill[passEq].val : 0.2;
+                const chance = p.id === 'naoyaSlime' ? 1.0 : pSkill[passEq].val;
+                if (tMob.hp / tMob.maxHp <= threshold && Math.random() < chance) {
                     dmg = tMob.hp;
                     if (mobEl) setTimeout(() => showFloatDamage('EXECUTE', mobEl, '#ff0000'), 150);
                 }
@@ -1159,17 +1200,22 @@ function heroTick() {
                 dmg = Math.floor(dmg * pSkill[passEq].val);
             }
             
-            tMob.hp -= dmg;
-            
-            if (p.lifesteal > 0) {
-              const heal = Math.floor(dmg * p.lifesteal);
-              if (heal > 0) {
-                p.hp = Math.min(p.maxHp, p.hp + heal);
-                setTimeout(() => showFloatDamage('+' + heal, pEl, '#a4dc8c'), 150);
-                const hpPet = All.$id('hp-pet-' + pIdx);
-                if (hpPet) setTimeout(() => { hpPet.style.width = ((p.hp / p.maxHp) * 100) + '%'; }, 150);
+            const doDamage = () => {
+              tMob.hp -= dmg;
+              
+              if (p.lifesteal > 0) {
+                const heal = Math.floor(dmg * p.lifesteal);
+                if (heal > 0) {
+                  p.hp = Math.min(p.maxHp, p.hp + heal);
+                  setTimeout(() => showFloatDamage('+' + heal, pEl, '#a4dc8c'), 150);
+                  const hpPet = All.$id('hp-pet-' + pIdx);
+                  if (hpPet) setTimeout(() => { hpPet.style.width = ((p.hp / p.maxHp) * 100) + '%'; }, 150);
+                }
               }
-            }
+            };
+
+            doDamage();
+
             
             if (pEl) { pEl.classList.remove('idle'); pEl.classList.add('attack'); setTimeout(() => { pEl.classList.remove('attack'); pEl.classList.add('idle'); }, 300); }
             if (mobEl) { setTimeout(() => { mobEl.classList.remove('idle'); mobEl.classList.add('hurt'); setTimeout(() => { mobEl.classList.remove('hurt'); mobEl.classList.add('idle'); }, 200); }, 150); }
@@ -1411,7 +1457,7 @@ function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
     animType = 'projectile'; spriteId = 'fireball';
   } else {
     // Determine type by pet ID
-    const meleeSlash = ['octo', 'ghostBlob', 'impBlob'];
+    const meleeSlash = ['octo', 'ghostBlob', 'impBlob', 'naoyaSlime'];
     const meleeSmash = ['slime', 'octoCream'];
     const meleeBite = ['slimePink'];
     
@@ -1608,4 +1654,140 @@ export function initHero() {
   }
 }
 
+// --- CUTSCENE ĐIỆN ẢNH ĐỘC QUYỀN CỦA NAOYA SLIME ---
+export function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
+    if (!attackerEl || !targetEls) return onComplete && onComplete();
+    const targets = Array.isArray(targetEls) ? targetEls : [targetEls];
+    if (targets.length === 0) return onComplete && onComplete();
 
+    const scene = targets[0].closest('.hero-scene') || targets[0].closest('#dg-arena');
+    if (!scene) return onComplete && onComplete();
+
+    // 1. Phủ màn Cinematic tĩnh (Letterbox + Grayscale Time-Stop)
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:absolute; inset:0; z-index:20; opacity:0; transition:opacity 0.3s; background:radial-gradient(circle, transparent 20%, rgba(50,0,0,0.7) 100%); backdrop-filter:grayscale(1) contrast(1.2);';
+    
+    // Viền phim rạp trên dưới
+    const topBar = document.createElement('div');
+    const botBar = document.createElement('div');
+    const barStyle = 'position:absolute; left:0; right:0; height:18%; background:#000; z-index:21; transition:transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);';
+    topBar.style.cssText = barStyle + 'top:0; transform:translateY(-100%);';
+    botBar.style.cssText = barStyle + 'bottom:0; transform:translateY(100%);';
+
+    scene.appendChild(overlay);
+    scene.appendChild(topBar);
+    scene.appendChild(botBar);
+
+    // Kích hoạt Khung hình phim
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+        topBar.style.transform = 'translateY(0)';
+        botBar.style.transform = 'translateY(0)';
+    }, 10);
+
+    // 2. Kéo Naoya và Nạn nhân lên sân khấu chính, chốt tọa độ gốc
+    const origTransform = attackerEl.style.transform;
+    const oldAz = attackerEl.style.zIndex;
+    attackerEl.style.zIndex = '25';
+
+    const targetOriginals = targets.map(tEl => ({
+        el: tEl,
+        origTransform: tEl.style.transform,
+        oldTz: tEl.style.zIndex
+    }));
+
+    targetOriginals.forEach(t => t.el.style.zIndex = '22');
+
+    const sRect = scene.getBoundingClientRect();
+    const targetCoords = targets.map(tEl => {
+        const tRect = tEl.getBoundingClientRect();
+        return {
+            tx: tRect.left - sRect.left + tRect.width / 2,
+            ty: tRect.top - sRect.top + tRect.height / 2
+        };
+    });
+
+    let frame = 0;
+    const maxFrames = 24;
+    
+    attackerEl.style.transition = 'none';
+
+    // 3. Bắt đầu 24 Khung hình băm vằm
+    const interval = setInterval(() => {
+        frame++;
+        
+        const randIdx = Math.floor(Math.random() * targetCoords.length);
+        const { tx, ty } = targetCoords[randIdx];
+        const currentTargetEl = targets[randIdx];
+        const origT = targetOriginals[randIdx].origTransform;
+
+        // Naoya dịch chuyển liên tục, chém chéo cơ thể
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 25 + Math.random() * 40; 
+        const px = tx + Math.cos(angle) * radius - 16;
+        const py = ty + Math.sin(angle) * radius - 16;
+        
+        attackerEl.style.transform = `translate3d(${px}px, ${py}px, 0) scale(1.3) skewX(${(Math.random()-0.5)*30}deg)`;
+
+        // Tàn ảnh (Ghosting trail) đằng sau lưng!
+        const ghost = attackerEl.cloneNode(true);
+        ghost.className = 'projection-ghost';
+        ghost.style.position = 'absolute';
+        ghost.style.zIndex = '24';
+        ghost.style.opacity = '0.6';
+        ghost.style.filter = 'grayscale(1) brightness(1.5)';
+        ghost.style.pointerEvents = 'none';
+        scene.appendChild(ghost);
+        setTimeout(() => ghost.remove(), 100);
+
+        // Nạn nhân rung lắc liên hồi, cộng dồn vào transform gốc để không bị lệch
+        currentTargetEl.style.transform = origT + ` translate(${(Math.random()-0.5)*10}px, ${(Math.random()-0.5)*10}px)`;
+
+        if (frame >= maxFrames) {
+            clearInterval(interval);
+            
+            // Khung hình 24: Bùng nổ không gian
+            const boom = document.createElement('div');
+            boom.style.cssText = `position:absolute; left:${tx}px; top:${ty}px; width:0; height:0; background:#fff; box-shadow:0 0 100px 50px #fff; border-radius:50%; z-index:26; transform:translate(-50%, -50%); transition:width 0.1s, height 0.1s, opacity 0.3s; opacity:1;`;
+            scene.appendChild(boom);
+            
+            setTimeout(() => {
+                boom.style.width = '200px';
+                boom.style.height = '200px';
+                boom.style.opacity = '0';
+            }, 10);
+            
+            setTimeout(() => boom.remove(), 350);
+
+            // Hoàn trả màn hình và UI
+            overlay.style.opacity = '0';
+            topBar.style.transform = 'translateY(-100%)';
+            botBar.style.transform = 'translateY(100%)';
+            
+            setTimeout(() => {
+                overlay.remove();
+                topBar.remove();
+                botBar.remove();
+            }, 300);
+
+            // Ném Naoya về chỗ cũ
+            attackerEl.style.transition = 'transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1)';
+            attackerEl.style.transform = origTransform;
+            
+            // Phục hồi nguyên trạng kẻ địch
+            targetOriginals.forEach(t => {
+                t.el.style.transform = t.origTransform;
+            });
+            
+            setTimeout(() => {
+                attackerEl.style.zIndex = oldAz;
+                targetOriginals.forEach(t => {
+                    t.el.style.zIndex = t.oldTz;
+                });
+            }, 300);
+
+            // 4. Kích nổ Dame
+            if (onComplete) onComplete();
+        }
+    }, 40); // 24 FPS (1000/24 ~ 40ms)
+}

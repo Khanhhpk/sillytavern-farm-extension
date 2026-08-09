@@ -17,3 +17,4 @@ export const ctx = {
 export const setExtensionContext = (params) => {
     Object.assign(ctx, params);
 };
+
