@@ -623,3 +623,57 @@ export function initEvents() {
     }
   } catch (e) { console.warn('[Farm] Lỗi khi đăng ký sự kiện CHAT_CHANGED:', e); }
 }
+
+export function startTribulationEvent(onComplete) {
+    const overlay = document.createElement('div');
+    overlay.className = 'trib-overlay';
+    overlay.innerHTML = `
+        <div class="trib-cloud"></div>
+        <div class="trib-lightning" id="trib-lightning"></div>
+        <div class="trib-content">
+            <div class="trib-title">THIÊN KIẾP GIÁNG LÂM</div>
+            <div class="trib-text">
+                Thiên Đạo phát hiện lượng tài sản của ngươi quá lớn, đe dọa đến sự cân bằng của Đa Vũ Trụ!<br><br>
+                Sấm sét đang cuộn trào... Hãy đưa ra quyết định của ngươi!
+            </div>
+            <button class="trib-btn trib-btn-sub" id="btn-submit">Cống Nạp Thiên Đạo (Trừ số Tỷ, giữ số lẻ)</button>
+            <button class="trib-btn trib-btn-def" id="btn-defy">Chống Lại Thiên Đạo (Bị khóa game 1 ngày)</button>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const btnSubmit = overlay.querySelector('#btn-submit');
+    const btnDefy = overlay.querySelector('#btn-defy');
+    const lightning = overlay.querySelector('#trib-lightning');
+
+    btnSubmit.onclick = () => {
+        // Trừ toàn bộ số hàng tỷ
+        const billions = Math.floor(ctx.S.coins / 1e9);
+        if (billions > 0) {
+            ctx.S.coins -= billions * 1e9;
+        }
+        delete ctx.S.needsTribulationCheck;
+        save(true);
+        toast('Ngươi đã cống nạp tài sản. Thiên Đạo tạm thời nguôi giận!');
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.remove();
+            if (onComplete) onComplete();
+        }, 500);
+    };
+
+    btnDefy.onclick = () => {
+        // Sét đánh
+        lightning.classList.add('strike');
+        setTimeout(() => {
+            ctx.S.blockedUntil = Date.now() + 24 * 60 * 60 * 1000;
+            delete ctx.S.needsTribulationCheck;
+            save(true);
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.remove();
+            }, 500);
+        }, 300);
+    };
+}

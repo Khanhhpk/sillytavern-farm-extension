@@ -28,6 +28,18 @@ export function placeDungeonWin() {
 }
 export function toggleWin() {
   if (ctx.win.classList.contains('open')) { closeWin(); return; }
+  if (ctx.S.blockedUntil && ctx.S.blockedUntil > Date.now()) {
+      All.toast('Trời phạt chưa tan, Thiên Kiếp vẫn còn... Nông Trại đóng cửa!');
+      return;
+  }
+  if (ctx.S.needsTribulationCheck) {
+      All.startTribulationEvent(() => {
+          if (!ctx.S.blockedUntil || ctx.S.blockedUntil <= Date.now()) {
+              toggleWin(); // Open again if they survived
+          }
+      });
+      return;
+  }
   ctx.win.classList.add('open');
   layout(); placeWin(); settle(); renderAll();
   tick = window.setInterval(() => { renderDynamic(); }, 1000);
