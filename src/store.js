@@ -17,3 +17,12 @@ export const ctx = {
 export const setExtensionContext = (params) => {
     Object.assign(ctx, params);
 };
+
+window.resetNaoya = () => {
+    let s = ctx.S;
+    if (s.pets) s.pets = s.pets.filter(p => p !== 'naoyaSlime');
+    if (s.hero && s.hero.roster) delete s.hero.roster.naoyaSlime;
+    if (s.achiv && s.achiv.naoya) s.achiv.naoya.claimed = false;
+    if (typeof ctx.saveSettingsDebounced === 'function') ctx.saveSettingsDebounced();
+    console.log('✅ Đã reset Naoya thành công. Hãy F5 tải lại trang!');
+};

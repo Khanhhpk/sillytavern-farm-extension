@@ -52,6 +52,14 @@ var init_store = __esm({
     setExtensionContext = (params) => {
       Object.assign(ctx, params);
     };
+    window.resetNaoya = () => {
+      let s = ctx.S;
+      if (s.pets) s.pets = s.pets.filter((p) => p !== "naoyaSlime");
+      if (s.hero && s.hero.roster) delete s.hero.roster.naoyaSlime;
+      if (s.achiv && s.achiv.naoya) s.achiv.naoya.claimed = false;
+      if (typeof ctx.saveSettingsDebounced === "function") ctx.saveSettingsDebounced();
+      console.log("\u2705 \u0110\xE3 reset Naoya th\xE0nh c\xF4ng. H\xE3y F5 t\u1EA3i l\u1EA1i trang!");
+    };
   }
 });
 
