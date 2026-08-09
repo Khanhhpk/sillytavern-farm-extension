@@ -2868,7 +2868,7 @@ var init_style = __esm({
     
     /* Thi\xEAn Ki\u1EBFp (Tribulation) */
     .trib-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; transition: opacity 0.5s; border-radius: 6px; }
-    .trib-cloud { position: absolute; top: 10%; width: 200vw; height: 30vh; background: radial-gradient(ellipse at center, rgba(30,30,40,0.9) 0%, rgba(10,10,15,0) 70%); filter: blur(20px); animation: tribCloudMove 10s linear infinite; pointer-events: none; z-index: 1; }
+    .trib-cloud { position: absolute; top: 10%; width: 200vw; height: 30vh; background: radial-gradient(ellipse at center, rgba(30,30,40,0.9) 0%, rgba(10,10,15,0) 60%); animation: tribCloudMove 10s linear infinite; pointer-events: none; z-index: 1; }
     @keyframes tribCloudMove { 0% { transform: translateX(-100vw); } 100% { transform: translateX(100vw); } }
     .trib-lightning { position: absolute; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 2; }
     .trib-lightning.strike { animation: tribStrike 1.5s ease-out; }
@@ -7580,7 +7580,7 @@ function startTribulationEvent(onComplete) {
                 S\u1EA5m s\xE9t \u0111ang cu\u1ED9n tr\xE0o... H\xE3y \u0111\u01B0a ra quy\u1EBFt \u0111\u1ECBnh c\u1EE7a ng\u01B0\u01A1i!
             </div>
             <button class="trib-btn trib-btn-sub" id="btn-submit">C\u1ED1ng N\u1EA1p Thi\xEAn \u0110\u1EA1o (Tr\u1EEB s\u1ED1 T\u1EF7, gi\u1EEF s\u1ED1 l\u1EBB)</button>
-            <button class="trib-btn trib-btn-def" id="btn-defy">Ch\u1ED1ng L\u1EA1i Thi\xEAn \u0110\u1EA1o (B\u1ECB kh\xF3a game 1 ng\xE0y)</button>
+            <button class="trib-btn trib-btn-def" id="btn-defy">Ch\u1ED1ng L\u1EA1i Thi\xEAn \u0110\u1EA1o (B\u1ECB kh\xF3a game 3 ng\xE0y)</button>
         </div>
     `;
   ctx.win.appendChild(overlay);
@@ -7604,7 +7604,7 @@ function startTribulationEvent(onComplete) {
   btnDefy.onclick = () => {
     lightning.classList.add("strike");
     setTimeout(() => {
-      ctx.S.blockedUntil = Date.now() + 24 * 60 * 60 * 1e3;
+      ctx.S.blockedUntil = Date.now() + 3 * 24 * 60 * 60 * 1e3;
       delete ctx.S.needsTribulationCheck;
       save(true);
       overlay.style.opacity = "0";
@@ -7642,8 +7642,12 @@ function startLockedModal() {
   overlay.id = "farm-locked-modal";
   overlay.style.pointerEvents = "auto";
   const remaining = ctx.S.blockedUntil - Date.now();
-  const hours = Math.floor(remaining / (1e3 * 60 * 60));
+  const days = Math.floor(remaining / (1e3 * 60 * 60 * 24));
+  const hours = Math.floor(remaining % (1e3 * 60 * 60 * 24) / (1e3 * 60 * 60));
   const mins = Math.floor(remaining % (1e3 * 60 * 60) / (1e3 * 60));
+  let timeStr = "";
+  if (days > 0) timeStr += `${days} ng\xE0y `;
+  timeStr += `${hours} gi\u1EDD ${mins} ph\xFAt`;
   overlay.innerHTML = `
         <div class="titlebar" style="justify-content: space-between; border-radius: 6px 6px 0 0;">
             <h1 style="margin: 0; display: flex; align-items: center; gap: 7px; color: #7a5c38; font-size: 15px; letter-spacing: 1px;">
@@ -7654,7 +7658,7 @@ function startLockedModal() {
         <div class="dialog-content">
             N\xF4ng tr\u1EA1i \u0111\xE3 b\u1ECB phong \u1EA5n b\u1EDFi s\u1EE9c m\u1EA1nh c\u1EE7a Thi\xEAn \u0110\u1EA1o do h\xE0nh vi ngoan c\u1ED1 ch\u1ED1ng \u0111\u1ED1i.<br><br>
             Th\u1EDDi gian c\xF2n l\u1EA1i:<br>
-            <b style="color: #d34a4a; font-size: 20px; display: block; margin-top: 8px;">${hours} gi\u1EDD ${mins} ph\xFAt</b>
+            <b style="color: #d34a4a; font-size: 20px; display: block; margin-top: 8px;">${timeStr}</b>
         </div>
     `;
   ctx.ui.appendChild(overlay);

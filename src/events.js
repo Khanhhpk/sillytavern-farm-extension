@@ -637,7 +637,7 @@ export function startTribulationEvent(onComplete) {
                 Sấm sét đang cuộn trào... Hãy đưa ra quyết định của ngươi!
             </div>
             <button class="trib-btn trib-btn-sub" id="btn-submit">Cống Nạp Thiên Đạo (Trừ số Tỷ, giữ số lẻ)</button>
-            <button class="trib-btn trib-btn-def" id="btn-defy">Chống Lại Thiên Đạo (Bị khóa game 1 ngày)</button>
+            <button class="trib-btn trib-btn-def" id="btn-defy">Chống Lại Thiên Đạo (Bị khóa game 3 ngày)</button>
         </div>
     `;
 
@@ -667,7 +667,7 @@ export function startTribulationEvent(onComplete) {
         // Sét đánh
         lightning.classList.add('strike');
         setTimeout(() => {
-            ctx.S.blockedUntil = Date.now() + 24 * 60 * 60 * 1000;
+            ctx.S.blockedUntil = Date.now() + 3 * 24 * 60 * 60 * 1000;
             delete ctx.S.needsTribulationCheck;
             save(true);
             overlay.style.opacity = '0';
@@ -712,8 +712,13 @@ export function startLockedModal() {
     overlay.style.pointerEvents = 'auto';
     
     const remaining = ctx.S.blockedUntil - Date.now();
-    const hours = Math.floor(remaining / (1000 * 60 * 60));
+    const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    
+    let timeStr = '';
+    if (days > 0) timeStr += `${days} ngày `;
+    timeStr += `${hours} giờ ${mins} phút`;
     
     overlay.innerHTML = `
         <div class="titlebar" style="justify-content: space-between; border-radius: 6px 6px 0 0;">
@@ -725,7 +730,7 @@ export function startLockedModal() {
         <div class="dialog-content">
             Nông trại đã bị phong ấn bởi sức mạnh của Thiên Đạo do hành vi ngoan cố chống đối.<br><br>
             Thời gian còn lại:<br>
-            <b style="color: #d34a4a; font-size: 20px; display: block; margin-top: 8px;">${hours} giờ ${mins} phút</b>
+            <b style="color: #d34a4a; font-size: 20px; display: block; margin-top: 8px;">${timeStr}</b>
         </div>
     `;
     ctx.ui.appendChild(overlay);
