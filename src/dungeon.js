@@ -1159,7 +1159,7 @@ function showWaveRewards() {
         fullTeam.forEach((p, idx) => {
             const isSel = idx === selectedIdx;
             const totalLv = Object.values(p.upgrades).reduce((a,b)=>a+b,0);
-            const formatNum = n => n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(1)+'K' : n;
+            const formatNum = n => n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(1)+'K' : Math.round(n);
             petsHtml += `<div class="dg-shop-pet ${isSel?'selected':''}" data-idx="${idx}">
                 ${petSVG(p.id, 40)}
                 <div class="lv">LV ${totalLv}</div>
