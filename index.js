@@ -5696,6 +5696,7 @@ function openPanel(kind) {
       if (code === "0209") {
         if (!testMode) {
           setTestMode(true);
+          ctx.S = JSON.parse(JSON.stringify(ctx.S));
           Object.keys(PETS).forEach((id) => {
             if (!ctx.S.hero) ctx.S.hero = {};
             if (!ctx.S.hero.roster) ctx.S.hero.roster = {};
