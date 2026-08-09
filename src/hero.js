@@ -1653,9 +1653,12 @@ export function initHero() {
 }
 
 // --- CUTSCENE ĐIỆN ẢNH ĐỘC QUYỀN CỦA NAOYA SLIME ---
-export function playNaoyaCutscene(attacker, attackerEl, targetEl, onComplete) {
-    if (!attackerEl || !targetEl) return onComplete && onComplete();
-    const scene = targetEl.closest('.hero-scene') || targetEl.closest('#dg-arena');
+export function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
+    if (!attackerEl || !targetEls) return onComplete && onComplete();
+    const targets = Array.isArray(targetEls) ? targetEls : [targetEls];
+    if (targets.length === 0) return onComplete && onComplete();
+
+    const scene = targets[0].closest('.hero-scene') || targets[0].closest('#dg-arena');
     if (!scene) return onComplete && onComplete();
 
     // 1. Phủ màn Cinematic tĩnh (Letterbox + Grayscale Time-Stop)
@@ -1683,14 +1686,24 @@ export function playNaoyaCutscene(attacker, attackerEl, targetEl, onComplete) {
     // 2. Kéo Naoya và Nạn nhân lên sân khấu chính, chốt tọa độ gốc
     const origTransform = attackerEl.style.transform;
     const oldAz = attackerEl.style.zIndex;
-    const oldTz = targetEl.style.zIndex;
     attackerEl.style.zIndex = '25';
-    targetEl.style.zIndex = '22';
 
-    const tRect = targetEl.getBoundingClientRect();
+    const targetOriginals = targets.map(tEl => ({
+        el: tEl,
+        origTransform: tEl.style.transform,
+        oldTz: tEl.style.zIndex
+    }));
+
+    targetOriginals.forEach(t => t.el.style.zIndex = '22');
+
     const sRect = scene.getBoundingClientRect();
-    const tx = tRect.left - sRect.left + tRect.width / 2;
-    const ty = tRect.top - sRect.top + tRect.height / 2;
+    const targetCoords = targets.map(tEl => {
+        const tRect = tEl.getBoundingClientRect();
+        return {
+            tx: tRect.left - sRect.left + tRect.width / 2,
+            ty: tRect.top - sRect.top + tRect.height / 2
+        };
+    });
 
     let frame = 0;
     const maxFrames = 24;
@@ -1701,6 +1714,11 @@ export function playNaoyaCutscene(attacker, attackerEl, targetEl, onComplete) {
     const interval = setInterval(() => {
         frame++;
         
+        const randIdx = Math.floor(Math.random() * targetCoords.length);
+        const { tx, ty } = targetCoords[randIdx];
+        const currentTargetEl = targets[randIdx];
+        const origT = targetOriginals[randIdx].origTransform;
+
         // Naoya dịch chuyển liên tục, chém chéo cơ thể
         const angle = Math.random() * Math.PI * 2;
         const radius = 25 + Math.random() * 40; 
@@ -1720,8 +1738,8 @@ export function playNaoyaCutscene(attacker, attackerEl, targetEl, onComplete) {
         scene.appendChild(ghost);
         setTimeout(() => ghost.remove(), 100);
 
-        // Nạn nhân rung lắc liên hồi
-        targetEl.style.transform = `translate3d(${(Math.random()-0.5)*10}px, ${(Math.random()-0.5)*10}px, 0)`;
+        // Nạn nhân rung lắc liên hồi, cộng dồn vào transform gốc để không bị lệch
+        currentTargetEl.style.transform = origT + ` translate(${(Math.random()-0.5)*10}px, ${(Math.random()-0.5)*10}px)`;
 
         if (frame >= maxFrames) {
             clearInterval(interval);
@@ -1753,11 +1771,17 @@ export function playNaoyaCutscene(attacker, attackerEl, targetEl, onComplete) {
             // Ném Naoya về chỗ cũ
             attackerEl.style.transition = 'transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1)';
             attackerEl.style.transform = origTransform;
-            targetEl.style.transform = 'translate3d(0,0,0)';
+            
+            // Phục hồi nguyên trạng kẻ địch
+            targetOriginals.forEach(t => {
+                t.el.style.transform = t.origTransform;
+            });
             
             setTimeout(() => {
                 attackerEl.style.zIndex = oldAz;
-                targetEl.style.zIndex = oldTz;
+                targetOriginals.forEach(t => {
+                    t.el.style.zIndex = t.oldTz;
+                });
             }, 300);
 
             // 4. Kích nổ Dame

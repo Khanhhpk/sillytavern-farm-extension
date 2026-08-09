@@ -909,10 +909,18 @@ function updateEntities(groupA, groupB, dt) {
                 const finalDmg = a.atk;
                 const projectionDmg = Math.floor(finalDmg * momentum);
                 
-                playNaoyaCutscene(a, a.el, closest.b.el, () => {
-                    targetGroup.forEach(e => {
+                const validTargets = targetGroup.filter(e => e.hp > 0 && e.el);
+                if (validTargets.length === 0) return;
+                const targetEls = validTargets.map(e => e.el);
+
+                validTargets.forEach(e => {
+                    if (!e.status) e.status = {};
+                    e.status.freeze = 1;
+                });
+
+                playNaoyaCutscene(a, a.el, targetEls, () => {
+                    validTargets.forEach(e => {
                         if (e.hp > 0) {
-                            // Áp dụng sát thương động năng
                             if (e !== closest.b) {
                                 e.hp -= projectionDmg;
                                 spawnDmg(e, -projectionDmg);
@@ -924,11 +932,6 @@ function updateEntities(groupA, groupB, dt) {
                                 }
                             }
 
-                            // Hình phạt vi phạm quy tắc khung hình: Đóng băng 1 giây
-                            if (!e.status) e.status = {};
-                            e.status.freeze = 1;
-
-                            // Để lại tàn ảnh đen trắng (Afterimage) tại vị trí nạn nhân
                             if (arena && a.el) {
                                 const ghost = a.el.cloneNode(true);
                                 ghost.className = 'dg-entity projection-ghost';
@@ -941,17 +944,14 @@ function updateEntities(groupA, groupB, dt) {
                                 ghost.style.pointerEvents = 'none';
                                 arena.appendChild(ghost);
                                 
-                                // Xóa tàn ảnh nhanh và gọn
                                 setTimeout(() => ghost.remove(), 150);
                             }
                         }
                     });
 
-                    // Hoạt ảnh lướt của Naoya (Bỏ qua các khung hình di chuyển trung gian)
                     a.el.style.transition = 'none';
                     a.el.style.transform = `translate3d(${closest.b.x - 16}px, ${closest.b.y - 16}px, 0) scale(1.1) skewX(-20deg)`;
                     
-                    // Trả về tư thế đứng thẳng
                     setTimeout(() => {
                         if (a.el) {
                             a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;

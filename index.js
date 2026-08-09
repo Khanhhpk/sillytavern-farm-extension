@@ -9108,9 +9108,11 @@ function initHero() {
     if (cashOutBtn) cashOutBtn.addEventListener("click", cashOutHero);
   }
 }
-function playNaoyaCutscene(attacker, attackerEl, targetEl, onComplete) {
-  if (!attackerEl || !targetEl) return onComplete && onComplete();
-  const scene2 = targetEl.closest(".hero-scene") || targetEl.closest("#dg-arena");
+function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
+  if (!attackerEl || !targetEls) return onComplete && onComplete();
+  const targets = Array.isArray(targetEls) ? targetEls : [targetEls];
+  if (targets.length === 0) return onComplete && onComplete();
+  const scene2 = targets[0].closest(".hero-scene") || targets[0].closest("#dg-arena");
   if (!scene2) return onComplete && onComplete();
   const overlay = document.createElement("div");
   overlay.style.cssText = "position:absolute; inset:0; z-index:20; opacity:0; transition:opacity 0.3s; background:radial-gradient(circle, transparent 20%, rgba(50,0,0,0.7) 100%); backdrop-filter:grayscale(1) contrast(1.2);";
@@ -9129,18 +9131,30 @@ function playNaoyaCutscene(attacker, attackerEl, targetEl, onComplete) {
   }, 10);
   const origTransform = attackerEl.style.transform;
   const oldAz = attackerEl.style.zIndex;
-  const oldTz = targetEl.style.zIndex;
   attackerEl.style.zIndex = "25";
-  targetEl.style.zIndex = "22";
-  const tRect = targetEl.getBoundingClientRect();
+  const targetOriginals = targets.map((tEl) => ({
+    el: tEl,
+    origTransform: tEl.style.transform,
+    oldTz: tEl.style.zIndex
+  }));
+  targetOriginals.forEach((t) => t.el.style.zIndex = "22");
   const sRect = scene2.getBoundingClientRect();
-  const tx = tRect.left - sRect.left + tRect.width / 2;
-  const ty = tRect.top - sRect.top + tRect.height / 2;
+  const targetCoords = targets.map((tEl) => {
+    const tRect = tEl.getBoundingClientRect();
+    return {
+      tx: tRect.left - sRect.left + tRect.width / 2,
+      ty: tRect.top - sRect.top + tRect.height / 2
+    };
+  });
   let frame = 0;
   const maxFrames = 24;
   attackerEl.style.transition = "none";
   const interval = setInterval(() => {
     frame++;
+    const randIdx = Math.floor(Math.random() * targetCoords.length);
+    const { tx, ty } = targetCoords[randIdx];
+    const currentTargetEl = targets[randIdx];
+    const origT = targetOriginals[randIdx].origTransform;
     const angle = Math.random() * Math.PI * 2;
     const radius = 25 + Math.random() * 40;
     const px = tx + Math.cos(angle) * radius - 16;
@@ -9155,7 +9169,7 @@ function playNaoyaCutscene(attacker, attackerEl, targetEl, onComplete) {
     ghost.style.pointerEvents = "none";
     scene2.appendChild(ghost);
     setTimeout(() => ghost.remove(), 100);
-    targetEl.style.transform = `translate3d(${(Math.random() - 0.5) * 10}px, ${(Math.random() - 0.5) * 10}px, 0)`;
+    currentTargetEl.style.transform = origT + ` translate(${(Math.random() - 0.5) * 10}px, ${(Math.random() - 0.5) * 10}px)`;
     if (frame >= maxFrames) {
       clearInterval(interval);
       const boom = document.createElement("div");
@@ -9177,10 +9191,14 @@ function playNaoyaCutscene(attacker, attackerEl, targetEl, onComplete) {
       }, 300);
       attackerEl.style.transition = "transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1)";
       attackerEl.style.transform = origTransform;
-      targetEl.style.transform = "translate3d(0,0,0)";
+      targetOriginals.forEach((t) => {
+        t.el.style.transform = t.origTransform;
+      });
       setTimeout(() => {
         attackerEl.style.zIndex = oldAz;
-        targetEl.style.zIndex = oldTz;
+        targetOriginals.forEach((t) => {
+          t.el.style.zIndex = t.oldTz;
+        });
       }, 300);
       if (onComplete) onComplete();
     }
@@ -10079,8 +10097,15 @@ function updateEntities(groupA, groupB, dt) {
         const momentum = 1 / (a.maxCd || 1);
         const finalDmg = a.atk;
         const projectionDmg = Math.floor(finalDmg * momentum);
-        playNaoyaCutscene(a, a.el, closest.b.el, () => {
-          targetGroup.forEach((e) => {
+        const validTargets = targetGroup.filter((e) => e.hp > 0 && e.el);
+        if (validTargets.length === 0) return;
+        const targetEls = validTargets.map((e) => e.el);
+        validTargets.forEach((e) => {
+          if (!e.status) e.status = {};
+          e.status.freeze = 1;
+        });
+        playNaoyaCutscene(a, a.el, targetEls, () => {
+          validTargets.forEach((e) => {
             if (e.hp > 0) {
               if (e !== closest.b) {
                 e.hp -= projectionDmg;
@@ -10092,8 +10117,6 @@ function updateEntities(groupA, groupB, dt) {
                   spawnDmg(e, -extraDmg, "crit");
                 }
               }
-              if (!e.status) e.status = {};
-              e.status.freeze = 1;
               if (arena && a.el) {
                 const ghost = a.el.cloneNode(true);
                 ghost.className = "dg-entity projection-ghost";
