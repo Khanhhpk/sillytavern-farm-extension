@@ -463,7 +463,7 @@ function _doStartWave() {
     updateHUD();
     
     // Calculate enemies based on wave
-    let count = Math.min(20, 2 + Math.floor(currentWave * 0.8));
+    let count = Math.min(40, 4 + Math.floor(currentWave * 1.5));
     let spawnElite = currentWave % 3 === 0;
     let isBossWave = currentWave % 10 === 0;
     
@@ -515,7 +515,7 @@ function _doStartWave() {
             maxHp: Math.round(type.hp * hpMultiplier), 
             atk: Math.round(type.atk * atkMultiplier),
             range: type.range, speed: type.speed, cd: 0, maxCd: type.cd, el, type: 'enemy',
-            skill: type.skill, ai: type.ai, gold: Math.round((type.gold || 5) * Math.pow(1.1, currentWave - 1))
+            skill: type.skill, ai: type.ai, gold: Math.round((type.gold || 5) * Math.pow(1.15, currentWave - 1))
         });
     }
     
@@ -1092,7 +1092,7 @@ function showWaveRewards() {
     
     // Calculate gold for this wave
     const isBoss = currentWave % 10 === 0;
-    const waveGold = Math.round(200 * Math.pow(1.1, currentWave - 1)) * (isBoss ? 3 : 1);
+    const waveGold = Math.round(250 * Math.pow(1.2, currentWave - 1)) * (isBoss ? 3 : 1);
     totalGold += Math.floor(waveGold * 0.6);
     shopGold += waveGold;
     
@@ -1168,7 +1168,7 @@ function showWaveRewards() {
         if (selectedPet) {
             const u = selectedPet.upgrades;
             const hpMissingPet = selectedPet.maxHp - selectedPet.hp;
-            const waveBaseGold = Math.round(200 * Math.pow(1.1, currentWave - 1));
+            const waveBaseGold = Math.round(250 * Math.pow(1.2, currentWave - 1));
             const healPetCost = Math.max(10, Math.floor(waveBaseGold * 0.2 * (hpMissingPet / selectedPet.maxHp)));
             
             const totalMaxHp = fullTeam.reduce((acc, member) => acc + member.maxHp, 0);
