@@ -34,25 +34,26 @@ export function toggleWin() {
           All.toast('Trời phạt chưa tan, Thiên Kiếp vẫn còn... Nông Trại đóng cửa!');
           return;
       }
+      ctx.win.classList.add('open');
+      layout(); placeWin(); settle(); renderAll();
+      tick = window.setInterval(() => { renderDynamic(); }, 1000);
+
       if (ctx.S.needsTribulationCheck) {
           startTribulationEvent(() => {
-              if (!ctx.S.blockedUntil || ctx.S.blockedUntil <= Date.now()) {
-                  toggleWin(); // Open again if they survived
+              if (ctx.S.blockedUntil && ctx.S.blockedUntil > Date.now()) {
+                  closeWin(); // Đóng lại nếu bị khóa
               }
           });
           return;
       }
       if (ctx.S.needsPoorTribulationNotice) {
           startPoorTribulationNotice(() => {
-              toggleWin(); // Open after notice
+              // Bảng đã mở sẵn, chạy xong thì thôi
           });
           delete ctx.S.needsPoorTribulationNotice;
           save(true);
           return;
       }
-      ctx.win.classList.add('open');
-      layout(); placeWin(); settle(); renderAll();
-      tick = window.setInterval(() => { renderDynamic(); }, 1000);
   } catch (e) {
       console.error("[Farm] toggleWin Error: ", e);
       if (All.toast) All.toast("Error: " + e.message);

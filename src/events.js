@@ -641,7 +641,7 @@ export function startTribulationEvent(onComplete) {
         </div>
     `;
 
-    ctx.ui.appendChild(overlay);
+    ctx.win.appendChild(overlay);
 
     const btnSubmit = overlay.querySelector('#btn-submit');
     const btnDefy = overlay.querySelector('#btn-defy');
@@ -690,7 +690,7 @@ export function startPoorTribulationNotice(onComplete) {
         </div>
     `;
     
-    ctx.ui.appendChild(overlay);
+    ctx.win.appendChild(overlay);
     
     // Đám mây bay qua mờ nhạt, text hiện lên 3.5 giây rồi bay đi
     setTimeout(() => {
