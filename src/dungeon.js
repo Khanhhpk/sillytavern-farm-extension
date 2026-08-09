@@ -1,6 +1,7 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
 import { petSVG, spriteSVG } from './graphics.js';
+import { playNaoyaCutscene } from './hero.js';
 
 export let isDungeonOpen = false;
 let phase = 'placement'; // 'placement', 'combat', 'end'
@@ -31,7 +32,7 @@ const PET_STATS = {
     dewSprout: { name: 'Mầm Sương', desc: '25% tỷ lệ trói chân kẻ địch trong 2 giây.', hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: 'root' },
     prismBlob: { name: 'Lăng Kính', desc: 'Bắn 3 tia sáng cùng lúc (sát thương chia nửa).', hp: 100, atk: 25, range: 140, speed: 40, cd: 1.4, skill: 'multishot' },
     penguin: { name: 'Cánh Cụt', desc: 'Đòn đánh làm giảm tốc độ di chuyển và tốc đánh.', hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: 'freeze' },
-    naoyaSlime: { name: 'Naoya', desc: 'Đầu Xạ Chú Pháp (Áp dụng Đầu Xạ Chú Pháp: Lướt 24 khung hình công kích toàn map, scale theo Gia tốc và Đóng băng quái 1s)', hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: 'projection_sorcery' },
+    naoyaSlime: { name: 'Naoya', desc: 'Kỹ năng chủ động (10s): Đầu Xạ Chú Pháp - Lướt 24 khung hình công kích toàn map và đóng băng quái 1s.', hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: 'projection_sorcery', maxSkillCd: 10 },
     default: { name: 'Pet Vô Danh', desc: 'Không có kỹ năng đặc biệt.', hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
 };
 
@@ -276,7 +277,8 @@ function initPlacementPhase() {
                 
                 const memberObj = {
                     id: pId, x, y, hp: stat.hp, maxHp: stat.hp, atk: stat.atk,
-                    range: stat.range, speed: stat.speed, cd: 0, maxCd: stat.cd, el, type: 'pet',
+                    range: stat.range, speed: stat.speed, cd: 0, maxCd: stat.cd,
+                    skillCd: stat.maxSkillCd || 0, maxSkillCd: stat.maxSkillCd || 0, el, type: 'pet',
                     skill: stat.skill, dockSlot: currentSlot
                 };
                 team.push(memberObj);
@@ -516,7 +518,8 @@ function _doStartWave() {
             hp: Math.round(type.hp * hpMultiplier), 
             maxHp: Math.round(type.hp * hpMultiplier), 
             atk: Math.round(type.atk * atkMultiplier),
-            range: type.range, speed: type.speed, cd: 0, maxCd: type.cd, el, type: 'enemy',
+            range: type.range, speed: type.speed, cd: 0, maxCd: type.cd,
+            skillCd: type.maxSkillCd || 0, maxSkillCd: type.maxSkillCd || 0, el, type: 'enemy',
             skill: type.skill, ai: type.ai, gold: Math.round((type.gold || 5) * 2 * Math.pow(1.15, currentWave - 1))
         });
     }
@@ -756,70 +759,6 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
             }
         });
     }
-
-    // [TAWA CORE] - THUẬT THỨC ĐỘC QUYỀN: ĐẦU XẠ CHÚ PHÁP (PROJECTION SORCERY)
-    if (skill === 'projection_sorcery' && attacker) {
-        const nowMs = Date.now();
-        if (!attacker.lastProjTime) attacker.lastProjTime = 0;
-
-        // [CƠ CHẾ ICD]: Chỉ kích hoạt lướt toàn bản đồ khi đã qua 2400ms (2.4 giây)
-        if (nowMs - attacker.lastProjTime >= 2400) {
-            attacker.lastProjTime = nowMs;
-
-            // Tính toán Gia tốc (Momentum): Tốc đánh (CD) càng nhỏ, gia tốc càng lớn.
-            const momentum = 1 / (attacker.maxCd || 1);
-            const projectionDmg = Math.floor(finalDmg * momentum);
-            const arena = document.getElementById('dg-arena');
-
-            enemyGroup.forEach(e => {
-                if (e.hp > 0) {
-                    // Áp dụng sát thương động năng
-                    if (e !== target) {
-                        e.hp -= projectionDmg;
-                        spawnDmg(e, -projectionDmg);
-                    } else {
-                        const extraDmg = Math.max(0, projectionDmg - finalDmg);
-                        if (extraDmg > 0) {
-                            e.hp -= extraDmg;
-                            spawnDmg(e, -extraDmg, 'crit');
-                        }
-                    }
-
-                    // Hình phạt vi phạm quy tắc khung hình: Đóng băng 1 giây
-                    if (!e.status) e.status = {};
-                    e.status.freeze = 1;
-
-                    // Để lại tàn ảnh đen trắng (Afterimage) tại vị trí nạn nhân
-                    if (arena && attacker.el) {
-                        const ghost = attacker.el.cloneNode(true);
-                        ghost.className = 'dg-entity projection-ghost';
-                        ghost.style.position = 'absolute';
-                        ghost.style.left = e.x + 'px';
-                        ghost.style.top = e.y + 'px';
-                        ghost.style.zIndex = '1';
-                        ghost.style.opacity = '0.5';
-                        ghost.style.filter = 'grayscale(1) contrast(1.5)';
-                        ghost.style.pointerEvents = 'none';
-                        arena.appendChild(ghost);
-                        
-                        // Xóa tàn ảnh nhanh và gọn
-                        setTimeout(() => ghost.remove(), 150);
-                    }
-                }
-            });
-
-            // Hoạt ảnh lướt của Naoya (Bỏ qua các khung hình di chuyển trung gian)
-            attacker.el.style.transition = 'none';
-            attacker.el.style.transform = `translate3d(${target.x - 16}px, ${target.y - 16}px, 0) scale(1.1) skewX(-20deg)`;
-            
-            // Trả về tư thế đứng thẳng
-            setTimeout(() => {
-                if (attacker.el) {
-                    attacker.el.style.transform = `translate3d(${attacker.x - 16}px, ${attacker.y - 16}px, 0)`;
-                }
-            }, 100);
-        }
-    }
 }
 
 function updateEntities(groupA, groupB, dt) {
@@ -835,6 +774,20 @@ function updateEntities(groupA, groupB, dt) {
         const cdPct = Math.max(0, Math.min(100, (1 - Math.max(0, a.cd) / a.maxCd) * 100));
         const cdFill = a.el.querySelector('.dg-cd-fill');
         if (cdFill) cdFill.style.width = cdPct + '%';
+        
+        // --- ACTIVE SKILL TICK ---
+        if (a.maxSkillCd > 0) {
+            if (a.skillCd > 0) a.skillCd -= dt;
+            const skillCdBar = a.el.querySelector('.dg-skill-cd-bar');
+            if (skillCdBar) {
+                skillCdBar.style.display = 'block';
+                const skillCdFill = skillCdBar.querySelector('.dg-skill-cd-fill');
+                if (skillCdFill) {
+                    const skillCdPct = Math.max(0, Math.min(100, (1 - Math.max(0, a.skillCd) / a.maxSkillCd) * 100));
+                    skillCdFill.style.width = skillCdPct + '%';
+                }
+            }
+        }
         
         // Status Effects
         if (!a.status) a.status = {};
@@ -949,6 +902,31 @@ function updateEntities(groupA, groupB, dt) {
         a.el.classList.remove('walk');
         
         if (closest) {
+            // Check active skill first
+            if (a.maxSkillCd > 0 && a.skillCd <= 0 && a.skill === 'projection_sorcery') {
+                a.skillCd = a.maxSkillCd;
+                const momentum = 1 / (a.maxCd || 1);
+                const projectionDmg = Math.floor(a.atk * 3 * momentum);
+                
+                playNaoyaCutscene(a, a.el, closest.b.el, () => {
+                    targetGroup.forEach(e => {
+                        if (e.hp > 0) {
+                            if (e !== closest.b) {
+                                e.hp -= projectionDmg;
+                                spawnDmg(e, -projectionDmg);
+                            } else {
+                                const extraDmg = Math.floor(projectionDmg * 1.5);
+                                e.hp -= extraDmg;
+                                spawnDmg(e, -extraDmg, 'crit');
+                            }
+                            if (!e.status) e.status = {};
+                            e.status.freeze = 1;
+                        }
+                    });
+                });
+                return;
+            }
+
             // Face target (with deadzone to prevent flip jitter)
             if (closest.dx < -1 && a.type === 'pet') a.el.classList.add('flip');
             else if (closest.dx > 1 && a.type === 'pet') a.el.classList.remove('flip');

@@ -1625,7 +1625,7 @@ export function initHero() {
 // --- CUTSCENE ĐIỆN ẢNH ĐỘC QUYỀN CỦA NAOYA SLIME ---
 export function playNaoyaCutscene(attacker, attackerEl, targetEl, onComplete) {
     if (!attackerEl || !targetEl) return onComplete && onComplete();
-    const scene = targetEl.closest('.hero-scene');
+    const scene = targetEl.closest('.hero-scene') || targetEl.closest('#dg-arena');
     if (!scene) return onComplete && onComplete();
 
     // 1. Phủ màn Cinematic tĩnh (Letterbox + Grayscale Time-Stop)
