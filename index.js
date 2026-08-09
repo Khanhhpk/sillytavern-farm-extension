@@ -47904,7 +47904,9 @@ var init_firebase = __esm({
     try {
       if (firebaseConfig.apiKey) {
         app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
+        db = initializeFirestore(app, {
+          experimentalForceLongPolling: true
+        });
         console.log("[Farm] Firebase Initialized");
       }
     } catch (e2) {

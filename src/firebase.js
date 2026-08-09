@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore } from "firebase/firestore";
 
 // Parse obfuscated env vars from esbuild
 function dec(base64Str) {
@@ -26,7 +26,9 @@ export let db = null;
 try {
     if (firebaseConfig.apiKey) {
         app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
+        db = initializeFirestore(app, {
+            experimentalForceLongPolling: true
+        });
         console.log("[Farm] Firebase Initialized");
     }
 } catch (e) {
