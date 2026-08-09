@@ -9501,7 +9501,7 @@ function loadDungeonState(saveData) {
   if (surrBtn) surrBtn.addEventListener("click", () => endDungeon(false));
   $id("dg-info-close").onclick = () => $id("dg-info-panel").style.display = "none";
   $id("dg-codex-close").onclick = () => $id("dg-codex-panel").style.display = "none";
-  const arena2 = $id("dg-arena");
+  const arena = $id("dg-arena");
   fullTeam = saveData.fullTeam.map((savedP) => {
     const el = document.createElement("div");
     el.className = "dg-entity pet";
@@ -9510,7 +9510,7 @@ function loadDungeonState(saveData) {
             ${petSVG(savedP.id, 32)}
         `;
     el.style.transform = `translate3d(${savedP.x - 16}px, ${savedP.y - 16}px, 0)`;
-    arena2.appendChild(el);
+    arena.appendChild(el);
     return { ...savedP, el };
   });
   team = [...fullTeam];
@@ -9554,7 +9554,7 @@ function initPlacementPhase() {
         ${bestHtml}
         <div class="dg-dock" id="dg-dock"></div>
     `;
-  const arena2 = $id("dg-arena");
+  const arena = $id("dg-arena");
   const dock = $id("dg-dock");
   dock.innerHTML = `
         <div id="dg-nav-left" style="font-size: 24px; font-weight: bold; color: #d9ba8a; cursor: pointer; user-select: none; padding: 0 5px; touch-action: manipulation; opacity: 0.3;">\u25C0</div>
@@ -9642,7 +9642,7 @@ function initPlacementPhase() {
       dragEl = null;
       draggingPet = null;
       currentSlot.releasePointerCapture(e.pointerId);
-      const rect = arena2.getBoundingClientRect();
+      const rect = arena.getBoundingClientRect();
       if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
         currentSlot.classList.add("placed");
         const stat = PET_STATS2[pId] || PET_STATS2.default;
@@ -9662,7 +9662,7 @@ function initPlacementPhase() {
         if (y > rect.height - 16) y = rect.height - 16;
         el.style.position = "absolute";
         el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
-        arena2.appendChild(el);
+        arena.appendChild(el);
         const memberObj = {
           id: pId,
           x,
@@ -9688,13 +9688,13 @@ function initPlacementPhase() {
           if (phase !== "placement") return;
           isPlacedDragging = true;
           el.style.zIndex = "100000";
-          const arect = arena2.getBoundingClientRect();
+          const arect = arena.getBoundingClientRect();
           el.style.transform = `translate3d(${ev.clientX - arect.left - 16}px, ${ev.clientY - arect.top - 16}px, 0)`;
           el.setPointerCapture(ev.pointerId);
         });
         el.addEventListener("pointermove", (ev) => {
           if (!isPlacedDragging) return;
-          const arect = arena2.getBoundingClientRect();
+          const arect = arena.getBoundingClientRect();
           el.style.transform = `translate3d(${ev.clientX - arect.left - 32}px, ${ev.clientY - arect.top - 32}px, 0)`;
         });
         el.addEventListener("pointerup", (ev) => {
@@ -9702,7 +9702,7 @@ function initPlacementPhase() {
           isPlacedDragging = false;
           el.releasePointerCapture(ev.pointerId);
           el.style.zIndex = "";
-          const arect = arena2.getBoundingClientRect();
+          const arect = arena.getBoundingClientRect();
           if (ev.clientX >= arect.left && ev.clientX <= arect.right && ev.clientY >= arect.top && ev.clientY <= arect.bottom) {
             el.style.position = "absolute";
             let nx = ev.clientX - arect.left - 16;
@@ -9818,11 +9818,11 @@ function startWave() {
   const isBossWave = currentWave % 10 === 0;
   if (isBossWave) {
     phase = "end";
-    const arena2 = $id("dg-arena");
+    const arena = $id("dg-arena");
     const banner = document.createElement("div");
     banner.className = "dg-boss-banner";
     banner.innerHTML = "\u26A0 BOSS WAVE \u26A0";
-    arena2.appendChild(banner);
+    arena.appendChild(banner);
     setTimeout(() => {
       banner.remove();
       _doStartWave();
@@ -9840,9 +9840,9 @@ function _doStartWave() {
     p.waveDmgTaken = 0;
     p.waveHealDone = 0;
   });
-  const arena2 = $id("dg-arena");
-  const w = arena2.clientWidth;
-  const h = arena2.clientHeight;
+  const arena = $id("dg-arena");
+  const w = arena.clientWidth;
+  const h = arena.clientHeight;
   updateHUD();
   let count = Math.min(40, 4 + Math.floor(currentWave * 1.5));
   let spawnElite = currentWave % 3 === 0;
@@ -9871,7 +9871,7 @@ function _doStartWave() {
     const x = 20 + Math.random() * (w - 60);
     const y = 40 + Math.random() * (h - 80);
     el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
-    arena2.appendChild(el);
+    arena.appendChild(el);
     let hpMultiplier = Math.pow(1.15, currentWave - 1);
     let atkMultiplier = Math.pow(1.2, currentWave - 1);
     if (isBossWave) {
@@ -9918,7 +9918,7 @@ function combatLoop() {
     let stepDt = Math.min(dt, 0.016);
     updateEntities(team, enemies, stepDt);
     updateEntities(enemies, team, stepDt);
-    const arena2 = $id("dg-arena");
+    const arena = $id("dg-arena");
     projectiles = projectiles.filter((p) => {
       if (!p.target || p.target.hp <= 0) {
         p.el.remove();
@@ -9981,7 +9981,7 @@ function combatLoop() {
 function spawnDmg(target, amount, type) {
   const isStr = typeof amount === "string";
   if (!isStr) amount = Math.round(amount);
-  const arena2 = $id("dg-arena");
+  const arena = $id("dg-arena");
   const dmg = document.createElement("div");
   dmg.className = "dg-dmg" + (type ? " " + type : "");
   dmg.textContent = type === "miss" ? "MISS!" : isStr ? amount : (amount > 0 ? "+" : "") + amount;
@@ -9991,7 +9991,7 @@ function spawnDmg(target, amount, type) {
   }
   dmg.style.left = target.x + "px";
   dmg.style.top = target.y - 8 + "px";
-  arena2.appendChild(dmg);
+  arena.appendChild(dmg);
   setTimeout(() => dmg.remove(), 800);
   if (target.el && target.maxHp) {
     const pct = Math.max(0, target.hp / target.maxHp) * 100;
@@ -10097,7 +10097,7 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
   }
 }
 function updateEntities(groupA, groupB, dt) {
-  const arena2 = $id("dg-arena");
+  const arena = $id("dg-arena");
   groupA.forEach((a) => {
     if (a.hp <= 0) return;
     if (a.cd > 0) {
@@ -10248,7 +10248,7 @@ function updateEntities(groupA, groupB, dt) {
                   spawnDmg(e, -extraDmg, "crit");
                 }
               }
-              if (arena2 && a.el) {
+              if (arena && a.el) {
                 const ghost = a.el.cloneNode(true);
                 ghost.className = "dg-entity projection-ghost";
                 ghost.style.position = "absolute";
@@ -10258,7 +10258,7 @@ function updateEntities(groupA, groupB, dt) {
                 ghost.style.opacity = "0.5";
                 ghost.style.filter = "grayscale(1) contrast(1.5)";
                 ghost.style.pointerEvents = "none";
-                arena2.appendChild(ghost);
+                arena.appendChild(ghost);
                 setTimeout(() => ghost.remove(), 150);
               }
             }
@@ -10282,7 +10282,7 @@ function updateEntities(groupA, groupB, dt) {
       if (a.panic > 0) a.panic -= dt;
       if (a.panic > 0 && !isRooted) {
         a.el.classList.add("walk");
-        const arenaRect = arena2.getBoundingClientRect();
+        const arenaRect = arena.getBoundingClientRect();
         const speed = a.speed * speedMult * dt;
         let cx = arenaRect.width / 2 - a.x;
         let cy = arenaRect.height / 2 - a.y;
@@ -10294,7 +10294,7 @@ function updateEntities(groupA, groupB, dt) {
         a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
       } else if (tooClose && !isRooted) {
         a.el.classList.add("walk");
-        const arenaRect = arena2.getBoundingClientRect();
+        const arenaRect = arena.getBoundingClientRect();
         const speed = a.speed * speedMult * dt;
         let kx = -(closest.dx / closest.dist);
         let ky = -(closest.dy / closest.dist);
@@ -10334,7 +10334,7 @@ function updateEntities(groupA, groupB, dt) {
           a.x += closest.dx / closest.dist * speed;
           a.y += closest.dy / closest.dist * speed;
         }
-        const arenaRect = arena2.getBoundingClientRect();
+        const arenaRect = arena.getBoundingClientRect();
         a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
         a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
         a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
@@ -10380,7 +10380,7 @@ function updateEntities(groupA, groupB, dt) {
             p.el.className = "dg-projectile";
             p.el.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#f0d" /></svg>';
             p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0)`;
-            arena2.appendChild(p.el);
+            arena.appendChild(p.el);
             if (a.skill === "multishot") {
               projectiles.push(p);
               let target2 = targetGroup[Math.floor(Math.random() * targetGroup.length)];
@@ -10388,13 +10388,13 @@ function updateEntities(groupA, groupB, dt) {
               if (target2 && target2 !== p.target) {
                 target2.incomingDmg = (target2.incomingDmg || 0) + a.atk * 0.5;
                 let p2 = { ...p, tx: target2.x, ty: target2.y - 16, target: target2, atk: a.atk * 0.5, el: p.el.cloneNode(true) };
-                arena2.appendChild(p2.el);
+                arena.appendChild(p2.el);
                 projectiles.push(p2);
               }
               if (target3 && target3 !== p.target && target3 !== target2) {
                 target3.incomingDmg = (target3.incomingDmg || 0) + a.atk * 0.5;
                 let p3 = { ...p, tx: target3.x, ty: target3.y - 16, target: target3, atk: a.atk * 0.5, el: p.el.cloneNode(true) };
-                arena2.appendChild(p3.el);
+                arena.appendChild(p3.el);
                 projectiles.push(p3);
               }
             } else {
@@ -10418,7 +10418,7 @@ function endDungeon(isWin) {
   projectiles = [];
   const surrenderBtn = $id("dg-surrender-btn");
   if (surrenderBtn) surrenderBtn.style.display = "none";
-  const arena2 = $id("dg-arena");
+  const arena = $id("dg-arena");
   const overlay = document.createElement("div");
   overlay.className = "dg-overlay";
   ctx.S.coins += totalGold;
@@ -10445,7 +10445,7 @@ function endDungeon(isWin) {
             <div class="buy plain" id="dg-finish-btn">Tho\xE1t</div>
         </div>
     `;
-  arena2.appendChild(overlay);
+  arena.appendChild(overlay);
   overlay.querySelector("#dg-restart-btn").addEventListener("click", () => {
     initPlacementPhase();
   });
@@ -10457,6 +10457,7 @@ function showWaveRewards(isLoaded = false) {
   phase = "end";
   stopCombatLoop();
   let bossDropHtml = "";
+  const arena = $id("dg-arena");
   if (!isLoaded) {
     projectiles.forEach((p) => p.el.remove());
     projectiles = [];
@@ -10464,11 +10465,10 @@ function showWaveRewards(isLoaded = false) {
     const waveGold = Math.round(500 * Math.pow(1.2, currentWave - 1)) * (isBoss ? 3 : 1);
     totalGold += Math.floor(waveGold * 0.3);
     shopGold += waveGold;
-    const arena2 = $id("dg-arena");
     fullTeam.forEach((p) => {
       if (p.hp <= 0) {
         p.hp = p.maxHp * 0.5;
-        arena2.appendChild(p.el);
+        arena.appendChild(p.el);
       } else {
         p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2);
       }
