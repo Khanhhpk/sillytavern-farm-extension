@@ -707,31 +707,33 @@ export function startLockedModal() {
     if (ctx.ui.querySelector('#farm-locked-modal')) return;
     
     const overlay = document.createElement('div');
-    overlay.className = 'trib-content';
+    overlay.className = 'dialog-win';
     overlay.id = 'farm-locked-modal';
     overlay.style.pointerEvents = 'auto';
-    overlay.style.position = 'fixed'; 
-    overlay.style.top = '50%';
-    overlay.style.left = '50%';
-    overlay.style.transform = 'translate(-50%, -50%)';
-    overlay.style.zIndex = '999999';
     
     const remaining = ctx.S.blockedUntil - Date.now();
     const hours = Math.floor(remaining / (1000 * 60 * 60));
     const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
     
     overlay.innerHTML = `
-        <button id="btn-close-locked" style="position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; border-radius: 50%; background: #1c1c1c; border: 2px solid #ff3b3b; color: #ff3b3b; font-weight: bold; cursor: pointer; font-size: 16px; line-height: 26px; text-align: center; box-shadow: 0 0 10px rgba(255,0,0,0.5); z-index: 20;">X</button>
-        <div class="trib-title">THIÊN PHẠT PHONG ẤN</div>
-        <div class="trib-text" style="font-size: 16px;">
+        <div class="titlebar" style="justify-content: space-between; border-radius: 6px 6px 0 0;">
+            <h1 style="margin: 0; display: flex; align-items: center; gap: 7px; color: #7a5c38; font-size: 15px; letter-spacing: 1px;">
+                ⚠️ THIÊN PHẠT PHONG ẤN
+            </h1>
+            <div class="close-x" id="btn-close-locked">×</div>
+        </div>
+        <div class="dialog-content">
             Nông trại đã bị phong ấn bởi sức mạnh của Thiên Đạo do hành vi ngoan cố chống đối.<br><br>
-            Thời gian còn lại: <b style="color: #ff5e5e; font-size: 18px;">${hours} giờ ${mins} phút</b>
+            Thời gian còn lại:<br>
+            <b style="color: #d34a4a; font-size: 20px; display: block; margin-top: 8px;">${hours} giờ ${mins} phút</b>
         </div>
     `;
     ctx.ui.appendChild(overlay);
 
     overlay.querySelector('#btn-close-locked').onclick = () => {
+        overlay.style.animation = 'none'; // reset
         overlay.style.opacity = '0';
-        setTimeout(() => overlay.remove(), 500);
+        overlay.style.transition = 'opacity 0.2s';
+        setTimeout(() => overlay.remove(), 200);
     };
 }

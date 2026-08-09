@@ -2203,6 +2203,14 @@ var init_style = __esm({
       border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
       box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }
     .dungeon-win.open-anim { display: flex; animation: winPop 0.2s cubic-bezier(0.18,0.89,0.32,1.28) forwards; }
+    
+    .dialog-win { position: fixed; z-index: 99999; width: min(450px, 90vw); display: flex;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      flex-direction: column; background: #f8efe0;
+      background-image: repeating-linear-gradient(0deg, transparent 0 30px, rgba(170,130,80,.14) 30px 33px);
+      border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
+      box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); animation: winPop 0.2s cubic-bezier(0.18,0.89,0.32,1.28) forwards; overflow: hidden; }
+    .dialog-content { padding: 20px 25px; text-align: center; color: #7a5c38; font-size: 15px; font-weight: bold; line-height: 1.6; }
     .titlebar { background: var(--sky); border-bottom: 4px solid var(--skyLine); padding: 9px 14px;
       display: flex; align-items: center; gap: 8px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.5);
       cursor: move; touch-action: none; user-select: none; flex: none; }
@@ -7631,29 +7639,31 @@ function startPoorTribulationNotice(onComplete) {
 function startLockedModal() {
   if (ctx.ui.querySelector("#farm-locked-modal")) return;
   const overlay = document.createElement("div");
-  overlay.className = "trib-content";
+  overlay.className = "dialog-win";
   overlay.id = "farm-locked-modal";
   overlay.style.pointerEvents = "auto";
-  overlay.style.position = "fixed";
-  overlay.style.top = "50%";
-  overlay.style.left = "50%";
-  overlay.style.transform = "translate(-50%, -50%)";
-  overlay.style.zIndex = "999999";
   const remaining = ctx.S.blockedUntil - Date.now();
   const hours = Math.floor(remaining / (1e3 * 60 * 60));
   const mins = Math.floor(remaining % (1e3 * 60 * 60) / (1e3 * 60));
   overlay.innerHTML = `
-        <button id="btn-close-locked" style="position: absolute; top: -15px; right: -15px; width: 30px; height: 30px; border-radius: 50%; background: #1c1c1c; border: 2px solid #ff3b3b; color: #ff3b3b; font-weight: bold; cursor: pointer; font-size: 16px; line-height: 26px; text-align: center; box-shadow: 0 0 10px rgba(255,0,0,0.5); z-index: 20;">X</button>
-        <div class="trib-title">THI\xCAN PH\u1EA0T PHONG \u1EA4N</div>
-        <div class="trib-text" style="font-size: 16px;">
+        <div class="titlebar" style="justify-content: space-between; border-radius: 6px 6px 0 0;">
+            <h1 style="margin: 0; display: flex; align-items: center; gap: 7px; color: #7a5c38; font-size: 15px; letter-spacing: 1px;">
+                \u26A0\uFE0F THI\xCAN PH\u1EA0T PHONG \u1EA4N
+            </h1>
+            <div class="close-x" id="btn-close-locked">\xD7</div>
+        </div>
+        <div class="dialog-content">
             N\xF4ng tr\u1EA1i \u0111\xE3 b\u1ECB phong \u1EA5n b\u1EDFi s\u1EE9c m\u1EA1nh c\u1EE7a Thi\xEAn \u0110\u1EA1o do h\xE0nh vi ngoan c\u1ED1 ch\u1ED1ng \u0111\u1ED1i.<br><br>
-            Th\u1EDDi gian c\xF2n l\u1EA1i: <b style="color: #ff5e5e; font-size: 18px;">${hours} gi\u1EDD ${mins} ph\xFAt</b>
+            Th\u1EDDi gian c\xF2n l\u1EA1i:<br>
+            <b style="color: #d34a4a; font-size: 20px; display: block; margin-top: 8px;">${hours} gi\u1EDD ${mins} ph\xFAt</b>
         </div>
     `;
   ctx.ui.appendChild(overlay);
   overlay.querySelector("#btn-close-locked").onclick = () => {
+    overlay.style.animation = "none";
     overlay.style.opacity = "0";
-    setTimeout(() => overlay.remove(), 500);
+    overlay.style.transition = "opacity 0.2s";
+    setTimeout(() => overlay.remove(), 200);
   };
 }
 var esc, clampN, SEC_LS_KEY, SEC, CS, eventFresh, todayEvent, eventPending, renderTimeout, INJECT_ID, heartbeat;

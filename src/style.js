@@ -38,6 +38,14 @@ export const styleCSS = `
       border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
       box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); }
     .dungeon-win.open-anim { display: flex; animation: winPop 0.2s cubic-bezier(0.18,0.89,0.32,1.28) forwards; }
+    
+    .dialog-win { position: fixed; z-index: 99999; width: min(450px, 90vw); display: flex;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      flex-direction: column; background: #f8efe0;
+      background-image: repeating-linear-gradient(0deg, transparent 0 30px, rgba(170,130,80,.14) 30px 33px);
+      border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px;
+      box-shadow: inset 0 0 0 4px #fff6e8, 0 14px 40px rgba(0,0,0,.55); animation: winPop 0.2s cubic-bezier(0.18,0.89,0.32,1.28) forwards; overflow: hidden; }
+    .dialog-content { padding: 20px 25px; text-align: center; color: #7a5c38; font-size: 15px; font-weight: bold; line-height: 1.6; }
     .titlebar { background: var(--sky); border-bottom: 4px solid var(--skyLine); padding: 9px 14px;
       display: flex; align-items: center; gap: 8px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.5);
       cursor: move; touch-action: none; user-select: none; flex: none; }
