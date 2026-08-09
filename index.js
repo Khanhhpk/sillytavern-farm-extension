@@ -6160,7 +6160,7 @@ function renderPlots() {
             <div class="feature-name">Th\xE1m Hi\u1EC3m</div>
           </div>
           <div class="explore-slot" id="eslot-achiv" style="background: rgba(60, 40, 20, 0.8); border-color: #f2c231; box-shadow: 0 4px 0 #8a6a1c, inset 0 0 0 3px rgba(242,194,49,0.4);">
-            <div style="font-size: 32px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">\u{1F3C6}</div>
+            ${spriteSVG("achivStar", 48)}
             <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Th\xE0nh T\u1EF1u</div>
           </div>
         `;
