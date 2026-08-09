@@ -15917,8 +15917,8 @@ var init_bundler = __esm({
 async function buildPeerConfigAsync() {
   const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
   try {
-    const apiKey = "MDgwZDg0ODYxZmZmYzdkMWNkZDY0NTk2OTNkMmJiNmIyZTcw" ? atob("MDgwZDg0ODYxZmZmYzdkMWNkZDY0NTk2OTNkMmJiNmIyZTcw") : "";
-    const appName = "a2Fpei1leHRlbnNpb24=" ? atob("a2Fpei1leHRlbnNpb24=") : "";
+    const apiKey = "" ? atob("") : "";
+    const appName = "" ? atob("") : "";
     if (apiKey && appName) {
       const resp = await fetch(`https://${appName}.metered.live/api/v1/turn/credentials?apiKey=${apiKey}`);
       if (resp.ok) {
@@ -47892,12 +47892,12 @@ var init_firebase = __esm({
     init_index_esm5();
     init_index_esm7();
     firebaseConfig = {
-      apiKey: dec(""),
-      authDomain: dec("") + ".firebaseapp.com",
-      projectId: dec(""),
-      storageBucket: dec("") + ".appspot.com",
-      messagingSenderId: dec(""),
-      appId: dec("")
+      apiKey: dec("QUl6YVN5Qlg5cDVVWmg5X2hXRmR0akRlRXd4anp1ZHJVX0hlaDB3"),
+      authDomain: dec("ZmFybS1leHRlbnNpb24=") + ".firebaseapp.com",
+      projectId: dec("ZmFybS1leHRlbnNpb24="),
+      storageBucket: dec("ZmFybS1leHRlbnNpb24=") + ".appspot.com",
+      messagingSenderId: dec("ODc4MzI4MjQ0MDE4"),
+      appId: dec("MTo4NzgzMjgyNDQwMTg6d2ViOmUxMTFkN2NkZmZlNDkzMTBlMmQ5MmI=")
     };
     app = null;
     db = null;
