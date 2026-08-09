@@ -5305,31 +5305,6 @@ function openPanel(kind) {
       <div style="display:flex;justify-content:flex-end;align-items:center;gap:4px;font-size:12px;font-weight:bold;color:#7a5c38;margin-bottom:6px">${spriteSVG("coin", 16)}${ctx.S.coins.toLocaleString()}</div>
       <div class="tabs">${tabs.map(([k, n]) => `<span class="tab${shopTab === k ? " active" : ""}" data-tab="${k}">${n}</span>`).join("")}</div>
       <div class="items">${items}</div>`);
-    $id("mbody").querySelectorAll("[data-tab]").forEach((t) => t.addEventListener("click", () => {
-      shopTab = t.dataset.tab;
-      openPanel("shop");
-    }));
-    $id("mbody").querySelectorAll("[data-buyseed]").forEach((b) => b.addEventListener("click", () => openBuyDlg("seed", b.dataset.buyseed)));
-    $id("mbody").querySelectorAll("[data-buyfert]").forEach((b) => b.addEventListener("click", () => openBuyDlg("fert", b.dataset.buyfert)));
-    $id("mbody").querySelectorAll("[data-buyticket]").forEach((b) => b.addEventListener("click", () => {
-      openBuyDlg("ticket", b.dataset.buyticket, "shop");
-    }));
-    $id("mbody").querySelectorAll("[data-buypet]").forEach((b) => b.addEventListener("click", () => {
-      const id = b.dataset.buypet, pd = PETS[id];
-      if (ctx.S.pets.indexOf(id) >= 0) return;
-      if (ctx.S.coins < pd.price) return toast("C\xF2n thi\u1EBFu " + (pd.price - ctx.S.coins).toLocaleString() + " G");
-      ctx.S.coins -= pd.price;
-      ctx.S.pets.push(id);
-      if (ctx.S.petsOut.length < PETS_OUT_MAX) {
-        ctx.S.petsOut.push(id);
-        toast(pd.name + " \u0111\xE3 d\u1ECDn ra b\u1EDD ru\u1ED9ng nh\xE0 b\u1EA1n!");
-      } else toast(pd.name + " \u0111\xE3 v\u1EC1 nh\xE0! B\u1EDD ru\u1ED9ng ch\u1EADt r\u1ED3i, b\xE9 \u0111ang ngh\u1EC9 \u1EDF trang Balo \xB7 B\xE9 tr\xF2n");
-      save();
-      renderStatus();
-      renderPets();
-      openPanel("shop");
-    }));
-    $id("mbody").querySelectorAll("[data-passdlg]").forEach((b) => b.addEventListener("click", () => openPassDlg(b.dataset.passdlg)));
   } else if (kind === "bag") {
     const btabs = `<div class="tabs"><span class="tab${bagTab === "crop" ? " active" : ""}" data-btab="crop">N\xF4ng s\u1EA3n</span><span class="tab${bagTab === "seed" ? " active" : ""}" data-btab="seed">H\u1EA1t gi\u1ED1ng</span><span class="tab${bagTab === "gacha" ? " active" : ""}" data-btab="gacha">\u0110\u1ED3 Gacha</span><span class="tab${bagTab === "pet" ? " active" : ""}" data-btab="pet">B\xE9 tr\xF2n</span><span class="tab${bagTab === "relic" ? " active" : ""}" data-btab="relic">Qu\xE0 c\u1EE7a b\xE9 tr\xF2n</span></div>`;
     if (bagTab === "seed") {
@@ -5374,47 +5349,6 @@ function openPanel(kind) {
         }
       }
       openModal("Balo", btabs + sellBar2 + (rows2 || '<div class="note">B\u1EA1n ch\u01B0a c\xF3 h\u1EA1t gi\u1ED1ng n\xE0o, ra c\u1EEDa h\xE0ng mua th\xEAm \u0111i!</div>'));
-      $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
-        bagTab = t.dataset.btab;
-        openPanel("bag");
-      }));
-      $id("mbody").querySelectorAll("[data-sellseeddlg]").forEach((b) => b.addEventListener("click", () => openSellSeedDlg(b.dataset.sellseeddlg)));
-      const smGo2 = $id("sellModeGo");
-      if (smGo2) smGo2.addEventListener("click", () => {
-        bagSellMode = true;
-        bagSel = {};
-        openPanel("bag");
-      });
-      $id("mbody").querySelectorAll("[data-selkey]").forEach((el) => el.addEventListener("click", () => {
-        bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
-        openPanel("bag");
-      }));
-      const ssNo2 = $id("sellSelNo");
-      if (ssNo2) ssNo2.addEventListener("click", () => {
-        bagSellMode = false;
-        openPanel("bag");
-      });
-      const ssGo2 = $id("sellSelGo");
-      if (ssGo2) ssGo2.addEventListener("click", () => {
-        const keys = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.seeds[k]);
-        if (!keys.length) return toast("Ch\u01B0a tick c\xE1i n\xE0o c\u1EA3");
-        let gain = 0;
-        keys.forEach((k) => {
-          const def = CROPS[k];
-          if (def) {
-            const p = Math.floor((def.seed || 100) * 0.5);
-            gain += p * ctx.S.seeds[k];
-          }
-          delete ctx.S.seeds[k];
-        });
-        ctx.S.coins += gain;
-        ctx.S.totalSales += gain;
-        bagSellMode = false;
-        save();
-        renderStatus();
-        toast("B\xE1n m\u1ED9t m\u1EBB h\u1EA1t gi\u1ED1ng: +" + gain.toLocaleString() + " G");
-        openPanel("bag");
-      });
       return;
     }
     if (bagTab === "gacha") {
@@ -5471,49 +5405,6 @@ function openPanel(kind) {
         }
       }
       openModal("Balo", btabs + sellBar2 + (rows2 || '<div class="note">Ch\u01B0a c\xF3 v\u1EADt ph\u1EA9m Gacha n\xE0o, sang m\xE1y Gachapon quay th\u1EED \u0111i!</div>'));
-      $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
-        bagTab = t.dataset.btab;
-        openPanel("bag");
-      }));
-      $id("mbody").querySelectorAll("[data-selldlg]").forEach((b) => b.addEventListener("click", () => openSellDlg(b.dataset.selldlg)));
-      $id("mbody").querySelectorAll("[data-takeout]").forEach((b) => b.addEventListener("click", () => openTakeout(b.dataset.takeout)));
-      const smGo2 = $id("sellModeGo");
-      if (smGo2) smGo2.addEventListener("click", () => {
-        bagSellMode = true;
-        bagSel = {};
-        openPanel("bag");
-      });
-      const sortBtn = $id("sortGachaBtn");
-      if (sortBtn) sortBtn.addEventListener("click", () => {
-        gachaSortMode = gachaSortMode === "default" ? "desc" : gachaSortMode === "desc" ? "asc" : "default";
-        openPanel("bag");
-      });
-      $id("mbody").querySelectorAll("[data-selkey]").forEach((el) => el.addEventListener("click", () => {
-        bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
-        openPanel("bag");
-      }));
-      const ssNo2 = $id("sellSelNo");
-      if (ssNo2) ssNo2.addEventListener("click", () => {
-        bagSellMode = false;
-        openPanel("bag");
-      });
-      const ssGo2 = $id("sellSelGo");
-      if (ssGo2) ssGo2.addEventListener("click", () => {
-        const keys = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.bag[k]);
-        if (!keys.length) return toast("Ch\u01B0a tick c\xE1i n\xE0o c\u1EA3");
-        let gain = 0;
-        keys.forEach((k) => {
-          gain += bagPrice(k) * ctx.S.bag[k];
-          delete ctx.S.bag[k];
-        });
-        ctx.S.coins += gain;
-        ctx.S.totalSales += gain;
-        bagSellMode = false;
-        save();
-        renderStatus();
-        toast("B\xE1n m\u1ED9t m\u1EBB \u0111\u1ED3 Gacha: +" + gain.toLocaleString() + " G");
-        openPanel("bag");
-      });
       return;
     }
     if (bagTab === "relic") {
@@ -5534,12 +5425,6 @@ function openPanel(kind) {
         <span class="info"><div class="name">M\u1EA3nh ng\xF4i sao \xD7${sh2.star}</div><div class="meta">\u0110\u1EADp v\u1EE1 s\u1EBD tri\u1EC7u h\u1ED3i ph\xF9 thu\u1EF7 tr\xF2n gh\xE9 th\u0103m</div></span>
         <span class="buy" data-useshard="star">Tri\u1EC7u h\u1ED3i</span></div>` : "");
       openModal("Balo", btabs + (relicRows || '<div class="note">Ng\u0103n qu\xE0 c\xF2n tr\u1ED1ng~ H\u1EA1t gi\u1ED1ng b\xED \u1EA9n \u0111\u1EBFn t\u1EEB chuy\u1EBFn t\xECm kho b\xE1u c\u1EE7a b\xE9 qu\u1EF7/b\xE9 thi\xEAn th\u1EA7n v\xE0 t\u1EEB \u0111\u01A1n h\xE0ng c\u1EE7a ph\xF9 thu\u1EF7; b\xE9 l\u0103ng quang / b\xE9 chu\xF4ng sao \u0111i t\xECm kho b\xE1u s\u1EBD mang m\u1EA3nh v\u1EE1 v\u1EC1</div>'));
-      $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
-        bagTab = t.dataset.btab;
-        openPanel("bag");
-      }));
-      $id("mbody").querySelectorAll("[data-useshard]").forEach((b) => b.addEventListener("click", useStarShard));
-      $id("mbody").querySelectorAll("[data-takeout]").forEach((b) => b.addEventListener("click", () => openTakeout(b.dataset.takeout)));
       return;
     }
     if (bagTab === "pet") {
@@ -5556,22 +5441,6 @@ function openPanel(kind) {
           <span class="buy${out ? " plain" : ""}" data-petout="${id}">${out ? "Thu v\u1EC1" : "Ra s\xE2n"}</span></div>`;
       }).join("") || '<div class="note">Ch\u01B0a c\xF3 b\xE9 tr\xF2n n\xE0o, ra c\u1EEDa h\xE0ng ng\u1EAFm th\u1EED \u0111i</div>';
       openModal("Balo", btabs + `<div class="note" style="margin-bottom:8px">B\u1EDD ru\u1ED9ng c\xF9ng l\xFAc \u0111\u1EE9ng \u0111\u01B0\u1EE3c t\u1ED1i \u0111a ${PETS_OUT_MAX} b\xE9; b\xE9 \u0111\u01B0\u1EE3c thu v\u1EC1 s\u1EBD ngh\u1EC9 \u1EDF \u0111\xE2y, kh\xF4ng l\xE0m vi\u1EC7c c\u0169ng kh\xF4ng t\xECm kho b\xE1u</div>` + prow);
-      $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
-        bagTab = t.dataset.btab;
-        openPanel("bag");
-      }));
-      $id("mbody").querySelectorAll("[data-petout]").forEach((b) => b.addEventListener("click", () => {
-        const id = b.dataset.petout;
-        const i = ctx.S.petsOut.indexOf(id);
-        if (i >= 0) ctx.S.petsOut.splice(i, 1);
-        else {
-          if (ctx.S.petsOut.length >= PETS_OUT_MAX) return toast("B\u1EDD ru\u1ED9ng ch\u1EC9 \u0111\u1EE9ng \u0111\u01B0\u1EE3c " + PETS_OUT_MAX + " b\xE9, thu m\u1ED9t b\xE9 v\u1EC1 \u0111\xE3");
-          ctx.S.petsOut.push(id);
-        }
-        save();
-        renderPets();
-        openPanel("bag");
-      }));
       return;
     }
     const rows = Object.keys(ctx.S.bag).filter((k) => !k.startsWith("unique@")).map((key) => {
@@ -5610,44 +5479,6 @@ function openPanel(kind) {
       }
     }
     openModal("Balo", btabs + sellBar + (rows || '<div class="note">Balo tr\u1ED1ng tr\u01A1n, \u0111i thu \xEDt rau \u0111i n\xE0o</div>'));
-    $id("mbody").querySelectorAll("[data-btab]").forEach((t) => t.addEventListener("click", () => {
-      bagTab = t.dataset.btab;
-      openPanel("bag");
-    }));
-    $id("mbody").querySelectorAll("[data-selldlg]").forEach((b) => b.addEventListener("click", () => openSellDlg(b.dataset.selldlg)));
-    $id("mbody").querySelectorAll("[data-takeout]").forEach((b) => b.addEventListener("click", () => openTakeout(b.dataset.takeout)));
-    const smGo = $id("sellModeGo");
-    if (smGo) smGo.addEventListener("click", () => {
-      bagSellMode = true;
-      bagSel = {};
-      openPanel("bag");
-    });
-    $id("mbody").querySelectorAll("[data-selkey]").forEach((el) => el.addEventListener("click", () => {
-      bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
-      openPanel("bag");
-    }));
-    const ssNo = $id("sellSelNo");
-    if (ssNo) ssNo.addEventListener("click", () => {
-      bagSellMode = false;
-      openPanel("bag");
-    });
-    const ssGo = $id("sellSelGo");
-    if (ssGo) ssGo.addEventListener("click", () => {
-      const keys = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.bag[k]);
-      if (!keys.length) return toast("Ch\u01B0a tick c\xE1i n\xE0o c\u1EA3");
-      let gain = 0;
-      keys.forEach((k) => {
-        gain += bagPrice(k) * ctx.S.bag[k];
-        delete ctx.S.bag[k];
-      });
-      ctx.S.coins += gain;
-      ctx.S.totalSales += gain;
-      bagSellMode = false;
-      save();
-      renderStatus();
-      toast("B\xE1n m\u1ED9t m\u1EBB n\xF4ng s\u1EA3n: +" + gain.toLocaleString() + " G");
-      openPanel("bag");
-    });
   } else {
     openModal("C\xE0i \u0111\u1EB7t", `
       <div style="font-size:11px; color:#a3763d; text-align:center; margin-bottom: 12px; font-weight: bold; background: rgba(0,0,0,0.05); padding: 4px; border-radius: 4px; user-select: text;">ID Ng\u01B0\u1EDDi Ch\u01A1i: ${ctx.S.playerId}</div>
@@ -5797,13 +5628,6 @@ function openPanel(kind) {
         $id("closeCreditBtn")?.addEventListener("click", () => openPanel("cfg"));
       });
     }
-    $id("mbody").querySelectorAll("[data-settheme]").forEach((b) => b.addEventListener("click", () => {
-      ctx.S.theme = b.dataset.settheme;
-      save();
-      applyTheme();
-      openPanel("cfg");
-      toast(ctx.S.theme === "sky" ? "\u0110\u1ED5i sang giao di\u1EC7n tr\u1EDDi quang~" : "V\u1EC1 l\u1EA1i giao di\u1EC7n h\u1ED3ng anh \u0111\xE0o~");
-    }));
     const cfgDragPet = $id("cfgDragPet");
     if (cfgDragPet) cfgDragPet.addEventListener("change", () => {
       ctx.S.dragPet = cfgDragPet.checked;
@@ -5848,12 +5672,171 @@ function openPanel(kind) {
 function initShop() {
   $id("mclose").addEventListener("click", closeModal);
   $id("mbody").addEventListener("click", (e) => {
-    const el = e.target.closest("[data-pick]");
-    if (!el || !pendingPick) return;
-    const cb = pendingPick;
-    setPendingPick(null);
-    closeModal();
-    cb(el.dataset.pick);
+    let el;
+    el = e.target.closest("[data-pick]");
+    if (el && pendingPick) {
+      const cb = pendingPick;
+      setPendingPick(null);
+      closeModal();
+      cb(el.dataset.pick);
+      return;
+    }
+    el = e.target.closest("[data-tab]");
+    if (el) {
+      shopTab = el.dataset.tab;
+      openPanel("shop");
+      return;
+    }
+    el = e.target.closest("[data-buyseed]");
+    if (el) {
+      openBuyDlg("seed", el.dataset.buyseed);
+      return;
+    }
+    el = e.target.closest("[data-buyfert]");
+    if (el) {
+      openBuyDlg("fert", el.dataset.buyfert);
+      return;
+    }
+    el = e.target.closest("[data-buyticket]");
+    if (el) {
+      openBuyDlg("ticket", el.dataset.buyticket, "shop");
+      return;
+    }
+    el = e.target.closest("[data-buypet]");
+    if (el) {
+      const id = el.dataset.buypet, pd = PETS[id];
+      if (ctx.S.pets.indexOf(id) >= 0) return;
+      if (ctx.S.coins < pd.price) return toast("C\xF2n thi\u1EBFu " + (pd.price - ctx.S.coins).toLocaleString() + " G");
+      ctx.S.coins -= pd.price;
+      ctx.S.pets.push(id);
+      if (ctx.S.petsOut.length < PETS_OUT_MAX) {
+        ctx.S.petsOut.push(id);
+        toast(pd.name + " \u0111\xE3 d\u1ECDn ra b\u1EDD ru\u1ED9ng nh\xE0 b\u1EA1n!");
+      } else toast(pd.name + " \u0111\xE3 v\u1EC1 nh\xE0! B\u1EDD ru\u1ED9ng ch\u1EADt r\u1ED3i, b\xE9 \u0111ang ngh\u1EC9 \u1EDF trang Balo \xB7 B\xE9 tr\xF2n");
+      save();
+      renderStatus();
+      renderPets();
+      openPanel("shop");
+      return;
+    }
+    el = e.target.closest("[data-passdlg]");
+    if (el) {
+      openPassDlg(el.dataset.passdlg);
+      return;
+    }
+    el = e.target.closest("[data-btab]");
+    if (el) {
+      bagTab = el.dataset.btab;
+      openPanel("bag");
+      return;
+    }
+    el = e.target.closest("[data-sellseeddlg]");
+    if (el) {
+      openSellSeedDlg(el.dataset.sellseeddlg);
+      return;
+    }
+    el = e.target.closest("#sellModeGo");
+    if (el) {
+      bagSellMode = true;
+      bagSel = {};
+      openPanel("bag");
+      return;
+    }
+    el = e.target.closest("[data-selkey]");
+    if (el) {
+      bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
+      openPanel("bag");
+      return;
+    }
+    el = e.target.closest("#sellSelNo");
+    if (el) {
+      bagSellMode = false;
+      openPanel("bag");
+      return;
+    }
+    el = e.target.closest("#sellSelGo");
+    if (el) {
+      if (bagTab === "seed") {
+        const keys = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.seeds[k]);
+        if (!keys.length) return toast("Ch\u01B0a tick c\xE1i n\xE0o c\u1EA3");
+        let gain = 0;
+        keys.forEach((k) => {
+          const def = CROPS[k];
+          if (def) {
+            const p = Math.floor((def.seed || 100) * 0.5);
+            gain += p * ctx.S.seeds[k];
+          }
+          delete ctx.S.seeds[k];
+        });
+        ctx.S.coins += gain;
+        ctx.S.totalSales += gain;
+        bagSellMode = false;
+        save();
+        renderStatus();
+        toast("B\xE1n m\u1ED9t m\u1EBB h\u1EA1t gi\u1ED1ng: +" + gain.toLocaleString() + " G");
+        openPanel("bag");
+      } else {
+        const keys = Object.keys(bagSel).filter((k) => bagSel[k] && ctx.S.bag[k]);
+        if (!keys.length) return toast("Ch\u01B0a tick c\xE1i n\xE0o c\u1EA3");
+        let gain = 0;
+        keys.forEach((k) => {
+          gain += bagPrice(k) * ctx.S.bag[k];
+          delete ctx.S.bag[k];
+        });
+        ctx.S.coins += gain;
+        ctx.S.totalSales += gain;
+        bagSellMode = false;
+        save();
+        renderStatus();
+        toast(bagTab === "gacha" ? "B\xE1n m\u1ED9t m\u1EBB \u0111\u1ED3 Gacha: +" + gain.toLocaleString() + " G" : "B\xE1n m\u1ED9t m\u1EBB n\xF4ng s\u1EA3n: +" + gain.toLocaleString() + " G");
+        openPanel("bag");
+      }
+      return;
+    }
+    el = e.target.closest("#sortGachaBtn");
+    if (el) {
+      gachaSortMode = gachaSortMode === "default" ? "desc" : gachaSortMode === "desc" ? "asc" : "default";
+      openPanel("bag");
+      return;
+    }
+    el = e.target.closest("[data-selldlg]");
+    if (el) {
+      openSellDlg(el.dataset.selldlg);
+      return;
+    }
+    el = e.target.closest("[data-takeout]");
+    if (el) {
+      openTakeout(el.dataset.takeout);
+      return;
+    }
+    el = e.target.closest("[data-useshard]");
+    if (el) {
+      useStarShard();
+      return;
+    }
+    el = e.target.closest("[data-petout]");
+    if (el) {
+      const id = el.dataset.petout;
+      const i = ctx.S.petsOut.indexOf(id);
+      if (i >= 0) ctx.S.petsOut.splice(i, 1);
+      else {
+        if (ctx.S.petsOut.length >= PETS_OUT_MAX) return toast("B\u1EDD ru\u1ED9ng ch\u1EC9 \u0111\u1EE9ng \u0111\u01B0\u1EE3c " + PETS_OUT_MAX + " b\xE9, thu m\u1ED9t b\xE9 v\u1EC1 \u0111\xE3");
+        ctx.S.petsOut.push(id);
+      }
+      save();
+      renderPets();
+      openPanel("bag");
+      return;
+    }
+    el = e.target.closest("[data-settheme]");
+    if (el) {
+      ctx.S.theme = el.dataset.settheme;
+      save();
+      applyTheme();
+      openPanel("cfg");
+      toast(ctx.S.theme === "sky" ? "\u0110\u1ED5i sang giao di\u1EC7n tr\u1EDDi quang~" : "V\u1EC1 l\u1EA1i giao di\u1EC7n h\u1ED3ng anh \u0111\xE0o~");
+      return;
+    }
   });
   $id("modal").addEventListener("click", (e) => {
     if (e.target === $id("modal")) closeModal();
@@ -6671,15 +6654,6 @@ function openWitchDlg() {
     <div class="wzsub">\u2726 \uFF61\uFF9F\u263D \u2234 \u2727 \u2234 \u263D\uFF9F\uFF61 \u2726</div>${rows}${reroll}
     <div class="wzleave">\u263D ${wz.order.done ? '"\u2736\u25C7\u2026!" (tr\xF4ng c\xF4 \u1EA5y h\xE0i l\xF2ng l\u1EAFm)' : "C\xF4 \u1EA5y c\xF2n n\xE1n l\u1EA1i kho\u1EA3ng " + fmtLeft(wz.leaveAt - now())}</div>
   </div>`);
-  $id("mbody").querySelectorAll("[data-wdeliver]").forEach((b) => b.addEventListener("click", () => witchDeliver(+b.dataset.wdeliver)));
-  $id("mbody").querySelectorAll("[data-wreroll]").forEach((b) => b.addEventListener("click", () => {
-    if (!(ctx.S.shards && ctx.S.shards.prism > 0)) return;
-    ctx.S.shards.prism--;
-    ctx.S.witch.order = makeWitchOrder();
-    save();
-    toast("L\u0103ng quang lo\xE9 l\xEAn, \u0111\u01A1n h\xE0ng \u0111\xE3 \u0111\u1ED5i m\u1ED9t lo\u1EA1t");
-    openWitchDlg();
-  }));
 }
 function useStarShard() {
   if (!(ctx.S.shards && ctx.S.shards.star > 0)) return;
@@ -6707,19 +6681,8 @@ function openTakeout(key) {
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <input class="inp" id="takeN" type="number" min="1" max="${have}" value="1" style="width:90px">
       <span style="font-size:12px;color:#7a5c38">/ \u0111ang c\xF3 ${have}</span>
-      <span class="buy" id="takeGo">X\xE1c nh\u1EADn l\u1EA5y ra</span>
+      <span class="buy" id="takeGo" data-key="${key}" data-have="${have}">X\xE1c nh\u1EADn l\u1EA5y ra</span>
     </div>`);
-  $id("takeGo").addEventListener("click", () => {
-    const n = clampN($id("takeN").value, 1, have, 1) | 0;
-    ctx.S.bag[key] = have - n;
-    if (ctx.S.bag[key] <= 0) delete ctx.S.bag[key];
-    const d = mutDescOf(key);
-    takeoutNote = (takeoutNote || []).filter((t) => now() < t.until).concat({ txt: n + " " + bagName(key) + (d ? " (hi\u1EC7u \u1EE9ng \u0111\xE3 \u0111\u1ECBnh: " + d + ")" : ""), until: now() + 10 * MIN });
-    save();
-    renderStatus();
-    toast("\u0110\xE3 l\u1EA5y ra " + n + " " + bagName(key));
-    openPanel("bag");
-  });
 }
 function openSellDlg(key) {
   const have = ctx.S.bag[key] || 0;
@@ -6730,11 +6693,8 @@ function openSellDlg(key) {
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <input class="inp" id="sellN" type="number" min="1" max="${have}" value="1" style="width:90px">
       <span style="font-size:12px;color:#7a5c38">/ ${have}</span>
-      <span class="buy" id="sellGo">X\xE1c nh\u1EADn b\xE1n</span>
+      <span class="buy" id="sellGo" data-key="${key}" data-have="${have}">X\xE1c nh\u1EADn b\xE1n</span>
     </div>`);
-  $id("sellGo").addEventListener("click", () => {
-    sell(key, clampN($id("sellN").value, 1, have, 1) | 0);
-  });
 }
 function openSellSeedDlg(id) {
   const have = ctx.S.seeds[id] || 0;
@@ -6748,11 +6708,8 @@ function openSellSeedDlg(id) {
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <input class="inp" id="sellSeedN" type="number" min="1" max="${have}" value="1" style="width:90px">
       <span style="font-size:12px;color:#7a5c38">/ ${have}</span>
-      <span class="buy" id="sellSeedGo">X\xE1c nh\u1EADn b\xE1n</span>
+      <span class="buy" id="sellSeedGo" data-id="${id}" data-have="${have}">X\xE1c nh\u1EADn b\xE1n</span>
     </div>`);
-  $id("sellSeedGo").addEventListener("click", () => {
-    sellSeed(id, clampN($id("sellSeedN").value, 1, have, 1) | 0);
-  });
 }
 function buildTicket(k) {
   const water2 = k === "water";
@@ -6780,22 +6737,9 @@ function openPassDlg(k) {
   const owned = !!ctx.S.passes[k];
   const poor = ctx.S.coins < ps.price;
   openModal(ps.name, buildTicket(k) + (owned ? '<div class="note">\u0110\xE3 s\u1EDF h\u1EEFu \xB7 c\u1EA5t trong k\u1EB9p gi\u1EA5y t\u1EDD c\u1EE7a b\u1EA1n. C\xE1c b\xE9 tr\xF2n \u1EDF trang t\u01B0\u01A1ng \u1EE9ng lu\xF4n hoan ngh\xEAnh b\u1EA1n gh\xE9 mua.</div>' : `<div style="display:flex;gap:8px;align-items:center">
-        <span class="buy${poor ? " off" : ""}" id="passGo">Mua ${ps.price.toLocaleString()} G</span>
+        <span class="buy${poor ? " off" : ""}" id="passGo" data-k="${k}" data-price="${ps.price}">Mua ${ps.price.toLocaleString()} G</span>
         <span class="buy plain" id="passNo">\u0110\u1EC3 ngh\u0129 th\xEAm</span>
       </div>`));
-  if (!owned) {
-    $id("passGo").addEventListener("click", () => {
-      if (ctx.S.coins < ps.price) return toast("C\xF2n thi\u1EBFu " + (ps.price - ctx.S.coins).toLocaleString() + " G");
-      ctx.S.coins -= ps.price;
-      ctx.S.passes[k] = true;
-      save();
-      renderStatus();
-      renderPager();
-      openPanel("shop");
-      toast(ps.name + " \u0111\xE3 v\xE0o tay! " + (k === "water" ? "Ru\u1ED9ng v\xF9ng n\u01B0\u1EDBc \u0111\xE3 m\u1EDF, l\u1EADt trang qua xem th\u1EED \u0111i" : "Ru\u1ED9ng khu m\u1ECF \u0111\xE3 m\u1EDF, l\u1EADt trang qua xem th\u1EED \u0111i"));
-    });
-    $id("passNo").addEventListener("click", () => openPanel("shop"));
-  }
 }
 function openBuyDlg(kind, id, returnTo = "shop") {
   let def, price, name;
@@ -6812,31 +6756,10 @@ function openBuyDlg(kind, id, returnTo = "shop") {
   openModal("Mua \xB7 " + name, `
     <div class="note" style="margin-bottom:8px">\u0110\u01A1n gi\xE1 ${price} G \xB7 v\xE0ng hi\u1EC7n c\xF3 ${ctx.S.coins.toLocaleString()} \xB7 mua \u0111\u01B0\u1EE3c t\u1ED1i \u0111a ${maxN}</div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <input class="inp" id="buyN" type="number" min="1" max="${maxN}" value="1" style="width:90px">
+      <input class="inp" id="buyN" type="number" min="1" max="${maxN}" value="1" style="width:90px" data-maxn="${maxN}" data-price="${price}">
       <span id="buyTotal" style="font-size:12px;color:#7a5c38;font-weight:bold">T\u1ED5ng ${price} G</span>
-      <span class="buy" id="buyGo">X\xE1c nh\u1EADn mua</span>
+      <span class="buy" id="buyGo" data-kind="${kind}" data-id="${id}" data-price="${price}" data-name="${name}" data-returnto="${returnTo}" data-maxn="${maxN}">X\xE1c nh\u1EADn mua</span>
     </div>`);
-  const upd = () => {
-    const n = clampN($id("buyN").value, 1, maxN, 1) | 0;
-    $id("buyTotal").textContent = "T\u1ED5ng " + (n * price).toLocaleString() + " G";
-    return n;
-  };
-  $id("buyN").addEventListener("input", upd);
-  $id("buyGo").addEventListener("click", () => {
-    const n = upd(), cost = n * price;
-    if (ctx.S.coins < cost) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng r\u1ED3i");
-    ctx.S.coins -= cost;
-    if (kind === "seed") ctx.S.seeds[id] = (ctx.S.seeds[id] || 0) + n;
-    else if (kind === "fert") ctx.S.ferts[id] = (ctx.S.ferts[id] || 0) + n;
-    else if (kind === "ticket") {
-      if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
-      ctx.S.tickets[id] = (ctx.S.tickets[id] || 0) + n;
-    }
-    save();
-    renderStatus();
-    toast("\u0110\xE3 mua " + name + " \xD7" + n);
-    openPanel(returnTo);
-  });
 }
 function toast(msg) {
   const t = $id("toast");
@@ -6862,6 +6785,105 @@ function initWitch() {
     b.textContent = WITCH_CRY[Math.floor(Math.random() * WITCH_CRY.length)];
     el.appendChild(b);
     window.setTimeout(() => b.remove(), 1900);
+  });
+  $id("mbody").addEventListener("click", (e) => {
+    let el;
+    el = e.target.closest("[data-wdeliver]");
+    if (el) {
+      witchDeliver(+el.dataset.wdeliver);
+      return;
+    }
+    el = e.target.closest("[data-wreroll]");
+    if (el) {
+      if (!(ctx.S.shards && ctx.S.shards.prism > 0)) return;
+      ctx.S.shards.prism--;
+      ctx.S.witch.order = makeWitchOrder();
+      save();
+      toast("L\u0103ng quang lo\xE9 l\xEAn, \u0111\u01A1n h\xE0ng \u0111\xE3 \u0111\u1ED5i m\u1ED9t lo\u1EA1t");
+      openWitchDlg();
+      return;
+    }
+    el = e.target.closest("#takeGo");
+    if (el) {
+      const key = el.dataset.key;
+      const have = +el.dataset.have;
+      const n = clampN($id("takeN").value, 1, have, 1) | 0;
+      ctx.S.bag[key] = have - n;
+      if (ctx.S.bag[key] <= 0) delete ctx.S.bag[key];
+      const d = mutDescOf(key);
+      takeoutNote = (takeoutNote || []).filter((t) => now() < t.until).concat({ txt: n + " " + bagName(key) + (d ? " (hi\u1EC7u \u1EE9ng \u0111\xE3 \u0111\u1ECBnh: " + d + ")" : ""), until: now() + 10 * MIN });
+      save();
+      renderStatus();
+      toast("\u0110\xE3 l\u1EA5y ra " + n + " " + bagName(key));
+      openPanel("bag");
+      return;
+    }
+    el = e.target.closest("#sellGo");
+    if (el) {
+      const key = el.dataset.key;
+      const have = +el.dataset.have;
+      sell(key, clampN($id("sellN").value, 1, have, 1) | 0);
+      return;
+    }
+    el = e.target.closest("#sellSeedGo");
+    if (el) {
+      const id = el.dataset.id;
+      const have = +el.dataset.have;
+      sellSeed(id, clampN($id("sellSeedN").value, 1, have, 1) | 0);
+      return;
+    }
+    el = e.target.closest("#passGo");
+    if (el) {
+      const k = el.dataset.k;
+      const price = +el.dataset.price;
+      if (ctx.S.coins < price) return toast("C\xF2n thi\u1EBFu " + (price - ctx.S.coins).toLocaleString() + " G");
+      ctx.S.coins -= price;
+      ctx.S.passes[k] = true;
+      save();
+      renderStatus();
+      renderPager();
+      openPanel("shop");
+      toast(PASSES[k].name + " \u0111\xE3 v\xE0o tay! " + (k === "water" ? "Ru\u1ED9ng v\xF9ng n\u01B0\u1EDBc \u0111\xE3 m\u1EDF, l\u1EADt trang qua xem th\u1EED \u0111i" : "Ru\u1ED9ng khu m\u1ECF \u0111\xE3 m\u1EDF, l\u1EADt trang qua xem th\u1EED \u0111i"));
+      return;
+    }
+    el = e.target.closest("#passNo");
+    if (el) {
+      openPanel("shop");
+      return;
+    }
+    el = e.target.closest("#buyGo");
+    if (el) {
+      const kind = el.dataset.kind;
+      const id = el.dataset.id;
+      const price = +el.dataset.price;
+      const name = el.dataset.name;
+      const returnTo = el.dataset.returnto;
+      const maxN = +el.dataset.maxn;
+      const n = clampN($id("buyN").value, 1, maxN, 1) | 0;
+      const cost = n * price;
+      if (ctx.S.coins < cost) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng r\u1ED3i");
+      ctx.S.coins -= cost;
+      if (kind === "seed") ctx.S.seeds[id] = (ctx.S.seeds[id] || 0) + n;
+      else if (kind === "fert") ctx.S.ferts[id] = (ctx.S.ferts[id] || 0) + n;
+      else if (kind === "ticket") {
+        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+        ctx.S.tickets[id] = (ctx.S.tickets[id] || 0) + n;
+      }
+      save();
+      renderStatus();
+      toast("\u0110\xE3 mua " + name + " \xD7" + n);
+      openPanel(returnTo);
+      return;
+    }
+  });
+  $id("mbody").addEventListener("input", (e) => {
+    const el = e.target.closest("#buyN");
+    if (el) {
+      const maxN = +el.dataset.maxn;
+      const price = +el.dataset.price;
+      const n = clampN(el.value, 1, maxN, 1) | 0;
+      $id("buyTotal").textContent = "T\u1ED5ng " + (n * price).toLocaleString() + " G";
+    }
   });
 }
 var WITCH_CRY, takeoutNote, toastTimer;
@@ -8015,34 +8037,6 @@ function openHeroPanel() {
     </div>
   `);
   const mbody = $id("mbody");
-  mbody.querySelectorAll(".hero-slot.filled").forEach((el) => el.addEventListener("click", () => {
-    ctx.S.hero.party.splice(parseInt(el.dataset.rem), 1);
-    save();
-    openHeroPanel();
-  }));
-  mbody.querySelectorAll(".h-r-pet").forEach((el) => el.addEventListener("click", () => {
-    const pId = el.dataset.add;
-    if (ctx.S.hero.party.includes(pId)) return;
-    if (ctx.S.hero.party.length >= 3) return toast("\u0110\u1ED9i h\xECnh \u0111\xE3 \u0111\u1EA7y! (Max 3)");
-    ctx.S.hero.party.push(pId);
-    save();
-    openHeroPanel();
-  }));
-  mbody.querySelectorAll(".h-r-info").forEach((el) => el.addEventListener("click", () => {
-    openPetSkills(el.dataset.info);
-  }));
-  mbody.querySelectorAll(".hero-style-btn").forEach((el) => el.addEventListener("click", () => {
-    ctx.S.hero.style = el.dataset.style;
-    save();
-    openHeroPanel();
-  }));
-  mbody.querySelector("#hero-deploy").addEventListener("click", () => {
-    if (ctx.S.hero.party.length === 0) {
-      return toast("Vui l\xF2ng x\u1EBFp \u0110\u1ED9i h\xECnh tr\u01B0\u1EDBc khi Xu\u1EA5t chi\u1EBFn!");
-    }
-    closeModal();
-    openHeroMode();
-  });
 }
 function spendGold(cost) {
   if (ctx.S.hero.gold + (ctx.S.coins || 0) >= cost) {
@@ -8071,12 +8065,12 @@ function openPetSkills(pId) {
     let actionBtn = "";
     if (isUnlocked) {
       if (isEquipped) {
-        actionBtn = `<div class="hero-deploy-btn" data-action="unequip" data-type="${typeId}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto; background:#4CAF50; color:#fff; border-color:#2E7D32;">\u0110ang Trang B\u1ECB</div>`;
+        actionBtn = `<div class="hero-deploy-btn" data-action="unequip" data-pid="${pId}" data-type="${typeId}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto; background:#4CAF50; color:#fff; border-color:#2E7D32;">\u0110ang Trang B\u1ECB</div>`;
       } else {
-        actionBtn = `<div class="hero-deploy-btn sk-equip-btn" data-action="equip" data-type="${typeId}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto;">Trang b\u1ECB</div>`;
+        actionBtn = `<div class="hero-deploy-btn sk-equip-btn" data-action="equip" data-pid="${pId}" data-type="${typeId}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto;">Trang b\u1ECB</div>`;
       }
     } else if (levelMet) {
-      actionBtn = `<div class="hero-deploy-btn sk-unlock-btn" data-tier="${typeId}" data-cost="${cost}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto;">M\u1EDF kh\xF3a<br>${cost}G</div>`;
+      actionBtn = `<div class="hero-deploy-btn sk-unlock-btn" data-pid="${pId}" data-tier="${typeId}" data-cost="${cost}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto;">M\u1EDF kh\xF3a<br>${cost}G</div>`;
     } else {
       actionBtn = `<div style="color:#777; font-size:12px; text-align:center;">C\u1EA7n Lv.${reqLvl}</div>`;
     }
@@ -8125,13 +8119,13 @@ function openPetSkills(pId) {
       
       <div class="hero-panel-section" style="margin-top:16px;">C\u01B0\u1EDDng H\xF3a (Enhance)</div>
       <div class="betsides">
-        <div class="betside hero-deploy-btn" id="pet-enh-hp" style="margin-top:0; padding:10px; font-size:14px;">
+        <div class="betside hero-deploy-btn" id="pet-enh-hp" data-pid="${pId}" data-cost="${st.enhHpCost}" style="margin-top:0; padding:10px; font-size:14px;">
           +50 HP<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} V\xE0ng)</span>
         </div>
-        <div class="betside hero-deploy-btn" id="pet-enh-atk" style="margin-top:0; padding:10px; font-size:14px;">
+        <div class="betside hero-deploy-btn" id="pet-enh-atk" data-pid="${pId}" data-cost="${st.enhAtkCost}" style="margin-top:0; padding:10px; font-size:14px;">
           +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} V\xE0ng)</span>
         </div>
-        <div class="betside hero-deploy-btn" id="pet-enh-spd" style="margin-top:0; padding:10px; font-size:14px;">
+        <div class="betside hero-deploy-btn" id="pet-enh-spd" data-pid="${pId}" data-cost="${st.enhSpdCost}" style="margin-top:0; padding:10px; font-size:14px;">
           +0.1 SPD<br><span style="font-size:12px; font-weight:normal;">(${st.enhSpdCost} V\xE0ng)</span>
         </div>
       </div>
@@ -8142,62 +8136,6 @@ function openPetSkills(pId) {
     </div>
   `);
   const mbody = $id("mbody");
-  mbody.querySelectorAll(".sk-unlock-btn").forEach((btn) => btn.addEventListener("click", () => {
-    const cost = parseInt(btn.dataset.cost);
-    const tier = btn.dataset.tier;
-    if (spendGold(cost)) {
-      ctx.S.hero.roster[pId][`${tier}_unlocked`] = true;
-      save();
-      openPetSkills(pId);
-    }
-  }));
-  mbody.querySelectorAll('[data-action="equip"], [data-action="unequip"]').forEach((btn) => btn.addEventListener("click", () => {
-    const typeId = btn.dataset.type;
-    const isAct = typeId.startsWith("a");
-    if (btn.dataset.action === "equip") {
-      if (isAct) ctx.S.hero.roster[pId].active_eq = typeId;
-      else ctx.S.hero.roster[pId].passive_eq = typeId;
-    } else {
-      if (isAct) delete ctx.S.hero.roster[pId].active_eq;
-      else delete ctx.S.hero.roster[pId].passive_eq;
-    }
-    save();
-    openPetSkills(pId);
-    if (runState && runState.pets.some((p) => p.id === pId)) {
-      const pt = runState.pets.find((p) => p.id === pId);
-      if (pt) {
-        if (isAct) {
-          pt.skillMaxCd = btn.dataset.action === "equip" ? pSkill[typeId].cd || 0 : 0;
-          pt.skillCd = pt.skillMaxCd;
-        }
-        renderHeroUI();
-      }
-    }
-  }));
-  mbody.querySelector("#pet-enh-hp").addEventListener("click", () => {
-    if (spendGold(st.enhHpCost)) {
-      ctx.S.hero.roster[pId].enhHp = (ctx.S.hero.roster[pId].enhHp || 0) + 1;
-      save();
-      openPetSkills(pId);
-    }
-  });
-  mbody.querySelector("#pet-enh-atk").addEventListener("click", () => {
-    if (spendGold(st.enhAtkCost)) {
-      ctx.S.hero.roster[pId].enhAtk = (ctx.S.hero.roster[pId].enhAtk || 0) + 1;
-      save();
-      openPetSkills(pId);
-    }
-  });
-  mbody.querySelector("#pet-enh-spd").addEventListener("click", () => {
-    if (spendGold(st.enhSpdCost)) {
-      ctx.S.hero.roster[pId].enhSpd = (ctx.S.hero.roster[pId].enhSpd || 0) + 1;
-      save();
-      openPetSkills(pId);
-    }
-  });
-  mbody.querySelector("#pet-back-btn").addEventListener("click", () => {
-    openHeroPanel();
-  });
 }
 function openHeroMode() {
   initHeroState();
@@ -9337,6 +9275,123 @@ function initHero() {
     const cashOutBtn = $id("hero-cashout");
     if (cashOutBtn) cashOutBtn.addEventListener("click", cashOutHero);
   }
+  $id("mbody").addEventListener("click", (e) => {
+    let el;
+    el = e.target.closest(".hero-slot.filled");
+    if (el) {
+      ctx.S.hero.party.splice(parseInt(el.dataset.rem), 1);
+      save();
+      openHeroPanel();
+      return;
+    }
+    el = e.target.closest(".h-r-pet");
+    if (el) {
+      const pId = el.dataset.add;
+      if (ctx.S.hero.party.includes(pId)) return;
+      if (ctx.S.hero.party.length >= 3) return toast("\u0110\u1ED9i h\xECnh \u0111\xE3 \u0111\u1EA7y! (Max 3)");
+      ctx.S.hero.party.push(pId);
+      save();
+      openHeroPanel();
+      return;
+    }
+    el = e.target.closest(".h-r-info");
+    if (el) {
+      openPetSkills(el.dataset.info);
+      return;
+    }
+    el = e.target.closest(".hero-style-btn");
+    if (el) {
+      ctx.S.hero.style = el.dataset.style;
+      save();
+      openHeroPanel();
+      return;
+    }
+    el = e.target.closest("#hero-deploy");
+    if (el) {
+      if (ctx.S.hero.party.length === 0) return toast("Vui l\xF2ng x\u1EBFp \u0110\u1ED9i h\xECnh tr\u01B0\u1EDBc khi Xu\u1EA5t chi\u1EBFn!");
+      closeModal();
+      openHeroMode();
+      return;
+    }
+    el = e.target.closest(".sk-unlock-btn");
+    if (el) {
+      const pId = el.dataset.pid;
+      const tier = el.dataset.tier;
+      const cost = parseInt(el.dataset.cost);
+      if (spendGold(cost)) {
+        ctx.S.hero.roster[pId][`${tier}_unlocked`] = true;
+        save();
+        openPetSkills(pId);
+      }
+      return;
+    }
+    el = e.target.closest('[data-action="equip"], [data-action="unequip"]');
+    if (el) {
+      const pId = el.dataset.pid;
+      const typeId = el.dataset.type;
+      const action = el.dataset.action;
+      const isAct = typeId.startsWith("a");
+      if (action === "equip") {
+        if (isAct) ctx.S.hero.roster[pId].active_eq = typeId;
+        else ctx.S.hero.roster[pId].passive_eq = typeId;
+      } else {
+        if (isAct) delete ctx.S.hero.roster[pId].active_eq;
+        else delete ctx.S.hero.roster[pId].passive_eq;
+      }
+      save();
+      openPetSkills(pId);
+      if (runState && runState.pets.some((p) => p.id === pId)) {
+        const pt = runState.pets.find((p) => p.id === pId);
+        if (pt) {
+          if (isAct) {
+            const pSkill = PET_SKILLS[pId] || PET_SKILLS.default;
+            pt.skillMaxCd = action === "equip" ? pSkill[typeId].cd || 0 : 0;
+            pt.skillCd = pt.skillMaxCd;
+          }
+          renderHeroUI();
+        }
+      }
+      return;
+    }
+    el = e.target.closest("#pet-enh-hp");
+    if (el) {
+      const pId = el.dataset.pid;
+      const cost = parseInt(el.dataset.cost);
+      if (spendGold(cost)) {
+        ctx.S.hero.roster[pId].enhHp = (ctx.S.hero.roster[pId].enhHp || 0) + 1;
+        save();
+        openPetSkills(pId);
+      }
+      return;
+    }
+    el = e.target.closest("#pet-enh-atk");
+    if (el) {
+      const pId = el.dataset.pid;
+      const cost = parseInt(el.dataset.cost);
+      if (spendGold(cost)) {
+        ctx.S.hero.roster[pId].enhAtk = (ctx.S.hero.roster[pId].enhAtk || 0) + 1;
+        save();
+        openPetSkills(pId);
+      }
+      return;
+    }
+    el = e.target.closest("#pet-enh-spd");
+    if (el) {
+      const pId = el.dataset.pid;
+      const cost = parseInt(el.dataset.cost);
+      if (spendGold(cost)) {
+        ctx.S.hero.roster[pId].enhSpd = (ctx.S.hero.roster[pId].enhSpd || 0) + 1;
+        save();
+        openPetSkills(pId);
+      }
+      return;
+    }
+    el = e.target.closest("#pet-back-btn");
+    if (el) {
+      openHeroPanel();
+      return;
+    }
+  });
 }
 function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
   if (!attackerEl || !targetEls) return onComplete && onComplete();

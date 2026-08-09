@@ -77,15 +77,7 @@ export function openWitchDlg() {
     <div class="wzsub">✦ ｡ﾟ☽ ∴ ✧ ∴ ☽ﾟ｡ ✦</div>${rows}${reroll}
     <div class="wzleave">☽ ${wz.order.done ? '"✶◇…!" (trông cô ấy hài lòng lắm)' : 'Cô ấy còn nán lại khoảng ' + fmtLeft(wz.leaveAt - now())}</div>
   </div>`);
-  // @ts-ignore
-  All.$id('mbody').querySelectorAll('[data-wdeliver]').forEach(b => b.addEventListener('click', () => witchDeliver(+b.dataset.wdeliver)));
-  All.$id('mbody').querySelectorAll('[data-wreroll]').forEach(b => b.addEventListener('click', () => {   // v1.0: dùng mảnh lăng quang đổi đơn
-    if (!(ctx.S.shards && ctx.S.shards.prism > 0)) return;
-    ctx.S.shards.prism--;
-    ctx.S.witch.order = makeWitchOrder();
-    save(); toast('Lăng quang loé lên, đơn hàng đã đổi một loạt');
-    openWitchDlg();
-  }));
+
 }
 export function useStarShard() {                               // v1.0: mảnh ngôi sao = triệu hồi phù thuỷ
   if (!(ctx.S.shards && ctx.S.shards.star > 0)) return;
@@ -113,20 +105,8 @@ export function openTakeout(key) {
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <input class="inp" id="takeN" type="number" min="1" max="${have}" value="1" style="width:90px">
       <span style="font-size:12px;color:#7a5c38">/ đang có ${have}</span>
-      <span class="buy" id="takeGo">Xác nhận lấy ra</span>
+      <span class="buy" id="takeGo" data-key="${key}" data-have="${have}">Xác nhận lấy ra</span>
     </div>`);
-  All.$id('takeGo').addEventListener('click', () => {
-    // @ts-ignore
-    const n = clampN(All.$id('takeN').value, 1, have, 1) | 0;
-    ctx.S.bag[key] = have - n;
-    if (ctx.S.bag[key] <= 0) delete ctx.S.bag[key];
-    const d = mutDescOf(key);
-    takeoutNote = ((takeoutNote || []).filter(t => now() < t.until))
-      .concat({ txt: n + ' ' + bagName(key) + (d ? ' (hiệu ứng đã định: ' + d + ')' : ''), until: now() + 10 * MIN });
-    save(); renderStatus();
-    toast('Đã lấy ra ' + n + ' ' + bagName(key));
-    openPanel('bag');
-  });
 }
 
 /* #21: bán cũng dùng popup chọn số lượng */
@@ -139,12 +119,8 @@ export function openSellDlg(key) {
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <input class="inp" id="sellN" type="number" min="1" max="${have}" value="1" style="width:90px">
       <span style="font-size:12px;color:#7a5c38">/ ${have}</span>
-      <span class="buy" id="sellGo">Xác nhận bán</span>
+      <span class="buy" id="sellGo" data-key="${key}" data-have="${have}">Xác nhận bán</span>
     </div>`);
-  All.$id('sellGo').addEventListener('click', () => {
-    // @ts-ignore
-    sell(key, clampN(All.$id('sellN').value, 1, have, 1) | 0);
-  });
 }
 
 export function openSellSeedDlg(id) {
@@ -159,12 +135,8 @@ export function openSellSeedDlg(id) {
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <input class="inp" id="sellSeedN" type="number" min="1" max="${have}" value="1" style="width:90px">
       <span style="font-size:12px;color:#7a5c38">/ ${have}</span>
-      <span class="buy" id="sellSeedGo">Xác nhận bán</span>
+      <span class="buy" id="sellSeedGo" data-id="${id}" data-have="${have}">Xác nhận bán</span>
     </div>`);
-  All.$id('sellSeedGo').addEventListener('click', () => {
-    // @ts-ignore
-    sellSeed(id, clampN(All.$id('sellSeedN').value, 1, have, 1) | 0);
-  });
 }
 
 /* Vé: popup hiện trọn mặt vé (tấm vé cũng là đồ sưu tầm) */
@@ -196,18 +168,9 @@ export function openPassDlg(k) {
   openModal(ps.name, buildTicket(k) + (owned
     ? '<div class="note">Đã sở hữu · cất trong kẹp giấy tờ của bạn. Các bé tròn ở trang tương ứng luôn hoan nghênh bạn ghé mua.</div>'
     : `<div style="display:flex;gap:8px;align-items:center">
-        <span class="buy${poor ? ' off' : ''}" id="passGo">Mua ${ps.price.toLocaleString()} G</span>
+        <span class="buy${poor ? ' off' : ''}" id="passGo" data-k="${k}" data-price="${ps.price}">Mua ${ps.price.toLocaleString()} G</span>
         <span class="buy plain" id="passNo">Để nghĩ thêm</span>
       </div>`));
-  if (!owned) {
-    All.$id('passGo').addEventListener('click', () => {
-      if (ctx.S.coins < ps.price) return toast('Còn thiếu ' + (ps.price - ctx.S.coins).toLocaleString() + ' G');
-      ctx.S.coins -= ps.price; ctx.S.passes[k] = true;
-      save(); renderStatus(); renderPager(); openPanel('shop');
-      toast(ps.name + ' đã vào tay! ' + (k === 'water' ? 'Ruộng vùng nước đã mở, lật trang qua xem thử đi' : 'Ruộng khu mỏ đã mở, lật trang qua xem thử đi'));
-    });
-    All.$id('passNo').addEventListener('click', () => openPanel('shop'));
-  }
 }
 
 /* v0.9 (#47): popup mua hàng loạt —— bấm mua hạt giống/phân bón → nhập số lượng → xác nhận, cảm giác giống hệt lúc bán (thời 72 ô thì đây là nhu cầu thiết yếu) */
@@ -226,27 +189,10 @@ export function openBuyDlg(kind, id, returnTo = 'shop') {
   openModal('Mua · ' + name, `
     <div class="note" style="margin-bottom:8px">Đơn giá ${price} G · vàng hiện có ${ctx.S.coins.toLocaleString()} · mua được tối đa ${maxN}</div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <input class="inp" id="buyN" type="number" min="1" max="${maxN}" value="1" style="width:90px">
+      <input class="inp" id="buyN" type="number" min="1" max="${maxN}" value="1" style="width:90px" data-maxn="${maxN}" data-price="${price}">
       <span id="buyTotal" style="font-size:12px;color:#7a5c38;font-weight:bold">Tổng ${price} G</span>
-      <span class="buy" id="buyGo">Xác nhận mua</span>
+      <span class="buy" id="buyGo" data-kind="${kind}" data-id="${id}" data-price="${price}" data-name="${name}" data-returnto="${returnTo}" data-maxn="${maxN}">Xác nhận mua</span>
     </div>`);
-  // @ts-ignore
-  const upd = () => { const n = clampN(All.$id('buyN').value, 1, maxN, 1) | 0; All.$id('buyTotal').textContent = 'Tổng ' + (n * price).toLocaleString() + ' G'; return n; };
-  All.$id('buyN').addEventListener('input', upd);
-  All.$id('buyGo').addEventListener('click', () => {
-    const n = upd(), cost = n * price;
-    if (ctx.S.coins < cost) return toast('Không đủ vàng rồi');
-    ctx.S.coins -= cost;
-    if (kind === 'seed') ctx.S.seeds[id] = (ctx.S.seeds[id] || 0) + n;
-    else if (kind === 'fert') ctx.S.ferts[id] = (ctx.S.ferts[id] || 0) + n;
-    else if (kind === 'ticket') {
-      if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
-      ctx.S.tickets[id] = (ctx.S.tickets[id] || 0) + n;
-    }
-    save(); renderStatus();
-    toast('Đã mua ' + name + ' ×' + n);
-    openPanel(returnTo);
-  });
 }
 
 
@@ -268,16 +214,121 @@ export function toast(msg) {
 
 export function initWitch() {
   All.$id('witch').addEventListener('click', e => {
-  // @ts-ignore
-  if (e.target.closest('.wtag')) return openWitchDlg();
-  const el = All.$id('witch');                              // Chọc vào chính cô ấy = chào hỏi (tiếng phù thuỷ, người nghe không hiểu là bình thường nhé)
-  el.querySelector('.pbubble')?.remove();
-  const b = document.createElement('span');
-  b.className = 'pbubble wb';
-  b.textContent = WITCH_CRY[Math.floor(Math.random() * WITCH_CRY.length)];
-  el.appendChild(b);
-  window.setTimeout(() => b.remove(), 1900);
-});
+    // @ts-ignore
+    if (e.target.closest('.wtag')) return openWitchDlg();
+    const el = All.$id('witch');
+    el.querySelector('.pbubble')?.remove();
+    const b = document.createElement('span');
+    b.className = 'pbubble wb';
+    b.textContent = WITCH_CRY[Math.floor(Math.random() * WITCH_CRY.length)];
+    el.appendChild(b);
+    window.setTimeout(() => b.remove(), 1900);
+  });
+  
+  All.$id('mbody').addEventListener('click', e => {
+    let el;
+    // @ts-ignore
+    el = e.target.closest('[data-wdeliver]');
+    if (el) { witchDeliver(+el.dataset.wdeliver); return; }
+    // @ts-ignore
+    el = e.target.closest('[data-wreroll]');
+    if (el) {
+      if (!(ctx.S.shards && ctx.S.shards.prism > 0)) return;
+      ctx.S.shards.prism--;
+      ctx.S.witch.order = makeWitchOrder();
+      save(); toast('Lăng quang loé lên, đơn hàng đã đổi một loạt');
+      openWitchDlg();
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('#takeGo');
+    if (el) {
+      const key = el.dataset.key;
+      const have = +el.dataset.have;
+      // @ts-ignore
+      const n = clampN(All.$id('takeN').value, 1, have, 1) | 0;
+      ctx.S.bag[key] = have - n;
+      if (ctx.S.bag[key] <= 0) delete ctx.S.bag[key];
+      const d = mutDescOf(key);
+      takeoutNote = ((takeoutNote || []).filter(t => now() < t.until))
+        .concat({ txt: n + ' ' + bagName(key) + (d ? ' (hiệu ứng đã định: ' + d + ')' : ''), until: now() + 10 * MIN });
+      save(); renderStatus();
+      toast('Đã lấy ra ' + n + ' ' + bagName(key));
+      openPanel('bag');
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('#sellGo');
+    if (el) {
+      const key = el.dataset.key;
+      const have = +el.dataset.have;
+      // @ts-ignore
+      sell(key, clampN(All.$id('sellN').value, 1, have, 1) | 0);
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('#sellSeedGo');
+    if (el) {
+      const id = el.dataset.id;
+      const have = +el.dataset.have;
+      // @ts-ignore
+      sellSeed(id, clampN(All.$id('sellSeedN').value, 1, have, 1) | 0);
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('#passGo');
+    if (el) {
+      const k = el.dataset.k;
+      const price = +el.dataset.price;
+      if (ctx.S.coins < price) return toast('Còn thiếu ' + (price - ctx.S.coins).toLocaleString() + ' G');
+      ctx.S.coins -= price; ctx.S.passes[k] = true;
+      save(); renderStatus(); renderPager(); openPanel('shop');
+      toast(PASSES[k].name + ' đã vào tay! ' + (k === 'water' ? 'Ruộng vùng nước đã mở, lật trang qua xem thử đi' : 'Ruộng khu mỏ đã mở, lật trang qua xem thử đi'));
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('#passNo');
+    if (el) { openPanel('shop'); return; }
+    // @ts-ignore
+    el = e.target.closest('#buyGo');
+    if (el) {
+      const kind = el.dataset.kind;
+      const id = el.dataset.id;
+      const price = +el.dataset.price;
+      const name = el.dataset.name;
+      const returnTo = el.dataset.returnto;
+      const maxN = +el.dataset.maxn;
+      // @ts-ignore
+      const n = clampN(All.$id('buyN').value, 1, maxN, 1) | 0;
+      const cost = n * price;
+      if (ctx.S.coins < cost) return toast('Không đủ vàng rồi');
+      ctx.S.coins -= cost;
+      if (kind === 'seed') ctx.S.seeds[id] = (ctx.S.seeds[id] || 0) + n;
+      else if (kind === 'fert') ctx.S.ferts[id] = (ctx.S.ferts[id] || 0) + n;
+      else if (kind === 'ticket') {
+        if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+        ctx.S.tickets[id] = (ctx.S.tickets[id] || 0) + n;
+      }
+      save(); renderStatus();
+      toast('Đã mua ' + name + ' ×' + n);
+      openPanel(returnTo);
+      return;
+    }
+  });
+
+  All.$id('mbody').addEventListener('input', e => {
+    // @ts-ignore
+    const el = e.target.closest('#buyN');
+    if (el) {
+      // @ts-ignore
+      const maxN = +el.dataset.maxn;
+      // @ts-ignore
+      const price = +el.dataset.price;
+      // @ts-ignore
+      const n = clampN(el.value, 1, maxN, 1) | 0;
+      All.$id('buyTotal').textContent = 'Tổng ' + (n * price).toLocaleString() + ' G';
+    }
+  });
 
 /* ---------- Mẹo nhỏ ---------- */
 /* #18: lấy ra —— bỏ khỏi balo để mang vào cốt truyện, không quy ra tiền, không thể hoàn tác; trong 10 phút sau khi lấy ra, phần tiêm sẽ kèm một câu nhắc */

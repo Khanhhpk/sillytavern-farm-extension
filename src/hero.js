@@ -263,38 +263,6 @@ export function openHeroPanel() {
   `);
   
   const mbody = All.$id('mbody');
-  mbody.querySelectorAll('.hero-slot.filled').forEach(el => el.addEventListener('click', () => {
-    ctx.S.hero.party.splice(parseInt(el.dataset.rem), 1);
-    save();
-    openHeroPanel();
-  }));
-  
-  mbody.querySelectorAll('.h-r-pet').forEach(el => el.addEventListener('click', () => {
-    const pId = el.dataset.add;
-    if (ctx.S.hero.party.includes(pId)) return;
-    if (ctx.S.hero.party.length >= 3) return All.toast('Đội hình đã đầy! (Max 3)');
-    ctx.S.hero.party.push(pId);
-    save();
-    openHeroPanel();
-  }));
-  
-  mbody.querySelectorAll('.h-r-info').forEach(el => el.addEventListener('click', () => {
-    openPetSkills(el.dataset.info);
-  }));
-  
-  mbody.querySelectorAll('.hero-style-btn').forEach(el => el.addEventListener('click', () => {
-    ctx.S.hero.style = el.dataset.style;
-    save();
-    openHeroPanel();
-  }));
-  
-  mbody.querySelector('#hero-deploy').addEventListener('click', () => {
-    if (ctx.S.hero.party.length === 0) {
-      return All.toast('Vui lòng xếp Đội hình trước khi Xuất chiến!');
-    }
-    closeModal();
-    openHeroMode();
-  });
 }
 
 function spendGold(cost) {
@@ -327,12 +295,12 @@ function openPetSkills(pId) {
     
     if (isUnlocked) {
       if (isEquipped) {
-        actionBtn = `<div class="hero-deploy-btn" data-action="unequip" data-type="${typeId}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto; background:#4CAF50; color:#fff; border-color:#2E7D32;">Đang Trang Bị</div>`;
+        actionBtn = `<div class="hero-deploy-btn" data-action="unequip" data-pid="${pId}" data-type="${typeId}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto; background:#4CAF50; color:#fff; border-color:#2E7D32;">Đang Trang Bị</div>`;
       } else {
-        actionBtn = `<div class="hero-deploy-btn sk-equip-btn" data-action="equip" data-type="${typeId}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto;">Trang bị</div>`;
+        actionBtn = `<div class="hero-deploy-btn sk-equip-btn" data-action="equip" data-pid="${pId}" data-type="${typeId}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto;">Trang bị</div>`;
       }
     } else if (levelMet) {
-      actionBtn = `<div class="hero-deploy-btn sk-unlock-btn" data-tier="${typeId}" data-cost="${cost}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto;">Mở khóa<br>${cost}G</div>`;
+      actionBtn = `<div class="hero-deploy-btn sk-unlock-btn" data-pid="${pId}" data-tier="${typeId}" data-cost="${cost}" style="margin-top:0; padding:6px 12px; font-size:12px; width:auto;">Mở khóa<br>${cost}G</div>`;
     } else {
       actionBtn = `<div style="color:#777; font-size:12px; text-align:center;">Cần Lv.${reqLvl}</div>`;
     }
@@ -385,13 +353,13 @@ function openPetSkills(pId) {
       
       <div class="hero-panel-section" style="margin-top:16px;">Cường Hóa (Enhance)</div>
       <div class="betsides">
-        <div class="betside hero-deploy-btn" id="pet-enh-hp" style="margin-top:0; padding:10px; font-size:14px;">
+        <div class="betside hero-deploy-btn" id="pet-enh-hp" data-pid="${pId}" data-cost="${st.enhHpCost}" style="margin-top:0; padding:10px; font-size:14px;">
           +50 HP<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} Vàng)</span>
         </div>
-        <div class="betside hero-deploy-btn" id="pet-enh-atk" style="margin-top:0; padding:10px; font-size:14px;">
+        <div class="betside hero-deploy-btn" id="pet-enh-atk" data-pid="${pId}" data-cost="${st.enhAtkCost}" style="margin-top:0; padding:10px; font-size:14px;">
           +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} Vàng)</span>
         </div>
-        <div class="betside hero-deploy-btn" id="pet-enh-spd" style="margin-top:0; padding:10px; font-size:14px;">
+        <div class="betside hero-deploy-btn" id="pet-enh-spd" data-pid="${pId}" data-cost="${st.enhSpdCost}" style="margin-top:0; padding:10px; font-size:14px;">
           +0.1 SPD<br><span style="font-size:12px; font-weight:normal;">(${st.enhSpdCost} Vàng)</span>
         </div>
       </div>
@@ -403,70 +371,6 @@ function openPetSkills(pId) {
   `);
   
   const mbody = All.$id('mbody');
-  
-  mbody.querySelectorAll('.sk-unlock-btn').forEach(btn => btn.addEventListener('click', () => {
-    const cost = parseInt(btn.dataset.cost);
-    const tier = btn.dataset.tier;
-    if (spendGold(cost)) {
-      ctx.S.hero.roster[pId][`${tier}_unlocked`] = true;
-      save();
-      openPetSkills(pId);
-    }
-  }));
-
-  mbody.querySelectorAll('[data-action="equip"], [data-action="unequip"]').forEach(btn => btn.addEventListener('click', () => {
-    const typeId = btn.dataset.type;
-    const isAct = typeId.startsWith('a');
-    if (btn.dataset.action === 'equip') {
-      if (isAct) ctx.S.hero.roster[pId].active_eq = typeId;
-      else ctx.S.hero.roster[pId].passive_eq = typeId;
-    } else {
-      if (isAct) delete ctx.S.hero.roster[pId].active_eq;
-      else delete ctx.S.hero.roster[pId].passive_eq;
-    }
-    save();
-    openPetSkills(pId);
-    
-    // Nạp lại team nếu đang trong trận
-    if (runState && runState.pets.some(p => p.id === pId)) {
-        const pt = runState.pets.find(p => p.id === pId);
-        if (pt) {
-            if (isAct) {
-                pt.skillMaxCd = (btn.dataset.action === 'equip') ? (pSkill[typeId].cd || 0) : 0;
-                pt.skillCd = pt.skillMaxCd;
-            }
-            renderHeroUI(); // Cập nhật lại giao diện để hiện/ẩn thanh skill
-        }
-    }
-  }));
-  
-  mbody.querySelector('#pet-enh-hp').addEventListener('click', () => {
-    if (spendGold(st.enhHpCost)) {
-      ctx.S.hero.roster[pId].enhHp = (ctx.S.hero.roster[pId].enhHp || 0) + 1;
-      save();
-      openPetSkills(pId);
-    }
-  });
-  
-  mbody.querySelector('#pet-enh-atk').addEventListener('click', () => {
-    if (spendGold(st.enhAtkCost)) {
-      ctx.S.hero.roster[pId].enhAtk = (ctx.S.hero.roster[pId].enhAtk || 0) + 1;
-      save();
-      openPetSkills(pId);
-    }
-  });
-  
-  mbody.querySelector('#pet-enh-spd').addEventListener('click', () => {
-    if (spendGold(st.enhSpdCost)) {
-      ctx.S.hero.roster[pId].enhSpd = (ctx.S.hero.roster[pId].enhSpd || 0) + 1;
-      save();
-      openPetSkills(pId);
-    }
-  });
-  
-  mbody.querySelector('#pet-back-btn').addEventListener('click', () => {
-    openHeroPanel();
-  });
 }
 
 export function openHeroMode() {
@@ -1652,6 +1556,116 @@ export function initHero() {
     const cashOutBtn = All.$id('hero-cashout');
     if (cashOutBtn) cashOutBtn.addEventListener('click', cashOutHero);
   }
+  
+  All.$id('mbody').addEventListener('click', e => {
+    let el;
+    // @ts-ignore
+    el = e.target.closest('.hero-slot.filled');
+    if (el) {
+      ctx.S.hero.party.splice(parseInt(el.dataset.rem), 1);
+      save(); openHeroPanel();
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('.h-r-pet');
+    if (el) {
+      const pId = el.dataset.add;
+      if (ctx.S.hero.party.includes(pId)) return;
+      if (ctx.S.hero.party.length >= 3) return All.toast('Đội hình đã đầy! (Max 3)');
+      ctx.S.hero.party.push(pId);
+      save(); openHeroPanel();
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('.h-r-info');
+    if (el) { openPetSkills(el.dataset.info); return; }
+    // @ts-ignore
+    el = e.target.closest('.hero-style-btn');
+    if (el) { ctx.S.hero.style = el.dataset.style; save(); openHeroPanel(); return; }
+    // @ts-ignore
+    el = e.target.closest('#hero-deploy');
+    if (el) {
+      if (ctx.S.hero.party.length === 0) return All.toast('Vui lòng xếp Đội hình trước khi Xuất chiến!');
+      closeModal(); openHeroMode();
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('.sk-unlock-btn');
+    if (el) {
+      const pId = el.dataset.pid;
+      const tier = el.dataset.tier;
+      const cost = parseInt(el.dataset.cost);
+      if (spendGold(cost)) {
+        ctx.S.hero.roster[pId][`${tier}_unlocked`] = true;
+        save(); openPetSkills(pId);
+      }
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('[data-action="equip"], [data-action="unequip"]');
+    if (el) {
+      const pId = el.dataset.pid;
+      const typeId = el.dataset.type;
+      const action = el.dataset.action;
+      const isAct = typeId.startsWith('a');
+      if (action === 'equip') {
+        if (isAct) ctx.S.hero.roster[pId].active_eq = typeId;
+        else ctx.S.hero.roster[pId].passive_eq = typeId;
+      } else {
+        if (isAct) delete ctx.S.hero.roster[pId].active_eq;
+        else delete ctx.S.hero.roster[pId].passive_eq;
+      }
+      save(); openPetSkills(pId);
+      if (runState && runState.pets.some(p => p.id === pId)) {
+        const pt = runState.pets.find(p => p.id === pId);
+        if (pt) {
+            if (isAct) {
+                const pSkill = PET_SKILLS[pId] || PET_SKILLS.default;
+                pt.skillMaxCd = (action === 'equip') ? (pSkill[typeId].cd || 0) : 0;
+                pt.skillCd = pt.skillMaxCd;
+            }
+            renderHeroUI();
+        }
+      }
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('#pet-enh-hp');
+    if (el) {
+      const pId = el.dataset.pid;
+      const cost = parseInt(el.dataset.cost);
+      if (spendGold(cost)) {
+        ctx.S.hero.roster[pId].enhHp = (ctx.S.hero.roster[pId].enhHp || 0) + 1;
+        save(); openPetSkills(pId);
+      }
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('#pet-enh-atk');
+    if (el) {
+      const pId = el.dataset.pid;
+      const cost = parseInt(el.dataset.cost);
+      if (spendGold(cost)) {
+        ctx.S.hero.roster[pId].enhAtk = (ctx.S.hero.roster[pId].enhAtk || 0) + 1;
+        save(); openPetSkills(pId);
+      }
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('#pet-enh-spd');
+    if (el) {
+      const pId = el.dataset.pid;
+      const cost = parseInt(el.dataset.cost);
+      if (spendGold(cost)) {
+        ctx.S.hero.roster[pId].enhSpd = (ctx.S.hero.roster[pId].enhSpd || 0) + 1;
+        save(); openPetSkills(pId);
+      }
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('#pet-back-btn');
+    if (el) { openHeroPanel(); return; }
+  });
 }
 
 // --- CUTSCENE ĐIỆN ẢNH ĐỘC QUYỀN CỦA NAOYA SLIME ---
