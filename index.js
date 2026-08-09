@@ -2868,7 +2868,7 @@ var init_style = __esm({
     
     /* Thi\xEAn Ki\u1EBFp (Tribulation) */
     .trib-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; transition: opacity 0.5s; border-radius: 6px; }
-    .trib-cloud { position: absolute; top: 10%; width: 200vw; height: 30vh; background: radial-gradient(ellipse at center, rgba(30,30,40,0.9) 0%, rgba(10,10,15,0) 70%); filter: blur(20px); animation: tribCloudMove 10s linear infinite; pointer-events: none; z-index: 1; }
+    .trib-cloud { position: absolute; top: 10%; width: 200vw; height: 30vh; background: radial-gradient(ellipse at center, rgba(30,30,40,0.9) 0%, rgba(10,10,15,0) 60%); animation: tribCloudMove 10s linear infinite; pointer-events: none; z-index: 1; }
     @keyframes tribCloudMove { 0% { transform: translateX(-100vw); } 100% { transform: translateX(100vw); } }
     .trib-lightning { position: absolute; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 2; }
     .trib-lightning.strike { animation: tribStrike 1.5s ease-out; }
