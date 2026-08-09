@@ -778,7 +778,7 @@ function heroTick() {
       
       let totalGold = 0;
       runState.monsters.forEach(m => {
-         totalGold += Math.floor((runState.stage * 30 + 100) * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
+         totalGold += Math.floor((runState.stage * 30 + 100) * 0.6 * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
       });
       
       let pGoldMult = 1.0;
