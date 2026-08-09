@@ -7616,6 +7616,8 @@ function closeDungeonView() {
   if (!isDungeonOpen) return;
   isDungeonOpen = false;
   stopCombatLoop();
+  const dragEl = document.getElementById("dg-drag-el");
+  if (dragEl) dragEl.remove();
   const dungeonWin = $id("dungeon-win");
   if (dungeonWin) {
     dungeonWin.style.display = "none";
@@ -7729,6 +7731,7 @@ function initPlacementPhase() {
       if (slot.classList.contains("placed")) return;
       draggingPet = { id: petId, slot };
       dragEl = document.createElement("div");
+      dragEl.id = "dg-drag-el";
       dragEl.className = "dg-entity pet";
       dragEl.style.pointerEvents = "none";
       dragEl.style.position = "fixed";
@@ -8038,7 +8041,7 @@ function combatLoop() {
         p.el.remove();
         return false;
       } else {
-        const move = p.speed * dt;
+        const move = p.speed * stepDt;
         p.x += dx / dist * move;
         p.y += dy / dist * move;
         p.tx = p.target.x;
