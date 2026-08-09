@@ -7950,7 +7950,7 @@ function _doStartWave() {
   const w = arena.clientWidth;
   const h = arena.clientHeight;
   updateHUD();
-  let count = Math.min(30, 3 + Math.floor(currentWave * 1.5));
+  let count = Math.min(20, 2 + Math.floor(currentWave * 0.8));
   let spawnElite = currentWave % 3 === 0;
   let isBossWave = currentWave % 10 === 0;
   if (isBossWave) {
@@ -8487,7 +8487,7 @@ function showWaveRewards() {
   projectiles.forEach((p) => p.el.remove());
   projectiles = [];
   const isBoss = currentWave % 10 === 0;
-  const waveGold = Math.round(300 * Math.pow(1.1, currentWave - 1)) * (isBoss ? 3 : 1);
+  const waveGold = Math.round(200 * Math.pow(1.1, currentWave - 1)) * (isBoss ? 3 : 1);
   totalGold += Math.floor(waveGold * 0.6);
   shopGold += waveGold;
   const arena = $id("dg-arena");
@@ -8561,7 +8561,7 @@ function showWaveRewards() {
     if (selectedPet) {
       const u = selectedPet.upgrades;
       const hpMissingPet = selectedPet.maxHp - selectedPet.hp;
-      const waveBaseGold = Math.round(300 * Math.pow(1.1, currentWave - 1));
+      const waveBaseGold = Math.round(200 * Math.pow(1.1, currentWave - 1));
       const healPetCost = Math.max(10, Math.floor(waveBaseGold * 0.2 * (hpMissingPet / selectedPet.maxHp)));
       const totalMaxHp = fullTeam.reduce((acc, member) => acc + member.maxHp, 0);
       const hpMissingTeam = fullTeam.reduce((acc, member) => acc + (member.maxHp - member.hp), 0);
@@ -8711,20 +8711,20 @@ var init_dungeon = __esm({
       default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
     };
     ENEMY_TYPES = [
-      { id: "douya", name: "M\u1EA7m Non", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 60, atk: 16, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout", gold: 2 },
-      { id: "tomato", name: "C\xE0 Chua Tr\xF2n", desc: "C\u1EADn chi\u1EBFn c\u01A1 b\u1EA3n.", hp: 120, atk: 24, range: 40, speed: 30, cd: 1, ai: "melee", gold: 4 },
-      { id: "radish", name: "C\u1EE7 C\u1EA3i T\u1ED1c \u0110\u1ED9", desc: "Ch\u1EA1y c\u1EF1c nhanh.", hp: 75, atk: 16, range: 30, speed: 70, cd: 0.5, ai: "melee", gold: 3 },
-      { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 90, atk: 40, range: 40, speed: 60, cd: 1, ai: "assassin", sp: "moonberry", gold: 5 },
-      { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 180, atk: 20, range: 40, speed: 25, cd: 1.2, ai: "melee", gold: 6 },
-      { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 220, atk: 28, range: 40, speed: 20, cd: 1.5, ai: "melee", gold: 8 },
-      { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 350, atk: 40, range: 50, speed: 15, cd: 3, ai: "tank", gold: 15 },
-      { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 100, atk: 36, range: 120, speed: 20, cd: 1.5, ai: "ranged", gold: 8 },
-      { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 120, atk: 16, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot", gold: 10 },
-      { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 160, atk: 24, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root", gold: 12 },
-      { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 350, atk: 30, range: 100, speed: 15, cd: 2, ai: "ranged", gold: 20 },
-      { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 900, atk: 80, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true, gold: 100 },
-      { id: "pumpkin", name: "Vua B\xED Ng\xF4", desc: "Boss: Tank AoE slam.", hp: 1200, atk: 70, range: 50, speed: 15, cd: 2.5, ai: "tank", skill: "cleave", elite: true, sp: "pumpkin", gold: 150 },
-      { id: "fangW", name: "Ph\xF9 Th\u1EE7y Hoa", desc: "Boss: Ph\xE1o \u0111\xE0i b\u1EAFn xa.", hp: 600, atk: 90, range: 160, speed: 18, cd: 1.8, ai: "ranged", skill: "multishot", elite: true, sp: "fangW", gold: 120 }
+      { id: "douya", name: "M\u1EA7m Non", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 50, atk: 12, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout", gold: 2 },
+      { id: "tomato", name: "C\xE0 Chua Tr\xF2n", desc: "C\u1EADn chi\u1EBFn c\u01A1 b\u1EA3n.", hp: 100, atk: 18, range: 40, speed: 30, cd: 1, ai: "melee", gold: 4 },
+      { id: "radish", name: "C\u1EE7 C\u1EA3i T\u1ED1c \u0110\u1ED9", desc: "Ch\u1EA1y c\u1EF1c nhanh.", hp: 60, atk: 12, range: 30, speed: 70, cd: 0.5, ai: "melee", gold: 3 },
+      { id: "moonberry", name: "D\xE2u T\xE2y Gai", desc: "Th\xEDch kh\xE1ch t\u1EADp k\xEDch.", hp: 70, atk: 30, range: 40, speed: 60, cd: 1, ai: "assassin", sp: "moonberry", gold: 5 },
+      { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 150, atk: 15, range: 40, speed: 25, cd: 1.2, ai: "melee", gold: 6 },
+      { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 180, atk: 20, range: 40, speed: 20, cd: 1.5, ai: "melee", gold: 8 },
+      { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 30, range: 50, speed: 15, cd: 3, ai: "tank", gold: 15 },
+      { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 80, atk: 25, range: 120, speed: 20, cd: 1.5, ai: "ranged", gold: 8 },
+      { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 100, atk: 12, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot", gold: 10 },
+      { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 130, atk: 18, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root", gold: 12 },
+      { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 300, atk: 25, range: 100, speed: 15, cd: 2, ai: "ranged", gold: 20 },
+      { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 700, atk: 60, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true, gold: 100 },
+      { id: "pumpkin", name: "Vua B\xED Ng\xF4", desc: "Boss: Tank AoE slam.", hp: 1e3, atk: 50, range: 50, speed: 15, cd: 2.5, ai: "tank", skill: "cleave", elite: true, sp: "pumpkin", gold: 150 },
+      { id: "fangW", name: "Ph\xF9 Th\u1EE7y Hoa", desc: "Boss: Ph\xE1o \u0111\xE0i b\u1EAFn xa.", hp: 500, atk: 70, range: 160, speed: 18, cd: 1.8, ai: "ranged", skill: "multishot", elite: true, sp: "fangW", gold: 120 }
     ];
     fullTeam = [];
   }

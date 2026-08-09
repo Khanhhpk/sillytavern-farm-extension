@@ -35,20 +35,20 @@ const PET_STATS = {
 };
 
 const ENEMY_TYPES = [
-    { id: 'douya', name: 'Mầm Non', desc: 'Lính bầy đàn.', hp: 60, atk: 16, range: 40, speed: 45, cd: 0.8, ai: 'melee', sp: 'sprout', gold: 2 },
-    { id: 'tomato', name: 'Cà Chua Tròn', desc: 'Cận chiến cơ bản.', hp: 120, atk: 24, range: 40, speed: 30, cd: 1, ai: 'melee', gold: 4 },
-    { id: 'radish', name: 'Củ Cải Tốc Độ', desc: 'Chạy cực nhanh.', hp: 75, atk: 16, range: 30, speed: 70, cd: 0.5, ai: 'melee', gold: 3 },
-    { id: 'moonberry', name: 'Dâu Tây Gai', desc: 'Thích khách tập kích.', hp: 90, atk: 40, range: 40, speed: 60, cd: 1, ai: 'assassin', sp: 'moonberry', gold: 5 },
-    { id: 'chuncai', name: 'Rau Thuần', desc: 'Đeo bám dai dẳng.', hp: 180, atk: 20, range: 40, speed: 25, cd: 1.2, ai: 'melee', gold: 6 },
-    { id: 'lingjiao', name: 'Củ Ấu Giáp', desc: 'Cận chiến có giáp.', hp: 220, atk: 28, range: 40, speed: 20, cd: 1.5, ai: 'melee', gold: 8 },
-    { id: 'pumpkin', name: 'Bí Ngô Khổng Lồ', desc: 'Tanker chậm chạp.', hp: 350, atk: 40, range: 50, speed: 15, cd: 3, ai: 'tank', gold: 15 },
-    { id: 'fangW', name: 'Hoa Bá Vương', desc: 'Pháp sư bắn từ xa.', hp: 100, atk: 36, range: 120, speed: 20, cd: 1.5, ai: 'ranged', gold: 8 },
-    { id: 'starbush', name: 'Bụi Sao', desc: 'Xạ thủ 3 tia.', hp: 120, atk: 16, range: 140, speed: 25, cd: 1.5, ai: 'ranged', skill: 'multishot', gold: 10 },
-    { id: 'opalvine', name: 'Dây Leo Opal', desc: 'Trói chân đối thủ.', hp: 160, atk: 24, range: 90, speed: 20, cd: 1.2, ai: 'ranged', skill: 'root', gold: 12 },
-    { id: 'lianou', name: 'Củ Sen Khổng Lồ', desc: 'Ném bùn từ xa.', hp: 350, atk: 30, range: 100, speed: 15, cd: 2, ai: 'ranged', gold: 20 },
-    { id: 'dragoncry', name: 'Long Tinh', desc: 'Boss: Cực khỏe.', hp: 900, atk: 80, range: 60, speed: 20, cd: 2, ai: 'tank', skill: 'cleave', elite: true, gold: 100 },
-    { id: 'pumpkin', name: 'Vua Bí Ngô', desc: 'Boss: Tank AoE slam.', hp: 1200, atk: 70, range: 50, speed: 15, cd: 2.5, ai: 'tank', skill: 'cleave', elite: true, sp: 'pumpkin', gold: 150 },
-    { id: 'fangW', name: 'Phù Thủy Hoa', desc: 'Boss: Pháo đài bắn xa.', hp: 600, atk: 90, range: 160, speed: 18, cd: 1.8, ai: 'ranged', skill: 'multishot', elite: true, sp: 'fangW', gold: 120 }
+    { id: 'douya', name: 'Mầm Non', desc: 'Lính bầy đàn.', hp: 50, atk: 12, range: 40, speed: 45, cd: 0.8, ai: 'melee', sp: 'sprout', gold: 2 },
+    { id: 'tomato', name: 'Cà Chua Tròn', desc: 'Cận chiến cơ bản.', hp: 100, atk: 18, range: 40, speed: 30, cd: 1, ai: 'melee', gold: 4 },
+    { id: 'radish', name: 'Củ Cải Tốc Độ', desc: 'Chạy cực nhanh.', hp: 60, atk: 12, range: 30, speed: 70, cd: 0.5, ai: 'melee', gold: 3 },
+    { id: 'moonberry', name: 'Dâu Tây Gai', desc: 'Thích khách tập kích.', hp: 70, atk: 30, range: 40, speed: 60, cd: 1, ai: 'assassin', sp: 'moonberry', gold: 5 },
+    { id: 'chuncai', name: 'Rau Thuần', desc: 'Đeo bám dai dẳng.', hp: 150, atk: 15, range: 40, speed: 25, cd: 1.2, ai: 'melee', gold: 6 },
+    { id: 'lingjiao', name: 'Củ Ấu Giáp', desc: 'Cận chiến có giáp.', hp: 180, atk: 20, range: 40, speed: 20, cd: 1.5, ai: 'melee', gold: 8 },
+    { id: 'pumpkin', name: 'Bí Ngô Khổng Lồ', desc: 'Tanker chậm chạp.', hp: 300, atk: 30, range: 50, speed: 15, cd: 3, ai: 'tank', gold: 15 },
+    { id: 'fangW', name: 'Hoa Bá Vương', desc: 'Pháp sư bắn từ xa.', hp: 80, atk: 25, range: 120, speed: 20, cd: 1.5, ai: 'ranged', gold: 8 },
+    { id: 'starbush', name: 'Bụi Sao', desc: 'Xạ thủ 3 tia.', hp: 100, atk: 12, range: 140, speed: 25, cd: 1.5, ai: 'ranged', skill: 'multishot', gold: 10 },
+    { id: 'opalvine', name: 'Dây Leo Opal', desc: 'Trói chân đối thủ.', hp: 130, atk: 18, range: 90, speed: 20, cd: 1.2, ai: 'ranged', skill: 'root', gold: 12 },
+    { id: 'lianou', name: 'Củ Sen Khổng Lồ', desc: 'Ném bùn từ xa.', hp: 300, atk: 25, range: 100, speed: 15, cd: 2, ai: 'ranged', gold: 20 },
+    { id: 'dragoncry', name: 'Long Tinh', desc: 'Boss: Cực khỏe.', hp: 700, atk: 60, range: 60, speed: 20, cd: 2, ai: 'tank', skill: 'cleave', elite: true, gold: 100 },
+    { id: 'pumpkin', name: 'Vua Bí Ngô', desc: 'Boss: Tank AoE slam.', hp: 1000, atk: 50, range: 50, speed: 15, cd: 2.5, ai: 'tank', skill: 'cleave', elite: true, sp: 'pumpkin', gold: 150 },
+    { id: 'fangW', name: 'Phù Thủy Hoa', desc: 'Boss: Pháo đài bắn xa.', hp: 500, atk: 70, range: 160, speed: 18, cd: 1.8, ai: 'ranged', skill: 'multishot', elite: true, sp: 'fangW', gold: 120 }
 ];
 
 export function openDungeonView() {
@@ -463,7 +463,7 @@ function _doStartWave() {
     updateHUD();
     
     // Calculate enemies based on wave
-    let count = Math.min(30, 3 + Math.floor(currentWave * 1.5));
+    let count = Math.min(20, 2 + Math.floor(currentWave * 0.8));
     let spawnElite = currentWave % 3 === 0;
     let isBossWave = currentWave % 10 === 0;
     
@@ -1092,7 +1092,7 @@ function showWaveRewards() {
     
     // Calculate gold for this wave
     const isBoss = currentWave % 10 === 0;
-    const waveGold = Math.round(300 * Math.pow(1.1, currentWave - 1)) * (isBoss ? 3 : 1);
+    const waveGold = Math.round(200 * Math.pow(1.1, currentWave - 1)) * (isBoss ? 3 : 1);
     totalGold += Math.floor(waveGold * 0.6);
     shopGold += waveGold;
     
@@ -1168,7 +1168,7 @@ function showWaveRewards() {
         if (selectedPet) {
             const u = selectedPet.upgrades;
             const hpMissingPet = selectedPet.maxHp - selectedPet.hp;
-            const waveBaseGold = Math.round(300 * Math.pow(1.1, currentWave - 1));
+            const waveBaseGold = Math.round(200 * Math.pow(1.1, currentWave - 1));
             const healPetCost = Math.max(10, Math.floor(waveBaseGold * 0.2 * (hpMissingPet / selectedPet.maxHp)));
             
             const totalMaxHp = fullTeam.reduce((acc, member) => acc + member.maxHp, 0);
