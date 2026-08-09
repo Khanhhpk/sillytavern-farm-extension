@@ -146,7 +146,7 @@ export function openPanel(kind) {
           <span class="price">${spriteSVG('coin', 16)}${f.price}</span>
           <span class="buy${ctx.S.coins < f.price ? ' off' : ''}" data-buyfert="${id}">Mua</span></div>`).join('');
     } else if (shopTab === 'pet') {
-      items = Object.keys(PETS).map(id => {
+      items = Object.keys(PETS).filter(id => !PETS[id].hidden).map(id => {
         const pd = PETS[id];
         const owned = ctx.S.pets.indexOf(id) >= 0;
         const unlocked = pageUnlocked(pd.page);

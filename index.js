@@ -5262,7 +5262,7 @@ function openPanel(kind) {
           <span class="price">${spriteSVG("coin", 16)}${f.price}</span>
           <span class="buy${ctx.S.coins < f.price ? " off" : ""}" data-buyfert="${id}">Mua</span></div>`).join("");
     } else if (shopTab === "pet") {
-      items = Object.keys(PETS).map((id) => {
+      items = Object.keys(PETS).filter((id) => !PETS[id].hidden).map((id) => {
         const pd = PETS[id];
         const owned = ctx.S.pets.indexOf(id) >= 0;
         const unlocked = pageUnlocked(pd.page);
@@ -7797,6 +7797,12 @@ function loadState() {
       delete ctx.S.jobCfg[k];
     }
   });
+  if (ctx.S.pets && ctx.S.pets.includes("naoyaSlime")) {
+    if (!ctx.S.achiv || !ctx.S.achiv.naoya || !ctx.S.achiv.naoya.claimed) {
+      ctx.S.pets = ctx.S.pets.filter((p) => p !== "naoyaSlime");
+      if (ctx.S.petsOut) ctx.S.petsOut = ctx.S.petsOut.filter((p) => p !== "naoyaSlime");
+    }
+  }
   Object.keys(ctx.S.bag || {}).forEach((k) => {
     const base = k.split("@")[0];
     if (base === "mysbG" || base === "mysbW" || base === "mysbM") {

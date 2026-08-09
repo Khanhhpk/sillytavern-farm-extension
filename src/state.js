@@ -59,6 +59,14 @@ export function loadState() {
     }
   });
 
+  // Khóa lại Naoya Slime nếu nhận được do lỗi cũ (mua từ shop với giá 0)
+  if (ctx.S.pets && ctx.S.pets.includes('naoyaSlime')) {
+      if (!ctx.S.achiv || !ctx.S.achiv.naoya || !ctx.S.achiv.naoya.claimed) {
+          ctx.S.pets = ctx.S.pets.filter(p => p !== 'naoyaSlime');
+          if (ctx.S.petsOut) ctx.S.petsOut = ctx.S.petsOut.filter(p => p !== 'naoyaSlime');
+      }
+  }
+
   Object.keys(ctx.S.bag || {}).forEach(k => {
     const base = k.split('@')[0];
     if (base === 'mysbG' || base === 'mysbW' || base === 'mysbM') {
