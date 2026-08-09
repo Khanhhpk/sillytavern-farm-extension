@@ -1439,6 +1439,24 @@ var init_graphics = __esm({
         "................",
         "................",
         "................"
+      ],
+      naoyaSlime: [
+        "................",
+        "................",
+        "................",
+        "................",
+        ".....yyyyyy.....",
+        "....yYYYYYYy....",
+        "...yYWWYYYYYy...",
+        "..yYYWWYYYYYYy..",
+        "..yYKKKYYKKKYy..",
+        "..yYWKKYYWKKYy..",
+        ".yYYYYYYYYYYYYy.",
+        ".yYYYYYYYYKYYYy.",
+        ".yYYYYYYKKYYYYy.",
+        ".yYYYYYYYYYYYYy.",
+        "..yyyyyyyyyyyy..",
+        "................"
       ]
     };
     petLinear = (x1, y1, x2, y2, stops) => ({ type: "linear", x1, y1, x2, y2, stops });
@@ -1488,7 +1506,8 @@ var init_graphics = __esm({
       starBell: { name: "B\xE9 chu\xF4ng sao", page: 3, price: 8e3, cry: ["Leng keng~", "\u2606!", "(l\u1EAFc l\u1EAFc nh\u1EB9)"], desc: "Lo\u1EA1i s\u1EA3n xu\u1EA5t \xB7 t\xECm kho b\xE1u rung r\u01A1i m\u1EA3nh ng\xF4i sao (tri\u1EC7u h\u1ED3i \u0111\u01B0\u1EE3c ph\xF9 thu\u1EF7 tr\xF2n)" },
       /* —— Át chủ bài (page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
       peach_soda: { name: "B\xE9 soda \u0111\xE0o", page: 1, price: 9999, cry: ["B\u1ED1p\u2014\u2014!", "(n\u1ED5i m\u1ED9t bong b\xF3ng nh\u1ECF)", "X\xEC~", "(v\u1ECB ng\xF2n ng\u1ECDt)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 tinh linh soda v\u1ECB \u0111\xE0o \xB7 d\u1EC5 th\u01B0\u01A1ng qu\xE1 m\u1EE9c n\xEAn \u0111\u1EAFt nh\u1EA5t" },
-      penguin: { name: "Chim c\xE1nh c\u1EE5t", page: 1, price: 1e5, cry: ["Pingu!", "N\xFAp n\xFAp~", "Tr\u01B0\u1EE3t tuy\u1EBFt n\xE0o!", "C\xE1nh c\u1EE5t!"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 AFK m\u1ED7i 1 ti\u1EBFng mang v\u1EC1 1 v\xE9 gacha ng\u1EABu nhi\xEAn (70% v\xE9 th\u01B0\u1EDDng, 30% v\xE9 \u0111\u1EB7c bi\u1EC7t)" }
+      penguin: { name: "Chim c\xE1nh c\u1EE5t", page: 1, price: 1e5, cry: ["Pingu!", "N\xFAp n\xFAp~", "Tr\u01B0\u1EE3t tuy\u1EBFt n\xE0o!", "C\xE1nh c\u1EE5t!"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 AFK m\u1ED7i 1 ti\u1EBFng mang v\u1EC1 1 v\xE9 gacha ng\u1EABu nhi\xEAn (70% v\xE9 th\u01B0\u1EDDng, 30% v\xE9 \u0111\u1EB7c bi\u1EC7t)" },
+      naoyaSlime: { name: "Naoya", page: 1, hidden: true, price: 0, cry: ["R\xE1c r\u01B0\u1EDFi!", "L\u0169 y\u1EBFu k\xE9m...", "B\u1EA9n h\u1EBFt c\u1EA3 ng\u01B0\u1EDDi!", "(l\u01B0\u1EDDm khinh b\u1EC9)"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t (Th\xE0nh t\u1EF1u) \xB7 K\u1EBB t\u1EF1 x\u01B0ng l\xE0 thi\xEAn t\xE0i nh\u01B0ng l\u1EA1i b\u1ECB k\u1EB9t trong h\xECnh h\xE0i Slime tr\xF2n vo n\xFAng n\xEDnh." }
     };
     PASSES = {
       water: { name: "V\xE9 v\xF9ng n\u01B0\u1EDBc", price: 6e3, desc: "M\u1EDF kho\xE1 ru\u1ED9ng v\xF9ng n\u01B0\u1EDBc (trang 2) + quy\u1EC1n mua b\xE9 tr\xF2n trang 2 v\xE0 h\u1EA1t gi\u1ED1ng thu\u1EF7 sinh, t\u1EB7ng k\xE8m \xF4 ru\u1ED9ng n\u1ED5i \u0111\u1EA7u ti\xEAn" },
@@ -5067,6 +5086,63 @@ function closeModal() {
   setPendingPick(null);
   bagSellMode = false;
 }
+function openAchivModal() {
+  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
+  if (!ctx.S.achiv) ctx.S.achiv = { naoya: { claimed: false } };
+  const stats = ctx.S.stats;
+  const n = ctx.S.achiv.naoya;
+  const q1 = Math.min(24, stats.totalHarvests);
+  const q2 = Math.min(24, ctx.S.hero?.maxStage || 1);
+  const q3 = Math.min(240, stats.totalCrits);
+  const done = q1 >= 24 && q2 >= 24 && q3 >= 240;
+  const btn = n.claimed ? `<div class="buy off" style="text-align:center; padding:10px;">\u0110\xE3 \u0110\xE1nh Th\u1EE9c Naoya Slime</div>` : done ? `<div class="buy" id="claimNaoya" style="text-align:center; padding:10px; font-size:14px; background:#fcd34d; color:#27272a; border-color:#d97706; box-shadow: 0 4px 10px rgba(252,211,77,0.4);">\u2726 \u0110\xD3N K\u1EBA KI\xCAU NG\u1EA0O V\u1EC0 NH\xC0 \u2726</div>` : `<div class="buy off" style="text-align:center; padding:10px;">Ch\u01B0a \u0110\u1EE7 \u0110i\u1EC1u Ki\u1EC7n</div>`;
+  openModal("Th\xE1nh Ph\u1EA3 Th\xE0nh T\u1EF1u", `
+      <div class="note" style="margin-bottom:12px;">C\xE1c Spec Pet (Th\u1EA7n Th\xFA \u0110\u1ED9c Nh\u1EA5t) kh\xF4ng th\u1EC3 d\xF9ng V\xE0ng v\u1EA5y b\u1EA9n. B\u1EA1n ph\u1EA3i ch\u1EE9ng minh th\u1EF1c l\u1EF1c qua Th\u1ED1ng k\xEA T\u1ED5ng.</div>
+      
+      <!-- B\u1ECCC TO\xC0N B\u1ED8 B\u1EB0NG DETAILS \u0110\u1EC2 C\xD3 TH\u1EC2 THU G\u1ECCN TO\xC0N T\u1EACP -->
+      <details style="background:#2c2538; border:2px solid #bd923b; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" open>
+          
+          <summary style="display:flex; justify-content:space-between; align-items:center; padding:15px; cursor:pointer; outline:none;">
+             <div style="font-weight:bold; font-size:15px; color:#fcd34d; text-shadow: 0 1px 2px #000;">
+                 M\xE0y kh\xF4ng c\xF3 tr\xE1i tim con ng\u01B0\u1EDDi \xE0?
+             </div>
+             <span style="font-size: 20px;">\u{1F31F}</span>
+          </summary>
+          
+          <div style="padding: 0 15px 15px 15px;">
+              <div style="font-size:12px; color:#d0ce70; margin-bottom:14px; font-style:italic; border-bottom: 1px solid #4a3461; padding-bottom: 10px;">
+                  "\u0110\xE1nh th\u1EE9c Slime Thi\u1EBFu Gia (Naoya) - K\u1EBB c\u0103m gh\xE9t s\u1EF1 ch\u1EADm ch\u1EA1p v\xE0 y\u1EBFu k\xE9m."
+              </div>
+              
+              <div style="margin-top: 10px;">
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">1. S\u1EF1 T\xE0n \xDAa: <span style="color:#aaa; font-weight:normal;">Thu ho\u1EA1ch 24 N\xF4ng s\u1EA3n b\u1EA5t k\u1EF3</span></div>
+                  <div style="background:#111; height:10px; border-radius:5px; margin-bottom:8px; overflow:hidden; border:1px solid #000;"><div style="background:linear-gradient(90deg, #4a3461, #8a6bc8); height:100%; width:${q1 / 24 * 100}%; transition: 0.5s;"></div></div>
+                  <div style="text-align:right; font-size:10px; margin-top:-6px; margin-bottom:15px; color:#aaa;">${q1}/24</div>
+                  
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. \u0110\u1EE9ng Tr\xEAn T\u1EA5t C\u1EA3: <span style="color:#aaa; font-weight:normal;">Ch\u1EA1m t\u1EDBi Stage 24 \u1EDF H\u1EA7m ng\u1EE5c</span></div>
+                  <div style="background:#111; height:10px; border-radius:5px; margin-bottom:8px; overflow:hidden; border:1px solid #000;"><div style="background:linear-gradient(90deg, #4a3461, #8a6bc8); height:100%; width:${q2 / 24 * 100}%; transition: 0.5s;"></div></div>
+                  <div style="text-align:right; font-size:10px; margin-top:-6px; margin-bottom:15px; color:#aaa;">${q2}/24</div>
+                  
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">3. K\u1EBB Cu\u1ED3ng T\u1ED1c \u0110\u1ED9: <span style="color:#aaa; font-weight:normal;">G\xE2y 240 \u0111\xF2n Ch\xED M\u1EA1ng (Crit) \u1EDF H\u1EA7m ng\u1EE5c</span></div>
+                  <div style="background:#111; height:10px; border-radius:5px; margin-bottom:8px; overflow:hidden; border:1px solid #000;"><div style="background:linear-gradient(90deg, #4a3461, #8a6bc8); height:100%; width:${q3 / 240 * 100}%; transition: 0.5s;"></div></div>
+                  <div style="text-align:right; font-size:10px; margin-top:-6px; color:#aaa;">${q3}/240</div>
+              </div>
+
+              <div style="margin-top:10px;">${btn}</div>
+          </div>
+      </details>
+  `);
+  const claimBtn = $id("claimNaoya");
+  if (claimBtn) claimBtn.addEventListener("click", () => {
+    ctx.S.achiv.naoya.claimed = true;
+    if (!ctx.S.pets.includes("naoyaSlime")) {
+      ctx.S.pets.push("naoyaSlime");
+      toast("\u2726 B\xD9M! Naoya \u0111\xE3 khinh b\u1EC9 b\u01B0\u1EDBc v\xE0o Balo c\u1EE7a b\u1EA1n!");
+    }
+    save();
+    openAchivModal();
+  });
+}
 function openPanel(kind) {
   if (kind === "gacha") {
     return openGachaModal();
@@ -6033,6 +6109,10 @@ function renderPlots() {
             ${spriteSVG("threeSlimesWalking", 64)}
             <div class="feature-name">Th\xE1m Hi\u1EC3m</div>
           </div>
+          <div class="explore-slot" id="eslot-achiv" style="background: rgba(60, 40, 20, 0.8); border-color: #f2c231; box-shadow: 0 4px 0 #8a6a1c, inset 0 0 0 3px rgba(242,194,49,0.4);">
+            <div style="font-size: 32px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">\u{1F3C6}</div>
+            <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Th\xE0nh T\u1EF1u</div>
+          </div>
         `;
         const dBtn = $id("eslot-dungeon");
         if (dBtn) dBtn.addEventListener("click", () => openPanel("dungeon"));
@@ -6040,6 +6120,8 @@ function renderPlots() {
         if (bBtn) bBtn.addEventListener("click", () => openPanel("bet"));
         const hBtn = $id("eslot-hero");
         if (hBtn) hBtn.addEventListener("click", () => openHeroPanel());
+        const aBtn = $id("eslot-achiv");
+        if (aBtn) aBtn.addEventListener("click", () => openAchivModal());
       }
     }
     return;
@@ -7486,6 +7568,7 @@ function loadState() {
   if (!ctx.S.theme) ctx.S.theme = "sakura";
   if (!ctx.S.page) ctx.S.page = 1;
   if (ctx.S.dragPet === void 0) ctx.S.dragPet = false;
+  if (!ctx.S.achiv) ctx.S.achiv = { naoya: { radishes: 0, crits: 0, claimed: false } };
   ctx.S.view = "farm";
   const petRenameMap = { "bunny": "jellyfish", "slimeNight": "peach_soda", "batBlob": "mystery_blob" };
   if (ctx.S.pets) ctx.S.pets = ctx.S.pets.map((p) => petRenameMap[p] || p);
@@ -8201,6 +8284,52 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
       }
     });
   }
+  if (skill === "projection_sorcery" && attacker) {
+    const nowMs = Date.now();
+    if (!attacker.lastProjTime) attacker.lastProjTime = 0;
+    if (nowMs - attacker.lastProjTime >= 2400) {
+      attacker.lastProjTime = nowMs;
+      const momentum = 1 / (attacker.maxCd || 1);
+      const projectionDmg = Math.floor(finalDmg * momentum);
+      const arena = document.getElementById("dg-arena");
+      enemyGroup.forEach((e) => {
+        if (e.hp > 0) {
+          if (e !== target) {
+            e.hp -= projectionDmg;
+            spawnDmg(e, -projectionDmg);
+          } else {
+            const extraDmg = Math.max(0, projectionDmg - finalDmg);
+            if (extraDmg > 0) {
+              e.hp -= extraDmg;
+              spawnDmg(e, -extraDmg, "crit");
+            }
+          }
+          if (!e.status) e.status = {};
+          e.status.freeze = 1;
+          if (arena && attacker.el) {
+            const ghost = attacker.el.cloneNode(true);
+            ghost.className = "dg-entity projection-ghost";
+            ghost.style.position = "absolute";
+            ghost.style.left = e.x + "px";
+            ghost.style.top = e.y + "px";
+            ghost.style.zIndex = "1";
+            ghost.style.opacity = "0.5";
+            ghost.style.filter = "grayscale(1) contrast(1.5)";
+            ghost.style.pointerEvents = "none";
+            arena.appendChild(ghost);
+            setTimeout(() => ghost.remove(), 150);
+          }
+        }
+      });
+      attacker.el.style.transition = "none";
+      attacker.el.style.transform = `translate3d(${target.x - 16}px, ${target.y - 16}px, 0) scale(1.1) skewX(-20deg)`;
+      setTimeout(() => {
+        if (attacker.el) {
+          attacker.el.style.transform = `translate3d(${attacker.x - 16}px, ${attacker.y - 16}px, 0)`;
+        }
+      }, 100);
+    }
+  }
 }
 function updateEntities(groupA, groupB, dt) {
   const arena = $id("dg-arena");
@@ -8733,6 +8862,7 @@ var init_dungeon = __esm({
       dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "25% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.", hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: "root" },
       prismBlob: { name: "L\u0103ng K\xEDnh", desc: "B\u1EAFn 3 tia s\xE1ng c\xF9ng l\xFAc (s\xE1t th\u01B0\u01A1ng chia n\u1EEDa).", hp: 100, atk: 25, range: 140, speed: 40, cd: 1.4, skill: "multishot" },
       penguin: { name: "C\xE1nh C\u1EE5t", desc: "\u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze" },
+      naoyaSlime: { name: "Naoya", desc: "\u0110\u1EA7u X\u1EA1 Ch\xFA Ph\xE1p (\xC1p d\u1EE5ng \u0110\u1EA7u X\u1EA1 Ch\xFA Ph\xE1p: L\u01B0\u1EDBt 24 khung h\xECnh c\xF4ng k\xEDch to\xE0n map, scale theo Gia t\u1ED1c v\xE0 \u0110\xF3ng b\u0103ng qu\xE1i 1s)", hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: "projection_sorcery" },
       default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
     };
     ENEMY_TYPES = [
@@ -9810,6 +9940,9 @@ function heroTick() {
             p.combo = (p.combo || 0) + 1;
             let isCrit = Math.random() < p.crit;
             if (passEq && pSkill[passEq] && pSkill[passEq].type === "combo_master" && p.combo % pSkill[passEq].val === 0) isCrit = true;
+            if (isCrit && ctx.S.achiv && !ctx.S.achiv.naoya.claimed) {
+              ctx.S.achiv.naoya.crits++;
+            }
             let dmgBase = Math.max(1, Math.floor(p.atk * atkMult * (0.8 + Math.random() * 0.4)));
             if (p.armorPen > 0) dmgBase = Math.floor(dmgBase * (1 + p.armorPen));
             if (passEq && pSkill[passEq]) {
@@ -9838,17 +9971,24 @@ function heroTick() {
             if (passEq && pSkill[passEq] && pSkill[passEq].type === "initial_burst" && runState.waveTime <= 3) {
               dmg = Math.floor(dmg * pSkill[passEq].val);
             }
-            tMob.hp -= dmg;
-            if (p.lifesteal > 0) {
-              const heal = Math.floor(dmg * p.lifesteal);
-              if (heal > 0) {
-                p.hp = Math.min(p.maxHp, p.hp + heal);
-                setTimeout(() => showFloatDamage("+" + heal, pEl, "#a4dc8c"), 150);
-                const hpPet = $id("hp-pet-" + pIdx);
-                if (hpPet) setTimeout(() => {
-                  hpPet.style.width = p.hp / p.maxHp * 100 + "%";
-                }, 150);
+            const doDamage = () => {
+              tMob.hp -= dmg;
+              if (p.lifesteal > 0) {
+                const heal = Math.floor(dmg * p.lifesteal);
+                if (heal > 0) {
+                  p.hp = Math.min(p.maxHp, p.hp + heal);
+                  setTimeout(() => showFloatDamage("+" + heal, pEl, "#a4dc8c"), 150);
+                  const hpPet = $id("hp-pet-" + pIdx);
+                  if (hpPet) setTimeout(() => {
+                    hpPet.style.width = p.hp / p.maxHp * 100 + "%";
+                  }, 150);
+                }
               }
+            };
+            if (p.id === "naoyaSlime") {
+              playNaoyaCutscene(p, pEl, mobEl, doDamage);
+            } else {
+              doDamage();
             }
             if (pEl) {
               pEl.classList.remove("idle");
@@ -10103,7 +10243,7 @@ function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
     animType = "projectile";
     spriteId = "fireball";
   } else {
-    const meleeSlash = ["octo", "ghostBlob", "impBlob"];
+    const meleeSlash = ["octo", "ghostBlob", "impBlob", "naoyaSlime"];
     const meleeSmash = ["slime", "octoCream"];
     const meleeBite = ["slimePink"];
     if (meleeSlash.includes(pId)) {
@@ -10301,6 +10441,84 @@ function initHero() {
     if (cashOutBtn) cashOutBtn.addEventListener("click", cashOutHero);
   }
 }
+function playNaoyaCutscene(attacker, attackerEl, targetEl, onComplete) {
+  if (!attackerEl || !targetEl) return onComplete && onComplete();
+  const scene2 = targetEl.closest(".hero-scene");
+  if (!scene2) return onComplete && onComplete();
+  const overlay = document.createElement("div");
+  overlay.style.cssText = "position:absolute; inset:0; z-index:20; opacity:0; transition:opacity 0.3s; background:radial-gradient(circle, transparent 20%, rgba(50,0,0,0.7) 100%); backdrop-filter:grayscale(1) contrast(1.2);";
+  const topBar = document.createElement("div");
+  const botBar = document.createElement("div");
+  const barStyle = "position:absolute; left:0; right:0; height:18%; background:#000; z-index:21; transition:transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);";
+  topBar.style.cssText = barStyle + "top:0; transform:translateY(-100%);";
+  botBar.style.cssText = barStyle + "bottom:0; transform:translateY(100%);";
+  scene2.appendChild(overlay);
+  scene2.appendChild(topBar);
+  scene2.appendChild(botBar);
+  setTimeout(() => {
+    overlay.style.opacity = "1";
+    topBar.style.transform = "translateY(0)";
+    botBar.style.transform = "translateY(0)";
+  }, 10);
+  const origTransform = attackerEl.style.transform;
+  const oldAz = attackerEl.style.zIndex;
+  const oldTz = targetEl.style.zIndex;
+  attackerEl.style.zIndex = "25";
+  targetEl.style.zIndex = "22";
+  const tRect = targetEl.getBoundingClientRect();
+  const sRect = scene2.getBoundingClientRect();
+  const tx = tRect.left - sRect.left + tRect.width / 2;
+  const ty = tRect.top - sRect.top + tRect.height / 2;
+  let frame = 0;
+  const maxFrames = 24;
+  attackerEl.style.transition = "none";
+  const interval = setInterval(() => {
+    frame++;
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 25 + Math.random() * 40;
+    const px = tx + Math.cos(angle) * radius - 16;
+    const py = ty + Math.sin(angle) * radius - 16;
+    attackerEl.style.transform = `translate3d(${px}px, ${py}px, 0) scale(1.3) skewX(${(Math.random() - 0.5) * 30}deg)`;
+    const ghost = attackerEl.cloneNode(true);
+    ghost.className = "projection-ghost";
+    ghost.style.position = "absolute";
+    ghost.style.zIndex = "24";
+    ghost.style.opacity = "0.6";
+    ghost.style.filter = "grayscale(1) brightness(1.5)";
+    ghost.style.pointerEvents = "none";
+    scene2.appendChild(ghost);
+    setTimeout(() => ghost.remove(), 100);
+    targetEl.style.transform = `translate3d(${(Math.random() - 0.5) * 10}px, ${(Math.random() - 0.5) * 10}px, 0)`;
+    if (frame >= maxFrames) {
+      clearInterval(interval);
+      const boom = document.createElement("div");
+      boom.style.cssText = `position:absolute; left:${tx}px; top:${ty}px; width:0; height:0; background:#fff; box-shadow:0 0 100px 50px #fff; border-radius:50%; z-index:26; transform:translate(-50%, -50%); transition:width 0.1s, height 0.1s, opacity 0.3s; opacity:1;`;
+      scene2.appendChild(boom);
+      setTimeout(() => {
+        boom.style.width = "200px";
+        boom.style.height = "200px";
+        boom.style.opacity = "0";
+      }, 10);
+      setTimeout(() => boom.remove(), 350);
+      overlay.style.opacity = "0";
+      topBar.style.transform = "translateY(-100%)";
+      botBar.style.transform = "translateY(100%)";
+      setTimeout(() => {
+        overlay.remove();
+        topBar.remove();
+        botBar.remove();
+      }, 300);
+      attackerEl.style.transition = "transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1)";
+      attackerEl.style.transform = origTransform;
+      targetEl.style.transform = "translate3d(0,0,0)";
+      setTimeout(() => {
+        attackerEl.style.zIndex = oldAz;
+        targetEl.style.zIndex = oldTz;
+      }, 300);
+      if (onComplete) onComplete();
+    }
+  }, 40);
+}
 var heroLoop, lastTick, PET_SKILLS, PET_STATS2, runState, hToastTimer, hGesture;
 var init_hero = __esm({
   "src/hero.js"() {
@@ -10424,6 +10642,7 @@ var init_hero = __esm({
       starBell: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1 },
       peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
       penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5, baseSpd: 1 },
+      naoyaSlime: { baseHp: 80, hpPerLv: 10, baseAtk: 24, atkPerLv: 6, baseSpd: 2.4 },
       default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1 }
     };
     runState = null;
@@ -16089,6 +16308,7 @@ __export(all_exports, {
   onOrbMove: () => onOrbMove,
   onOrbUp: () => onOrbUp,
   onResize: () => onResize,
+  openAchivModal: () => openAchivModal,
   openBetModal: () => openBetModal,
   openBuyDlg: () => openBuyDlg,
   openDungeonView: () => openDungeonView,
@@ -16131,6 +16351,7 @@ __export(all_exports, {
   placePet: () => placePet,
   placeWin: () => placeWin,
   plant: () => plant,
+  playNaoyaCutscene: () => playNaoyaCutscene,
   plotEmote: () => plotEmote,
   plotHTML: () => plotHTML,
   registerDynamicSprite: () => registerDynamicSprite,

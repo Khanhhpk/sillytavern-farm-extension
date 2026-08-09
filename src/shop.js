@@ -29,6 +29,75 @@ export function closeModal() {
   bagSellMode = false; 
 }   // Tự kiểm: đóng cửa sổ thì thoát chế độ tick chọn
 
+/* ---------- Giao diện Bảng Thành Tựu Ngôi Sao ---------- */
+export function openAchivModal() {
+  // Đồng bộ hệ thống dữ liệu chuẩn
+  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
+  if (!ctx.S.achiv) ctx.S.achiv = { naoya: { claimed: false } }; // Chỉ cần cờ đánh dấu đã nhận!
+  
+  const stats = ctx.S.stats;
+  const n = ctx.S.achiv.naoya;
+  
+  // Các Quest sau này cũng sẽ dùng chung cấu trúc y hệt thế này
+  const q1 = Math.min(24, stats.totalHarvests);
+  const q2 = Math.min(24, ctx.S.hero?.maxStage || 1);
+  const q3 = Math.min(240, stats.totalCrits);
+  const done = q1 >= 24 && q2 >= 24 && q3 >= 240;
+
+  const btn = n.claimed ? `<div class="buy off" style="text-align:center; padding:10px;">Đã Đánh Thức Naoya Slime</div>` :
+              done ? `<div class="buy" id="claimNaoya" style="text-align:center; padding:10px; font-size:14px; background:#fcd34d; color:#27272a; border-color:#d97706; box-shadow: 0 4px 10px rgba(252,211,77,0.4);">✦ ĐÓN KẺ KIÊU NGẠO VỀ NHÀ ✦</div>` :
+              `<div class="buy off" style="text-align:center; padding:10px;">Chưa Đủ Điều Kiện</div>`;
+
+  openModal('Thánh Phả Thành Tựu', `
+      <div class="note" style="margin-bottom:12px;">Các Spec Pet (Thần Thú Độc Nhất) không thể dùng Vàng vấy bẩn. Bạn phải chứng minh thực lực qua Thống kê Tổng.</div>
+      
+      <!-- BỌC TOÀN BỘ BẰNG DETAILS ĐỂ CÓ THỂ THU GỌN TOÀN TẬP -->
+      <details style="background:#2c2538; border:2px solid #bd923b; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" open>
+          
+          <summary style="display:flex; justify-content:space-between; align-items:center; padding:15px; cursor:pointer; outline:none;">
+             <div style="font-weight:bold; font-size:15px; color:#fcd34d; text-shadow: 0 1px 2px #000;">
+                 Mày không có trái tim con người à?
+             </div>
+             <span style="font-size: 20px;">🌟</span>
+          </summary>
+          
+          <div style="padding: 0 15px 15px 15px;">
+              <div style="font-size:12px; color:#d0ce70; margin-bottom:14px; font-style:italic; border-bottom: 1px solid #4a3461; padding-bottom: 10px;">
+                  "Đánh thức Slime Thiếu Gia (Naoya) - Kẻ căm ghét sự chậm chạp và yếu kém."
+              </div>
+              
+              <div style="margin-top: 10px;">
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">1. Sự Tàn Úa: <span style="color:#aaa; font-weight:normal;">Thu hoạch 24 Nông sản bất kỳ</span></div>
+                  <div style="background:#111; height:10px; border-radius:5px; margin-bottom:8px; overflow:hidden; border:1px solid #000;"><div style="background:linear-gradient(90deg, #4a3461, #8a6bc8); height:100%; width:${(q1/24)*100}%; transition: 0.5s;"></div></div>
+                  <div style="text-align:right; font-size:10px; margin-top:-6px; margin-bottom:15px; color:#aaa;">${q1}/24</div>
+                  
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. Đứng Trên Tất Cả: <span style="color:#aaa; font-weight:normal;">Chạm tới Stage 24 ở Hầm ngục</span></div>
+                  <div style="background:#111; height:10px; border-radius:5px; margin-bottom:8px; overflow:hidden; border:1px solid #000;"><div style="background:linear-gradient(90deg, #4a3461, #8a6bc8); height:100%; width:${(q2/24)*100}%; transition: 0.5s;"></div></div>
+                  <div style="text-align:right; font-size:10px; margin-top:-6px; margin-bottom:15px; color:#aaa;">${q2}/24</div>
+                  
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">3. Kẻ Cuồng Tốc Độ: <span style="color:#aaa; font-weight:normal;">Gây 240 đòn Chí Mạng (Crit) ở Hầm ngục</span></div>
+                  <div style="background:#111; height:10px; border-radius:5px; margin-bottom:8px; overflow:hidden; border:1px solid #000;"><div style="background:linear-gradient(90deg, #4a3461, #8a6bc8); height:100%; width:${(q3/240)*100}%; transition: 0.5s;"></div></div>
+                  <div style="text-align:right; font-size:10px; margin-top:-6px; color:#aaa;">${q3}/240</div>
+              </div>
+
+              <div style="margin-top:10px;">${btn}</div>
+          </div>
+      </details>
+  `);
+
+  const claimBtn = All.$id('claimNaoya');
+  if (claimBtn) claimBtn.addEventListener('click', () => {
+      ctx.S.achiv.naoya.claimed = true;
+      if (!ctx.S.pets.includes('naoyaSlime')) { 
+          ctx.S.pets.push('naoyaSlime');
+          toast('✦ BÙM! Naoya đã khinh bỉ bước vào Balo của bạn!');
+      }
+      save();
+      openAchivModal(); 
+  });
+}
+
+
 export let shopTab = 'seed';
 export let bagTab = 'crop';
 export let bagSellMode = false, bagSel = {};              // Bán một chạm: chế độ tick chọn (mặc định chọn hết)

@@ -124,6 +124,7 @@ export const PET_STATS = {
   starBell: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1.0 },
   peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
   penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5, baseSpd: 1.0 },
+  naoyaSlime: { baseHp: 80, hpPerLv: 10, baseAtk: 24, atkPerLv: 6, baseSpd: 2.4 },
   default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1.0 }
 };
 
@@ -1122,6 +1123,10 @@ function heroTick() {
             p.combo = (p.combo || 0) + 1;
             let isCrit = Math.random() < p.crit;
             if (passEq && pSkill[passEq] && pSkill[passEq].type === 'combo_master' && p.combo % pSkill[passEq].val === 0) isCrit = true;
+
+            if (isCrit && ctx.S.achiv && !ctx.S.achiv.naoya.claimed) {
+                ctx.S.achiv.naoya.crits++;
+            }
             
             let dmgBase = Math.max(1, Math.floor(p.atk * atkMult * (0.8 + Math.random() * 0.4)));
             if (p.armorPen > 0) dmgBase = Math.floor(dmgBase * (1 + p.armorPen));
@@ -1159,17 +1164,26 @@ function heroTick() {
                 dmg = Math.floor(dmg * pSkill[passEq].val);
             }
             
-            tMob.hp -= dmg;
-            
-            if (p.lifesteal > 0) {
-              const heal = Math.floor(dmg * p.lifesteal);
-              if (heal > 0) {
-                p.hp = Math.min(p.maxHp, p.hp + heal);
-                setTimeout(() => showFloatDamage('+' + heal, pEl, '#a4dc8c'), 150);
-                const hpPet = All.$id('hp-pet-' + pIdx);
-                if (hpPet) setTimeout(() => { hpPet.style.width = ((p.hp / p.maxHp) * 100) + '%'; }, 150);
+            const doDamage = () => {
+              tMob.hp -= dmg;
+              
+              if (p.lifesteal > 0) {
+                const heal = Math.floor(dmg * p.lifesteal);
+                if (heal > 0) {
+                  p.hp = Math.min(p.maxHp, p.hp + heal);
+                  setTimeout(() => showFloatDamage('+' + heal, pEl, '#a4dc8c'), 150);
+                  const hpPet = All.$id('hp-pet-' + pIdx);
+                  if (hpPet) setTimeout(() => { hpPet.style.width = ((p.hp / p.maxHp) * 100) + '%'; }, 150);
+                }
               }
+            };
+
+            if (p.id === 'naoyaSlime') {
+                playNaoyaCutscene(p, pEl, mobEl, doDamage);
+            } else {
+                doDamage();
             }
+
             
             if (pEl) { pEl.classList.remove('idle'); pEl.classList.add('attack'); setTimeout(() => { pEl.classList.remove('attack'); pEl.classList.add('idle'); }, 300); }
             if (mobEl) { setTimeout(() => { mobEl.classList.remove('idle'); mobEl.classList.add('hurt'); setTimeout(() => { mobEl.classList.remove('hurt'); mobEl.classList.add('idle'); }, 200); }, 150); }
@@ -1411,7 +1425,7 @@ function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
     animType = 'projectile'; spriteId = 'fireball';
   } else {
     // Determine type by pet ID
-    const meleeSlash = ['octo', 'ghostBlob', 'impBlob'];
+    const meleeSlash = ['octo', 'ghostBlob', 'impBlob', 'naoyaSlime'];
     const meleeSmash = ['slime', 'octoCream'];
     const meleeBite = ['slimePink'];
     
@@ -1608,4 +1622,116 @@ export function initHero() {
   }
 }
 
+// --- CUTSCENE ĐIỆN ẢNH ĐỘC QUYỀN CỦA NAOYA SLIME ---
+export function playNaoyaCutscene(attacker, attackerEl, targetEl, onComplete) {
+    if (!attackerEl || !targetEl) return onComplete && onComplete();
+    const scene = targetEl.closest('.hero-scene');
+    if (!scene) return onComplete && onComplete();
 
+    // 1. Phủ màn Cinematic tĩnh (Letterbox + Grayscale Time-Stop)
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:absolute; inset:0; z-index:20; opacity:0; transition:opacity 0.3s; background:radial-gradient(circle, transparent 20%, rgba(50,0,0,0.7) 100%); backdrop-filter:grayscale(1) contrast(1.2);';
+    
+    // Viền phim rạp trên dưới
+    const topBar = document.createElement('div');
+    const botBar = document.createElement('div');
+    const barStyle = 'position:absolute; left:0; right:0; height:18%; background:#000; z-index:21; transition:transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);';
+    topBar.style.cssText = barStyle + 'top:0; transform:translateY(-100%);';
+    botBar.style.cssText = barStyle + 'bottom:0; transform:translateY(100%);';
+
+    scene.appendChild(overlay);
+    scene.appendChild(topBar);
+    scene.appendChild(botBar);
+
+    // Kích hoạt Khung hình phim
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+        topBar.style.transform = 'translateY(0)';
+        botBar.style.transform = 'translateY(0)';
+    }, 10);
+
+    // 2. Kéo Naoya và Nạn nhân lên sân khấu chính, chốt tọa độ gốc
+    const origTransform = attackerEl.style.transform;
+    const oldAz = attackerEl.style.zIndex;
+    const oldTz = targetEl.style.zIndex;
+    attackerEl.style.zIndex = '25';
+    targetEl.style.zIndex = '22';
+
+    const tRect = targetEl.getBoundingClientRect();
+    const sRect = scene.getBoundingClientRect();
+    const tx = tRect.left - sRect.left + tRect.width / 2;
+    const ty = tRect.top - sRect.top + tRect.height / 2;
+
+    let frame = 0;
+    const maxFrames = 24;
+    
+    attackerEl.style.transition = 'none';
+
+    // 3. Bắt đầu 24 Khung hình băm vằm
+    const interval = setInterval(() => {
+        frame++;
+        
+        // Naoya dịch chuyển liên tục, chém chéo cơ thể
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 25 + Math.random() * 40; 
+        const px = tx + Math.cos(angle) * radius - 16;
+        const py = ty + Math.sin(angle) * radius - 16;
+        
+        attackerEl.style.transform = `translate3d(${px}px, ${py}px, 0) scale(1.3) skewX(${(Math.random()-0.5)*30}deg)`;
+
+        // Tàn ảnh (Ghosting trail) đằng sau lưng!
+        const ghost = attackerEl.cloneNode(true);
+        ghost.className = 'projection-ghost';
+        ghost.style.position = 'absolute';
+        ghost.style.zIndex = '24';
+        ghost.style.opacity = '0.6';
+        ghost.style.filter = 'grayscale(1) brightness(1.5)';
+        ghost.style.pointerEvents = 'none';
+        scene.appendChild(ghost);
+        setTimeout(() => ghost.remove(), 100);
+
+        // Nạn nhân rung lắc liên hồi
+        targetEl.style.transform = `translate3d(${(Math.random()-0.5)*10}px, ${(Math.random()-0.5)*10}px, 0)`;
+
+        if (frame >= maxFrames) {
+            clearInterval(interval);
+            
+            // Khung hình 24: Bùng nổ không gian
+            const boom = document.createElement('div');
+            boom.style.cssText = `position:absolute; left:${tx}px; top:${ty}px; width:0; height:0; background:#fff; box-shadow:0 0 100px 50px #fff; border-radius:50%; z-index:26; transform:translate(-50%, -50%); transition:width 0.1s, height 0.1s, opacity 0.3s; opacity:1;`;
+            scene.appendChild(boom);
+            
+            setTimeout(() => {
+                boom.style.width = '200px';
+                boom.style.height = '200px';
+                boom.style.opacity = '0';
+            }, 10);
+            
+            setTimeout(() => boom.remove(), 350);
+
+            // Hoàn trả màn hình và UI
+            overlay.style.opacity = '0';
+            topBar.style.transform = 'translateY(-100%)';
+            botBar.style.transform = 'translateY(100%)';
+            
+            setTimeout(() => {
+                overlay.remove();
+                topBar.remove();
+                botBar.remove();
+            }, 300);
+
+            // Ném Naoya về chỗ cũ
+            attackerEl.style.transition = 'transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1)';
+            attackerEl.style.transform = origTransform;
+            targetEl.style.transform = 'translate3d(0,0,0)';
+            
+            setTimeout(() => {
+                attackerEl.style.zIndex = oldAz;
+                targetEl.style.zIndex = oldTz;
+            }, 300);
+
+            // 4. Kích nổ Dame
+            if (onComplete) onComplete();
+        }
+    }, 40); // 24 FPS (1000/24 ~ 40ms)
+}
