@@ -5121,7 +5121,7 @@ function openAchivModal() {
   const done = q1 >= 240 && q2 >= 24 && q3 >= 2400;
   const btn = n.claimed ? `<div class="buy off" style="text-align:center; padding:10px;">\u0110\xE3 \u0110\xE1nh Th\u1EE9c Naoya Slime</div>` : done ? `<div class="buy" id="claimNaoya" style="text-align:center; padding:10px; font-size:14px; background:#fcd34d; color:#27272a; border-color:#d97706; box-shadow: 0 4px 10px rgba(252,211,77,0.4);">\u2726 \u0110\xD3N K\u1EBA KI\xCAU NG\u1EA0O V\u1EC0 NH\xC0 \u2726</div>` : `<div class="buy off" style="text-align:center; padding:10px;">Ch\u01B0a \u0110\u1EE7 \u0110i\u1EC1u Ki\u1EC7n</div>`;
   openModal("Th\xE1nh Ph\u1EA3 Th\xE0nh T\u1EF1u", `
-      <div class="note" style="margin-bottom:12px;">C\xE1c Spec Pet (Th\u1EA7n Th\xFA \u0110\u1ED9c Nh\u1EA5t) kh\xF4ng th\u1EC3 d\xF9ng V\xE0ng v\u1EA5y b\u1EA9n. B\u1EA1n ph\u1EA3i ch\u1EE9ng minh th\u1EF1c l\u1EF1c qua Th\u1ED1ng k\xEA T\u1ED5ng.</div>
+      <div class="note" style="margin-bottom:12px;">C\xE1c Spec Pet (Th\u1EA7n Th\xFA \u0110\u1ED9c Nh\u1EA5t) kh\xF4ng th\u1EC3 d\xF9ng V\xE0ng v\u1EA5y b\u1EA9n. B\u1EA1n ph\u1EA3i ch\u1EE9ng minh th\u1EF1c l\u1EF1c qua Th\xE0nh T\u1EF1u.</div>
       
       <!-- B\u1ECCC TO\xC0N B\u1ED8 B\u1EB0NG DETAILS \u0110\u1EC2 C\xD3 TH\u1EC2 THU G\u1ECCN TO\xC0N T\u1EACP -->
       <details style="background:#2c2538; border:2px solid #bd923b; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" open>
@@ -5145,13 +5145,13 @@ function openAchivModal() {
                       <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q1}/240</div>
                   </div>
                   
-                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. \u0110\u1EE9ng Tr\xEAn T\u1EA5t C\u1EA3: <span style="color:#aaa; font-weight:normal;">Ch\u1EA1m t\u1EDBi Wave 24 \u1EDF H\u1EA7m ng\u1EE5c</span></div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. \u0110\u1EE9ng Tr\xEAn T\u1EA5t C\u1EA3: <span style="color:#aaa; font-weight:normal;">Ch\u1EA1m t\u1EDBi Wave 24 \u1EDF Dungeon</span></div>
                   <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #4a3461; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
                       <div style="background:linear-gradient(90deg, #7c3aed, #a78bfa); width:${q2 / 24 * 100}%; height:100%;"></div>
                       <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q2}/24</div>
                   </div>
                   
-                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">3. K\u1EBB Cu\u1ED3ng T\u1ED1c \u0110\u1ED9: <span style="color:#aaa; font-weight:normal;">G\xE2y 2400 \u0111\xF2n Ch\xED M\u1EA1ng (Crit) \u1EDF H\u1EA7m ng\u1EE5c</span></div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">3. K\u1EBB Cu\u1ED3ng T\u1ED1c \u0110\u1ED9: <span style="color:#aaa; font-weight:normal;">G\xE2y 2400 \u0111\xF2n Ch\xED M\u1EA1ng (Crit) \u1EDF Dungeon</span></div>
                   <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #4a3461; height:10px; position:relative; margin-bottom:16px; overflow:hidden;">
                       <div style="background:linear-gradient(90deg, #7c3aed, #a78bfa); width:${q3 / 2400 * 100}%; height:100%;"></div>
                       <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q3}/2400</div>

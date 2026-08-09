@@ -49,7 +49,7 @@ export function openAchivModal() {
               `<div class="buy off" style="text-align:center; padding:10px;">Chưa Đủ Điều Kiện</div>`;
 
   openModal('Thánh Phả Thành Tựu', `
-      <div class="note" style="margin-bottom:12px;">Các Spec Pet (Thần Thú Độc Nhất) không thể dùng Vàng vấy bẩn. Bạn phải chứng minh thực lực qua Thống kê Tổng.</div>
+      <div class="note" style="margin-bottom:12px;">Các Spec Pet (Thần Thú Độc Nhất) không thể dùng Vàng vấy bẩn. Bạn phải chứng minh thực lực qua Thành Tựu.</div>
       
       <!-- BỌC TOÀN BỘ BẰNG DETAILS ĐỂ CÓ THỂ THU GỌN TOÀN TẬP -->
       <details style="background:#2c2538; border:2px solid #bd923b; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" open>
@@ -73,13 +73,13 @@ export function openAchivModal() {
                       <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q1}/240</div>
                   </div>
                   
-                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. Đứng Trên Tất Cả: <span style="color:#aaa; font-weight:normal;">Chạm tới Wave 24 ở Hầm ngục</span></div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. Đứng Trên Tất Cả: <span style="color:#aaa; font-weight:normal;">Chạm tới Wave 24 ở Dungeon</span></div>
                   <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #4a3461; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
                       <div style="background:linear-gradient(90deg, #7c3aed, #a78bfa); width:${(q2/24)*100}%; height:100%;"></div>
                       <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q2}/24</div>
                   </div>
                   
-                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">3. Kẻ Cuồng Tốc Độ: <span style="color:#aaa; font-weight:normal;">Gây 2400 đòn Chí Mạng (Crit) ở Hầm ngục</span></div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">3. Kẻ Cuồng Tốc Độ: <span style="color:#aaa; font-weight:normal;">Gây 2400 đòn Chí Mạng (Crit) ở Dungeon</span></div>
                   <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #4a3461; height:10px; position:relative; margin-bottom:16px; overflow:hidden;">
                       <div style="background:linear-gradient(90deg, #7c3aed, #a78bfa); width:${(q3/2400)*100}%; height:100%;"></div>
                       <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q3}/2400</div>
