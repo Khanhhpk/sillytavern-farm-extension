@@ -127,6 +127,10 @@ export function harvest(pi, quiet) {
   const c = curPlots()[pi].crop;
   if (!c || now() < c.matureAt) return null;
   rollMutation(c, pi);                                  // Cửa thu hoạch gieo bù (chống việc bấm quá nhanh trong 1 giây sau khi chín làm bỏ qua bước xét)
+  
+  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
+  ctx.S.stats.totalHarvests = (ctx.S.stats.totalHarvests || 0) + 1;
+  
   const def = CROPS[c.id];
   let n = 1;                      // v1.1: hệ số sản lượng nghỉ hưu (sự kiện chỉ ảnh hưởng thời gian sinh trưởng)
   const dev = todayEvent();

@@ -3260,6 +3260,8 @@ function harvest(pi, quiet) {
   const c = curPlots()[pi].crop;
   if (!c || now() < c.matureAt) return null;
   rollMutation(c, pi);
+  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
+  ctx.S.stats.totalHarvests = (ctx.S.stats.totalHarvests || 0) + 1;
   const def = CROPS[c.id];
   let n = 1;
   const dev = todayEvent();
@@ -9935,6 +9937,10 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     if (Math.random() < critChance) {
       finalDmg = Math.round(finalDmg * (attacker.critDmg || 1.5));
       isCrit = true;
+      if (attacker.type === "pet") {
+        if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
+        ctx.S.stats.totalCrits = (ctx.S.stats.totalCrits || 0) + 1;
+      }
     }
   }
   if (target.armor && target.armor > 0) {

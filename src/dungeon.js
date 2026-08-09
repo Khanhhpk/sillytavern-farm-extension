@@ -697,6 +697,10 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
         if (Math.random() < critChance) {
             finalDmg = Math.round(finalDmg * (attacker.critDmg || 1.5));
             isCrit = true;
+            if (attacker.type === 'pet') {
+                if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
+                ctx.S.stats.totalCrits = (ctx.S.stats.totalCrits || 0) + 1;
+            }
         }
     }
     
