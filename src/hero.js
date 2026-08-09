@@ -102,6 +102,11 @@ export const PET_SKILLS = {
     p1: { name: 'Mỏ Vàng', type: 'gold_drop', val: 2.0, desc: 'Nhân đôi Vàng rớt ra từ quái' },
     p2: { name: 'Nhặt Nhạnh', type: 'scavenger', val: 0.05, desc: 'Khi đầy máu, đánh có 5% rơi 1 Vàng' }
   },
+  naoyaSlime: {
+      a1: { name: '24 Khung Hình', type: 'multi_strike', val: 24, cd: 8, duration: 1, desc: 'Tung 24 đòn chém liên tiếp (Mỗi đòn 50% ATK)' },
+      a2: { name: 'Đứng Trên Tất Cả', type: 'atk_spd_self', val: 2.4, cd: 12, duration: 3, desc: 'Buff x2.4 Tốc Đánh trong 3s' },
+      p1: { name: 'Khinh Miệt Kẻ Yếu', type: 'execute', val: 0.24, desc: 'Tự động kiết liễu quái có HP < 24%' }
+  },
   default: { 
     a1: { name: 'Cố Gắng', type: 'atk_up', val: 0.2, cd: 5, duration: 3, desc: 'Tăng 20% ATK' }, 
     p1: { name: 'Lạc Quan', type: 'crit_rate', val: 0.2, desc: 'Tỉ lệ Bạo kích +20%' } 
@@ -941,13 +946,41 @@ function heroTick() {
               setTimeout(() => showFloatDamage('-' + dmg, mobEl, '#ff5555'), 150);
               spawnSkillEffect(pEl, mobEl, aSk.type);
             } else if (aSk.type === 'multi_strike') {
-              for(let i=0; i<aSk.val; i++) {
-                setTimeout(() => {
-                    if (tMob.hp > 0) {
-                        tMob.hp -= p.atk;
-                        spawnAttackEffect(p.id, pEl, mobEl, false, false);
-                    }
-                }, i * 150);
+              if (p.id === 'naoyaSlime') {
+                  // [Tawa Hook]: Kích hoạt Cutscene Điện ảnh
+                  runState.isTransitioning = true; // Đóng băng thời gian
+                  playNaoyaCutscene(p, pEl, mobEl, () => {
+                      // Đợi chém xong mới xả sát thương tổng cộng dồn
+                      let totalDmg = 0;
+                      for(let i = 0; i < aSk.val; i++) {
+                          if (tMob.hp > 0) {
+                              tMob.hp -= p.atk * 0.5;
+                              totalDmg += p.atk * 0.5;
+                          }
+                      }
+                      setTimeout(() => showFloatDamage('-' + Math.floor(totalDmg), mobEl, '#ff0000'), 0);
+                      
+                      // --- HỆ THỐNG GIAO TIẾP (NAOYA DIALOGUE) ---
+                      const isDead = tMob.hp <= 0;
+                      const quotesAlive = ["Rác rưởi!", "Chậm quá đấy!", "Biết thân biết phận đi!"];
+                      const quote = isDead 
+                          ? "Mày không phải Toji." 
+                          : quotesAlive[Math.floor(Math.random() * quotesAlive.length)];
+                      
+                      // Hiện Bong bóng thoại cho Naoya
+                      setTimeout(() => showFloatDamage('💬 ' + quote, pEl, '#fcd34d'), 300);
+
+                      runState.isTransitioning = false; // Mở lại trận đấu
+                  });
+              } else {
+                  for(let i=0; i<aSk.val; i++) {
+                    setTimeout(() => {
+                        if (tMob.hp > 0) {
+                            tMob.hp -= p.atk;
+                            spawnAttackEffect(p.id, pEl, mobEl, false, false);
+                        }
+                    }, i * 150);
+                  }
               }
             } else if (aSk.type === 'atk_spd_self') {
                p.spdBuff = aSk.val; 
@@ -1178,11 +1211,7 @@ function heroTick() {
               }
             };
 
-            if (p.id === 'naoyaSlime') {
-                playNaoyaCutscene(p, pEl, mobEl, doDamage);
-            } else {
-                doDamage();
-            }
+            doDamage();
 
             
             if (pEl) { pEl.classList.remove('idle'); pEl.classList.add('attack'); setTimeout(() => { pEl.classList.remove('attack'); pEl.classList.add('idle'); }, 300); }

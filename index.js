@@ -8400,13 +8400,32 @@ function heroTick() {
               setTimeout(() => showFloatDamage("-" + dmg, mobEl, "#ff5555"), 150);
               spawnSkillEffect(pEl, mobEl, aSk.type);
             } else if (aSk.type === "multi_strike") {
-              for (let i = 0; i < aSk.val; i++) {
-                setTimeout(() => {
-                  if (tMob.hp > 0) {
-                    tMob.hp -= p.atk;
-                    spawnAttackEffect(p.id, pEl, mobEl, false, false);
+              if (p.id === "naoyaSlime") {
+                runState.isTransitioning = true;
+                playNaoyaCutscene(p, pEl, mobEl, () => {
+                  let totalDmg = 0;
+                  for (let i = 0; i < aSk.val; i++) {
+                    if (tMob.hp > 0) {
+                      tMob.hp -= p.atk * 0.5;
+                      totalDmg += p.atk * 0.5;
+                    }
                   }
-                }, i * 150);
+                  setTimeout(() => showFloatDamage("-" + Math.floor(totalDmg), mobEl, "#ff0000"), 0);
+                  const isDead = tMob.hp <= 0;
+                  const quotesAlive = ["R\xE1c r\u01B0\u1EDFi!", "Ch\u1EADm qu\xE1 \u0111\u1EA5y!", "Bi\u1EBFt th\xE2n bi\u1EBFt ph\u1EADn \u0111i!"];
+                  const quote = isDead ? "M\xE0y kh\xF4ng ph\u1EA3i Toji." : quotesAlive[Math.floor(Math.random() * quotesAlive.length)];
+                  setTimeout(() => showFloatDamage("\u{1F4AC} " + quote, pEl, "#fcd34d"), 300);
+                  runState.isTransitioning = false;
+                });
+              } else {
+                for (let i = 0; i < aSk.val; i++) {
+                  setTimeout(() => {
+                    if (tMob.hp > 0) {
+                      tMob.hp -= p.atk;
+                      spawnAttackEffect(p.id, pEl, mobEl, false, false);
+                    }
+                  }, i * 150);
+                }
               }
             } else if (aSk.type === "atk_spd_self") {
               p.spdBuff = aSk.val;
@@ -8637,11 +8656,7 @@ function heroTick() {
                 }
               }
             };
-            if (p.id === "naoyaSlime") {
-              playNaoyaCutscene(p, pEl, mobEl, doDamage);
-            } else {
-              doDamage();
-            }
+            doDamage();
             if (pEl) {
               pEl.classList.remove("idle");
               pEl.classList.add("attack");
@@ -9272,6 +9287,11 @@ var init_hero = __esm({
         a2: { name: "N\xE9m Ti\u1EC1n", type: "coin_toss", val: 0, cd: 10, duration: 0, desc: "Ti\xEAu 20% V\xE0ng \u0111\xE1nh bay 50% HP qu\xE1i" },
         p1: { name: "M\u1ECF V\xE0ng", type: "gold_drop", val: 2, desc: "Nh\xE2n \u0111\xF4i V\xE0ng r\u1EDBt ra t\u1EEB qu\xE1i" },
         p2: { name: "Nh\u1EB7t Nh\u1EA1nh", type: "scavenger", val: 0.05, desc: "Khi \u0111\u1EA7y m\xE1u, \u0111\xE1nh c\xF3 5% r\u01A1i 1 V\xE0ng" }
+      },
+      naoyaSlime: {
+        a1: { name: "24 Khung H\xECnh", type: "multi_strike", val: 24, cd: 8, duration: 1, desc: "Tung 24 \u0111\xF2n ch\xE9m li\xEAn ti\u1EBFp (M\u1ED7i \u0111\xF2n 50% ATK)" },
+        a2: { name: "\u0110\u1EE9ng Tr\xEAn T\u1EA5t C\u1EA3", type: "atk_spd_self", val: 2.4, cd: 12, duration: 3, desc: "Buff x2.4 T\u1ED1c \u0110\xE1nh trong 3s" },
+        p1: { name: "Khinh Mi\u1EC7t K\u1EBB Y\u1EBFu", type: "execute", val: 0.24, desc: "T\u1EF1 \u0111\u1ED9ng ki\u1EBFt li\u1EC5u qu\xE1i c\xF3 HP < 24%" }
       },
       default: {
         a1: { name: "C\u1ED1 G\u1EAFng", type: "atk_up", val: 0.2, cd: 5, duration: 3, desc: "T\u0103ng 20% ATK" },
@@ -10056,23 +10076,44 @@ function updateEntities(groupA, groupB, dt) {
       if (a.maxSkillCd > 0 && a.skillCd <= 0 && a.skill === "projection_sorcery") {
         a.skillCd = a.maxSkillCd;
         const momentum = 1 / (a.maxCd || 1);
-        const projectionDmg = Math.floor(a.atk * 3 * momentum);
-        playNaoyaCutscene(a, a.el, closest.b.el, () => {
-          targetGroup.forEach((e) => {
-            if (e.hp > 0) {
-              if (e !== closest.b) {
-                e.hp -= projectionDmg;
-                spawnDmg(e, -projectionDmg);
-              } else {
-                const extraDmg = Math.floor(projectionDmg * 1.5);
+        const finalDmg = a.atk;
+        const projectionDmg = Math.floor(finalDmg * momentum);
+        targetGroup.forEach((e) => {
+          if (e.hp > 0) {
+            if (e !== closest.b) {
+              e.hp -= projectionDmg;
+              spawnDmg(e, -projectionDmg);
+            } else {
+              const extraDmg = Math.max(0, projectionDmg - finalDmg);
+              if (extraDmg > 0) {
                 e.hp -= extraDmg;
                 spawnDmg(e, -extraDmg, "crit");
               }
-              if (!e.status) e.status = {};
-              e.status.freeze = 1;
             }
-          });
+            if (!e.status) e.status = {};
+            e.status.freeze = 1;
+            if (arena && a.el) {
+              const ghost = a.el.cloneNode(true);
+              ghost.className = "dg-entity projection-ghost";
+              ghost.style.position = "absolute";
+              ghost.style.left = e.x + "px";
+              ghost.style.top = e.y + "px";
+              ghost.style.zIndex = "1";
+              ghost.style.opacity = "0.5";
+              ghost.style.filter = "grayscale(1) contrast(1.5)";
+              ghost.style.pointerEvents = "none";
+              arena.appendChild(ghost);
+              setTimeout(() => ghost.remove(), 150);
+            }
+          }
         });
+        a.el.style.transition = "none";
+        a.el.style.transform = `translate3d(${closest.b.x - 16}px, ${closest.b.y - 16}px, 0) scale(1.1) skewX(-20deg)`;
+        setTimeout(() => {
+          if (a.el) {
+            a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+          }
+        }, 100);
         return;
       }
       if (closest.dx < -1 && a.type === "pet") a.el.classList.add("flip");
