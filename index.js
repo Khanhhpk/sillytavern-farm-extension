@@ -48053,12 +48053,16 @@ async function loadFleaList() {
         const words = desc.split(" ");
         shortDesc = words.slice(0, 30).join(" ") + (words.length > 30 ? "..." : "");
       }
+      let rarityBadge = "";
+      if (data.itemId.startsWith("unique@") && data.itemData && data.itemData.rarity) {
+        rarityBadge = `<span style="font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || "#ff8000"}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
+      }
       html += `
                 <div class="flea-item ${isMine ? "mine" : ""}">
                     <div style="display:flex; flex:1; align-items:center; cursor:pointer;" onclick="FarmAll.showFleaItemDetail('${docSnap.id}')">
                         <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
                         <div class="flea-item-info">
-                            <div class="flea-item-name">${itemName} x${data.amount}</div>
+                            <div class="flea-item-name">${itemName} x${data.amount}${rarityBadge}</div>
                             <div class="flea-item-seller" style="font-size: 11px; color: #777; margin-top: 2px;">Ng\u01B0\u1EDDi b\xE1n: ${data.sellerName || data.sellerId.substring(0, 6)}</div>
                             ${shortDesc ? `<div style="font-size: 10px; color: #555; margin-top: 2px; font-style: italic;">${shortDesc}</div>` : ""}
                         </div>
