@@ -191,28 +191,7 @@ export function openPanel(kind) {
       <div style="display:flex;justify-content:flex-end;align-items:center;gap:4px;font-size:12px;font-weight:bold;color:#7a5c38;margin-bottom:6px">${spriteSVG('coin', 16)}${ctx.S.coins.toLocaleString()}</div>
       <div class="tabs">${tabs.map(([k, n]) => `<span class="tab${shopTab === k ? ' active' : ''}" data-tab="${k}">${n}</span>`).join('')}</div>
       <div class="items">${items}</div>`);
-    // @ts-ignore
-    All.$id('mbody').querySelectorAll('[data-tab]').forEach(t => t.addEventListener('click', () => { shopTab = t.dataset.tab; openPanel('shop'); }));
-    // @ts-ignore
-    All.$id('mbody').querySelectorAll('[data-buyseed]').forEach(b => b.addEventListener('click', () => openBuyDlg('seed', b.dataset.buyseed)));
-    // @ts-ignore
-    All.$id('mbody').querySelectorAll('[data-buyfert]').forEach(b => b.addEventListener('click', () => openBuyDlg('fert', b.dataset.buyfert)));
-    All.$id('mbody').querySelectorAll('[data-buyticket]').forEach(b => b.addEventListener('click', () => {
-      // @ts-ignore
-      openBuyDlg('ticket', b.dataset.buyticket, 'shop');
-    }));
-    All.$id('mbody').querySelectorAll('[data-buypet]').forEach(b => b.addEventListener('click', () => {
-      // @ts-ignore
-      const id = b.dataset.buypet, pd = PETS[id];
-      if (ctx.S.pets.indexOf(id) >= 0) return;
-      if (ctx.S.coins < pd.price) return toast('Còn thiếu ' + (pd.price - ctx.S.coins).toLocaleString() + ' G');
-      ctx.S.coins -= pd.price; ctx.S.pets.push(id);
-      if (ctx.S.petsOut.length < PETS_OUT_MAX) { ctx.S.petsOut.push(id); toast(pd.name + ' đã dọn ra bờ ruộng nhà bạn!'); }
-      else toast(pd.name + ' đã về nhà! Bờ ruộng chật rồi, bé đang nghỉ ở trang Balo · Bé tròn');
-      save(); renderStatus(); renderPets(); openPanel('shop');
-    }));
-    // @ts-ignore
-    All.$id('mbody').querySelectorAll('[data-passdlg]').forEach(b => b.addEventListener('click', () => openPassDlg(b.dataset.passdlg)));
+
   } else if (kind === 'bag') {
     const btabs = `<div class="tabs"><span class="tab${bagTab === 'crop' ? ' active' : ''}" data-btab="crop">Nông sản</span><span class="tab${bagTab === 'seed' ? ' active' : ''}" data-btab="seed">Hạt giống</span><span class="tab${bagTab === 'gacha' ? ' active' : ''}" data-btab="gacha">Đồ Gacha</span><span class="tab${bagTab === 'pet' ? ' active' : ''}" data-btab="pet">Bé tròn</span><span class="tab${bagTab === 'relic' ? ' active' : ''}" data-btab="relic">Quà của bé tròn</span></div>`;
     if (bagTab === 'seed') {
@@ -257,37 +236,7 @@ export function openPanel(kind) {
         }
       }
       openModal('Balo', btabs + sellBar + (rows || '<div class="note">Bạn chưa có hạt giống nào, ra cửa hàng mua thêm đi!</div>'));
-      // @ts-ignore
-      All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
-      // @ts-ignore
-      All.$id('mbody').querySelectorAll('[data-sellseeddlg]').forEach(b => b.addEventListener('click', () => openSellSeedDlg(b.dataset.sellseeddlg)));
-      const smGo = All.$id('sellModeGo');
-      if (smGo) smGo.addEventListener('click', () => { bagSellMode = true; bagSel = {}; openPanel('bag'); });
-      All.$id('mbody').querySelectorAll('[data-selkey]').forEach(el => el.addEventListener('click', () => {
-        // @ts-ignore
-        bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
-        openPanel('bag');
-      }));
-      const ssNo = All.$id('sellSelNo');
-      if (ssNo) ssNo.addEventListener('click', () => { bagSellMode = false; openPanel('bag'); });
-      const ssGo = All.$id('sellSelGo');
-      if (ssGo) ssGo.addEventListener('click', () => {
-        const keys = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.seeds[k]);
-        if (!keys.length) return toast('Chưa tick cái nào cả');
-        let gain = 0;
-        keys.forEach(k => { 
-          const def = CROPS[k];
-          if (def) {
-            const p = Math.floor((def.seed || 100) * 0.5);
-            gain += p * ctx.S.seeds[k]; 
-          }
-          delete ctx.S.seeds[k]; 
-        });
-        ctx.S.coins += gain; ctx.S.totalSales += gain;
-        bagSellMode = false; save(); renderStatus();
-        toast('Bán một mẻ hạt giống: +' + gain.toLocaleString() + ' G');
-        openPanel('bag');
-      });
+
       return;
     }
     if (bagTab === 'gacha') {
@@ -344,37 +293,7 @@ export function openPanel(kind) {
         }
       }
       openModal('Balo', btabs + sellBar + (rows || '<div class="note">Chưa có vật phẩm Gacha nào, sang máy Gachapon quay thử đi!</div>'));
-      // @ts-ignore
-      All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
-      // @ts-ignore
-      All.$id('mbody').querySelectorAll('[data-selldlg]').forEach(b => b.addEventListener('click', () => openSellDlg(b.dataset.selldlg)));
-      // @ts-ignore
-      All.$id('mbody').querySelectorAll('[data-takeout]').forEach(b => b.addEventListener('click', () => openTakeout(b.dataset.takeout)));
-      const smGo = All.$id('sellModeGo');
-      if (smGo) smGo.addEventListener('click', () => { bagSellMode = true; bagSel = {}; openPanel('bag'); });
-      const sortBtn = All.$id('sortGachaBtn');
-      if (sortBtn) sortBtn.addEventListener('click', () => {
-        gachaSortMode = gachaSortMode === 'default' ? 'desc' : (gachaSortMode === 'desc' ? 'asc' : 'default');
-        openPanel('bag');
-      });
-      All.$id('mbody').querySelectorAll('[data-selkey]').forEach(el => el.addEventListener('click', () => {
-        // @ts-ignore
-        bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
-        openPanel('bag');
-      }));
-      const ssNo = All.$id('sellSelNo');
-      if (ssNo) ssNo.addEventListener('click', () => { bagSellMode = false; openPanel('bag'); });
-      const ssGo = All.$id('sellSelGo');
-      if (ssGo) ssGo.addEventListener('click', () => {
-        const keys = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.bag[k]);
-        if (!keys.length) return toast('Chưa tick cái nào cả');
-        let gain = 0;
-        keys.forEach(k => { gain += bagPrice(k) * ctx.S.bag[k]; delete ctx.S.bag[k]; });
-        ctx.S.coins += gain; ctx.S.totalSales += gain;
-        bagSellMode = false; save(); renderStatus();
-        toast('Bán một mẻ đồ Gacha: +' + gain.toLocaleString() + ' G');
-        openPanel('bag');
-      });
+
       return;
     }
     if (bagTab === 'relic') {                            // v1.0: quà của bé tròn —— quầy riêng cho mảnh vỡ và hạt giống bí ẩn
@@ -398,10 +317,7 @@ export function openPanel(kind) {
         <span class="info"><div class="name">Mảnh ngôi sao ×${sh2.star}</div><div class="meta">Đập vỡ sẽ triệu hồi phù thuỷ tròn ghé thăm</div></span>
         <span class="buy" data-useshard="star">Triệu hồi</span></div>` : '');
       openModal('Balo', btabs + (relicRows || '<div class="note">Ngăn quà còn trống~ Hạt giống bí ẩn đến từ chuyến tìm kho báu của bé quỷ/bé thiên thần và từ đơn hàng của phù thuỷ; bé lăng quang / bé chuông sao đi tìm kho báu sẽ mang mảnh vỡ về</div>'));
-      // @ts-ignore
-      All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
-      All.$id('mbody').querySelectorAll('[data-useshard]').forEach(b => b.addEventListener('click', useStarShard));
-      All.$id('mbody').querySelectorAll('[data-takeout]').forEach(b => b.addEventListener('click', () => openTakeout(b.dataset.takeout)));
+
       return;
     }
     if (bagTab === 'pet') {
@@ -417,19 +333,7 @@ export function openPanel(kind) {
           <span class="buy${out ? ' plain' : ''}" data-petout="${id}">${out ? 'Thu về' : 'Ra sân'}</span></div>`;
       }).join('') || '<div class="note">Chưa có bé tròn nào, ra cửa hàng ngắm thử đi</div>';
       openModal('Balo', btabs + `<div class="note" style="margin-bottom:8px">Bờ ruộng cùng lúc đứng được tối đa ${PETS_OUT_MAX} bé; bé được thu về sẽ nghỉ ở đây, không làm việc cũng không tìm kho báu</div>` + prow);
-      // @ts-ignore
-      All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
-      All.$id('mbody').querySelectorAll('[data-petout]').forEach(b => b.addEventListener('click', () => {
-        // @ts-ignore
-        const id = b.dataset.petout;
-        const i = ctx.S.petsOut.indexOf(id);
-        if (i >= 0) ctx.S.petsOut.splice(i, 1);
-        else {
-          if (ctx.S.petsOut.length >= PETS_OUT_MAX) return toast('Bờ ruộng chỉ đứng được ' + PETS_OUT_MAX + ' bé, thu một bé về đã');
-          ctx.S.petsOut.push(id);
-        }
-        save(); renderPets(); openPanel('bag');
-      }));
+
       return;
     }
     const rows = Object.keys(ctx.S.bag).filter(k => !k.startsWith('unique@')).map(key => {
@@ -468,36 +372,7 @@ export function openPanel(kind) {
       }
     }
     openModal('Balo', btabs + sellBar + (rows || '<div class="note">Balo trống trơn, đi thu ít rau đi nào</div>'));
-    // @ts-ignore
-    All.$id('mbody').querySelectorAll('[data-btab]').forEach(t => t.addEventListener('click', () => { bagTab = t.dataset.btab; openPanel('bag'); }));
-    // @ts-ignore
-    All.$id('mbody').querySelectorAll('[data-selldlg]').forEach(b => b.addEventListener('click', () => openSellDlg(b.dataset.selldlg)));
-    // @ts-ignore
-    All.$id('mbody').querySelectorAll('[data-takeout]').forEach(b => b.addEventListener('click', () => openTakeout(b.dataset.takeout)));
-    const smGo = All.$id('sellModeGo');
-    if (smGo) smGo.addEventListener('click', () => {
-      bagSellMode = true; bagSel = {};                   // Mặc định không chọn gì (wen chốt: tránh lỡ tay bán mất hàng đột biến sưu tầm)
-      openPanel('bag');
-    });
-    All.$id('mbody').querySelectorAll('[data-selkey]').forEach(el => el.addEventListener('click', () => {
-      // @ts-ignore
-      bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
-      openPanel('bag');
-    }));
-    const ssNo = All.$id('sellSelNo');
-    if (ssNo) ssNo.addEventListener('click', () => { bagSellMode = false; openPanel('bag'); });
-    const ssGo = All.$id('sellSelGo');
-    if (ssGo) ssGo.addEventListener('click', () => {
-      const keys = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.bag[k]);
-      if (!keys.length) return toast('Chưa tick cái nào cả');
-      let gain = 0;
-      keys.forEach(k => { gain += bagPrice(k) * ctx.S.bag[k]; delete ctx.S.bag[k]; });
-      ctx.S.coins += gain; ctx.S.totalSales += gain;
-      bagSellMode = false;
-      save(); renderStatus();
-      toast('Bán một mẻ nông sản: +' + gain.toLocaleString() + ' G');
-      openPanel('bag');
-    });
+
   } else {
     openModal('Cài đặt', `
       <div style="font-size:11px; color:#a3763d; text-align:center; margin-bottom: 12px; font-weight: bold; background: rgba(0,0,0,0.05); padding: 4px; border-radius: 4px; user-select: text;">ID Người Chơi: ${ctx.S.playerId}</div>
@@ -646,11 +521,7 @@ export function openPanel(kind) {
         All.$id('closeCreditBtn')?.addEventListener('click', () => openPanel('cfg'));
       });
     }
-    All.$id('mbody').querySelectorAll('[data-settheme]').forEach(b => b.addEventListener('click', () => {
-      // @ts-ignore
-      ctx.S.theme = b.dataset.settheme; save(); applyTheme(); openPanel('cfg');
-      toast(ctx.S.theme === 'sky' ? 'Đổi sang giao diện trời quang~' : 'Về lại giao diện hồng anh đào~');
-    }));
+
     
     const cfgDragPet = All.$id('cfgDragPet');
     if (cfgDragPet) cfgDragPet.addEventListener('change', () => {
@@ -694,11 +565,120 @@ export function openPanel(kind) {
 export function initShop() {
 All.$id('mclose').addEventListener('click', closeModal);
 All.$id('mbody').addEventListener('click', e => {
+  let el;
   // @ts-ignore
-  const el = e.target.closest('[data-pick]');
-  if (!el || !pendingPick) return;
-  const cb = pendingPick; setPendingPick(null);
-  closeModal(); cb(el.dataset.pick);
+  el = e.target.closest('[data-pick]');
+  if (el && pendingPick) {
+    const cb = pendingPick; setPendingPick(null);
+    closeModal(); cb(el.dataset.pick);
+    return;
+  }
+  // @ts-ignore
+  el = e.target.closest('[data-tab]');
+  if (el) { shopTab = el.dataset.tab; openPanel('shop'); return; }
+  // @ts-ignore
+  el = e.target.closest('[data-buyseed]');
+  if (el) { openBuyDlg('seed', el.dataset.buyseed); return; }
+  // @ts-ignore
+  el = e.target.closest('[data-buyfert]');
+  if (el) { openBuyDlg('fert', el.dataset.buyfert); return; }
+  // @ts-ignore
+  el = e.target.closest('[data-buyticket]');
+  if (el) { openBuyDlg('ticket', el.dataset.buyticket, 'shop'); return; }
+  // @ts-ignore
+  el = e.target.closest('[data-buypet]');
+  if (el) {
+    const id = el.dataset.buypet, pd = PETS[id];
+    if (ctx.S.pets.indexOf(id) >= 0) return;
+    if (ctx.S.coins < pd.price) return toast('Còn thiếu ' + (pd.price - ctx.S.coins).toLocaleString() + ' G');
+    ctx.S.coins -= pd.price; ctx.S.pets.push(id);
+    if (ctx.S.petsOut.length < PETS_OUT_MAX) { ctx.S.petsOut.push(id); toast(pd.name + ' đã dọn ra bờ ruộng nhà bạn!'); }
+    else toast(pd.name + ' đã về nhà! Bờ ruộng chật rồi, bé đang nghỉ ở trang Balo · Bé tròn');
+    save(); renderStatus(); renderPets(); openPanel('shop');
+    return;
+  }
+  // @ts-ignore
+  el = e.target.closest('[data-passdlg]');
+  if (el) { openPassDlg(el.dataset.passdlg); return; }
+  // @ts-ignore
+  el = e.target.closest('[data-btab]');
+  if (el) { bagTab = el.dataset.btab; openPanel('bag'); return; }
+  // @ts-ignore
+  el = e.target.closest('[data-sellseeddlg]');
+  if (el) { openSellSeedDlg(el.dataset.sellseeddlg); return; }
+  // @ts-ignore
+  el = e.target.closest('#sellModeGo');
+  if (el) { bagSellMode = true; bagSel = {}; openPanel('bag'); return; }
+  // @ts-ignore
+  el = e.target.closest('[data-selkey]');
+  if (el) {
+    bagSel[el.dataset.selkey] = !bagSel[el.dataset.selkey];
+    openPanel('bag');
+    return;
+  }
+  // @ts-ignore
+  el = e.target.closest('#sellSelNo');
+  if (el) { bagSellMode = false; openPanel('bag'); return; }
+  // @ts-ignore
+  el = e.target.closest('#sellSelGo');
+  if (el) {
+    if (bagTab === 'seed') {
+      const keys = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.seeds[k]);
+      if (!keys.length) return toast('Chưa tick cái nào cả');
+      let gain = 0;
+      keys.forEach(k => { 
+        const def = CROPS[k];
+        if (def) { const p = Math.floor((def.seed || 100) * 0.5); gain += p * ctx.S.seeds[k]; }
+        delete ctx.S.seeds[k]; 
+      });
+      ctx.S.coins += gain; ctx.S.totalSales += gain;
+      bagSellMode = false; save(); renderStatus();
+      toast('Bán một mẻ hạt giống: +' + gain.toLocaleString() + ' G');
+      openPanel('bag');
+    } else {
+      const keys = Object.keys(bagSel).filter(k => bagSel[k] && ctx.S.bag[k]);
+      if (!keys.length) return toast('Chưa tick cái nào cả');
+      let gain = 0;
+      keys.forEach(k => { gain += bagPrice(k) * ctx.S.bag[k]; delete ctx.S.bag[k]; });
+      ctx.S.coins += gain; ctx.S.totalSales += gain;
+      bagSellMode = false; save(); renderStatus();
+      toast(bagTab === 'gacha' ? 'Bán một mẻ đồ Gacha: +' + gain.toLocaleString() + ' G' : 'Bán một mẻ nông sản: +' + gain.toLocaleString() + ' G');
+      openPanel('bag');
+    }
+    return;
+  }
+  // @ts-ignore
+  el = e.target.closest('#sortGachaBtn');
+  if (el) { gachaSortMode = gachaSortMode === 'default' ? 'desc' : (gachaSortMode === 'desc' ? 'asc' : 'default'); openPanel('bag'); return; }
+  // @ts-ignore
+  el = e.target.closest('[data-selldlg]');
+  if (el) { openSellDlg(el.dataset.selldlg); return; }
+  // @ts-ignore
+  el = e.target.closest('[data-takeout]');
+  if (el) { openTakeout(el.dataset.takeout); return; }
+  // @ts-ignore
+  el = e.target.closest('[data-useshard]');
+  if (el) { useStarShard(); return; }
+  // @ts-ignore
+  el = e.target.closest('[data-petout]');
+  if (el) {
+    const id = el.dataset.petout;
+    const i = ctx.S.petsOut.indexOf(id);
+    if (i >= 0) ctx.S.petsOut.splice(i, 1);
+    else {
+      if (ctx.S.petsOut.length >= PETS_OUT_MAX) return toast('Bờ ruộng chỉ đứng được ' + PETS_OUT_MAX + ' bé, thu một bé về đã');
+      ctx.S.petsOut.push(id);
+    }
+    save(); renderPets(); openPanel('bag');
+    return;
+  }
+  // @ts-ignore
+  el = e.target.closest('[data-settheme]');
+  if (el) {
+    ctx.S.theme = el.dataset.settheme; save(); applyTheme(); openPanel('cfg');
+    toast(ctx.S.theme === 'sky' ? 'Đổi sang giao diện trời quang~' : 'Về lại giao diện hồng anh đào~');
+    return;
+  }
 });
 All.$id('modal').addEventListener('click', e => { if (e.target === All.$id('modal')) closeModal(); });
 // @ts-ignore

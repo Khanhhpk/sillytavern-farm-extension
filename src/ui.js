@@ -1,6 +1,6 @@
 
 import { ctx } from './store.js';
-import { styleCSS } from './style.js';
+import { styleCSS, fleaStyles } from './style.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
@@ -109,7 +109,7 @@ export function initUI() {
   $id = id => sh.querySelector('#' + id);
 
   const style = document.createElement('style');
-  style.textContent = styleCSS;
+  style.textContent = styleCSS + '\n' + fleaStyles;
   sh.appendChild(style);
 
   ctx.ui = document.createElement('div');
@@ -160,8 +160,8 @@ export function initUI() {
     
     <div class="modal" id="trade-win" onclick="if(event.target === this) FarmAll.closeTradeModal()">
       <div class="mpanel" style="width: min(600px, 96%);">
-        <div class="mtitle"><span>Trao đổi</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">×</div></div>
-        <div class="mbody" id="trade-body" style="min-height: 200px;"></div>
+        <div class="mtitle"><span id="trade-win-title">Chợ Trời Khởi Nguyên</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">×</div></div>
+        <div class="mbody" id="trade-body" style="min-height: 200px; position: relative;"></div>
       </div>
     </div>
     

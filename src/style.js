@@ -719,3 +719,19 @@ export const styleCSS = `
     .trib-btn-def:hover { background: linear-gradient(#5a4070, #3a2550); }
     .trib-btn-def:active { transform: translateY(2px); }
 `;
+export const fleaStyles = `
+.flea-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px dashed #c2a274; }
+.flea-header h3 { margin: 0; color: #7a5c38; }
+.flea-list { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; }
+.flea-item { display: flex; align-items: center; background: #faf0dc; padding: 10px; border: 2px solid #e0c8a0; border-radius: 8px; gap: 10px; }
+.flea-item.mine { border-color: #4caf50; background: #e8f5e9; }
+.flea-item-icon { font-size: 24px; width: 32px; text-align: center; }
+.flea-item-info { flex: 1; }
+.flea-item-name { font-weight: bold; color: #5d4037; }
+.flea-item-seller { font-size: 11px; color: #8d6e63; }
+.flea-item-action { text-align: right; }
+.flea-item-price { font-weight: bold; color: #ffb300; text-shadow: 0 1px 1px #000; margin-bottom: 4px; }
+.flea-post-form { display: flex; flex-direction: column; gap: 10px; }
+.flea-post-form label { font-size: 12px; font-weight: bold; color: #7a5c38; }
+.flea-post-form select, .flea-post-form input { padding: 8px; border: 2px solid #e0c8a0; border-radius: 4px; font-family: inherit; }
+`;
