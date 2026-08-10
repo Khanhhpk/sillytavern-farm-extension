@@ -638,7 +638,7 @@ function bjHandleMsg(fromPid, data) {
             bjPlayers[fromPid] = { name: data.name || 'Kh\u00e1ch', status };
             if (bjIsHost) {
                 bjBroadcast({ type: 'PLAYER_JOIN', pid: fromPid, name: data.name, status }, fromPid);
-                bjConns[fromPid].send({ type: 'WELCOME', players: bjPlayers, settings: bjSettings, gameState: bjGameState });
+                bjConns[fromPid].send({ type: 'WELCOME', players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData });
             }
             bjRenderRoom();
             break;
@@ -646,7 +646,9 @@ function bjHandleMsg(fromPid, data) {
         case 'WELCOME':
             bjPlayers = data.players || {}; bjSettings = data.settings || bjSettings;
             bjGameState = data.gameState || null;
-            bjMyStatus = bjGameState ? 'spectator' : 'idle';
+            bjRoomPhase = data.roomPhase || (bjGameState ? 'ingame' : 'lobby');
+            bjSummaryData = data.summaryData || null;
+            bjMyStatus = (bjGameState && bjRoomPhase !== 'summary') ? 'spectator' : 'idle';
             bjRenderRoom(); break;
         case 'PLAYER_JOIN':
             bjPlayers[data.pid] = { name: data.name, status: data.status };
