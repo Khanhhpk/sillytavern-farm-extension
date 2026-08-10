@@ -1568,6 +1568,7 @@ window['bjGiveMoney'] = function(reqId) {
     if (!log) return;
     const rd = log.reqData;
     if (rd.pid === bjMyId) return bjToast('Bạn không thể tự cho tiền mình!');
+    if (!bjPlayers[rd.pid]) return bjToast('Người này đã rời phòng!');
     const remaining = rd.amount - rd.fulfilled;
     if (remaining <= 0) return bjToast('Đã đủ tiền rồi!');
     
