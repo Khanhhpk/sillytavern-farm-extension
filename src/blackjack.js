@@ -1193,7 +1193,7 @@ function bjApplySettings() {
     const min = parseInt(All.$id('bj-cfg-min')?.value) || 10;
     const max = parseInt(All.$id('bj-cfg-max')?.value) || 0;
     const decks = Math.min(8, Math.max(1, parseInt(All.$id('bj-cfg-decks')?.value) || 6));
-    const delay = Math.min(30, Math.max(5, parseInt(All.$id('bj-cfg-delay')?.value) || 10));
+    const delay = Math.max(5, parseInt(All.$id('bj-cfg-delay')?.value) || 10);
     bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks, delay };
     bjBroadcast({ type: 'SETTINGS_UPDATE', settings: bjSettings });
     bjToast(`Đã cập nhật: min ${bjSettings.minBet}G, chờ ${delay}s`);
@@ -1243,7 +1243,7 @@ function bjRenderRoom() {
                         <label style="font-size:11px;color:#ddd;">Min <input class="inp" id="bj-cfg-min" type="number" value="${bjSettings.minBet}" min="1" style="width:50px;padding:4px;font-size:11px"></label>
                         <label style="font-size:11px;color:#ddd;">Max <input class="inp" id="bj-cfg-max" type="number" value="${bjSettings.maxBet}" min="0" style="width:50px;padding:4px;font-size:11px"></label>
                         <label style="font-size:11px;color:#ddd;">Bộ <input class="inp" id="bj-cfg-decks" type="number" value="${bjSettings.numDecks}" min="1" max="8" style="width:40px;padding:4px;font-size:11px"></label>
-                        <label style="font-size:11px;color:#ddd;">Chờ(s) <input class="inp" id="bj-cfg-delay" type="number" value="${bjSettings.delay}" min="5" max="30" style="width:40px;padding:4px;font-size:11px"></label>
+                        <label style="font-size:11px;color:#ddd;">Chờ(s) <input class="inp" id="bj-cfg-delay" type="number" value="${bjSettings.delay}" min="5" style="width:40px;padding:4px;font-size:11px"></label>
                         <div class="buy plain" id="bj-cfg-apply" style="font-size:11px;padding:4px 8px">Lưu</div>
                     </div>
                 </div>
