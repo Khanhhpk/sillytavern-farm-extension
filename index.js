@@ -6429,7 +6429,7 @@ function renderPlots() {
   if (expWrap) expWrap.style.display = "none";
   const casWrap = $id("casino-blocks");
   if (casWrap) casWrap.style.display = "none";
-  if (wrap2) wrap2.style.display = "block";
+  if (wrap2) wrap2.style.display = "";
   const pg = ctx.S.page, plots = curPlots(), nb = curBlocks();
   if (wrap2.children.length !== 6 || wrap2.dataset.pg !== String(pg)) {
     wrap2.dataset.pg = pg;

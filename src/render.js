@@ -193,7 +193,7 @@ export function renderPlots() {
   if (expWrap) expWrap.style.display = 'none';
   const casWrap = All.$id('casino-blocks');
   if (casWrap) casWrap.style.display = 'none';
-  if (wrap) wrap.style.display = 'block';
+  if (wrap) wrap.style.display = '';
 
   const pg = ctx.S.page, plots = curPlots(), nb = curBlocks();
   
