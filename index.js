@@ -2421,6 +2421,9 @@ var init_style = __esm({
     .field.explore-mode .explore-slot { background: transparent; border-color: #8a5cc0; box-shadow: inset 0 0 0 3px rgba(138,92,192,0.5), 0 4px 0 #4b3082; }
     .field.explore-mode .explore-slot:active { transform: translateY(4px); box-shadow: inset 0 0 0 3px rgba(138,92,192,0.5), 0 0 0 #4b3082; }
     .field.explore-mode .explore-slot .feature-name { color: #e0ccff; text-shadow: 0 1px 2px #000; }
+    .casino-blocks .explore-slot { background: transparent; box-shadow: inset 0 0 0 3px rgba(138,104,68,0.5), 0 4px 0 #8a6844; }
+    .casino-blocks .explore-slot:active { transform: translateY(4px); box-shadow: inset 0 0 0 3px rgba(138,104,68,0.5), 0 0 0 #8a6844; }
+    .casino-blocks .explore-slot .feature-name { color: #ffd94d; text-shadow: 0 1px 2px #000; }
     .block { display: grid; grid-template-columns: repeat(2, var(--plot, 74px)); grid-auto-rows: var(--plot, 74px);
       gap: 6px; position: relative; }
     .plot { background-color: #b99b84; border: 3px solid #937863; border-radius: 6px;
