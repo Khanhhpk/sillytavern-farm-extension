@@ -714,7 +714,8 @@ function combatLoop() {
         if (e.hp <= 0) {
             e.el.remove();
             if (e.gold) {
-                const homeG = Math.floor(e.gold * 0.3);
+                // Tiền mang về ngoài Farm tăng tuyến tính
+                const homeG = 1 + Math.floor(currentWave / 10);
                 totalGold += homeG;
                 shopGold += e.gold;
                 spawnDmg({x: e.x, y: e.y - 10}, `+${e.gold} 🛠`, 'gold');
@@ -1257,6 +1258,10 @@ function endDungeon(isWin) {
     overlay.className = 'dg-overlay';
     
     ctx.S.coins += totalGold;
+    // Tịch thu tiền lạm phát do lỗi cũ (giới hạn 9,999,999)
+    if (ctx.S.coins > 9999999) {
+        ctx.S.coins = 9999999;
+    }
     
     // Highscore check
     if (!ctx.S.dungeonBest) ctx.S.dungeonBest = { wave: 0, gold: 0 };
@@ -1309,7 +1314,9 @@ function showWaveRewards(isLoaded = false) {
         // Calculate gold for this wave
         const isBoss = currentWave % 10 === 0;
         const waveGold = Math.round(500 * Math.pow(1.10, currentWave - 1)) * (isBoss ? 3 : 1);
-        totalGold += Math.floor(waveGold * 0.3);
+        // Tiền thưởng ngoài farm scale tuyến tính
+        const waveHomeGold = (10 + currentWave * 2) * (isBoss ? 3 : 1);
+        totalGold += waveHomeGold;
         shopGold += waveGold;
         
         fullTeam.forEach(p => {

@@ -10313,7 +10313,7 @@ function combatLoop() {
       if (e2.hp <= 0) {
         e2.el.remove();
         if (e2.gold) {
-          const homeG = Math.floor(e2.gold * 0.3);
+          const homeG = 1 + Math.floor(currentWave / 10);
           totalGold += homeG;
           shopGold += e2.gold;
           spawnDmg({ x: e2.x, y: e2.y - 10 }, `+${e2.gold} \u{1F6E0}`, "gold");
@@ -10783,6 +10783,9 @@ function endDungeon(isWin) {
   const overlay = document.createElement("div");
   overlay.className = "dg-overlay";
   ctx.S.coins += totalGold;
+  if (ctx.S.coins > 9999999) {
+    ctx.S.coins = 9999999;
+  }
   if (!ctx.S.dungeonBest) ctx.S.dungeonBest = { wave: 0, gold: 0 };
   let isNewRecord = false;
   if (currentWave > ctx.S.dungeonBest.wave) {
@@ -10824,7 +10827,8 @@ function showWaveRewards(isLoaded = false) {
     projectiles = [];
     const isBoss = currentWave % 10 === 0;
     const waveGold = Math.round(500 * Math.pow(1.1, currentWave - 1)) * (isBoss ? 3 : 1);
-    totalGold += Math.floor(waveGold * 0.3);
+    const waveHomeGold = (10 + currentWave * 2) * (isBoss ? 3 : 1);
+    totalGold += waveHomeGold;
     shopGold += waveGold;
     fullTeam.forEach((p2) => {
       if (p2.hp <= 0) {
