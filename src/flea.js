@@ -41,14 +41,15 @@ export async function renderFleaMarket() {
         All.$id('trade-body').innerHTML = `
             <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
                 <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">Tạo Tên Người Chơi</div>
-                <div style="font-size: 12px; color: #555;">Vui lòng nhập tên để hiển thị khi giao dịch trên Chợ Trời.</div>
-                <input type="text" id="inp-flea-username" class="inp" placeholder="Nhập tên của bạn...">
+                <div style="font-size: 12px; color: #555;">Vui lòng nhập tên để hiển thị khi giao dịch trên Chợ Trời. (Tối đa 16 ký tự)</div>
+                <input type="text" id="inp-flea-username" class="inp" placeholder="Nhập tên của bạn..." maxlength="16">
                 <div class="buy" id="btn-flea-save-username" style="padding: 10px;">Lưu tên</div>
             </div>
         `;
         All.$id('btn-flea-save-username').onclick = () => {
             const val = All.$id('inp-flea-username').value.trim();
             if (val) {
+                if (val.length > 16) return All.toast('Tên tối đa 16 ký tự!');
                 ctx.S.username = val;
                 All.save();
                 renderFleaMarket();
@@ -164,7 +165,9 @@ export function renderFleaItems() {
     
     let itemsArr = Object.entries(currentFleaItems).map(([id, data]) => {
         const itemName = getFleaItemName(data.itemId, data.itemData);
-        const sellerName = escapeHtml(data.sellerName || data.sellerId.substring(0, 6));
+        let rawSellerName = data.sellerName || data.sellerId.substring(0, 6);
+        if (rawSellerName.length > 16) rawSellerName = rawSellerName.substring(0, 16) + '...';
+        const sellerName = escapeHtml(rawSellerName);
         let effType = 'other';
         if (data.itemId.startsWith('unique@')) effType = 'uniques';
         else if (data.itemId.includes('@')) effType = 'mutants';
@@ -395,7 +398,10 @@ async function renderHistory() {
             totalGold += data.price;
             const itemName = getFleaItemName(data.itemId, data.itemData);
             const icon = getFleaItemIcon(data.itemId, data.itemData);
-            const buyerName = escapeHtml(data.buyerName || "Người mua ẩn danh");
+            
+            let rawBuyerName = data.buyerName || "Người mua ẩn danh";
+            if (rawBuyerName.length > 16) rawBuyerName = rawBuyerName.substring(0, 16) + '...';
+            const buyerName = escapeHtml(rawBuyerName);
             
             html += `
                 <div class="flea-item mine">
