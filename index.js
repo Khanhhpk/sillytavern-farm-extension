@@ -6467,10 +6467,6 @@ function renderPlots() {
           <div class="feature-name">Hi-Lo</div>
         </div>
       </div>
-      <div style="text-align:center; color: #ffd94d; font-size: 24px; text-shadow: 0 2px 4px #000; width:100%;">
-        <div style="width: 128px; height: 128px; margin: 0 auto 20px;">${spriteSVG("casinoNeonGoldMap", 128)}</div>
-        S\xF2ng b\u1EA1c \u0111ang \u0111\u01B0\u1EE3c x\xE2y d\u1EF1ng th\xEAm...
-      </div>
     `;
     const bBtn = $id("cslot-bet");
     if (bBtn) bBtn.addEventListener("click", () => openPanel("bet"));

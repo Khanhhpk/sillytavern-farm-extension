@@ -187,10 +187,6 @@ export function renderPlots() {
           <div class="feature-name">Hi-Lo</div>
         </div>
       </div>
-      <div style="text-align:center; color: #ffd94d; font-size: 24px; text-shadow: 0 2px 4px #000; width:100%;">
-        <div style="width: 128px; height: 128px; margin: 0 auto 20px;">${spriteSVG('casinoNeonGoldMap', 128)}</div>
-        Sòng bạc đang được xây dựng thêm...
-      </div>
     `;
     const bBtn = All.$id('cslot-bet');
     if (bBtn) bBtn.addEventListener('click', () => All.openPanel('bet'));
