@@ -67,7 +67,7 @@ export function openBetModal() {
 
   // keepBetTable = true: mở/vẽ lại chính bàn cược không được rút tiền treo trên bàn,
   // nếu không ván cược sẽ bị phân định sai (xem giải thích ở openModal trong shop.js).
-  openModal('Đỏ Đen', `
+  openModal('Hi-Lo', `
     <div class="betwrap">
       <div class="note" id="betCoins"></div>
       <div class="betnum" id="betNum">${anchor}</div>

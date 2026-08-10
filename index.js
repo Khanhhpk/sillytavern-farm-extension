@@ -638,6 +638,40 @@ var init_graphics = __esm({
         ".....fFFFFFFMKKKKKKMFFFFFFf.....",
         ".....ffffffffffffffffffffff....."
       ],
+      hiloIcon: [
+        "................................",
+        "................................",
+        "................................",
+        "........K.......................",
+        ".......KFK......................",
+        "......KFFRK.....................",
+        ".....KFFFRRK....................",
+        "....KFFFFRRRK...................",
+        "...KFFFFFRRRRK..................",
+        "..KFFFFFFRRRRRK.................",
+        "..KKKKFFFRRKKKK.....KKKKKKK.....",
+        ".....KFFFRRK........KBBBbbK.....",
+        ".....KFFFRRK........KBBBbbK.....",
+        ".....KFFFRRK........KBBBbbK.....",
+        ".....KFFFRRK........KBBBbbK.....",
+        ".....KFFFRRK........KBBBbbK.....",
+        ".....KFFFRRK........KBBBbbK.....",
+        ".....KFFFRRK........KBBBbbK.....",
+        ".....KFFFRRK........KBBBbbK.....",
+        ".....KFFFRRK........KBBBbbK.....",
+        ".....KFFFRRK........KBBBbbK.....",
+        ".....KKKKKKK.....KKKKBBBbbKKKK..",
+        ".................KBBBBBBbbbbbK..",
+        "..................KBBBBBbbbbK...",
+        "...................KBBBBbbbK....",
+        "....................KBBBbbK.....",
+        ".....................KBBbK......",
+        "......................KbK.......",
+        ".......................K........",
+        "................................",
+        "................................",
+        "................................"
+      ],
       casinoNeonGoldMap: [
         "................................................................",
         "................................................................",
@@ -5140,7 +5174,7 @@ function openBetModal() {
     chain = [];
     newRound();
   }
-  openModal("\u0110\u1ECF \u0110en", `
+  openModal("Hi-Lo", `
     <div class="betwrap">
       <div class="note" id="betCoins"></div>
       <div class="betnum" id="betNum">${anchor}</div>
@@ -6369,10 +6403,6 @@ function renderPlots() {
             ${spriteSVG("dungeonGate", 48)}
             <div class="feature-name">H\u1EA7m ng\u1EE5c</div>
           </div>
-          <div class="explore-slot" id="eslot-bet">
-            ${spriteSVG("diceIcon", 48)}
-            <div class="feature-name">\u0110\u1ECF \u0110en</div>
-          </div>
           <div class="explore-slot" id="eslot-hero">
             ${spriteSVG("threeSlimesWalking", 64)}
             <div class="feature-name">Th\xE1m Hi\u1EC3m</div>
@@ -6402,8 +6432,6 @@ function renderPlots() {
         });
         const dBtn = $id("eslot-dungeon");
         if (dBtn) dBtn.addEventListener("click", () => openPanel("dungeon"));
-        const bBtn = $id("eslot-bet");
-        if (bBtn) bBtn.addEventListener("click", () => openPanel("bet"));
         const hBtn = $id("eslot-hero");
         if (hBtn) hBtn.addEventListener("click", () => openHeroPanel());
         const fBtn = $id("eslot-flea");
@@ -6429,12 +6457,23 @@ function renderPlots() {
       fieldEl.appendChild(casWrap2);
     }
     casWrap2.style.display = "flex";
+    casWrap2.style.flexWrap = "wrap";
+    casWrap2.style.alignContent = "flex-start";
+    casWrap2.style.justifyContent = "center";
     casWrap2.innerHTML = `
-      <div style="text-align:center; color: #ffd94d; font-size: 24px; text-shadow: 0 2px 4px #000;">
+      <div style="width:100%; display:flex; gap:16px; justify-content:center; margin-bottom:40px;">
+        <div class="explore-slot" id="cslot-bet">
+          ${spriteSVG("hiloIcon", 48)}
+          <div class="feature-name">Hi-Lo</div>
+        </div>
+      </div>
+      <div style="text-align:center; color: #ffd94d; font-size: 24px; text-shadow: 0 2px 4px #000; width:100%;">
         <div style="width: 128px; height: 128px; margin: 0 auto 20px;">${spriteSVG("casinoNeonGoldMap", 128)}</div>
-        S\xF2ng b\u1EA1c \u0111ang \u0111\u01B0\u1EE3c x\xE2y d\u1EF1ng...
+        S\xF2ng b\u1EA1c \u0111ang \u0111\u01B0\u1EE3c x\xE2y d\u1EF1ng th\xEAm...
       </div>
     `;
+    const bBtn = $id("cslot-bet");
+    if (bBtn) bBtn.addEventListener("click", () => openPanel("bet"));
     return;
   }
   if (expWrap) expWrap.style.display = "none";

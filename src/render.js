@@ -122,10 +122,6 @@ export function renderPlots() {
             ${spriteSVG('dungeonGate', 48)}
             <div class="feature-name">Hầm ngục</div>
           </div>
-          <div class="explore-slot" id="eslot-bet">
-            ${spriteSVG('diceIcon', 48)}
-            <div class="feature-name">Đỏ Đen</div>
-          </div>
           <div class="explore-slot" id="eslot-hero">
             ${spriteSVG('threeSlimesWalking', 64)}
             <div class="feature-name">Thám Hiểm</div>
@@ -155,8 +151,6 @@ export function renderPlots() {
         });
         const dBtn = All.$id('eslot-dungeon');
         if (dBtn) dBtn.addEventListener('click', () => All.openPanel('dungeon'));
-        const bBtn = All.$id('eslot-bet');
-        if (bBtn) bBtn.addEventListener('click', () => All.openPanel('bet'));
         const hBtn = All.$id('eslot-hero');
         if (hBtn) hBtn.addEventListener('click', () => All.openHeroPanel());
         const fBtn = All.$id('eslot-flea');
@@ -183,12 +177,23 @@ export function renderPlots() {
       All.fieldEl.appendChild(casWrap);
     }
     casWrap.style.display = 'flex';
+    casWrap.style.flexWrap = 'wrap';
+    casWrap.style.alignContent = 'flex-start';
+    casWrap.style.justifyContent = 'center';
     casWrap.innerHTML = `
-      <div style="text-align:center; color: #ffd94d; font-size: 24px; text-shadow: 0 2px 4px #000;">
+      <div style="width:100%; display:flex; gap:16px; justify-content:center; margin-bottom:40px;">
+        <div class="explore-slot" id="cslot-bet">
+          ${spriteSVG('hiloIcon', 48)}
+          <div class="feature-name">Hi-Lo</div>
+        </div>
+      </div>
+      <div style="text-align:center; color: #ffd94d; font-size: 24px; text-shadow: 0 2px 4px #000; width:100%;">
         <div style="width: 128px; height: 128px; margin: 0 auto 20px;">${spriteSVG('casinoNeonGoldMap', 128)}</div>
-        Sòng bạc đang được xây dựng...
+        Sòng bạc đang được xây dựng thêm...
       </div>
     `;
+    const bBtn = All.$id('cslot-bet');
+    if (bBtn) bBtn.addEventListener('click', () => All.openPanel('bet'));
     return;
   }
 
