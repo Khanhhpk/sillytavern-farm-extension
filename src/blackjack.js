@@ -1051,19 +1051,25 @@ function bjHostEndRound() {
         const h = gs.hands[pid];
         if (!h) continue;
         let p = 0;
-        if (h.insuranceBet > 0 && dBJ) p += h.insuranceBet * 3;
-        for (let i = 0; i < h.cards.length; i++) {
-            const cards = h.cards[i]; const bet = h.bet[i];
-            const pTotal = handTotal(cards);
-            const isOnly = h.cards.length === 1;
-            const pBJ = isBlackjack(cards) && isOnly;
-            if (h.surrendered && isOnly) { p += Math.floor(bet / 2); continue; }
-            if (pTotal > 21) continue;
-            if (pBJ && dBJ) { p += bet; continue; }
-            if (pBJ) { p += bet + Math.floor(bet * 1.5); continue; }
-            if (dBJ) continue;
-            if (dBust || pTotal > dTotal) { p += bet * 2; continue; }
-            if (pTotal === dTotal) { p += bet; continue; }
+        const ans = gs.insuranceAnswers?.[pid];
+        
+        if (ans === 'even') {
+            p = h.bet[0] * 2;
+        } else {
+            if (h.insuranceBet > 0 && dBJ) p += h.insuranceBet * 3;
+            for (let i = 0; i < h.cards.length; i++) {
+                const cards = h.cards[i]; const bet = h.bet[i];
+                const pTotal = handTotal(cards);
+                const isOnly = h.cards.length === 1;
+                const pBJ = isBlackjack(cards) && isOnly;
+                if (h.surrendered && isOnly) { p += Math.floor(bet / 2); continue; }
+                if (pTotal > 21) continue;
+                if (pBJ && dBJ) { p += bet; continue; }
+                if (pBJ) { p += bet + Math.floor(bet * 1.5); continue; }
+                if (dBJ) continue;
+                if (dBust || pTotal > dTotal) { p += bet * 2; continue; }
+                if (pTotal === dTotal) { p += bet; continue; }
+            }
         }
         payouts[pid] = p;
     }
@@ -1367,10 +1373,6 @@ function bjBindMyActions() {
         });
     });
     All.$id('bj-rm-even')?.addEventListener('click', () => {
-        const h = gs?.hands?.[bjMyId];
-        if (!h) return;
-        const payout = h.bet[0]*2;
-        ctx.S.coins=(ctx.S.coins||0)+payout; save(); renderStatus();
         bjRoomAction('INSURANCE_ANSWER', { answer:'even' });
     });
     All.$id('bj-rm-buy-ins')?.addEventListener('click', () => {

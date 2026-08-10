@@ -50183,34 +50183,39 @@ function bjHostEndRound() {
     const h = gs.hands[pid];
     if (!h) continue;
     let p2 = 0;
-    if (h.insuranceBet > 0 && dBJ) p2 += h.insuranceBet * 3;
-    for (let i2 = 0; i2 < h.cards.length; i2++) {
-      const cards = h.cards[i2];
-      const bet = h.bet[i2];
-      const pTotal = handTotal(cards);
-      const isOnly = h.cards.length === 1;
-      const pBJ = isBlackjack(cards) && isOnly;
-      if (h.surrendered && isOnly) {
-        p2 += Math.floor(bet / 2);
-        continue;
-      }
-      if (pTotal > 21) continue;
-      if (pBJ && dBJ) {
-        p2 += bet;
-        continue;
-      }
-      if (pBJ) {
-        p2 += bet + Math.floor(bet * 1.5);
-        continue;
-      }
-      if (dBJ) continue;
-      if (dBust || pTotal > dTotal) {
-        p2 += bet * 2;
-        continue;
-      }
-      if (pTotal === dTotal) {
-        p2 += bet;
-        continue;
+    const ans = gs.insuranceAnswers?.[pid];
+    if (ans === "even") {
+      p2 = h.bet[0] * 2;
+    } else {
+      if (h.insuranceBet > 0 && dBJ) p2 += h.insuranceBet * 3;
+      for (let i2 = 0; i2 < h.cards.length; i2++) {
+        const cards = h.cards[i2];
+        const bet = h.bet[i2];
+        const pTotal = handTotal(cards);
+        const isOnly = h.cards.length === 1;
+        const pBJ = isBlackjack(cards) && isOnly;
+        if (h.surrendered && isOnly) {
+          p2 += Math.floor(bet / 2);
+          continue;
+        }
+        if (pTotal > 21) continue;
+        if (pBJ && dBJ) {
+          p2 += bet;
+          continue;
+        }
+        if (pBJ) {
+          p2 += bet + Math.floor(bet * 1.5);
+          continue;
+        }
+        if (dBJ) continue;
+        if (dBust || pTotal > dTotal) {
+          p2 += bet * 2;
+          continue;
+        }
+        if (pTotal === dTotal) {
+          p2 += bet;
+          continue;
+        }
       }
     }
     payouts[pid] = p2;
@@ -50508,12 +50513,6 @@ function bjBindMyActions() {
     });
   });
   $id("bj-rm-even")?.addEventListener("click", () => {
-    const h = gs?.hands?.[bjMyId];
-    if (!h) return;
-    const payout = h.bet[0] * 2;
-    ctx.S.coins = (ctx.S.coins || 0) + payout;
-    save();
-    renderStatus();
     bjRoomAction("INSURANCE_ANSWER", { answer: "even" });
   });
   $id("bj-rm-buy-ins")?.addEventListener("click", () => {
