@@ -1,6 +1,6 @@
 
 import { ctx } from './store.js';
-import { styleCSS, fleaStyles } from './style.js';
+import { styleCSS, fleaStyles, blackjackStyles } from './style.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
 import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
@@ -122,7 +122,7 @@ export function initUI() {
   $id = id => sh.querySelector('#' + id);
 
   const style = document.createElement('style');
-  style.textContent = styleCSS + '\n' + fleaStyles;
+  style.textContent = styleCSS + '\n' + fleaStyles + '\n' + blackjackStyles;
   sh.appendChild(style);
 
   ctx.ui = document.createElement('div');
@@ -191,6 +191,14 @@ export function initUI() {
     </div>
 
     <div class="toast" id="toast"></div>
+  </div>
+
+  <div id="bj-win" class="dungeon-win" style="display:none; z-index:99999;">
+    <div class="titlebar" id="bj-drag">
+      <h1>${spriteSVG('spadeIcon', 16)} Phân khu Giải Trí</h1>
+      <div class="close-x" onclick="FarmAll.closeBlackjack()">×</div>
+    </div>
+    <div id="bj-body" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; padding-bottom: 20px;"></div>
   </div>
   
   <div id="hero-bar" class="hero-bar" style="display:none">

@@ -27,6 +27,16 @@ export function placeDungeonWin() {
   dungeonWin.style.left = Math.min(Math.max(x, 0), Math.max(vw - w, 0)) + 'px';
   dungeonWin.style.top = Math.min(Math.max(y, 0), vh - 60) + 'px';
 }
+export function placeBjWin() {
+  const bjWin = All.$id('bj-win');
+  if (!bjWin) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const w = Math.min(600, vw * 0.96);
+  let x = ctx.S.bjWin ? ctx.S.bjWin.fx * vw : (vw - w) / 2;
+  let y = ctx.S.bjWin ? ctx.S.bjWin.fy * vh : vh * 0.04;
+  bjWin.style.left = Math.min(Math.max(x, 0), Math.max(vw - w, 0)) + 'px';
+  bjWin.style.top = Math.min(Math.max(y, 0), vh - 60) + 'px';
+}
 export function toggleWin() {
   try {
       if (ctx.win.classList.contains('open')) { closeWin(); return; }
@@ -115,6 +125,32 @@ export function initWindows() {
       dungeonWg = null;
       const dungeonWin = All.$id('dungeon-win');
       ctx.S.dungeonWin = { fx: dungeonWin.offsetLeft / window.innerWidth, fy: dungeonWin.offsetTop / window.innerHeight };
+      All.save();
+    });
+  }
+
+  const bjDragBar = All.$id('bj-drag');
+  let bjWg = null;
+  if (bjDragBar) {
+    bjDragBar.addEventListener('pointerdown', e => {
+      if (e.target.classList.contains('close-x')) return;
+      if (window.innerWidth <= 640) return;
+      bjDragBar.setPointerCapture(e.pointerId);
+      const bjWin = All.$id('bj-win');
+      bjWg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: bjWin.offsetLeft, oy: bjWin.offsetTop };
+    });
+    bjDragBar.addEventListener('pointermove', e => {
+      if (!bjWg || e.pointerId !== bjWg.id) return;
+      const bjWin = All.$id('bj-win');
+      bjWin.style.left = bjWg.ox + e.clientX - bjWg.sx + 'px';
+      bjWin.style.top = bjWg.oy + e.clientY - bjWg.sy + 'px';
+    });
+    bjDragBar.addEventListener('pointerup', e => {
+      if (!bjWg || e.pointerId !== bjWg.id) return;
+      try { bjDragBar.releasePointerCapture(e.pointerId); } catch (er) {}
+      bjWg = null;
+      const bjWin = All.$id('bj-win');
+      ctx.S.bjWin = { fx: bjWin.offsetLeft / window.innerWidth, fy: bjWin.offsetTop / window.innerHeight };
       All.save();
     });
   }

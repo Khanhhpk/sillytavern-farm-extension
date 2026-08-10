@@ -573,6 +573,7 @@ var init_graphics = __esm({
       raincloud: ["................", "................", "................", "......LLLL......", ".....LWWWWL.....", "...LLWWWWWWL....", "..LWWWWWWWWWL...", "..LWWWWWWWWWL...", "...LLLLLLLLLL...", "................", "....B...B...B...", "................", "...B...B...B....", "................", "................", "................"],
       bush: ["................", "................", ".....DDDD.......", "...DDGEEGDD.....", "..DGEEGGWEGD....", ".DGEGGEEGGGED...", ".DGGEEGGGEGGD...", ".DGGWGGEEGGGD...", ".DGEGGGGGGEGD...", ".DGGGEGGGWGGD...", "..DGGGGGGGGD....", "...DDGGGGDD.....", ".....DDDD.......", "................", "................", "................"],
       pinkgrass: ["................", "................", "....W......W....", ".....pp...pp....", "....pnfp.pfnp...", ".....pp...pp....", "......f....f....", ".....pp...pp....", "....pfnp.pnfp...", ".....pp...pp....", "..W...f....f....", "...BBbfBBBfbBB..", "..BbBBbBbBBbBb..", "...bbBBbbBBbb...", "................", "................"],
+      spadeIcon: ["................", "................", ".......KK.......", "......KKKK......", ".....KKKKKK.....", "....KKKKKKKK....", "...KKKKKKKKKK...", "..KKKKKKKKKKKK..", "..KKKKKKKKKKKK..", "...KKKKKKKKKK...", "....KKK..KKK....", ".......KK.......", "......KKKK......", "................", "................", "................"],
       emHeart: ["................", "................", "................", "................", "....ff...ff.....", "...fFpf.fFFf....", "...fFFFfFFFf....", "...fFFFFFFFf....", "....fFFFFFf.....", ".....fFFFf......", "......fFf.......", ".......f........", "................", "................", "................", "................"],
       emStar: ["................", "................", "................", ".......U........", "......UCU.......", "......UCU.......", "...UUUCCCUUU....", "....UCCCCCU.....", ".....UCCCU......", "....UCU.UCU.....", "....U.....U.....", "................", "................", "................", "................", "................"],
       emLeaf: ["................", "................", "................", "................", "......DD........", ".....DGGD.......", "....DGEGGD......", "....DGGGGD......", ".....DGGD.......", "......DD........", ".......D........", ".......D........", "................", "................", "................", "................"],
@@ -2294,7 +2295,7 @@ var init_graphics = __esm({
 });
 
 // src/style.js
-var styleCSS, fleaStyles;
+var styleCSS, fleaStyles, blackjackStyles;
 var init_style = __esm({
   "src/style.js"() {
     styleCSS = `
@@ -3039,6 +3040,137 @@ var init_style = __esm({
 .flea-post-form label { font-size: 12px; font-weight: bold; color: #7a5c38; }
 .flea-post-form select, .flea-post-form input { padding: 8px; border: 2px solid #e0c8a0; border-radius: 4px; font-family: inherit; }
 `;
+    blackjackStyles = `
+/* ===== BLACKJACK CSS ===== */
+#bj-win.dungeon-win {
+    background: #0f2c1b; /* Classic dark green felt */
+    background-image: radial-gradient(circle at center, #1b4d2e 0%, #0a1c11 100%);
+    border: 4px solid #d4af37; /* Gold border */
+    outline: 4px solid #111;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+    color: #f1f1f1;
+}
+#bj-win .titlebar {
+    background: linear-gradient(to bottom, #d4af37, #aa831b);
+    border-bottom: 2px solid #5a4200;
+    color: #332200;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+}
+#bj-win .close-x { color: #332200; text-shadow: 1px 1px 0 rgba(255,255,255,0.4); }
+
+#bj-solo-wrap { display: flex; flex-direction: column; gap: 16px; padding: 10px 0; }
+.bj-table { background: rgba(0, 0, 0, 0.2); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); position: relative; }
+.bj-table::before { content: "BLACKJACK PAYS 3 TO 2"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(212,175,55,0.15); font-weight: bold; font-size: 24px; letter-spacing: 3px; text-align: center; pointer-events: none; width: 100%; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+
+.bj-dealer-area, .bj-player-area { display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 1; }
+.bj-area-label { color: #d4af37; font-weight: bold; font-size: 13px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); text-transform: uppercase; letter-spacing: 1px; background: rgba(0,0,0,0.4); padding: 2px 10px; border-radius: 12px; }
+.bj-hand-row { display: flex; justify-content: center; gap: 6px; min-height: 80px; perspective: 1000px; }
+
+.bj-card { width: 56px; height: 80px; background: #fff; border-radius: 6px; border: 1px solid #999; box-shadow: 2px 2px 8px rgba(0,0,0,0.6); position: relative; font-weight: bold; display: flex; align-items: center; justify-content: center; user-select: none; color: #111; }
+.bj-card.small { width: 42px; height: 60px; font-size: 12px; }
+.bj-card.back { background: #8b0000; border-color: #fff; padding: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+.bj-card-back-inner { width: 100%; height: 100%; border: 2px dashed rgba(255,255,255,0.4); border-radius: 3px; background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.15) 5px, rgba(255,255,255,0.15) 10px); }
+.bj-card-corner { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; font-size: 13px; }
+.bj-card.small .bj-card-corner { font-size: 10px; }
+.bj-card-corner.tl { top: 4px; left: 4px; }
+.bj-card-corner.br { bottom: 4px; right: 4px; transform: rotate(180deg); }
+.bj-card-corner span { font-size: 14px; }
+.bj-card.small .bj-card-corner span { font-size: 11px; }
+.bj-card-center { font-size: 24px; }
+.bj-card.small .bj-card-center { font-size: 18px; }
+
+/* Animations */
+.bj-anim-deal { animation: bjDeal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; transform: translateY(-50px) scale(0.8); }
+@keyframes bjDeal { to { opacity: 1; transform: translateY(0) scale(1); } }
+.bj-anim-flip { animation: bjFlip 0.6s ease-out forwards; transform-style: preserve-3d; }
+@keyframes bjFlip { 0% { transform: rotateY(180deg) scale(1); } 50% { transform: rotateY(90deg) scale(1.1); } 100% { transform: rotateY(0deg) scale(1); } }
+
+.bj-score { color: #fff; font-size: 12px; background: rgba(0,0,0,0.8); padding: 3px 10px; border-radius: 12px; min-width: 60px; text-align: center; border: 1px solid rgba(212,175,55,0.5); box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+#bj-player-hands { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+.bj-player-hand { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; border-radius: 10px; transition: background 0.3s; position: relative; }
+.bj-player-hand.active-hand { background: rgba(212, 175, 55, 0.15); box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); border: 1px dashed rgba(212, 175, 55, 0.6); }
+.bj-player-hand.active-hand::after { content: "\u25BC"; position: absolute; top: -15px; color: #d4af37; font-size: 14px; animation: bounce 1s infinite; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+.bj-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 10px; position: relative; z-index: 10; }
+.bj-bet-row { display: flex; gap: 6px; align-items: center; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 10px; border: 1px solid #d4af37; box-shadow: 0 4px 6px rgba(0,0,0,0.4); }
+.bj-quick { cursor: pointer; padding: 5px 10px; border-radius: 6px; background: linear-gradient(to bottom, #444, #222); font-size: 12px; font-weight: bold; color: #d4af37; border: 1px solid #555; }
+.bj-quick:hover { background: linear-gradient(to bottom, #555, #333); border-color: #d4af37; }
+.bj-btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.bj-message { text-align: center; font-weight: bold; font-size: 14px; color: #f1c40f; min-height: 20px; padding: 5px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
+.bj-msg-sm { font-size: 13px; color: #ddd; font-weight: bold; text-align: center; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+
+/* ROOM MODE */
+.bj-room-layout { display: flex; flex-direction: row; height: 100%; position: relative; overflow: hidden; }
+.bj-room-main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
+.bj-room-topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 2px solid #111; background: rgba(0,0,0,0.6); box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+.bj-room-code-badge { background: linear-gradient(45deg, #b8860b, #d4af37); color: #000; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; letter-spacing: 1px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); cursor: pointer; }
+.bj-room-code-badge:hover { filter: brightness(1.1); }
+.bj-chat-toggle { display: block; cursor: pointer; background: rgba(0,0,0,0.5); border: 1px solid #d4af37; border-radius: 6px; padding: 4px 10px; color: #d4af37; font-weight: bold; font-size: 12px; margin-left: 10px; }
+.bj-players-grid { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 10px; width: 100%; z-index: 1; margin-top: 10px; }
+.bj-player-slot { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; background: rgba(0,0,0,0.4); border-radius: 10px; min-width: 100px; border: 2px solid transparent; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+.bj-player-slot.me { border-color: rgba(212,175,55,0.5); }
+.bj-player-slot.my-turn { background: rgba(212, 175, 55, 0.2); border-color: #d4af37; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+.bj-player-slot.spectator { opacity: 0.6; filter: grayscale(1); }
+.bj-player-name { color: #f1f1f1; font-size: 11px; font-weight: bold; text-shadow: 1px 1px 2px #000; text-align: center; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 6px; }
+
+.bj-lobby-wrap { display: flex; flex-direction: column; gap: 15px; padding: 15px; flex: 1; justify-content: center; align-items: center; }
+.bj-lobby-box { background: rgba(0,0,0,0.5); border: 2px solid #d4af37; border-radius: 12px; padding: 15px; width: 100%; max-width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+.bj-lobby-title { font-size: 16px; font-weight: bold; color: #d4af37; text-align: center; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px dashed rgba(212,175,55,0.3); padding-bottom: 5px; }
+.bj-player-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; padding-right: 5px; }
+.bj-player-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; color: #eee; padding: 8px 10px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 3px solid transparent; }
+.bj-player-row.ready { border-left-color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
+.bj-player-row.host { border-left-color: #d4af37; }
+.bj-kick-btn { background: #e74c3c; color: white; border: none; border-radius: 4px; padding: 3px 6px; font-size: 10px; cursor: pointer; font-weight: bold; opacity: 0.8; }
+.bj-kick-btn:hover { opacity: 1; }
+
+.bj-settings-host { background: rgba(0,0,0,0.6); padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.1); }
+.bj-chat-wrap { position: absolute; top: 0; right: 0; bottom: 0; z-index: 100; display: flex; flex-direction: column; width: 280px; background: rgba(0,0,0,0.85); border-left: 2px solid #111; box-shadow: -5px 0 15px rgba(0,0,0,0.8); transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.bj-chat-wrap.open { transform: translateX(0); }
+.bj-chat-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(0,0,0,0.8); border-bottom: 2px solid #111; color: #d4af37; font-weight: bold; font-size: 14px; }
+.bj-chat-close { cursor: pointer; color: #e74c3c; font-size: 16px; }
+.bj-chat-log { flex: 1; padding: 10px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 4px; color: #ddd; }
+.bj-chat-line { word-break: break-word; line-height: 1.4; }
+.bj-chat-line b { color: #d4af37; }
+.bj-chat-inp-row { display: flex; gap: 5px; padding: 8px; background: rgba(0,0,0,0.8); border-top: 1px solid #333; }
+.bj-chat-inp { background: #222 !important; color: #fff !important; border: 1px solid #444 !important; border-radius: 6px; }
+
+.bj-summary-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: mutFadeIn 0.3s; padding: 20px; }
+.bj-summary-box { background: linear-gradient(135deg, #1a2a20, #0a1410); border: 2px solid #d4af37; border-radius: 12px; width: 100%; max-width: 500px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+.bj-summary-title { font-size: 20px; color: #d4af37; text-align: center; margin-bottom: 15px; font-weight: bold; letter-spacing: 2px; }
+.bj-summary-table { width: 100%; border-collapse: collapse; font-size: 12px; color: #eee; text-align: left; }
+.bj-summary-table th, .bj-summary-table td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.bj-summary-table th { color: #d4af37; font-weight: bold; }
+.bj-summary-row.me { background: rgba(212,175,55,0.15); }
+.bj-val-win { color: #2ecc71; font-weight: bold; }
+.bj-val-lose { color: #e74c3c; }
+.bj-val-push { color: #f1c40f; }
+.bj-countdown { font-size: 14px; color: #aaa; text-align: center; margin-top: 15px; font-weight: bold; }
+
+.bj-double-btn { background: linear-gradient(#f39c12, #d35400) !important; color: white !important; border: 1px solid #e67e22 !important; }
+.bj-split-btn { background: linear-gradient(#9b59b6, #8e44ad) !important; color: white !important; border: 1px solid #9b59b6 !important; }
+.bj-surr-btn { color: #e74c3c !important; border-color: #c0392b !important; }
+.bj-btn-ready { background: linear-gradient(#2ecc71, #27ae60) !important; color: white !important; border-color: #2ecc71 !important; }
+.bj-btn-ready.not-ready { background: linear-gradient(#e74c3c, #c0392b) !important; border-color: #e74c3c !important; }
+.bj-coin-anim { position: absolute; color: #f1c40f; font-weight: bold; font-size: 16px; animation: bjCoinFly 1.5s ease-out forwards; pointer-events: none; text-shadow: 0 0 5px #000; z-index: 20; }
+@keyframes bjCoinFly { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.5); } }
+
+@media (max-width: 640px) {
+    .bj-chat-wrap.mobile-chat-focus {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        width: 100%;
+        transform: translateX(0);
+        z-index: 100000;
+        background: rgba(0,0,0,0.95);
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
+        border-top: 2px solid #d4af37;
+        border-left: none;
+    }
+}
+`;
   }
 });
 
@@ -3132,7 +3264,7 @@ function initUI() {
   sh = root.attachShadow({ mode: "open" });
   $id = (id) => sh.querySelector("#" + id);
   const style = document.createElement("style");
-  style.textContent = styleCSS + "\n" + fleaStyles;
+  style.textContent = styleCSS + "\n" + fleaStyles + "\n" + blackjackStyles;
   sh.appendChild(style);
   ctx.ui = document.createElement("div");
   ctx.ui.innerHTML = `
@@ -3200,6 +3332,14 @@ function initUI() {
     </div>
 
     <div class="toast" id="toast"></div>
+  </div>
+
+  <div id="bj-win" class="dungeon-win" style="display:none; z-index:99999;">
+    <div class="titlebar" id="bj-drag">
+      <h1>${spriteSVG("spadeIcon", 16)} Ph\xE2n khu Gi\u1EA3i Tr\xED</h1>
+      <div class="close-x" onclick="FarmAll.closeBlackjack()">\xD7</div>
+    </div>
+    <div id="bj-body" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; padding-bottom: 20px;"></div>
   </div>
   
   <div id="hero-bar" class="hero-bar" style="display:none">
@@ -6093,6 +6233,16 @@ function placeDungeonWin() {
   dungeonWin.style.left = Math.min(Math.max(x2, 0), Math.max(vw - w2, 0)) + "px";
   dungeonWin.style.top = Math.min(Math.max(y2, 0), vh - 60) + "px";
 }
+function placeBjWin() {
+  const bjWin = $id("bj-win");
+  if (!bjWin) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const w2 = Math.min(600, vw * 0.96);
+  let x2 = ctx.S.bjWin ? ctx.S.bjWin.fx * vw : (vw - w2) / 2;
+  let y2 = ctx.S.bjWin ? ctx.S.bjWin.fy * vh : vh * 0.04;
+  bjWin.style.left = Math.min(Math.max(x2, 0), Math.max(vw - w2, 0)) + "px";
+  bjWin.style.top = Math.min(Math.max(y2, 0), vh - 60) + "px";
+}
 function toggleWin() {
   try {
     if (ctx.win.classList.contains("open")) {
@@ -6188,6 +6338,34 @@ function initWindows() {
       dungeonWg = null;
       const dungeonWin = $id("dungeon-win");
       ctx.S.dungeonWin = { fx: dungeonWin.offsetLeft / window.innerWidth, fy: dungeonWin.offsetTop / window.innerHeight };
+      save();
+    });
+  }
+  const bjDragBar = $id("bj-drag");
+  let bjWg = null;
+  if (bjDragBar) {
+    bjDragBar.addEventListener("pointerdown", (e2) => {
+      if (e2.target.classList.contains("close-x")) return;
+      if (window.innerWidth <= 640) return;
+      bjDragBar.setPointerCapture(e2.pointerId);
+      const bjWin = $id("bj-win");
+      bjWg = { id: e2.pointerId, sx: e2.clientX, sy: e2.clientY, ox: bjWin.offsetLeft, oy: bjWin.offsetTop };
+    });
+    bjDragBar.addEventListener("pointermove", (e2) => {
+      if (!bjWg || e2.pointerId !== bjWg.id) return;
+      const bjWin = $id("bj-win");
+      bjWin.style.left = bjWg.ox + e2.clientX - bjWg.sx + "px";
+      bjWin.style.top = bjWg.oy + e2.clientY - bjWg.sy + "px";
+    });
+    bjDragBar.addEventListener("pointerup", (e2) => {
+      if (!bjWg || e2.pointerId !== bjWg.id) return;
+      try {
+        bjDragBar.releasePointerCapture(e2.pointerId);
+      } catch (er2) {
+      }
+      bjWg = null;
+      const bjWin = $id("bj-win");
+      ctx.S.bjWin = { fx: bjWin.offsetLeft / window.innerWidth, fy: bjWin.offsetTop / window.innerHeight };
       save();
     });
   }
@@ -6469,10 +6647,16 @@ function renderPlots() {
           ${spriteSVG("hiloIcon", 48)}
           <div class="feature-name">Hi-Lo</div>
         </div>
+        <div class="explore-slot" id="cslot-bj">
+          ${spriteSVG("spadeIcon", 48)}
+          <div class="feature-name">Blackjack</div>
+        </div>
       </div>
     `;
     const bBtn = $id("cslot-bet");
     if (bBtn) bBtn.addEventListener("click", () => openPanel("bet"));
+    const bjBtn = $id("cslot-bj");
+    if (bjBtn) bjBtn.addEventListener("click", () => openBlackjackPicker());
     return;
   }
   if (expWrap) expWrap.style.display = "none";
@@ -7504,14 +7688,14 @@ async function requestDayEvent(force) {
   renderBanner();
   try {
     const wb = await collectWorldbook();
-    const prompt = buildEventPrompt(wb);
+    const prompt2 = buildEventPrompt(wb);
     console.log("====== [FARM DEBUG] PROMPT SENT TO LLM ======");
-    console.log(prompt);
+    console.log(prompt2);
     console.log("===============================================");
     const reqBody = {
       model: SEC.model,
       messages: [
-        { role: "system", content: prompt },
+        { role: "system", content: prompt2 },
         { role: "user", content: "H\xE3y t\u1EA1o s\u1EF1 ki\u1EC7n v\u01B0\u1EDDn rau cho h\xF4m nay." }
       ],
       max_tokens: 2e3 + Object.keys(CROPS).length * 100
@@ -9231,7 +9415,7 @@ function showFloatDamage(text, target, color = null) {
 }
 function spawnSkillEffect(startEl, targetEl, skillType) {
   if (!startEl) return;
-  const scene2 = startEl.closest(".hero-scene") || document.querySelector(".hero-scene");
+  const scene2 = startEl.closest(".hero-scene") || sh.querySelector(".hero-scene");
   if (!scene2) return;
   const sRect = scene2.getBoundingClientRect();
   const healSkills = ["heal_party", "heal_self"];
@@ -9324,7 +9508,7 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
 }
 function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
   if (!startEl || !targetEl) return;
-  const scene2 = startEl.closest(".hero-scene") || document.querySelector(".hero-scene");
+  const scene2 = startEl.closest(".hero-scene") || sh.querySelector(".hero-scene");
   if (!scene2) return;
   const sRect = scene2.getBoundingClientRect();
   const startRect = startEl.getBoundingClientRect();
@@ -48864,6 +49048,1741 @@ var init_flea = __esm({
   }
 });
 
+// src/blackjack.js
+function bjToast(msg) {
+  let t2 = $id("bj-toast");
+  if (!t2) {
+    t2 = document.createElement("div");
+    t2.id = "bj-toast";
+    t2.style.cssText = "position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;pointer-events:none;opacity:0;transition:opacity 0.3s;z-index:100000;box-shadow:0 4px 12px rgba(0,0,0,0.5);text-align:center;font-weight:bold;min-width:200px;";
+    const win = $id("bj-win");
+    if (win) win.appendChild(t2);
+    else document.body.appendChild(t2);
+  }
+  t2.textContent = msg;
+  t2.style.opacity = "1";
+  if (t2._timer) clearTimeout(t2._timer);
+  t2._timer = setTimeout(() => {
+    t2.style.opacity = "0";
+  }, 2500);
+}
+function bjSystemChat(msg) {
+  bjChatLog.push({ name: "H\u1EC7 th\u1ED1ng", msg, ts: Date.now(), isSystem: true });
+  if (bjChatLog.length > 50) bjChatLog.shift();
+  const wrap2 = $id("bj-chat-wrap");
+  if (!wrap2 || !wrap2.classList.contains("open")) {
+    bjUnreadChat++;
+    bjRenderRoom();
+  }
+  bjRenderChat();
+}
+function cardValue(rank) {
+  if (rank === "A") return 11;
+  if (["J", "Q", "K"].includes(rank)) return 10;
+  return parseInt(rank);
+}
+function handTotal(hand) {
+  let total = 0, aces = 0;
+  for (const card of hand) {
+    if (card.hidden) continue;
+    total += cardValue(card.rank);
+    if (card.rank === "A") aces++;
+  }
+  while (total > 21 && aces > 0) {
+    total -= 10;
+    aces--;
+  }
+  return total;
+}
+function isSoft(hand) {
+  let total = 0, aces = 0;
+  for (const card of hand) {
+    if (card.hidden) continue;
+    total += cardValue(card.rank);
+    if (card.rank === "A") aces++;
+  }
+  while (total > 21 && aces > 0) {
+    total -= 10;
+    aces--;
+  }
+  return aces > 0 && total <= 21;
+}
+function buildShoe(numDecks, seed) {
+  const cards = [];
+  for (let d = 0; d < numDecks; d++) {
+    for (const suit of SUITS) {
+      for (const rank of RANKS) {
+        cards.push({ suit, rank });
+      }
+    }
+  }
+  let s2 = seed >>> 0;
+  const rng = () => {
+    s2 |= 0;
+    s2 = s2 + 1831565813 | 0;
+    let t2 = Math.imul(s2 ^ s2 >>> 15, 1 | s2);
+    t2 = t2 + Math.imul(t2 ^ t2 >>> 7, 61 | t2) ^ t2;
+    return ((t2 ^ t2 >>> 14) >>> 0) / 4294967296;
+  };
+  for (let i2 = cards.length - 1; i2 > 0; i2--) {
+    const j = Math.floor(rng() * (i2 + 1));
+    [cards[i2], cards[j]] = [cards[j], cards[i2]];
+  }
+  return cards;
+}
+function isBlackjack(hand) {
+  if (hand.length !== 2) return false;
+  return handTotal(hand) === 21;
+}
+function is10Value(rank) {
+  return ["10", "J", "Q", "K"].includes(rank);
+}
+function cardHTML(card, small) {
+  let animCls = "";
+  if (card.isNew) {
+    animCls = " bj-anim-deal";
+    delete card.isNew;
+  } else if (card.justRevealed) {
+    animCls = " bj-anim-flip";
+    delete card.justRevealed;
+  }
+  if (card.hidden) {
+    return `<div class="bj-card back${small ? " small" : ""}${animCls}"><div class="bj-card-back-inner"></div></div>`;
+  }
+  const isRed = card.suit === "\u2665" || card.suit === "\u2666";
+  const col = isRed ? "#c0392b" : "#1a1a2e";
+  return `<div class="bj-card${small ? " small" : ""}${animCls}" style="color:${col}">
+        <div class="bj-card-corner tl">${card.rank}<br><span>${card.suit}</span></div>
+        <div class="bj-card-center">${card.suit}</div>
+        <div class="bj-card-corner br">${card.rank}<br><span>${card.suit}</span></div>
+    </div>`;
+}
+function openBlackjackSolo() {
+  soloState = {
+    phase: "bet",
+    shoe: [],
+    shoeIdx: 0,
+    playerHands: [[]],
+    activeHandIdx: 0,
+    dealerHand: [],
+    bets: [0],
+    insuranceBet: 0,
+    splitAceIdxs: /* @__PURE__ */ new Set(),
+    settings: { minBet: 10, maxBet: 0, numDecks: 6 }
+  };
+  soloState.shoe = buildShoe(soloState.settings.numDecks, Date.now() & 4294967295);
+  const win = $id("bj-win");
+  const body = $id("bj-body");
+  if (win && body) {
+    win.style.display = "flex";
+    placeBjWin();
+    body.innerHTML = buildSoloUI();
+    soloRender();
+  }
+}
+function soloDrawCard(hidden) {
+  const s2 = soloState;
+  if (s2.shoeIdx >= s2.shoe.length) {
+    s2.shoe = buildShoe(s2.settings.numDecks, Date.now() & 4294967295);
+    s2.shoeIdx = 0;
+  }
+  return { ...s2.shoe[s2.shoeIdx++], hidden: !!hidden, isNew: true };
+}
+function buildSoloUI() {
+  return `<div id="bj-solo-wrap">
+        <div class="bj-table">
+            <div class="bj-dealer-area">
+                <div class="bj-area-label">Nh\xE0 c\xE1i</div>
+                <div class="bj-hand-row" id="bj-dealer-hand"></div>
+                <div class="bj-score" id="bj-dealer-score"></div>
+            </div>
+            <div class="bj-player-area">
+                <div class="bj-area-label">B\u1EA1n \u2014 <span id="bj-coins-display"></span></div>
+                <div id="bj-player-hands"></div>
+            </div>
+        </div>
+        <div id="bj-message" class="bj-message"></div>
+        <div id="bj-actions" class="bj-actions"></div>
+    </div>`;
+}
+function soloRender() {
+  const s2 = soloState;
+  if (!$id("bj-solo-wrap")) return;
+  const coinsEl = $id("bj-coins-display");
+  if (coinsEl) coinsEl.textContent = `${(ctx.S.coins || 0).toLocaleString()} G`;
+  const dealerEl = $id("bj-dealer-hand");
+  const dealerScoreEl = $id("bj-dealer-score");
+  if (dealerEl) {
+    dealerEl.innerHTML = s2.dealerHand.map((c2) => cardHTML(c2)).join("");
+    const vis = s2.dealerHand.filter((c2) => !c2.hidden);
+    if (dealerScoreEl) dealerScoreEl.textContent = vis.length ? `\u0110i\u1EC3m: ${handTotal(vis)}` : "";
+  }
+  const handsEl = $id("bj-player-hands");
+  if (handsEl) {
+    handsEl.innerHTML = s2.playerHands.map((hand, i2) => {
+      const isActive = i2 === s2.activeHandIdx && s2.phase === "player";
+      const total = handTotal(hand);
+      const bet = s2.bets[i2] || 0;
+      return `<div class="bj-player-hand${isActive ? " active-hand" : ""}">
+                <div class="bj-hand-row">${hand.map((c2) => cardHTML(c2)).join("")}</div>
+                <div class="bj-score">\u0110i\u1EC3m: ${total}${total > 21 ? " \u{1F480} Bust!" : ""} \u2014 C\u01B0\u1EE3c: ${bet.toLocaleString()}G</div>
+            </div>`;
+    }).join("");
+  }
+  const msgEl = $id("bj-message");
+  if (msgEl && s2.phase !== "done") msgEl.textContent = "";
+  renderSoloActions();
+}
+function renderSoloActions() {
+  const s2 = soloState;
+  const actEl = $id("bj-actions");
+  if (!actEl) return;
+  const coins = ctx.S.coins || 0;
+  if (s2.phase === "bet") {
+    const min = s2.settings.minBet;
+    actEl.innerHTML = `
+            <div class="bj-bet-row">
+                <input class="inp" id="bj-bet-inp" type="number" min="${min}" value="${Math.max(min, Math.min(100, coins))}" style="width:110px">
+                <span class="buy plain bj-quick" data-q="4">\xBC</span>
+                <span class="buy plain bj-quick" data-q="2">\xBD</span>
+                <span class="buy plain bj-quick" data-q="1">Max</span>
+            </div>
+            <div class="bj-btn-row" style="margin-top:8px;">
+                <div class="buy" id="bj-deal">\u{1F0CF} Ph\xE1t B\xE0i</div>
+            </div>`;
+    actEl.querySelectorAll(".bj-quick").forEach((b2) => b2.addEventListener("click", () => {
+      const inp = $id("bj-bet-inp");
+      if (inp) inp.value = String(Math.max(min, Math.floor(coins / Number(b2.getAttribute("data-q")))));
+    }));
+    $id("bj-deal").addEventListener("click", soloStartRound);
+    return;
+  }
+  if (s2.phase === "insurance") {
+    const hand = s2.playerHands[0];
+    const bet = s2.bets[0];
+    const hasBJ = isBlackjack(hand);
+    if (hasBJ) {
+      actEl.innerHTML = `
+                <div class="bj-msg-sm">B\u1EA1n c\xF3 Blackjack! Dealer upcard l\xE0 Ace.</div>
+                <div class="bj-btn-row">
+                    <div class="buy" id="bj-even-money">L\u1EA5y ngay 1:1 (Even Money)</div>
+                    <div class="buy plain" id="bj-no-insurance">B\u1ECF qua, ch\u1EDD k\u1EBFt qu\u1EA3</div>
+                </div>`;
+      $id("bj-even-money").addEventListener("click", soloEvenMoney);
+      $id("bj-no-insurance").addEventListener("click", () => soloAfterInsurance(false));
+    } else {
+      const maxIns = Math.floor(bet / 2);
+      actEl.innerHTML = `
+                <div class="bj-msg-sm">Dealer upcard l\xE0 Ace \u2014 Mua b\u1EA3o hi\u1EC3m? (t\u1ED1i \u0111a ${maxIns}G)</div>
+                <div class="bj-btn-row">
+                    <div class="buy" id="bj-buy-ins">Mua ${maxIns}G</div>
+                    <div class="buy plain" id="bj-skip-ins">B\u1ECF qua</div>
+                </div>`;
+      $id("bj-buy-ins").addEventListener("click", () => soloBuyInsurance(maxIns));
+      $id("bj-skip-ins").addEventListener("click", () => soloAfterInsurance(false));
+    }
+    return;
+  }
+  if (s2.phase === "player") {
+    const hand = s2.playerHands[s2.activeHandIdx];
+    const total = handTotal(hand);
+    const bet = s2.bets[s2.activeHandIdx];
+    const isSplitAce = s2.splitAceIdxs.has(s2.activeHandIdx);
+    const canDouble = hand.length === 2 && coins >= bet && !isSplitAce;
+    const canSplit = hand.length === 2 && hand[0].rank === hand[1].rank && coins >= bet && s2.playerHands.length < 4;
+    const canSurrender = hand.length === 2 && s2.activeHandIdx === 0 && s2.playerHands.length === 1;
+    if (total > 21) {
+      setTimeout(() => soloNextHand(), 700);
+      actEl.innerHTML = `<div class="bj-msg-sm">\u{1F480} Bust! T\u1EF1 \u0111\u1ED9ng chuy\u1EC3n tay...</div>`;
+      return;
+    }
+    if (isSplitAce) {
+      setTimeout(() => soloNextHand(), 400);
+      actEl.innerHTML = `<div class="bj-msg-sm">Split Ace \u2014 Ch\u1EC9 nh\u1EADn 1 l\xE1, t\u1EF1 Stand.</div>`;
+      return;
+    }
+    let html = `<div class="bj-btn-row">
+            <div class="buy" id="bj-hit">Hit</div>
+            <div class="buy plain" id="bj-stand">Stand</div>`;
+    if (canDouble) html += `<div class="buy bj-double-btn" id="bj-double">Double</div>`;
+    if (canSplit) html += `<div class="buy bj-split-btn" id="bj-split">Split</div>`;
+    if (canSurrender) html += `<div class="buy plain bj-surr-btn" id="bj-surrender">Surrender</div>`;
+    html += `</div>`;
+    actEl.innerHTML = html;
+    $id("bj-hit").addEventListener("click", soloHit);
+    $id("bj-stand").addEventListener("click", soloStand);
+    if (canDouble) $id("bj-double").addEventListener("click", soloDouble);
+    if (canSplit) $id("bj-split").addEventListener("click", soloSplit);
+    if (canSurrender) $id("bj-surrender").addEventListener("click", soloSurrender);
+    return;
+  }
+  if (s2.phase === "done") {
+    actEl.innerHTML = `<div class="bj-btn-row"><div class="buy" id="bj-next-round">V\xE1n M\u1EDBi</div></div>`;
+    $id("bj-next-round").addEventListener("click", soloNewRound);
+  }
+}
+function soloStartRound() {
+  const s2 = soloState;
+  const coins = ctx.S.coins || 0;
+  const inp = $id("bj-bet-inp");
+  const want = Math.max(0, parseInt(inp ? inp.value : "0") || 0);
+  if (want < s2.settings.minBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${s2.settings.minBet}G`);
+  if (s2.settings.maxBet > 0 && want > s2.settings.maxBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${s2.settings.maxBet}G`);
+  if (want > coins) return bjToast(`Kh\xF4ng \u0111\u1EE7 v\xE0ng (${coins.toLocaleString()}G)`);
+  ctx.S.coins = (ctx.S.coins || 0) - want;
+  save();
+  s2.bets = [want];
+  s2.insuranceBet = 0;
+  s2.playerHands = [[]];
+  s2.activeHandIdx = 0;
+  s2.dealerHand = [];
+  s2.splitAceIdxs = /* @__PURE__ */ new Set();
+  s2.playerHands[0].push(soloDrawCard());
+  s2.dealerHand.push(soloDrawCard());
+  s2.playerHands[0].push(soloDrawCard());
+  s2.dealerHand.push(soloDrawCard(true));
+  const dealerUp = s2.dealerHand[0];
+  if (dealerUp.rank === "A") {
+    s2.phase = "insurance";
+  } else if (is10Value(dealerUp.rank)) {
+    const dealerBJ = isBlackjack([s2.dealerHand[0], { ...s2.dealerHand[1], hidden: false }]);
+    if (dealerBJ) {
+      s2.dealerHand[1].hidden = false;
+      s2.phase = "done";
+      soloResolveAll();
+      soloRender();
+      return;
+    }
+    s2.phase = "player";
+    if (isBlackjack(s2.playerHands[0])) {
+      s2.dealerHand[1].hidden = false;
+      s2.phase = "done";
+      soloResolveAll();
+      soloRender();
+      return;
+    }
+  } else {
+    s2.phase = "player";
+    if (isBlackjack(s2.playerHands[0])) {
+      s2.dealerHand[1].hidden = false;
+      s2.phase = "done";
+      soloResolveAll();
+      soloRender();
+      return;
+    }
+  }
+  soloRender();
+}
+function soloEvenMoney() {
+  const s2 = soloState;
+  const payout = s2.bets[0] * 2;
+  ctx.S.coins = (ctx.S.coins || 0) + payout;
+  save();
+  renderStatus();
+  s2.dealerHand[1].hidden = false;
+  s2.phase = "done";
+  showMsg(`\u2660 Even Money! Nh\u1EADn l\u1EA1i ${payout.toLocaleString()}G`);
+  soloRender();
+}
+function soloBuyInsurance(amount) {
+  const s2 = soloState;
+  if ((ctx.S.coins || 0) < amount) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng mua b\u1EA3o hi\u1EC3m");
+  ctx.S.coins = (ctx.S.coins || 0) - amount;
+  s2.insuranceBet = amount;
+  save();
+  soloAfterInsurance(true);
+}
+function soloAfterInsurance(boughtIns) {
+  const s2 = soloState;
+  const dealerBJ = isBlackjack([s2.dealerHand[0], { ...s2.dealerHand[1], hidden: false }]);
+  if (dealerBJ) {
+    s2.dealerHand[1].hidden = false;
+    if (boughtIns) {
+      const insPayout = s2.insuranceBet * 3;
+      ctx.S.coins = (ctx.S.coins || 0) + insPayout;
+      save();
+      showMsg(`Dealer Blackjack! B\u1EA3o hi\u1EC3m tr\u1EA3 ${insPayout.toLocaleString()}G`);
+    }
+    s2.phase = "done";
+    soloResolveAll();
+    soloRender();
+    return;
+  }
+  s2.phase = "player";
+  if (isBlackjack(s2.playerHands[0])) {
+    s2.dealerHand[1].hidden = false;
+    s2.phase = "done";
+    soloResolveAll();
+    soloRender();
+    return;
+  }
+  soloRender();
+}
+function soloHit() {
+  const s2 = soloState;
+  const hand = s2.playerHands[s2.activeHandIdx];
+  hand.push(soloDrawCard());
+  soloRender();
+  if (handTotal(hand) > 21) setTimeout(() => soloNextHand(), 700);
+}
+function soloStand() {
+  soloNextHand();
+}
+function soloDouble() {
+  const s2 = soloState;
+  const idx = s2.activeHandIdx;
+  const bet = s2.bets[idx];
+  if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Double");
+  ctx.S.coins = (ctx.S.coins || 0) - bet;
+  s2.bets[idx] *= 2;
+  save();
+  s2.playerHands[idx].push(soloDrawCard());
+  soloRender();
+  setTimeout(() => soloNextHand(), 500);
+}
+function soloSplit() {
+  const s2 = soloState;
+  const idx = s2.activeHandIdx;
+  const bet = s2.bets[idx];
+  if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Split");
+  ctx.S.coins = (ctx.S.coins || 0) - bet;
+  save();
+  const hand = s2.playerHands[idx];
+  const isSplitAce = hand[0].rank === "A";
+  const splitCard = hand.splice(1, 1)[0];
+  const newHand = [splitCard];
+  hand.push(soloDrawCard());
+  newHand.push(soloDrawCard());
+  s2.playerHands.splice(idx + 1, 0, newHand);
+  s2.bets.splice(idx + 1, 0, bet);
+  if (isSplitAce) {
+    s2.splitAceIdxs.add(idx);
+    s2.splitAceIdxs.add(idx + 1);
+  }
+  soloRender();
+}
+function soloSurrender() {
+  const s2 = soloState;
+  s2.playerHands[s2.activeHandIdx].surrendered = true;
+  const refund = Math.floor(s2.bets[0] / 2);
+  ctx.S.coins = (ctx.S.coins || 0) + refund;
+  save();
+  renderStatus();
+  soloNextHand();
+}
+function soloNextHand() {
+  const s2 = soloState;
+  const next = s2.activeHandIdx + 1;
+  if (next < s2.playerHands.length) {
+    s2.activeHandIdx = next;
+    soloRender();
+  } else soloRunDealer();
+}
+function soloRunDealer() {
+  const s2 = soloState;
+  s2.dealerHand[1].hidden = false;
+  s2.dealerHand[1].justRevealed = true;
+  s2.phase = "dealer";
+  soloRender();
+  const allBust = s2.playerHands.every((h) => handTotal(h) > 21);
+  if (allBust) {
+    s2.phase = "done";
+    soloResolveAll();
+    soloRender();
+    return;
+  }
+  let step = 0;
+  const iv = setInterval(() => {
+    const total = handTotal(s2.dealerHand);
+    const soft = isSoft(s2.dealerHand);
+    if (total < 17 || soft && total === 16) {
+      s2.dealerHand.push(soloDrawCard());
+      soloRender();
+    } else {
+      clearInterval(iv);
+      s2.phase = "done";
+      soloResolveAll();
+      soloRender();
+    }
+    if (++step > 12) clearInterval(iv);
+  }, 600);
+}
+function soloResolveAll() {
+  const s2 = soloState;
+  const dTotal = handTotal(s2.dealerHand);
+  const dBJ = isBlackjack(s2.dealerHand);
+  const dBust = dTotal > 21;
+  const results = [];
+  for (let i2 = 0; i2 < s2.playerHands.length; i2++) {
+    const hand = s2.playerHands[i2];
+    const pTotal = handTotal(hand);
+    const isOnly = s2.playerHands.length === 1;
+    const pBJ = isBlackjack(hand) && isOnly;
+    const bet = s2.bets[i2];
+    const lbl = isOnly ? "" : `Tay ${i2 + 1}: `;
+    if (pTotal > 21) {
+      results.push(`${lbl}\u{1F480} Bust (m\u1EA5t ${bet.toLocaleString()}G)`);
+      continue;
+    }
+    if (pBJ && dBJ) {
+      ctx.S.coins = (ctx.S.coins || 0) + bet;
+      results.push(`${lbl}\u{1F91D} Ho\xE0 BJ`);
+      continue;
+    }
+    if (pBJ) {
+      const p2 = bet + Math.floor(bet * 1.5);
+      ctx.S.coins = (ctx.S.coins || 0) + p2;
+      results.push(`${lbl}\u2660 BLACKJACK +${Math.floor(bet * 1.5).toLocaleString()}G`);
+      continue;
+    }
+    if (dBJ) {
+      results.push(`${lbl}\u{1F494} Dealer BJ`);
+      continue;
+    }
+    if (dBust || pTotal > dTotal) {
+      ctx.S.coins = (ctx.S.coins || 0) + bet * 2;
+      results.push(`${lbl}\u2705 Th\u1EAFng +${bet.toLocaleString()}G`);
+      continue;
+    }
+    if (pTotal === dTotal) {
+      ctx.S.coins = (ctx.S.coins || 0) + bet;
+      results.push(`${lbl}\u{1F91D} Ho\xE0`);
+      continue;
+    }
+    results.push(`${lbl}\u274C Thua`);
+  }
+  save();
+  renderStatus();
+  showMsg(results.join("\n"));
+}
+function showMsg(text) {
+  const el = $id("bj-message");
+  if (el) el.innerHTML = text.replace(/\n/g, "<br>");
+}
+function soloNewRound() {
+  const s2 = soloState;
+  s2.phase = "bet";
+  s2.playerHands = [[]];
+  s2.activeHandIdx = 0;
+  s2.dealerHand = [];
+  s2.bets = [0];
+  s2.insuranceBet = 0;
+  s2.splitAceIdxs = /* @__PURE__ */ new Set();
+  const msgEl = $id("bj-message");
+  if (msgEl) msgEl.innerHTML = "";
+  soloRender();
+}
+function bjMyName() {
+  return ctx.S.username || "Kh\xE1ch";
+}
+function openBlackjackRoom() {
+  const win = $id("bj-win");
+  if (win) {
+    win.classList.add("open");
+    win.style.display = "flex";
+    placeBjWin();
+  }
+  bjResetState();
+  bjRenderMenu();
+}
+function closeBlackjack() {
+  if (bjPeer) {
+    try {
+      bjPeer.destroy();
+    } catch (e2) {
+    }
+    bjPeer = null;
+  }
+  bjConns = {};
+  bjResetState();
+  const win = $id("bj-win");
+  if (win) {
+    win.classList.remove("open");
+    win.style.display = "none";
+  }
+}
+function bjResetState() {
+  bjConns = {};
+  bjIsHost = false;
+  bjMyId = "";
+  bjRoomId = "";
+  bjPlayers = {};
+  bjGameState = null;
+  bjMyStatus = "idle";
+  bjChatLog = [];
+  bjUnreadChat = 0;
+  bjRoomPhase = "lobby";
+  if (bjSummaryTimer) clearInterval(bjSummaryTimer);
+  bjSummaryTimer = null;
+  bjSummaryTimeLeft = 0;
+  bjSummaryData = null;
+}
+function bjBroadcast(data, excludePid) {
+  for (const [pid, conn2] of Object.entries(bjConns)) {
+    if (pid === excludePid) continue;
+    if (conn2 && conn2.open) conn2.send(data);
+  }
+}
+function bjRenderMenu() {
+  const body = $id("bj-body");
+  if (!body) return;
+  if (!ctx.S.username) {
+    body.innerHTML = `<div style="padding:20px;text-align:center;display:flex;flex-direction:column;gap:12px;">
+            <div class="bj-msg-sm">B\u1EA1n c\u1EA7n c\xF3 t\xEAn ng\u01B0\u1EDDi ch\u01A1i tr\u01B0\u1EDBc</div>
+            <input class="inp" id="bj-inp-name" placeholder="Nh\u1EADp t\xEAn c\u1EE7a b\u1EA1n...">
+            <div class="buy" id="bj-save-name" style="text-align:center">L\u01B0u t\xEAn</div>
+        </div>`;
+    $id("bj-save-name").onclick = () => {
+      const v2 = ($id("bj-inp-name").value || "").trim();
+      if (!v2) return bjToast("T\xEAn kh\xF4ng \u0111\u01B0\u1EE3c tr\u1ED1ng!");
+      ctx.S.username = v2;
+      save();
+      bjRenderMenu();
+    };
+    return;
+  }
+  body.innerHTML = `<div style="padding:20px;display:flex;flex-direction:column;gap:14px;text-align:center;">
+        <div style="font-weight:bold;color:#ffd94d;font-size:14px;">\u{1F3B0} Ph\xF2ng Blackjack \u2014 ${bjMyName()}</div>
+        <div class="buy" id="bj-host-btn" style="text-align:center">\u{1F3B0} T\u1EA1o Ph\xF2ng (Host)</div>
+        <div style="display:flex;gap:8px;">
+            <input class="inp" id="bj-join-code" placeholder="Nh\u1EADp m\xE3 ph\xF2ng..." style="flex:1">
+            <div class="buy plain" id="bj-join-btn">Tham gia</div>
+        </div>
+        <div id="bj-room-status" style="font-size:12px;color:#e05;font-weight:bold;min-height:16px;"></div>
+    </div>`;
+  $id("bj-host-btn").onclick = bjHostRoom;
+  $id("bj-join-btn").onclick = bjJoinRoom;
+}
+function bjUpdateStatus(msg, color) {
+  const el = $id("bj-room-status");
+  if (el) {
+    el.textContent = msg;
+    el.style.color = color || "#ffd94d";
+  }
+}
+async function bjHostRoom() {
+  bjUpdateStatus("\u0110ang t\u1EA1o ph\xF2ng...", "#ffd94d");
+  const roomId = "bj-" + Math.random().toString(36).substr(2, 6);
+  const peerOpts = await buildPeerConfigAsync();
+  bjPeer = new $416260bce337df90$export$ecd1fc136c422448(roomId, peerOpts);
+  bjIsHost = true;
+  bjPeer.on("open", (id) => {
+    bjMyId = id;
+    bjRoomId = id;
+    bjPlayers[id] = { name: bjMyName(), status: "idle" };
+    bjRenderRoom();
+  });
+  bjPeer.on("connection", (inConn) => {
+    const active = Object.keys(bjConns).filter((p2) => bjConns[p2] && bjConns[p2].open);
+    if (active.length >= MAX_PLAYERS - 1) {
+      inConn.on("open", () => {
+        inConn.send({ type: "ROOM_FULL" });
+        setTimeout(() => inConn.close(), 500);
+      });
+      return;
+    }
+    inConn.on("open", () => {
+      bjConns[inConn.peer] = inConn;
+      bjSetupConn(inConn);
+    });
+  });
+  bjPeer.on("error", (err) => bjUpdateStatus("L\u1ED7i: " + err.type, "#e05"));
+}
+async function bjJoinRoom() {
+  const code = ($id("bj-join-code")?.value || "").trim();
+  if (!code) return bjUpdateStatus("Nh\u1EADp m\xE3 ph\xF2ng!", "#e05");
+  bjUpdateStatus("\u0110ang k\u1EBFt n\u1ED1i...", "#ffd94d");
+  const peerOpts = await buildPeerConfigAsync();
+  const myShortId = "bj-" + Math.random().toString(36).substr(2, 6);
+  bjPeer = new $416260bce337df90$export$ecd1fc136c422448(myShortId, peerOpts);
+  bjIsHost = false;
+  bjPeer.on("open", () => {
+    const conn2 = bjPeer.connect(code, { reliable: true });
+    bjConns[code] = conn2;
+    conn2.on("open", () => {
+      bjRoomId = code;
+      bjMyId = bjPeer.id;
+      bjSetupConn(conn2);
+      conn2.send({ type: "HELLO", name: bjMyName(), id: bjMyId });
+    });
+    conn2.on("error", () => bjUpdateStatus("L\u1ED7i k\u1EBFt n\u1ED1i!", "#e05"));
+  });
+  bjPeer.on("connection", (inConn) => {
+    const active = Object.keys(bjConns).filter((p2) => bjConns[p2] && bjConns[p2].open);
+    if (active.length >= MAX_PLAYERS - 1) {
+      inConn.on("open", () => {
+        inConn.send({ type: "ROOM_FULL" });
+        setTimeout(() => inConn.close(), 500);
+      });
+      return;
+    }
+    inConn.on("open", () => {
+      bjConns[inConn.peer] = inConn;
+      bjSetupConn(inConn);
+    });
+  });
+  bjPeer.on("error", (err) => bjUpdateStatus("L\u1ED7i: " + err.type, "#e05"));
+}
+function bjSetupConn(conn2) {
+  conn2.on("data", (data) => bjHandleMsg(conn2.peer, data));
+  conn2.on("close", () => bjHandleDisconnect(conn2.peer));
+  conn2.on("error", () => bjHandleDisconnect(conn2.peer));
+}
+function bjBroadcastProfits() {
+  if (!bjIsHost) return;
+  const profits = {};
+  for (const p2 in bjPlayers) profits[p2] = bjPlayers[p2].netProfit || 0;
+  const msg = { type: "UPDATE_PROFITS", profits };
+  bjBroadcast(msg);
+  bjHandleMsg(bjMyId, msg);
+}
+function bjHandleMsg(fromPid, data) {
+  switch (data.type) {
+    case "HELLO": {
+      const status = bjGameState && bjRoomPhase !== "summary" ? "spectator" : "idle";
+      bjPlayers[fromPid] = { name: data.name || "Kh\xE1ch", status, netProfit: 0 };
+      if (bjIsHost) {
+        bjBroadcast({ type: "PLAYER_JOIN", pid: fromPid, name: data.name, status }, fromPid);
+        bjConns[fromPid].send({ type: "WELCOME", players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData, chatLog: bjChatLog });
+      }
+      bjRenderRoom();
+      break;
+    }
+    case "WELCOME":
+      bjPlayers = data.players || {};
+      bjSettings = data.settings || bjSettings;
+      bjGameState = data.gameState || null;
+      bjRoomPhase = data.roomPhase || (bjGameState ? "ingame" : "lobby");
+      bjSummaryData = data.summaryData || null;
+      if (data.chatLog) bjChatLog = data.chatLog;
+      bjMyStatus = bjGameState && bjRoomPhase !== "summary" ? "spectator" : "idle";
+      bjRenderRoom();
+      break;
+    case "PLAYER_JOIN":
+      bjPlayers[data.pid] = { name: data.name || "Kh\xE1ch", status: data.status || "idle", netProfit: 0 };
+      bjSystemChat(`${bjPlayers[data.pid].name} \u0111\xE3 v\xE0o ph\xF2ng`);
+      bjRenderRoom();
+      break;
+    case "PLAYER_LEFT":
+      delete bjPlayers[data.pid];
+      if (bjGameState) bjGameState.turnOrder = bjGameState.turnOrder.filter((p2) => p2 !== data.pid);
+      bjRenderRoom();
+      break;
+    case "READY":
+      if (bjPlayers[fromPid]) bjPlayers[fromPid].status = data.ready ? "ready" : "idle";
+      if (bjIsHost) bjBroadcast({ type: "READY", pid: fromPid, ready: data.ready }, fromPid);
+      bjRenderRoom();
+      break;
+    case "BET_PLACED":
+      if (bjGameState) {
+        if (!bjGameState.hands[data.pid]) {
+          bjGameState.hands[data.pid] = { cards: [[]], bet: [0], stood: [false], doubled: [false], activeHandIdx: 0, splitAceIdxs: [], insuranceBet: 0, surrendered: false };
+        }
+        bjGameState.hands[data.pid].bet[0] = data.bet;
+        bjGameState.betsIn = bjGameState.betsIn || {};
+        bjGameState.betsIn[data.pid] = data.bet;
+        if (bjIsHost && bjPlayers[data.pid]) {
+          bjPlayers[data.pid].netProfit = (bjPlayers[data.pid].netProfit || 0) - data.bet;
+          bjBroadcastProfits();
+        }
+        const allBet = bjGameState.turnOrder.every((p2) => bjGameState.betsIn?.[p2] > 0);
+        if (allBet && bjIsHost) {
+          if (bjGameState.betTimer) clearTimeout(bjGameState.betTimer);
+          bjHostRunDealerInitial();
+        }
+        bjRenderRoom();
+      }
+      break;
+    case "SETTINGS_UPDATE":
+      bjSettings = data.settings;
+      bjSystemChat(`Host c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ch\u1EDD ${bjSettings.delay}s`);
+      bjRenderRoom();
+      break;
+    case "KICKED":
+      bjToast("B\u1EA1n \u0111\xE3 b\u1ECB \u0111u\u1ED5i kh\u1ECFi ph\xF2ng.");
+      closeBlackjack();
+      break;
+    case "ROUND_START":
+      bjGameState = {
+        phase: "betting",
+        seed: data.seed,
+        shoeIdx: 0,
+        shoe: buildShoe(bjSettings.numDecks, data.seed),
+        hands: {},
+        dealerHand: [],
+        currentTurn: null,
+        turnOrder: data.turnOrder,
+        betsIn: {},
+        insuranceAnswers: {}
+      };
+      bjRoomPhase = "ingame";
+      bjSummaryData = null;
+      if (bjSummaryTimer) {
+        clearInterval(bjSummaryTimer);
+        bjSummaryTimer = null;
+      }
+      bjMyStatus = bjPlayers[bjMyId]?.status === "spectator" ? "spectator" : "betting";
+      bjRenderRoom();
+      break;
+    case "DEAL_CARDS":
+      if (bjGameState) {
+        bjGameState.hands = data.hands;
+        bjGameState.dealerHand = data.dealerHand;
+        bjGameState.phase = data.phase;
+        bjGameState.currentTurn = data.currentTurn;
+        if (data.shoeIdx !== void 0) bjGameState.shoeIdx = data.shoeIdx;
+      }
+      bjMyStatus = bjGameState?.hands[bjMyId] ? "playing" : "spectator";
+      bjRenderRoom();
+      break;
+    case "ACTION":
+      bjHandleRoomAction(fromPid, data);
+      break;
+    case "SUMMARY_START":
+      if (data.payouts) {
+        const payout = data.payouts[bjMyId] || 0;
+        if (payout > 0) {
+          ctx.S.coins = (ctx.S.coins || 0) + payout;
+          save();
+          renderStatus();
+          bjToast(`Nh\u1EADn ${payout.toLocaleString()}G t\u1EEB b\xE0n!`);
+        }
+      }
+      for (const p2 of Object.keys(bjPlayers)) {
+        if (bjPlayers[p2].status === "spectator") bjPlayers[p2].status = "idle";
+      }
+      bjSummaryData = data;
+      bjRoomPhase = "summary";
+      bjMyStatus = "idle";
+      bjRenderRoom();
+      break;
+    case "TIMER_TICK":
+      bjSummaryTimeLeft = data.left;
+      const tEl = $id("bj-summary-timer");
+      if (tEl) tEl.innerText = `V\xF2ng m\u1EDBi sau: ${data.left}s`;
+      break;
+    case "SKIP_TIMER":
+      bjSummaryTimeLeft = 0;
+      break;
+    case "BACK_TO_LOBBY":
+      bjGameState = null;
+      bjRoomPhase = "lobby";
+      bjSummaryData = null;
+      bjRenderRoom();
+      break;
+    case "CHAT":
+      bjChatLog.push({ name: bjPlayers[fromPid]?.name || "?", msg: data.msg, ts: Date.now() });
+      if (bjChatLog.length > 50) bjChatLog.shift();
+      if (!$id("bj-chat-wrap")?.classList.contains("open")) {
+        bjUnreadChat++;
+        bjRenderRoom();
+      }
+      bjRenderChat();
+      if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
+      break;
+    case "CHAT_REQ":
+      bjChatLog.push({ name: bjPlayers[fromPid]?.name || fromPid, isReq: true, reqData: data.reqData, ts: Date.now() });
+      if (bjChatLog.length > 50) bjChatLog.shift();
+      if (!$id("bj-chat-wrap")?.classList.contains("open")) {
+        bjUnreadChat++;
+        bjRenderRoom();
+      }
+      bjRenderChat();
+      if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
+      break;
+    case "GIVE_MONEY":
+      const log2 = bjChatLog.find((e2) => e2.reqData && e2.reqData.reqId === data.reqId);
+      if (log2) {
+        log2.reqData.fulfilled += data.amount;
+        if (log2.reqData.pid === bjMyId) {
+          ctx.S.coins = (ctx.S.coins || 0) + data.amount;
+          save();
+          renderStatus();
+          bjSystemChat(`${data.from} \u0111\xE3 cho b\u1EA1n ${data.amount.toLocaleString()}G!`);
+        }
+        bjRenderChat();
+      }
+      if (bjIsHost) {
+        if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - data.amount;
+        if (log2 && bjPlayers[log2.reqData.pid]) bjPlayers[log2.reqData.pid].netProfit = (bjPlayers[log2.reqData.pid].netProfit || 0) + data.amount;
+        bjBroadcastProfits();
+      }
+      if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
+      break;
+    case "GOLD_SEND":
+      if (data.targetPid === bjMyId) {
+        ctx.S.coins = (ctx.S.coins || 0) + data.amount;
+        save();
+        renderStatus();
+        bjSystemChat(`${bjPlayers[fromPid]?.name || "?"} g\u1EEDi b\u1EA1n ${data.amount.toLocaleString()}G!`);
+      }
+      if (bjIsHost) {
+        if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - data.amount;
+        if (bjPlayers[data.targetPid]) bjPlayers[data.targetPid].netProfit = (bjPlayers[data.targetPid].netProfit || 0) + data.amount;
+        bjBroadcastProfits();
+        if (fromPid !== bjMyId) bjBroadcast(data, fromPid);
+      }
+      break;
+    case "UPDATE_PROFITS":
+      if (data.profits) {
+        for (const p2 in data.profits) {
+          if (bjPlayers[p2]) bjPlayers[p2].netProfit = data.profits[p2];
+        }
+        const modal = document.querySelector(".bj-player-list-modal");
+        if (modal) bjRenderPlayerListModal();
+      }
+      break;
+    case "ROOM_FULL":
+      bjToast("Ph\xF2ng \u0111\xE3 \u0111\u1EA7y!");
+      closeBlackjack();
+      break;
+  }
+}
+function bjHandleDisconnect(pid) {
+  if (!bjConns[pid] && !bjPlayers[pid] && pid !== bjRoomId) return;
+  delete bjConns[pid];
+  if (bjPlayers[pid]) {
+    const name3 = bjPlayers[pid].name;
+    delete bjPlayers[pid];
+    bjSystemChat(`${name3} \u0111\xE3 r\u1EDDi ph\xF2ng`);
+    if (bjIsHost) {
+      if (bjGameState) {
+        bjGameState.turnOrder = bjGameState.turnOrder.filter((p2) => p2 !== pid);
+        if (bjGameState.currentTurn === pid) bjAdvanceTurn();
+      }
+      bjBroadcast({ type: "PLAYER_LEFT", pid });
+      bjRenderRoom();
+    }
+  }
+  if (!bjIsHost) {
+    if (pid === bjRoomId) {
+      const remainingPids = Object.keys(bjPlayers).sort();
+      if (remainingPids.length > 0) {
+        const newHostId = remainingPids[0];
+        if (newHostId === bjMyId) {
+          bjIsHost = true;
+          bjRoomId = bjMyId;
+          bjSystemChat(`Host c\u0169 tho\xE1t. B\u1EA1n \u0111\xE3 tr\u1EDF th\xE0nh Host m\u1EDBi!`);
+          if (bjGameState) {
+            bjGameState.turnOrder = bjGameState.turnOrder.filter((p2) => p2 !== pid);
+            if (bjGameState.currentTurn === pid) bjAdvanceTurn();
+          }
+          if (bjRoomPhase === "summary" && !bjSummaryTimer) {
+            bjSummaryTimer = setInterval(() => {
+              bjSummaryTimeLeft--;
+              if (bjSummaryTimeLeft <= 0) bjHostEndSummary();
+              else {
+                bjBroadcast({ type: "TIMER_TICK", left: bjSummaryTimeLeft });
+                const tEl = $id("bj-summary-timer");
+                if (tEl) tEl.innerText = `V\xF2ng m\u1EDBi sau: ${bjSummaryTimeLeft}s`;
+              }
+            }, 1e3);
+          }
+          bjRenderRoom();
+        } else {
+          bjRoomId = newHostId;
+          bjSystemChat(`Host c\u0169 tho\xE1t. \u0110ang \u0111\u1ED5i Host t\u1EDBi ${bjPlayers[newHostId]?.name || "ng\u01B0\u1EDDi ch\u01A1i kh\xE1c"}...`);
+          const conn2 = bjPeer.connect(newHostId, { reliable: true });
+          bjConns[newHostId] = conn2;
+          conn2.on("open", () => {
+            bjSetupConn(conn2);
+            conn2.send({ type: "HELLO", name: bjMyName(), id: bjMyId });
+          });
+          conn2.on("error", () => {
+            bjToast("Kh\xF4ng th\u1EC3 k\u1EBFt n\u1ED1i \u0111\u1EBFn Host m\u1EDBi!");
+            closeBlackjack();
+          });
+        }
+      } else {
+        closeBlackjack();
+        bjToast("Ph\xF2ng \u0111\xE3 \u0111\xF3ng.");
+      }
+    } else {
+      bjRenderRoom();
+    }
+  }
+}
+function bjHostStartRound() {
+  const connPids = Object.keys(bjConns).filter((p2) => bjConns[p2] && bjConns[p2].open);
+  const pids = [bjMyId, ...connPids];
+  const active = pids.filter((p2) => bjPlayers[p2] && bjPlayers[p2].status !== "spectator");
+  if (active.length === 0) return bjToast("C\u1EA7n \xEDt nh\u1EA5t 1 ng\u01B0\u1EDDi ch\u01A1i");
+  const seed = (Date.now() ^ Math.floor(Math.random() * 4294967295)) & 4294967295;
+  bjGameState = {
+    phase: "betting",
+    seed,
+    shoeIdx: 0,
+    shoe: buildShoe(bjSettings.numDecks, seed),
+    hands: {},
+    dealerHand: [],
+    currentTurn: null,
+    turnOrder: active,
+    betsIn: {},
+    insuranceAnswers: {}
+  };
+  for (const pid of active) {
+    bjGameState.hands[pid] = { cards: [[]], bet: [0], stood: [false], doubled: [false], activeHandIdx: 0, splitAceIdxs: [], insuranceBet: 0, surrendered: false };
+  }
+  bjRoomPhase = "ingame";
+  bjMyStatus = "betting";
+  bjBroadcast({ type: "ROUND_START", seed, turnOrder: active });
+  bjRenderRoom();
+}
+function bjHostRunDealerInitial() {
+  const gs = bjGameState;
+  const shoe = gs.shoe;
+  let idx = gs.shoeIdx;
+  const draw = (hidden) => ({ ...shoe[idx++], hidden: !!hidden, isNew: true });
+  for (const pid of gs.turnOrder) {
+    gs.hands[pid].cards[0].push(draw());
+  }
+  gs.dealerHand.push(draw());
+  for (const pid of gs.turnOrder) gs.hands[pid].cards[0].push(draw());
+  gs.dealerHand.push(draw(true));
+  gs.shoeIdx = idx;
+  const up = gs.dealerHand[0];
+  let phase2 = "player";
+  if (up.rank === "A") {
+    phase2 = "insurance";
+    gs.insuranceAnswers = {};
+  } else if (is10Value(up.rank)) {
+    if (isBlackjack([gs.dealerHand[0], { ...gs.dealerHand[1], hidden: false }])) {
+      gs.dealerHand[1].hidden = false;
+      phase2 = "dealer_bj";
+    }
+  }
+  gs.phase = phase2;
+  gs.currentTurn = phase2 === "player" ? gs.turnOrder[0] : null;
+  const msg = { type: "DEAL_CARDS", hands: gs.hands, dealerHand: gs.dealerHand, phase: phase2, currentTurn: gs.currentTurn, shoeIdx: gs.shoeIdx };
+  bjBroadcast(msg);
+  bjHandleMsg(bjMyId, msg);
+  if (phase2 === "dealer_bj") setTimeout(() => bjHostEndRound(), 1500);
+  else if (phase2 === "player") bjAutoStandBJs();
+}
+function bjAutoStandBJs() {
+  const gs = bjGameState;
+  for (const pid of gs.turnOrder) {
+    const h = gs.hands[pid];
+    if (h && isBlackjack(h.cards[0])) h.stood[0] = true;
+  }
+  bjAdvanceTurn();
+}
+function bjCheckInsuranceAnswers() {
+  const gs = bjGameState;
+  if (!gs.turnOrder.every((p2) => (gs.insuranceAnswers || {})[p2] !== void 0)) return;
+  let profitChanged = false;
+  for (const pid of gs.turnOrder) {
+    const ans = gs.insuranceAnswers[pid];
+    const h = gs.hands[pid];
+    if (ans === "ins" && !h.insuranceBetPaid) {
+      h.insuranceBet = Math.floor(h.bet[0] / 2);
+      h.insuranceBetPaid = true;
+      if (bjPlayers[pid]) bjPlayers[pid].netProfit = (bjPlayers[pid].netProfit || 0) - h.insuranceBet;
+      profitChanged = true;
+    }
+  }
+  if (profitChanged) bjBroadcastProfits();
+  if (isBlackjack([gs.dealerHand[0], { ...gs.dealerHand[1], hidden: false }])) {
+    gs.dealerHand[1].hidden = false;
+    gs.phase = "dealer_bj";
+    const msg = { type: "DEAL_CARDS", hands: gs.hands, dealerHand: gs.dealerHand, phase: "dealer_bj", currentTurn: null, shoeIdx: gs.shoeIdx };
+    bjBroadcast(msg);
+    bjHandleMsg(bjMyId, msg);
+    setTimeout(() => bjHostEndRound(), 1500);
+  } else {
+    gs.phase = "player";
+    gs.currentTurn = gs.turnOrder[0];
+    const msg = { type: "DEAL_CARDS", hands: gs.hands, dealerHand: gs.dealerHand, phase: "player", currentTurn: gs.currentTurn, shoeIdx: gs.shoeIdx };
+    bjBroadcast(msg);
+    bjHandleMsg(bjMyId, msg);
+    bjAutoStandBJs();
+  }
+}
+function bjAdvanceTurn() {
+  if (!bjGameState || !bjIsHost) return;
+  const gs = bjGameState;
+  let next = null;
+  for (const pid of gs.turnOrder) {
+    const h = gs.hands[pid];
+    if (!h) continue;
+    const done = h.cards.every((c2, i2) => h.stood[i2] || handTotal(c2) >= 21);
+    if (!done) {
+      next = pid;
+      break;
+    }
+  }
+  if (next) {
+    gs.currentTurn = next;
+    const msg = { type: "ACTION", actionType: "TURN_CHANGE", pid: next };
+    bjBroadcast(msg);
+    bjHandleMsg(bjMyId, msg);
+  } else {
+    bjHostRunDealer();
+  }
+}
+function bjHandleRoomAction(fromPid, data) {
+  if (!bjGameState) return;
+  const gs = bjGameState;
+  if (data.actionType === "TURN_CHANGE") {
+    gs.currentTurn = data.pid;
+    bjRenderRoom();
+    return;
+  }
+  if (data.actionType === "DEALER_REVEAL" || data.actionType === "DEALER_HIT") {
+    gs.dealerHand = data.dealerHand;
+    bjRenderRoom();
+    return;
+  }
+  if (data.actionType === "INSURANCE_ANSWER") {
+    if (bjIsHost) {
+      gs.insuranceAnswers = gs.insuranceAnswers || {};
+      gs.insuranceAnswers[fromPid] = data.answer;
+      bjCheckInsuranceAnswers();
+    }
+    return;
+  }
+  if (!bjIsHost) {
+    if (data.hand) {
+      gs.hands[data.pid] = data.hand;
+      if (data.shoeIdx !== void 0) gs.shoeIdx = data.shoeIdx;
+    }
+    bjRenderRoom();
+    return;
+  }
+  const h = gs.hands[fromPid];
+  if (!h || gs.currentTurn !== fromPid) return;
+  const idx = h.activeHandIdx || 0;
+  if (data.actionType === "HIT") {
+    h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++], isNew: true });
+    if (handTotal(h.cards[idx]) >= 21) {
+      h.stood[idx] = true;
+      if (idx + 1 < h.cards.length) h.activeHandIdx = idx + 1;
+    }
+  } else if (data.actionType === "STAND") {
+    h.stood[idx] = true;
+    if (idx + 1 < h.cards.length) h.activeHandIdx = idx + 1;
+  } else if (data.actionType === "DOUBLE" && bjIsHost) {
+    h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++], isNew: true });
+    if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - h.bet[idx];
+    h.bet[idx] *= 2;
+    h.stood[idx] = true;
+    h.doubled[idx] = true;
+    bjBroadcastProfits();
+  } else if (data.actionType === "SPLIT" && bjIsHost) {
+    if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - h.bet[idx];
+    const c2 = h.cards[idx].pop();
+    h.cards.splice(idx + 1, 0, [c2]);
+    const sc = gs.shoe[gs.shoeIdx++];
+    const sc2 = gs.shoe[gs.shoeIdx++];
+    h.cards[idx].push({ ...sc, isNew: true });
+    const nh = h.cards[idx + 1];
+    nh.push({ ...sc2, isNew: true });
+    h.bet.splice(idx + 1, 0, h.bet[idx]);
+    h.stood.splice(idx + 1, 0, false);
+    h.doubled.splice(idx + 1, 0, false);
+    if (sc.rank === "A") {
+      h.splitAceIdxs = h.splitAceIdxs || [];
+      h.splitAceIdxs.push(idx, idx + 1);
+      h.stood[idx] = true;
+      h.stood[idx + 1] = true;
+    }
+    bjBroadcastProfits();
+  } else if (data.actionType === "SURRENDER") {
+    h.surrendered = true;
+    h.stood[idx] = true;
+  }
+  gs.hands[fromPid] = h;
+  bjBroadcast({ type: "ACTION", actionType: data.actionType, pid: fromPid, hand: h, shoeIdx: gs.shoeIdx });
+  const done = h.cards.every((c2, i2) => h.stood[i2] || handTotal(c2) >= 21);
+  if (done) bjAdvanceTurn();
+  else bjRenderRoom();
+}
+function bjHostRunDealer() {
+  const gs = bjGameState;
+  gs.dealerHand[1].hidden = false;
+  gs.dealerHand[1].justRevealed = true;
+  gs.phase = "dealer";
+  const allBust = gs.turnOrder.every((p2) => {
+    const h = gs.hands[p2];
+    return h && h.cards.every((c2) => handTotal(c2) > 21) || h?.surrendered;
+  });
+  const revMsg = { type: "ACTION", actionType: "DEALER_REVEAL", dealerHand: gs.dealerHand };
+  bjBroadcast(revMsg);
+  bjHandleMsg(bjMyId, revMsg);
+  const step = () => {
+    if (allBust) {
+      bjHostEndRound();
+      return;
+    }
+    const tot = handTotal(gs.dealerHand);
+    if (tot < 17 || isSoft(gs.dealerHand) && tot === 16) {
+      gs.dealerHand.push({ ...gs.shoe[gs.shoeIdx++] });
+      const hitMsg = { type: "ACTION", actionType: "DEALER_HIT", dealerHand: gs.dealerHand };
+      bjBroadcast(hitMsg);
+      bjHandleMsg(bjMyId, hitMsg);
+      setTimeout(step, 700);
+    } else {
+      bjHostEndRound();
+    }
+  };
+  setTimeout(step, 700);
+}
+function bjHostEndRound() {
+  const gs = bjGameState;
+  const dTotal = handTotal(gs.dealerHand);
+  const dBJ = isBlackjack(gs.dealerHand);
+  const dBust = dTotal > 21;
+  const payouts = {};
+  for (const pid of gs.turnOrder) {
+    const h = gs.hands[pid];
+    if (!h) continue;
+    let p2 = 0;
+    const ans = gs.insuranceAnswers?.[pid];
+    if (ans === "even") {
+      p2 = h.bet[0] * 2;
+    } else {
+      if (h.insuranceBet > 0 && dBJ) p2 += h.insuranceBet * 3;
+      for (let i2 = 0; i2 < h.cards.length; i2++) {
+        const cards = h.cards[i2];
+        const bet = h.bet[i2];
+        const pTotal = handTotal(cards);
+        const isOnly = h.cards.length === 1;
+        const pBJ = isBlackjack(cards) && isOnly;
+        if (h.surrendered && isOnly) {
+          p2 += Math.floor(bet / 2);
+          continue;
+        }
+        if (pTotal > 21) continue;
+        if (pBJ && dBJ) {
+          p2 += bet;
+          continue;
+        }
+        if (pBJ) {
+          p2 += bet + Math.floor(bet * 1.5);
+          continue;
+        }
+        if (dBJ) continue;
+        if (dBust || pTotal > dTotal) {
+          p2 += bet * 2;
+          continue;
+        }
+        if (pTotal === dTotal) {
+          p2 += bet;
+          continue;
+        }
+      }
+    }
+    payouts[pid] = p2;
+  }
+  for (const pid in payouts) {
+    if (bjPlayers[pid]) bjPlayers[pid].netProfit = (bjPlayers[pid].netProfit || 0) + payouts[pid];
+  }
+  bjBroadcastProfits();
+  if (payouts[bjMyId]) {
+    ctx.S.coins = (ctx.S.coins || 0) + payouts[bjMyId];
+    save();
+    renderStatus();
+  }
+  const msg = { type: "SUMMARY_START", payouts, dealerHand: gs.dealerHand, gs: JSON.parse(JSON.stringify(gs)) };
+  bjBroadcast(msg);
+  bjHandleMsg(bjMyId, msg);
+  if (bjIsHost) {
+    bjSummaryTimeLeft = bjSettings.delay || 10;
+    bjSummaryTimer = setInterval(() => {
+      bjSummaryTimeLeft--;
+      if (bjSummaryTimeLeft <= 0) bjHostEndSummary();
+      else {
+        bjBroadcast({ type: "TIMER_TICK", left: bjSummaryTimeLeft });
+        const tEl = $id("bj-summary-timer");
+        if (tEl) tEl.innerText = `V\xF2ng m\u1EDBi sau: ${bjSummaryTimeLeft}s`;
+      }
+    }, 1e3);
+  }
+}
+function bjHostEndSummary() {
+  if (bjSummaryTimer) clearInterval(bjSummaryTimer);
+  bjSummaryTimer = null;
+  const active = Object.keys(bjPlayers).filter((p2) => bjPlayers[p2].status !== "spectator");
+  if (active.length === 0) {
+    bjRoomPhase = "lobby";
+    bjGameState = null;
+    bjBroadcast({ type: "BACK_TO_LOBBY" });
+    bjRenderRoom();
+  } else {
+    bjHostStartRound();
+  }
+}
+function bjRoomPlaceBet(amount) {
+  const coins = ctx.S.coins || 0;
+  if (coins < amount) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng!");
+  if (amount < bjSettings.minBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${bjSettings.minBet}G`);
+  if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${bjSettings.maxBet}G`);
+  ctx.S.coins = coins - amount;
+  save();
+  renderStatus();
+  const msg = { type: "BET_PLACED", pid: bjMyId, bet: amount };
+  bjBroadcast(msg);
+  bjHandleMsg(bjMyId, msg);
+}
+function bjRoomAction(actionType, extra) {
+  const msg = { type: "ACTION", actionType, pid: bjMyId, ...extra || {} };
+  if (bjIsHost) bjHandleRoomAction(bjMyId, msg);
+  else bjBroadcast(msg);
+}
+function bjApplySettings() {
+  const min = parseInt($id("bj-cfg-min")?.value) || 10;
+  const max = parseInt($id("bj-cfg-max")?.value) || 0;
+  const decks = Math.min(8, Math.max(1, parseInt($id("bj-cfg-decks")?.value) || 6));
+  const delay = Math.max(5, parseInt($id("bj-cfg-delay")?.value) || 10);
+  bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks, delay };
+  bjBroadcast({ type: "SETTINGS_UPDATE", settings: bjSettings });
+  bjToast(`\u0110\xE3 c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ch\u1EDD ${delay}s`);
+}
+function bjRenderRoom() {
+  const body = $id("bj-body");
+  if (!body) return;
+  const gs = bjGameState;
+  const allPids = Object.keys(bjPlayers);
+  let html = `<div class="bj-room-layout">
+        <div class="bj-room-main">
+            <div class="bj-room-topbar">
+                <div class="bj-room-code-badge" id="bj-room-code-badge" title="Copy m\xE3 ph\xF2ng">\u{1F0CB} ${bjRoomId}</div>
+                <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} \u2014 ${(ctx.S.coins || 0).toLocaleString()}G${bjMyStatus === "spectator" ? " \u{1F441}" : ""}</div>
+                <div class="buy plain" id="bj-show-players" style="font-size:11px;margin-right:5px;">\u{1F465} Danh S\xE1ch</div>
+                <div class="buy plain" id="bj-out-room-ingame" style="font-size:11px;">\u2190 Tho\xE1t</div>
+                <div class="bj-chat-toggle" id="bj-chat-toggle">\u{1F4AC} Chat ${bjUnreadChat > 0 ? `<span style="background:#e74c3c;color:white;border-radius:10px;padding:1px 5px;margin-left:5px;font-size:10px;">${bjUnreadChat}</span>` : ""}</div>
+            </div>
+            <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 10px;">`;
+  if (bjRoomPhase === "lobby") {
+    const isAllReady = allPids.filter((p2) => p2 !== bjMyId && bjPlayers[p2].status !== "spectator").every((p2) => bjPlayers[p2].status === "ready");
+    html += `<div class="bj-lobby-wrap">
+            <div class="bj-lobby-box">
+                <div class="bj-lobby-title">S\u1EA3nh Ch\u1EDD</div>
+                <div class="bj-player-list">
+                    ${allPids.map((p2) => {
+      const isHost = p2 === bjRoomId;
+      const ready = bjPlayers[p2].status === "ready";
+      const meStr = p2 === bjMyId ? " (B\u1EA1n)" : "";
+      const kickBtn = bjIsHost && p2 !== bjMyId ? `<button class="bj-kick-btn" data-pid="${p2}">Kick</button>` : "";
+      return `<div class="bj-player-row ${ready ? "ready" : ""} ${isHost ? "host" : ""}">
+                            <span>${bjPlayers[p2].name}${meStr} ${isHost ? "\u{1F451}" : ready ? "\u2714" : "\u23F3"}</span>
+                            ${kickBtn}
+                        </div>`;
+    }).join("")}
+                </div>
+                ${bjIsHost ? `
+                <div class="bj-settings-host">
+                    <div style="font-size:12px;font-weight:bold;color:#ffd94d;margin-bottom:6px;">\u2699\uFE0F C\xE0i \u0111\u1EB7t b\xE0n</div>
+                    <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">
+                        <label style="font-size:11px;color:#ddd;">Min <input class="inp" id="bj-cfg-min" type="number" value="${bjSettings.minBet}" min="1" style="width:50px;padding:4px;font-size:11px"></label>
+                        <label style="font-size:11px;color:#ddd;">Max <input class="inp" id="bj-cfg-max" type="number" value="${bjSettings.maxBet}" min="0" style="width:50px;padding:4px;font-size:11px"></label>
+                        <label style="font-size:11px;color:#ddd;">B\u1ED9 <input class="inp" id="bj-cfg-decks" type="number" value="${bjSettings.numDecks}" min="1" max="8" style="width:40px;padding:4px;font-size:11px"></label>
+                        <label style="font-size:11px;color:#ddd;">Ch\u1EDD(s) <input class="inp" id="bj-cfg-delay" type="number" value="${bjSettings.delay}" min="5" style="width:40px;padding:4px;font-size:11px"></label>
+                        <div class="buy plain" id="bj-cfg-apply" style="font-size:11px;padding:4px 8px">L\u01B0u</div>
+                    </div>
+                </div>
+                <div class="bj-btn-row" style="margin-top:15px;">
+                    <div class="buy ${!isAllReady && allPids.length > 1 ? "plain" : ""}" id="bj-start-room-btn" ${!isAllReady && allPids.length > 1 ? 'style="opacity:0.5;pointer-events:none"' : ""}>\u25B6 B\u1EAFt \u0111\u1EA7u</div>
+                </div>
+                ` : `
+                <div class="bj-btn-row" style="margin-top:15px;">
+                    <div class="buy bj-btn-ready ${bjPlayers[bjMyId].status === "ready" ? "" : "not-ready"}" id="bj-ready-btn">${bjPlayers[bjMyId].status === "ready" ? "H\u1EE7y S\u1EB5n S\xE0ng" : "S\u1EB5n S\xE0ng"}</div>
+                </div>
+                <div class="bj-msg-sm" style="text-align:center;padding:10px;opacity:0.7">Ch\u1EDD Host b\u1EAFt \u0111\u1EA7u...</div>
+                `}
+            </div>
+        </div>`;
+  } else {
+    html += `<div class="bj-table">
+            <div class="bj-dealer-area">
+                <div class="bj-area-label">Nh\xE0 c\xE1i (m\xE1y)</div>
+                <div class="bj-hand-row">${(gs?.dealerHand || []).map((c2) => cardHTML(c2, true)).join("")}</div>
+                <div class="bj-score">${gs?.dealerHand?.length ? `\u0110i\u1EC3m: ${handTotal(gs.dealerHand.filter((c2) => !c2.hidden))}` : ""}</div>
+            </div>
+            <div class="bj-players-grid">`;
+    for (const pid of gs?.turnOrder || []) {
+      const ph = bjPlayers[pid] || { name: pid };
+      const h = gs.hands?.[pid];
+      const isMe = pid === bjMyId, isTurn = gs.currentTurn === pid;
+      html += `<div class="bj-player-slot${isMe ? " me" : ""}${isTurn ? " my-turn" : ""}">
+                <div class="bj-player-name">${ph.name}${isTurn ? " \u27A4" : ""}${isMe ? " (B\u1EA1n)" : ""}</div>`;
+      if (h) {
+        h.cards.forEach((cards, i2) => {
+          const tot = handTotal(cards);
+          html += `<div class="bj-hand-row">${cards.map((c2) => cardHTML(c2, true)).join("")}</div>
+                        <div class="bj-score">${tot}${tot > 21 ? " Bust!" : ""} \u2014 ${(h.bet[i2] || 0).toLocaleString()}G</div>`;
+        });
+      } else html += `<div class="bj-msg-sm" style="opacity:0.5">Ch\u1EDD \u0111\u1EB7t c\u01B0\u1EE3c...</div>`;
+      html += `</div>`;
+    }
+    for (const pid of allPids) {
+      if (!gs?.turnOrder?.includes(pid)) {
+        html += `<div class="bj-player-slot spectator"><div class="bj-player-name">\u{1F441} ${bjPlayers[pid].name} (xem)</div></div>`;
+      }
+    }
+    html += `</div></div>
+        <div id="bj-my-actions" class="bj-actions">${bjBuildMyActions()}</div>
+        <div id="bj-room-msg" class="bj-message"></div>`;
+    if (bjRoomPhase === "summary" && bjSummaryData) {
+      html += `<div class="bj-summary-overlay">
+                <div class="bj-summary-box">
+                    <div class="bj-summary-title">T\u1ED4NG K\u1EBET V\xD2NG</div>
+                    <table class="bj-summary-table">
+                        <tr><th>Ng\u01B0\u1EDDi ch\u01A1i</th><th>\u0110i\u1EC3m</th><th>C\u01B0\u1EE3c</th><th>K\u1EBFt qu\u1EA3</th><th>Nh\u1EADn</th></tr>
+                        <tr><td><b>Nh\xE0 c\xE1i</b></td><td>${handTotal(bjSummaryData.dealerHand)}</td><td>-</td><td>-</td><td>-</td></tr>
+                        ${(bjSummaryData.gs?.turnOrder || []).map((pid) => {
+        const name3 = bjPlayers[pid]?.name || pid;
+        const h = bjSummaryData.gs.hands[pid];
+        if (!h) return "";
+        let pts = h.cards.map((c2) => handTotal(c2)).join(" / ");
+        let bet = h.bet.reduce((a, b2) => a + b2, 0) + (h.insuranceBet || 0);
+        let pay = bjSummaryData.payouts[pid] || 0;
+        let resCls = pay > bet ? "bj-val-win" : pay === bet ? "bj-val-push" : "bj-val-lose";
+        return `<tr class="${pid === bjMyId ? "me" : ""}"><td>${name3}</td><td>${pts}</td><td>${bet.toLocaleString()}</td><td class="${resCls}">${pay > bet ? "Th\u1EAFng" : pay === bet ? "H\xF2a" : "Thua"}</td><td class="${resCls}">+${pay.toLocaleString()}</td></tr>`;
+      }).join("")}
+                    </table>
+                    <div class="bj-countdown" id="bj-summary-timer">V\xF2ng m\u1EDBi sau: ${bjSummaryTimeLeft}s</div>
+                    ${bjIsHost ? `<div class="bj-btn-row" style="margin-top:15px;"><div class="buy plain" id="bj-skip-btn">B\u1ECF qua (Skip)</div></div>` : ""}
+                </div>
+            </div>`;
+    }
+  }
+  html += `</div></div>
+    <div class="bj-chat-wrap" id="bj-chat-wrap">
+        <div class="bj-chat-header" id="bj-chat-close">
+            <span>\u{1F4AC} Chat</span>
+            <span class="bj-chat-close">\u274C</span>
+        </div>
+        <div class="bj-chat-log" id="bj-chat-log"></div>
+        <div class="bj-chat-inp-row">
+            <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin ti\u1EC1n">\u{1F4B0}</div>
+            <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
+            <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">G\u1EEDi</div>
+        </div>
+    </div></div>`;
+  body.innerHTML = html;
+  $id("bj-out-room-ingame")?.addEventListener("click", closeBlackjack);
+  $id("bj-show-players")?.addEventListener("click", () => {
+    const modalId = "bj-player-list-modal";
+    const exist = $id(modalId);
+    if (exist) {
+      exist.remove();
+      return;
+    }
+    const modal = document.createElement("div");
+    modal.id = modalId;
+    modal.className = "bj-player-list-modal";
+    modal.style.cssText = "position:absolute;top:50px;left:50%;transform:translateX(-50%);background:rgba(20,20,20,0.95);border:1px solid #555;border-radius:8px;padding:15px;z-index:9999;width:90%;max-width:400px;box-shadow:0 8px 30px rgba(0,0,0,0.8);max-height:80%;overflow-y:auto;";
+    $id("bj-win").appendChild(modal);
+    bjRenderPlayerListModal();
+  });
+  $id("bj-room-code-badge")?.addEventListener("click", () => {
+    navigator.clipboard.writeText(bjRoomId).then(() => bjToast("Copy m\xE3 ph\xF2ng!"));
+  });
+  $id("bj-start-room-btn")?.addEventListener("click", () => {
+    if (bjIsHost) bjHostStartRound();
+  });
+  $id("bj-cfg-apply")?.addEventListener("click", bjApplySettings);
+  $id("bj-ready-btn")?.addEventListener("click", () => {
+    const isReady = bjPlayers[bjMyId].status !== "ready";
+    const msg = { type: "READY", ready: isReady };
+    bjHandleMsg(bjMyId, msg);
+    if (!bjIsHost) bjBroadcast(msg);
+  });
+  $id("bj-skip-btn")?.addEventListener("click", () => {
+    if (bjIsHost) {
+      bjSummaryTimeLeft = 0;
+      bjBroadcast({ type: "SKIP_TIMER" });
+      bjHostEndSummary();
+    }
+  });
+  $id("bj-win").querySelectorAll(".bj-kick-btn").forEach((b2) => b2.addEventListener("click", () => {
+    const pid = b2.getAttribute("data-pid");
+    if (confirm("B\u1EA1n mu\u1ED1n \u0111u\u1ED5i ng\u01B0\u1EDDi ch\u01A1i n\xE0y?")) {
+      if (bjConns[pid]) bjConns[pid].send({ type: "KICKED" });
+      setTimeout(() => {
+        if (bjConns[pid]) bjConns[pid].close();
+        bjHandleDisconnect(pid);
+      }, 500);
+    }
+  }));
+  bjBindMyActions();
+  bjBindChat();
+  bjRenderChat();
+}
+function bjRenderPlayerListModal() {
+  const modal = $id("bj-player-list-modal");
+  if (!modal) return;
+  modal.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid #444;padding-bottom:10px;">
+            <div style="font-weight:bold;color:#ffd94d;">DANH S\xC1CH NG\u01AF\u1EDCI CH\u01A0I</div>
+            <div class="buy plain" id="bj-player-list-close" style="padding:2px 8px;cursor:pointer;">\u0110\xF3ng</div>
+        </div>
+        <table class="bj-summary-table" style="width:100%; text-align:left;">
+            <tr><th>T\xEAn</th><th>Vai tr\xF2</th><th>L\u1EE3i nhu\u1EADn</th></tr>
+            ${Object.keys(bjPlayers).map((p2) => {
+    const pl = bjPlayers[p2];
+    const prof = pl.netProfit || 0;
+    const color = prof > 0 ? "#4caf50" : prof < 0 ? "#f44336" : "#fff";
+    const sign = prof > 0 ? "+" : "";
+    return `<tr>
+                    <td>${pl.name} ${p2 === bjMyId ? "(B\u1EA1n)" : ""}</td>
+                    <td>${pl.status === "spectator" ? "\u{1F441}\uFE0F \u0110ang xem" : p2 === bjRoomId ? "\u{1F451} Host" : "Kh\xE1ch"}</td>
+                    <td style="color:${color}; font-weight:bold;">${sign}${prof.toLocaleString()}G</td>
+                </tr>`;
+  }).join("")}
+        </table>
+    `;
+  $id("bj-player-list-close")?.addEventListener("click", () => modal.remove());
+}
+function bjBuildMyActions() {
+  const gs = bjGameState;
+  if (!gs) return "";
+  if (bjMyStatus === "spectator") return `<div class="bj-msg-sm" style="text-align:center;opacity:0.6">\u{1F441} \u0110ang xem \u2014 S\u1EBD v\xE0o \u1EDF round sau</div>`;
+  const coins = ctx.S.coins || 0;
+  if (gs.phase === "betting") {
+    if (gs.betsIn?.[bjMyId]) return `<div class="bj-msg-sm" style="text-align:center;color:#7ed;">\u2713 \u0110\xE3 \u0111\u1EB7t ${gs.betsIn[bjMyId].toLocaleString()}G \u2014 Ch\u1EDD ng\u01B0\u1EDDi kh\xE1c...</div>`;
+    const min = bjSettings.minBet;
+    if (coins < min) return `<div class="bj-msg-sm" style="color:#e05;">\u26A0 Kh\xF4ng \u0111\u1EE7 v\xE0ng c\u01B0\u1EE3c (c\u1EA7n t\u1ED1i thi\u1EC3u ${min}G)</div>`;
+    return `<div class="bj-bet-row">
+            <input class="inp" id="bj-room-bet-inp" type="number" min="${min}" max="${bjSettings.maxBet || ""}" value="${Math.min(Math.max(min, 100), coins)}" style="width:110px">
+            <span class="buy plain bj-quick bj-rquick" data-q="4">\xBC</span>
+            <span class="buy plain bj-quick bj-rquick" data-q="2">\xBD</span>
+            <span class="buy plain bj-quick bj-rquick" data-q="1">Max</span>
+            <div class="buy" id="bj-room-place-bet">\u0110\u1EB7t C\u01B0\u1EE3c</div>
+        </div>`;
+  }
+  if (gs.phase === "insurance") {
+    const myHand = gs.hands?.[bjMyId];
+    if (!myHand) return "";
+    const hasBJ = isBlackjack(myHand.cards[0]);
+    if (hasBJ) return `<div class="bj-btn-row">
+            <div class="buy" id="bj-rm-even">L\u1EA5y ngay 1:1 (Even Money)</div>
+            <div class="buy plain" id="bj-rm-skip-ins">B\u1ECF qua</div>
+        </div>`;
+    const maxIns = Math.floor((myHand.bet[0] || 0) / 2);
+    return `<div class="bj-msg-sm">Dealer Ace \u2014 Mua b\u1EA3o hi\u1EC3m ${maxIns}G?</div>
+        <div class="bj-btn-row">
+            <div class="buy" id="bj-rm-buy-ins">Mua ${maxIns}G</div>
+            <div class="buy plain" id="bj-rm-skip-ins">B\u1ECF qua</div>
+        </div>`;
+  }
+  if (gs.phase === "player") {
+    if (gs.currentTurn !== bjMyId) return `<div class="bj-msg-sm" style="text-align:center;opacity:0.6">\u231B \u0110\u1EE3i l\u01B0\u1EE3t b\u1EA1n...</div>`;
+    const h = gs.hands?.[bjMyId];
+    if (!h) return "";
+    const idx = h.activeHandIdx || 0;
+    const hand = h.cards[idx];
+    const tot = handTotal(hand);
+    const bet = h.bet[idx];
+    const isSA = (h.splitAceIdxs || []).includes(idx);
+    if (tot > 21) return `<div class="bj-msg-sm">\u{1F480} Bust!</div>`;
+    if (isSA) return `<div class="bj-msg-sm">Split Ace \u2014 T\u1EF1 Stand.</div>`;
+    const canD = hand.length === 2 && coins >= bet && !isSA;
+    const canSp = hand.length === 2 && hand[0].rank === hand[1].rank && coins >= bet && h.cards.length < 4;
+    const canSu = hand.length === 2 && idx === 0 && h.cards.length === 1;
+    return `<div class="bj-btn-row">
+            <div class="buy" id="bj-rm-hit">Hit</div>
+            <div class="buy plain" id="bj-rm-stand">Stand</div>
+            ${canD ? `<div class="buy bj-double-btn" id="bj-rm-double">Double</div>` : ""}
+            ${canSp ? `<div class="buy bj-split-btn" id="bj-rm-split">Split</div>` : ""}
+            ${canSu ? `<div class="buy plain" id="bj-rm-surrender">Surrender</div>` : ""}
+        </div>`;
+  }
+  if (gs.phase === "dealer" || gs.phase === "dealer_bj") return `<div class="bj-msg-sm" style="text-align:center;opacity:0.6">\u{1F0CF} Nh\xE0 c\xE1i \u0111ang r\xFAt b\xE0i...</div>`;
+  return "";
+}
+function bjBindMyActions() {
+  const gs = bjGameState;
+  $id("bj-room-place-bet")?.addEventListener("click", () => {
+    const inp = $id("bj-room-bet-inp");
+    bjRoomPlaceBet(parseInt(inp?.value || "0") || 0);
+  });
+  $id("bj-win").querySelectorAll(".bj-rquick").forEach((b2) => {
+    b2.addEventListener("click", () => {
+      const inp = $id("bj-room-bet-inp");
+      const q = parseInt(b2.getAttribute("data-q") || "1");
+      const coins = Number(ctx.S.coins) || 0;
+      const min = Number(bjSettings.minBet) || 10;
+      if (inp) inp.value = String(Math.max(min, Math.floor(coins / q)));
+    });
+  });
+  $id("bj-rm-even")?.addEventListener("click", () => {
+    bjRoomAction("INSURANCE_ANSWER", { answer: "even" });
+  });
+  $id("bj-rm-buy-ins")?.addEventListener("click", () => {
+    const h = gs?.hands?.[bjMyId];
+    const ins = Math.floor((h?.bet[0] || 0) / 2);
+    if ((ctx.S.coins || 0) < ins) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng");
+    ctx.S.coins = (ctx.S.coins || 0) - ins;
+    save();
+    bjRoomAction("INSURANCE_ANSWER", { answer: "ins" });
+  });
+  $id("bj-rm-skip-ins")?.addEventListener("click", () => bjRoomAction("INSURANCE_ANSWER", { answer: "skip" }));
+  $id("bj-rm-hit")?.addEventListener("click", () => bjRoomAction("HIT"));
+  $id("bj-rm-stand")?.addEventListener("click", () => bjRoomAction("STAND"));
+  $id("bj-rm-double")?.addEventListener("click", () => {
+    const h = gs?.hands?.[bjMyId];
+    const idx = h?.activeHandIdx || 0;
+    const bet = h?.bet[idx] || 0;
+    if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Double");
+    ctx.S.coins = (ctx.S.coins || 0) - bet;
+    save();
+    bjRoomAction("DOUBLE");
+  });
+  $id("bj-rm-split")?.addEventListener("click", () => {
+    const h = gs?.hands?.[bjMyId];
+    const idx = h?.activeHandIdx || 0;
+    const bet = h?.bet[idx] || 0;
+    if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Split");
+    ctx.S.coins = (ctx.S.coins || 0) - bet;
+    save();
+    bjRoomAction("SPLIT");
+  });
+  $id("bj-rm-surrender")?.addEventListener("click", () => bjRoomAction("SURRENDER"));
+}
+function bjRenderChat() {
+  const el = $id("bj-chat-log");
+  if (!el) return;
+  el.innerHTML = bjChatLog.slice(-50).map((e2) => {
+    if (e2.isSystem) return `<div class="bj-chat-line" style="color:#ffd94d; font-style:italic"><b>H\u1EC7 th\u1ED1ng:</b> ${e2.msg.replace(/</g, "&lt;")}</div>`;
+    if (e2.isReq) {
+      const rd = e2.reqData;
+      const isDone = rd.fulfilled >= rd.amount;
+      const btn = `<button class="buy ${isDone ? "plain" : ""}" style="font-size:10px;padding:2px 5px;margin-left:5px;" ${isDone ? "disabled" : ""} onclick="bjGiveMoney('${rd.reqId}')">${isDone ? "Xong" : "Cho"}</button>`;
+      return `<div class="bj-chat-line"><b>${e2.name}</b> xin <b>${rd.amount.toLocaleString()}G</b> (\u0110\xE3 nh\u1EADn: ${rd.fulfilled.toLocaleString()})${btn}</div>`;
+    }
+    return `<div class="bj-chat-line"><b>${e2.name}:</b> ${e2.msg.replace(/</g, "&lt;")}</div>`;
+  }).join("");
+  setTimeout(() => {
+    if (el) el.scrollTop = el.scrollHeight + 100;
+  }, 10);
+}
+function bjBindChat() {
+  const send = () => {
+    const inp2 = $id("bj-chat-inp");
+    const msg = (inp2?.value || "").trim();
+    if (!msg) return;
+    if (inp2) inp2.value = "";
+    bjChatLog.push({ name: bjMyName(), msg, ts: Date.now() });
+    if (bjChatLog.length > 50) bjChatLog.shift();
+    bjRenderChat();
+    bjBroadcast({ type: "CHAT", msg });
+  };
+  $id("bj-chat-send")?.addEventListener("click", send);
+  $id("bj-chat-req-btn")?.addEventListener("click", () => {
+    const amtStr = prompt("Nh\u1EADp s\u1ED1 ti\u1EC1n mu\u1ED1n xin (G):");
+    const amt = parseInt(amtStr);
+    if (!isNaN(amt) && amt > 0) {
+      const reqId = bjMyId + "-" + Date.now();
+      const msg = { type: "CHAT_REQ", reqData: { reqId, pid: bjMyId, amount: amt, fulfilled: 0 } };
+      bjHandleMsg(bjMyId, msg);
+      bjBroadcast(msg);
+    }
+  });
+  $id("bj-chat-toggle")?.addEventListener("click", () => {
+    $id("bj-chat-wrap")?.classList.add("open");
+    if (bjUnreadChat > 0) {
+      bjUnreadChat = 0;
+      bjRenderRoom();
+    }
+  });
+  $id("bj-chat-close")?.addEventListener("click", () => {
+    $id("bj-chat-wrap")?.classList.remove("open");
+  });
+  const inp = $id("bj-chat-inp");
+  if (inp) {
+    inp.addEventListener("keydown", (e2) => {
+      if (e2.key === "Enter") send();
+    });
+    inp.addEventListener("focus", () => {
+      if (window.innerWidth <= 640) {
+        const wrap2 = $id("bj-chat-wrap");
+        if (wrap2) wrap2.classList.add("mobile-chat-focus");
+      }
+    });
+    inp.addEventListener("blur", () => {
+      if (window.innerWidth <= 640) {
+        const wrap2 = $id("bj-chat-wrap");
+        if (wrap2) wrap2.classList.remove("mobile-chat-focus");
+      }
+    });
+  }
+}
+function openBlackjackPicker() {
+  const win = $id("bj-win");
+  const body = $id("bj-body");
+  if (!win || !body) return;
+  body.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:16px;padding:30px 10px;">
+            <div style="text-align:center;font-size:16px;color:#a3763d;font-weight:bold;margin-bottom:10px;">Ch\u1ECDn ch\u1EBF \u0111\u1ED9 ch\u01A1i</div>
+            <div class="buy" id="bj-solo-pick" style="text-align:center;padding:20px;font-size:16px;">
+                \u{1F0CF} Ch\u01A1i \u0110\u01A1n<br><small style="font-weight:normal;font-size:12px;opacity:0.8;">Solo vs Nh\xE0 c\xE1i m\xE1y t\xEDnh</small>
+            </div>
+            <div class="buy plain" id="bj-room-pick" style="text-align:center;padding:20px;font-size:16px;">
+                \u{1F3B0} Ch\u01A1i Ph\xF2ng<br><small style="font-weight:normal;font-size:12px;opacity:0.8;">\u0110a ng\u01B0\u1EDDi (t\u1ED1i \u0111a 4), c\xF9ng \u0111\u1EA5u v\u1EDBi nh\xE0 c\xE1i</small>
+            </div>
+        </div>`;
+  win.style.display = "flex";
+  placeBjWin();
+  $id("bj-solo-pick").addEventListener("click", openBlackjackSolo);
+  $id("bj-room-pick").addEventListener("click", openBlackjackRoom);
+}
+var SUITS, RANKS, soloState, bjPeer, bjConns, bjIsHost, bjMyId, bjRoomId, bjPlayers, bjGameState, bjSettings, bjMyStatus, bjChatLog, bjUnreadChat, bjRoomPhase, bjSummaryTimer, bjSummaryTimeLeft, bjSummaryData, MAX_PLAYERS;
+var init_blackjack = __esm({
+  "src/blackjack.js"() {
+    init_shop();
+    init_store();
+    init_state();
+    init_witch();
+    init_render();
+    init_net();
+    init_bundler();
+    init_all();
+    SUITS = ["\u2660", "\u2665", "\u2666", "\u2663"];
+    RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+    soloState = null;
+    bjPeer = null;
+    bjConns = {};
+    bjIsHost = false;
+    bjMyId = "";
+    bjRoomId = "";
+    bjPlayers = {};
+    bjGameState = null;
+    bjSettings = { minBet: 10, maxBet: 0, numDecks: 6, delay: 10 };
+    bjMyStatus = "idle";
+    bjChatLog = [];
+    bjUnreadChat = 0;
+    bjRoomPhase = "lobby";
+    bjSummaryTimer = null;
+    bjSummaryTimeLeft = 0;
+    bjSummaryData = null;
+    MAX_PLAYERS = 4;
+    window["bjGiveMoney"] = function(reqId) {
+      const log2 = bjChatLog.find((e2) => e2.reqData && e2.reqData.reqId === reqId);
+      if (!log2) return;
+      const rd = log2.reqData;
+      if (rd.pid === bjMyId) return bjToast("B\u1EA1n kh\xF4ng th\u1EC3 t\u1EF1 cho ti\u1EC1n m\xECnh!");
+      if (!bjPlayers[rd.pid]) return bjToast("Ng\u01B0\u1EDDi n\xE0y \u0111\xE3 r\u1EDDi ph\xF2ng!");
+      const remaining = rd.amount - rd.fulfilled;
+      if (remaining <= 0) return bjToast("\u0110\xE3 \u0111\u1EE7 ti\u1EC1n r\u1ED3i!");
+      const amtStr = prompt(`Cho ti\u1EC1n ${log2.name} (T\u1ED1i \u0111a: ${remaining.toLocaleString()}G):`, String(remaining));
+      const amt = parseInt(amtStr);
+      if (isNaN(amt) || amt <= 0) return;
+      const coins = ctx.S.coins || 0;
+      if (coins < amt) return bjToast("B\u1EA1n kh\xF4ng \u0111\u1EE7 ti\u1EC1n!");
+      const give = Math.min(amt, remaining);
+      ctx.S.coins = coins - give;
+      save();
+      renderStatus();
+      const msg = { type: "GIVE_MONEY", reqId, from: bjMyName(), amount: give };
+      bjHandleMsg(bjMyId, msg);
+      if (bjIsHost) bjBroadcast(msg);
+      else bjBroadcast(msg);
+    };
+  }
+});
+
 // src/all.js
 var all_exports = {};
 __export(all_exports, {
@@ -48904,6 +50823,7 @@ __export(all_exports, {
   bagSel: () => bagSel,
   bagSellMode: () => bagSellMode,
   bagTab: () => bagTab,
+  bjToast: () => bjToast,
   blockPrice: () => blockPrice,
   buildEventPrompt: () => buildEventPrompt,
   buildTicket: () => buildTicket,
@@ -48917,6 +50837,7 @@ __export(all_exports, {
   cashOutHero: () => cashOutHero,
   charName: () => charName,
   clampN: () => clampN,
+  closeBlackjack: () => closeBlackjack,
   closeDungeonView: () => closeDungeonView,
   closeHeroMode: () => closeHeroMode,
   closeModal: () => closeModal,
@@ -48998,6 +50919,9 @@ __export(all_exports, {
   onResize: () => onResize,
   openAchivModal: () => openAchivModal,
   openBetModal: () => openBetModal,
+  openBlackjackPicker: () => openBlackjackPicker,
+  openBlackjackRoom: () => openBlackjackRoom,
+  openBlackjackSolo: () => openBlackjackSolo,
   openBuyDlg: () => openBuyDlg,
   openDungeonView: () => openDungeonView,
   openFleaMarket: () => openFleaMarket,
@@ -49035,6 +50959,7 @@ __export(all_exports, {
   petTouch: () => petTouch,
   pickFrom: () => pickFrom,
   pileWith: () => pileWith,
+  placeBjWin: () => placeBjWin,
   placeDungeonWin: () => placeDungeonWin,
   placeHeroBar: () => placeHeroBar,
   placeOrb: () => placeOrb,
@@ -49148,6 +51073,7 @@ var init_all = __esm({
     init_trade();
     init_sync();
     init_flea();
+    init_blackjack();
   }
 });
 
