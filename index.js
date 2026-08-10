@@ -49728,6 +49728,14 @@ function bjSetupConn(conn2) {
   conn2.on("close", () => bjHandleDisconnect(conn2.peer));
   conn2.on("error", () => bjHandleDisconnect(conn2.peer));
 }
+function bjBroadcastProfits() {
+  if (!bjIsHost) return;
+  const profits = {};
+  for (const p2 in bjPlayers) profits[p2] = bjPlayers[p2].netProfit || 0;
+  const msg = { type: "UPDATE_PROFITS", profits };
+  bjBroadcast(msg);
+  bjHandleMsg(bjMyId, msg);
+}
 function bjHandleMsg(fromPid, data) {
   switch (data.type) {
     case "HELLO": {
@@ -49751,7 +49759,8 @@ function bjHandleMsg(fromPid, data) {
       bjRenderRoom();
       break;
     case "PLAYER_JOIN":
-      bjPlayers[data.pid] = { name: data.name, status: data.status };
+      bjPlayers[data.pid] = { name: data.name || "Kh\xE1ch", status: "idle", netProfit: 0 };
+      bjSystemChat(`${bjPlayers[data.pid].name} \u0111\xE3 v\xE0o ph\xF2ng`);
       bjRenderRoom();
       break;
     case "PLAYER_LEFT":
@@ -49763,6 +49772,22 @@ function bjHandleMsg(fromPid, data) {
       if (bjPlayers[fromPid]) bjPlayers[fromPid].status = data.ready ? "ready" : "idle";
       if (bjIsHost) bjBroadcast({ type: "READY", pid: fromPid, ready: data.ready }, fromPid);
       bjRenderRoom();
+      break;
+    case "BET_PLACED":
+      if (bjGameState) {
+        const h = bjGameState.hands[data.pid];
+        if (h) h.bet[0] = data.bet;
+        if (bjIsHost && bjPlayers[data.pid]) {
+          bjPlayers[data.pid].netProfit = (bjPlayers[data.pid].netProfit || 0) - data.bet;
+          bjBroadcastProfits();
+        }
+        const allBet = bjGameState.turnOrder.every((p2) => bjGameState.hands[p2]?.bet?.[0] > 0);
+        if (allBet && bjIsHost) {
+          if (bjGameState.betTimer) clearTimeout(bjGameState.betTimer);
+          bjHostRunDealerInitial();
+        }
+        bjRenderRoom();
+      }
       break;
     case "SETTINGS_UPDATE":
       bjSettings = data.settings;
@@ -49795,23 +49820,6 @@ function bjHandleMsg(fromPid, data) {
       bjMyStatus = bjPlayers[bjMyId]?.status === "spectator" ? "spectator" : "betting";
       bjRenderRoom();
       break;
-    case "BET_PLACED":
-      if (bjGameState) {
-        bjGameState.betsIn[data.pid] = data.bet;
-        bjGameState.hands[data.pid] = {
-          cards: [[]],
-          bet: [data.bet],
-          stood: [false],
-          doubled: [false],
-          activeHandIdx: 0,
-          splitAceIdxs: [],
-          insuranceBet: 0,
-          surrendered: false
-        };
-      }
-      bjRenderRoom();
-      if (bjIsHost) bjCheckAllBetsIn();
-      break;
     case "DEAL_CARDS":
       if (bjGameState) {
         bjGameState.hands = data.hands;
@@ -49822,13 +49830,6 @@ function bjHandleMsg(fromPid, data) {
       }
       bjMyStatus = bjGameState?.hands[bjMyId] ? "playing" : "spectator";
       bjRenderRoom();
-      break;
-    case "INSURANCE_ANSWER":
-      if (bjIsHost) {
-        bjGameState.insuranceAnswers = bjGameState.insuranceAnswers || {};
-        bjGameState.insuranceAnswers[data.pid] = data.answer;
-        bjCheckInsuranceAnswers();
-      }
       break;
     case "ACTION":
       bjHandleRoomAction(fromPid, data);
@@ -49897,6 +49898,11 @@ function bjHandleMsg(fromPid, data) {
         }
         bjRenderChat();
       }
+      if (bjIsHost) {
+        if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - data.amount;
+        if (log2 && bjPlayers[log2.reqData.pid]) bjPlayers[log2.reqData.pid].netProfit = (bjPlayers[log2.reqData.pid].netProfit || 0) + data.amount;
+        bjBroadcastProfits();
+      }
       if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
       break;
     case "GOLD_SEND":
@@ -49905,6 +49911,20 @@ function bjHandleMsg(fromPid, data) {
         save();
         renderStatus();
         bjSystemChat(`${bjPlayers[fromPid]?.name || "?"} g\u1EEDi b\u1EA1n ${data.amount.toLocaleString()}G!`);
+      }
+      if (bjIsHost) {
+        if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - data.amount;
+        if (bjPlayers[data.targetPid]) bjPlayers[data.targetPid].netProfit = (bjPlayers[data.targetPid].netProfit || 0) + data.amount;
+        bjBroadcastProfits();
+      }
+      break;
+    case "UPDATE_PROFITS":
+      if (data.profits) {
+        for (const p2 in data.profits) {
+          if (bjPlayers[p2]) bjPlayers[p2].netProfit = data.profits[p2];
+        }
+        const modal = document.querySelector(".bj-player-list-modal");
+        if (modal) bjRenderPlayerListModal();
       }
       break;
     case "ROOM_FULL":
@@ -49924,7 +49944,6 @@ function bjHandleDisconnect(pid) {
       if (bjGameState) {
         bjGameState.turnOrder = bjGameState.turnOrder.filter((p2) => p2 !== pid);
         if (bjGameState.currentTurn === pid) bjAdvanceTurn();
-        else bjCheckAllBetsIn();
       }
       bjBroadcast({ type: "PLAYER_LEFT", pid });
       bjRenderRoom();
@@ -49942,7 +49961,6 @@ function bjHandleDisconnect(pid) {
           if (bjGameState) {
             bjGameState.turnOrder = bjGameState.turnOrder.filter((p2) => p2 !== pid);
             if (bjGameState.currentTurn === pid) bjAdvanceTurn();
-            else if (bjGameState.phase === "betting") bjCheckAllBetsIn();
           }
           if (bjRoomPhase === "summary" && !bjSummaryTimer) {
             bjSummaryTimer = setInterval(() => {
@@ -49985,21 +50003,31 @@ function bjHostStartRound() {
   const active = pids.filter((p2) => bjPlayers[p2] && bjPlayers[p2].status !== "spectator");
   if (active.length === 0) return bjToast("C\u1EA7n \xEDt nh\u1EA5t 1 ng\u01B0\u1EDDi ch\u01A1i");
   const seed = (Date.now() ^ Math.floor(Math.random() * 4294967295)) & 4294967295;
-  const msg = { type: "ROUND_START", seed, turnOrder: active, betDeadline: Date.now() + 3e4 };
-  bjBroadcast(msg);
-  bjHandleMsg(bjMyId, msg);
+  bjGameState = {
+    phase: "betting",
+    seed,
+    shoeIdx: 0,
+    shoe: buildShoe(bjSettings.numDecks, seed),
+    hands: {},
+    dealerHand: [],
+    currentTurn: null,
+    turnOrder: active,
+    betsIn: {},
+    insuranceAnswers: {}
+  };
+  for (const pid of active) {
+    bjGameState.hands[pid] = { cards: [[]], bet: [0], stood: [false], doubled: [false], activeHandIdx: 0, splitAceIdxs: [], insuranceBet: 0, surrendered: false };
+  }
+  bjRoomPhase = "ingame";
+  bjBroadcast({ type: "ROUND_START", seed, turnOrder: active });
+  bjRenderRoom();
 }
-function bjCheckAllBetsIn() {
-  if (!bjGameState || bjGameState.phase !== "betting") return;
-  if (bjGameState.turnOrder.every((p2) => bjGameState.betsIn[p2] !== void 0)) bjHostDealCards();
-}
-function bjHostDealCards() {
+function bjHostRunDealerInitial() {
   const gs = bjGameState;
   const shoe = gs.shoe;
   let idx = gs.shoeIdx;
   const draw = (hidden) => ({ ...shoe[idx++], hidden: !!hidden, isNew: true });
   for (const pid of gs.turnOrder) {
-    if (!gs.hands[pid]) gs.hands[pid] = { cards: [[]], bet: [0], stood: [false], doubled: [false], activeHandIdx: 0, splitAceIdxs: [], insuranceBet: 0, surrendered: false };
     gs.hands[pid].cards[0].push(draw());
   }
   gs.dealerHand.push(draw());
@@ -50036,11 +50064,18 @@ function bjAutoStandBJs() {
 function bjCheckInsuranceAnswers() {
   const gs = bjGameState;
   if (!gs.turnOrder.every((p2) => (gs.insuranceAnswers || {})[p2] !== void 0)) return;
+  let profitChanged = false;
   for (const pid of gs.turnOrder) {
     const ans = gs.insuranceAnswers[pid];
     const h = gs.hands[pid];
-    if (ans === "ins") h.insuranceBet = Math.floor(h.bet[0] / 2);
+    if (ans === "ins" && !h.insuranceBetPaid) {
+      h.insuranceBet = Math.floor(h.bet[0] / 2);
+      h.insuranceBetPaid = true;
+      if (bjPlayers[pid]) bjPlayers[pid].netProfit = (bjPlayers[pid].netProfit || 0) - h.insuranceBet;
+      profitChanged = true;
+    }
   }
+  if (profitChanged) bjBroadcastProfits();
   if (isBlackjack([gs.dealerHand[0], { ...gs.dealerHand[1], hidden: false }])) {
     gs.dealerHand[1].hidden = false;
     gs.phase = "dealer_bj";
@@ -50064,7 +50099,7 @@ function bjAdvanceTurn() {
   for (const pid of gs.turnOrder) {
     const h = gs.hands[pid];
     if (!h) continue;
-    const done = h.cards.every((c2, i2) => h.stood[i2] || handTotal(c2) > 21);
+    const done = h.cards.every((c2, i2) => h.stood[i2] || handTotal(c2) >= 21);
     if (!done) {
       next = pid;
       break;
@@ -50092,14 +50127,7 @@ function bjHandleRoomAction(fromPid, data) {
     bjRenderRoom();
     return;
   }
-  if (data.hand) {
-    gs.hands[data.pid] = data.hand;
-    if (data.shoeIdx !== void 0) gs.shoeIdx = data.shoeIdx;
-    bjRenderRoom();
-    if (!bjIsHost) return;
-  }
-  if (!bjIsHost) return;
-  if (data.actionType === "INSURANCE_ANSWER") {
+  if (data.actionType === "INSURANCE_ANSWER" && bjIsHost) {
     gs.insuranceAnswers = gs.insuranceAnswers || {};
     gs.insuranceAnswers[fromPid] = data.answer;
     bjCheckInsuranceAnswers();
@@ -50110,20 +50138,25 @@ function bjHandleRoomAction(fromPid, data) {
   const idx = h.activeHandIdx || 0;
   if (data.actionType === "HIT") {
     h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++], isNew: true });
-    if (handTotal(h.cards[idx]) > 21) h.stood[idx] = true;
+    if (handTotal(h.cards[idx]) >= 21) h.stood[idx] = true;
   } else if (data.actionType === "STAND") {
     h.stood[idx] = true;
-    if (idx + 1 < h.cards.length) h.activeHandIdx = idx + 1;
-  } else if (data.actionType === "DOUBLE") {
+  } else if (data.actionType === "DOUBLE" && bjIsHost) {
     h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++], isNew: true });
+    if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - h.bet[idx];
     h.bet[idx] *= 2;
     h.stood[idx] = true;
     h.doubled[idx] = true;
-  } else if (data.actionType === "SPLIT") {
-    const sc = h.cards[idx].splice(1, 1)[0];
-    const nh = [sc, { ...gs.shoe[gs.shoeIdx++], isNew: true }];
-    h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++], isNew: true });
-    h.cards.splice(idx + 1, 0, nh);
+    bjBroadcastProfits();
+  } else if (data.actionType === "SPLIT" && bjIsHost) {
+    if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - h.bet[idx];
+    const c2 = h.cards[idx].pop();
+    h.cards.splice(idx + 1, 0, [c2]);
+    const sc = gs.shoe[gs.shoeIdx++];
+    const sc2 = gs.shoe[gs.shoeIdx++];
+    h.cards[idx].push({ ...sc, isNew: true });
+    const nh = h.cards[idx + 1];
+    nh.push({ ...sc2, isNew: true });
     h.bet.splice(idx + 1, 0, h.bet[idx]);
     h.stood.splice(idx + 1, 0, false);
     h.doubled.splice(idx + 1, 0, false);
@@ -50133,13 +50166,14 @@ function bjHandleRoomAction(fromPid, data) {
       h.stood[idx] = true;
       h.stood[idx + 1] = true;
     }
+    bjBroadcastProfits();
   } else if (data.actionType === "SURRENDER") {
     h.surrendered = true;
     h.stood[idx] = true;
   }
   gs.hands[fromPid] = h;
   bjBroadcast({ type: "ACTION", actionType: data.actionType, pid: fromPid, hand: h, shoeIdx: gs.shoeIdx });
-  const done = h.cards.every((c2, i2) => h.stood[i2] || handTotal(c2) > 21);
+  const done = h.cards.every((c2, i2) => h.stood[i2] || handTotal(c2) >= 21);
   if (done) bjAdvanceTurn();
   else bjRenderRoom();
 }
@@ -50220,6 +50254,10 @@ function bjHostEndRound() {
     }
     payouts[pid] = p2;
   }
+  for (const pid in payouts) {
+    if (bjPlayers[pid]) bjPlayers[pid].netProfit = (bjPlayers[pid].netProfit || 0) + payouts[pid];
+  }
+  bjBroadcastProfits();
   if (payouts[bjMyId]) {
     ctx.S.coins = (ctx.S.coins || 0) + payouts[bjMyId];
     save();
@@ -50301,7 +50339,7 @@ function bjRenderRoom() {
                 <div class="bj-lobby-title">S\u1EA3nh Ch\u1EDD</div>
                 <div class="bj-player-list">
                     ${allPids.map((p2) => {
-      const isHost = p2 === Object.keys(bjPlayers)[0];
+      const isHost = p2 === bjRoomId;
       const ready = bjPlayers[p2].status === "ready";
       const meStr = p2 === bjMyId ? " (B\u1EA1n)" : "";
       const kickBtn = bjIsHost && p2 !== bjMyId ? `<button class="bj-kick-btn" data-pid="${p2}">Kick</button>` : "";
@@ -50394,9 +50432,7 @@ function bjRenderRoom() {
             <span>\u{1F4AC} Chat</span>
             <span class="bj-chat-close">\u274C</span>
         </div>
-        <div class="bj-chat-log" id="bj-chat-log">${bjChatLog.slice(-20).map(
-    (e2) => `<div class="bj-chat-line"><b>${e2.name}:</b> ${e2.msg.replace(/</g, "&lt;")}</div>`
-  ).join("")}</div>
+        <div class="bj-chat-log" id="bj-chat-log"></div>
         <div class="bj-chat-inp-row">
             <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin ti\u1EC1n">\u{1F4B0}</div>
             <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
@@ -50405,6 +50441,20 @@ function bjRenderRoom() {
     </div></div>`;
   body.innerHTML = html;
   $id("bj-out-room-ingame")?.addEventListener("click", closeBlackjack);
+  $id("bj-show-players")?.addEventListener("click", () => {
+    const modalId = "bj-player-list-modal";
+    const exist = $id(modalId);
+    if (exist) {
+      exist.remove();
+      return;
+    }
+    const modal = document.createElement("div");
+    modal.id = modalId;
+    modal.className = "bj-player-list-modal";
+    modal.style.cssText = "position:absolute;top:50px;left:50%;transform:translateX(-50%);background:rgba(20,20,20,0.95);border:1px solid #555;border-radius:8px;padding:15px;z-index:9999;width:90%;max-width:400px;box-shadow:0 8px 30px rgba(0,0,0,0.8);max-height:80%;overflow-y:auto;";
+    $id("bj-win").appendChild(modal);
+    bjRenderPlayerListModal();
+  });
   $id("bj-room-code-badge")?.addEventListener("click", () => {
     navigator.clipboard.writeText(bjRoomId).then(() => bjToast("Copy m\xE3 ph\xF2ng!"));
   });
@@ -50437,8 +50487,31 @@ function bjRenderRoom() {
   }));
   bjBindMyActions();
   bjBindChat();
-  const cl = $id("bj-chat-log");
-  if (cl) cl.scrollTop = cl.scrollHeight;
+  bjRenderChat();
+}
+function bjRenderPlayerListModal() {
+  const modal = $id("bj-player-list-modal");
+  if (!modal) return;
+  modal.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid #444;padding-bottom:10px;">
+            <div style="font-weight:bold;color:#ffd94d;">DANH S\xC1CH NG\u01AF\u1EDCI CH\u01A0I</div>
+            <div class="buy plain" style="padding:2px 8px;" onclick="document.getElementById('bj-player-list-modal').remove()">\u0110\xF3ng</div>
+        </div>
+        <table class="bj-summary-table" style="width:100%; text-align:left;">
+            <tr><th>T\xEAn</th><th>Vai tr\xF2</th><th>L\u1EE3i nhu\u1EADn</th></tr>
+            ${Object.keys(bjPlayers).map((p2) => {
+    const pl = bjPlayers[p2];
+    const prof = pl.netProfit || 0;
+    const color = prof > 0 ? "#4caf50" : prof < 0 ? "#f44336" : "#fff";
+    const sign = prof > 0 ? "+" : "";
+    return `<tr>
+                    <td>${pl.name} ${p2 === bjMyId ? "(B\u1EA1n)" : ""}</td>
+                    <td>${pl.status === "spectator" ? "\u{1F441}\uFE0F \u0110ang xem" : p2 === bjRoomId ? "\u{1F451} Host" : "Kh\xE1ch"}</td>
+                    <td style="color:${color}; font-weight:bold;">${sign}${prof.toLocaleString()}G</td>
+                </tr>`;
+  }).join("")}
+        </table>
+    `;
 }
 function bjBuildMyActions() {
   const gs = bjGameState;
@@ -50668,6 +50741,7 @@ var init_blackjack = __esm({
       if (!log2) return;
       const rd = log2.reqData;
       if (rd.pid === bjMyId) return bjToast("B\u1EA1n kh\xF4ng th\u1EC3 t\u1EF1 cho ti\u1EC1n m\xECnh!");
+      if (!bjPlayers[rd.pid]) return bjToast("Ng\u01B0\u1EDDi n\xE0y \u0111\xE3 r\u1EDDi ph\xF2ng!");
       const remaining = rd.amount - rd.fulfilled;
       if (remaining <= 0) return bjToast("\u0110\xE3 \u0111\u1EE7 ti\u1EC1n r\u1ED3i!");
       const amtStr = prompt(`Cho ti\u1EC1n ${log2.name} (T\u1ED1i \u0111a: ${remaining.toLocaleString()}G):`, String(remaining));
