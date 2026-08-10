@@ -805,6 +805,22 @@ function bjHandleDisconnect(pid) {
                     bjIsHost = true;
                     bjRoomId = bjMyId;
                     toast(`Host c\u0169 tho\u00e1t. B\u1ea1n \u0111\u00e3 tr\u1edf th\u00e0nh Host m\u1edbi!`);
+                    if (bjGameState) {
+                        bjGameState.turnOrder = bjGameState.turnOrder.filter(p => p !== pid);
+                        if (bjGameState.currentTurn === pid) bjAdvanceTurn();
+                        else if (bjGameState.phase === 'betting') bjCheckAllBetsIn();
+                    }
+                    if (bjRoomPhase === 'summary' && !bjSummaryTimer) {
+                        bjSummaryTimer = setInterval(() => {
+                            bjSummaryTimeLeft--;
+                            if (bjSummaryTimeLeft <= 0) bjHostEndSummary();
+                            else {
+                                bjBroadcast({ type: 'TIMER_TICK', left: bjSummaryTimeLeft });
+                                const tEl = All.$id('bj-summary-timer');
+                                if (tEl) tEl.innerText = `V\u00f2ng m\u1edbi sau: ${bjSummaryTimeLeft}s`;
+                            }
+                        }, 1000);
+                    }
                     bjRenderRoom();
                 } else {
                     bjRoomId = newHostId;
