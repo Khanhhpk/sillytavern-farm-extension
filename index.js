@@ -6239,7 +6239,7 @@ function renderPlots() {
         if (hBtn) hBtn.addEventListener("click", () => openHeroPanel());
         const fBtn = $id("eslot-flea");
         if (fBtn) fBtn.addEventListener("click", () => {
-          const ui = document.getElementById("trade");
+          const ui = document.getElementById("trade-win");
           if (ui) ui.classList.add("open");
           openFleaMarket();
         });
@@ -47957,7 +47957,6 @@ function renderFleaMarket() {
   $id("flea-refresh").addEventListener("click", loadFleaList);
   $id("flea-post").addEventListener("click", renderPostItem);
   loadFleaList();
-  $id("viewToggle").textContent = "Ch\u1EE3 Tr\u1EDDi";
 }
 async function loadFleaList() {
   const listEl = $id("flea-list");

@@ -52,7 +52,6 @@ function renderFleaMarket() {
     All.$id('flea-post').addEventListener('click', renderPostItem);
     
     loadFleaList();
-    All.$id('viewToggle').textContent = 'Chợ Trời';
 }
 
 async function loadFleaList() {
