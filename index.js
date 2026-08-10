@@ -5585,6 +5585,7 @@ function openPanel(kind) {
       <div class="shead">C\xF4ng c\u1EE5 d\xE0nh cho Gi\xE1m \u0111\u1ED1c \u0110\u1ED3 ho\u1EA1 / Dev</div>
       <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap;">
         <span class="buy plain" id="openSandboxBtn">\u{1F3A8} M\u1EDF X\u01B0\u1EDFng Ch\u1EBF T\xE1c AI</span>
+        <span class="buy plain" id="openSpriteViewerBtn">\u{1F5BC}\uFE0F Xem Th\u01B0 Vi\u1EC7n Sprite</span>
         <input class="inp" type="password" id="testCode" placeholder="M\xE3 \u1EA9n..." style="width:100px;padding:3px 6px">
         <span class="buy" id="testBtn">Test Mode</span>
       </div>
@@ -5625,7 +5626,13 @@ function openPanel(kind) {
       save();
       toast("\u0110\xE3 l\u01B0u t\xEAn ng\u01B0\u1EDDi ch\u01A1i");
     });
-    if ($id("openSandboxBtn")) $id("openSandboxBtn").addEventListener("click", openSandbox);
+    if ($id("openSandboxBtn")) $id("openSandboxBtn")?.addEventListener("click", () => {
+      openModal("X\u01B0\u1EDFng Ch\u1EBF T\xE1c AI", openSandbox());
+      setTimeout(() => {
+        $id("sandboxDrawBtn")?.click();
+      }, 50);
+    });
+    $id("openSpriteViewerBtn")?.addEventListener("click", openSpriteViewerModal);
     const testBtn = $id("testBtn");
     if (testBtn) testBtn.addEventListener("click", () => {
       const code = $id("testCode")?.value;
@@ -5892,6 +5899,28 @@ function initShop() {
     if (e2.target === $id("modal")) closeModal();
   });
   sh.querySelectorAll("[data-open]").forEach((b2) => b2.addEventListener("click", () => openPanel(b2.dataset.open)));
+}
+function openSpriteViewerModal() {
+  let html = `<div style="display:flex; flex-wrap:wrap; gap:10px; max-height:60vh; overflow-y:auto; padding-right:5px">`;
+  html += `<div class="shead" style="width:100%; margin-top:0;">Th\xFA c\u01B0ng (PET_SPR)</div>`;
+  Object.keys(PET_SPR).forEach((key) => {
+    html += `<div style="display:flex; flex-direction:column; align-items:center; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px; width:72px; box-sizing:border-box">
+      ${petSVG(key, 40)}
+      <div style="font-size:9px; margin-top:4px; text-align:center; overflow:hidden; text-overflow:ellipsis; width:100%; white-space:nowrap" title="${key}">${key}</div>
+    </div>`;
+  });
+  html += `<div class="shead" style="width:100%; margin-top:10px">M\xF4i tr\u01B0\u1EDDng & V\u1EADt ph\u1EA9m (SPR)</div>`;
+  Object.keys(SPR).forEach((key) => {
+    html += `<div style="display:flex; flex-direction:column; align-items:center; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px; width:72px; box-sizing:border-box">
+      ${spriteSVG(key, 40)}
+      <div style="font-size:9px; margin-top:4px; text-align:center; overflow:hidden; text-overflow:ellipsis; width:100%; white-space:nowrap" title="${key}">${key}</div>
+    </div>`;
+  });
+  html += `</div>`;
+  html += `<div style="margin-top:12px;text-align:center">
+      <span class="buy plain" onclick="document.querySelector('[data-open=\\'cfg\\']').click()">Quay l\u1EA1i C\xE0i \u0111\u1EB7t</span>
+  </div>`;
+  openModal("Th\u01B0 Vi\u1EC7n Sprite", html);
 }
 var shopTab, bagTab, bagSellMode, bagSel, gachaSortMode;
 var init_shop = __esm({
@@ -48660,9 +48689,11 @@ __export(all_exports, {
   PETS: () => PETS,
   PET_P: () => PET_P,
   PET_SKILLS: () => PET_SKILLS,
+  PET_SPR: () => PET_SPR,
   PET_STATS: () => PET_STATS,
   SEC: () => SEC,
   SEC_LS_KEY: () => SEC_LS_KEY,
+  SPR: () => SPR,
   SPRITE_PX: () => SPRITE_PX,
   TOOLS: () => TOOLS,
   WITCH_CRY: () => WITCH_CRY,
@@ -48784,6 +48815,7 @@ __export(all_exports, {
   openSandbox: () => openSandbox,
   openSellDlg: () => openSellDlg,
   openSellSeedDlg: () => openSellSeedDlg,
+  openSpriteViewerModal: () => openSpriteViewerModal,
   openSyncHostModal: () => openSyncHostModal,
   openSyncJoinModal: () => openSyncJoinModal,
   openTakeout: () => openTakeout,
