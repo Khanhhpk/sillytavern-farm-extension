@@ -33,7 +33,7 @@ function bjSystemChat(msg) {
 }
 //  CARD ENGINE
 // ─────────────────────────────────────────────────────────────────────────────
-const SUITS = ['\u2660', '\u2665', '\u2666', '\u2663'];
+const SUITS = ['♠', '♥', '♦', '♣'];
 const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
 function cardValue(rank) {
@@ -104,7 +104,7 @@ function cardHTML(card, small) {
     if (card.hidden) {
         return `<div class="bj-card back${small ? ' small' : ''}${animCls}"><div class="bj-card-back-inner"></div></div>`;
     }
-    const isRed = card.suit === '\u2665' || card.suit === '\u2666';
+    const isRed = card.suit === '♥' || card.suit === '♦';
     const col = isRed ? '#c0392b' : '#1a1a2e';
     return `<div class="bj-card${small ? ' small' : ''}${animCls}" style="color:${col}">
         <div class="bj-card-corner tl">${card.rank}<br><span>${card.suit}</span></div>
@@ -155,12 +155,12 @@ function buildSoloUI() {
     return `<div id="bj-solo-wrap">
         <div class="bj-table">
             <div class="bj-dealer-area">
-                <div class="bj-area-label">Nh\u00e0 c\u00e1i</div>
+                <div class="bj-area-label">Nhà cái</div>
                 <div class="bj-hand-row" id="bj-dealer-hand"></div>
                 <div class="bj-score" id="bj-dealer-score"></div>
             </div>
             <div class="bj-player-area">
-                <div class="bj-area-label">B\u1ea1n \u2014 <span id="bj-coins-display"></span></div>
+                <div class="bj-area-label">Bạn — <span id="bj-coins-display"></span></div>
                 <div id="bj-player-hands"></div>
             </div>
         </div>
@@ -179,7 +179,7 @@ function soloRender() {
     if (dealerEl) {
         dealerEl.innerHTML = s.dealerHand.map(c => cardHTML(c)).join('');
         const vis = s.dealerHand.filter(c => !c.hidden);
-        if (dealerScoreEl) dealerScoreEl.textContent = vis.length ? `\u0110i\u1ec3m: ${handTotal(vis)}` : '';
+        if (dealerScoreEl) dealerScoreEl.textContent = vis.length ? `Điểm: ${handTotal(vis)}` : '';
     }
     const handsEl = All.$id('bj-player-hands');
     if (handsEl) {
@@ -189,7 +189,7 @@ function soloRender() {
             const bet = s.bets[i] || 0;
             return `<div class="bj-player-hand${isActive ? ' active-hand' : ''}">
                 <div class="bj-hand-row">${hand.map(c => cardHTML(c)).join('')}</div>
-                <div class="bj-score">\u0110i\u1ec3m: ${total}${total > 21 ? ' \uD83D\uDC80 Bust!' : ''} \u2014 C\u01b0\u1ee3c: ${bet.toLocaleString()}G</div>
+                <div class="bj-score">Điểm: ${total}${total > 21 ? ' 💀 Bust!' : ''} — Cược: ${bet.toLocaleString()}G</div>
             </div>`;
         }).join('');
     }
@@ -209,12 +209,12 @@ function renderSoloActions() {
         actEl.innerHTML = `
             <div class="bj-bet-row">
                 <input class="inp" id="bj-bet-inp" type="number" min="${min}" value="${Math.max(min, Math.min(100, coins))}" style="width:110px">
-                <span class="buy plain bj-quick" data-q="4">\u00bc</span>
-                <span class="buy plain bj-quick" data-q="2">\u00bd</span>
+                <span class="buy plain bj-quick" data-q="4">¼</span>
+                <span class="buy plain bj-quick" data-q="2">½</span>
                 <span class="buy plain bj-quick" data-q="1">Max</span>
             </div>
             <div class="bj-btn-row" style="margin-top:8px;">
-                <div class="buy" id="bj-deal">\uD83C\uDCCF Ph\u00e1t B\u00e0i</div>
+                <div class="buy" id="bj-deal">🃏 Phát Bài</div>
             </div>`;
         actEl.querySelectorAll('.bj-quick').forEach(b => b.addEventListener('click', () => {
             const inp = All.$id('bj-bet-inp');
@@ -230,20 +230,20 @@ function renderSoloActions() {
         const hasBJ = isBlackjack(hand);
         if (hasBJ) {
             actEl.innerHTML = `
-                <div class="bj-msg-sm">B\u1ea1n c\u00f3 Blackjack! Dealer upcard l\u00e0 Ace.</div>
+                <div class="bj-msg-sm">Bạn có Blackjack! Dealer upcard là Ace.</div>
                 <div class="bj-btn-row">
-                    <div class="buy" id="bj-even-money">L\u1ea5y ngay 1:1 (Even Money)</div>
-                    <div class="buy plain" id="bj-no-insurance">B\u1ecf qua, ch\u1edd k\u1ebft qu\u1ea3</div>
+                    <div class="buy" id="bj-even-money">Lấy ngay 1:1 (Even Money)</div>
+                    <div class="buy plain" id="bj-no-insurance">Bỏ qua, chờ kết quả</div>
                 </div>`;
             All.$id('bj-even-money').addEventListener('click', soloEvenMoney);
             All.$id('bj-no-insurance').addEventListener('click', () => soloAfterInsurance(false));
         } else {
             const maxIns = Math.floor(bet / 2);
             actEl.innerHTML = `
-                <div class="bj-msg-sm">Dealer upcard l\u00e0 Ace \u2014 Mua b\u1ea3o hi\u1ec3m? (t\u1ed1i \u0111a ${maxIns}G)</div>
+                <div class="bj-msg-sm">Dealer upcard là Ace — Mua bảo hiểm? (tối đa ${maxIns}G)</div>
                 <div class="bj-btn-row">
                     <div class="buy" id="bj-buy-ins">Mua ${maxIns}G</div>
-                    <div class="buy plain" id="bj-skip-ins">B\u1ecf qua</div>
+                    <div class="buy plain" id="bj-skip-ins">Bỏ qua</div>
                 </div>`;
             All.$id('bj-buy-ins').addEventListener('click', () => soloBuyInsurance(maxIns));
             All.$id('bj-skip-ins').addEventListener('click', () => soloAfterInsurance(false));
@@ -262,12 +262,12 @@ function renderSoloActions() {
 
         if (total > 21) {
             setTimeout(() => soloNextHand(), 700);
-            actEl.innerHTML = `<div class="bj-msg-sm">\uD83D\uDC80 Bust! T\u1ef1 \u0111\u1ed9ng chuy\u1ec3n tay...</div>`;
+            actEl.innerHTML = `<div class="bj-msg-sm">💀 Bust! Tự động chuyển tay...</div>`;
             return;
         }
         if (isSplitAce) {
             setTimeout(() => soloNextHand(), 400);
-            actEl.innerHTML = `<div class="bj-msg-sm">Split Ace \u2014 Ch\u1ec9 nh\u1eadn 1 l\u00e1, t\u1ef1 Stand.</div>`;
+            actEl.innerHTML = `<div class="bj-msg-sm">Split Ace — Chỉ nhận 1 lá, tự Stand.</div>`;
             return;
         }
 
@@ -288,7 +288,7 @@ function renderSoloActions() {
     }
 
     if (s.phase === 'done') {
-        actEl.innerHTML = `<div class="bj-btn-row"><div class="buy" id="bj-next-round">V\u00e1n M\u1edbi</div></div>`;
+        actEl.innerHTML = `<div class="bj-btn-row"><div class="buy" id="bj-next-round">Ván Mới</div></div>`;
         All.$id('bj-next-round').addEventListener('click', soloNewRound);
     }
 }
@@ -298,9 +298,9 @@ function soloStartRound() {
     const coins = ctx.S.coins || 0;
     const inp = All.$id('bj-bet-inp');
     const want = Math.max(0, parseInt(inp ? inp.value : '0') || 0);
-    if (want < s.settings.minBet) return bjToast(`C\u01b0\u1ee3c t\u1ed1i thi\u1ec3u ${s.settings.minBet}G`);
-    if (s.settings.maxBet > 0 && want > s.settings.maxBet) return bjToast(`C\u01b0\u1ee3c t\u1ed1i \u0111a ${s.settings.maxBet}G`);
-    if (want > coins) return bjToast(`Kh\u00f4ng \u0111\u1ee7 v\u00e0ng (${coins.toLocaleString()}G)`);
+    if (want < s.settings.minBet) return bjToast(`Cược tối thiểu ${s.settings.minBet}G`);
+    if (s.settings.maxBet > 0 && want > s.settings.maxBet) return bjToast(`Cược tối đa ${s.settings.maxBet}G`);
+    if (want > coins) return bjToast(`Không đủ vàng (${coins.toLocaleString()}G)`);
 
     ctx.S.coins = (ctx.S.coins || 0) - want;
     save();
@@ -341,13 +341,13 @@ function soloEvenMoney() {
     ctx.S.coins = (ctx.S.coins || 0) + payout;
     save(); renderStatus();
     s.dealerHand[1].hidden = false; s.phase = 'done';
-    showMsg(`\u2660 Even Money! Nh\u1eadn l\u1ea1i ${payout.toLocaleString()}G`);
+    showMsg(`♠ Even Money! Nhận lại ${payout.toLocaleString()}G`);
     soloRender();
 }
 
 function soloBuyInsurance(amount) {
     const s = soloState;
-    if ((ctx.S.coins || 0) < amount) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng mua b\u1ea3o hi\u1ec3m');
+    if ((ctx.S.coins || 0) < amount) return bjToast('Không đủ vàng mua bảo hiểm');
     ctx.S.coins = (ctx.S.coins || 0) - amount;
     s.insuranceBet = amount;
     save();
@@ -363,7 +363,7 @@ function soloAfterInsurance(boughtIns) {
             const insPayout = s.insuranceBet * 3;
             ctx.S.coins = (ctx.S.coins || 0) + insPayout;
             save();
-            showMsg(`Dealer Blackjack! B\u1ea3o hi\u1ec3m tr\u1ea3 ${insPayout.toLocaleString()}G`);
+            showMsg(`Dealer Blackjack! Bảo hiểm trả ${insPayout.toLocaleString()}G`);
         }
         s.phase = 'done'; soloResolveAll(); soloRender(); return;
     }
@@ -389,7 +389,7 @@ function soloDouble() {
     const s = soloState;
     const idx = s.activeHandIdx;
     const bet = s.bets[idx];
-    if ((ctx.S.coins || 0) < bet) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng Double');
+    if ((ctx.S.coins || 0) < bet) return bjToast('Không đủ vàng Double');
     ctx.S.coins = (ctx.S.coins || 0) - bet;
     s.bets[idx] *= 2;
     save();
@@ -402,7 +402,7 @@ function soloSplit() {
     const s = soloState;
     const idx = s.activeHandIdx;
     const bet = s.bets[idx];
-    if ((ctx.S.coins || 0) < bet) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng Split');
+    if ((ctx.S.coins || 0) < bet) return bjToast('Không đủ vàng Split');
     ctx.S.coins = (ctx.S.coins || 0) - bet;
     save();
     const hand = s.playerHands[idx];
@@ -469,13 +469,13 @@ function soloResolveAll() {
         const pBJ = isBlackjack(hand) && isOnly;
         const bet = s.bets[i];
         const lbl = isOnly ? '' : `Tay ${i + 1}: `;
-        if (pTotal > 21) { results.push(`${lbl}\uD83D\uDC80 Bust (m\u1ea5t ${bet.toLocaleString()}G)`); continue; }
-        if (pBJ && dBJ) { ctx.S.coins = (ctx.S.coins || 0) + bet; results.push(`${lbl}\uD83E\uDD1D Ho\u00e0 BJ`); continue; }
-        if (pBJ) { const p = bet + Math.floor(bet * 1.5); ctx.S.coins = (ctx.S.coins || 0) + p; results.push(`${lbl}\u2660 BLACKJACK +${Math.floor(bet*1.5).toLocaleString()}G`); continue; }
-        if (dBJ) { results.push(`${lbl}\uD83D\uDC94 Dealer BJ`); continue; }
-        if (dBust || pTotal > dTotal) { ctx.S.coins = (ctx.S.coins || 0) + bet * 2; results.push(`${lbl}\u2705 Th\u1eafng +${bet.toLocaleString()}G`); continue; }
-        if (pTotal === dTotal) { ctx.S.coins = (ctx.S.coins || 0) + bet; results.push(`${lbl}\uD83E\uDD1D Ho\u00e0`); continue; }
-        results.push(`${lbl}\u274C Thua`);
+        if (pTotal > 21) { results.push(`${lbl}💀 Bust (mất ${bet.toLocaleString()}G)`); continue; }
+        if (pBJ && dBJ) { ctx.S.coins = (ctx.S.coins || 0) + bet; results.push(`${lbl}🤝 Hoà BJ`); continue; }
+        if (pBJ) { const p = bet + Math.floor(bet * 1.5); ctx.S.coins = (ctx.S.coins || 0) + p; results.push(`${lbl}♠ BLACKJACK +${Math.floor(bet*1.5).toLocaleString()}G`); continue; }
+        if (dBJ) { results.push(`${lbl}💔 Dealer BJ`); continue; }
+        if (dBust || pTotal > dTotal) { ctx.S.coins = (ctx.S.coins || 0) + bet * 2; results.push(`${lbl}✅ Thắng +${bet.toLocaleString()}G`); continue; }
+        if (pTotal === dTotal) { ctx.S.coins = (ctx.S.coins || 0) + bet; results.push(`${lbl}🤝 Hoà`); continue; }
+        results.push(`${lbl}❌ Thua`);
     }
     save(); renderStatus();
     showMsg(results.join('\n'));
@@ -515,7 +515,7 @@ let bjSummaryTimeLeft = 0;
 let bjSummaryData = null;
 const MAX_PLAYERS = 4;
 
-function bjMyName() { return ctx.S.username || 'Kh\u00e1ch'; }
+function bjMyName() { return ctx.S.username || 'Khách'; }
 
 export function openBlackjackRoom() {
     const win = All.$id('bj-win');
@@ -561,13 +561,13 @@ function bjRenderMenu() {
     if (!body) return;
     if (!ctx.S.username) {
         body.innerHTML = `<div style="padding:20px;text-align:center;display:flex;flex-direction:column;gap:12px;">
-            <div class="bj-msg-sm">B\u1ea1n c\u1ea7n c\u00f3 t\u00ean ng\u01b0\u1eddi ch\u01a1i tr\u01b0\u1edbc</div>
-            <input class="inp" id="bj-inp-name" placeholder="Nh\u1eadp t\u00ean c\u1ee7a b\u1ea1n...">
-            <div class="buy" id="bj-save-name" style="text-align:center">L\u01b0u t\u00ean</div>
+            <div class="bj-msg-sm">Bạn cần có tên người chơi trước</div>
+            <input class="inp" id="bj-inp-name" placeholder="Nhập tên của bạn...">
+            <div class="buy" id="bj-save-name" style="text-align:center">Lưu tên</div>
         </div>`;
         All.$id('bj-save-name').onclick = () => {
             const v = (All.$id('bj-inp-name').value || '').trim();
-            if (!v) return bjToast('T\u00ean kh\u00f4ng \u0111\u01b0\u1ee3c tr\u1ed1ng!');
+            if (!v) return bjToast('Tên không được trống!');
             ctx.S.username = v;
             import('./state.js').then(m => m.save());
             bjRenderMenu();
@@ -575,10 +575,10 @@ function bjRenderMenu() {
         return;
     }
     body.innerHTML = `<div style="padding:20px;display:flex;flex-direction:column;gap:14px;text-align:center;">
-        <div style="font-weight:bold;color:#ffd94d;font-size:14px;">\uD83C\uDFB0 Ph\u00f2ng Blackjack \u2014 ${bjMyName()}</div>
-        <div class="buy" id="bj-host-btn" style="text-align:center">\uD83C\uDFB0 T\u1ea1o Ph\u00f2ng (Host)</div>
+        <div style="font-weight:bold;color:#ffd94d;font-size:14px;">🎰 Phòng Blackjack — ${bjMyName()}</div>
+        <div class="buy" id="bj-host-btn" style="text-align:center">🎰 Tạo Phòng (Host)</div>
         <div style="display:flex;gap:8px;">
-            <input class="inp" id="bj-join-code" placeholder="Nh\u1eadp m\u00e3 ph\u00f2ng..." style="flex:1">
+            <input class="inp" id="bj-join-code" placeholder="Nhập mã phòng..." style="flex:1">
             <div class="buy plain" id="bj-join-btn">Tham gia</div>
         </div>
         <div id="bj-room-status" style="font-size:12px;color:#e05;font-weight:bold;min-height:16px;"></div>
@@ -593,7 +593,7 @@ function bjUpdateStatus(msg, color) {
 }
 
 async function bjHostRoom() {
-    bjUpdateStatus('\u0110ang t\u1ea1o ph\u00f2ng...', '#ffd94d');
+    bjUpdateStatus('Đang tạo phòng...', '#ffd94d');
     const roomId = 'bj-' + Math.random().toString(36).substr(2, 6);
     const peerOpts = await buildPeerConfigAsync();
     bjPeer = new Peer(roomId, peerOpts);
@@ -614,13 +614,13 @@ async function bjHostRoom() {
             bjSetupConn(inConn);
         });
     });
-    bjPeer.on('error', err => bjUpdateStatus('L\u1ed7i: ' + err.type, '#e05'));
+    bjPeer.on('error', err => bjUpdateStatus('Lỗi: ' + err.type, '#e05'));
 }
 
 async function bjJoinRoom() {
     const code = (All.$id('bj-join-code')?.value || '').trim();
-    if (!code) return bjUpdateStatus('Nh\u1eadp m\u00e3 ph\u00f2ng!', '#e05');
-    bjUpdateStatus('\u0110ang k\u1ebft n\u1ed1i...', '#ffd94d');
+    if (!code) return bjUpdateStatus('Nhập mã phòng!', '#e05');
+    bjUpdateStatus('Đang kết nối...', '#ffd94d');
     const peerOpts = await buildPeerConfigAsync();
     const myShortId = 'bj-' + Math.random().toString(36).substr(2, 6);
     bjPeer = new Peer(myShortId, peerOpts);
@@ -633,7 +633,7 @@ async function bjJoinRoom() {
             bjSetupConn(conn);
             conn.send({ type: 'HELLO', name: bjMyName(), id: bjMyId });
         });
-        conn.on('error', () => bjUpdateStatus('L\u1ed7i k\u1ebft n\u1ed1i!', '#e05'));
+        conn.on('error', () => bjUpdateStatus('Lỗi kết nối!', '#e05'));
     });
     bjPeer.on('connection', inConn => {
         const active = Object.keys(bjConns).filter(p => bjConns[p] && bjConns[p].open);
@@ -646,7 +646,7 @@ async function bjJoinRoom() {
             bjSetupConn(inConn);
         });
     });
-    bjPeer.on('error', err => bjUpdateStatus('L\u1ed7i: ' + err.type, '#e05'));
+    bjPeer.on('error', err => bjUpdateStatus('Lỗi: ' + err.type, '#e05'));
 }
 
 function bjSetupConn(conn) {
@@ -659,7 +659,7 @@ function bjHandleMsg(fromPid, data) {
     switch (data.type) {
         case 'HELLO': {
             const status = (bjGameState && bjRoomPhase !== 'summary') ? 'spectator' : 'idle';
-            bjPlayers[fromPid] = { name: data.name || 'Kh\u00e1ch', status };
+            bjPlayers[fromPid] = { name: data.name || 'Khách', status };
             if (bjIsHost) {
                 bjBroadcast({ type: 'PLAYER_JOIN', pid: fromPid, name: data.name, status }, fromPid);
                 bjConns[fromPid].send({ type: 'WELCOME', players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData, chatLog: bjChatLog });
@@ -688,10 +688,10 @@ function bjHandleMsg(fromPid, data) {
             bjRenderRoom(); break;
         case 'SETTINGS_UPDATE':
             bjSettings = data.settings;
-            bjSystemChat(`Host c\u1eadp nh\u1eadt: min ${bjSettings.minBet}G, ch\u1edd ${bjSettings.delay}s`);
+            bjSystemChat(`Host cập nhật: min ${bjSettings.minBet}G, chờ ${bjSettings.delay}s`);
             bjRenderRoom(); break;
         case 'KICKED':
-            bjToast('B\u1ea1n \u0111\u00e3 b\u1ecb \u0111u\u1ed5i kh\u1ecfi ph\u00f2ng.');
+            bjToast('Bạn đã bị đuổi khỏi phòng.');
             closeBlackjack(); break;
         case 'ROUND_START':
             bjGameState = {
@@ -740,7 +740,7 @@ function bjHandleMsg(fromPid, data) {
                 if (payout > 0) {
                     ctx.S.coins = (ctx.S.coins || 0) + payout;
                     save(); renderStatus();
-                    bjToast(`Nh\u1eadn ${payout.toLocaleString()}G t\u1eeb b\u00e0n!`);
+                    bjToast(`Nhận ${payout.toLocaleString()}G từ bàn!`);
                 }
             }
             for (const p of Object.keys(bjPlayers)) {
@@ -753,7 +753,7 @@ function bjHandleMsg(fromPid, data) {
         case 'TIMER_TICK':
             bjSummaryTimeLeft = data.left;
             const tEl = All.$id('bj-summary-timer');
-            if (tEl) tEl.innerText = `V\u00f2ng m\u1edbi sau: ${data.left}s`;
+            if (tEl) tEl.innerText = `Vòng mới sau: ${data.left}s`;
             break;
         case 'SKIP_TIMER':
             bjSummaryTimeLeft = 0; break;
@@ -781,7 +781,7 @@ function bjHandleMsg(fromPid, data) {
                 if (log.reqData.pid === bjMyId) {
                     ctx.S.coins = (ctx.S.coins || 0) + data.amount;
                     save(); renderStatus();
-                    bjSystemChat(`${data.from} \u0111\u00e3 cho b\u1ea1n ${data.amount.toLocaleString()}G!`);
+                    bjSystemChat(`${data.from} đã cho bạn ${data.amount.toLocaleString()}G!`);
                 }
                 bjRenderChat();
             }
@@ -791,11 +791,11 @@ function bjHandleMsg(fromPid, data) {
             if (data.targetPid === bjMyId) {
                 ctx.S.coins = (ctx.S.coins || 0) + data.amount;
                 save(); renderStatus();
-                bjSystemChat(`${bjPlayers[fromPid]?.name || '?'} g\u1eedi b\u1ea1n ${data.amount.toLocaleString()}G!`);
+                bjSystemChat(`${bjPlayers[fromPid]?.name || '?'} gửi bạn ${data.amount.toLocaleString()}G!`);
             }
             break;
         case 'ROOM_FULL':
-            bjToast('Ph\u00f2ng \u0111\u00e3 \u0111\u1ea7y!'); closeBlackjack(); break;
+            bjToast('Phòng đã đầy!'); closeBlackjack(); break;
     }
 }
 
@@ -806,7 +806,7 @@ function bjHandleDisconnect(pid) {
     if (bjPlayers[pid]) {
         const name = bjPlayers[pid].name;
         delete bjPlayers[pid];
-        bjSystemChat(`${name} \u0111\u00e3 r\u1eddi ph\u00f2ng`);
+        bjSystemChat(`${name} đã rời phòng`);
         if (bjIsHost) {
             if (bjGameState) {
                 bjGameState.turnOrder = bjGameState.turnOrder.filter(p => p !== pid);
@@ -827,7 +827,7 @@ function bjHandleDisconnect(pid) {
                 if (newHostId === bjMyId) {
                     bjIsHost = true;
                     bjRoomId = bjMyId;
-                    bjSystemChat(`Host c\u0169 tho\u00e1t. B\u1ea1n \u0111\u00e3 tr\u1edf th\u00e0nh Host m\u1edbi!`);
+                    bjSystemChat(`Host cũ thoát. Bạn đã trở thành Host mới!`);
                     if (bjGameState) {
                         bjGameState.turnOrder = bjGameState.turnOrder.filter(p => p !== pid);
                         if (bjGameState.currentTurn === pid) bjAdvanceTurn();
@@ -840,24 +840,24 @@ function bjHandleDisconnect(pid) {
                             else {
                                 bjBroadcast({ type: 'TIMER_TICK', left: bjSummaryTimeLeft });
                                 const tEl = All.$id('bj-summary-timer');
-                                if (tEl) tEl.innerText = `V\u00f2ng m\u1edbi sau: ${bjSummaryTimeLeft}s`;
+                                if (tEl) tEl.innerText = `Vòng mới sau: ${bjSummaryTimeLeft}s`;
                             }
                         }, 1000);
                     }
                     bjRenderRoom();
                 } else {
                     bjRoomId = newHostId;
-                    bjSystemChat(`Host c\u0169 tho\u00e1t. \u0110ang \u0111\u1ed5i Host t\u1edbi ${bjPlayers[newHostId]?.name || 'ng\u01b0\u1eddi ch\u01a1i kh\u00e1c'}...`);
+                    bjSystemChat(`Host cũ thoát. Đang đổi Host tới ${bjPlayers[newHostId]?.name || 'người chơi khác'}...`);
                     const conn = bjPeer.connect(newHostId, { reliable: true });
                     bjConns[newHostId] = conn;
                     conn.on('open', () => {
                         bjSetupConn(conn);
                         conn.send({ type: 'HELLO', name: bjMyName(), id: bjMyId });
                     });
-                    conn.on('error', () => { bjToast('Kh\u00f4ng th\u1ec3 k\u1ebft n\u1ed1i \u0111\u1ebfn Host m\u1edbi!'); closeBlackjack(); });
+                    conn.on('error', () => { bjToast('Không thể kết nối đến Host mới!'); closeBlackjack(); });
                 }
             } else {
-                closeBlackjack(); bjToast('Ph\u00f2ng \u0111\u00e3 \u0111\u00f3ng.');
+                closeBlackjack(); bjToast('Phòng đã đóng.');
             }
         } else {
             bjRenderRoom();
@@ -869,7 +869,7 @@ function bjHostStartRound() {
     const connPids = Object.keys(bjConns).filter(p => bjConns[p] && bjConns[p].open);
     const pids = [bjMyId, ...connPids];
     const active = pids.filter(p => bjPlayers[p] && bjPlayers[p].status !== 'spectator');
-    if (active.length === 0) return bjToast('C\u1ea7n \u00edt nh\u1ea5t 1 ng\u01b0\u1eddi ch\u01a1i');
+    if (active.length === 0) return bjToast('Cần ít nhất 1 người chơi');
     const seed = (Date.now() ^ Math.floor(Math.random() * 0xffffffff)) & 0xffffffff;
     const msg = { type: 'ROUND_START', seed, turnOrder: active, betDeadline: Date.now() + 30000 };
     bjBroadcast(msg); bjHandleMsg(bjMyId, msg);
@@ -1086,7 +1086,7 @@ function bjHostEndRound() {
             else {
                 bjBroadcast({ type: 'TIMER_TICK', left: bjSummaryTimeLeft });
                 const tEl = All.$id('bj-summary-timer');
-                if (tEl) tEl.innerText = `V\u00f2ng m\u1edbi sau: ${bjSummaryTimeLeft}s`;
+                if (tEl) tEl.innerText = `Vòng mới sau: ${bjSummaryTimeLeft}s`;
             }
         }, 1000);
     }
@@ -1108,9 +1108,9 @@ function bjHostEndSummary() {
 
 function bjRoomPlaceBet(amount) {
     const coins = ctx.S.coins || 0;
-    if (coins < amount) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng!');
-    if (amount < bjSettings.minBet) return bjToast(`C\u01b0\u1ee3c t\u1ed1i thi\u1ec3u ${bjSettings.minBet}G`);
-    if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return bjToast(`C\u01b0\u1ee3c t\u1ed1i \u0111a ${bjSettings.maxBet}G`);
+    if (coins < amount) return bjToast('Không đủ vàng!');
+    if (amount < bjSettings.minBet) return bjToast(`Cược tối thiểu ${bjSettings.minBet}G`);
+    if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return bjToast(`Cược tối đa ${bjSettings.maxBet}G`);
     ctx.S.coins = coins - amount; save(); renderStatus();
     const msg = { type: 'BET_PLACED', pid: bjMyId, bet: amount };
     bjBroadcast(msg); bjHandleMsg(bjMyId, msg);
@@ -1129,7 +1129,7 @@ function bjApplySettings() {
     const delay = Math.min(30, Math.max(5, parseInt(All.$id('bj-cfg-delay')?.value) || 10));
     bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks, delay };
     bjBroadcast({ type: 'SETTINGS_UPDATE', settings: bjSettings });
-    bjToast(`\u0110\u00e3 c\u1eadp nh\u1eadt: min ${bjSettings.minBet}G, ch\u1edd ${delay}s`);
+    bjToast(`Đã cập nhật: min ${bjSettings.minBet}G, chờ ${delay}s`);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1144,10 +1144,10 @@ function bjRenderRoom() {
     let html = `<div class="bj-room-layout">
         <div class="bj-room-main">
             <div class="bj-room-topbar">
-                <div class="bj-room-code-badge" id="bj-room-code-badge" title="Copy m\u00e3 ph\u00f2ng">\uD83C\uDCCB ${bjRoomId}</div>
-                <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} \u2014 ${(ctx.S.coins||0).toLocaleString()}G${bjMyStatus==='spectator'?' \uD83D\uDC41':''}</div>
-                <div class="buy plain" id="bj-out-room-ingame" style="font-size:11px;">\u2190 Tho\u00e1t</div>
-                <div class="bj-chat-toggle" id="bj-chat-toggle">\uD83D\uDCAC Chat ${bjUnreadChat > 0 ? `<span style="background:#e74c3c;color:white;border-radius:10px;padding:1px 5px;margin-left:5px;font-size:10px;">${bjUnreadChat}</span>` : ''}</div>
+                <div class="bj-room-code-badge" id="bj-room-code-badge" title="Copy mã phòng">🃋 ${bjRoomId}</div>
+                <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} — ${(ctx.S.coins||0).toLocaleString()}G${bjMyStatus==='spectator'?' 👁':''}</div>
+                <div class="buy plain" id="bj-out-room-ingame" style="font-size:11px;">← Thoát</div>
+                <div class="bj-chat-toggle" id="bj-chat-toggle">💬 Chat ${bjUnreadChat > 0 ? `<span style="background:#e74c3c;color:white;border-radius:10px;padding:1px 5px;margin-left:5px;font-size:10px;">${bjUnreadChat}</span>` : ''}</div>
             </div>
             <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 10px;">`;
 
@@ -1155,38 +1155,38 @@ function bjRenderRoom() {
         const isAllReady = allPids.filter(p => p !== bjMyId && bjPlayers[p].status !== 'spectator').every(p => bjPlayers[p].status === 'ready');
         html += `<div class="bj-lobby-wrap">
             <div class="bj-lobby-box">
-                <div class="bj-lobby-title">S\u1ea3nh Ch\u1edd</div>
+                <div class="bj-lobby-title">Sảnh Chờ</div>
                 <div class="bj-player-list">
                     ${allPids.map(p => {
-                        const isHost = (p === Object.keys(bjPlayers)[0]); // Tạm tính người đầu tiên là host nếu chưa migration
+                        const isHost = (p === bjRoomId);
                         const ready = bjPlayers[p].status === 'ready';
-                        const meStr = p === bjMyId ? ' (B\u1ea1n)' : '';
+                        const meStr = p === bjMyId ? ' (Bạn)' : '';
                         const kickBtn = (bjIsHost && p !== bjMyId) ? `<button class="bj-kick-btn" data-pid="${p}">Kick</button>` : '';
                         return `<div class="bj-player-row ${ready ? 'ready' : ''} ${isHost ? 'host' : ''}">
-                            <span>${bjPlayers[p].name}${meStr} ${isHost?'\uD83D\uDC51':(ready?'\u2714':'\u23F3')}</span>
+                            <span>${bjPlayers[p].name}${meStr} ${isHost?'👑':(ready?'✔':'⏳')}</span>
                             ${kickBtn}
                         </div>`;
                     }).join('')}
                 </div>
                 ${bjIsHost ? `
                 <div class="bj-settings-host">
-                    <div style="font-size:12px;font-weight:bold;color:#ffd94d;margin-bottom:6px;">\u2699\uFE0F C\u00e0i \u0111\u1eb7t b\u00e0n</div>
+                    <div style="font-size:12px;font-weight:bold;color:#ffd94d;margin-bottom:6px;">⚙️ Cài đặt bàn</div>
                     <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">
                         <label style="font-size:11px;color:#ddd;">Min <input class="inp" id="bj-cfg-min" type="number" value="${bjSettings.minBet}" min="1" style="width:50px;padding:4px;font-size:11px"></label>
                         <label style="font-size:11px;color:#ddd;">Max <input class="inp" id="bj-cfg-max" type="number" value="${bjSettings.maxBet}" min="0" style="width:50px;padding:4px;font-size:11px"></label>
-                        <label style="font-size:11px;color:#ddd;">B\u1ed9 <input class="inp" id="bj-cfg-decks" type="number" value="${bjSettings.numDecks}" min="1" max="8" style="width:40px;padding:4px;font-size:11px"></label>
-                        <label style="font-size:11px;color:#ddd;">Ch\u1edd(s) <input class="inp" id="bj-cfg-delay" type="number" value="${bjSettings.delay}" min="5" max="30" style="width:40px;padding:4px;font-size:11px"></label>
-                        <div class="buy plain" id="bj-cfg-apply" style="font-size:11px;padding:4px 8px">L\u01b0u</div>
+                        <label style="font-size:11px;color:#ddd;">Bộ <input class="inp" id="bj-cfg-decks" type="number" value="${bjSettings.numDecks}" min="1" max="8" style="width:40px;padding:4px;font-size:11px"></label>
+                        <label style="font-size:11px;color:#ddd;">Chờ(s) <input class="inp" id="bj-cfg-delay" type="number" value="${bjSettings.delay}" min="5" max="30" style="width:40px;padding:4px;font-size:11px"></label>
+                        <div class="buy plain" id="bj-cfg-apply" style="font-size:11px;padding:4px 8px">Lưu</div>
                     </div>
                 </div>
                 <div class="bj-btn-row" style="margin-top:15px;">
-                    <div class="buy ${!isAllReady && allPids.length > 1 ? 'plain' : ''}" id="bj-start-room-btn" ${!isAllReady && allPids.length > 1 ? 'style="opacity:0.5;pointer-events:none"' : ''}>\u25b6 B\u1eaft \u0111\u1ea7u</div>
+                    <div class="buy ${!isAllReady && allPids.length > 1 ? 'plain' : ''}" id="bj-start-room-btn" ${!isAllReady && allPids.length > 1 ? 'style="opacity:0.5;pointer-events:none"' : ''}>▶ Bắt đầu</div>
                 </div>
                 ` : `
                 <div class="bj-btn-row" style="margin-top:15px;">
-                    <div class="buy bj-btn-ready ${bjPlayers[bjMyId].status === 'ready' ? '' : 'not-ready'}" id="bj-ready-btn">${bjPlayers[bjMyId].status === 'ready' ? 'H\u1ee7y S\u1eb5n S\u00e0ng' : 'S\u1eb5n S\u00e0ng'}</div>
+                    <div class="buy bj-btn-ready ${bjPlayers[bjMyId].status === 'ready' ? '' : 'not-ready'}" id="bj-ready-btn">${bjPlayers[bjMyId].status === 'ready' ? 'Hủy Sẵn Sàng' : 'Sẵn Sàng'}</div>
                 </div>
-                <div class="bj-msg-sm" style="text-align:center;padding:10px;opacity:0.7">Ch\u1edd Host b\u1eaft \u0111\u1ea7u...</div>
+                <div class="bj-msg-sm" style="text-align:center;padding:10px;opacity:0.7">Chờ Host bắt đầu...</div>
                 `}
             </div>
         </div>`;
@@ -1194,9 +1194,9 @@ function bjRenderRoom() {
         // ingame or summary
         html += `<div class="bj-table">
             <div class="bj-dealer-area">
-                <div class="bj-area-label">Nh\u00e0 c\u00e1i (m\u00e1y)</div>
+                <div class="bj-area-label">Nhà cái (máy)</div>
                 <div class="bj-hand-row">${(gs?.dealerHand||[]).map(c => cardHTML(c, true)).join('')}</div>
-                <div class="bj-score">${gs?.dealerHand?.length ? `\u0110i\u1ec3m: ${handTotal(gs.dealerHand.filter(c=>!c.hidden))}` : ''}</div>
+                <div class="bj-score">${gs?.dealerHand?.length ? `Điểm: ${handTotal(gs.dealerHand.filter(c=>!c.hidden))}` : ''}</div>
             </div>
             <div class="bj-players-grid">`;
         for (const pid of (gs?.turnOrder || [])) {
@@ -1204,19 +1204,19 @@ function bjRenderRoom() {
             const h = gs.hands?.[pid];
             const isMe = pid === bjMyId, isTurn = gs.currentTurn === pid;
             html += `<div class="bj-player-slot${isMe?' me':''}${isTurn?' my-turn':''}">
-                <div class="bj-player-name">${ph.name}${isTurn?' \u27a4':''}${isMe?' (B\u1ea1n)':''}</div>`;
+                <div class="bj-player-name">${ph.name}${isTurn?' ➤':''}${isMe?' (Bạn)':''}</div>`;
             if (h) {
                 h.cards.forEach((cards, i) => {
                     const tot = handTotal(cards);
                     html += `<div class="bj-hand-row">${cards.map(c => cardHTML(c,true)).join('')}</div>
-                        <div class="bj-score">${tot}${tot>21?' Bust!':''} \u2014 ${(h.bet[i]||0).toLocaleString()}G</div>`;
+                        <div class="bj-score">${tot}${tot>21?' Bust!':''} — ${(h.bet[i]||0).toLocaleString()}G</div>`;
                 });
-            } else html += `<div class="bj-msg-sm" style="opacity:0.5">Ch\u1edd \u0111\u1eb7t c\u01b0\u1ee3c...</div>`;
+            } else html += `<div class="bj-msg-sm" style="opacity:0.5">Chờ đặt cược...</div>`;
             html += `</div>`;
         }
         for (const pid of allPids) {
             if (!gs?.turnOrder?.includes(pid)) {
-                html += `<div class="bj-player-slot spectator"><div class="bj-player-name">\uD83D\uDC41 ${bjPlayers[pid].name} (xem)</div></div>`;
+                html += `<div class="bj-player-slot spectator"><div class="bj-player-name">👁 ${bjPlayers[pid].name} (xem)</div></div>`;
             }
         }
         html += `</div></div>
@@ -1226,10 +1226,10 @@ function bjRenderRoom() {
         if (bjRoomPhase === 'summary' && bjSummaryData) {
             html += `<div class="bj-summary-overlay">
                 <div class="bj-summary-box">
-                    <div class="bj-summary-title">T\u1ed4NG K\u1ebeT V\u00d2NG</div>
+                    <div class="bj-summary-title">TỔNG KẾT VÒNG</div>
                     <table class="bj-summary-table">
-                        <tr><th>Ng\u01b0\u1eddi ch\u01a1i</th><th>\u0110i\u1ec3m</th><th>C\u01b0\u1ee3c</th><th>K\u1ebft qu\u1ea3</th><th>Nh\u1eadn</th></tr>
-                        <tr><td><b>Nh\u00e0 c\u00e1i</b></td><td>${handTotal(bjSummaryData.dealerHand)}</td><td>-</td><td>-</td><td>-</td></tr>
+                        <tr><th>Người chơi</th><th>Điểm</th><th>Cược</th><th>Kết quả</th><th>Nhận</th></tr>
+                        <tr><td><b>Nhà cái</b></td><td>${handTotal(bjSummaryData.dealerHand)}</td><td>-</td><td>-</td><td>-</td></tr>
                         ${(bjSummaryData.gs?.turnOrder || []).map(pid => {
                             const name = bjPlayers[pid]?.name || pid;
                             const h = bjSummaryData.gs.hands[pid];
@@ -1238,11 +1238,11 @@ function bjRenderRoom() {
                             let bet = h.bet.reduce((a,b)=>a+b, 0) + (h.insuranceBet||0);
                             let pay = bjSummaryData.payouts[pid] || 0;
                             let resCls = pay > bet ? 'bj-val-win' : (pay === bet ? 'bj-val-push' : 'bj-val-lose');
-                            return `<tr class="${pid===bjMyId?'me':''}"><td>${name}</td><td>${pts}</td><td>${bet.toLocaleString()}</td><td class="${resCls}">${pay>bet?'Th\u1eafng':(pay===bet?'H\u00f2a':'Thua')}</td><td class="${resCls}">+${pay.toLocaleString()}</td></tr>`;
+                            return `<tr class="${pid===bjMyId?'me':''}"><td>${name}</td><td>${pts}</td><td>${bet.toLocaleString()}</td><td class="${resCls}">${pay>bet?'Thắng':(pay===bet?'Hòa':'Thua')}</td><td class="${resCls}">+${pay.toLocaleString()}</td></tr>`;
                         }).join('')}
                     </table>
-                    <div class="bj-countdown" id="bj-summary-timer">V\u00f2ng m\u1edbi sau: ${bjSummaryTimeLeft}s</div>
-                    ${bjIsHost ? `<div class="bj-btn-row" style="margin-top:15px;"><div class="buy plain" id="bj-skip-btn">B\u1ecf qua (Skip)</div></div>` : ''}
+                    <div class="bj-countdown" id="bj-summary-timer">Vòng mới sau: ${bjSummaryTimeLeft}s</div>
+                    ${bjIsHost ? `<div class="bj-btn-row" style="margin-top:15px;"><div class="buy plain" id="bj-skip-btn">Bỏ qua (Skip)</div></div>` : ''}
                 </div>
             </div>`;
         }
@@ -1251,23 +1251,23 @@ function bjRenderRoom() {
     html += `</div></div>
     <div class="bj-chat-wrap" id="bj-chat-wrap">
         <div class="bj-chat-header" id="bj-chat-close">
-            <span>\uD83D\uDCAC Chat</span>
-            <span class="bj-chat-close">\u274C</span>
+            <span>💬 Chat</span>
+            <span class="bj-chat-close">❌</span>
         </div>
         <div class="bj-chat-log" id="bj-chat-log">${bjChatLog.slice(-20).map(e =>
             `<div class="bj-chat-line"><b>${e.name}:</b> ${e.msg.replace(/</g,'&lt;')}</div>`
         ).join('')}</div>
         <div class="bj-chat-inp-row">
-            <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin ti\u1ec1n">\uD83D\uDCB0</div>
+            <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin tiền">💰</div>
             <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
-            <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">G\u1eedi</div>
+            <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">Gửi</div>
         </div>
     </div></div>`;
 
     body.innerHTML = html;
     All.$id('bj-out-room-ingame')?.addEventListener('click', closeBlackjack);
     All.$id('bj-room-code-badge')?.addEventListener('click', () => {
-        navigator.clipboard.writeText(bjRoomId).then(() => bjToast('Copy m\u00e3 ph\u00f2ng!'));
+        navigator.clipboard.writeText(bjRoomId).then(() => bjToast('Copy mã phòng!'));
     });
     All.$id('bj-start-room-btn')?.addEventListener('click', () => { if (bjIsHost) bjHostStartRound(); });
     All.$id('bj-cfg-apply')?.addEventListener('click', bjApplySettings);
@@ -1286,7 +1286,7 @@ function bjRenderRoom() {
     });
     All.$id('bj-win').querySelectorAll('.bj-kick-btn').forEach(b => b.addEventListener('click', () => {
         const pid = b.getAttribute('data-pid');
-        if (confirm('B\u1ea1n mu\u1ed1n \u0111u\u1ed5i ng\u01b0\u1eddi ch\u01a1i n\u00e0y?')) {
+        if (confirm('Bạn muốn đuổi người chơi này?')) {
             if (bjConns[pid]) bjConns[pid].send({ type: 'KICKED' });
             setTimeout(() => {
                 if (bjConns[pid]) bjConns[pid].close();
@@ -1303,19 +1303,19 @@ function bjRenderRoom() {
 function bjBuildMyActions() {
     const gs = bjGameState;
     if (!gs) return '';
-    if (bjMyStatus === 'spectator') return `<div class="bj-msg-sm" style="text-align:center;opacity:0.6">\uD83D\uDC41 \u0110ang xem \u2014 S\u1ebd v\u00e0o \u1edf round sau</div>`;
+    if (bjMyStatus === 'spectator') return `<div class="bj-msg-sm" style="text-align:center;opacity:0.6">👁 Đang xem — Sẽ vào ở round sau</div>`;
     const coins = ctx.S.coins || 0;
 
     if (gs.phase === 'betting') {
-        if (gs.betsIn?.[bjMyId]) return `<div class="bj-msg-sm" style="text-align:center;color:#7ed;">\u2713 \u0110\u00e3 \u0111\u1eb7t ${gs.betsIn[bjMyId].toLocaleString()}G \u2014 Ch\u1edd ng\u01b0\u1eddi kh\u00e1c...</div>`;
+        if (gs.betsIn?.[bjMyId]) return `<div class="bj-msg-sm" style="text-align:center;color:#7ed;">✓ Đã đặt ${gs.betsIn[bjMyId].toLocaleString()}G — Chờ người khác...</div>`;
         const min = bjSettings.minBet;
-        if (coins < min) return `<div class="bj-msg-sm" style="color:#e05;">\u26a0 Kh\u00f4ng \u0111\u1ee7 v\u00e0ng c\u01b0\u1ee3c (c\u1ea7n t\u1ed1i thi\u1ec3u ${min}G)</div>`;
+        if (coins < min) return `<div class="bj-msg-sm" style="color:#e05;">⚠ Không đủ vàng cược (cần tối thiểu ${min}G)</div>`;
         return `<div class="bj-bet-row">
             <input class="inp" id="bj-room-bet-inp" type="number" min="${min}" max="${bjSettings.maxBet||''}" value="${Math.min(Math.max(min,100),coins)}" style="width:110px">
-            <span class="buy plain bj-quick bj-rquick" data-q="4">\u00bc</span>
-            <span class="buy plain bj-quick bj-rquick" data-q="2">\u00bd</span>
+            <span class="buy plain bj-quick bj-rquick" data-q="4">¼</span>
+            <span class="buy plain bj-quick bj-rquick" data-q="2">½</span>
             <span class="buy plain bj-quick bj-rquick" data-q="1">Max</span>
-            <div class="buy" id="bj-room-place-bet">\u0110\u1eb7t C\u01b0\u1ee3c</div>
+            <div class="buy" id="bj-room-place-bet">Đặt Cược</div>
         </div>`;
     }
     if (gs.phase === 'insurance') {
@@ -1323,25 +1323,25 @@ function bjBuildMyActions() {
         if (!myHand) return '';
         const hasBJ = isBlackjack(myHand.cards[0]);
         if (hasBJ) return `<div class="bj-btn-row">
-            <div class="buy" id="bj-rm-even">L\u1ea5y ngay 1:1 (Even Money)</div>
-            <div class="buy plain" id="bj-rm-skip-ins">B\u1ecf qua</div>
+            <div class="buy" id="bj-rm-even">Lấy ngay 1:1 (Even Money)</div>
+            <div class="buy plain" id="bj-rm-skip-ins">Bỏ qua</div>
         </div>`;
         const maxIns = Math.floor((myHand.bet[0]||0)/2);
-        return `<div class="bj-msg-sm">Dealer Ace \u2014 Mua b\u1ea3o hi\u1ec3m ${maxIns}G?</div>
+        return `<div class="bj-msg-sm">Dealer Ace — Mua bảo hiểm ${maxIns}G?</div>
         <div class="bj-btn-row">
             <div class="buy" id="bj-rm-buy-ins">Mua ${maxIns}G</div>
-            <div class="buy plain" id="bj-rm-skip-ins">B\u1ecf qua</div>
+            <div class="buy plain" id="bj-rm-skip-ins">Bỏ qua</div>
         </div>`;
     }
     if (gs.phase === 'player') {
-        if (gs.currentTurn !== bjMyId) return `<div class="bj-msg-sm" style="text-align:center;opacity:0.6">\u231b \u0110\u1ee3i l\u01b0\u1ee3t b\u1ea1n...</div>`;
+        if (gs.currentTurn !== bjMyId) return `<div class="bj-msg-sm" style="text-align:center;opacity:0.6">⌛ Đợi lượt bạn...</div>`;
         const h = gs.hands?.[bjMyId];
         if (!h) return '';
         const idx = h.activeHandIdx || 0;
         const hand = h.cards[idx]; const tot = handTotal(hand); const bet = h.bet[idx];
         const isSA = (h.splitAceIdxs||[]).includes(idx);
-        if (tot > 21) return `<div class="bj-msg-sm">\uD83D\uDC80 Bust!</div>`;
-        if (isSA) return `<div class="bj-msg-sm">Split Ace \u2014 T\u1ef1 Stand.</div>`;
+        if (tot > 21) return `<div class="bj-msg-sm">💀 Bust!</div>`;
+        if (isSA) return `<div class="bj-msg-sm">Split Ace — Tự Stand.</div>`;
         const canD = hand.length===2 && coins>=bet && !isSA;
         const canSp = hand.length===2 && hand[0].rank===hand[1].rank && coins>=bet && h.cards.length<4;
         const canSu = hand.length===2 && idx===0 && h.cards.length===1;
@@ -1353,7 +1353,7 @@ function bjBuildMyActions() {
             ${canSu?`<div class="buy plain" id="bj-rm-surrender">Surrender</div>`:''}
         </div>`;
     }
-    if (gs.phase==='dealer'||gs.phase==='dealer_bj') return `<div class="bj-msg-sm" style="text-align:center;opacity:0.6">\uD83C\uDCCF Nh\u00e0 c\u00e1i \u0111ang r\u00fat b\u00e0i...</div>`;
+    if (gs.phase==='dealer'||gs.phase==='dealer_bj') return `<div class="bj-msg-sm" style="text-align:center;opacity:0.6">🃏 Nhà cái đang rút bài...</div>`;
     return '';
 }
 
@@ -1378,7 +1378,7 @@ function bjBindMyActions() {
     All.$id('bj-rm-buy-ins')?.addEventListener('click', () => {
         const h = gs?.hands?.[bjMyId];
         const ins = Math.floor((h?.bet[0]||0)/2);
-        if ((ctx.S.coins||0)<ins) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng');
+        if ((ctx.S.coins||0)<ins) return bjToast('Không đủ vàng');
         ctx.S.coins=(ctx.S.coins||0)-ins; save();
         bjRoomAction('INSURANCE_ANSWER',{answer:'ins'});
     });
@@ -1387,12 +1387,12 @@ function bjBindMyActions() {
     All.$id('bj-rm-stand')?.addEventListener('click',()=>bjRoomAction('STAND'));
     All.$id('bj-rm-double')?.addEventListener('click',()=>{
         const h=gs?.hands?.[bjMyId]; const idx=h?.activeHandIdx||0; const bet=h?.bet[idx]||0;
-        if((ctx.S.coins||0)<bet) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng Double');
+        if((ctx.S.coins||0)<bet) return bjToast('Không đủ vàng Double');
         ctx.S.coins=(ctx.S.coins||0)-bet; save(); bjRoomAction('DOUBLE');
     });
     All.$id('bj-rm-split')?.addEventListener('click',()=>{
         const h=gs?.hands?.[bjMyId]; const idx=h?.activeHandIdx||0; const bet=h?.bet[idx]||0;
-        if((ctx.S.coins||0)<bet) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng Split');
+        if((ctx.S.coins||0)<bet) return bjToast('Không đủ vàng Split');
         ctx.S.coins=(ctx.S.coins||0)-bet; save(); bjRoomAction('SPLIT');
     });
     All.$id('bj-rm-surrender')?.addEventListener('click',()=>bjRoomAction('SURRENDER'));
@@ -1407,7 +1407,7 @@ function bjRenderChat() {
             const rd = e.reqData;
             const isDone = rd.fulfilled >= rd.amount;
             const btn = `<button class="buy ${isDone ? 'plain' : ''}" style="font-size:10px;padding:2px 5px;margin-left:5px;" ${isDone?'disabled':''} onclick="bjGiveMoney('${rd.reqId}')">${isDone ? 'Xong' : 'Cho'}</button>`;
-            return `<div class="bj-chat-line"><b>${e.name}</b> xin <b>${rd.amount.toLocaleString()}G</b> (\u0110\u00e3 nh\u1eadn: ${rd.fulfilled.toLocaleString()})${btn}</div>`;
+            return `<div class="bj-chat-line"><b>${e.name}</b> xin <b>${rd.amount.toLocaleString()}G</b> (Đã nhận: ${rd.fulfilled.toLocaleString()})${btn}</div>`;
         }
         return `<div class="bj-chat-line"><b>${e.name}:</b> ${e.msg.replace(/</g,'&lt;')}</div>`;
     }).join('');
@@ -1427,7 +1427,7 @@ function bjBindChat() {
     };
     All.$id('bj-chat-send')?.addEventListener('click', send);
     All.$id('bj-chat-req-btn')?.addEventListener('click', () => {
-        const amtStr = prompt('Nh\u1eadp s\u1ed1 ti\u1ec1n mu\u1ed1n xin (G):');
+        const amtStr = prompt('Nhập số tiền muốn xin (G):');
         const amt = parseInt(amtStr);
         if (!isNaN(amt) && amt > 0) {
             const reqId = bjMyId + '-' + Date.now();
@@ -1471,12 +1471,12 @@ export function openBlackjackPicker() {
     
     body.innerHTML = `
         <div style="display:flex;flex-direction:column;gap:16px;padding:30px 10px;">
-            <div style="text-align:center;font-size:16px;color:#a3763d;font-weight:bold;margin-bottom:10px;">Ch\u1ecdn ch\u1ebf \u0111\u1ed9 ch\u01a1i</div>
+            <div style="text-align:center;font-size:16px;color:#a3763d;font-weight:bold;margin-bottom:10px;">Chọn chế độ chơi</div>
             <div class="buy" id="bj-solo-pick" style="text-align:center;padding:20px;font-size:16px;">
-                \uD83C\uDCCF Ch\u01a1i \u0110\u01a1n<br><small style="font-weight:normal;font-size:12px;opacity:0.8;">Solo vs Nh\u00e0 c\u00e1i m\u00e1y t\u00ednh</small>
+                🃏 Chơi Đơn<br><small style="font-weight:normal;font-size:12px;opacity:0.8;">Solo vs Nhà cái máy tính</small>
             </div>
             <div class="buy plain" id="bj-room-pick" style="text-align:center;padding:20px;font-size:16px;">
-                \uD83C\uDFB0 Ch\u01a1i Ph\u00f2ng<br><small style="font-weight:normal;font-size:12px;opacity:0.8;">\u0110a ng\u01b0\u1eddi (t\u1ed1i \u0111a 4), c\u00f9ng \u0111\u1ea5u v\u1edbi nh\u00e0 c\u00e1i</small>
+                🎰 Chơi Phòng<br><small style="font-weight:normal;font-size:12px;opacity:0.8;">Đa người (tối đa 4), cùng đấu với nhà cái</small>
             </div>
         </div>`;
     win.style.display = 'flex';
@@ -1490,16 +1490,16 @@ window['bjGiveMoney'] = function(reqId) {
     const log = bjChatLog.find(e => e.reqData && e.reqData.reqId === reqId);
     if (!log) return;
     const rd = log.reqData;
-    if (rd.pid === bjMyId) return bjToast('B\u1ea1n kh\u00f4ng th\u1ec3 t\u1ef1 cho ti\u1ec1n m\u00ecnh!');
+    if (rd.pid === bjMyId) return bjToast('Bạn không thể tự cho tiền mình!');
     const remaining = rd.amount - rd.fulfilled;
-    if (remaining <= 0) return bjToast('\u0110\u00e3 \u0111\u1ee7 ti\u1ec1n r\u1ed3i!');
+    if (remaining <= 0) return bjToast('Đã đủ tiền rồi!');
     
-    const amtStr = prompt(`Cho ti\u1ec1n ${log.name} (T\u1ed1i \u0111a: ${remaining.toLocaleString()}G):`, String(remaining));
+    const amtStr = prompt(`Cho tiền ${log.name} (Tối đa: ${remaining.toLocaleString()}G):`, String(remaining));
     const amt = parseInt(amtStr);
     if (isNaN(amt) || amt <= 0) return;
     
     const coins = ctx.S.coins || 0;
-    if (coins < amt) return bjToast('B\u1ea1n kh\u00f4ng \u0111\u1ee7 ti\u1ec1n!');
+    if (coins < amt) return bjToast('Bạn không đủ tiền!');
     
     const give = Math.min(amt, remaining);
     ctx.S.coins = coins - give;
