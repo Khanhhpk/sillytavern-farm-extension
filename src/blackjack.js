@@ -1281,13 +1281,13 @@ function bjBindMyActions() {
         bjRoomPlaceBet(parseInt(inp?.value||'0')||0);
     });
     document.querySelectorAll('.bj-rquick').forEach(b => {
-        b.onclick = () => {
+        b.addEventListener('click', () => {
             const inp = All.$id('bj-room-bet-inp');
             const q = parseInt(b.getAttribute('data-q') || '1');
-            const coins = parseInt(ctx.S.coins) || 0;
-            const min = parseInt(bjSettings.minBet) || 10;
+            const coins = Number(ctx.S.coins) || 0;
+            const min = Number(bjSettings.minBet) || 10;
             if (inp) inp.value = String(Math.max(min, Math.floor(coins / q)));
-        };
+        });
     });
     All.$id('bj-rm-even')?.addEventListener('click', () => {
         const h = gs?.hands?.[bjMyId];
