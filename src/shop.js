@@ -2,7 +2,7 @@
 import { ctx, extensionName, NS } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
-import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
+import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P, SPR, PET_SPR } from './graphics.js';
 import { pendingPick, renderStatus, renderAll, setPendingPick } from './render.js';
 import { fmtDur, mutDescOf, bagName, bagPrice } from './logic.js';
 import { openBuyDlg, toast, openPassDlg, useStarShard, openSellDlg, openSellSeedDlg, openTakeout } from './witch.js';
@@ -429,6 +429,7 @@ export function openPanel(kind) {
       <div class="shead">Công cụ dành cho Giám đốc Đồ hoạ / Dev</div>
       <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap;">
         <span class="buy plain" id="openSandboxBtn">🎨 Mở Xưởng Chế Tác AI</span>
+        <span class="buy plain" id="openSpriteViewerBtn">🖼️ Xem Thư Viện Sprite</span>
         <input class="inp" type="password" id="testCode" placeholder="Mã ẩn..." style="width:100px;padding:3px 6px">
         <span class="buy" id="testBtn">Test Mode</span>
       </div>
@@ -465,8 +466,13 @@ export function openPanel(kind) {
       save();
       toast('Đã lưu tên người chơi');
     });
-    if (All.$id('openSandboxBtn')) All.$id('openSandboxBtn').addEventListener('click', openSandbox);
-
+    if (All.$id('openSandboxBtn')) All.$id('openSandboxBtn')?.addEventListener('click', () => {
+      openModal('Xưởng Chế Tác AI', openSandbox());
+      setTimeout(() => {
+        All.$id('sandboxDrawBtn')?.click();
+      }, 50);
+    });
+    All.$id('openSpriteViewerBtn')?.addEventListener('click', openSpriteViewerModal);
     const testBtn = All.$id('testBtn');
     if (testBtn) testBtn.addEventListener('click', () => {
       // @ts-ignore
@@ -683,4 +689,30 @@ All.$id('mbody').addEventListener('click', e => {
 All.$id('modal').addEventListener('click', e => { if (e.target === All.$id('modal')) closeModal(); });
 // @ts-ignore
 sh.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openPanel(b.dataset.open)));
+}
+
+export function openSpriteViewerModal() {
+  let html = `<div style="display:flex; flex-wrap:wrap; gap:10px; max-height:60vh; overflow-y:auto; padding-right:5px">`;
+  html += `<div class="shead" style="width:100%; margin-top:0;">Thú cưng (PET_SPR)</div>`;
+  Object.keys(PET_SPR).forEach(key => {
+    html += `<div style="display:flex; flex-direction:column; align-items:center; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px; width:72px; box-sizing:border-box">
+      ${petSVG(key, 40)}
+      <div style="font-size:10px; font-weight:bold; color:#5a4b3c; margin-top:4px; text-align:center; overflow:hidden; text-overflow:ellipsis; width:100%; white-space:nowrap" title="${key}">${key}</div>
+    </div>`;
+  });
+
+  html += `<div class="shead" style="width:100%; margin-top:10px">Môi trường & Vật phẩm (SPR)</div>`;
+  Object.keys(SPR).forEach(key => {
+    html += `<div style="display:flex; flex-direction:column; align-items:center; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px; width:72px; box-sizing:border-box">
+      ${spriteSVG(key, 40)}
+      <div style="font-size:10px; font-weight:bold; color:#5a4b3c; margin-top:4px; text-align:center; overflow:hidden; text-overflow:ellipsis; width:100%; white-space:nowrap" title="${key}">${key}</div>
+    </div>`;
+  });
+
+  html += `</div>`;
+  html += `<div style="margin-top:12px;text-align:center">
+      <span class="buy plain" onclick="FarmAll.openPanel('cfg')">Quay lại Cài đặt</span>
+  </div>`;
+  
+  openModal('Thư Viện Sprite', html);
 }
