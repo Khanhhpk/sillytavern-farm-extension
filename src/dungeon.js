@@ -44,10 +44,10 @@ const ENEMY_TYPES = [
     { id: 'chuncai', name: 'Rau Thuần', desc: 'Đeo bám dai dẳng.', hp: 150, atk: 15, range: 40, speed: 25, cd: 1.2, ai: 'melee', gold: 6 },
     { id: 'lingjiao', name: 'Củ Ấu Giáp', desc: 'Cận chiến có giáp.', hp: 180, atk: 20, range: 40, speed: 20, cd: 1.5, ai: 'melee', gold: 8 },
     { id: 'pumpkin', name: 'Bí Ngô Khổng Lồ', desc: 'Tanker chậm chạp.', hp: 300, atk: 30, range: 50, speed: 15, cd: 3, ai: 'tank', gold: 15 },
-    { id: 'fangW', name: 'Hoa Bá Vương', desc: 'Pháp sư bắn từ xa.', hp: 80, atk: 25, range: 120, speed: 20, cd: 1.5, ai: 'ranged', gold: 8 },
-    { id: 'starbush', name: 'Bụi Sao', desc: 'Xạ thủ 3 tia.', hp: 100, atk: 12, range: 140, speed: 25, cd: 1.5, ai: 'ranged', skill: 'multishot', gold: 10 },
-    { id: 'opalvine', name: 'Dây Leo Opal', desc: 'Trói chân đối thủ.', hp: 130, atk: 18, range: 90, speed: 20, cd: 1.2, ai: 'ranged', skill: 'root', gold: 12 },
-    { id: 'lianou', name: 'Củ Sen Khổng Lồ', desc: 'Ném bùn từ xa.', hp: 300, atk: 25, range: 100, speed: 15, cd: 2, ai: 'ranged', gold: 20 },
+    { id: 'fangW', name: 'Hoa Bá Vương', desc: 'Pháp sư bắn từ xa.', hp: 60, atk: 15, range: 100, speed: 20, cd: 1.8, ai: 'ranged', gold: 8 },
+    { id: 'starbush', name: 'Bụi Sao', desc: 'Xạ thủ 3 tia.', hp: 70, atk: 8, range: 120, speed: 25, cd: 2.0, ai: 'ranged', skill: 'multishot', gold: 10 },
+    { id: 'opalvine', name: 'Dây Leo Opal', desc: 'Trói chân đối thủ.', hp: 130, atk: 15, range: 90, speed: 20, cd: 1.5, ai: 'ranged', skill: 'root', gold: 12 },
+    { id: 'lianou', name: 'Củ Sen Khổng Lồ', desc: 'Ném bùn từ xa.', hp: 200, atk: 18, range: 100, speed: 15, cd: 2.5, ai: 'ranged', gold: 20 },
     { id: 'dragoncry', name: 'Long Tinh', desc: 'Boss: Cực khỏe.', hp: 700, atk: 60, range: 60, speed: 20, cd: 2, ai: 'tank', skill: 'cleave', elite: true, gold: 100 },
     { id: 'pumpkin', name: 'Vua Bí Ngô', desc: 'Boss: Tank AoE slam.', hp: 1000, atk: 50, range: 50, speed: 15, cd: 2.5, ai: 'tank', skill: 'cleave', elite: true, sp: 'pumpkin', gold: 150 },
     { id: 'fangW', name: 'Phù Thủy Hoa', desc: 'Boss: Pháo đài bắn xa.', hp: 500, atk: 70, range: 160, speed: 18, cd: 1.8, ai: 'ranged', skill: 'multishot', elite: true, sp: 'fangW', gold: 120 }
@@ -558,7 +558,7 @@ function _doStartWave() {
     updateHUD();
     
     // Calculate enemies based on wave
-    let count = Math.min(40, 4 + Math.floor(currentWave * 1.5));
+    let count = Math.min(40, 4 + Math.floor(currentWave * 1.2)); // Giảm từ 1.5 xuống 1.2
     let spawnElite = currentWave % 3 === 0;
     let isBossWave = currentWave % 10 === 0;
     
@@ -588,17 +588,31 @@ function _doStartWave() {
             ${spriteSVG(type.sp || type.id, 32)}
         `;
         
-        // Spawn anywhere in the arena
-        const x = 20 + Math.random() * (w - 60);
-        const y = 40 + Math.random() * (h - 80);
+        // Spawn anywhere in the arena, avoiding pets
+        let x, y, validSpawn;
+        let attempts = 0;
+        do {
+            x = 20 + Math.random() * (w - 60);
+            y = 40 + Math.random() * (h - 80);
+            validSpawn = true;
+            for (let p of fullTeam) {
+                // Tăng khoảng cách an toàn lên đáng kể
+                let safeDist = Math.max(100, (p.range || 50) + 60);
+                if (Math.hypot(x - p.x, y - p.y) < safeDist) {
+                    validSpawn = false;
+                    break;
+                }
+            }
+            attempts++;
+        } while (!validSpawn && attempts < 50);
         
         el.style.transform = `translate3d(${x - 16}px, ${y - 16}px, 0)`;
         
         arena.appendChild(el);
         
         // Scale hp and atk based on pure exponential wave
-        let hpMultiplier = Math.pow(1.15, currentWave - 1);
-        let atkMultiplier = Math.pow(1.20, currentWave - 1);
+        let hpMultiplier = Math.pow(1.12, currentWave - 1); // Giảm từ 1.15 xuống 1.12
+        let atkMultiplier = Math.pow(1.15, currentWave - 1); // Giảm từ 1.20 xuống 1.15
         if (isBossWave) {
             hpMultiplier *= 1.5;
             atkMultiplier *= 1.2;
@@ -1344,7 +1358,7 @@ function showWaveRewards(isLoaded = false) {
     overlay.style.boxSizing = 'border-box';
     overlay.style.background = 'rgba(0,0,0,0.9)';
     
-    const getCost = (lv) => Math.floor(50 * Math.pow(1.4, lv));
+    const getCost = (lv) => Math.floor(50 * Math.pow(1.2, lv));
 
     const renderShop = (selectedIdx) => {
         const selectedPet = fullTeam[selectedIdx];
@@ -1390,18 +1404,22 @@ function showWaveRewards(isLoaded = false) {
             const hpMissingTeam = fullTeam.reduce((acc, member) => acc + (member.maxHp - member.hp), 0);
             const healTeamCost = Math.max(30, totalMaxHp > 0 ? Math.floor(waveBaseGold * 0.5 * (hpMissingTeam / totalMaxHp)) : 30);
             
+            // Công thức tính giá: Giá gốc * 1.2^Level.
+            // Độ dốc cân bằng hơn để phù hợp với lượng tiền kiếm được ở late game.
+            const calc = (base, lv) => Math.floor(base * Math.pow(1.2, lv));
+            
             const stats = [
-                { id: 'hp', name: 'Max HP (+25%)', val: selectedPet.maxHp, lv: u.hp, cost: Math.floor(40 * Math.pow(1.4, u.hp)) },
-                { id: 'atk', name: 'ATK (+25%)', val: selectedPet.atk, lv: u.atk, cost: Math.floor(40 * Math.pow(1.4, u.atk)) },
-                { id: 'aspd', name: 'ATK SPD (+10%)', val: selectedPet.maxCd.toFixed(2)+'s', lv: u.aspd, cost: Math.floor(60 * Math.pow(1.4, u.aspd)), forceCanBuy: selectedPet.maxCd > 0.11 },
-                { id: 'spd', name: 'Move Speed (+10%)', val: selectedPet.speed, lv: u.spd, cost: Math.floor(30 * Math.pow(1.4, u.spd)), forceCanBuy: selectedPet.speed < 150 },
-                { id: 'critR', name: 'Crit Rate (+5%)', val: (selectedPet.critRate*100).toFixed(0)+'%', lv: u.critR, cost: Math.floor(50 * Math.pow(1.4, u.critR)), forceCanBuy: selectedPet.critRate < 0.59 },
-                { id: 'critD', name: 'Crit Dmg (+20%)', val: (selectedPet.critDmg*100).toFixed(0)+'%', lv: u.critD, cost: Math.floor(50 * Math.pow(1.4, u.critD)) },
-                { id: 'dodge', name: 'Né Tránh (+5%)', val: (selectedPet.dodge*100).toFixed(0)+'%', lv: u.dodge || 0, cost: Math.floor(60 * Math.pow(1.4, u.dodge || 0)), forceCanBuy: selectedPet.dodge < 0.39 }
+                { id: 'hp', name: 'Max HP (+25%)', val: selectedPet.maxHp, lv: u.hp, cost: calc(80, u.hp) },
+                { id: 'atk', name: 'ATK (+25%)', val: selectedPet.atk, lv: u.atk, cost: calc(80, u.atk) },
+                { id: 'aspd', name: 'ATK SPD (+10%)', val: selectedPet.maxCd.toFixed(2)+'s', lv: u.aspd, cost: calc(100, u.aspd), forceCanBuy: selectedPet.maxCd > 0.11 },
+                { id: 'spd', name: 'Move Speed (+10%)', val: selectedPet.speed, lv: u.spd, cost: calc(50, u.spd), forceCanBuy: selectedPet.speed < 150 },
+                { id: 'critR', name: 'Crit Rate (+5%)', val: (selectedPet.critRate*100).toFixed(0)+'%', lv: u.critR, cost: calc(90, u.critR), forceCanBuy: selectedPet.critRate < 0.59 },
+                { id: 'critD', name: 'Crit Dmg (+20%)', val: (selectedPet.critDmg*100).toFixed(0)+'%', lv: u.critD, cost: calc(90, u.critD) },
+                { id: 'dodge', name: 'Né Tránh (+5%)', val: (selectedPet.dodge*100).toFixed(0)+'%', lv: u.dodge || 0, cost: calc(100, u.dodge || 0), forceCanBuy: selectedPet.dodge < 0.39 }
             ];
 
             if (PET_STATS[selectedPet.id] && PET_STATS[selectedPet.id].range > 60) {
-                stats.push({ id: 'range', name: 'Tầm Đánh (+10%)', val: Math.round(selectedPet.range), lv: u.range || 0, cost: Math.floor(40 * Math.pow(1.2, u.range || 0)), forceCanBuy: selectedPet.range < 400 });
+                stats.push({ id: 'range', name: 'Tầm Đánh (+10%)', val: Math.round(selectedPet.range), lv: u.range || 0, cost: calc(70, u.range || 0), forceCanBuy: selectedPet.range < 400 });
             }
 
             stats.push(

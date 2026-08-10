@@ -10155,7 +10155,7 @@ function _doStartWave() {
   const w2 = arena.clientWidth;
   const h = arena.clientHeight;
   updateHUD();
-  let count2 = Math.min(40, 4 + Math.floor(currentWave * 1.5));
+  let count2 = Math.min(40, 4 + Math.floor(currentWave * 1.2));
   let spawnElite = currentWave % 3 === 0;
   let isBossWave = currentWave % 10 === 0;
   if (isBossWave) {
@@ -10179,12 +10179,25 @@ function _doStartWave() {
             <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
             ${spriteSVG(type.sp || type.id, 32)}
         `;
-    const x2 = 20 + Math.random() * (w2 - 60);
-    const y2 = 40 + Math.random() * (h - 80);
+    let x2, y2, validSpawn;
+    let attempts = 0;
+    do {
+      x2 = 20 + Math.random() * (w2 - 60);
+      y2 = 40 + Math.random() * (h - 80);
+      validSpawn = true;
+      for (let p2 of fullTeam) {
+        let safeDist = Math.max(100, (p2.range || 50) + 60);
+        if (Math.hypot(x2 - p2.x, y2 - p2.y) < safeDist) {
+          validSpawn = false;
+          break;
+        }
+      }
+      attempts++;
+    } while (!validSpawn && attempts < 50);
     el.style.transform = `translate3d(${x2 - 16}px, ${y2 - 16}px, 0)`;
     arena.appendChild(el);
-    let hpMultiplier = Math.pow(1.15, currentWave - 1);
-    let atkMultiplier = Math.pow(1.2, currentWave - 1);
+    let hpMultiplier = Math.pow(1.12, currentWave - 1);
+    let atkMultiplier = Math.pow(1.15, currentWave - 1);
     if (isBossWave) {
       hpMultiplier *= 1.5;
       atkMultiplier *= 1.2;
@@ -10851,7 +10864,7 @@ function showWaveRewards(isLoaded = false) {
   overlay.style.padding = "20px";
   overlay.style.boxSizing = "border-box";
   overlay.style.background = "rgba(0,0,0,0.9)";
-  const getCost = (lv) => Math.floor(50 * Math.pow(1.4, lv));
+  const getCost = (lv) => Math.floor(50 * Math.pow(1.2, lv));
   const renderShop = (selectedIdx) => {
     const selectedPet = fullTeam[selectedIdx];
     let petsHtml = '<div class="dg-shop-left">';
@@ -10890,17 +10903,18 @@ function showWaveRewards(isLoaded = false) {
       const totalMaxHp = fullTeam.reduce((acc, member) => acc + member.maxHp, 0);
       const hpMissingTeam = fullTeam.reduce((acc, member) => acc + (member.maxHp - member.hp), 0);
       const healTeamCost = Math.max(30, totalMaxHp > 0 ? Math.floor(waveBaseGold * 0.5 * (hpMissingTeam / totalMaxHp)) : 30);
+      const calc = (base, lv) => Math.floor(base * Math.pow(1.2, lv));
       const stats = [
-        { id: "hp", name: "Max HP (+25%)", val: selectedPet.maxHp, lv: u2.hp, cost: Math.floor(40 * Math.pow(1.4, u2.hp)) },
-        { id: "atk", name: "ATK (+25%)", val: selectedPet.atk, lv: u2.atk, cost: Math.floor(40 * Math.pow(1.4, u2.atk)) },
-        { id: "aspd", name: "ATK SPD (+10%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u2.aspd, cost: Math.floor(60 * Math.pow(1.4, u2.aspd)), forceCanBuy: selectedPet.maxCd > 0.11 },
-        { id: "spd", name: "Move Speed (+10%)", val: selectedPet.speed, lv: u2.spd, cost: Math.floor(30 * Math.pow(1.4, u2.spd)), forceCanBuy: selectedPet.speed < 150 },
-        { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u2.critR, cost: Math.floor(50 * Math.pow(1.4, u2.critR)), forceCanBuy: selectedPet.critRate < 0.59 },
-        { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u2.critD, cost: Math.floor(50 * Math.pow(1.4, u2.critD)) },
-        { id: "dodge", name: "N\xE9 Tr\xE1nh (+5%)", val: (selectedPet.dodge * 100).toFixed(0) + "%", lv: u2.dodge || 0, cost: Math.floor(60 * Math.pow(1.4, u2.dodge || 0)), forceCanBuy: selectedPet.dodge < 0.39 }
+        { id: "hp", name: "Max HP (+25%)", val: selectedPet.maxHp, lv: u2.hp, cost: calc(80, u2.hp) },
+        { id: "atk", name: "ATK (+25%)", val: selectedPet.atk, lv: u2.atk, cost: calc(80, u2.atk) },
+        { id: "aspd", name: "ATK SPD (+10%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u2.aspd, cost: calc(100, u2.aspd), forceCanBuy: selectedPet.maxCd > 0.11 },
+        { id: "spd", name: "Move Speed (+10%)", val: selectedPet.speed, lv: u2.spd, cost: calc(50, u2.spd), forceCanBuy: selectedPet.speed < 150 },
+        { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u2.critR, cost: calc(90, u2.critR), forceCanBuy: selectedPet.critRate < 0.59 },
+        { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u2.critD, cost: calc(90, u2.critD) },
+        { id: "dodge", name: "N\xE9 Tr\xE1nh (+5%)", val: (selectedPet.dodge * 100).toFixed(0) + "%", lv: u2.dodge || 0, cost: calc(100, u2.dodge || 0), forceCanBuy: selectedPet.dodge < 0.39 }
       ];
       if (PET_STATS2[selectedPet.id] && PET_STATS2[selectedPet.id].range > 60) {
-        stats.push({ id: "range", name: "T\u1EA7m \u0110\xE1nh (+10%)", val: Math.round(selectedPet.range), lv: u2.range || 0, cost: Math.floor(40 * Math.pow(1.2, u2.range || 0)), forceCanBuy: selectedPet.range < 400 });
+        stats.push({ id: "range", name: "T\u1EA7m \u0110\xE1nh (+10%)", val: Math.round(selectedPet.range), lv: u2.range || 0, cost: calc(70, u2.range || 0), forceCanBuy: selectedPet.range < 400 });
       }
       stats.push(
         { id: "heal_pet", name: "H\u1ED3i M\xE1u (Full)", val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: "", cost: healPetCost, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
@@ -11044,10 +11058,10 @@ var init_dungeon = __esm({
       { id: "chuncai", name: "Rau Thu\u1EA7n", desc: "\u0110eo b\xE1m dai d\u1EB3ng.", hp: 150, atk: 15, range: 40, speed: 25, cd: 1.2, ai: "melee", gold: 6 },
       { id: "lingjiao", name: "C\u1EE7 \u1EA4u Gi\xE1p", desc: "C\u1EADn chi\u1EBFn c\xF3 gi\xE1p.", hp: 180, atk: 20, range: 40, speed: 20, cd: 1.5, ai: "melee", gold: 8 },
       { id: "pumpkin", name: "B\xED Ng\xF4 Kh\u1ED5ng L\u1ED3", desc: "Tanker ch\u1EADm ch\u1EA1p.", hp: 300, atk: 30, range: 50, speed: 15, cd: 3, ai: "tank", gold: 15 },
-      { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 80, atk: 25, range: 120, speed: 20, cd: 1.5, ai: "ranged", gold: 8 },
-      { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 100, atk: 12, range: 140, speed: 25, cd: 1.5, ai: "ranged", skill: "multishot", gold: 10 },
-      { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 130, atk: 18, range: 90, speed: 20, cd: 1.2, ai: "ranged", skill: "root", gold: 12 },
-      { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 300, atk: 25, range: 100, speed: 15, cd: 2, ai: "ranged", gold: 20 },
+      { id: "fangW", name: "Hoa B\xE1 V\u01B0\u01A1ng", desc: "Ph\xE1p s\u01B0 b\u1EAFn t\u1EEB xa.", hp: 60, atk: 15, range: 100, speed: 20, cd: 1.8, ai: "ranged", gold: 8 },
+      { id: "starbush", name: "B\u1EE5i Sao", desc: "X\u1EA1 th\u1EE7 3 tia.", hp: 70, atk: 8, range: 120, speed: 25, cd: 2, ai: "ranged", skill: "multishot", gold: 10 },
+      { id: "opalvine", name: "D\xE2y Leo Opal", desc: "Tr\xF3i ch\xE2n \u0111\u1ED1i th\u1EE7.", hp: 130, atk: 15, range: 90, speed: 20, cd: 1.5, ai: "ranged", skill: "root", gold: 12 },
+      { id: "lianou", name: "C\u1EE7 Sen Kh\u1ED5ng L\u1ED3", desc: "N\xE9m b\xF9n t\u1EEB xa.", hp: 200, atk: 18, range: 100, speed: 15, cd: 2.5, ai: "ranged", gold: 20 },
       { id: "dragoncry", name: "Long Tinh", desc: "Boss: C\u1EF1c kh\u1ECFe.", hp: 700, atk: 60, range: 60, speed: 20, cd: 2, ai: "tank", skill: "cleave", elite: true, gold: 100 },
       { id: "pumpkin", name: "Vua B\xED Ng\xF4", desc: "Boss: Tank AoE slam.", hp: 1e3, atk: 50, range: 50, speed: 15, cd: 2.5, ai: "tank", skill: "cleave", elite: true, sp: "pumpkin", gold: 150 },
       { id: "fangW", name: "Ph\xF9 Th\u1EE7y Hoa", desc: "Boss: Ph\xE1o \u0111\xE0i b\u1EAFn xa.", hp: 500, atk: 70, range: 160, speed: 18, cd: 1.8, ai: "ranged", skill: "multishot", elite: true, sp: "fangW", gold: 120 }
