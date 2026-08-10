@@ -573,6 +573,7 @@ var init_graphics = __esm({
       raincloud: ["................", "................", "................", "......LLLL......", ".....LWWWWL.....", "...LLWWWWWWL....", "..LWWWWWWWWWL...", "..LWWWWWWWWWL...", "...LLLLLLLLLL...", "................", "....B...B...B...", "................", "...B...B...B....", "................", "................", "................"],
       bush: ["................", "................", ".....DDDD.......", "...DDGEEGDD.....", "..DGEEGGWEGD....", ".DGEGGEEGGGED...", ".DGGEEGGGEGGD...", ".DGGWGGEEGGGD...", ".DGEGGGGGGEGD...", ".DGGGEGGGWGGD...", "..DGGGGGGGGD....", "...DDGGGGDD.....", ".....DDDD.......", "................", "................", "................"],
       pinkgrass: ["................", "................", "....W......W....", ".....pp...pp....", "....pnfp.pfnp...", ".....pp...pp....", "......f....f....", ".....pp...pp....", "....pfnp.pnfp...", ".....pp...pp....", "..W...f....f....", "...BBbfBBBfbBB..", "..BbBBbBbBBbBb..", "...bbBBbbBBbb...", "................", "................"],
+      spadeIcon: ["................", "................", ".......WW.......", "......WWWW......", ".....WWWWWW.....", "....WWWWWWWW....", "...WWWWWWWWWW...", "..WWWWWWWWWWWW..", "..WWWWWWWWWWWW..", "...WWWWWWWWWW...", "....WWW..WWW....", ".......WW.......", "......WWWW......", "................", "................", "................"],
       emHeart: ["................", "................", "................", "................", "....ff...ff.....", "...fFpf.fFFf....", "...fFFFfFFFf....", "...fFFFFFFFf....", "....fFFFFFf.....", ".....fFFFf......", "......fFf.......", ".......f........", "................", "................", "................", "................"],
       emStar: ["................", "................", "................", ".......U........", "......UCU.......", "......UCU.......", "...UUUCCCUUU....", "....UCCCCCU.....", ".....UCCCU......", "....UCU.UCU.....", "....U.....U.....", "................", "................", "................", "................", "................"],
       emLeaf: ["................", "................", "................", "................", "......DD........", ".....DGGD.......", "....DGEGGD......", "....DGGGGD......", ".....DGGD.......", "......DD........", ".......D........", ".......D........", "................", "................", "................", "................"],
@@ -3200,6 +3201,14 @@ function initUI() {
     </div>
 
     <div class="toast" id="toast"></div>
+  </div>
+
+  <div class="dialog-win" id="bj-room-win" style="display:none; left:50%; top:50%; transform:translate(-50%, -50%); z-index:99999; flex-direction:column; background:#f8efe0; border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px; max-width: 600px; width: 96vw; max-height: 90vh;">
+    <div class="titlebar" id="bj-room-drag">
+      <h1>${spriteSVG("spadeIcon", 16)} Ph\xE2n khu Gi\u1EA3i Tr\xED</h1>
+      <div class="close-x" onclick="FarmAll.closeBlackjackRoom()">\xD7</div>
+    </div>
+    <div id="bj-room-body" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
   </div>
   
   <div id="hero-bar" class="hero-bar" style="display:none">
@@ -6469,10 +6478,16 @@ function renderPlots() {
           ${spriteSVG("hiloIcon", 48)}
           <div class="feature-name">Hi-Lo</div>
         </div>
+        <div class="explore-slot" id="cslot-bj">
+          ${spriteSVG("spadeIcon", 48)}
+          <div class="feature-name">Blackjack</div>
+        </div>
       </div>
     `;
     const bBtn = $id("cslot-bet");
     if (bBtn) bBtn.addEventListener("click", () => openPanel("bet"));
+    const bjBtn = $id("cslot-bj");
+    if (bjBtn) bjBtn.addEventListener("click", () => openBlackjackPicker());
     return;
   }
   if (expWrap) expWrap.style.display = "none";
@@ -48864,6 +48879,1281 @@ var init_flea = __esm({
   }
 });
 
+// src/blackjack.js
+function cardValue(rank) {
+  if (rank === "A") return 11;
+  if (["J", "Q", "K"].includes(rank)) return 10;
+  return parseInt(rank);
+}
+function handTotal(hand) {
+  let total = 0, aces = 0;
+  for (const card of hand) {
+    if (card.hidden) continue;
+    total += cardValue(card.rank);
+    if (card.rank === "A") aces++;
+  }
+  while (total > 21 && aces > 0) {
+    total -= 10;
+    aces--;
+  }
+  return total;
+}
+function isSoft(hand) {
+  let total = 0, aces = 0;
+  for (const card of hand) {
+    if (card.hidden) continue;
+    total += cardValue(card.rank);
+    if (card.rank === "A") aces++;
+  }
+  while (total > 21 && aces > 0) {
+    total -= 10;
+    aces--;
+  }
+  return aces > 0 && total <= 21;
+}
+function buildShoe(numDecks, seed) {
+  const cards = [];
+  for (let d = 0; d < numDecks; d++) {
+    for (const suit of SUITS) {
+      for (const rank of RANKS) {
+        cards.push({ suit, rank });
+      }
+    }
+  }
+  let s2 = seed >>> 0;
+  const rng = () => {
+    s2 |= 0;
+    s2 = s2 + 1831565813 | 0;
+    let t2 = Math.imul(s2 ^ s2 >>> 15, 1 | s2);
+    t2 = t2 + Math.imul(t2 ^ t2 >>> 7, 61 | t2) ^ t2;
+    return ((t2 ^ t2 >>> 14) >>> 0) / 4294967296;
+  };
+  for (let i2 = cards.length - 1; i2 > 0; i2--) {
+    const j = Math.floor(rng() * (i2 + 1));
+    [cards[i2], cards[j]] = [cards[j], cards[i2]];
+  }
+  return cards;
+}
+function isBlackjack(hand) {
+  if (hand.length !== 2) return false;
+  return handTotal(hand) === 21;
+}
+function is10Value(rank) {
+  return ["10", "J", "Q", "K"].includes(rank);
+}
+function cardHTML(card, small) {
+  if (card.hidden) {
+    return `<div class="bj-card back${small ? " small" : ""}"><div class="bj-card-back-inner"></div></div>`;
+  }
+  const isRed = card.suit === "\u2665" || card.suit === "\u2666";
+  const col = isRed ? "#c0392b" : "#1a1a2e";
+  return `<div class="bj-card${small ? " small" : ""}" style="color:${col}">
+        <div class="bj-card-corner tl">${card.rank}<br><span>${card.suit}</span></div>
+        <div class="bj-card-center">${card.suit}</div>
+        <div class="bj-card-corner br">${card.rank}<br><span>${card.suit}</span></div>
+    </div>`;
+}
+function openBlackjackSolo() {
+  soloState = {
+    phase: "bet",
+    shoe: [],
+    shoeIdx: 0,
+    playerHands: [[]],
+    activeHandIdx: 0,
+    dealerHand: [],
+    bets: [0],
+    insuranceBet: 0,
+    splitAceIdxs: /* @__PURE__ */ new Set(),
+    settings: { minBet: 10, maxBet: 0, numDecks: 6 }
+  };
+  soloState.shoe = buildShoe(soloState.settings.numDecks, Date.now() & 4294967295);
+  openModal("\u2660 Blackjack \u2014 Ch\u01A1i \u0110\u01A1n", buildSoloUI(), false);
+  soloRender();
+}
+function soloDrawCard(hidden) {
+  const s2 = soloState;
+  if (s2.shoeIdx >= s2.shoe.length) {
+    s2.shoe = buildShoe(s2.settings.numDecks, Date.now() & 4294967295);
+    s2.shoeIdx = 0;
+  }
+  return { ...s2.shoe[s2.shoeIdx++], hidden: !!hidden };
+}
+function buildSoloUI() {
+  return `<div id="bj-solo-wrap">
+        <div class="bj-table">
+            <div class="bj-dealer-area">
+                <div class="bj-area-label">Nh\xE0 c\xE1i</div>
+                <div class="bj-hand-row" id="bj-dealer-hand"></div>
+                <div class="bj-score" id="bj-dealer-score"></div>
+            </div>
+            <div class="bj-player-area">
+                <div class="bj-area-label">B\u1EA1n \u2014 <span id="bj-coins-display"></span></div>
+                <div id="bj-player-hands"></div>
+            </div>
+        </div>
+        <div id="bj-message" class="bj-message"></div>
+        <div id="bj-actions" class="bj-actions"></div>
+    </div>`;
+}
+function soloRender() {
+  const s2 = soloState;
+  if (!$id("bj-solo-wrap")) return;
+  const coinsEl = $id("bj-coins-display");
+  if (coinsEl) coinsEl.textContent = `${(ctx.S.coins || 0).toLocaleString()} G`;
+  const dealerEl = $id("bj-dealer-hand");
+  const dealerScoreEl = $id("bj-dealer-score");
+  if (dealerEl) {
+    dealerEl.innerHTML = s2.dealerHand.map((c2) => cardHTML(c2)).join("");
+    const vis = s2.dealerHand.filter((c2) => !c2.hidden);
+    if (dealerScoreEl) dealerScoreEl.textContent = vis.length ? `\u0110i\u1EC3m: ${handTotal(vis)}` : "";
+  }
+  const handsEl = $id("bj-player-hands");
+  if (handsEl) {
+    handsEl.innerHTML = s2.playerHands.map((hand, i2) => {
+      const isActive = i2 === s2.activeHandIdx && s2.phase === "player";
+      const total = handTotal(hand);
+      const bet = s2.bets[i2] || 0;
+      return `<div class="bj-player-hand${isActive ? " active-hand" : ""}">
+                <div class="bj-hand-row">${hand.map((c2) => cardHTML(c2)).join("")}</div>
+                <div class="bj-score">\u0110i\u1EC3m: ${total}${total > 21 ? " \u{1F480} Bust!" : ""} \u2014 C\u01B0\u1EE3c: ${bet.toLocaleString()}G</div>
+            </div>`;
+    }).join("");
+  }
+  const msgEl = $id("bj-message");
+  if (msgEl && s2.phase !== "done") msgEl.textContent = "";
+  renderSoloActions();
+}
+function renderSoloActions() {
+  const s2 = soloState;
+  const actEl = $id("bj-actions");
+  if (!actEl) return;
+  const coins = ctx.S.coins || 0;
+  if (s2.phase === "bet") {
+    const min = s2.settings.minBet;
+    actEl.innerHTML = `
+            <div class="bj-bet-row">
+                <input class="inp" id="bj-bet-inp" type="number" min="${min}" value="${Math.max(min, Math.min(100, coins))}" style="width:110px">
+                <span class="buy plain bj-quick" data-q="4">\xBC</span>
+                <span class="buy plain bj-quick" data-q="2">\xBD</span>
+                <span class="buy plain bj-quick" data-q="1">Max</span>
+            </div>
+            <div class="bj-btn-row" style="margin-top:8px;">
+                <div class="buy" id="bj-deal">\u{1F0CF} Ph\xE1t B\xE0i</div>
+            </div>`;
+    actEl.querySelectorAll(".bj-quick").forEach((b2) => b2.addEventListener("click", () => {
+      const inp = $id("bj-bet-inp");
+      if (inp) inp.value = String(Math.max(min, Math.floor(coins / Number(b2.getAttribute("data-q")))));
+    }));
+    $id("bj-deal").addEventListener("click", soloStartRound);
+    return;
+  }
+  if (s2.phase === "insurance") {
+    const hand = s2.playerHands[0];
+    const bet = s2.bets[0];
+    const hasBJ = isBlackjack(hand);
+    if (hasBJ) {
+      actEl.innerHTML = `
+                <div class="bj-msg-sm">B\u1EA1n c\xF3 Blackjack! Dealer upcard l\xE0 Ace.</div>
+                <div class="bj-btn-row">
+                    <div class="buy" id="bj-even-money">L\u1EA5y ngay 1:1 (Even Money)</div>
+                    <div class="buy plain" id="bj-no-insurance">B\u1ECF qua, ch\u1EDD k\u1EBFt qu\u1EA3</div>
+                </div>`;
+      $id("bj-even-money").addEventListener("click", soloEvenMoney);
+      $id("bj-no-insurance").addEventListener("click", () => soloAfterInsurance(false));
+    } else {
+      const maxIns = Math.floor(bet / 2);
+      actEl.innerHTML = `
+                <div class="bj-msg-sm">Dealer upcard l\xE0 Ace \u2014 Mua b\u1EA3o hi\u1EC3m? (t\u1ED1i \u0111a ${maxIns}G)</div>
+                <div class="bj-btn-row">
+                    <div class="buy" id="bj-buy-ins">Mua ${maxIns}G</div>
+                    <div class="buy plain" id="bj-skip-ins">B\u1ECF qua</div>
+                </div>`;
+      $id("bj-buy-ins").addEventListener("click", () => soloBuyInsurance(maxIns));
+      $id("bj-skip-ins").addEventListener("click", () => soloAfterInsurance(false));
+    }
+    return;
+  }
+  if (s2.phase === "player") {
+    const hand = s2.playerHands[s2.activeHandIdx];
+    const total = handTotal(hand);
+    const bet = s2.bets[s2.activeHandIdx];
+    const isSplitAce = s2.splitAceIdxs.has(s2.activeHandIdx);
+    const canDouble = hand.length === 2 && coins >= bet && !isSplitAce;
+    const canSplit = hand.length === 2 && hand[0].rank === hand[1].rank && coins >= bet && s2.playerHands.length < 4;
+    const canSurrender = hand.length === 2 && s2.activeHandIdx === 0 && s2.playerHands.length === 1;
+    if (total > 21) {
+      setTimeout(() => soloNextHand(), 700);
+      actEl.innerHTML = `<div class="bj-msg-sm">\u{1F480} Bust! T\u1EF1 \u0111\u1ED9ng chuy\u1EC3n tay...</div>`;
+      return;
+    }
+    if (isSplitAce) {
+      setTimeout(() => soloNextHand(), 400);
+      actEl.innerHTML = `<div class="bj-msg-sm">Split Ace \u2014 Ch\u1EC9 nh\u1EADn 1 l\xE1, t\u1EF1 Stand.</div>`;
+      return;
+    }
+    let html = `<div class="bj-btn-row">
+            <div class="buy" id="bj-hit">Hit</div>
+            <div class="buy plain" id="bj-stand">Stand</div>`;
+    if (canDouble) html += `<div class="buy bj-double-btn" id="bj-double">Double</div>`;
+    if (canSplit) html += `<div class="buy bj-split-btn" id="bj-split">Split</div>`;
+    if (canSurrender) html += `<div class="buy plain bj-surr-btn" id="bj-surrender">Surrender</div>`;
+    html += `</div>`;
+    actEl.innerHTML = html;
+    $id("bj-hit").addEventListener("click", soloHit);
+    $id("bj-stand").addEventListener("click", soloStand);
+    if (canDouble) $id("bj-double").addEventListener("click", soloDouble);
+    if (canSplit) $id("bj-split").addEventListener("click", soloSplit);
+    if (canSurrender) $id("bj-surrender").addEventListener("click", soloSurrender);
+    return;
+  }
+  if (s2.phase === "done") {
+    actEl.innerHTML = `<div class="bj-btn-row"><div class="buy" id="bj-next-round">V\xE1n M\u1EDBi</div></div>`;
+    $id("bj-next-round").addEventListener("click", soloNewRound);
+  }
+}
+function soloStartRound() {
+  const s2 = soloState;
+  const coins = ctx.S.coins || 0;
+  const inp = $id("bj-bet-inp");
+  const want = Math.max(0, parseInt(inp ? inp.value : "0") || 0);
+  if (want < s2.settings.minBet) return toast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${s2.settings.minBet}G`);
+  if (s2.settings.maxBet > 0 && want > s2.settings.maxBet) return toast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${s2.settings.maxBet}G`);
+  if (want > coins) return toast(`Kh\xF4ng \u0111\u1EE7 v\xE0ng (${coins.toLocaleString()}G)`);
+  ctx.S.coins = (ctx.S.coins || 0) - want;
+  save();
+  s2.bets = [want];
+  s2.insuranceBet = 0;
+  s2.playerHands = [[]];
+  s2.activeHandIdx = 0;
+  s2.dealerHand = [];
+  s2.splitAceIdxs = /* @__PURE__ */ new Set();
+  s2.playerHands[0].push(soloDrawCard());
+  s2.dealerHand.push(soloDrawCard());
+  s2.playerHands[0].push(soloDrawCard());
+  s2.dealerHand.push(soloDrawCard(true));
+  const dealerUp = s2.dealerHand[0];
+  if (dealerUp.rank === "A") {
+    s2.phase = "insurance";
+  } else if (is10Value(dealerUp.rank)) {
+    const dealerBJ = isBlackjack([s2.dealerHand[0], { ...s2.dealerHand[1], hidden: false }]);
+    if (dealerBJ) {
+      s2.dealerHand[1].hidden = false;
+      s2.phase = "done";
+      soloResolveAll();
+      soloRender();
+      return;
+    }
+    s2.phase = "player";
+    if (isBlackjack(s2.playerHands[0])) {
+      s2.dealerHand[1].hidden = false;
+      s2.phase = "done";
+      soloResolveAll();
+      soloRender();
+      return;
+    }
+  } else {
+    s2.phase = "player";
+    if (isBlackjack(s2.playerHands[0])) {
+      s2.dealerHand[1].hidden = false;
+      s2.phase = "done";
+      soloResolveAll();
+      soloRender();
+      return;
+    }
+  }
+  soloRender();
+}
+function soloEvenMoney() {
+  const s2 = soloState;
+  const payout = s2.bets[0] * 2;
+  ctx.S.coins = (ctx.S.coins || 0) + payout;
+  save();
+  renderStatus();
+  s2.dealerHand[1].hidden = false;
+  s2.phase = "done";
+  showMsg(`\u2660 Even Money! Nh\u1EADn l\u1EA1i ${payout.toLocaleString()}G`);
+  soloRender();
+}
+function soloBuyInsurance(amount) {
+  const s2 = soloState;
+  if ((ctx.S.coins || 0) < amount) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng mua b\u1EA3o hi\u1EC3m");
+  ctx.S.coins = (ctx.S.coins || 0) - amount;
+  s2.insuranceBet = amount;
+  save();
+  soloAfterInsurance(true);
+}
+function soloAfterInsurance(boughtIns) {
+  const s2 = soloState;
+  const dealerBJ = isBlackjack([s2.dealerHand[0], { ...s2.dealerHand[1], hidden: false }]);
+  if (dealerBJ) {
+    s2.dealerHand[1].hidden = false;
+    if (boughtIns) {
+      const insPayout = s2.insuranceBet * 3;
+      ctx.S.coins = (ctx.S.coins || 0) + insPayout;
+      save();
+      showMsg(`Dealer Blackjack! B\u1EA3o hi\u1EC3m tr\u1EA3 ${insPayout.toLocaleString()}G`);
+    }
+    s2.phase = "done";
+    soloResolveAll();
+    soloRender();
+    return;
+  }
+  s2.phase = "player";
+  if (isBlackjack(s2.playerHands[0])) {
+    s2.dealerHand[1].hidden = false;
+    s2.phase = "done";
+    soloResolveAll();
+    soloRender();
+    return;
+  }
+  soloRender();
+}
+function soloHit() {
+  const s2 = soloState;
+  const hand = s2.playerHands[s2.activeHandIdx];
+  hand.push(soloDrawCard());
+  soloRender();
+  if (handTotal(hand) > 21) setTimeout(() => soloNextHand(), 700);
+}
+function soloStand() {
+  soloNextHand();
+}
+function soloDouble() {
+  const s2 = soloState;
+  const idx = s2.activeHandIdx;
+  const bet = s2.bets[idx];
+  if ((ctx.S.coins || 0) < bet) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Double");
+  ctx.S.coins = (ctx.S.coins || 0) - bet;
+  s2.bets[idx] *= 2;
+  save();
+  s2.playerHands[idx].push(soloDrawCard());
+  soloRender();
+  setTimeout(() => soloNextHand(), 500);
+}
+function soloSplit() {
+  const s2 = soloState;
+  const idx = s2.activeHandIdx;
+  const bet = s2.bets[idx];
+  if ((ctx.S.coins || 0) < bet) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Split");
+  ctx.S.coins = (ctx.S.coins || 0) - bet;
+  save();
+  const hand = s2.playerHands[idx];
+  const isSplitAce = hand[0].rank === "A";
+  const splitCard = hand.splice(1, 1)[0];
+  const newHand = [splitCard];
+  hand.push(soloDrawCard());
+  newHand.push(soloDrawCard());
+  s2.playerHands.splice(idx + 1, 0, newHand);
+  s2.bets.splice(idx + 1, 0, bet);
+  if (isSplitAce) {
+    s2.splitAceIdxs.add(idx);
+    s2.splitAceIdxs.add(idx + 1);
+  }
+  soloRender();
+}
+function soloSurrender() {
+  const s2 = soloState;
+  const refund = Math.floor(s2.bets[0] / 2);
+  ctx.S.coins = (ctx.S.coins || 0) + refund;
+  save();
+  renderStatus();
+  s2.dealerHand[1].hidden = false;
+  s2.phase = "done";
+  showMsg(`Surrender \u2014 Nh\u1EADn l\u1EA1i ${refund.toLocaleString()}G`);
+  soloRender();
+}
+function soloNextHand() {
+  const s2 = soloState;
+  const next = s2.activeHandIdx + 1;
+  if (next < s2.playerHands.length) {
+    s2.activeHandIdx = next;
+    soloRender();
+  } else soloRunDealer();
+}
+function soloRunDealer() {
+  const s2 = soloState;
+  s2.dealerHand[1].hidden = false;
+  s2.phase = "dealer";
+  soloRender();
+  const allBust = s2.playerHands.every((h) => handTotal(h) > 21);
+  if (allBust) {
+    s2.phase = "done";
+    soloResolveAll();
+    soloRender();
+    return;
+  }
+  let step = 0;
+  const iv = setInterval(() => {
+    const total = handTotal(s2.dealerHand);
+    const soft = isSoft(s2.dealerHand);
+    if (total < 17 || soft && total === 16) {
+      s2.dealerHand.push(soloDrawCard());
+      soloRender();
+    } else {
+      clearInterval(iv);
+      s2.phase = "done";
+      soloResolveAll();
+      soloRender();
+    }
+    if (++step > 12) clearInterval(iv);
+  }, 600);
+}
+function soloResolveAll() {
+  const s2 = soloState;
+  const dTotal = handTotal(s2.dealerHand);
+  const dBJ = isBlackjack(s2.dealerHand);
+  const dBust = dTotal > 21;
+  const results = [];
+  for (let i2 = 0; i2 < s2.playerHands.length; i2++) {
+    const hand = s2.playerHands[i2];
+    const pTotal = handTotal(hand);
+    const isOnly = s2.playerHands.length === 1;
+    const pBJ = isBlackjack(hand) && isOnly;
+    const bet = s2.bets[i2];
+    const lbl = isOnly ? "" : `Tay ${i2 + 1}: `;
+    if (pTotal > 21) {
+      results.push(`${lbl}\u{1F480} Bust (m\u1EA5t ${bet.toLocaleString()}G)`);
+      continue;
+    }
+    if (pBJ && dBJ) {
+      ctx.S.coins = (ctx.S.coins || 0) + bet;
+      results.push(`${lbl}\u{1F91D} Ho\xE0 BJ`);
+      continue;
+    }
+    if (pBJ) {
+      const p2 = bet + Math.floor(bet * 1.5);
+      ctx.S.coins = (ctx.S.coins || 0) + p2;
+      results.push(`${lbl}\u2660 BLACKJACK +${Math.floor(bet * 1.5).toLocaleString()}G`);
+      continue;
+    }
+    if (dBJ) {
+      results.push(`${lbl}\u{1F494} Dealer BJ`);
+      continue;
+    }
+    if (dBust || pTotal > dTotal) {
+      ctx.S.coins = (ctx.S.coins || 0) + bet * 2;
+      results.push(`${lbl}\u2705 Th\u1EAFng +${bet.toLocaleString()}G`);
+      continue;
+    }
+    if (pTotal === dTotal) {
+      ctx.S.coins = (ctx.S.coins || 0) + bet;
+      results.push(`${lbl}\u{1F91D} Ho\xE0`);
+      continue;
+    }
+    results.push(`${lbl}\u274C Thua`);
+  }
+  save();
+  renderStatus();
+  showMsg(results.join("\n"));
+}
+function showMsg(text) {
+  const el = $id("bj-message");
+  if (el) el.innerHTML = text.replace(/\n/g, "<br>");
+}
+function soloNewRound() {
+  const s2 = soloState;
+  s2.phase = "bet";
+  s2.playerHands = [[]];
+  s2.activeHandIdx = 0;
+  s2.dealerHand = [];
+  s2.bets = [0];
+  s2.insuranceBet = 0;
+  s2.splitAceIdxs = /* @__PURE__ */ new Set();
+  const msgEl = $id("bj-message");
+  if (msgEl) msgEl.innerHTML = "";
+  soloRender();
+}
+function bjMyName() {
+  return ctx.S.username || "Kh\xE1ch";
+}
+function openBlackjackRoom() {
+  const win = $id("bj-room-win");
+  if (win) win.classList.add("open");
+  bjResetState();
+  bjRenderMenu();
+}
+function closeBlackjackRoom() {
+  if (bjPeer) {
+    try {
+      bjPeer.destroy();
+    } catch (e2) {
+    }
+    bjPeer = null;
+  }
+  bjConns = {};
+  bjResetState();
+  const win = $id("bj-room-win");
+  if (win) win.classList.remove("open");
+}
+function bjResetState() {
+  bjConns = {};
+  bjIsHost = false;
+  bjMyId = "";
+  bjRoomId = "";
+  bjPlayers = {};
+  bjGameState = null;
+  bjMyStatus = "idle";
+  bjChatLog = [];
+}
+function bjBroadcast(data, excludePid) {
+  for (const [pid, conn2] of Object.entries(bjConns)) {
+    if (pid === excludePid) continue;
+    if (conn2 && conn2.open) conn2.send(data);
+  }
+}
+function bjRenderMenu() {
+  const body = $id("bj-room-body");
+  if (!body) return;
+  if (!ctx.S.username) {
+    body.innerHTML = `<div style="padding:20px;text-align:center;display:flex;flex-direction:column;gap:12px;">
+            <div class="bj-msg-sm">B\u1EA1n c\u1EA7n c\xF3 t\xEAn ng\u01B0\u1EDDi ch\u01A1i tr\u01B0\u1EDBc</div>
+            <input class="inp" id="bj-inp-name" placeholder="Nh\u1EADp t\xEAn c\u1EE7a b\u1EA1n...">
+            <div class="buy" id="bj-save-name" style="text-align:center">L\u01B0u t\xEAn</div>
+        </div>`;
+    $id("bj-save-name").onclick = () => {
+      const v2 = ($id("bj-inp-name").value || "").trim();
+      if (!v2) return toast("T\xEAn kh\xF4ng \u0111\u01B0\u1EE3c tr\u1ED1ng!");
+      ctx.S.username = v2;
+      Promise.resolve().then(() => (init_state(), state_exports)).then((m2) => m2.save());
+      bjRenderMenu();
+    };
+    return;
+  }
+  body.innerHTML = `<div style="padding:20px;display:flex;flex-direction:column;gap:14px;text-align:center;">
+        <div style="font-weight:bold;color:#ffd94d;font-size:14px;">\u{1F3B0} Ph\xF2ng Blackjack \u2014 ${bjMyName()}</div>
+        <div class="buy" id="bj-host-btn" style="text-align:center">\u{1F3B0} T\u1EA1o Ph\xF2ng (Host)</div>
+        <div style="display:flex;gap:8px;">
+            <input class="inp" id="bj-join-code" placeholder="Nh\u1EADp m\xE3 ph\xF2ng..." style="flex:1">
+            <div class="buy plain" id="bj-join-btn">Tham gia</div>
+        </div>
+        <div id="bj-room-status" style="font-size:12px;color:#e05;font-weight:bold;min-height:16px;"></div>
+    </div>`;
+  $id("bj-host-btn").onclick = bjHostRoom;
+  $id("bj-join-btn").onclick = bjJoinRoom;
+}
+function bjUpdateStatus(msg, color) {
+  const el = $id("bj-room-status");
+  if (el) {
+    el.textContent = msg;
+    el.style.color = color || "#ffd94d";
+  }
+}
+async function bjHostRoom() {
+  bjUpdateStatus("\u0110ang t\u1EA1o ph\xF2ng...", "#ffd94d");
+  const roomId = "bj-" + Math.random().toString(36).substr(2, 6);
+  const peerOpts = await buildPeerConfigAsync();
+  bjPeer = new $416260bce337df90$export$ecd1fc136c422448(roomId, peerOpts);
+  bjIsHost = true;
+  bjPeer.on("open", (id) => {
+    bjMyId = id;
+    bjRoomId = id;
+    bjPlayers[id] = { name: bjMyName(), status: "idle" };
+    bjRenderRoom();
+  });
+  bjPeer.on("connection", (inConn) => {
+    const active = Object.keys(bjConns).filter((p2) => bjConns[p2] && bjConns[p2].open);
+    if (active.length >= MAX_PLAYERS - 1) {
+      inConn.on("open", () => {
+        inConn.send({ type: "ROOM_FULL" });
+        setTimeout(() => inConn.close(), 500);
+      });
+      return;
+    }
+    inConn.on("open", () => {
+      bjConns[inConn.peer] = inConn;
+      bjSetupConn(inConn);
+    });
+  });
+  bjPeer.on("error", (err) => bjUpdateStatus("L\u1ED7i: " + err.type, "#e05"));
+}
+async function bjJoinRoom() {
+  const code = ($id("bj-join-code")?.value || "").trim();
+  if (!code) return bjUpdateStatus("Nh\u1EADp m\xE3 ph\xF2ng!", "#e05");
+  bjUpdateStatus("\u0110ang k\u1EBFt n\u1ED1i...", "#ffd94d");
+  const peerOpts = await buildPeerConfigAsync();
+  bjPeer = new $416260bce337df90$export$ecd1fc136c422448(void 0, peerOpts);
+  bjIsHost = false;
+  bjPeer.on("open", () => {
+    const conn2 = bjPeer.connect(code, { reliable: true });
+    bjConns[code] = conn2;
+    conn2.on("open", () => {
+      bjRoomId = code;
+      bjMyId = bjPeer.id;
+      bjSetupConn(conn2);
+      conn2.send({ type: "HELLO", name: bjMyName(), id: bjMyId });
+    });
+    conn2.on("error", () => bjUpdateStatus("L\u1ED7i k\u1EBFt n\u1ED1i!", "#e05"));
+  });
+  bjPeer.on("error", (err) => bjUpdateStatus("L\u1ED7i: " + err.type, "#e05"));
+}
+function bjSetupConn(conn2) {
+  conn2.on("data", (data) => bjHandleMsg(conn2.peer, data));
+  conn2.on("close", () => bjHandleDisconnect(conn2.peer));
+  conn2.on("error", () => bjHandleDisconnect(conn2.peer));
+}
+function bjHandleMsg(fromPid, data) {
+  switch (data.type) {
+    case "HELLO": {
+      const status = bjGameState ? "spectator" : "idle";
+      bjPlayers[fromPid] = { name: data.name || "Kh\xE1ch", status };
+      if (bjIsHost) {
+        bjBroadcast({ type: "PLAYER_JOIN", pid: fromPid, name: data.name, status }, fromPid);
+        bjConns[fromPid].send({ type: "WELCOME", players: bjPlayers, settings: bjSettings, gameState: bjGameState });
+      }
+      bjRenderRoom();
+      break;
+    }
+    case "WELCOME":
+      bjPlayers = data.players || {};
+      bjSettings = data.settings || bjSettings;
+      bjGameState = data.gameState || null;
+      bjMyStatus = bjGameState ? "spectator" : "idle";
+      bjRenderRoom();
+      break;
+    case "PLAYER_JOIN":
+      bjPlayers[data.pid] = { name: data.name, status: data.status };
+      bjRenderRoom();
+      break;
+    case "PLAYER_LEFT":
+      delete bjPlayers[data.pid];
+      if (bjGameState && bjGameState.currentTurn === data.pid && bjIsHost) bjAdvanceTurn();
+      bjRenderRoom();
+      break;
+    case "SETTINGS_UPDATE":
+      bjSettings = data.settings;
+      toast(`Host c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ${bjSettings.numDecks} b\u1ED9 b\xE0i`);
+      bjRenderRoom();
+      break;
+    case "ROUND_START":
+      bjGameState = {
+        phase: "betting",
+        seed: data.seed,
+        shoeIdx: 0,
+        shoe: buildShoe(bjSettings.numDecks, data.seed),
+        hands: {},
+        dealerHand: [],
+        currentTurn: null,
+        turnOrder: data.turnOrder,
+        betsIn: {},
+        insuranceAnswers: {}
+      };
+      bjMyStatus = bjPlayers[bjMyId]?.status === "spectator" ? "spectator" : "betting";
+      bjRenderRoom();
+      if (bjIsHost) setTimeout(() => {
+        if (bjGameState?.phase === "betting") bjHostDealCards();
+      }, 3e4);
+      break;
+    case "BET_PLACED":
+      if (bjGameState) {
+        bjGameState.betsIn[data.pid] = data.bet;
+        bjGameState.hands[data.pid] = {
+          cards: [[]],
+          bet: [data.bet],
+          stood: [false],
+          doubled: [false],
+          activeHandIdx: 0,
+          splitAceIdxs: [],
+          insuranceBet: 0,
+          surrendered: false
+        };
+      }
+      bjRenderRoom();
+      if (bjIsHost) bjCheckAllBetsIn();
+      break;
+    case "DEAL_CARDS":
+      if (bjGameState) {
+        bjGameState.hands = data.hands;
+        bjGameState.dealerHand = data.dealerHand;
+        bjGameState.phase = data.phase;
+        bjGameState.currentTurn = data.currentTurn;
+        if (data.shoeIdx !== void 0) bjGameState.shoeIdx = data.shoeIdx;
+      }
+      bjMyStatus = bjGameState?.hands[bjMyId] ? "playing" : "spectator";
+      bjRenderRoom();
+      break;
+    case "INSURANCE_ANSWER":
+      if (bjIsHost) {
+        bjGameState.insuranceAnswers = bjGameState.insuranceAnswers || {};
+        bjGameState.insuranceAnswers[data.pid] = data.answer;
+        bjCheckInsuranceAnswers();
+      }
+      break;
+    case "ACTION":
+      bjHandleRoomAction(fromPid, data);
+      break;
+    case "ROUND_END":
+      if (data.payouts) {
+        const payout = data.payouts[bjMyId] || 0;
+        if (payout > 0) {
+          ctx.S.coins = (ctx.S.coins || 0) + payout;
+          save();
+          renderStatus();
+          toast(`Nh\u1EADn ${payout.toLocaleString()}G t\u1EEB b\xE0n!`);
+        }
+      }
+      bjGameState = null;
+      bjMyStatus = "idle";
+      if (bjPlayers[bjMyId]) bjPlayers[bjMyId].status = "idle";
+      bjRenderRoom();
+      break;
+    case "CHAT":
+      bjChatLog.push({ name: bjPlayers[fromPid]?.name || "?", msg: data.msg, ts: Date.now() });
+      if (bjChatLog.length > 50) bjChatLog.shift();
+      bjRenderChat();
+      break;
+    case "GOLD_SEND":
+      if (data.targetPid === bjMyId) {
+        ctx.S.coins = (ctx.S.coins || 0) + data.amount;
+        save();
+        renderStatus();
+        toast(`${bjPlayers[fromPid]?.name || "?"} g\u1EEDi b\u1EA1n ${data.amount.toLocaleString()}G!`);
+      }
+      break;
+    case "ROOM_FULL":
+      toast("Ph\xF2ng \u0111\xE3 \u0111\u1EA7y!");
+      closeBlackjackRoom();
+      break;
+  }
+}
+function bjHandleDisconnect(pid) {
+  delete bjConns[pid];
+  if (bjPlayers[pid]) {
+    const name3 = bjPlayers[pid].name;
+    delete bjPlayers[pid];
+    if (bjGameState && bjGameState.currentTurn === pid && bjIsHost) bjAdvanceTurn();
+    toast(`${name3} \u0111\xE3 r\u1EDDi ph\xF2ng`);
+  }
+  bjBroadcast({ type: "PLAYER_LEFT", pid });
+  if (Object.keys(bjConns).length === 0 && !bjIsHost) {
+    closeBlackjackRoom();
+    toast("Ph\xF2ng \u0111\xE3 \u0111\xF3ng.");
+  }
+  bjRenderRoom();
+}
+function bjHostStartRound() {
+  const connPids = Object.keys(bjConns).filter((p2) => bjConns[p2] && bjConns[p2].open);
+  const pids = [bjMyId, ...connPids];
+  const active = pids.filter((p2) => bjPlayers[p2] && bjPlayers[p2].status !== "spectator");
+  if (active.length === 0) return toast("C\u1EA7n \xEDt nh\u1EA5t 1 ng\u01B0\u1EDDi ch\u01A1i");
+  const seed = (Date.now() ^ Math.floor(Math.random() * 4294967295)) & 4294967295;
+  const msg = { type: "ROUND_START", seed, turnOrder: active, betDeadline: Date.now() + 3e4 };
+  bjHandleMsg(bjMyId, msg);
+  bjBroadcast(msg);
+}
+function bjCheckAllBetsIn() {
+  if (!bjGameState || bjGameState.phase !== "betting") return;
+  if (bjGameState.turnOrder.every((p2) => bjGameState.betsIn[p2] !== void 0)) bjHostDealCards();
+}
+function bjHostDealCards() {
+  const gs = bjGameState;
+  const shoe = gs.shoe;
+  let idx = gs.shoeIdx;
+  const draw = (hidden) => ({ ...shoe[idx++], hidden: !!hidden });
+  for (const pid of gs.turnOrder) {
+    if (!gs.hands[pid]) gs.hands[pid] = { cards: [[]], bet: [0], stood: [false], doubled: [false], activeHandIdx: 0, splitAceIdxs: [], insuranceBet: 0, surrendered: false };
+    gs.hands[pid].cards[0].push(draw());
+  }
+  gs.dealerHand.push(draw());
+  for (const pid of gs.turnOrder) gs.hands[pid].cards[0].push(draw());
+  gs.dealerHand.push(draw(true));
+  gs.shoeIdx = idx;
+  const up = gs.dealerHand[0];
+  let phase2 = "player";
+  if (up.rank === "A") {
+    phase2 = "insurance";
+    gs.insuranceAnswers = {};
+  } else if (is10Value(up.rank)) {
+    if (isBlackjack([gs.dealerHand[0], { ...gs.dealerHand[1], hidden: false }])) {
+      gs.dealerHand[1].hidden = false;
+      phase2 = "dealer_bj";
+    }
+  }
+  gs.phase = phase2;
+  gs.currentTurn = phase2 === "player" ? gs.turnOrder[0] : null;
+  const msg = { type: "DEAL_CARDS", hands: gs.hands, dealerHand: gs.dealerHand, phase: phase2, currentTurn: gs.currentTurn, shoeIdx: gs.shoeIdx };
+  bjHandleMsg(bjMyId, msg);
+  bjBroadcast(msg);
+  if (phase2 === "dealer_bj") setTimeout(() => bjHostEndRound(), 1500);
+  else if (phase2 === "player") bjAutoStandBJs();
+}
+function bjAutoStandBJs() {
+  const gs = bjGameState;
+  for (const pid of gs.turnOrder) {
+    const h = gs.hands[pid];
+    if (h && isBlackjack(h.cards[0])) h.stood[0] = true;
+  }
+  bjAdvanceTurn();
+}
+function bjCheckInsuranceAnswers() {
+  const gs = bjGameState;
+  if (!gs.turnOrder.every((p2) => (gs.insuranceAnswers || {})[p2] !== void 0)) return;
+  for (const pid of gs.turnOrder) {
+    const ans = gs.insuranceAnswers[pid];
+    const h = gs.hands[pid];
+    if (ans === "ins") h.insuranceBet = Math.floor(h.bet[0] / 2);
+  }
+  if (isBlackjack([gs.dealerHand[0], { ...gs.dealerHand[1], hidden: false }])) {
+    gs.dealerHand[1].hidden = false;
+    gs.phase = "dealer_bj";
+    const msg = { type: "DEAL_CARDS", hands: gs.hands, dealerHand: gs.dealerHand, phase: "dealer_bj", currentTurn: null, shoeIdx: gs.shoeIdx };
+    bjBroadcast(msg);
+    bjHandleMsg(bjMyId, msg);
+    setTimeout(() => bjHostEndRound(), 1500);
+  } else {
+    gs.phase = "player";
+    gs.currentTurn = gs.turnOrder[0];
+    const msg = { type: "DEAL_CARDS", hands: gs.hands, dealerHand: gs.dealerHand, phase: "player", currentTurn: gs.currentTurn, shoeIdx: gs.shoeIdx };
+    bjBroadcast(msg);
+    bjHandleMsg(bjMyId, msg);
+    bjAutoStandBJs();
+  }
+}
+function bjAdvanceTurn() {
+  if (!bjGameState || !bjIsHost) return;
+  const gs = bjGameState;
+  let next = null;
+  for (const pid of gs.turnOrder) {
+    const h = gs.hands[pid];
+    if (!h) continue;
+    const done = h.cards.every((c2, i2) => h.stood[i2] || handTotal(c2) > 21);
+    if (!done) {
+      next = pid;
+      break;
+    }
+  }
+  if (next) {
+    gs.currentTurn = next;
+    const msg = { type: "ACTION", actionType: "TURN_CHANGE", pid: next };
+    bjBroadcast(msg);
+    bjHandleMsg(bjMyId, msg);
+  } else {
+    bjHostRunDealer();
+  }
+}
+function bjHandleRoomAction(fromPid, data) {
+  if (!bjGameState) return;
+  const gs = bjGameState;
+  if (data.actionType === "TURN_CHANGE") {
+    gs.currentTurn = data.pid;
+    bjRenderRoom();
+    return;
+  }
+  if (data.actionType === "DEALER_REVEAL" || data.actionType === "DEALER_HIT") {
+    gs.dealerHand = data.dealerHand;
+    bjRenderRoom();
+    return;
+  }
+  if (!bjIsHost) return;
+  if (data.actionType === "INSURANCE_ANSWER") {
+    gs.insuranceAnswers = gs.insuranceAnswers || {};
+    gs.insuranceAnswers[fromPid] = data.answer;
+    bjCheckInsuranceAnswers();
+    return;
+  }
+  const h = gs.hands[fromPid];
+  if (!h || gs.currentTurn !== fromPid) return;
+  const idx = h.activeHandIdx || 0;
+  if (data.actionType === "HIT") {
+    h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++] });
+    if (handTotal(h.cards[idx]) > 21) h.stood[idx] = true;
+  } else if (data.actionType === "STAND") {
+    h.stood[idx] = true;
+    if (idx + 1 < h.cards.length) h.activeHandIdx = idx + 1;
+  } else if (data.actionType === "DOUBLE") {
+    h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++] });
+    h.bet[idx] *= 2;
+    h.stood[idx] = true;
+    h.doubled[idx] = true;
+  } else if (data.actionType === "SPLIT") {
+    const sc = h.cards[idx].splice(1, 1)[0];
+    const nh = [sc, { ...gs.shoe[gs.shoeIdx++] }];
+    h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++] });
+    h.cards.splice(idx + 1, 0, nh);
+    h.bet.splice(idx + 1, 0, h.bet[idx]);
+    h.stood.splice(idx + 1, 0, false);
+    h.doubled.splice(idx + 1, 0, false);
+    if (sc.rank === "A") {
+      h.splitAceIdxs = h.splitAceIdxs || [];
+      h.splitAceIdxs.push(idx, idx + 1);
+      h.stood[idx] = true;
+      h.stood[idx + 1] = true;
+    }
+  } else if (data.actionType === "SURRENDER") {
+    h.surrendered = true;
+    h.stood[idx] = true;
+  }
+  gs.hands[fromPid] = h;
+  bjBroadcast({ type: "ACTION", actionType: data.actionType, pid: fromPid, hand: h, shoeIdx: gs.shoeIdx });
+  const done = h.cards.every((c2, i2) => h.stood[i2] || handTotal(c2) > 21);
+  if (done) bjAdvanceTurn();
+  else bjRenderRoom();
+}
+function bjHostRunDealer() {
+  const gs = bjGameState;
+  gs.dealerHand[1].hidden = false;
+  gs.phase = "dealer";
+  const allBust = gs.turnOrder.every((p2) => {
+    const h = gs.hands[p2];
+    return h && h.cards.every((c2) => handTotal(c2) > 21) || h?.surrendered;
+  });
+  const revMsg = { type: "ACTION", actionType: "DEALER_REVEAL", dealerHand: gs.dealerHand };
+  bjBroadcast(revMsg);
+  bjHandleMsg(bjMyId, revMsg);
+  const step = () => {
+    if (allBust) {
+      bjHostEndRound();
+      return;
+    }
+    const tot = handTotal(gs.dealerHand);
+    if (tot < 17 || isSoft(gs.dealerHand) && tot === 16) {
+      gs.dealerHand.push({ ...gs.shoe[gs.shoeIdx++] });
+      const hitMsg = { type: "ACTION", actionType: "DEALER_HIT", dealerHand: gs.dealerHand };
+      bjBroadcast(hitMsg);
+      bjHandleMsg(bjMyId, hitMsg);
+      setTimeout(step, 700);
+    } else {
+      bjHostEndRound();
+    }
+  };
+  setTimeout(step, 700);
+}
+function bjHostEndRound() {
+  const gs = bjGameState;
+  const dTotal = handTotal(gs.dealerHand);
+  const dBJ = isBlackjack(gs.dealerHand);
+  const dBust = dTotal > 21;
+  const payouts = {};
+  for (const pid of gs.turnOrder) {
+    const h = gs.hands[pid];
+    if (!h) continue;
+    let p2 = 0;
+    if (h.insuranceBet > 0 && dBJ) p2 += h.insuranceBet * 3;
+    for (let i2 = 0; i2 < h.cards.length; i2++) {
+      const cards = h.cards[i2];
+      const bet = h.bet[i2];
+      const pTotal = handTotal(cards);
+      const isOnly = h.cards.length === 1;
+      const pBJ = isBlackjack(cards) && isOnly;
+      if (h.surrendered && isOnly) {
+        p2 += Math.floor(bet / 2);
+        continue;
+      }
+      if (pTotal > 21) continue;
+      if (pBJ && dBJ) {
+        p2 += bet;
+        continue;
+      }
+      if (pBJ) {
+        p2 += bet + Math.floor(bet * 1.5);
+        continue;
+      }
+      if (dBJ) continue;
+      if (dBust || pTotal > dTotal) {
+        p2 += bet * 2;
+        continue;
+      }
+      if (pTotal === dTotal) {
+        p2 += bet;
+        continue;
+      }
+    }
+    payouts[pid] = p2;
+  }
+  if (payouts[bjMyId]) {
+    ctx.S.coins = (ctx.S.coins || 0) + payouts[bjMyId];
+    save();
+    renderStatus();
+  }
+  const msg = { type: "ROUND_END", payouts, dealerHand: gs.dealerHand };
+  bjBroadcast(msg);
+  bjHandleMsg(bjMyId, msg);
+}
+function bjRoomPlaceBet(amount) {
+  const coins = ctx.S.coins || 0;
+  if (coins < amount) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng!");
+  if (amount < bjSettings.minBet) return toast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${bjSettings.minBet}G`);
+  if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return toast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${bjSettings.maxBet}G`);
+  ctx.S.coins = coins - amount;
+  save();
+  renderStatus();
+  const msg = { type: "BET_PLACED", pid: bjMyId, bet: amount };
+  bjHandleMsg(bjMyId, msg);
+  bjBroadcast(msg);
+}
+function bjRoomAction(actionType, extra) {
+  const msg = { type: "ACTION", actionType, pid: bjMyId, ...extra || {} };
+  if (bjIsHost) bjHandleRoomAction(bjMyId, msg);
+  else bjBroadcast(msg);
+}
+function bjApplySettings() {
+  const min = parseInt($id("bj-cfg-min")?.value) || 10;
+  const max = parseInt($id("bj-cfg-max")?.value) || 0;
+  const decks = Math.min(8, Math.max(1, parseInt($id("bj-cfg-decks")?.value) || 6));
+  bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks };
+  bjBroadcast({ type: "SETTINGS_UPDATE", settings: bjSettings });
+  toast(`\u0110\xE3 c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ${bjSettings.numDecks} b\u1ED9 b\xE0i`);
+}
+function bjRenderRoom() {
+  const body = $id("bj-room-body");
+  if (!body) return;
+  const gs = bjGameState;
+  const allPids = Object.keys(bjPlayers);
+  let html = `<div class="bj-room-layout">
+        <div class="bj-room-topbar">
+            <div class="bj-room-code-badge">\u{1F0CB} ${bjRoomId}</div>
+            <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} \u2014 ${(ctx.S.coins || 0).toLocaleString()}G${bjMyStatus === "spectator" ? " \u{1F441}" : ""}</div>
+            <div class="buy plain" id="bj-out-room-ingame" style="font-size:11px;">\u2190 Tho\xE1t</div>
+        </div>`;
+  if (gs) {
+    html += `<div class="bj-table">
+            <div class="bj-dealer-area">
+                <div class="bj-area-label">Nh\xE0 c\xE1i (m\xE1y)</div>
+                <div class="bj-hand-row">${(gs.dealerHand || []).map((c2) => cardHTML(c2, true)).join("")}</div>
+                <div class="bj-score">${gs.dealerHand?.length ? `\u0110i\u1EC3m: ${handTotal(gs.dealerHand.filter((c2) => !c2.hidden))}` : ""}</div>
+            </div>
+            <div class="bj-players-grid">`;
+    for (const pid of gs.turnOrder || []) {
+      const ph = bjPlayers[pid] || { name: pid };
+      const h = gs.hands?.[pid];
+      const isMe = pid === bjMyId, isTurn = gs.currentTurn === pid;
+      html += `<div class="bj-player-slot${isMe ? " me" : ""}${isTurn ? " my-turn" : ""}">
+                <div class="bj-player-name">${ph.name}${isTurn ? " \u27A4" : ""}${isMe ? " (B\u1EA1n)" : ""}</div>`;
+      if (h) {
+        h.cards.forEach((cards, i2) => {
+          const tot = handTotal(cards);
+          html += `<div class="bj-hand-row">${cards.map((c2) => cardHTML(c2, true)).join("")}</div>
+                        <div class="bj-score">${tot}${tot > 21 ? " Bust!" : ""} \u2014 ${(h.bet[i2] || 0).toLocaleString()}G</div>`;
+        });
+      } else html += `<div class="bj-msg-sm" style="opacity:0.5">Ch\u1EDD \u0111\u1EB7t c\u01B0\u1EE3c...</div>`;
+      html += `</div>`;
+    }
+    for (const pid of allPids) {
+      if (!gs.turnOrder?.includes(pid)) {
+        html += `<div class="bj-player-slot spectator"><div class="bj-player-name">\u{1F441} ${bjPlayers[pid].name} (xem)</div></div>`;
+      }
+    }
+    html += `</div></div>
+        <div id="bj-my-actions" class="bj-actions">${bjBuildMyActions()}</div>
+        <div id="bj-room-msg" class="bj-message"></div>`;
+  } else {
+    html += `<div class="bj-player-list">${allPids.map(
+      (p2) => `<div class="bj-player-row">${bjPlayers[p2].name}${p2 === bjMyId ? " (B\u1EA1n)" : ""}</div>`
+    ).join("") || '<div style="opacity:0.5;font-size:12px;">Ch\u01B0a c\xF3 ai...</div>'}</div>`;
+    if (bjIsHost) {
+      html += `<div class="bj-settings-host">
+                <div style="font-size:12px;font-weight:bold;color:#ffd94d;margin-bottom:6px;">\u2699\uFE0F C\xE0i \u0111\u1EB7t b\xE0n</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                    <label style="font-size:11px;color:#ddd;">Min <input class="inp" id="bj-cfg-min" type="number" value="${bjSettings.minBet}" min="1" style="width:60px"></label>
+                    <label style="font-size:11px;color:#ddd;">Max <input class="inp" id="bj-cfg-max" type="number" value="${bjSettings.maxBet}" min="0" style="width:60px"> <span style="color:#888;font-size:10px">(0=\u221E)</span></label>
+                    <label style="font-size:11px;color:#ddd;">B\u1ED9 <input class="inp" id="bj-cfg-decks" type="number" value="${bjSettings.numDecks}" min="1" max="8" style="width:50px"></label>
+                    <div class="buy plain" id="bj-cfg-apply" style="font-size:11px;">\xC1p d\u1EE5ng</div>
+                </div>
+            </div>
+            <div class="bj-btn-row" style="margin-top:10px;">
+                <div class="buy" id="bj-start-room-btn">\u25B6 B\u1EAFt \u0111\u1EA7u v\xF2ng m\u1EDBi</div>
+            </div>`;
+    } else {
+      html += `<div class="bj-msg-sm" style="text-align:center;padding:10px;opacity:0.7">Ch\u1EDD host b\u1EAFt \u0111\u1EA7u...</div>`;
+    }
+  }
+  html += `<div class="bj-chat-wrap">
+        <div class="bj-chat-log" id="bj-chat-log">${bjChatLog.slice(-20).map(
+    (e2) => `<div class="bj-chat-line"><b>${e2.name}:</b> ${e2.msg.replace(/</g, "&lt;")}</div>`
+  ).join("")}</div>
+        <div class="bj-chat-inp-row">
+            <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1">
+            <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">G\u1EEDi</div>
+        </div>
+    </div></div>`;
+  body.innerHTML = html;
+  $id("bj-out-room-ingame")?.addEventListener("click", closeBlackjackRoom);
+  $id("bj-start-room-btn")?.addEventListener("click", bjHostStartRound);
+  $id("bj-cfg-apply")?.addEventListener("click", bjApplySettings);
+  bjBindMyActions();
+  bjBindChat();
+  const cl = $id("bj-chat-log");
+  if (cl) cl.scrollTop = cl.scrollHeight;
+}
+function bjBuildMyActions() {
+  const gs = bjGameState;
+  if (!gs) return "";
+  if (bjMyStatus === "spectator") return `<div class="bj-msg-sm" style="text-align:center;opacity:0.6">\u{1F441} \u0110ang xem \u2014 S\u1EBD v\xE0o \u1EDF round sau</div>`;
+  const coins = ctx.S.coins || 0;
+  if (gs.phase === "betting") {
+    if (gs.betsIn?.[bjMyId]) return `<div class="bj-msg-sm" style="text-align:center;color:#7ed;">\u2713 \u0110\xE3 \u0111\u1EB7t ${gs.betsIn[bjMyId].toLocaleString()}G \u2014 Ch\u1EDD ng\u01B0\u1EDDi kh\xE1c...</div>`;
+    const min = bjSettings.minBet;
+    if (coins < min) return `<div class="bj-msg-sm" style="color:#e05;">\u26A0 Kh\xF4ng \u0111\u1EE7 v\xE0ng c\u01B0\u1EE3c (c\u1EA7n t\u1ED1i thi\u1EC3u ${min}G)</div>`;
+    return `<div class="bj-bet-row">
+            <input class="inp" id="bj-room-bet-inp" type="number" min="${min}" max="${bjSettings.maxBet || ""}" value="${Math.min(Math.max(min, 100), coins)}" style="width:110px">
+            <span class="buy plain bj-rquick" data-q="4">\xBC</span>
+            <span class="buy plain bj-rquick" data-q="2">\xBD</span>
+            <span class="buy plain bj-rquick" data-q="1">Max</span>
+            <div class="buy" id="bj-room-place-bet">\u0110\u1EB7t C\u01B0\u1EE3c</div>
+        </div>`;
+  }
+  if (gs.phase === "insurance") {
+    const myHand = gs.hands?.[bjMyId];
+    if (!myHand) return "";
+    const hasBJ = isBlackjack(myHand.cards[0]);
+    if (hasBJ) return `<div class="bj-btn-row">
+            <div class="buy" id="bj-rm-even">L\u1EA5y ngay 1:1 (Even Money)</div>
+            <div class="buy plain" id="bj-rm-skip-ins">B\u1ECF qua</div>
+        </div>`;
+    const maxIns = Math.floor((myHand.bet[0] || 0) / 2);
+    return `<div class="bj-msg-sm">Dealer Ace \u2014 Mua b\u1EA3o hi\u1EC3m ${maxIns}G?</div>
+        <div class="bj-btn-row">
+            <div class="buy" id="bj-rm-buy-ins">Mua ${maxIns}G</div>
+            <div class="buy plain" id="bj-rm-skip-ins">B\u1ECF qua</div>
+        </div>`;
+  }
+  if (gs.phase === "player") {
+    if (gs.currentTurn !== bjMyId) return `<div class="bj-msg-sm" style="text-align:center;opacity:0.6">\u231B \u0110\u1EE3i l\u01B0\u1EE3t b\u1EA1n...</div>`;
+    const h = gs.hands?.[bjMyId];
+    if (!h) return "";
+    const idx = h.activeHandIdx || 0;
+    const hand = h.cards[idx];
+    const tot = handTotal(hand);
+    const bet = h.bet[idx];
+    const isSA = (h.splitAceIdxs || []).includes(idx);
+    if (tot > 21) return `<div class="bj-msg-sm">\u{1F480} Bust!</div>`;
+    if (isSA) return `<div class="bj-msg-sm">Split Ace \u2014 T\u1EF1 Stand.</div>`;
+    const canD = hand.length === 2 && coins >= bet && !isSA;
+    const canSp = hand.length === 2 && hand[0].rank === hand[1].rank && coins >= bet && h.cards.length < 4;
+    const canSu = hand.length === 2 && idx === 0 && h.cards.length === 1;
+    return `<div class="bj-btn-row">
+            <div class="buy" id="bj-rm-hit">Hit</div>
+            <div class="buy plain" id="bj-rm-stand">Stand</div>
+            ${canD ? `<div class="buy bj-double-btn" id="bj-rm-double">Double</div>` : ""}
+            ${canSp ? `<div class="buy bj-split-btn" id="bj-rm-split">Split</div>` : ""}
+            ${canSu ? `<div class="buy plain" id="bj-rm-surrender">Surrender</div>` : ""}
+        </div>`;
+  }
+  if (gs.phase === "dealer" || gs.phase === "dealer_bj") return `<div class="bj-msg-sm" style="text-align:center;opacity:0.6">\u{1F0CF} Nh\xE0 c\xE1i \u0111ang r\xFAt b\xE0i...</div>`;
+  return "";
+}
+function bjBindMyActions() {
+  const gs = bjGameState;
+  $id("bj-room-place-bet")?.addEventListener("click", () => {
+    const inp = $id("bj-room-bet-inp");
+    bjRoomPlaceBet(parseInt(inp?.value || "0") || 0);
+  });
+  document.querySelectorAll(".bj-rquick").forEach((b2) => b2.addEventListener("click", () => {
+    const inp = $id("bj-room-bet-inp");
+    const q = parseInt(b2.getAttribute("data-q") || "1");
+    if (inp) inp.value = String(Math.max(bjSettings.minBet, Math.floor((ctx.S.coins || 0) / q)));
+  }));
+  $id("bj-rm-even")?.addEventListener("click", () => {
+    const h = gs?.hands?.[bjMyId];
+    if (!h) return;
+    const payout = h.bet[0] * 2;
+    ctx.S.coins = (ctx.S.coins || 0) + payout;
+    save();
+    renderStatus();
+    bjRoomAction("INSURANCE_ANSWER", { answer: "even" });
+  });
+  $id("bj-rm-buy-ins")?.addEventListener("click", () => {
+    const h = gs?.hands?.[bjMyId];
+    const ins = Math.floor((h?.bet[0] || 0) / 2);
+    if ((ctx.S.coins || 0) < ins) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng");
+    ctx.S.coins = (ctx.S.coins || 0) - ins;
+    save();
+    bjRoomAction("INSURANCE_ANSWER", { answer: "ins" });
+  });
+  $id("bj-rm-skip-ins")?.addEventListener("click", () => bjRoomAction("INSURANCE_ANSWER", { answer: "skip" }));
+  $id("bj-rm-hit")?.addEventListener("click", () => bjRoomAction("HIT"));
+  $id("bj-rm-stand")?.addEventListener("click", () => bjRoomAction("STAND"));
+  $id("bj-rm-double")?.addEventListener("click", () => {
+    const h = gs?.hands?.[bjMyId];
+    const idx = h?.activeHandIdx || 0;
+    const bet = h?.bet[idx] || 0;
+    if ((ctx.S.coins || 0) < bet) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Double");
+    ctx.S.coins = (ctx.S.coins || 0) - bet;
+    save();
+    bjRoomAction("DOUBLE");
+  });
+  $id("bj-rm-split")?.addEventListener("click", () => {
+    const h = gs?.hands?.[bjMyId];
+    const idx = h?.activeHandIdx || 0;
+    const bet = h?.bet[idx] || 0;
+    if ((ctx.S.coins || 0) < bet) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Split");
+    ctx.S.coins = (ctx.S.coins || 0) - bet;
+    save();
+    bjRoomAction("SPLIT");
+  });
+  $id("bj-rm-surrender")?.addEventListener("click", () => bjRoomAction("SURRENDER"));
+}
+function bjRenderChat() {
+  const el = $id("bj-chat-log");
+  if (!el) return;
+  el.innerHTML = bjChatLog.slice(-20).map(
+    (e2) => `<div class="bj-chat-line"><b>${e2.name}:</b> ${e2.msg.replace(/</g, "&lt;")}</div>`
+  ).join("");
+  el.scrollTop = el.scrollHeight;
+}
+function bjBindChat() {
+  const send = () => {
+    const inp = $id("bj-chat-inp");
+    const msg = (inp?.value || "").trim();
+    if (!msg) return;
+    if (inp) inp.value = "";
+    bjChatLog.push({ name: bjMyName(), msg, ts: Date.now() });
+    if (bjChatLog.length > 50) bjChatLog.shift();
+    bjRenderChat();
+    bjBroadcast({ type: "CHAT", msg });
+  };
+  $id("bj-chat-send")?.addEventListener("click", send);
+  $id("bj-chat-inp")?.addEventListener("keydown", (e2) => {
+    if (e2.key === "Enter") send();
+  });
+}
+function openBlackjackPicker() {
+  openModal("\u2660 Black Jack", `
+        <div style="display:flex;flex-direction:column;gap:16px;padding:10px 0;">
+            <div style="text-align:center;font-size:13px;color:#a3763d;">Ch\u1ECDn ch\u1EBF \u0111\u1ED9 ch\u01A1i</div>
+            <div class="buy" id="bj-solo-pick" style="text-align:center;padding:14px;font-size:14px;">
+                \u{1F0CF} Ch\u01A1i \u0110\u01A1n<br><small style="font-weight:normal;font-size:11px;">Solo vs Nh\xE0 c\xE1i m\xE1y t\xEDnh</small>
+            </div>
+            <div class="buy plain" id="bj-room-pick" style="text-align:center;padding:14px;font-size:14px;">
+                \u{1F3B0} Ch\u01A1i Ph\xF2ng<br><small style="font-weight:normal;font-size:11px;">\u0110a ng\u01B0\u1EDDi (t\u1ED1i \u0111a 4), c\xF9ng \u0111\u1EA5u v\u1EDBi nh\xE0 c\xE1i</small>
+            </div>
+        </div>`, false);
+  $id("bj-solo-pick").addEventListener("click", () => {
+    $id("modal")?.classList.remove("open");
+    openBlackjackSolo();
+  });
+  $id("bj-room-pick").addEventListener("click", () => {
+    $id("modal")?.classList.remove("open");
+    openBlackjackRoom();
+  });
+}
+var SUITS, RANKS, soloState, bjPeer, bjConns, bjIsHost, bjMyId, bjRoomId, bjPlayers, bjGameState, bjSettings, bjMyStatus, bjChatLog, MAX_PLAYERS;
+var init_blackjack = __esm({
+  "src/blackjack.js"() {
+    init_shop();
+    init_store();
+    init_state();
+    init_witch();
+    init_render();
+    init_net();
+    init_bundler();
+    init_all();
+    SUITS = ["\u2660", "\u2665", "\u2666", "\u2663"];
+    RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+    soloState = null;
+    bjPeer = null;
+    bjConns = {};
+    bjIsHost = false;
+    bjMyId = "";
+    bjRoomId = "";
+    bjPlayers = {};
+    bjGameState = null;
+    bjSettings = { minBet: 10, maxBet: 0, numDecks: 6 };
+    bjMyStatus = "idle";
+    bjChatLog = [];
+    MAX_PLAYERS = 4;
+  }
+});
+
 // src/all.js
 var all_exports = {};
 __export(all_exports, {
@@ -48917,6 +50207,7 @@ __export(all_exports, {
   cashOutHero: () => cashOutHero,
   charName: () => charName,
   clampN: () => clampN,
+  closeBlackjackRoom: () => closeBlackjackRoom,
   closeDungeonView: () => closeDungeonView,
   closeHeroMode: () => closeHeroMode,
   closeModal: () => closeModal,
@@ -48998,6 +50289,9 @@ __export(all_exports, {
   onResize: () => onResize,
   openAchivModal: () => openAchivModal,
   openBetModal: () => openBetModal,
+  openBlackjackPicker: () => openBlackjackPicker,
+  openBlackjackRoom: () => openBlackjackRoom,
+  openBlackjackSolo: () => openBlackjackSolo,
   openBuyDlg: () => openBuyDlg,
   openDungeonView: () => openDungeonView,
   openFleaMarket: () => openFleaMarket,
@@ -49148,6 +50442,7 @@ var init_all = __esm({
     init_trade();
     init_sync();
     init_flea();
+    init_blackjack();
   }
 });
 

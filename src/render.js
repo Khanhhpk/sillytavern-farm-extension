@@ -186,10 +186,16 @@ export function renderPlots() {
           ${spriteSVG('hiloIcon', 48)}
           <div class="feature-name">Hi-Lo</div>
         </div>
+        <div class="explore-slot" id="cslot-bj">
+          ${spriteSVG('spadeIcon', 48)}
+          <div class="feature-name">Blackjack</div>
+        </div>
       </div>
     `;
     const bBtn = All.$id('cslot-bet');
     if (bBtn) bBtn.addEventListener('click', () => All.openPanel('bet'));
+    const bjBtn = All.$id('cslot-bj');
+    if (bjBtn) bjBtn.addEventListener('click', () => All.openBlackjackPicker());
     return;
   }
 

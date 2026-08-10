@@ -18,3 +18,4 @@ export * from './hero.js';
 export * from './trade.js';
 export * from './sync.js';
 export * from './flea.js';
+export * from './blackjack.js';
