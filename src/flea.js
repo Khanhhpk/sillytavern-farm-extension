@@ -277,8 +277,8 @@ function renderPostItem() {
     if (ctx.S.bag) {
         Object.entries(ctx.S.bag).forEach(([k, v]) => {
             if (v > 0) {
-                if (k.startsWith('unique@')) catGacha += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('uniques', '${k}', ${v})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${v})</div>`;
-                else catBag += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('bag', '${k}', ${v})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${v})</div>`;
+                if (k.startsWith('unique@')) catGacha += `<div class="trade-pick" onclick="FarmAll.uiSelectFleaAdd('uniques', '${k}', ${v})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${v})</div>`;
+                else catBag += `<div class="trade-pick" onclick="FarmAll.uiSelectFleaAdd('bag', '${k}', ${v})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${v})</div>`;
             }
         });
     }
@@ -286,20 +286,20 @@ function renderPostItem() {
     let catSeeds = '';
     if (ctx.S.seeds) {
         Object.entries(ctx.S.seeds).forEach(([k, v]) => {
-            if (v > 0) catSeeds += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('seeds', '${k}', ${v})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${v})</div>`;
+            if (v > 0) catSeeds += `<div class="trade-pick" onclick="FarmAll.uiSelectFleaAdd('seeds', '${k}', ${v})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${v})</div>`;
         });
     }
 
     let catFerts = '';
     if (ctx.S.ferts) {
         Object.entries(ctx.S.ferts).forEach(([k, v]) => {
-            if (v > 0) catFerts += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('ferts', '${k}', ${v})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${v})</div>`;
+            if (v > 0) catFerts += `<div class="trade-pick" onclick="FarmAll.uiSelectFleaAdd('ferts', '${k}', ${v})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${v})</div>`;
         });
     }
 
     let catTickets = '';
-    ['norm', 'spec', 'super'].forEach(k => { if (ctx.S.tickets && ctx.S.tickets[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('tickets', '${k}', ${ctx.S.tickets[k]})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${ctx.S.tickets[k]})</div>`; });
-    ['prism', 'star', 'legend'].forEach(k => { if (ctx.S.shards && ctx.S.shards[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('shards', '${k}', ${ctx.S.shards[k]})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${ctx.S.shards[k]})</div>`; });
+    ['norm', 'spec', 'super'].forEach(k => { if (ctx.S.tickets && ctx.S.tickets[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectFleaAdd('tickets', '${k}', ${ctx.S.tickets[k]})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${ctx.S.tickets[k]})</div>`; });
+    ['prism', 'star', 'legend'].forEach(k => { if (ctx.S.shards && ctx.S.shards[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectFleaAdd('shards', '${k}', ${ctx.S.shards[k]})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${ctx.S.shards[k]})</div>`; });
 
     let html = '';
     if (catBag) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">NÔNG SẢN</div>` + catBag;
