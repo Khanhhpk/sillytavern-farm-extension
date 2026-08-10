@@ -105,8 +105,13 @@ export function openBlackjackSolo() {
         settings: { minBet: 10, maxBet: 0, numDecks: 6 },
     };
     soloState.shoe = buildShoe(soloState.settings.numDecks, Date.now() & 0xffffffff);
-    openModal('\u2660 Blackjack \u2014 Ch\u01a1i \u0110\u01a1n', buildSoloUI(), false);
-    soloRender();
+    const win = All.$id('bj-win');
+    const body = All.$id('bj-body');
+    if (win && body) {
+        win.style.display = 'flex';
+        body.innerHTML = buildSoloUI();
+        soloRender();
+    }
 }
 
 function soloDrawCard(hidden) {
@@ -480,18 +485,24 @@ const MAX_PLAYERS = 4;
 function bjMyName() { return ctx.S.username || 'Kh\u00e1ch'; }
 
 export function openBlackjackRoom() {
-    const win = All.$id('bj-room-win');
-    if (win) win.classList.add('open');
+    const win = All.$id('bj-win');
+    if (win) {
+        win.classList.add('open');
+        win.style.display = 'flex';
+    }
     bjResetState();
     bjRenderMenu();
 }
 
-export function closeBlackjackRoom() {
+export function closeBlackjack() {
     if (bjPeer) { try { bjPeer.destroy(); } catch (e) {} bjPeer = null; }
     bjConns = {};
     bjResetState();
-    const win = All.$id('bj-room-win');
-    if (win) win.classList.remove('open');
+    const win = All.$id('bj-win');
+    if (win) {
+        win.classList.remove('open');
+        win.style.display = 'none';
+    }
 }
 
 function bjResetState() {
@@ -507,7 +518,7 @@ function bjBroadcast(data, excludePid) {
 }
 
 function bjRenderMenu() {
-    const body = All.$id('bj-room-body');
+    const body = All.$id('bj-body');
     if (!body) return;
     if (!ctx.S.username) {
         body.innerHTML = `<div style="padding:20px;text-align:center;display:flex;flex-direction:column;gap:12px;">
@@ -684,7 +695,7 @@ function bjHandleMsg(fromPid, data) {
             }
             break;
         case 'ROOM_FULL':
-            toast('Ph\u00f2ng \u0111\u00e3 \u0111\u1ea7y!'); closeBlackjackRoom(); break;
+            toast('Ph\u00f2ng \u0111\u00e3 \u0111\u1ea7y!'); closeBlackjack(); break;
     }
 }
 
@@ -698,7 +709,7 @@ function bjHandleDisconnect(pid) {
     }
     bjBroadcast({ type: 'PLAYER_LEFT', pid });
     if (Object.keys(bjConns).length === 0 && !bjIsHost) {
-        closeBlackjackRoom(); toast('Ph\u00f2ng \u0111\u00e3 \u0111\u00f3ng.');
+        closeBlackjack(); toast('Ph\u00f2ng \u0111\u00e3 \u0111\u00f3ng.');
     }
     bjRenderRoom();
 }
@@ -932,7 +943,7 @@ function bjApplySettings() {
 //  ROOM — Render
 // ─────────────────────────────────────────────────────────────────────────────
 function bjRenderRoom() {
-    const body = All.$id('bj-room-body');
+    const body = All.$id('bj-body');
     if (!body) return;
     const gs = bjGameState;
     const allPids = Object.keys(bjPlayers);
@@ -1008,7 +1019,7 @@ function bjRenderRoom() {
     </div></div>`;
 
     body.innerHTML = html;
-    All.$id('bj-out-room-ingame')?.addEventListener('click', closeBlackjackRoom);
+    All.$id('bj-out-room-ingame')?.addEventListener('click', closeBlackjack);
     All.$id('bj-start-room-btn')?.addEventListener('click', bjHostStartRound);
     All.$id('bj-cfg-apply')?.addEventListener('click', bjApplySettings);
     bjBindMyActions();
@@ -1143,22 +1154,22 @@ function bjBindChat() {
 //  MODE PICKER
 // ─────────────────────────────────────────────────────────────────────────────
 export function openBlackjackPicker() {
-    openModal('\u2660 Black Jack', `
-        <div style="display:flex;flex-direction:column;gap:16px;padding:10px 0;">
-            <div style="text-align:center;font-size:13px;color:#a3763d;">Ch\u1ecdn ch\u1ebf \u0111\u1ed9 ch\u01a1i</div>
-            <div class="buy" id="bj-solo-pick" style="text-align:center;padding:14px;font-size:14px;">
-                \uD83C\uDCCF Ch\u01a1i \u0110\u01a1n<br><small style="font-weight:normal;font-size:11px;">Solo vs Nh\u00e0 c\u00e1i m\u00e1y t\u00ednh</small>
+    const win = All.$id('bj-win');
+    const body = All.$id('bj-body');
+    if (!win || !body) return;
+    
+    body.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:16px;padding:30px 10px;">
+            <div style="text-align:center;font-size:16px;color:#a3763d;font-weight:bold;margin-bottom:10px;">Ch\u1ecdn ch\u1ebf \u0111\u1ed9 ch\u01a1i</div>
+            <div class="buy" id="bj-solo-pick" style="text-align:center;padding:20px;font-size:16px;">
+                \uD83C\uDCCF Ch\u01a1i \u0110\u01a1n<br><small style="font-weight:normal;font-size:12px;opacity:0.8;">Solo vs Nh\u00e0 c\u00e1i m\u00e1y t\u00ednh</small>
             </div>
-            <div class="buy plain" id="bj-room-pick" style="text-align:center;padding:14px;font-size:14px;">
-                \uD83C\uDFB0 Ch\u01a1i Ph\u00f2ng<br><small style="font-weight:normal;font-size:11px;">\u0110a ng\u01b0\u1eddi (t\u1ed1i \u0111a 4), c\u00f9ng \u0111\u1ea5u v\u1edbi nh\u00e0 c\u00e1i</small>
+            <div class="buy plain" id="bj-room-pick" style="text-align:center;padding:20px;font-size:16px;">
+                \uD83C\uDFB0 Ch\u01a1i Ph\u00f2ng<br><small style="font-weight:normal;font-size:12px;opacity:0.8;">\u0110a ng\u01b0\u1eddi (t\u1ed1i \u0111a 4), c\u00f9ng \u0111\u1ea5u v\u1edbi nh\u00e0 c\u00e1i</small>
             </div>
-        </div>`, false);
-    All.$id('bj-solo-pick').addEventListener('click', () => {
-        All.$id('modal')?.classList.remove('open');
-        openBlackjackSolo();
-    });
-    All.$id('bj-room-pick').addEventListener('click', () => {
-        All.$id('modal')?.classList.remove('open');
-        openBlackjackRoom();
-    });
+        </div>`;
+    win.style.display = 'flex';
+    
+    All.$id('bj-solo-pick').addEventListener('click', openBlackjackSolo);
+    All.$id('bj-room-pick').addEventListener('click', openBlackjackRoom);
 }

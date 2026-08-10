@@ -2295,7 +2295,7 @@ var init_graphics = __esm({
 });
 
 // src/style.js
-var styleCSS, fleaStyles;
+var styleCSS, fleaStyles, blackjackStyles;
 var init_style = __esm({
   "src/style.js"() {
     styleCSS = `
@@ -3040,6 +3040,63 @@ var init_style = __esm({
 .flea-post-form label { font-size: 12px; font-weight: bold; color: #7a5c38; }
 .flea-post-form select, .flea-post-form input { padding: 8px; border: 2px solid #e0c8a0; border-radius: 4px; font-family: inherit; }
 `;
+    blackjackStyles = `
+/* ===== BLACKJACK CSS ===== */
+#bj-solo-wrap { display: flex; flex-direction: column; gap: 16px; padding: 10px 0; }
+.bj-table { background: #1a4a2e; border: 4px solid #3e2723; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); position: relative; }
+.bj-table::before { content: "BLACKJACK PAYS 3 TO 2"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(255,255,255,0.1); font-weight: bold; font-size: 20px; letter-spacing: 2px; text-align: center; pointer-events: none; width: 100%; }
+.bj-dealer-area, .bj-player-area { display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 1; }
+.bj-area-label { color: #f1c40f; font-weight: bold; font-size: 13px; text-shadow: 1px 1px 2px #000; text-transform: uppercase; letter-spacing: 1px; }
+.bj-hand-row { display: flex; justify-content: center; gap: 6px; min-height: 80px; }
+.bj-card { width: 56px; height: 80px; background: #fff; border-radius: 6px; border: 1px solid #ccc; box-shadow: 2px 2px 5px rgba(0,0,0,0.3); position: relative; font-weight: bold; display: flex; align-items: center; justify-content: center; user-select: none; }
+.bj-card.small { width: 42px; height: 60px; font-size: 12px; }
+.bj-card.back { background: #b71c1c; border-color: #fff; padding: 4px; }
+.bj-card-back-inner { width: 100%; height: 100%; border: 2px dashed rgba(255,255,255,0.5); border-radius: 3px; background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.1) 5px, rgba(255,255,255,0.1) 10px); }
+.bj-card-corner { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; font-size: 13px; }
+.bj-card.small .bj-card-corner { font-size: 10px; }
+.bj-card-corner.tl { top: 4px; left: 4px; }
+.bj-card-corner.br { bottom: 4px; right: 4px; transform: rotate(180deg); }
+.bj-card-corner span { font-size: 14px; }
+.bj-card.small .bj-card-corner span { font-size: 11px; }
+.bj-card-center { font-size: 24px; }
+.bj-card.small .bj-card-center { font-size: 18px; }
+.bj-score { color: #fff; font-size: 12px; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 10px; min-width: 60px; text-align: center; }
+#bj-player-hands { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+.bj-player-hand { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; border-radius: 8px; transition: background 0.3s; position: relative; }
+.bj-player-hand.active-hand { background: rgba(241, 196, 15, 0.2); box-shadow: 0 0 10px rgba(241, 196, 15, 0.5); border: 1px dashed rgba(241, 196, 15, 0.5); }
+.bj-player-hand.active-hand::after { content: "\u25BC"; position: absolute; top: -15px; color: #f1c40f; font-size: 14px; animation: bounce 1s infinite; }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.bj-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.bj-bet-row { display: flex; gap: 6px; align-items: center; background: #faf0dc; padding: 6px; border-radius: 8px; border: 2px solid #e0c8a0; }
+.bj-quick { cursor: pointer; padding: 4px 8px; border-radius: 4px; background: #e0c8a0; font-size: 12px; font-weight: bold; color: #5d4037; }
+.bj-quick:hover { background: #d0b890; }
+.bj-btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.bj-message { text-align: center; font-weight: bold; font-size: 14px; color: #5d4037; min-height: 20px; padding: 5px; }
+.bj-msg-sm { font-size: 12px; color: #7a5c38; font-weight: bold; text-align: center; }
+
+/* ROOM MODE */
+.bj-room-layout { display: flex; flex-direction: column; height: 100%; background: #f8efe0; }
+.bj-room-topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 2px solid #c9a273; background: #e6d2b5; }
+.bj-room-code-badge { background: #7a5c38; color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; letter-spacing: 1px; }
+.bj-players-grid { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 10px; width: 100%; z-index: 1; margin-top: 10px; }
+.bj-player-slot { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 8px; min-width: 100px; border: 2px solid transparent; }
+.bj-player-slot.me { border-color: rgba(255,255,255,0.4); }
+.bj-player-slot.my-turn { background: rgba(241, 196, 15, 0.2); border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.3); }
+.bj-player-slot.spectator { opacity: 0.7; }
+.bj-player-name { color: #fff; font-size: 11px; font-weight: bold; text-shadow: 1px 1px 1px #000; text-align: center; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bj-player-list { display: flex; flex-direction: column; gap: 5px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; margin-top: 10px; max-height: 150px; overflow-y: auto; }
+.bj-player-row { font-size: 12px; font-weight: bold; color: #5d4037; padding: 4px 0; border-bottom: 1px dashed #c9a273; }
+.bj-player-row:last-child { border-bottom: none; }
+.bj-settings-host { background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+.bj-chat-wrap { display: flex; flex-direction: column; flex: 1; min-height: 150px; background: #fff; border-top: 2px solid #c9a273; }
+.bj-chat-log { flex: 1; padding: 10px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 4px; }
+.bj-chat-line { color: #333; word-break: break-word; }
+.bj-chat-inp-row { display: flex; gap: 5px; padding: 8px; background: #f0e6d6; border-top: 1px solid #d0ba9d; }
+
+.bj-double-btn { background: linear-gradient(#f39c12, #d35400) !important; color: white !important; }
+.bj-split-btn { background: linear-gradient(#9b59b6, #8e44ad) !important; color: white !important; }
+.bj-surr-btn { color: #c0392b !important; }
+`;
   }
 });
 
@@ -3133,7 +3190,7 @@ function initUI() {
   sh = root.attachShadow({ mode: "open" });
   $id = (id) => sh.querySelector("#" + id);
   const style = document.createElement("style");
-  style.textContent = styleCSS + "\n" + fleaStyles;
+  style.textContent = styleCSS + "\n" + fleaStyles + "\n" + blackjackStyles;
   sh.appendChild(style);
   ctx.ui = document.createElement("div");
   ctx.ui.innerHTML = `
@@ -3203,12 +3260,12 @@ function initUI() {
     <div class="toast" id="toast"></div>
   </div>
 
-  <div class="dialog-win" id="bj-room-win" style="display:none; left:50%; top:50%; transform:translate(-50%, -50%); z-index:99999; flex-direction:column; background:#f8efe0; border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px; max-width: 600px; width: 96vw; max-height: 90vh;">
-    <div class="titlebar" id="bj-room-drag">
+  <div class="dialog-win" id="bj-win" style="display:none; left:50%; top:50%; transform:translate(-50%, -50%); z-index:99999; flex-direction:column; background:#f8efe0; border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px; max-width: 600px; width: 96vw; max-height: 90vh;">
+    <div class="titlebar" id="bj-drag">
       <h1>${spriteSVG("spadeIcon", 16)} Ph\xE2n khu Gi\u1EA3i Tr\xED</h1>
-      <div class="close-x" onclick="FarmAll.closeBlackjackRoom()">\xD7</div>
+      <div class="close-x" onclick="FarmAll.closeBlackjack()">\xD7</div>
     </div>
-    <div id="bj-room-body" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
+    <div id="bj-body" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
   </div>
   
   <div id="hero-bar" class="hero-bar" style="display:none">
@@ -48967,8 +49024,13 @@ function openBlackjackSolo() {
     settings: { minBet: 10, maxBet: 0, numDecks: 6 }
   };
   soloState.shoe = buildShoe(soloState.settings.numDecks, Date.now() & 4294967295);
-  openModal("\u2660 Blackjack \u2014 Ch\u01A1i \u0110\u01A1n", buildSoloUI(), false);
-  soloRender();
+  const win = $id("bj-win");
+  const body = $id("bj-body");
+  if (win && body) {
+    win.style.display = "flex";
+    body.innerHTML = buildSoloUI();
+    soloRender();
+  }
 }
 function soloDrawCard(hidden) {
   const s2 = soloState;
@@ -49367,12 +49429,15 @@ function bjMyName() {
   return ctx.S.username || "Kh\xE1ch";
 }
 function openBlackjackRoom() {
-  const win = $id("bj-room-win");
-  if (win) win.classList.add("open");
+  const win = $id("bj-win");
+  if (win) {
+    win.classList.add("open");
+    win.style.display = "flex";
+  }
   bjResetState();
   bjRenderMenu();
 }
-function closeBlackjackRoom() {
+function closeBlackjack() {
   if (bjPeer) {
     try {
       bjPeer.destroy();
@@ -49382,8 +49447,11 @@ function closeBlackjackRoom() {
   }
   bjConns = {};
   bjResetState();
-  const win = $id("bj-room-win");
-  if (win) win.classList.remove("open");
+  const win = $id("bj-win");
+  if (win) {
+    win.classList.remove("open");
+    win.style.display = "none";
+  }
 }
 function bjResetState() {
   bjConns = {};
@@ -49402,7 +49470,7 @@ function bjBroadcast(data, excludePid) {
   }
 }
 function bjRenderMenu() {
-  const body = $id("bj-room-body");
+  const body = $id("bj-body");
   if (!body) return;
   if (!ctx.S.username) {
     body.innerHTML = `<div style="padding:20px;text-align:center;display:flex;flex-direction:column;gap:12px;">
@@ -49611,7 +49679,7 @@ function bjHandleMsg(fromPid, data) {
       break;
     case "ROOM_FULL":
       toast("Ph\xF2ng \u0111\xE3 \u0111\u1EA7y!");
-      closeBlackjackRoom();
+      closeBlackjack();
       break;
   }
 }
@@ -49625,7 +49693,7 @@ function bjHandleDisconnect(pid) {
   }
   bjBroadcast({ type: "PLAYER_LEFT", pid });
   if (Object.keys(bjConns).length === 0 && !bjIsHost) {
-    closeBlackjackRoom();
+    closeBlackjack();
     toast("Ph\xF2ng \u0111\xE3 \u0111\xF3ng.");
   }
   bjRenderRoom();
@@ -49894,7 +49962,7 @@ function bjApplySettings() {
   toast(`\u0110\xE3 c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ${bjSettings.numDecks} b\u1ED9 b\xE0i`);
 }
 function bjRenderRoom() {
-  const body = $id("bj-room-body");
+  const body = $id("bj-body");
   if (!body) return;
   const gs = bjGameState;
   const allPids = Object.keys(bjPlayers);
@@ -49966,7 +50034,7 @@ function bjRenderRoom() {
         </div>
     </div></div>`;
   body.innerHTML = html;
-  $id("bj-out-room-ingame")?.addEventListener("click", closeBlackjackRoom);
+  $id("bj-out-room-ingame")?.addEventListener("click", closeBlackjack);
   $id("bj-start-room-btn")?.addEventListener("click", bjHostStartRound);
   $id("bj-cfg-apply")?.addEventListener("click", bjApplySettings);
   bjBindMyActions();
@@ -50107,24 +50175,22 @@ function bjBindChat() {
   });
 }
 function openBlackjackPicker() {
-  openModal("\u2660 Black Jack", `
-        <div style="display:flex;flex-direction:column;gap:16px;padding:10px 0;">
-            <div style="text-align:center;font-size:13px;color:#a3763d;">Ch\u1ECDn ch\u1EBF \u0111\u1ED9 ch\u01A1i</div>
-            <div class="buy" id="bj-solo-pick" style="text-align:center;padding:14px;font-size:14px;">
-                \u{1F0CF} Ch\u01A1i \u0110\u01A1n<br><small style="font-weight:normal;font-size:11px;">Solo vs Nh\xE0 c\xE1i m\xE1y t\xEDnh</small>
+  const win = $id("bj-win");
+  const body = $id("bj-body");
+  if (!win || !body) return;
+  body.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:16px;padding:30px 10px;">
+            <div style="text-align:center;font-size:16px;color:#a3763d;font-weight:bold;margin-bottom:10px;">Ch\u1ECDn ch\u1EBF \u0111\u1ED9 ch\u01A1i</div>
+            <div class="buy" id="bj-solo-pick" style="text-align:center;padding:20px;font-size:16px;">
+                \u{1F0CF} Ch\u01A1i \u0110\u01A1n<br><small style="font-weight:normal;font-size:12px;opacity:0.8;">Solo vs Nh\xE0 c\xE1i m\xE1y t\xEDnh</small>
             </div>
-            <div class="buy plain" id="bj-room-pick" style="text-align:center;padding:14px;font-size:14px;">
-                \u{1F3B0} Ch\u01A1i Ph\xF2ng<br><small style="font-weight:normal;font-size:11px;">\u0110a ng\u01B0\u1EDDi (t\u1ED1i \u0111a 4), c\xF9ng \u0111\u1EA5u v\u1EDBi nh\xE0 c\xE1i</small>
+            <div class="buy plain" id="bj-room-pick" style="text-align:center;padding:20px;font-size:16px;">
+                \u{1F3B0} Ch\u01A1i Ph\xF2ng<br><small style="font-weight:normal;font-size:12px;opacity:0.8;">\u0110a ng\u01B0\u1EDDi (t\u1ED1i \u0111a 4), c\xF9ng \u0111\u1EA5u v\u1EDBi nh\xE0 c\xE1i</small>
             </div>
-        </div>`, false);
-  $id("bj-solo-pick").addEventListener("click", () => {
-    $id("modal")?.classList.remove("open");
-    openBlackjackSolo();
-  });
-  $id("bj-room-pick").addEventListener("click", () => {
-    $id("modal")?.classList.remove("open");
-    openBlackjackRoom();
-  });
+        </div>`;
+  win.style.display = "flex";
+  $id("bj-solo-pick").addEventListener("click", openBlackjackSolo);
+  $id("bj-room-pick").addEventListener("click", openBlackjackRoom);
 }
 var SUITS, RANKS, soloState, bjPeer, bjConns, bjIsHost, bjMyId, bjRoomId, bjPlayers, bjGameState, bjSettings, bjMyStatus, bjChatLog, MAX_PLAYERS;
 var init_blackjack = __esm({
@@ -50207,7 +50273,7 @@ __export(all_exports, {
   cashOutHero: () => cashOutHero,
   charName: () => charName,
   clampN: () => clampN,
-  closeBlackjackRoom: () => closeBlackjackRoom,
+  closeBlackjack: () => closeBlackjack,
   closeDungeonView: () => closeDungeonView,
   closeHeroMode: () => closeHeroMode,
   closeModal: () => closeModal,
