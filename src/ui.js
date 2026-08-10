@@ -35,7 +35,7 @@ export function applyPageSkin() {
   } else if (isCasino) {
     fieldEl.style.backgroundImage = 'none';
     fieldEl.style.backgroundColor = '#0a0210';
-    if (titleH1) titleH1.innerHTML = `🎰 Sòng bạc hoàng gia`;
+    if (titleH1) titleH1.innerHTML = `${spriteSVG('casinoNeonGoldMap', 16)} Sòng bạc hoàng gia`;
   } else {
     // @ts-ignore
     fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? 'water' : ctx.S.page === 3 ? 'mine' : 'grass', 4242);

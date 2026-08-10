@@ -139,7 +139,7 @@ export function renderPlots() {
             <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Thành Tựu</div>
           </div>
           <div class="explore-slot" id="eslot-casino" style="border-color: #ffd94d; box-shadow: 0 4px 0 #b08a5c, inset 0 0 0 3px rgba(255,217,77,0.4);">
-            <div style="width:64px;height:64px;position:relative;">${spriteSVG('casinoNeonGoldMap', 64) || '🎰'}</div>
+            <div style="width:64px;height:64px;position:relative;">${spriteSVG('casinoNeonGoldMap', 64)}</div>
             <div class="feature-name" style="color: #ffd94d; text-shadow: 0 1px 2px #000;">Casino</div>
           </div>
         `;
@@ -185,7 +185,7 @@ export function renderPlots() {
     casWrap.style.display = 'flex';
     casWrap.innerHTML = `
       <div style="text-align:center; color: #ffd94d; font-size: 24px; text-shadow: 0 2px 4px #000;">
-        <div style="font-size: 64px; margin-bottom: 20px;">🎰</div>
+        <div style="width: 128px; height: 128px; margin: 0 auto 20px;">${spriteSVG('casinoNeonGoldMap', 128)}</div>
         Sòng bạc đang được xây dựng...
       </div>
     `;

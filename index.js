@@ -3023,7 +3023,7 @@ function applyPageSkin() {
   } else if (isCasino) {
     fieldEl.style.backgroundImage = "none";
     fieldEl.style.backgroundColor = "#0a0210";
-    if (titleH1) titleH1.innerHTML = `\u{1F3B0} S\xF2ng b\u1EA1c ho\xE0ng gia`;
+    if (titleH1) titleH1.innerHTML = `${spriteSVG("casinoNeonGoldMap", 16)} S\xF2ng b\u1EA1c ho\xE0ng gia`;
   } else {
     fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? "water" : ctx.S.page === 3 ? "mine" : "grass", 4242);
     fieldEl.style.backgroundColor = "";
@@ -6386,7 +6386,7 @@ function renderPlots() {
             <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Th\xE0nh T\u1EF1u</div>
           </div>
           <div class="explore-slot" id="eslot-casino" style="border-color: #ffd94d; box-shadow: 0 4px 0 #b08a5c, inset 0 0 0 3px rgba(255,217,77,0.4);">
-            <div style="width:64px;height:64px;position:relative;">${spriteSVG("casinoNeonGoldMap", 64) || "\u{1F3B0}"}</div>
+            <div style="width:64px;height:64px;position:relative;">${spriteSVG("casinoNeonGoldMap", 64)}</div>
             <div class="feature-name" style="color: #ffd94d; text-shadow: 0 1px 2px #000;">Casino</div>
           </div>
         `;
@@ -6431,7 +6431,7 @@ function renderPlots() {
     casWrap2.style.display = "flex";
     casWrap2.innerHTML = `
       <div style="text-align:center; color: #ffd94d; font-size: 24px; text-shadow: 0 2px 4px #000;">
-        <div style="font-size: 64px; margin-bottom: 20px;">\u{1F3B0}</div>
+        <div style="width: 128px; height: 128px; margin: 0 auto 20px;">${spriteSVG("casinoNeonGoldMap", 128)}</div>
         S\xF2ng b\u1EA1c \u0111ang \u0111\u01B0\u1EE3c x\xE2y d\u1EF1ng...
       </div>
     `;
