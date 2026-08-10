@@ -204,7 +204,7 @@ export function renderFleaItems() {
         
         let rarityBadge = '';
         if (data.itemId.startsWith('unique@') && data.itemData && data.itemData.rarity) {
-            rarityBadge = `<span style="font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || '#ff8000'}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
+            rarityBadge = `<span style="display:inline-block; white-space:nowrap; font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || '#ff8000'}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
         }
 
         html += `
@@ -217,11 +217,11 @@ export function renderFleaItems() {
                         ${shortDesc ? `<div style="font-size: 10px; color: #555; margin-top: 2px; font-style: italic;">${shortDesc}</div>` : ''}
                     </div>
                 </div>
-                <div class="flea-item-action">
+                <div class="flea-item-action" style="min-width: 80px; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end;">
                     <div class="flea-item-price">${data.price} G</div>
                     ${isMine ? 
                         `<button class="btn flea-cancel" data-id="${docSnapId}">Gỡ Xuống</button>` :
-                        `<button class="btn flea-buy" data-id="${docSnapId}" data-price="${data.price}">Mua</button>`
+                        `<button class="btn flea-buy" data-id="${docSnapId}" data-price="${data.price}" data-name="${itemName}">Mua</button>`
                     }
                 </div>
             </div>
@@ -233,7 +233,13 @@ export function renderFleaItems() {
     
     // Gắn sự kiện
     listEl.querySelectorAll('.flea-buy').forEach(btn => {
-        btn.addEventListener('click', (e) => buyItem(e.target.dataset.id, parseInt(e.target.dataset.price)));
+        btn.addEventListener('click', (e) => {
+            const itemName = e.target.dataset.name;
+            const price = parseInt(e.target.dataset.price);
+            if (confirm(`Bạn có chắc chắn muốn mua "${itemName}" với giá ${price} G không?`)) {
+                buyItem(e.target.dataset.id, price);
+            }
+        });
     });
     listEl.querySelectorAll('.flea-cancel').forEach(btn => {
         btn.addEventListener('click', (e) => cancelItem(e.target.dataset.id));

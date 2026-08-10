@@ -48120,7 +48120,7 @@ function renderFleaItems() {
     }
     let rarityBadge = "";
     if (data.itemId.startsWith("unique@") && data.itemData && data.itemData.rarity) {
-      rarityBadge = `<span style="font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || "#ff8000"}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
+      rarityBadge = `<span style="display:inline-block; white-space:nowrap; font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || "#ff8000"}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
     }
     html += `
             <div class="flea-item ${isMine ? "mine" : ""}">
@@ -48132,9 +48132,9 @@ function renderFleaItems() {
                         ${shortDesc ? `<div style="font-size: 10px; color: #555; margin-top: 2px; font-style: italic;">${shortDesc}</div>` : ""}
                     </div>
                 </div>
-                <div class="flea-item-action">
+                <div class="flea-item-action" style="min-width: 80px; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end;">
                     <div class="flea-item-price">${data.price} G</div>
-                    ${isMine ? `<button class="btn flea-cancel" data-id="${docSnapId}">G\u1EE1 Xu\u1ED1ng</button>` : `<button class="btn flea-buy" data-id="${docSnapId}" data-price="${data.price}">Mua</button>`}
+                    ${isMine ? `<button class="btn flea-cancel" data-id="${docSnapId}">G\u1EE1 Xu\u1ED1ng</button>` : `<button class="btn flea-buy" data-id="${docSnapId}" data-price="${data.price}" data-name="${itemName}">Mua</button>`}
                 </div>
             </div>
         `;
@@ -48142,7 +48142,13 @@ function renderFleaItems() {
   if (html === "") html = '<div class="empty-market">Kh\xF4ng t\xECm th\u1EA5y m\xF3n \u0111\u1ED3 n\xE0o.</div>';
   listEl.innerHTML = html;
   listEl.querySelectorAll(".flea-buy").forEach((btn) => {
-    btn.addEventListener("click", (e2) => buyItem(e2.target.dataset.id, parseInt(e2.target.dataset.price)));
+    btn.addEventListener("click", (e2) => {
+      const itemName = e2.target.dataset.name;
+      const price = parseInt(e2.target.dataset.price);
+      if (confirm(`B\u1EA1n c\xF3 ch\u1EAFc ch\u1EAFn mu\u1ED1n mua "${itemName}" v\u1EDBi gi\xE1 ${price} G kh\xF4ng?`)) {
+        buyItem(e2.target.dataset.id, price);
+      }
+    });
   });
   listEl.querySelectorAll(".flea-cancel").forEach((btn) => {
     btn.addEventListener("click", (e2) => cancelItem(e2.target.dataset.id));
