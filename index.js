@@ -3042,16 +3042,34 @@ var init_style = __esm({
 `;
     blackjackStyles = `
 /* ===== BLACKJACK CSS ===== */
+#bj-win.dungeon-win {
+    background: #0f2c1b; /* Classic dark green felt */
+    background-image: radial-gradient(circle at center, #1b4d2e 0%, #0a1c11 100%);
+    border: 4px solid #d4af37; /* Gold border */
+    outline: 4px solid #111;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+    color: #f1f1f1;
+}
+#bj-win .titlebar {
+    background: linear-gradient(to bottom, #d4af37, #aa831b);
+    border-bottom: 2px solid #5a4200;
+    color: #332200;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+}
+#bj-win .close-x { color: #332200; text-shadow: 1px 1px 0 rgba(255,255,255,0.4); }
+
 #bj-solo-wrap { display: flex; flex-direction: column; gap: 16px; padding: 10px 0; }
-.bj-table { background: #1a4a2e; border: 4px solid #3e2723; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); position: relative; }
-.bj-table::before { content: "BLACKJACK PAYS 3 TO 2"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(255,255,255,0.1); font-weight: bold; font-size: 20px; letter-spacing: 2px; text-align: center; pointer-events: none; width: 100%; }
+.bj-table { background: rgba(0, 0, 0, 0.2); border: 2px solid rgba(212, 175, 55, 0.3); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); position: relative; }
+.bj-table::before { content: "BLACKJACK PAYS 3 TO 2"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(212,175,55,0.15); font-weight: bold; font-size: 24px; letter-spacing: 3px; text-align: center; pointer-events: none; width: 100%; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+
 .bj-dealer-area, .bj-player-area { display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 1; }
-.bj-area-label { color: #f1c40f; font-weight: bold; font-size: 13px; text-shadow: 1px 1px 2px #000; text-transform: uppercase; letter-spacing: 1px; }
-.bj-hand-row { display: flex; justify-content: center; gap: 6px; min-height: 80px; }
-.bj-card { width: 56px; height: 80px; background: #fff; border-radius: 6px; border: 1px solid #ccc; box-shadow: 2px 2px 5px rgba(0,0,0,0.3); position: relative; font-weight: bold; display: flex; align-items: center; justify-content: center; user-select: none; }
+.bj-area-label { color: #d4af37; font-weight: bold; font-size: 13px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); text-transform: uppercase; letter-spacing: 1px; background: rgba(0,0,0,0.4); padding: 2px 10px; border-radius: 12px; }
+.bj-hand-row { display: flex; justify-content: center; gap: 6px; min-height: 80px; perspective: 1000px; }
+
+.bj-card { width: 56px; height: 80px; background: #fff; border-radius: 6px; border: 1px solid #999; box-shadow: 2px 2px 8px rgba(0,0,0,0.6); position: relative; font-weight: bold; display: flex; align-items: center; justify-content: center; user-select: none; color: #111; }
 .bj-card.small { width: 42px; height: 60px; font-size: 12px; }
-.bj-card.back { background: #b71c1c; border-color: #fff; padding: 4px; }
-.bj-card-back-inner { width: 100%; height: 100%; border: 2px dashed rgba(255,255,255,0.5); border-radius: 3px; background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.1) 5px, rgba(255,255,255,0.1) 10px); }
+.bj-card.back { background: #8b0000; border-color: #fff; padding: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+.bj-card-back-inner { width: 100%; height: 100%; border: 2px dashed rgba(255,255,255,0.4); border-radius: 3px; background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.15) 5px, rgba(255,255,255,0.15) 10px); }
 .bj-card-corner { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; font-size: 13px; }
 .bj-card.small .bj-card-corner { font-size: 10px; }
 .bj-card-corner.tl { top: 4px; left: 4px; }
@@ -3060,42 +3078,76 @@ var init_style = __esm({
 .bj-card.small .bj-card-corner span { font-size: 11px; }
 .bj-card-center { font-size: 24px; }
 .bj-card.small .bj-card-center { font-size: 18px; }
-.bj-score { color: #fff; font-size: 12px; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 10px; min-width: 60px; text-align: center; }
+
+/* Animations */
+.bj-anim-deal { animation: bjDeal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; transform: translateY(-50px) scale(0.8); }
+@keyframes bjDeal { to { opacity: 1; transform: translateY(0) scale(1); } }
+.bj-anim-flip { animation: bjFlip 0.6s ease-out forwards; transform-style: preserve-3d; }
+@keyframes bjFlip { 0% { transform: rotateY(180deg) scale(1); } 50% { transform: rotateY(90deg) scale(1.1); } 100% { transform: rotateY(0deg) scale(1); } }
+
+.bj-score { color: #fff; font-size: 12px; background: rgba(0,0,0,0.8); padding: 3px 10px; border-radius: 12px; min-width: 60px; text-align: center; border: 1px solid rgba(212,175,55,0.5); box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 #bj-player-hands { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
-.bj-player-hand { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; border-radius: 8px; transition: background 0.3s; position: relative; }
-.bj-player-hand.active-hand { background: rgba(241, 196, 15, 0.2); box-shadow: 0 0 10px rgba(241, 196, 15, 0.5); border: 1px dashed rgba(241, 196, 15, 0.5); }
-.bj-player-hand.active-hand::after { content: "\u25BC"; position: absolute; top: -15px; color: #f1c40f; font-size: 14px; animation: bounce 1s infinite; }
-@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-.bj-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-.bj-bet-row { display: flex; gap: 6px; align-items: center; background: #faf0dc; padding: 6px; border-radius: 8px; border: 2px solid #e0c8a0; }
-.bj-quick { cursor: pointer; padding: 4px 8px; border-radius: 4px; background: #e0c8a0; font-size: 12px; font-weight: bold; color: #5d4037; }
-.bj-quick:hover { background: #d0b890; }
+.bj-player-hand { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; border-radius: 10px; transition: background 0.3s; position: relative; }
+.bj-player-hand.active-hand { background: rgba(212, 175, 55, 0.15); box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); border: 1px dashed rgba(212, 175, 55, 0.6); }
+.bj-player-hand.active-hand::after { content: "\u25BC"; position: absolute; top: -15px; color: #d4af37; font-size: 14px; animation: bounce 1s infinite; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+.bj-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 10px; }
+.bj-bet-row { display: flex; gap: 6px; align-items: center; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 10px; border: 1px solid #d4af37; box-shadow: 0 4px 6px rgba(0,0,0,0.4); }
+.bj-quick { cursor: pointer; padding: 5px 10px; border-radius: 6px; background: linear-gradient(to bottom, #444, #222); font-size: 12px; font-weight: bold; color: #d4af37; border: 1px solid #555; }
+.bj-quick:hover { background: linear-gradient(to bottom, #555, #333); border-color: #d4af37; }
 .bj-btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-.bj-message { text-align: center; font-weight: bold; font-size: 14px; color: #5d4037; min-height: 20px; padding: 5px; }
-.bj-msg-sm { font-size: 12px; color: #7a5c38; font-weight: bold; text-align: center; }
+.bj-message { text-align: center; font-weight: bold; font-size: 14px; color: #f1c40f; min-height: 20px; padding: 5px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
+.bj-msg-sm { font-size: 13px; color: #ddd; font-weight: bold; text-align: center; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
 
 /* ROOM MODE */
-.bj-room-layout { display: flex; flex-direction: column; height: 100%; background: #f8efe0; }
-.bj-room-topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 2px solid #c9a273; background: #e6d2b5; }
-.bj-room-code-badge { background: #7a5c38; color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; letter-spacing: 1px; }
+.bj-room-layout { display: flex; flex-direction: column; height: 100%; }
+.bj-room-topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 2px solid #111; background: rgba(0,0,0,0.6); box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+.bj-room-code-badge { background: linear-gradient(45deg, #b8860b, #d4af37); color: #000; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; letter-spacing: 1px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); cursor: pointer; }
+.bj-room-code-badge:hover { filter: brightness(1.1); }
 .bj-players-grid { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 10px; width: 100%; z-index: 1; margin-top: 10px; }
-.bj-player-slot { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 8px; min-width: 100px; border: 2px solid transparent; }
-.bj-player-slot.me { border-color: rgba(255,255,255,0.4); }
-.bj-player-slot.my-turn { background: rgba(241, 196, 15, 0.2); border-color: #f1c40f; box-shadow: 0 0 10px rgba(241, 196, 15, 0.3); }
-.bj-player-slot.spectator { opacity: 0.7; }
-.bj-player-name { color: #fff; font-size: 11px; font-weight: bold; text-shadow: 1px 1px 1px #000; text-align: center; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bj-player-list { display: flex; flex-direction: column; gap: 5px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px; margin-top: 10px; max-height: 150px; overflow-y: auto; }
-.bj-player-row { font-size: 12px; font-weight: bold; color: #5d4037; padding: 4px 0; border-bottom: 1px dashed #c9a273; }
-.bj-player-row:last-child { border-bottom: none; }
-.bj-settings-host { background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
-.bj-chat-wrap { display: flex; flex-direction: column; flex: 1; min-height: 150px; background: #fff; border-top: 2px solid #c9a273; }
-.bj-chat-log { flex: 1; padding: 10px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 4px; }
-.bj-chat-line { color: #333; word-break: break-word; }
-.bj-chat-inp-row { display: flex; gap: 5px; padding: 8px; background: #f0e6d6; border-top: 1px solid #d0ba9d; }
+.bj-player-slot { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; background: rgba(0,0,0,0.4); border-radius: 10px; min-width: 100px; border: 2px solid transparent; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+.bj-player-slot.me { border-color: rgba(212,175,55,0.5); }
+.bj-player-slot.my-turn { background: rgba(212, 175, 55, 0.2); border-color: #d4af37; box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); }
+.bj-player-slot.spectator { opacity: 0.6; filter: grayscale(1); }
+.bj-player-name { color: #f1f1f1; font-size: 11px; font-weight: bold; text-shadow: 1px 1px 2px #000; text-align: center; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 6px; }
 
-.bj-double-btn { background: linear-gradient(#f39c12, #d35400) !important; color: white !important; }
-.bj-split-btn { background: linear-gradient(#9b59b6, #8e44ad) !important; color: white !important; }
-.bj-surr-btn { color: #c0392b !important; }
+.bj-lobby-wrap { display: flex; flex-direction: column; gap: 15px; padding: 15px; flex: 1; justify-content: center; align-items: center; }
+.bj-lobby-box { background: rgba(0,0,0,0.5); border: 2px solid #d4af37; border-radius: 12px; padding: 15px; width: 100%; max-width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+.bj-lobby-title { font-size: 16px; font-weight: bold; color: #d4af37; text-align: center; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px dashed rgba(212,175,55,0.3); padding-bottom: 5px; }
+.bj-player-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; padding-right: 5px; }
+.bj-player-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; color: #eee; padding: 8px 10px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 3px solid transparent; }
+.bj-player-row.ready { border-left-color: #2ecc71; background: rgba(46, 204, 113, 0.1); }
+.bj-player-row.host { border-left-color: #d4af37; }
+.bj-kick-btn { background: #e74c3c; color: white; border: none; border-radius: 4px; padding: 3px 6px; font-size: 10px; cursor: pointer; font-weight: bold; opacity: 0.8; }
+.bj-kick-btn:hover { opacity: 1; }
+
+.bj-settings-host { background: rgba(0,0,0,0.6); padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.1); }
+.bj-chat-wrap { display: flex; flex-direction: column; height: 180px; background: rgba(0,0,0,0.5); border-top: 2px solid #111; }
+.bj-chat-log { flex: 1; padding: 10px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 4px; color: #ddd; }
+.bj-chat-line { word-break: break-word; line-height: 1.4; }
+.bj-chat-line b { color: #d4af37; }
+.bj-chat-inp-row { display: flex; gap: 5px; padding: 8px; background: rgba(0,0,0,0.8); border-top: 1px solid #333; }
+.bj-chat-inp { background: #222 !important; color: #fff !important; border: 1px solid #444 !important; border-radius: 6px; }
+
+.bj-summary-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: mutFadeIn 0.3s; padding: 20px; }
+.bj-summary-box { background: linear-gradient(135deg, #1a2a20, #0a1410); border: 2px solid #d4af37; border-radius: 12px; width: 100%; max-width: 500px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+.bj-summary-title { font-size: 20px; color: #d4af37; text-align: center; margin-bottom: 15px; font-weight: bold; letter-spacing: 2px; }
+.bj-summary-table { width: 100%; border-collapse: collapse; font-size: 12px; color: #eee; text-align: left; }
+.bj-summary-table th, .bj-summary-table td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.bj-summary-table th { color: #d4af37; font-weight: bold; }
+.bj-summary-row.me { background: rgba(212,175,55,0.15); }
+.bj-val-win { color: #2ecc71; font-weight: bold; }
+.bj-val-lose { color: #e74c3c; }
+.bj-val-push { color: #f1c40f; }
+.bj-countdown { font-size: 14px; color: #aaa; text-align: center; margin-top: 15px; font-weight: bold; }
+
+.bj-double-btn { background: linear-gradient(#f39c12, #d35400) !important; color: white !important; border: 1px solid #e67e22 !important; }
+.bj-split-btn { background: linear-gradient(#9b59b6, #8e44ad) !important; color: white !important; border: 1px solid #9b59b6 !important; }
+.bj-surr-btn { color: #e74c3c !important; border-color: #c0392b !important; }
+.bj-btn-ready { background: linear-gradient(#2ecc71, #27ae60) !important; color: white !important; border-color: #2ecc71 !important; }
+.bj-btn-ready.not-ready { background: linear-gradient(#e74c3c, #c0392b) !important; border-color: #e74c3c !important; }
+.bj-coin-anim { position: absolute; color: #f1c40f; font-weight: bold; font-size: 16px; animation: bjCoinFly 1.5s ease-out forwards; pointer-events: none; text-shadow: 0 0 5px #000; z-index: 20; }
+@keyframes bjCoinFly { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.5); } }
 `;
   }
 });
@@ -49502,6 +49554,11 @@ function bjResetState() {
   bjGameState = null;
   bjMyStatus = "idle";
   bjChatLog = [];
+  bjRoomPhase = "lobby";
+  if (bjSummaryTimer) clearInterval(bjSummaryTimer);
+  bjSummaryTimer = null;
+  bjSummaryTimeLeft = 0;
+  bjSummaryData = null;
 }
 function bjBroadcast(data, excludePid) {
   for (const [pid, conn2] of Object.entries(bjConns)) {
@@ -49592,6 +49649,20 @@ async function bjJoinRoom() {
     });
     conn2.on("error", () => bjUpdateStatus("L\u1ED7i k\u1EBFt n\u1ED1i!", "#e05"));
   });
+  bjPeer.on("connection", (inConn) => {
+    const active = Object.keys(bjConns).filter((p2) => bjConns[p2] && bjConns[p2].open);
+    if (active.length >= MAX_PLAYERS - 1) {
+      inConn.on("open", () => {
+        inConn.send({ type: "ROOM_FULL" });
+        setTimeout(() => inConn.close(), 500);
+      });
+      return;
+    }
+    inConn.on("open", () => {
+      bjConns[inConn.peer] = inConn;
+      bjSetupConn(inConn);
+    });
+  });
   bjPeer.on("error", (err) => bjUpdateStatus("L\u1ED7i: " + err.type, "#e05"));
 }
 function bjSetupConn(conn2) {
@@ -49627,10 +49698,19 @@ function bjHandleMsg(fromPid, data) {
       if (bjGameState && bjGameState.currentTurn === data.pid && bjIsHost) bjAdvanceTurn();
       bjRenderRoom();
       break;
+    case "READY":
+      if (bjPlayers[fromPid]) bjPlayers[fromPid].status = data.ready ? "ready" : "idle";
+      if (bjIsHost) bjBroadcast({ type: "READY", pid: fromPid, ready: data.ready }, fromPid);
+      bjRenderRoom();
+      break;
     case "SETTINGS_UPDATE":
       bjSettings = data.settings;
-      toast(`Host c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ${bjSettings.numDecks} b\u1ED9 b\xE0i`);
+      toast(`Host c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ch\u1EDD ${bjSettings.delay}s`);
       bjRenderRoom();
+      break;
+    case "KICKED":
+      toast("B\u1EA1n \u0111\xE3 b\u1ECB \u0111u\u1ED5i kh\u1ECFi ph\xF2ng.");
+      closeBlackjack();
       break;
     case "ROUND_START":
       bjGameState = {
@@ -49645,6 +49725,12 @@ function bjHandleMsg(fromPid, data) {
         betsIn: {},
         insuranceAnswers: {}
       };
+      bjRoomPhase = "ingame";
+      bjSummaryData = null;
+      if (bjSummaryTimer) {
+        clearInterval(bjSummaryTimer);
+        bjSummaryTimer = null;
+      }
       bjMyStatus = bjPlayers[bjMyId]?.status === "spectator" ? "spectator" : "betting";
       bjRenderRoom();
       if (bjIsHost) setTimeout(() => {
@@ -49689,7 +49775,7 @@ function bjHandleMsg(fromPid, data) {
     case "ACTION":
       bjHandleRoomAction(fromPid, data);
       break;
-    case "ROUND_END":
+    case "SUMMARY_START":
       if (data.payouts) {
         const payout = data.payouts[bjMyId] || 0;
         if (payout > 0) {
@@ -49699,9 +49785,24 @@ function bjHandleMsg(fromPid, data) {
           toast(`Nh\u1EADn ${payout.toLocaleString()}G t\u1EEB b\xE0n!`);
         }
       }
-      bjGameState = null;
+      bjSummaryData = data;
+      bjRoomPhase = "summary";
       bjMyStatus = "idle";
       if (bjPlayers[bjMyId]) bjPlayers[bjMyId].status = "idle";
+      bjRenderRoom();
+      break;
+    case "TIMER_TICK":
+      bjSummaryTimeLeft = data.left;
+      const tEl = $id("bj-summary-timer");
+      if (tEl) tEl.innerText = `V\xF2ng m\u1EDBi sau: ${data.left}s`;
+      break;
+    case "SKIP_TIMER":
+      bjSummaryTimeLeft = 0;
+      break;
+    case "BACK_TO_LOBBY":
+      bjGameState = null;
+      bjRoomPhase = "lobby";
+      bjSummaryData = null;
       bjRenderRoom();
       break;
     case "CHAT":
@@ -49731,12 +49832,46 @@ function bjHandleDisconnect(pid) {
     if (bjGameState && bjGameState.currentTurn === pid && bjIsHost) bjAdvanceTurn();
     toast(`${name3} \u0111\xE3 r\u1EDDi ph\xF2ng`);
   }
-  bjBroadcast({ type: "PLAYER_LEFT", pid });
-  if (Object.keys(bjConns).length === 0 && !bjIsHost) {
-    closeBlackjack();
-    toast("Ph\xF2ng \u0111\xE3 \u0111\xF3ng.");
+  if (bjIsHost) {
+    bjBroadcast({ type: "PLAYER_LEFT", pid });
+    if (Object.keys(bjConns).filter((p2) => bjConns[p2]?.open).length === 0) {
+      closeBlackjack();
+      toast("Ph\xF2ng \u0111\xE3 \u0111\xF3ng (kh\xF4ng c\xF2n ai).");
+    } else {
+      bjRenderRoom();
+    }
+  } else {
+    if (pid === bjRoomId) {
+      const remainingPids = Object.keys(bjPlayers).sort();
+      if (remainingPids.length > 0) {
+        const newHostId = remainingPids[0];
+        if (newHostId === bjMyId) {
+          bjIsHost = true;
+          bjRoomId = bjMyId;
+          toast(`Host c\u0169 tho\xE1t. B\u1EA1n \u0111\xE3 tr\u1EDF th\xE0nh Host m\u1EDBi!`);
+          bjRenderRoom();
+        } else {
+          bjRoomId = newHostId;
+          toast(`Host c\u0169 tho\xE1t. \u0110ang \u0111\u1ED5i Host t\u1EDBi ${bjPlayers[newHostId]?.name || "ng\u01B0\u1EDDi ch\u01A1i kh\xE1c"}...`);
+          const conn2 = bjPeer.connect(newHostId, { reliable: true });
+          bjConns[newHostId] = conn2;
+          conn2.on("open", () => {
+            bjSetupConn(conn2);
+            conn2.send({ type: "HELLO", name: bjMyName(), id: bjMyId });
+          });
+          conn2.on("error", () => {
+            toast("Kh\xF4ng th\u1EC3 k\u1EBFt n\u1ED1i \u0111\u1EBFn Host m\u1EDBi!");
+            closeBlackjack();
+          });
+        }
+      } else {
+        closeBlackjack();
+        toast("Ph\xF2ng \u0111\xE3 \u0111\xF3ng.");
+      }
+    } else {
+      bjRenderRoom();
+    }
   }
-  bjRenderRoom();
 }
 function bjHostStartRound() {
   const connPids = Object.keys(bjConns).filter((p2) => bjConns[p2] && bjConns[p2].open);
@@ -49972,9 +50107,31 @@ function bjHostEndRound() {
     save();
     renderStatus();
   }
-  const msg = { type: "ROUND_END", payouts, dealerHand: gs.dealerHand };
+  const msg = { type: "SUMMARY_START", payouts, dealerHand: gs.dealerHand, gs: JSON.parse(JSON.stringify(gs)) };
   bjBroadcast(msg);
   bjHandleMsg(bjMyId, msg);
+  if (bjIsHost) {
+    bjSummaryTimeLeft = bjSettings.delay || 10;
+    bjSummaryTimer = setInterval(() => {
+      bjSummaryTimeLeft--;
+      if (bjSummaryTimeLeft <= 0) bjHostEndSummary();
+      else bjBroadcast({ type: "TIMER_TICK", left: bjSummaryTimeLeft });
+      bjRenderRoom();
+    }, 1e3);
+  }
+}
+function bjHostEndSummary() {
+  if (bjSummaryTimer) clearInterval(bjSummaryTimer);
+  bjSummaryTimer = null;
+  const active = Object.keys(bjPlayers).filter((p2) => bjPlayers[p2].status !== "spectator");
+  if (active.length === 0) {
+    bjRoomPhase = "lobby";
+    bjGameState = null;
+    bjBroadcast({ type: "BACK_TO_LOBBY" });
+    bjRenderRoom();
+  } else {
+    bjHostStartRound();
+  }
 }
 function bjRoomPlaceBet(amount) {
   const coins = ctx.S.coins || 0;
@@ -49997,9 +50154,10 @@ function bjApplySettings() {
   const min = parseInt($id("bj-cfg-min")?.value) || 10;
   const max = parseInt($id("bj-cfg-max")?.value) || 0;
   const decks = Math.min(8, Math.max(1, parseInt($id("bj-cfg-decks")?.value) || 6));
-  bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks };
+  const delay = Math.min(30, Math.max(5, parseInt($id("bj-cfg-delay")?.value) || 10));
+  bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks, delay };
   bjBroadcast({ type: "SETTINGS_UPDATE", settings: bjSettings });
-  toast(`\u0110\xE3 c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ${bjSettings.numDecks} b\u1ED9 b\xE0i`);
+  toast(`\u0110\xE3 c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ch\u1EDD ${delay}s`);
 }
 function bjRenderRoom() {
   const body = $id("bj-body");
@@ -50008,19 +50166,58 @@ function bjRenderRoom() {
   const allPids = Object.keys(bjPlayers);
   let html = `<div class="bj-room-layout">
         <div class="bj-room-topbar">
-            <div class="bj-room-code-badge">\u{1F0CB} ${bjRoomId}</div>
+            <div class="bj-room-code-badge" title="Copy m\xE3 ph\xF2ng" onclick="navigator.clipboard.writeText('${bjRoomId}'); All.showToast('Copy m\xE3 ph\xF2ng!')">\u{1F0CB} ${bjRoomId}</div>
             <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} \u2014 ${(ctx.S.coins || 0).toLocaleString()}G${bjMyStatus === "spectator" ? " \u{1F441}" : ""}</div>
             <div class="buy plain" id="bj-out-room-ingame" style="font-size:11px;">\u2190 Tho\xE1t</div>
         </div>`;
-  if (gs) {
+  if (bjRoomPhase === "lobby") {
+    const isAllReady = allPids.filter((p2) => p2 !== bjMyId && bjPlayers[p2].status !== "spectator").every((p2) => bjPlayers[p2].status === "ready");
+    html += `<div class="bj-lobby-wrap">
+            <div class="bj-lobby-box">
+                <div class="bj-lobby-title">S\u1EA3nh Ch\u1EDD</div>
+                <div class="bj-player-list">
+                    ${allPids.map((p2) => {
+      const isHost = p2 === Object.keys(bjPlayers)[0];
+      const ready = bjPlayers[p2].status === "ready";
+      const meStr = p2 === bjMyId ? " (B\u1EA1n)" : "";
+      const kickBtn = bjIsHost && p2 !== bjMyId ? `<button class="bj-kick-btn" data-pid="${p2}">Kick</button>` : "";
+      return `<div class="bj-player-row ${ready ? "ready" : ""} ${isHost ? "host" : ""}">
+                            <span>${bjPlayers[p2].name}${meStr} ${isHost ? "\u{1F451}" : ready ? "\u2714" : "\u23F3"}</span>
+                            ${kickBtn}
+                        </div>`;
+    }).join("")}
+                </div>
+                ${bjIsHost ? `
+                <div class="bj-settings-host">
+                    <div style="font-size:12px;font-weight:bold;color:#ffd94d;margin-bottom:6px;">\u2699\uFE0F C\xE0i \u0111\u1EB7t b\xE0n</div>
+                    <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">
+                        <label style="font-size:11px;color:#ddd;">Min <input class="inp" id="bj-cfg-min" type="number" value="${bjSettings.minBet}" min="1" style="width:50px;padding:4px;font-size:11px"></label>
+                        <label style="font-size:11px;color:#ddd;">Max <input class="inp" id="bj-cfg-max" type="number" value="${bjSettings.maxBet}" min="0" style="width:50px;padding:4px;font-size:11px"></label>
+                        <label style="font-size:11px;color:#ddd;">B\u1ED9 <input class="inp" id="bj-cfg-decks" type="number" value="${bjSettings.numDecks}" min="1" max="8" style="width:40px;padding:4px;font-size:11px"></label>
+                        <label style="font-size:11px;color:#ddd;">Ch\u1EDD(s) <input class="inp" id="bj-cfg-delay" type="number" value="${bjSettings.delay}" min="5" max="30" style="width:40px;padding:4px;font-size:11px"></label>
+                        <div class="buy plain" id="bj-cfg-apply" style="font-size:11px;padding:4px 8px">L\u01B0u</div>
+                    </div>
+                </div>
+                <div class="bj-btn-row" style="margin-top:15px;">
+                    <div class="buy ${!isAllReady && allPids.length > 1 ? "plain" : ""}" id="bj-start-room-btn" ${!isAllReady && allPids.length > 1 ? 'style="opacity:0.5;pointer-events:none"' : ""}>\u25B6 B\u1EAFt \u0111\u1EA7u</div>
+                </div>
+                ` : `
+                <div class="bj-btn-row" style="margin-top:15px;">
+                    <div class="buy bj-btn-ready ${bjPlayers[bjMyId].status === "ready" ? "" : "not-ready"}" id="bj-ready-btn">${bjPlayers[bjMyId].status === "ready" ? "H\u1EE7y S\u1EB5n S\xE0ng" : "S\u1EB5n S\xE0ng"}</div>
+                </div>
+                <div class="bj-msg-sm" style="text-align:center;padding:10px;opacity:0.7">Ch\u1EDD Host b\u1EAFt \u0111\u1EA7u...</div>
+                `}
+            </div>
+        </div>`;
+  } else {
     html += `<div class="bj-table">
             <div class="bj-dealer-area">
                 <div class="bj-area-label">Nh\xE0 c\xE1i (m\xE1y)</div>
-                <div class="bj-hand-row">${(gs.dealerHand || []).map((c2) => cardHTML(c2, true)).join("")}</div>
-                <div class="bj-score">${gs.dealerHand?.length ? `\u0110i\u1EC3m: ${handTotal(gs.dealerHand.filter((c2) => !c2.hidden))}` : ""}</div>
+                <div class="bj-hand-row">${(gs?.dealerHand || []).map((c2) => cardHTML(c2, true)).join("")}</div>
+                <div class="bj-score">${gs?.dealerHand?.length ? `\u0110i\u1EC3m: ${handTotal(gs.dealerHand.filter((c2) => !c2.hidden))}` : ""}</div>
             </div>
             <div class="bj-players-grid">`;
-    for (const pid of gs.turnOrder || []) {
+    for (const pid of gs?.turnOrder || []) {
       const ph = bjPlayers[pid] || { name: pid };
       const h = gs.hands?.[pid];
       const isMe = pid === bjMyId, isTurn = gs.currentTurn === pid;
@@ -50036,32 +50233,35 @@ function bjRenderRoom() {
       html += `</div>`;
     }
     for (const pid of allPids) {
-      if (!gs.turnOrder?.includes(pid)) {
+      if (!gs?.turnOrder?.includes(pid)) {
         html += `<div class="bj-player-slot spectator"><div class="bj-player-name">\u{1F441} ${bjPlayers[pid].name} (xem)</div></div>`;
       }
     }
     html += `</div></div>
         <div id="bj-my-actions" class="bj-actions">${bjBuildMyActions()}</div>
         <div id="bj-room-msg" class="bj-message"></div>`;
-  } else {
-    html += `<div class="bj-player-list">${allPids.map(
-      (p2) => `<div class="bj-player-row">${bjPlayers[p2].name}${p2 === bjMyId ? " (B\u1EA1n)" : ""}</div>`
-    ).join("") || '<div style="opacity:0.5;font-size:12px;">Ch\u01B0a c\xF3 ai...</div>'}</div>`;
-    if (bjIsHost) {
-      html += `<div class="bj-settings-host">
-                <div style="font-size:12px;font-weight:bold;color:#ffd94d;margin-bottom:6px;">\u2699\uFE0F C\xE0i \u0111\u1EB7t b\xE0n</div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                    <label style="font-size:11px;color:#ddd;">Min <input class="inp" id="bj-cfg-min" type="number" value="${bjSettings.minBet}" min="1" style="width:60px"></label>
-                    <label style="font-size:11px;color:#ddd;">Max <input class="inp" id="bj-cfg-max" type="number" value="${bjSettings.maxBet}" min="0" style="width:60px"> <span style="color:#888;font-size:10px">(0=\u221E)</span></label>
-                    <label style="font-size:11px;color:#ddd;">B\u1ED9 <input class="inp" id="bj-cfg-decks" type="number" value="${bjSettings.numDecks}" min="1" max="8" style="width:50px"></label>
-                    <div class="buy plain" id="bj-cfg-apply" style="font-size:11px;">\xC1p d\u1EE5ng</div>
+    if (bjRoomPhase === "summary" && bjSummaryData) {
+      html += `<div class="bj-summary-overlay">
+                <div class="bj-summary-box">
+                    <div class="bj-summary-title">T\u1ED4NG K\u1EBET V\xD2NG</div>
+                    <table class="bj-summary-table">
+                        <tr><th>Ng\u01B0\u1EDDi ch\u01A1i</th><th>\u0110i\u1EC3m</th><th>C\u01B0\u1EE3c</th><th>K\u1EBFt qu\u1EA3</th><th>Nh\u1EADn</th></tr>
+                        <tr><td><b>Nh\xE0 c\xE1i</b></td><td>${handTotal(bjSummaryData.dealerHand)}</td><td>-</td><td>-</td><td>-</td></tr>
+                        ${(bjSummaryData.gs?.turnOrder || []).map((pid) => {
+        const name3 = bjPlayers[pid]?.name || pid;
+        const h = bjSummaryData.gs.hands[pid];
+        if (!h) return "";
+        let pts = h.cards.map((c2) => handTotal(c2)).join(" / ");
+        let bet = h.bet.reduce((a, b2) => a + b2, 0) + (h.insuranceBet || 0);
+        let pay = bjSummaryData.payouts[pid] || 0;
+        let resCls = pay > bet ? "bj-val-win" : pay === bet ? "bj-val-push" : "bj-val-lose";
+        return `<tr class="${pid === bjMyId ? "me" : ""}"><td>${name3}</td><td>${pts}</td><td>${bet.toLocaleString()}</td><td class="${resCls}">${pay > bet ? "Th\u1EAFng" : pay === bet ? "H\xF2a" : "Thua"}</td><td class="${resCls}">+${pay.toLocaleString()}</td></tr>`;
+      }).join("")}
+                    </table>
+                    <div class="bj-countdown" id="bj-summary-timer">V\xF2ng m\u1EDBi sau: ${bjSummaryTimeLeft}s</div>
+                    ${bjIsHost ? `<div class="bj-btn-row" style="margin-top:15px;"><div class="buy plain" id="bj-skip-btn">B\u1ECF qua (Skip)</div></div>` : ""}
                 </div>
-            </div>
-            <div class="bj-btn-row" style="margin-top:10px;">
-                <div class="buy" id="bj-start-room-btn">\u25B6 B\u1EAFt \u0111\u1EA7u v\xF2ng m\u1EDBi</div>
             </div>`;
-    } else {
-      html += `<div class="bj-msg-sm" style="text-align:center;padding:10px;opacity:0.7">Ch\u1EDD host b\u1EAFt \u0111\u1EA7u...</div>`;
     }
   }
   html += `<div class="bj-chat-wrap">
@@ -50075,8 +50275,32 @@ function bjRenderRoom() {
     </div></div>`;
   body.innerHTML = html;
   $id("bj-out-room-ingame")?.addEventListener("click", closeBlackjack);
-  $id("bj-start-room-btn")?.addEventListener("click", bjHostStartRound);
+  $id("bj-start-room-btn")?.addEventListener("click", () => {
+    if (bjIsHost) bjHostStartRound();
+  });
   $id("bj-cfg-apply")?.addEventListener("click", bjApplySettings);
+  $id("bj-ready-btn")?.addEventListener("click", () => {
+    bjMyStatus = bjPlayers[bjMyId].status === "ready" ? "idle" : "ready";
+    bjRoomAction("READY", { ready: bjMyStatus === "ready" });
+    bjRenderRoom();
+  });
+  $id("bj-skip-btn")?.addEventListener("click", () => {
+    if (bjIsHost) {
+      bjSummaryTimeLeft = 0;
+      bjBroadcast({ type: "SKIP_TIMER" });
+      bjHostEndSummary();
+    }
+  });
+  document.querySelectorAll(".bj-kick-btn").forEach((b2) => b2.addEventListener("click", () => {
+    const pid = b2.getAttribute("data-pid");
+    if (confirm("B\u1EA1n mu\u1ED1n \u0111u\u1ED5i ng\u01B0\u1EDDi ch\u01A1i n\xE0y?")) {
+      if (bjConns[pid]) bjConns[pid].send({ type: "KICKED" });
+      setTimeout(() => {
+        if (bjConns[pid]) bjConns[pid].close();
+        bjHandleDisconnect(pid);
+      }, 500);
+    }
+  }));
   bjBindMyActions();
   bjBindChat();
   const cl = $id("bj-chat-log");
@@ -50233,7 +50457,7 @@ function openBlackjackPicker() {
   $id("bj-solo-pick").addEventListener("click", openBlackjackSolo);
   $id("bj-room-pick").addEventListener("click", openBlackjackRoom);
 }
-var SUITS, RANKS, soloState, bjPeer, bjConns, bjIsHost, bjMyId, bjRoomId, bjPlayers, bjGameState, bjSettings, bjMyStatus, bjChatLog, MAX_PLAYERS;
+var SUITS, RANKS, soloState, bjPeer, bjConns, bjIsHost, bjMyId, bjRoomId, bjPlayers, bjGameState, bjSettings, bjMyStatus, bjChatLog, bjRoomPhase, bjSummaryTimer, bjSummaryTimeLeft, bjSummaryData, MAX_PLAYERS;
 var init_blackjack = __esm({
   "src/blackjack.js"() {
     init_shop();
@@ -50254,9 +50478,13 @@ var init_blackjack = __esm({
     bjRoomId = "";
     bjPlayers = {};
     bjGameState = null;
-    bjSettings = { minBet: 10, maxBet: 0, numDecks: 6 };
+    bjSettings = { minBet: 10, maxBet: 0, numDecks: 6, delay: 10 };
     bjMyStatus = "idle";
     bjChatLog = [];
+    bjRoomPhase = "lobby";
+    bjSummaryTimer = null;
+    bjSummaryTimeLeft = 0;
+    bjSummaryData = null;
     MAX_PLAYERS = 4;
   }
 });
