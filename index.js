@@ -3091,7 +3091,7 @@ var init_style = __esm({
 .bj-player-hand.active-hand { background: rgba(212, 175, 55, 0.15); box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); border: 1px dashed rgba(212, 175, 55, 0.6); }
 .bj-player-hand.active-hand::after { content: "\u25BC"; position: absolute; top: -15px; color: #d4af37; font-size: 14px; animation: bounce 1s infinite; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
-.bj-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 10px; }
+.bj-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 10px; position: relative; z-index: 10; }
 .bj-bet-row { display: flex; gap: 6px; align-items: center; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 10px; border: 1px solid #d4af37; box-shadow: 0 4px 6px rgba(0,0,0,0.4); }
 .bj-quick { cursor: pointer; padding: 5px 10px; border-radius: 6px; background: linear-gradient(to bottom, #444, #222); font-size: 12px; font-weight: bold; color: #d4af37; border: 1px solid #555; }
 .bj-quick:hover { background: linear-gradient(to bottom, #555, #333); border-color: #d4af37; }
@@ -49833,6 +49833,7 @@ function bjHandleMsg(fromPid, data) {
   }
 }
 function bjHandleDisconnect(pid) {
+  if (!bjConns[pid] && !bjPlayers[pid] && pid !== bjRoomId) return;
   delete bjConns[pid];
   if (bjPlayers[pid]) {
     const name3 = bjPlayers[pid].name;
@@ -49842,12 +49843,8 @@ function bjHandleDisconnect(pid) {
   }
   if (bjIsHost) {
     bjBroadcast({ type: "PLAYER_LEFT", pid });
-    if (Object.keys(bjConns).filter((p2) => bjConns[p2]?.open).length === 0) {
-      closeBlackjack();
-      toast("Ph\xF2ng \u0111\xE3 \u0111\xF3ng (kh\xF4ng c\xF2n ai).");
-    } else {
-      bjRenderRoom();
-    }
+    bjRenderRoom();
+    if (bjGameState) bjCheckAllBetsIn();
   } else {
     if (pid === bjRoomId) {
       const remainingPids = Object.keys(bjPlayers).sort();
@@ -49993,6 +49990,12 @@ function bjHandleRoomAction(fromPid, data) {
     gs.dealerHand = data.dealerHand;
     bjRenderRoom();
     return;
+  }
+  if (data.hand) {
+    gs.hands[data.pid] = data.hand;
+    if (data.shoeIdx !== void 0) gs.shoeIdx = data.shoeIdx;
+    bjRenderRoom();
+    if (!bjIsHost) return;
   }
   if (!bjIsHost) return;
   if (data.actionType === "INSURANCE_ANSWER") {
@@ -50330,9 +50333,9 @@ function bjBuildMyActions() {
     if (coins < min) return `<div class="bj-msg-sm" style="color:#e05;">\u26A0 Kh\xF4ng \u0111\u1EE7 v\xE0ng c\u01B0\u1EE3c (c\u1EA7n t\u1ED1i thi\u1EC3u ${min}G)</div>`;
     return `<div class="bj-bet-row">
             <input class="inp" id="bj-room-bet-inp" type="number" min="${min}" max="${bjSettings.maxBet || ""}" value="${Math.min(Math.max(min, 100), coins)}" style="width:110px">
-            <span class="buy plain bj-rquick" data-q="4">\xBC</span>
-            <span class="buy plain bj-rquick" data-q="2">\xBD</span>
-            <span class="buy plain bj-rquick" data-q="1">Max</span>
+            <span class="buy plain bj-quick bj-rquick" data-q="4">\xBC</span>
+            <span class="buy plain bj-quick bj-rquick" data-q="2">\xBD</span>
+            <span class="buy plain bj-quick bj-rquick" data-q="1">Max</span>
             <div class="buy" id="bj-room-place-bet">\u0110\u1EB7t C\u01B0\u1EE3c</div>
         </div>`;
   }

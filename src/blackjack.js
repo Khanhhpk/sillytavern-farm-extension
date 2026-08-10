@@ -749,6 +749,8 @@ function bjHandleMsg(fromPid, data) {
 }
 
 function bjHandleDisconnect(pid) {
+    if (!bjConns[pid] && !bjPlayers[pid] && pid !== bjRoomId) return; // Already handled
+    
     delete bjConns[pid];
     if (bjPlayers[pid]) {
         const name = bjPlayers[pid].name;
@@ -759,11 +761,8 @@ function bjHandleDisconnect(pid) {
     
     if (bjIsHost) {
         bjBroadcast({ type: 'PLAYER_LEFT', pid });
-        if (Object.keys(bjConns).filter(p => bjConns[p]?.open).length === 0) {
-            closeBlackjack(); toast('Ph\u00f2ng \u0111\u00e3 \u0111\u00f3ng (kh\u00f4ng c\u00f2n ai).');
-        } else {
-            bjRenderRoom();
-        }
+        bjRenderRoom();
+        if (bjGameState) bjCheckAllBetsIn();
     } else {
         if (pid === bjRoomId) {
             // Host disconnected! Host Migration
@@ -897,6 +896,12 @@ function bjHandleRoomAction(fromPid, data) {
     if (data.actionType === 'TURN_CHANGE') { gs.currentTurn = data.pid; bjRenderRoom(); return; }
     if (data.actionType === 'DEALER_REVEAL' || data.actionType === 'DEALER_HIT') {
         gs.dealerHand = data.dealerHand; bjRenderRoom(); return;
+    }
+    if (data.hand) {
+        gs.hands[data.pid] = data.hand;
+        if (data.shoeIdx !== undefined) gs.shoeIdx = data.shoeIdx;
+        bjRenderRoom();
+        if (!bjIsHost) return;
     }
     if (!bjIsHost) return;
     if (data.actionType === 'INSURANCE_ANSWER') {
@@ -1218,9 +1223,9 @@ function bjBuildMyActions() {
         if (coins < min) return `<div class="bj-msg-sm" style="color:#e05;">\u26a0 Kh\u00f4ng \u0111\u1ee7 v\u00e0ng c\u01b0\u1ee3c (c\u1ea7n t\u1ed1i thi\u1ec3u ${min}G)</div>`;
         return `<div class="bj-bet-row">
             <input class="inp" id="bj-room-bet-inp" type="number" min="${min}" max="${bjSettings.maxBet||''}" value="${Math.min(Math.max(min,100),coins)}" style="width:110px">
-            <span class="buy plain bj-rquick" data-q="4">\u00bc</span>
-            <span class="buy plain bj-rquick" data-q="2">\u00bd</span>
-            <span class="buy plain bj-rquick" data-q="1">Max</span>
+            <span class="buy plain bj-quick bj-rquick" data-q="4">\u00bc</span>
+            <span class="buy plain bj-quick bj-rquick" data-q="2">\u00bd</span>
+            <span class="buy plain bj-quick bj-rquick" data-q="1">Max</span>
             <div class="buy" id="bj-room-place-bet">\u0110\u1eb7t C\u01b0\u1ee3c</div>
         </div>`;
     }

@@ -792,7 +792,7 @@ export const blackjackStyles = `
 .bj-player-hand.active-hand { background: rgba(212, 175, 55, 0.15); box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); border: 1px dashed rgba(212, 175, 55, 0.6); }
 .bj-player-hand.active-hand::after { content: "▼"; position: absolute; top: -15px; color: #d4af37; font-size: 14px; animation: bounce 1s infinite; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
-.bj-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 10px; }
+.bj-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 10px; position: relative; z-index: 10; }
 .bj-bet-row { display: flex; gap: 6px; align-items: center; background: rgba(0,0,0,0.6); padding: 8px; border-radius: 10px; border: 1px solid #d4af37; box-shadow: 0 4px 6px rgba(0,0,0,0.4); }
 .bj-quick { cursor: pointer; padding: 5px 10px; border-radius: 6px; background: linear-gradient(to bottom, #444, #222); font-size: 12px; font-weight: bold; color: #d4af37; border: 1px solid #555; }
 .bj-quick:hover { background: linear-gradient(to bottom, #555, #333); border-color: #d4af37; }
