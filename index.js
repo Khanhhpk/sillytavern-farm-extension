@@ -3063,8 +3063,8 @@ function initUI() {
     
     <div class="modal" id="trade-win" onclick="if(event.target === this) FarmAll.closeTradeModal()">
       <div class="mpanel" style="width: min(600px, 96%);">
-        <div class="mtitle"><span id="trade-win-title">Trao \u0111\u1ED5i</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">\xD7</div></div>
-        <div class="mbody" id="trade-body" style="min-height: 200px;"></div>
+        <div class="mtitle"><span id="trade-win-title">Ch\u1EE3 Tr\u1EDDi Kh\u1EDFi Nguy\xEAn</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">\xD7</div></div>
+        <div class="mbody" id="trade-body" style="min-height: 200px; position: relative;"></div>
       </div>
     </div>
     
@@ -48009,6 +48009,20 @@ async function renderFleaMarket() {
             </div>
         </div>
         <div id="flea-list" class="flea-list">\u0110ang t\u1EA3i danh s\xE1ch...</div>
+          
+          <div id="flea-detail-act" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:99; border-radius: 8px;">
+              <div style="background:#fffaf0; padding:20px; border:3px solid #c9a273; border-radius:12px; width:85%; max-width:320px; display:flex; flex-direction:column; gap:12px; position:relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                  <button onclick="FarmAll.$id('flea-detail-act').style.display='none'" style="position:absolute; top:8px; right:10px; background:none; border:none; font-weight:bold; cursor:pointer; color:#7a5c38; font-size:16px;">\u2715</button>
+                  
+                  <div style="display:flex; gap:15px; align-items:center;">
+                      <div id="lbl-flea-dtl-icon" style="font-size:32px; background:#f0e6d2; padding:10px; border-radius:8px; border:1px solid #d4b895; display:flex; justify-content:center; align-items:center; width:64px; height:64px;"></div>
+                      <div style="flex:1;">
+                          <div id="lbl-flea-dtl-name" style="font-size:15px; font-weight:bold; color:#d32f2f; margin-bottom:5px;"></div>
+                      </div>
+                  </div>
+                  <div id="lbl-flea-dtl-desc" style="font-size:13px; color:#555; line-height:1.4; padding:5px 0;"></div>
+              </div>
+          </div>
     `;
   $id("flea-history-btn").addEventListener("click", renderHistory);
   $id("flea-refresh").addEventListener("click", loadFleaList);
@@ -48024,18 +48038,29 @@ async function loadFleaList() {
     const q = query(collection(db, "flea_market"), where("status", "==", "active"));
     const snapshot = await getDocs(q);
     let html = "";
+    currentFleaItems = {};
     snapshot.forEach((docSnap) => {
       const data = docSnap.data();
+      currentFleaItems[docSnap.id] = data;
       const isMine = data.sellerId === ctx.S.playerId;
       const itemName = getFleaItemName(data.itemId, data.itemData);
       let icon = getFleaItemIcon(data.itemId, data.itemData);
       icon = icon.replace(/width="20"/g, 'width="32"').replace(/height="20"/g, 'height="32"');
+      const desc = getFleaItemDesc(data.itemId, data.itemData);
+      let shortDesc = "";
+      if (desc && data.itemId.includes("@")) {
+        const words = desc.split(" ");
+        shortDesc = words.slice(0, 15).join(" ") + (words.length > 15 ? "..." : "");
+      }
       html += `
                 <div class="flea-item ${isMine ? "mine" : ""}">
-                    <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
-                    <div class="flea-item-info">
-                        <div class="flea-item-name">${itemName} x${data.amount}</div>
-                        <div class="flea-item-seller" style="font-size: 11px; color: #777; margin-top: 2px;">Ng\u01B0\u1EDDi b\xE1n: ${data.sellerName || data.sellerId.substring(0, 6)}</div>
+                    <div style="display:flex; flex:1; align-items:center; cursor:pointer;" onclick="FarmAll.showFleaItemDetail('${docSnap.id}')">
+                        <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
+                        <div class="flea-item-info">
+                            <div class="flea-item-name">${itemName} x${data.amount}</div>
+                            <div class="flea-item-seller" style="font-size: 11px; color: #777; margin-top: 2px;">Ng\u01B0\u1EDDi b\xE1n: ${data.sellerName || data.sellerId.substring(0, 6)}</div>
+                            ${shortDesc ? `<div style="font-size: 10px; color: #555; margin-top: 2px; font-style: italic;">${shortDesc}</div>` : ""}
+                        </div>
                     </div>
                     <div class="flea-item-action">
                         <div class="flea-item-price">${data.price} G</div>
@@ -48268,7 +48293,7 @@ function getFleaItemIcon(id, itemData = null) {
   if (CROPS && CROPS[id]) return spriteSVG(CROPS[id].sp || id, 20);
   return "";
 }
-function getFleaItemDesc(id) {
+function getFleaItemDesc(id, itemData = null) {
   if (id === "coins") return "Ti\u1EC1n t\u1EC7 chung c\u1EE7a N\xF4ng tr\u1EA1i.";
   if (id === "norm") return "V\xE9 quay gacha th\u01B0\u1EDDng.";
   if (id === "spec") return "V\xE9 quay gacha \u0111\u1EB7c bi\u1EC7t.";
@@ -48279,7 +48304,7 @@ function getFleaItemDesc(id) {
   if (id === "compost") return "Gi\u1EA3m 25% th\u1EDDi gian ph\xE1t tri\u1EC3n c\u1EE7a c\xE2y tr\u1ED3ng.";
   if (id === "shiny") return "T\u0103ng 50% t\u1ED1c \u0111\u1ED9 l\u1EDBn v\xE0 t\u0103ng 25% t\u1EF7 l\u1EC7 \u0111\u1ED9t bi\u1EBFn.";
   if (id.startsWith("unique@")) {
-    return ctx.S.uniques?.[id]?.desc || "M\u1ED9t b\u1EA3o v\u1EADt b\xED \u1EA9n kh\xF4ng r\xF5 ngu\u1ED3n g\u1ED1c.";
+    return itemData?.desc || ctx.S.uniques?.[id]?.desc || "M\u1ED9t b\u1EA3o v\u1EADt b\xED \u1EA9n kh\xF4ng r\xF5 ngu\u1ED3n g\u1ED1c.";
   }
   if (id.includes("@")) {
     const parts = id.split("@");
@@ -48456,7 +48481,21 @@ function renderPostItem() {
     }
   });
 }
-var selectedFleaType, selectedFleaId, selectedFleaMax;
+function showFleaItemDetail(docId) {
+  const data = currentFleaItems[docId];
+  if (!data) return;
+  const name3 = getFleaItemName(data.itemId, data.itemData);
+  let desc = getFleaItemDesc(data.itemId, data.itemData);
+  let iconStr = getFleaItemIcon(data.itemId, data.itemData);
+  iconStr = iconStr.replace(/width="20"/g, 'width="48"').replace(/height="20"/g, 'height="48"');
+  const ui = $id("flea-detail-act");
+  if (!ui) return;
+  $id("lbl-flea-dtl-icon").innerHTML = iconStr;
+  $id("lbl-flea-dtl-name").innerText = name3;
+  $id("lbl-flea-dtl-desc").innerText = desc || "Kh\xF4ng c\xF3 th\xF4ng tin chi ti\u1EBFt.";
+  ui.style.display = "flex";
+}
+var currentFleaItems, selectedFleaType, selectedFleaId, selectedFleaMax;
 var init_flea = __esm({
   "src/flea.js"() {
     init_store();
@@ -48464,6 +48503,7 @@ var init_flea = __esm({
     init_firebase();
     init_index_esm7();
     init_data();
+    currentFleaItems = {};
     selectedFleaType = null;
     selectedFleaId = null;
     selectedFleaMax = 0;
@@ -48688,6 +48728,7 @@ __export(all_exports, {
   sh: () => sh,
   shopTab: () => shopTab,
   shovel: () => shovel,
+  showFleaItemDetail: () => showFleaItemDetail,
   sleepPet: () => sleepPet,
   spriteSVG: () => spriteSVG,
   startLockedModal: () => startLockedModal,

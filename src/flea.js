@@ -4,6 +4,8 @@ import { db } from './firebase.js';
 import { collection, addDoc, getDocs, doc, updateDoc, query, where, deleteDoc } from 'firebase/firestore';
 import { CROPS, FERTS } from './data.js';
 
+let currentFleaItems = {};
+
 export async function openFleaMarket() {
     if (!db) {
         All.toast("Tính năng Chợ Trời yêu cầu cấu hình Firebase. Vui lòng thêm config vào .env");
@@ -68,6 +70,20 @@ export async function renderFleaMarket() {
             </div>
         </div>
         <div id="flea-list" class="flea-list">Đang tải danh sách...</div>
+          
+          <div id="flea-detail-act" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:99; border-radius: 8px;">
+              <div style="background:#fffaf0; padding:20px; border:3px solid #c9a273; border-radius:12px; width:85%; max-width:320px; display:flex; flex-direction:column; gap:12px; position:relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                  <button onclick="FarmAll.$id('flea-detail-act').style.display='none'" style="position:absolute; top:8px; right:10px; background:none; border:none; font-weight:bold; cursor:pointer; color:#7a5c38; font-size:16px;">✕</button>
+                  
+                  <div style="display:flex; gap:15px; align-items:center;">
+                      <div id="lbl-flea-dtl-icon" style="font-size:32px; background:#f0e6d2; padding:10px; border-radius:8px; border:1px solid #d4b895; display:flex; justify-content:center; align-items:center; width:64px; height:64px;"></div>
+                      <div style="flex:1;">
+                          <div id="lbl-flea-dtl-name" style="font-size:15px; font-weight:bold; color:#d32f2f; margin-bottom:5px;"></div>
+                      </div>
+                  </div>
+                  <div id="lbl-flea-dtl-desc" style="font-size:13px; color:#555; line-height:1.4; padding:5px 0;"></div>
+              </div>
+          </div>
     `;
     
     All.$id('flea-history-btn').addEventListener('click', renderHistory);
@@ -88,20 +104,32 @@ async function loadFleaList() {
         const snapshot = await getDocs(q);
         
         let html = '';
+        currentFleaItems = {};
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
+            currentFleaItems[docSnap.id] = data;
             const isMine = data.sellerId === ctx.S.playerId;
             
             const itemName = getFleaItemName(data.itemId, data.itemData);
             let icon = getFleaItemIcon(data.itemId, data.itemData);
             icon = icon.replace(/width="20"/g, 'width="32"').replace(/height="20"/g, 'height="32"');
+            
+            const desc = getFleaItemDesc(data.itemId, data.itemData);
+            let shortDesc = '';
+            if (desc && data.itemId.includes('@')) {
+                const words = desc.split(' ');
+                shortDesc = words.slice(0, 15).join(' ') + (words.length > 15 ? '...' : '');
+            }
 
             html += `
                 <div class="flea-item ${isMine ? 'mine' : ''}">
-                    <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
-                    <div class="flea-item-info">
-                        <div class="flea-item-name">${itemName} x${data.amount}</div>
-                        <div class="flea-item-seller" style="font-size: 11px; color: #777; margin-top: 2px;">Người bán: ${data.sellerName || data.sellerId.substring(0, 6)}</div>
+                    <div style="display:flex; flex:1; align-items:center; cursor:pointer;" onclick="FarmAll.showFleaItemDetail('${docSnap.id}')">
+                        <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
+                        <div class="flea-item-info">
+                            <div class="flea-item-name">${itemName} x${data.amount}</div>
+                            <div class="flea-item-seller" style="font-size: 11px; color: #777; margin-top: 2px;">Người bán: ${data.sellerName || data.sellerId.substring(0, 6)}</div>
+                            ${shortDesc ? `<div style="font-size: 10px; color: #555; margin-top: 2px; font-style: italic;">${shortDesc}</div>` : ''}
+                        </div>
                     </div>
                     <div class="flea-item-action">
                         <div class="flea-item-price">${data.price} G</div>
@@ -376,7 +404,7 @@ function getFleaItemIcon(id, itemData = null) {
     return '';
 }
 
-function getFleaItemDesc(id) {
+function getFleaItemDesc(id, itemData = null) {
     if (id === 'coins') return 'Tiền tệ chung của Nông trại.';
     if (id === 'norm') return 'Vé quay gacha thường.';
     if (id === 'spec') return 'Vé quay gacha đặc biệt.';
@@ -387,7 +415,7 @@ function getFleaItemDesc(id) {
     if (id === 'compost') return 'Giảm 25% thời gian phát triển của cây trồng.';
     if (id === 'shiny') return 'Tăng 50% tốc độ lớn và tăng 25% tỷ lệ đột biến.';
     if (id.startsWith('unique@')) {
-        return ctx.S.uniques?.[id]?.desc || 'Một bảo vật bí ẩn không rõ nguồn gốc.';
+        return itemData?.desc || ctx.S.uniques?.[id]?.desc || 'Một bảo vật bí ẩn không rõ nguồn gốc.';
     }
     if (id.includes('@')) {
         const parts = id.split('@');
@@ -587,4 +615,23 @@ function renderPostItem() {
             All.toast("Lỗi khi đăng bán: " + e.message);
         }
     });
+}
+
+export function showFleaItemDetail(docId) {
+    const data = currentFleaItems[docId];
+    if (!data) return;
+    
+    const name = getFleaItemName(data.itemId, data.itemData);
+    let desc = getFleaItemDesc(data.itemId, data.itemData);
+    let iconStr = getFleaItemIcon(data.itemId, data.itemData);
+    iconStr = iconStr.replace(/width="20"/g, 'width="48"').replace(/height="20"/g, 'height="48"');
+    
+    const ui = All.$id('flea-detail-act');
+    if (!ui) return;
+    
+    All.$id('lbl-flea-dtl-icon').innerHTML = iconStr;
+    All.$id('lbl-flea-dtl-name').innerText = name;
+    All.$id('lbl-flea-dtl-desc').innerText = desc || "Không có thông tin chi tiết.";
+    
+    ui.style.display = 'flex';
 }
