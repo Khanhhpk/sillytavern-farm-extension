@@ -3029,7 +3029,7 @@ function initUI() {
     
     <div class="modal" id="trade-win" onclick="if(event.target === this) FarmAll.closeTradeModal()">
       <div class="mpanel" style="width: min(600px, 96%);">
-        <div class="mtitle"><span id="trade-win-title">Giao d\u1ECBch</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">\xD7</div></div>
+        <div class="mtitle"><span id="trade-win-title">Trao \u0111\u1ED5i</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">\xD7</div></div>
         <div class="mbody" id="trade-body" style="min-height: 200px;"></div>
       </div>
     </div>
