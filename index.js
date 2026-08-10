@@ -49681,7 +49681,7 @@ function bjSetupConn(conn2) {
 function bjHandleMsg(fromPid, data) {
   switch (data.type) {
     case "HELLO": {
-      const status = bjGameState ? "spectator" : "idle";
+      const status = bjGameState && bjRoomPhase !== "summary" ? "spectator" : "idle";
       bjPlayers[fromPid] = { name: data.name || "Kh\xE1ch", status };
       if (bjIsHost) {
         bjBroadcast({ type: "PLAYER_JOIN", pid: fromPid, name: data.name, status }, fromPid);
@@ -49741,9 +49741,6 @@ function bjHandleMsg(fromPid, data) {
       }
       bjMyStatus = bjPlayers[bjMyId]?.status === "spectator" ? "spectator" : "betting";
       bjRenderRoom();
-      if (bjIsHost) setTimeout(() => {
-        if (bjGameState?.phase === "betting") bjHostDealCards();
-      }, 3e4);
       break;
     case "BET_PLACED":
       if (bjGameState) {
@@ -49793,10 +49790,12 @@ function bjHandleMsg(fromPid, data) {
           toast(`Nh\u1EADn ${payout.toLocaleString()}G t\u1EEB b\xE0n!`);
         }
       }
+      for (const p2 of Object.keys(bjPlayers)) {
+        if (bjPlayers[p2].status === "spectator") bjPlayers[p2].status = "idle";
+      }
       bjSummaryData = data;
       bjRoomPhase = "summary";
       bjMyStatus = "idle";
-      if (bjPlayers[bjMyId]) bjPlayers[bjMyId].status = "idle";
       bjRenderRoom();
       break;
     case "TIMER_TICK":
@@ -50127,8 +50126,11 @@ function bjHostEndRound() {
     bjSummaryTimer = setInterval(() => {
       bjSummaryTimeLeft--;
       if (bjSummaryTimeLeft <= 0) bjHostEndSummary();
-      else bjBroadcast({ type: "TIMER_TICK", left: bjSummaryTimeLeft });
-      bjRenderRoom();
+      else {
+        bjBroadcast({ type: "TIMER_TICK", left: bjSummaryTimeLeft });
+        const tEl = $id("bj-summary-timer");
+        if (tEl) tEl.innerText = `V\xF2ng m\u1EDBi sau: ${bjSummaryTimeLeft}s`;
+      }
     }, 1e3);
   }
 }
@@ -50181,7 +50183,8 @@ function bjRenderRoom() {
             <div class="bj-room-code-badge" id="bj-room-code-badge" title="Copy m\xE3 ph\xF2ng">\u{1F0CB} ${bjRoomId}</div>
             <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} \u2014 ${(ctx.S.coins || 0).toLocaleString()}G${bjMyStatus === "spectator" ? " \u{1F441}" : ""}</div>
             <div class="buy plain" id="bj-out-room-ingame" style="font-size:11px;">\u2190 Tho\xE1t</div>
-        </div>`;
+        </div>
+        <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 10px;">`;
   if (bjRoomPhase === "lobby") {
     const isAllReady = allPids.filter((p2) => p2 !== bjMyId && bjPlayers[p2].status !== "spectator").every((p2) => bjPlayers[p2].status === "ready");
     html += `<div class="bj-lobby-wrap">
@@ -50276,12 +50279,13 @@ function bjRenderRoom() {
             </div>`;
     }
   }
-  html += `<div class="bj-chat-wrap">
+  html += `</div>
+    <div class="bj-chat-wrap">
         <div class="bj-chat-log" id="bj-chat-log">${bjChatLog.slice(-20).map(
     (e2) => `<div class="bj-chat-line"><b>${e2.name}:</b> ${e2.msg.replace(/</g, "&lt;")}</div>`
   ).join("")}</div>
         <div class="bj-chat-inp-row">
-            <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1">
+            <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
             <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">G\u1EEDi</div>
         </div>
     </div></div>`;
@@ -50385,11 +50389,15 @@ function bjBindMyActions() {
     const inp = $id("bj-room-bet-inp");
     bjRoomPlaceBet(parseInt(inp?.value || "0") || 0);
   });
-  document.querySelectorAll(".bj-rquick").forEach((b2) => b2.addEventListener("click", () => {
-    const inp = $id("bj-room-bet-inp");
-    const q = parseInt(b2.getAttribute("data-q") || "1");
-    if (inp) inp.value = String(Math.max(bjSettings.minBet, Math.floor((ctx.S.coins || 0) / q)));
-  }));
+  document.querySelectorAll(".bj-rquick").forEach((b2) => {
+    b2.onclick = () => {
+      const inp = $id("bj-room-bet-inp");
+      const q = parseInt(b2.getAttribute("data-q") || "1");
+      const coins = parseInt(ctx.S.coins) || 0;
+      const min = parseInt(bjSettings.minBet) || 10;
+      if (inp) inp.value = String(Math.max(min, Math.floor(coins / q)));
+    };
+  });
   $id("bj-rm-even")?.addEventListener("click", () => {
     const h = gs?.hands?.[bjMyId];
     if (!h) return;
@@ -50436,7 +50444,9 @@ function bjRenderChat() {
   el.innerHTML = bjChatLog.slice(-20).map(
     (e2) => `<div class="bj-chat-line"><b>${e2.name}:</b> ${e2.msg.replace(/</g, "&lt;")}</div>`
   ).join("");
-  el.scrollTop = el.scrollHeight;
+  setTimeout(() => {
+    if (el) el.scrollTop = el.scrollHeight + 100;
+  }, 10);
 }
 function bjBindChat() {
   const send = () => {

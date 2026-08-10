@@ -634,7 +634,7 @@ function bjSetupConn(conn) {
 function bjHandleMsg(fromPid, data) {
     switch (data.type) {
         case 'HELLO': {
-            const status = bjGameState ? 'spectator' : 'idle';
+            const status = (bjGameState && bjRoomPhase !== 'summary') ? 'spectator' : 'idle';
             bjPlayers[fromPid] = { name: data.name || 'Kh\u00e1ch', status };
             if (bjIsHost) {
                 bjBroadcast({ type: 'PLAYER_JOIN', pid: fromPid, name: data.name, status }, fromPid);
@@ -678,7 +678,6 @@ function bjHandleMsg(fromPid, data) {
             if (bjSummaryTimer) { clearInterval(bjSummaryTimer); bjSummaryTimer = null; }
             bjMyStatus = (bjPlayers[bjMyId]?.status === 'spectator') ? 'spectator' : 'betting';
             bjRenderRoom();
-            if (bjIsHost) setTimeout(() => { if (bjGameState?.phase === 'betting') bjHostDealCards(); }, 30000);
             break;
         case 'BET_PLACED':
             if (bjGameState) {
@@ -717,10 +716,12 @@ function bjHandleMsg(fromPid, data) {
                     toast(`Nh\u1eadn ${payout.toLocaleString()}G t\u1eeb b\u00e0n!`);
                 }
             }
+            for (const p of Object.keys(bjPlayers)) {
+                if (bjPlayers[p].status === 'spectator') bjPlayers[p].status = 'idle';
+            }
             bjSummaryData = data;
             bjRoomPhase = 'summary';
             bjMyStatus = 'idle';
-            if (bjPlayers[bjMyId]) bjPlayers[bjMyId].status = 'idle';
             bjRenderRoom(); break;
         case 'TIMER_TICK':
             bjSummaryTimeLeft = data.left;
@@ -1006,8 +1007,11 @@ function bjHostEndRound() {
         bjSummaryTimer = setInterval(() => {
             bjSummaryTimeLeft--;
             if (bjSummaryTimeLeft <= 0) bjHostEndSummary();
-            else bjBroadcast({ type: 'TIMER_TICK', left: bjSummaryTimeLeft });
-            bjRenderRoom();
+            else {
+                bjBroadcast({ type: 'TIMER_TICK', left: bjSummaryTimeLeft });
+                const tEl = All.$id('bj-summary-timer');
+                if (tEl) tEl.innerText = `V\u00f2ng m\u1edbi sau: ${bjSummaryTimeLeft}s`;
+            }
         }, 1000);
     }
 }
@@ -1066,7 +1070,8 @@ function bjRenderRoom() {
             <div class="bj-room-code-badge" id="bj-room-code-badge" title="Copy m\u00e3 ph\u00f2ng">\uD83C\uDCCB ${bjRoomId}</div>
             <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} \u2014 ${(ctx.S.coins||0).toLocaleString()}G${bjMyStatus==='spectator'?' \uD83D\uDC41':''}</div>
             <div class="buy plain" id="bj-out-room-ingame" style="font-size:11px;">\u2190 Tho\u00e1t</div>
-        </div>`;
+        </div>
+        <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 10px;">`;
 
     if (bjRoomPhase === 'lobby') {
         const isAllReady = allPids.filter(p => p !== bjMyId && bjPlayers[p].status !== 'spectator').every(p => bjPlayers[p].status === 'ready');
@@ -1165,12 +1170,13 @@ function bjRenderRoom() {
         }
     }
 
-    html += `<div class="bj-chat-wrap">
+    html += `</div>
+    <div class="bj-chat-wrap">
         <div class="bj-chat-log" id="bj-chat-log">${bjChatLog.slice(-20).map(e =>
             `<div class="bj-chat-line"><b>${e.name}:</b> ${e.msg.replace(/</g,'&lt;')}</div>`
         ).join('')}</div>
         <div class="bj-chat-inp-row">
-            <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1">
+            <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
             <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">G\u1eedi</div>
         </div>
     </div></div>`;
@@ -1274,11 +1280,15 @@ function bjBindMyActions() {
         const inp = All.$id('bj-room-bet-inp');
         bjRoomPlaceBet(parseInt(inp?.value||'0')||0);
     });
-    document.querySelectorAll('.bj-rquick').forEach(b => b.addEventListener('click', () => {
-        const inp = All.$id('bj-room-bet-inp');
-        const q = parseInt(b.getAttribute('data-q')||'1');
-        if (inp) inp.value = String(Math.max(bjSettings.minBet, Math.floor((ctx.S.coins||0)/q)));
-    }));
+    document.querySelectorAll('.bj-rquick').forEach(b => {
+        b.onclick = () => {
+            const inp = All.$id('bj-room-bet-inp');
+            const q = parseInt(b.getAttribute('data-q') || '1');
+            const coins = parseInt(ctx.S.coins) || 0;
+            const min = parseInt(bjSettings.minBet) || 10;
+            if (inp) inp.value = String(Math.max(min, Math.floor(coins / q)));
+        };
+    });
     All.$id('bj-rm-even')?.addEventListener('click', () => {
         const h = gs?.hands?.[bjMyId];
         if (!h) return;
@@ -1315,7 +1325,7 @@ function bjRenderChat() {
     el.innerHTML = bjChatLog.slice(-20).map(e =>
         `<div class="bj-chat-line"><b>${e.name}:</b> ${e.msg.replace(/</g,'&lt;')}</div>`
     ).join('');
-    el.scrollTop = el.scrollHeight;
+    setTimeout(() => { if (el) el.scrollTop = el.scrollHeight + 100; }, 10);
 }
 
 function bjBindChat() {
