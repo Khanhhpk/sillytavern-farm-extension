@@ -139,6 +139,107 @@ async function loadFleaList() {
     }
 }
 
+export function renderFleaItems() {
+    const listEl = All.$id('flea-list');
+    if (!listEl) return;
+    
+    const searchStr = All.$id('inp-flea-search') ? All.$id('inp-flea-search').value.toLowerCase().trim() : '';
+    const typeFilter = All.$id('sel-flea-type') ? All.$id('sel-flea-type').value : 'all';
+    const sortVal = All.$id('sel-flea-sort') ? All.$id('sel-flea-sort').value : 'default';
+    
+    const rarityMap = { 'Thần thoại': 6, 'Huyền thoại': 5, 'Sử thi': 4, 'Hiếm': 3, 'Thường': 2, 'Rác': 1 };
+    
+    let itemsArr = Object.entries(currentFleaItems).map(([id, data]) => {
+        const itemName = getFleaItemName(data.itemId, data.itemData);
+        const sellerName = data.sellerName || data.sellerId.substring(0, 6);
+        let effType = 'other';
+        if (data.itemId.startsWith('unique@')) effType = 'uniques';
+        else if (data.itemId.includes('@')) effType = 'mutants';
+        else if (data.itemType === 'bag') effType = 'crops';
+        else if (data.itemType === 'seeds') effType = 'seeds';
+        else if (data.itemType === 'ferts') effType = 'ferts';
+        else if (data.itemType === 'tickets' || data.itemType === 'shards') effType = 'tickets';
+        
+        let rVal = 0;
+        if (data.itemData && data.itemData.rarity) rVal = rarityMap[data.itemData.rarity] || 0;
+        
+        return { id, data, itemName, sellerName, effType, rVal };
+    });
+    
+    // Lọc
+    itemsArr = itemsArr.filter(item => {
+        if (typeFilter !== 'all' && item.effType !== typeFilter) return false;
+        if (searchStr) {
+            const matchName = item.itemName.toLowerCase().includes(searchStr);
+            const matchSeller = item.sellerName.toLowerCase().includes(searchStr);
+            if (!matchName && !matchSeller) return false;
+        }
+        return true;
+    });
+    
+    // Sort
+    if (sortVal === 'rarity-desc') {
+        itemsArr.sort((a, b) => b.rVal - a.rVal);
+    } else if (sortVal === 'rarity-asc') {
+        itemsArr.sort((a, b) => a.rVal - b.rVal);
+    }
+    
+    // Render
+    let html = '';
+    itemsArr.forEach(item => {
+        const docSnapId = item.id;
+        const data = item.data;
+        const itemName = item.itemName;
+        const isMine = data.sellerId === ctx.S.playerId;
+        
+        let icon = getFleaItemIcon(data.itemId, data.itemData);
+        icon = icon.replace(/width="20"/g, 'width="32"').replace(/height="20"/g, 'height="32"');
+        
+        const desc = getFleaItemDesc(data.itemId, data.itemData);
+        let shortDesc = '';
+        if (desc && data.itemId.includes('@')) {
+            const words = desc.split(' ');
+            shortDesc = words.slice(0, 30).join(' ') + (words.length > 30 ? '...' : '');
+        }
+        
+        let rarityBadge = '';
+        if (data.itemId.startsWith('unique@') && data.itemData && data.itemData.rarity) {
+            rarityBadge = `<span style="font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || '#ff8000'}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
+        }
+
+        html += `
+            <div class="flea-item ${isMine ? 'mine' : ''}" style="border:1px solid #4caf50; border-radius:8px; padding:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; background:#e8f5e9;">
+                <div style="display:flex; flex:1; align-items:center; cursor:pointer;" onclick="FarmAll.showFleaItemDetail('${docSnapId}')">
+                    <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
+                    <div class="flea-item-info">
+                        <div class="flea-item-name" style="font-size:16px; font-weight:bold; color:#5d4037;">${itemName} x${data.amount}${rarityBadge}</div>
+                        <div class="flea-item-seller" style="font-size: 11px; color: #777; margin-top: 2px;">Người bán: ${item.sellerName}</div>
+                        ${shortDesc ? `<div style="font-size: 10px; color: #555; margin-top: 2px; font-style: italic;">${shortDesc}</div>` : ''}
+                    </div>
+                </div>
+                <div class="flea-item-action">
+                    <div class="flea-item-price" style="font-weight:bold; margin-bottom:4px; text-align:right;">${data.price} G</div>
+                    ${isMine ? 
+                        `<button class="btn flea-cancel" data-id="${docSnapId}">Gỡ Xuống</button>` :
+                        `<button class="btn flea-buy" data-id="${docSnapId}" data-price="${data.price}">Mua</button>`
+                    }
+                </div>
+            </div>
+        `;
+    });
+    
+    if (html === '') html = '<div class="empty-market">Không tìm thấy món đồ nào.</div>';
+    listEl.innerHTML = html;
+    
+    // Gắn sự kiện
+    listEl.querySelectorAll('.flea-buy').forEach(btn => {
+        btn.addEventListener('click', (e) => buyItem(e.target.dataset.id, parseInt(e.target.dataset.price)));
+    });
+    listEl.querySelectorAll('.flea-cancel').forEach(btn => {
+        btn.addEventListener('click', (e) => cancelItem(e.target.dataset.id));
+    });
+}
+
 async function buyItem(docId, price) {
     if (ctx.S.coins < price) {
         All.toast("Không đủ vàng!");

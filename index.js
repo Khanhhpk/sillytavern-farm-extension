@@ -48008,6 +48008,25 @@ async function renderFleaMarket() {
                 <button id="flea-post" class="btn">\u0110\u0103ng B\xE1n</button>
             </div>
         </div>
+        
+        <div class="flea-filters" style="display:flex; flex-wrap:wrap; gap:5px; margin:10px 0; padding:10px; border:2px inset #c9a273; background:rgba(0,0,0,0.05); border-radius:8px;">
+            <input type="text" id="inp-flea-search" class="inp" placeholder="T\xECm t\xEAn \u0111\u1ED3, ng\u01B0\u1EDDi b\xE1n..." style="flex:1; min-width:140px; padding:6px; box-sizing:border-box;">
+            <select id="sel-flea-type" class="inp" style="max-width:120px; padding:6px;">
+                <option value="all">T\u1EA5t c\u1EA3</option>
+                <option value="uniques">B\u1EA3o v\u1EADt (Gacha)</option>
+                <option value="mutants">\u0110\u1ED9t bi\u1EBFn</option>
+                <option value="crops">N\xF4ng s\u1EA3n</option>
+                <option value="seeds">H\u1EA1t gi\u1ED1ng</option>
+                <option value="ferts">V\u1EADt ph\u1EA9m</option>
+                <option value="tickets">V\xE9 / M\u1EA3nh</option>
+            </select>
+            <select id="sel-flea-sort" class="inp" style="max-width:130px; padding:6px;">
+                <option value="default">M\u1EB7c \u0111\u1ECBnh</option>
+                <option value="rarity-desc">\u0110\u1ED9 hi\u1EBFm \u2B07</option>
+                <option value="rarity-asc">\u0110\u1ED9 hi\u1EBFm \u2B06</option>
+            </select>
+        </div>
+        
         <div id="flea-list" class="flea-list">\u0110ang t\u1EA3i danh s\xE1ch...</div>
           
           <div id="flea-detail-act" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:99; border-radius: 8px;">
@@ -48028,6 +48047,9 @@ async function renderFleaMarket() {
   $id("flea-history-btn").addEventListener("click", renderHistory);
   $id("flea-refresh").addEventListener("click", loadFleaList);
   $id("flea-post").addEventListener("click", renderPostItem);
+  $id("inp-flea-search").addEventListener("input", renderFleaItems);
+  $id("sel-flea-type").addEventListener("change", renderFleaItems);
+  $id("sel-flea-sort").addEventListener("change", renderFleaItems);
   loadFleaList();
   checkSoldItemsNotif();
 }
@@ -48038,53 +48060,93 @@ async function loadFleaList() {
   try {
     const q = query(collection(db, "flea_market"), where("status", "==", "active"));
     const snapshot = await getDocs(q);
-    let html = "";
     currentFleaItems = {};
     snapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      currentFleaItems[docSnap.id] = data;
-      const isMine = data.sellerId === ctx.S.playerId;
-      const itemName = getFleaItemName(data.itemId, data.itemData);
-      let icon = getFleaItemIcon(data.itemId, data.itemData);
-      icon = icon.replace(/width="20"/g, 'width="32"').replace(/height="20"/g, 'height="32"');
-      const desc = getFleaItemDesc(data.itemId, data.itemData);
-      let shortDesc = "";
-      if (desc && data.itemId.includes("@")) {
-        const words = desc.split(" ");
-        shortDesc = words.slice(0, 30).join(" ") + (words.length > 30 ? "..." : "");
-      }
-      let rarityBadge = "";
-      if (data.itemId.startsWith("unique@") && data.itemData && data.itemData.rarity) {
-        rarityBadge = `<span style="font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || "#ff8000"}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
-      }
-      html += `
-                <div class="flea-item ${isMine ? "mine" : ""}">
-                    <div style="display:flex; flex:1; align-items:center; cursor:pointer;" onclick="FarmAll.showFleaItemDetail('${docSnap.id}')">
-                        <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
-                        <div class="flea-item-info">
-                            <div class="flea-item-name">${itemName} x${data.amount}${rarityBadge}</div>
-                            <div class="flea-item-seller" style="font-size: 11px; color: #777; margin-top: 2px;">Ng\u01B0\u1EDDi b\xE1n: ${data.sellerName || data.sellerId.substring(0, 6)}</div>
-                            ${shortDesc ? `<div style="font-size: 10px; color: #555; margin-top: 2px; font-style: italic;">${shortDesc}</div>` : ""}
-                        </div>
-                    </div>
-                    <div class="flea-item-action">
-                        <div class="flea-item-price">${data.price} G</div>
-                        ${isMine ? `<button class="btn flea-cancel" data-id="${docSnap.id}">G\u1EE1 Xu\u1ED1ng</button>` : `<button class="btn flea-buy" data-id="${docSnap.id}" data-price="${data.price}">Mua</button>`}
-                    </div>
-                </div>
-            `;
+      currentFleaItems[docSnap.id] = docSnap.data();
     });
-    if (html === "") html = '<div class="empty-market">Ch\u1EE3 hi\u1EC7n \u0111ang tr\u1ED1ng. H\xE3y \u0111\u0103ng b\xE1n g\xEC \u0111\xF3 nh\xE9!</div>';
-    listEl.innerHTML = html;
-    listEl.querySelectorAll(".flea-buy").forEach((btn) => {
-      btn.addEventListener("click", (e2) => buyItem(e2.target.dataset.id, parseInt(e2.target.dataset.price)));
-    });
-    listEl.querySelectorAll(".flea-cancel").forEach((btn) => {
-      btn.addEventListener("click", (e2) => cancelItem(e2.target.dataset.id));
-    });
+    renderFleaItems();
   } catch (e2) {
     listEl.innerHTML = `<div class="error">L\u1ED7i khi t\u1EA3i ch\u1EE3: ${e2.message}</div>`;
   }
+}
+function renderFleaItems() {
+  const listEl = $id("flea-list");
+  if (!listEl) return;
+  const searchStr = $id("inp-flea-search") ? $id("inp-flea-search").value.toLowerCase().trim() : "";
+  const typeFilter = $id("sel-flea-type") ? $id("sel-flea-type").value : "all";
+  const sortVal = $id("sel-flea-sort") ? $id("sel-flea-sort").value : "default";
+  const rarityMap = { "Th\u1EA7n tho\u1EA1i": 6, "Huy\u1EC1n tho\u1EA1i": 5, "S\u1EED thi": 4, "Hi\u1EBFm": 3, "Th\u01B0\u1EDDng": 2, "R\xE1c": 1 };
+  let itemsArr = Object.entries(currentFleaItems).map(([id, data]) => {
+    const itemName = getFleaItemName(data.itemId, data.itemData);
+    const sellerName = data.sellerName || data.sellerId.substring(0, 6);
+    let effType = "other";
+    if (data.itemId.startsWith("unique@")) effType = "uniques";
+    else if (data.itemId.includes("@")) effType = "mutants";
+    else if (data.itemType === "bag") effType = "crops";
+    else if (data.itemType === "seeds") effType = "seeds";
+    else if (data.itemType === "ferts") effType = "ferts";
+    else if (data.itemType === "tickets" || data.itemType === "shards") effType = "tickets";
+    let rVal = 0;
+    if (data.itemData && data.itemData.rarity) rVal = rarityMap[data.itemData.rarity] || 0;
+    return { id, data, itemName, sellerName, effType, rVal };
+  });
+  itemsArr = itemsArr.filter((item) => {
+    if (typeFilter !== "all" && item.effType !== typeFilter) return false;
+    if (searchStr) {
+      const matchName = item.itemName.toLowerCase().includes(searchStr);
+      const matchSeller = item.sellerName.toLowerCase().includes(searchStr);
+      if (!matchName && !matchSeller) return false;
+    }
+    return true;
+  });
+  if (sortVal === "rarity-desc") {
+    itemsArr.sort((a, b2) => b2.rVal - a.rVal);
+  } else if (sortVal === "rarity-asc") {
+    itemsArr.sort((a, b2) => a.rVal - b2.rVal);
+  }
+  let html = "";
+  itemsArr.forEach((item) => {
+    const docSnapId = item.id;
+    const data = item.data;
+    const itemName = item.itemName;
+    const isMine = data.sellerId === ctx.S.playerId;
+    let icon = getFleaItemIcon(data.itemId, data.itemData);
+    icon = icon.replace(/width="20"/g, 'width="32"').replace(/height="20"/g, 'height="32"');
+    const desc = getFleaItemDesc(data.itemId, data.itemData);
+    let shortDesc = "";
+    if (desc && data.itemId.includes("@")) {
+      const words = desc.split(" ");
+      shortDesc = words.slice(0, 30).join(" ") + (words.length > 30 ? "..." : "");
+    }
+    let rarityBadge = "";
+    if (data.itemId.startsWith("unique@") && data.itemData && data.itemData.rarity) {
+      rarityBadge = `<span style="font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || "#ff8000"}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
+    }
+    html += `
+            <div class="flea-item ${isMine ? "mine" : ""}" style="border:1px solid #4caf50; border-radius:8px; padding:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; background:#e8f5e9;">
+                <div style="display:flex; flex:1; align-items:center; cursor:pointer;" onclick="FarmAll.showFleaItemDetail('${docSnapId}')">
+                    <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
+                    <div class="flea-item-info">
+                        <div class="flea-item-name" style="font-size:16px; font-weight:bold; color:#5d4037;">${itemName} x${data.amount}${rarityBadge}</div>
+                        <div class="flea-item-seller" style="font-size: 11px; color: #777; margin-top: 2px;">Ng\u01B0\u1EDDi b\xE1n: ${item.sellerName}</div>
+                        ${shortDesc ? `<div style="font-size: 10px; color: #555; margin-top: 2px; font-style: italic;">${shortDesc}</div>` : ""}
+                    </div>
+                </div>
+                <div class="flea-item-action">
+                    <div class="flea-item-price" style="font-weight:bold; margin-bottom:4px; text-align:right;">${data.price} G</div>
+                    ${isMine ? `<button class="btn flea-cancel" data-id="${docSnapId}">G\u1EE1 Xu\u1ED1ng</button>` : `<button class="btn flea-buy" data-id="${docSnapId}" data-price="${data.price}">Mua</button>`}
+                </div>
+            </div>
+        `;
+  });
+  if (html === "") html = '<div class="empty-market">Kh\xF4ng t\xECm th\u1EA5y m\xF3n \u0111\u1ED3 n\xE0o.</div>';
+  listEl.innerHTML = html;
+  listEl.querySelectorAll(".flea-buy").forEach((btn) => {
+    btn.addEventListener("click", (e2) => buyItem(e2.target.dataset.id, parseInt(e2.target.dataset.price)));
+  });
+  listEl.querySelectorAll(".flea-cancel").forEach((btn) => {
+    btn.addEventListener("click", (e2) => cancelItem(e2.target.dataset.id));
+  });
 }
 async function buyItem(docId, price) {
   if (ctx.S.coins < price) {
@@ -48704,6 +48766,7 @@ __export(all_exports, {
   renderBanner: () => renderBanner,
   renderChips: () => renderChips,
   renderDynamic: () => renderDynamic,
+  renderFleaItems: () => renderFleaItems,
   renderFleaMarket: () => renderFleaMarket,
   renderPager: () => renderPager,
   renderPets: () => renderPets,
