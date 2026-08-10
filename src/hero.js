@@ -1255,7 +1255,7 @@ function showFloatDamage(text, target, color = null) {
 
 function spawnSkillEffect(startEl, targetEl, skillType) {
   if (!startEl) return;
-  const scene = startEl.closest('.hero-scene') || document.querySelector('.hero-scene');
+  const scene = startEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene');
   if (!scene) return;
   
   const sRect = scene.getBoundingClientRect();
@@ -1345,7 +1345,7 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
 
 function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
   if (!startEl || !targetEl) return;
-  const scene = startEl.closest('.hero-scene') || document.querySelector('.hero-scene');
+  const scene = startEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene');
   if (!scene) return;
   
   const sRect = scene.getBoundingClientRect();

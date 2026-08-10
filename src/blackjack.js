@@ -1201,7 +1201,7 @@ function bjRenderRoom() {
             bjHostEndSummary();
         }
     });
-    document.querySelectorAll('.bj-kick-btn').forEach(b => b.addEventListener('click', () => {
+    All.$id('bj-win').querySelectorAll('.bj-kick-btn').forEach(b => b.addEventListener('click', () => {
         const pid = b.getAttribute('data-pid');
         if (confirm('B\u1ea1n mu\u1ed1n \u0111u\u1ed5i ng\u01b0\u1eddi ch\u01a1i n\u00e0y?')) {
             if (bjConns[pid]) bjConns[pid].send({ type: 'KICKED' });

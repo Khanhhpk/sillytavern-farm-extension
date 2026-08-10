@@ -9406,7 +9406,7 @@ function showFloatDamage(text, target, color = null) {
 }
 function spawnSkillEffect(startEl, targetEl, skillType) {
   if (!startEl) return;
-  const scene2 = startEl.closest(".hero-scene") || document.querySelector(".hero-scene");
+  const scene2 = startEl.closest(".hero-scene") || sh.querySelector(".hero-scene");
   if (!scene2) return;
   const sRect = scene2.getBoundingClientRect();
   const healSkills = ["heal_party", "heal_self"];
@@ -9499,7 +9499,7 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
 }
 function spawnAttackEffect(pId, startEl, targetEl, isEnemy, isCrit) {
   if (!startEl || !targetEl) return;
-  const scene2 = startEl.closest(".hero-scene") || document.querySelector(".hero-scene");
+  const scene2 = startEl.closest(".hero-scene") || sh.querySelector(".hero-scene");
   if (!scene2) return;
   const sRect = scene2.getBoundingClientRect();
   const startRect = startEl.getBoundingClientRect();
@@ -50324,7 +50324,7 @@ function bjRenderRoom() {
       bjHostEndSummary();
     }
   });
-  document.querySelectorAll(".bj-kick-btn").forEach((b2) => b2.addEventListener("click", () => {
+  $id("bj-win").querySelectorAll(".bj-kick-btn").forEach((b2) => b2.addEventListener("click", () => {
     const pid = b2.getAttribute("data-pid");
     if (confirm("B\u1EA1n mu\u1ED1n \u0111u\u1ED5i ng\u01B0\u1EDDi ch\u01A1i n\xE0y?")) {
       if (bjConns[pid]) bjConns[pid].send({ type: "KICKED" });
