@@ -160,9 +160,11 @@ export function renderFleaItems() {
     
     const rarityMap = { 'Thần thoại': 6, 'Huyền thoại': 5, 'Sử thi': 4, 'Hiếm': 3, 'Thường': 2, 'Rác': 1 };
     
+    const escapeHtml = (str) => (str || '').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    
     let itemsArr = Object.entries(currentFleaItems).map(([id, data]) => {
         const itemName = getFleaItemName(data.itemId, data.itemData);
-        const sellerName = data.sellerName || data.sellerId.substring(0, 6);
+        const sellerName = escapeHtml(data.sellerName || data.sellerId.substring(0, 6));
         let effType = 'other';
         if (data.itemId.startsWith('unique@')) effType = 'uniques';
         else if (data.itemId.includes('@')) effType = 'mutants';
@@ -365,16 +367,19 @@ async function cancelItem(docId) {
 async function renderHistory() {
     if (All.$id('trade-win-title')) All.$id('trade-win-title').innerText = 'Lịch Sử Giao Dịch';
     const body = All.$id('trade-body');
+    
     body.innerHTML = `
-        <div class="flea-header" style="justify-content: flex-end;">
-            <button id="flea-back-hist" class="btn">Quay lại Chợ</button>
+        <div class="flea-header" style="justify-content: flex-start;">
+            <button id="flea-hist-back" class="btn">Quay lại Chợ</button>
         </div>
-        <div id="flea-hist-list" style="margin-top: 10px; max-height: 400px; overflow-y: auto;">Đang tải...</div>
+        <div id="flea-hist-list" class="flea-list" style="margin-top: 10px;">Đang tải lịch sử...</div>
     `;
     
-    All.$id('flea-back-hist').addEventListener('click', renderFleaMarket);
+    All.$id('flea-hist-back').addEventListener('click', renderFleaMarket);
     
     const listEl = All.$id('flea-hist-list');
+    
+    const escapeHtml = (str) => (str || '').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     
     try {
         const q = query(collection(db, "flea_market"), where("sellerId", "==", ctx.S.playerId), where("status", "==", "sold"));
@@ -383,22 +388,23 @@ async function renderHistory() {
         let html = '';
         let totalGold = 0;
         let soldDocs = [];
-
+        
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
-            soldDocs.push({ id: docSnap.id, ...data });
+            soldDocs.push({ id: docSnap.id, price: data.price });
             totalGold += data.price;
-            
             const itemName = getFleaItemName(data.itemId, data.itemData);
-            let icon = getFleaItemIcon(data.itemId, data.itemData);
-            icon = icon.replace(/width="20"/g, 'width="32"').replace(/height="20"/g, 'height="32"');
-
+            const icon = getFleaItemIcon(data.itemId, data.itemData);
+            const buyerName = escapeHtml(data.buyerName || "Người mua ẩn danh");
+            
             html += `
-                <div class="flea-item" style="border-color: #4caf50; background: #e8f5e9;">
-                    <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
-                    <div class="flea-item-info">
-                        <div class="flea-item-name">${itemName} x${data.amount}</div>
-                        <div class="flea-item-seller" style="font-size: 11px; color: #2e7d32; margin-top: 2px;">Người mua: ${data.buyerName || "Người mua ẩn danh"}</div>
+                <div class="flea-item mine">
+                    <div style="display:flex; flex:1; align-items:center;">
+                        <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
+                        <div class="flea-item-info">
+                            <div class="flea-item-name">${itemName} x${data.amount}</div>
+                            <div class="flea-item-seller" style="font-size: 11px; color: #2e7d32; margin-top: 2px;">Người mua: ${buyerName}</div>
+                        </div>
                     </div>
                     <div class="flea-item-action">
                         <div class="flea-item-price" style="color: #2e7d32;">+${data.price} G</div>
