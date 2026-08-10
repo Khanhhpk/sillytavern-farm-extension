@@ -49636,7 +49636,7 @@ function bjRenderMenu() {
       const v2 = ($id("bj-inp-name").value || "").trim();
       if (!v2) return bjToast("T\xEAn kh\xF4ng \u0111\u01B0\u1EE3c tr\u1ED1ng!");
       ctx.S.username = v2;
-      Promise.resolve().then(() => (init_state(), state_exports)).then((m2) => m2.save());
+      save();
       bjRenderMenu();
     };
     return;
