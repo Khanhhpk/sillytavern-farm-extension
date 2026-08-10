@@ -50516,7 +50516,7 @@ function bjRenderPlayerListModal() {
   modal.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid #444;padding-bottom:10px;">
             <div style="font-weight:bold;color:#ffd94d;">DANH S\xC1CH NG\u01AF\u1EDCI CH\u01A0I</div>
-            <div class="buy plain" style="padding:2px 8px;" onclick="document.getElementById('bj-player-list-modal').remove()">\u0110\xF3ng</div>
+            <div class="buy plain" id="bj-player-list-close" style="padding:2px 8px;cursor:pointer;">\u0110\xF3ng</div>
         </div>
         <table class="bj-summary-table" style="width:100%; text-align:left;">
             <tr><th>T\xEAn</th><th>Vai tr\xF2</th><th>L\u1EE3i nhu\u1EADn</th></tr>
@@ -50533,6 +50533,7 @@ function bjRenderPlayerListModal() {
   }).join("")}
         </table>
     `;
+  $id("bj-player-list-close")?.addEventListener("click", () => modal.remove());
 }
 function bjBuildMyActions() {
   const gs = bjGameState;
