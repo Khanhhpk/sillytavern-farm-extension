@@ -10783,9 +10783,6 @@ function endDungeon(isWin) {
   const overlay = document.createElement("div");
   overlay.className = "dg-overlay";
   ctx.S.coins += totalGold;
-  if (ctx.S.coins > 9999999) {
-    ctx.S.coins = 9999999;
-  }
   if (!ctx.S.dungeonBest) ctx.S.dungeonBest = { wave: 0, gold: 0 };
   let isNewRecord = false;
   if (currentWave > ctx.S.dungeonBest.wave) {

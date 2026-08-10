@@ -1258,10 +1258,7 @@ function endDungeon(isWin) {
     overlay.className = 'dg-overlay';
     
     ctx.S.coins += totalGold;
-    // Tịch thu tiền lạm phát do lỗi cũ (giới hạn 9,999,999)
-    if (ctx.S.coins > 9999999) {
-        ctx.S.coins = 9999999;
-    }
+    
     
     // Highscore check
     if (!ctx.S.dungeonBest) ctx.S.dungeonBest = { wave: 0, gold: 0 };
