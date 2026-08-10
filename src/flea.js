@@ -166,6 +166,16 @@ async function buyItem(docId, price) {
             ctx.S.seeds[data.itemId] = (ctx.S.seeds[data.itemId] || 0) + data.amount;
         } else if (data.itemType === 'ferts') {
             ctx.S.ferts[data.itemId] = (ctx.S.ferts[data.itemId] || 0) + data.amount;
+        } else if (data.itemType === 'tickets') {
+            if (!ctx.S.tickets) ctx.S.tickets = {};
+            ctx.S.tickets[data.itemId] = (ctx.S.tickets[data.itemId] || 0) + data.amount;
+        } else if (data.itemType === 'shards') {
+            if (!ctx.S.shards) ctx.S.shards = {};
+            ctx.S.shards[data.itemId] = (ctx.S.shards[data.itemId] || 0) + data.amount;
+        } else if (data.itemType === 'uniques') {
+            if (!ctx.S.uniques) ctx.S.uniques = {};
+            ctx.S.uniques[data.itemId] = data.itemData;
+            ctx.S.bag[data.itemId] = (ctx.S.bag[data.itemId] || 0) + data.amount;
         }
         All.save();
         All.toast("Mua thành công!");
@@ -189,6 +199,7 @@ async function cancelItem(docId) {
         if (data.itemType === 'uniques') {
             if (!ctx.S.uniques) ctx.S.uniques = {};
             ctx.S.uniques[data.itemId] = data.itemData;
+            ctx.S.bag[data.itemId] = (ctx.S.bag[data.itemId] || 0) + data.amount;
         } else {
             if (!ctx.S[data.itemType]) ctx.S[data.itemType] = {};
             ctx.S[data.itemType][data.itemId] = (ctx.S[data.itemType][data.itemId] || 0) + data.amount;
@@ -203,76 +214,134 @@ async function cancelItem(docId) {
     }
 }
 
+function getFleaItemName(id) {
+    if (id === 'coins') return 'Tiền xu';
+    if (id === 'norm') return 'Vé Thường';
+    if (id === 'spec') return 'Vé Đặc Biệt';
+    if (id === 'super') return 'Vé Siêu Cường';
+    if (id === 'prism') return 'Mảnh lăng quang';
+    if (id === 'star') return 'Mảnh ngôi sao';
+    if (id === 'legend') return 'Mảnh Huyền Thoại';
+    if (id === 'compost') return 'Phân Hữu Cơ';
+    if (id === 'shiny') return 'Phân Bón Bạc';
+    if (id.startsWith('unique@')) {
+        return ctx.S.uniques?.[id]?.name || 'Bảo vật bí ẩn';
+    }
+    if (id.includes('@')) {
+        const parts = id.split('@');
+        return `[Đột biến ${parts[0]}] ${CROPS[parts[1]]?.name || id}`;
+    }
+    return CROPS[id]?.name || id;
+}
+
+function getFleaItemIcon(id) {
+    if (id === 'coins') return All.spriteSVG('coin', 20);
+    if (id === 'norm' || id === 'spec' || id === 'super') {
+        const tId = id.charAt(0).toUpperCase() + id.slice(1);
+        return All.spriteSVG('ticket' + tId, 20);
+    }
+    if (id === 'prism' || id === 'star' || id === 'legend') {
+        const sId = id.charAt(0).toUpperCase() + id.slice(1);
+        return id === 'legend' ? All.spriteSVG('legendShard', 20) : All.spriteSVG('shard' + sId, 20);
+    }
+    if (id === 'compost' || id === 'shiny') return All.spriteSVG('fert_' + id, 20);
+    if (id.startsWith('unique@')) {
+        const item = ctx.S.uniques?.[id] || { sp: 'strawhat', color: '#4a90e2' };
+        return `<span style="color:${item.color}">${All.spriteSVG(item.sp, 20)}</span>`;
+    }
+    if (id.includes('@')) {
+        const parts = id.split('@');
+        return All.spriteSVG(CROPS[parts[1]]?.sp || 'sprout', 20);
+    }
+    if (CROPS && CROPS[id]) return All.spriteSVG(CROPS[id].sp || id, 20);
+    return '';
+}
+
+let selectedFleaType = null;
+let selectedFleaId = null;
+let selectedFleaMax = 0;
+
+export function uiSelectFleaAdd(type, id, max) {
+    selectedFleaType = type;
+    selectedFleaId = id;
+    selectedFleaMax = max;
+    All.$id('flea-post-act').style.display = 'flex';
+    All.$id('lbl-flea-sel').innerHTML = `Đã chọn: <span style="color:#d32f2f;">${getFleaItemName(id)}</span>`;
+    All.$id('flea-post-amount').value = 1;
+    All.$id('flea-post-amount').max = max;
+}
+
 function renderPostItem() {
-    let options = '';
-    
-    // Nông sản
-    Object.keys(ctx.S.bag).forEach(id => {
-        if (ctx.S.bag[id] > 0) {
-            const baseId = id.includes('@') ? id.split('@')[1] : id;
-            const c = CROPS[baseId];
-            const prefix = id.includes('@') ? `[Đột biến ${id.split('@')[0]}] ` : '';
-            options += `<option value="bag|${id}">Nông sản: ${prefix}${c ? c.name : id} (Còn: ${ctx.S.bag[id]})</option>`;
-        }
-    });
-    // Hạt giống
-    Object.keys(ctx.S.seeds).forEach(id => {
-        if (ctx.S.seeds[id] > 0) {
-            const c = CROPS[id];
-            options += `<option value="seeds|${id}">Hạt giống: ${c ? c.name : id} (Còn: ${ctx.S.seeds[id]})</option>`;
-        }
-    });
-    // Phân bón
-    Object.keys(ctx.S.ferts).forEach(id => {
-        if (ctx.S.ferts[id] > 0) {
-            const f = FERTS[id];
-            options += `<option value="ferts|${id}">Phân bón: ${f ? f.name : id} (Còn: ${ctx.S.ferts[id]})</option>`;
-        }
-    });
-    // Mảnh
-    if (ctx.S.shards) {
-        Object.keys(ctx.S.shards).forEach(id => {
-            if (ctx.S.shards[id] > 0) {
-                const shardNames = { prism: 'lăng quang', star: 'ngôi sao', legend: 'huyền thoại' };
-                options += `<option value="shards|${id}">Mảnh ${shardNames[id] || id} (Còn: ${ctx.S.shards[id]})</option>`;
+    let catBag = '';
+    let catGacha = '';
+    if (ctx.S.bag) {
+        Object.entries(ctx.S.bag).forEach(([k, v]) => {
+            if (v > 0) {
+                if (k.startsWith('unique@')) catGacha += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('uniques', '${k}', ${v})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${v})</div>`;
+                else catBag += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('bag', '${k}', ${v})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${v})</div>`;
             }
         });
     }
-    // Bảo vật
-    if (ctx.S.uniques) {
-        Object.keys(ctx.S.uniques).forEach(id => {
-            const u = ctx.S.uniques[id];
-            options += `<option value="uniques|${id}">Bảo vật: ${u.name}</option>`;
+    
+    let catSeeds = '';
+    if (ctx.S.seeds) {
+        Object.entries(ctx.S.seeds).forEach(([k, v]) => {
+            if (v > 0) catSeeds += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('seeds', '${k}', ${v})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${v})</div>`;
         });
     }
+
+    let catFerts = '';
+    if (ctx.S.ferts) {
+        Object.entries(ctx.S.ferts).forEach(([k, v]) => {
+            if (v > 0) catFerts += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('ferts', '${k}', ${v})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${v})</div>`;
+        });
+    }
+
+    let catTickets = '';
+    ['norm', 'spec', 'super'].forEach(k => { if (ctx.S.tickets && ctx.S.tickets[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('tickets', '${k}', ${ctx.S.tickets[k]})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${ctx.S.tickets[k]})</div>`; });
+    ['prism', 'star', 'legend'].forEach(k => { if (ctx.S.shards && ctx.S.shards[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('shards', '${k}', ${ctx.S.shards[k]})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${ctx.S.shards[k]})</div>`; });
+
+    let html = '';
+    if (catBag) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">NÔNG SẢN</div>` + catBag;
+    if (catSeeds) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">HẠT GIỐNG</div>` + catSeeds;
+    if (catFerts) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">PHÂN BÓN</div>` + catFerts;
+    if (catTickets) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">VÉ & MẢNH</div>` + catTickets;
+    if (catGacha) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">ĐỒ GACHA</div>` + catGacha;
 
     All.$id('trade-body').innerHTML = `
         <div class="flea-header">
             <h3>Đăng Bán</h3>
             <button id="flea-back" class="btn">Quay lại Chợ</button>
         </div>
-        <div class="flea-post-form">
-            <label>Chọn món đồ:</label>
-            <select id="flea-post-item">${options}</select>
+        <div class="flea-post-form" style="margin-top:10px;">
+            <div id="flea-post-list" style="display:flex; flex-wrap:wrap; gap:6px; max-height:200px; overflow-y:auto; padding:10px; border:2px inset #c9a273; background:rgba(0,0,0,0.05); border-radius:8px;">
+                ${html || '<div style="width:100%; text-align:center; color:#a3763d; font-style:italic;">Không có đồ để đăng bán</div>'}
+            </div>
             
-            <label>Số lượng muốn bán:</label>
-            <input type="number" id="flea-post-amount" min="1" value="1">
-            
-            <label>Giá bán tổng cộng (Vàng):</label>
-            <input type="number" id="flea-post-price" min="1" value="10">
-            
-            <button id="flea-post-submit" class="btn" style="margin-top: 10px; width: 100%;">Đăng Lên Chợ</button>
+            <div id="flea-post-act" style="display:none; flex-direction:column; gap:8px; margin-top:12px; padding:10px; border:2px dashed #b08a5c; border-radius:8px; background: #fffaf0;">
+                <div id="lbl-flea-sel" style="font-size:12px; font-weight:bold; color:#7a5c38; text-align:center;"></div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label style="font-size:12px; font-weight:bold; color:#6b4f2e;">Số lượng:</label>
+                    <input type="number" id="flea-post-amount" class="inp" min="1" value="1" style="width:100px;">
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label style="font-size:12px; font-weight:bold; color:#6b4f2e;">Giá tổng cộng (Vàng):</label>
+                    <input type="number" id="flea-post-price" class="inp" min="1" value="10" style="width:100px;">
+                </div>
+                
+                <button id="flea-post-submit" class="buy" style="margin-top: 5px; width: 100%; text-align:center;">Đăng Lên Chợ</button>
+            </div>
         </div>
     `;
     
     All.$id('flea-back').addEventListener('click', renderFleaMarket);
     
     All.$id('flea-post-submit').addEventListener('click', async () => {
-        const val = All.$id('flea-post-item').value;
-        if (!val) return All.toast("Chưa chọn món đồ nào");
-        const parts = val.split('|');
-        const itemType = parts[0];
-        const itemId = parts[1];
+        if (!selectedFleaType || !selectedFleaId) return All.toast("Chưa chọn món đồ nào");
+        const itemType = selectedFleaType;
+        const itemId = selectedFleaId;
         
         const amount = parseInt(All.$id('flea-post-amount').value);
         const price = parseInt(All.$id('flea-post-price').value);
@@ -298,6 +367,8 @@ function renderPostItem() {
         if (itemType === 'uniques') {
             itemData = ctx.S.uniques[itemId];
             delete ctx.S.uniques[itemId];
+            ctx.S.bag[itemId] -= amount;
+            if (ctx.S.bag[itemId] <= 0) delete ctx.S.bag[itemId];
         } else {
             ctx.S[itemType][itemId] -= amount;
             if (ctx.S[itemType][itemId] <= 0) delete ctx.S[itemType][itemId];
@@ -325,6 +396,7 @@ function renderPostItem() {
             if (itemType === 'uniques') {
                 if (!ctx.S.uniques) ctx.S.uniques = {};
                 ctx.S.uniques[itemId] = itemData;
+                ctx.S.bag[itemId] = (ctx.S.bag[itemId] || 0) + amount;
             } else {
                 ctx.S[itemType][itemId] = (ctx.S[itemType][itemId] || 0) + amount;
             }
