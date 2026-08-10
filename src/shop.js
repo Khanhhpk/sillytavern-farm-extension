@@ -697,7 +697,7 @@ export function openSpriteViewerModal() {
   Object.keys(PET_SPR).forEach(key => {
     html += `<div style="display:flex; flex-direction:column; align-items:center; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px; width:72px; box-sizing:border-box">
       ${petSVG(key, 40)}
-      <div style="font-size:9px; margin-top:4px; text-align:center; overflow:hidden; text-overflow:ellipsis; width:100%; white-space:nowrap" title="${key}">${key}</div>
+      <div style="font-size:10px; font-weight:bold; color:#5a4b3c; margin-top:4px; text-align:center; overflow:hidden; text-overflow:ellipsis; width:100%; white-space:nowrap" title="${key}">${key}</div>
     </div>`;
   });
 
@@ -705,7 +705,7 @@ export function openSpriteViewerModal() {
   Object.keys(SPR).forEach(key => {
     html += `<div style="display:flex; flex-direction:column; align-items:center; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px; width:72px; box-sizing:border-box">
       ${spriteSVG(key, 40)}
-      <div style="font-size:9px; margin-top:4px; text-align:center; overflow:hidden; text-overflow:ellipsis; width:100%; white-space:nowrap" title="${key}">${key}</div>
+      <div style="font-size:10px; font-weight:bold; color:#5a4b3c; margin-top:4px; text-align:center; overflow:hidden; text-overflow:ellipsis; width:100%; white-space:nowrap" title="${key}">${key}</div>
     </div>`;
   });
 
