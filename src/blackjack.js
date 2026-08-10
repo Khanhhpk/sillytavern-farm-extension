@@ -668,7 +668,7 @@ function bjHandleMsg(fromPid, data) {
     switch (data.type) {
         case 'HELLO': {
             const status = (bjGameState && bjRoomPhase !== 'summary') ? 'spectator' : 'idle';
-            bjPlayers[fromPid] = { name: data.name || 'Khách', status };
+            bjPlayers[fromPid] = { name: data.name || 'Khách', status, netProfit: 0 };
             if (bjIsHost) {
                 bjBroadcast({ type: 'PLAYER_JOIN', pid: fromPid, name: data.name, status }, fromPid);
                 bjConns[fromPid].send({ type: 'WELCOME', players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData, chatLog: bjChatLog });
@@ -685,7 +685,7 @@ function bjHandleMsg(fromPid, data) {
             bjMyStatus = (bjGameState && bjRoomPhase !== 'summary') ? 'spectator' : 'idle';
             bjRenderRoom(); break;
         case 'PLAYER_JOIN':
-            bjPlayers[data.pid] = { name: data.name || 'Khách', status: 'idle', netProfit: 0 };
+            bjPlayers[data.pid] = { name: data.name || 'Khách', status: data.status || 'idle', netProfit: 0 };
             bjSystemChat(`${bjPlayers[data.pid].name} đã vào phòng`);
             bjRenderRoom(); break;
         case 'PLAYER_LEFT':
@@ -814,6 +814,7 @@ function bjHandleMsg(fromPid, data) {
                 if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - data.amount;
                 if (bjPlayers[data.targetPid]) bjPlayers[data.targetPid].netProfit = (bjPlayers[data.targetPid].netProfit || 0) + data.amount;
                 bjBroadcastProfits();
+                if (fromPid !== bjMyId) bjBroadcast(data, fromPid);
             }
             break;
         case 'UPDATE_PROFITS':
@@ -911,6 +912,7 @@ function bjHostStartRound() {
         bjGameState.hands[pid] = { cards: [[]], bet: [0], stood: [false], doubled: [false], activeHandIdx: 0, splitAceIdxs: [], insuranceBet: 0, surrendered: false };
     }
     bjRoomPhase = 'ingame';
+    bjMyStatus = 'betting';
     bjBroadcast({ type: 'ROUND_START', seed, turnOrder: active });
     bjRenderRoom();
 }
@@ -1036,9 +1038,13 @@ function bjHandleRoomAction(fromPid, data) {
 
     if (data.actionType === 'HIT') {
         h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++], isNew: true });
-        if (handTotal(h.cards[idx]) >= 21) h.stood[idx] = true;
+        if (handTotal(h.cards[idx]) >= 21) {
+            h.stood[idx] = true;
+            if (idx + 1 < h.cards.length) h.activeHandIdx = idx + 1;
+        }
     } else if (data.actionType === 'STAND') {
         h.stood[idx] = true;
+        if (idx + 1 < h.cards.length) h.activeHandIdx = idx + 1;
     } else if (data.actionType === 'DOUBLE' && bjIsHost) {
         h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++], isNew: true });
         if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - h.bet[idx];
