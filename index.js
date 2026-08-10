@@ -48047,6 +48047,16 @@ async function buyItem(docId, price) {
       ctx.S.seeds[data.itemId] = (ctx.S.seeds[data.itemId] || 0) + data.amount;
     } else if (data.itemType === "ferts") {
       ctx.S.ferts[data.itemId] = (ctx.S.ferts[data.itemId] || 0) + data.amount;
+    } else if (data.itemType === "tickets") {
+      if (!ctx.S.tickets) ctx.S.tickets = {};
+      ctx.S.tickets[data.itemId] = (ctx.S.tickets[data.itemId] || 0) + data.amount;
+    } else if (data.itemType === "shards") {
+      if (!ctx.S.shards) ctx.S.shards = {};
+      ctx.S.shards[data.itemId] = (ctx.S.shards[data.itemId] || 0) + data.amount;
+    } else if (data.itemType === "uniques") {
+      if (!ctx.S.uniques) ctx.S.uniques = {};
+      ctx.S.uniques[data.itemId] = data.itemData;
+      ctx.S.bag[data.itemId] = (ctx.S.bag[data.itemId] || 0) + data.amount;
     }
     save();
     toast("Mua th\xE0nh c\xF4ng!");
@@ -48065,6 +48075,7 @@ async function cancelItem(docId) {
     if (data.itemType === "uniques") {
       if (!ctx.S.uniques) ctx.S.uniques = {};
       ctx.S.uniques[data.itemId] = data.itemData;
+      ctx.S.bag[data.itemId] = (ctx.S.bag[data.itemId] || 0) + data.amount;
     } else {
       if (!ctx.S[data.itemType]) ctx.S[data.itemType] = {};
       ctx.S[data.itemType][data.itemId] = (ctx.S[data.itemType][data.itemId] || 0) + data.amount;
@@ -48077,67 +48088,124 @@ async function cancelItem(docId) {
     toast("L\u1ED7i khi g\u1EE1 h\xE0ng: " + e2.message);
   }
 }
+function getFleaItemName(id) {
+  if (id === "coins") return "Ti\u1EC1n xu";
+  if (id === "norm") return "V\xE9 Th\u01B0\u1EDDng";
+  if (id === "spec") return "V\xE9 \u0110\u1EB7c Bi\u1EC7t";
+  if (id === "super") return "V\xE9 Si\xEAu C\u01B0\u1EDDng";
+  if (id === "prism") return "M\u1EA3nh l\u0103ng quang";
+  if (id === "star") return "M\u1EA3nh ng\xF4i sao";
+  if (id === "legend") return "M\u1EA3nh Huy\u1EC1n Tho\u1EA1i";
+  if (id === "compost") return "Ph\xE2n H\u1EEFu C\u01A1";
+  if (id === "shiny") return "Ph\xE2n B\xF3n B\u1EA1c";
+  if (id.startsWith("unique@")) {
+    return ctx.S.uniques?.[id]?.name || "B\u1EA3o v\u1EADt b\xED \u1EA9n";
+  }
+  if (id.includes("@")) {
+    const parts = id.split("@");
+    return `[\u0110\u1ED9t bi\u1EBFn ${parts[0]}] ${CROPS[parts[1]]?.name || id}`;
+  }
+  return CROPS[id]?.name || id;
+}
+function getFleaItemIcon(id) {
+  if (id === "coins") return spriteSVG("coin", 20);
+  if (id === "norm" || id === "spec" || id === "super") {
+    const tId = id.charAt(0).toUpperCase() + id.slice(1);
+    return spriteSVG("ticket" + tId, 20);
+  }
+  if (id === "prism" || id === "star" || id === "legend") {
+    const sId = id.charAt(0).toUpperCase() + id.slice(1);
+    return id === "legend" ? spriteSVG("legendShard", 20) : spriteSVG("shard" + sId, 20);
+  }
+  if (id === "compost" || id === "shiny") return spriteSVG("fert_" + id, 20);
+  if (id.startsWith("unique@")) {
+    const item = ctx.S.uniques?.[id] || { sp: "strawhat", color: "#4a90e2" };
+    return `<span style="color:${item.color}">${spriteSVG(item.sp, 20)}</span>`;
+  }
+  if (id.includes("@")) {
+    const parts = id.split("@");
+    return spriteSVG(CROPS[parts[1]]?.sp || "sprout", 20);
+  }
+  if (CROPS && CROPS[id]) return spriteSVG(CROPS[id].sp || id, 20);
+  return "";
+}
+function uiSelectFleaAdd(type, id, max) {
+  selectedFleaType = type;
+  selectedFleaId = id;
+  selectedFleaMax = max;
+  $id("flea-post-act").style.display = "flex";
+  $id("lbl-flea-sel").innerHTML = `\u0110\xE3 ch\u1ECDn: <span style="color:#d32f2f;">${getFleaItemName(id)}</span>`;
+  $id("flea-post-amount").value = 1;
+  $id("flea-post-amount").max = max;
+}
 function renderPostItem() {
-  let options = "";
-  Object.keys(ctx.S.bag).forEach((id) => {
-    if (ctx.S.bag[id] > 0) {
-      const baseId = id.includes("@") ? id.split("@")[1] : id;
-      const c2 = CROPS[baseId];
-      const prefix = id.includes("@") ? `[\u0110\u1ED9t bi\u1EBFn ${id.split("@")[0]}] ` : "";
-      options += `<option value="bag|${id}">N\xF4ng s\u1EA3n: ${prefix}${c2 ? c2.name : id} (C\xF2n: ${ctx.S.bag[id]})</option>`;
-    }
-  });
-  Object.keys(ctx.S.seeds).forEach((id) => {
-    if (ctx.S.seeds[id] > 0) {
-      const c2 = CROPS[id];
-      options += `<option value="seeds|${id}">H\u1EA1t gi\u1ED1ng: ${c2 ? c2.name : id} (C\xF2n: ${ctx.S.seeds[id]})</option>`;
-    }
-  });
-  Object.keys(ctx.S.ferts).forEach((id) => {
-    if (ctx.S.ferts[id] > 0) {
-      const f = FERTS[id];
-      options += `<option value="ferts|${id}">Ph\xE2n b\xF3n: ${f ? f.name : id} (C\xF2n: ${ctx.S.ferts[id]})</option>`;
-    }
-  });
-  if (ctx.S.shards) {
-    Object.keys(ctx.S.shards).forEach((id) => {
-      if (ctx.S.shards[id] > 0) {
-        const shardNames = { prism: "l\u0103ng quang", star: "ng\xF4i sao", legend: "huy\u1EC1n tho\u1EA1i" };
-        options += `<option value="shards|${id}">M\u1EA3nh ${shardNames[id] || id} (C\xF2n: ${ctx.S.shards[id]})</option>`;
+  let catBag = "";
+  let catGacha = "";
+  if (ctx.S.bag) {
+    Object.entries(ctx.S.bag).forEach(([k2, v2]) => {
+      if (v2 > 0) {
+        if (k2.startsWith("unique@")) catGacha += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('uniques', '${k2}', ${v2})">${getFleaItemIcon(k2)} ${getFleaItemName(k2)} (C\xF3: ${v2})</div>`;
+        else catBag += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('bag', '${k2}', ${v2})">${getFleaItemIcon(k2)} ${getFleaItemName(k2)} (C\xF3: ${v2})</div>`;
       }
     });
   }
-  if (ctx.S.uniques) {
-    Object.keys(ctx.S.uniques).forEach((id) => {
-      const u2 = ctx.S.uniques[id];
-      options += `<option value="uniques|${id}">B\u1EA3o v\u1EADt: ${u2.name}</option>`;
+  let catSeeds = "";
+  if (ctx.S.seeds) {
+    Object.entries(ctx.S.seeds).forEach(([k2, v2]) => {
+      if (v2 > 0) catSeeds += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('seeds', '${k2}', ${v2})">${getFleaItemIcon(k2)} ${getFleaItemName(k2)} (C\xF3: ${v2})</div>`;
     });
   }
+  let catFerts = "";
+  if (ctx.S.ferts) {
+    Object.entries(ctx.S.ferts).forEach(([k2, v2]) => {
+      if (v2 > 0) catFerts += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('ferts', '${k2}', ${v2})">${getFleaItemIcon(k2)} ${getFleaItemName(k2)} (C\xF3: ${v2})</div>`;
+    });
+  }
+  let catTickets = "";
+  ["norm", "spec", "super"].forEach((k2) => {
+    if (ctx.S.tickets && ctx.S.tickets[k2] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('tickets', '${k2}', ${ctx.S.tickets[k2]})">${getFleaItemIcon(k2)} ${getFleaItemName(k2)} (C\xF3: ${ctx.S.tickets[k2]})</div>`;
+  });
+  ["prism", "star", "legend"].forEach((k2) => {
+    if (ctx.S.shards && ctx.S.shards[k2] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.flea.uiSelectFleaAdd('shards', '${k2}', ${ctx.S.shards[k2]})">${getFleaItemIcon(k2)} ${getFleaItemName(k2)} (C\xF3: ${ctx.S.shards[k2]})</div>`;
+  });
+  let html = "";
+  if (catBag) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">N\xD4NG S\u1EA2N</div>` + catBag;
+  if (catSeeds) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">H\u1EA0T GI\u1ED0NG</div>` + catSeeds;
+  if (catFerts) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">PH\xC2N B\xD3N</div>` + catFerts;
+  if (catTickets) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">V\xC9 & M\u1EA2NH</div>` + catTickets;
+  if (catGacha) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">\u0110\u1ED2 GACHA</div>` + catGacha;
   $id("trade-body").innerHTML = `
         <div class="flea-header">
             <h3>\u0110\u0103ng B\xE1n</h3>
             <button id="flea-back" class="btn">Quay l\u1EA1i Ch\u1EE3</button>
         </div>
-        <div class="flea-post-form">
-            <label>Ch\u1ECDn m\xF3n \u0111\u1ED3:</label>
-            <select id="flea-post-item">${options}</select>
+        <div class="flea-post-form" style="margin-top:10px;">
+            <div id="flea-post-list" style="display:flex; flex-wrap:wrap; gap:6px; max-height:200px; overflow-y:auto; padding:10px; border:2px inset #c9a273; background:rgba(0,0,0,0.05); border-radius:8px;">
+                ${html || '<div style="width:100%; text-align:center; color:#a3763d; font-style:italic;">Kh\xF4ng c\xF3 \u0111\u1ED3 \u0111\u1EC3 \u0111\u0103ng b\xE1n</div>'}
+            </div>
             
-            <label>S\u1ED1 l\u01B0\u1EE3ng mu\u1ED1n b\xE1n:</label>
-            <input type="number" id="flea-post-amount" min="1" value="1">
-            
-            <label>Gi\xE1 b\xE1n t\u1ED5ng c\u1ED9ng (V\xE0ng):</label>
-            <input type="number" id="flea-post-price" min="1" value="10">
-            
-            <button id="flea-post-submit" class="btn" style="margin-top: 10px; width: 100%;">\u0110\u0103ng L\xEAn Ch\u1EE3</button>
+            <div id="flea-post-act" style="display:none; flex-direction:column; gap:8px; margin-top:12px; padding:10px; border:2px dashed #b08a5c; border-radius:8px; background: #fffaf0;">
+                <div id="lbl-flea-sel" style="font-size:12px; font-weight:bold; color:#7a5c38; text-align:center;"></div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label style="font-size:12px; font-weight:bold; color:#6b4f2e;">S\u1ED1 l\u01B0\u1EE3ng:</label>
+                    <input type="number" id="flea-post-amount" class="inp" min="1" value="1" style="width:100px;">
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label style="font-size:12px; font-weight:bold; color:#6b4f2e;">Gi\xE1 t\u1ED5ng c\u1ED9ng (V\xE0ng):</label>
+                    <input type="number" id="flea-post-price" class="inp" min="1" value="10" style="width:100px;">
+                </div>
+                
+                <button id="flea-post-submit" class="buy" style="margin-top: 5px; width: 100%; text-align:center;">\u0110\u0103ng L\xEAn Ch\u1EE3</button>
+            </div>
         </div>
     `;
   $id("flea-back").addEventListener("click", renderFleaMarket);
   $id("flea-post-submit").addEventListener("click", async () => {
-    const val = $id("flea-post-item").value;
-    if (!val) return toast("Ch\u01B0a ch\u1ECDn m\xF3n \u0111\u1ED3 n\xE0o");
-    const parts = val.split("|");
-    const itemType = parts[0];
-    const itemId = parts[1];
+    if (!selectedFleaType || !selectedFleaId) return toast("Ch\u01B0a ch\u1ECDn m\xF3n \u0111\u1ED3 n\xE0o");
+    const itemType = selectedFleaType;
+    const itemId = selectedFleaId;
     const amount = parseInt($id("flea-post-amount").value);
     const price = parseInt($id("flea-post-price").value);
     if (isNaN(amount) || amount <= 0) return toast("S\u1ED1 l\u01B0\u1EE3ng kh\xF4ng h\u1EE3p l\u1EC7");
@@ -48155,6 +48223,8 @@ function renderPostItem() {
     if (itemType === "uniques") {
       itemData = ctx.S.uniques[itemId];
       delete ctx.S.uniques[itemId];
+      ctx.S.bag[itemId] -= amount;
+      if (ctx.S.bag[itemId] <= 0) delete ctx.S.bag[itemId];
     } else {
       ctx.S[itemType][itemId] -= amount;
       if (ctx.S[itemType][itemId] <= 0) delete ctx.S[itemType][itemId];
@@ -48179,6 +48249,7 @@ function renderPostItem() {
       if (itemType === "uniques") {
         if (!ctx.S.uniques) ctx.S.uniques = {};
         ctx.S.uniques[itemId] = itemData;
+        ctx.S.bag[itemId] = (ctx.S.bag[itemId] || 0) + amount;
       } else {
         ctx.S[itemType][itemId] = (ctx.S[itemType][itemId] || 0) + amount;
       }
@@ -48187,6 +48258,7 @@ function renderPostItem() {
     }
   });
 }
+var selectedFleaType, selectedFleaId, selectedFleaMax;
 var init_flea = __esm({
   "src/flea.js"() {
     init_store();
@@ -48194,6 +48266,9 @@ var init_flea = __esm({
     init_firebase();
     init_index_esm7();
     init_data();
+    selectedFleaType = null;
+    selectedFleaId = null;
+    selectedFleaMax = 0;
   }
 });
 
@@ -48438,6 +48513,7 @@ __export(all_exports, {
   uiOpenAddItem: () => uiOpenAddItem,
   uiRemoveTradeItem: () => uiRemoveTradeItem,
   uiSelectAdd: () => uiSelectAdd,
+  uiSelectFleaAdd: () => uiSelectFleaAdd,
   uiToggleLock: () => uiToggleLock,
   updateInjection: () => updateInjection,
   updateNextScene: () => updateNextScene,
