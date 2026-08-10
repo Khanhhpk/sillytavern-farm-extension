@@ -3054,7 +3054,13 @@ function applyViewState() {
     else field.classList.remove("casino-mode");
   }
   if (viewToggle) {
-    viewToggle.innerHTML = isExplore || isCasino ? `${spriteSVG("strawhat", 16)} <span>V\u1EC1 N\xF4ng Tr\u1EA1i</span>` : `${spriteSVG("mapIcon", 16)} <span>Kh\xE1m ph\xE1</span>`;
+    if (isCasino) {
+      viewToggle.innerHTML = `${spriteSVG("mapIcon", 16)} <span>V\u1EC1 Kh\xE1m ph\xE1</span>`;
+    } else if (isExplore) {
+      viewToggle.innerHTML = `${spriteSVG("strawhat", 16)} <span>V\u1EC1 N\xF4ng Tr\u1EA1i</span>`;
+    } else {
+      viewToggle.innerHTML = `${spriteSVG("mapIcon", 16)} <span>Kh\xE1m ph\xE1</span>`;
+    }
   }
 }
 function renderPager() {
@@ -3281,7 +3287,10 @@ function initUI() {
   const viewToggle = $id("viewToggle");
   if (viewToggle) {
     viewToggle.addEventListener("click", () => {
-      if (ctx.S.view === "explore" || ctx.S.view === "casino") {
+      if (ctx.S.view === "casino") {
+        ctx.S.view = "explore";
+        toast("B\u1EA3n \u0111\u1ED3 Kh\xE1m ph\xE1");
+      } else if (ctx.S.view === "explore") {
         ctx.S.view = "farm";
         toast("Tr\u1EDF v\u1EC1 N\xF4ng tr\u1EA1i");
       } else {

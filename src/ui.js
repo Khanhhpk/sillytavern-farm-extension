@@ -77,9 +77,13 @@ export function applyViewState() {
 
   // Cập nhật nút chuyển tab
   if (viewToggle) {
-    viewToggle.innerHTML = (isExplore || isCasino)
-      ? `${spriteSVG('strawhat', 16)} <span>Về Nông Trại</span>`
-      : `${spriteSVG('mapIcon', 16)} <span>Khám phá</span>`;
+    if (isCasino) {
+      viewToggle.innerHTML = `${spriteSVG('mapIcon', 16)} <span>Về Khám phá</span>`;
+    } else if (isExplore) {
+      viewToggle.innerHTML = `${spriteSVG('strawhat', 16)} <span>Về Nông Trại</span>`;
+    } else {
+      viewToggle.innerHTML = `${spriteSVG('mapIcon', 16)} <span>Khám phá</span>`;
+    }
   }
 }
 
@@ -303,7 +307,10 @@ fieldEl.addEventListener('touchend', e => {
   const viewToggle = $id('viewToggle');
   if (viewToggle) {
     viewToggle.addEventListener('click', () => {
-      if (ctx.S.view === 'explore' || ctx.S.view === 'casino') {
+      if (ctx.S.view === 'casino') {
+        ctx.S.view = 'explore';
+        toast('Bản đồ Khám phá');
+      } else if (ctx.S.view === 'explore') {
         ctx.S.view = 'farm';
         toast('Trở về Nông trại');
       } else {
