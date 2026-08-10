@@ -47945,7 +47945,28 @@ async function checkSoldItems() {
     console.error("L\u1ED7i khi ki\u1EC3m tra h\xE0ng \u0111\xE3 b\xE1n:", e2);
   }
 }
-function renderFleaMarket() {
+async function renderFleaMarket() {
+  if (!ctx.S.username) {
+    $id("trade-body").innerHTML = `
+            <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
+                <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">T\u1EA1o T\xEAn Ng\u01B0\u1EDDi Ch\u01A1i</div>
+                <div style="font-size: 12px; color: #555;">Vui l\xF2ng nh\u1EADp t\xEAn \u0111\u1EC3 hi\u1EC3n th\u1ECB khi giao d\u1ECBch tr\xEAn Ch\u1EE3 Tr\u1EDDi.</div>
+                <input type="text" id="inp-flea-username" class="inp" placeholder="Nh\u1EADp t\xEAn c\u1EE7a b\u1EA1n...">
+                <div class="buy" id="btn-flea-save-username" style="padding: 10px;">L\u01B0u t\xEAn</div>
+            </div>
+        `;
+    $id("btn-flea-save-username").onclick = () => {
+      const val = $id("inp-flea-username").value.trim();
+      if (val) {
+        ctx.S.username = val;
+        save();
+        renderFleaMarket();
+      } else {
+        toast("T\xEAn kh\xF4ng \u0111\u01B0\u1EE3c \u0111\u1EC3 tr\u1ED1ng!");
+      }
+    };
+    return;
+  }
   $id("trade-body").innerHTML = `
         <div class="flea-header">
             <h3>Ch\u1EE3 Tr\u1EDDi Kh\u1EDFi Nguy\xEAn</h3>
@@ -48129,12 +48150,35 @@ function getFleaItemIcon(id) {
   if (CROPS && CROPS[id]) return spriteSVG(CROPS[id].sp || id, 20);
   return "";
 }
+function getFleaItemDesc(id) {
+  if (id === "coins") return "Ti\u1EC1n t\u1EC7 chung c\u1EE7a N\xF4ng tr\u1EA1i.";
+  if (id === "norm") return "V\xE9 quay gacha th\u01B0\u1EDDng.";
+  if (id === "spec") return "V\xE9 quay gacha \u0111\u1EB7c bi\u1EC7t.";
+  if (id === "super") return "V\xE9 quay gacha si\xEAu c\u1EA5p.";
+  if (id === "prism") return "M\u1EA3nh gh\xE9p qu\xFD hi\u1EBFm d\xF9ng \u0111\u1EC3 \u0111\u1ED5i ph\u1EA7n th\u01B0\u1EDFng l\u1EDBn.";
+  if (id === "star") return "M\u1EA3nh gh\xE9p n\xE2ng c\u1EA5p \u0111\u1EB7c bi\u1EC7t.";
+  if (id === "legend") return "M\u1EA3nh gh\xE9p huy\u1EC1n tho\u1EA1i c\u1EF1c hi\u1EBFm.";
+  if (id === "compost") return "Gi\u1EA3m 25% th\u1EDDi gian ph\xE1t tri\u1EC3n c\u1EE7a c\xE2y tr\u1ED3ng.";
+  if (id === "shiny") return "T\u0103ng 50% t\u1ED1c \u0111\u1ED9 l\u1EDBn v\xE0 t\u0103ng 25% t\u1EF7 l\u1EC7 \u0111\u1ED9t bi\u1EBFn.";
+  if (id.startsWith("unique@")) {
+    return ctx.S.uniques?.[id]?.desc || "M\u1ED9t b\u1EA3o v\u1EADt b\xED \u1EA9n kh\xF4ng r\xF5 ngu\u1ED3n g\u1ED1c.";
+  }
+  if (id.includes("@")) {
+    const parts = id.split("@");
+    return CROPS[parts[1]]?.desc || "C\xE2y tr\u1ED3ng \u0111\u1ED9t bi\u1EBFn \u0111\u1EB7c bi\u1EC7t.";
+  }
+  return CROPS[id]?.desc || "V\u1EADt ph\u1EA9m n\xF4ng tr\u1EA1i.";
+}
 function uiSelectFleaAdd(type, id, max) {
   selectedFleaType = type;
   selectedFleaId = id;
   selectedFleaMax = max;
   $id("flea-post-act").style.display = "flex";
-  $id("lbl-flea-sel").innerHTML = `\u0110\xE3 ch\u1ECDn: <span style="color:#d32f2f;">${getFleaItemName(id)}</span>`;
+  let iconStr = getFleaItemIcon(id);
+  iconStr = iconStr.replace(/width="20"/g, 'width="48"').replace(/height="20"/g, 'height="48"');
+  $id("lbl-flea-sel-icon").innerHTML = iconStr;
+  $id("lbl-flea-sel-name").innerText = getFleaItemName(id);
+  $id("lbl-flea-sel-desc").innerText = getFleaItemDesc(id);
   $id("flea-post-amount").value = 1;
   $id("flea-post-amount").max = max;
 }
@@ -48179,26 +48223,38 @@ function renderPostItem() {
             <h3>\u0110\u0103ng B\xE1n</h3>
             <button id="flea-back" class="btn">Quay l\u1EA1i Ch\u1EE3</button>
         </div>
-        <div class="flea-post-form" style="margin-top:10px;">
+        <div class="flea-post-form" style="margin-top:10px; position:relative;">
             <input type="text" id="flea-search" placeholder="T\xECm ki\u1EBFm m\xF3n \u0111\u1ED3..." style="width:100%; padding:6px; margin-bottom:8px; border:2px inset #c9a273; border-radius:4px; box-sizing:border-box;">
             <div id="flea-post-list" style="display:flex; flex-wrap:wrap; gap:6px; max-height:350px; overflow-y:auto; padding:10px; border:2px inset #c9a273; background:rgba(0,0,0,0.05); border-radius:8px;">
                 ${html || '<div style="width:100%; text-align:center; color:#a3763d; font-style:italic;">Kh\xF4ng c\xF3 \u0111\u1ED3 \u0111\u1EC3 \u0111\u0103ng b\xE1n</div>'}
             </div>
             
-            <div id="flea-post-act" style="display:none; flex-direction:column; gap:8px; margin-top:12px; padding:10px; border:2px dashed #b08a5c; border-radius:8px; background: #fffaf0;">
-                <div id="lbl-flea-sel" style="font-size:12px; font-weight:bold; color:#7a5c38; text-align:center;"></div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <label style="font-size:12px; font-weight:bold; color:#6b4f2e;">S\u1ED1 l\u01B0\u1EE3ng:</label>
-                    <input type="number" id="flea-post-amount" class="inp" min="1" value="1" style="width:100px;">
+            <div id="flea-post-act" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:99; border-radius: 8px;">
+                <div style="background:#fffaf0; padding:20px; border:3px solid #c9a273; border-radius:12px; width:85%; max-width:320px; display:flex; flex-direction:column; gap:12px; position:relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                    <button onclick="document.getElementById('flea-post-act').style.display='none'" style="position:absolute; top:8px; right:10px; background:none; border:none; font-weight:bold; cursor:pointer; color:#7a5c38; font-size:16px;">\u2715</button>
+                    
+                    <div style="display:flex; gap:15px; align-items:center;">
+                        <div id="lbl-flea-sel-icon" style="font-size:32px; background:#f0e6d2; padding:10px; border-radius:8px; border:1px solid #d4b895; display:flex; justify-content:center; align-items:center; width:64px; height:64px;"></div>
+                        <div style="flex:1;">
+                            <div id="lbl-flea-sel-name" style="font-size:15px; font-weight:bold; color:#d32f2f; margin-bottom:5px;"></div>
+                            <div id="lbl-flea-sel-desc" style="font-size:11px; color:#555; line-height:1.3;"></div>
+                        </div>
+                    </div>
+                    
+                    <hr style="border:0; border-top:1px dashed #d4b895; margin:5px 0;">
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label style="font-size:13px; font-weight:bold; color:#6b4f2e;">S\u1ED1 l\u01B0\u1EE3ng b\xE1n:</label>
+                        <input type="number" id="flea-post-amount" class="inp" min="1" value="1" style="width:100px;">
+                    </div>
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label style="font-size:13px; font-weight:bold; color:#6b4f2e;">Gi\xE1 t\u1ED5ng (V\xE0ng):</label>
+                        <input type="number" id="flea-post-price" class="inp" min="1" value="10" style="width:100px;">
+                    </div>
+                    
+                    <button id="flea-post-submit" class="buy" style="margin-top: 5px; width: 100%; text-align:center; padding: 10px; font-size: 14px;">X\xE1c nh\u1EADn \u0110\u0103ng B\xE1n</button>
                 </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <label style="font-size:12px; font-weight:bold; color:#6b4f2e;">Gi\xE1 t\u1ED5ng c\u1ED9ng (V\xE0ng):</label>
-                    <input type="number" id="flea-post-price" class="inp" min="1" value="10" style="width:100px;">
-                </div>
-                
-                <button id="flea-post-submit" class="buy" style="margin-top: 5px; width: 100%; text-align:center;">\u0110\u0103ng L\xEAn Ch\u1EE3</button>
             </div>
         </div>
     `;
@@ -48479,6 +48535,7 @@ __export(all_exports, {
   renderBanner: () => renderBanner,
   renderChips: () => renderChips,
   renderDynamic: () => renderDynamic,
+  renderFleaMarket: () => renderFleaMarket,
   renderPager: () => renderPager,
   renderPets: () => renderPets,
   renderPlots: () => renderPlots,

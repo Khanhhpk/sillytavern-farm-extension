@@ -38,7 +38,29 @@ async function checkSoldItems() {
     }
 }
 
-function renderFleaMarket() {
+export async function renderFleaMarket() {
+    if (!ctx.S.username) {
+        All.$id('trade-body').innerHTML = `
+            <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
+                <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">Tạo Tên Người Chơi</div>
+                <div style="font-size: 12px; color: #555;">Vui lòng nhập tên để hiển thị khi giao dịch trên Chợ Trời.</div>
+                <input type="text" id="inp-flea-username" class="inp" placeholder="Nhập tên của bạn...">
+                <div class="buy" id="btn-flea-save-username" style="padding: 10px;">Lưu tên</div>
+            </div>
+        `;
+        All.$id('btn-flea-save-username').onclick = () => {
+            const val = All.$id('inp-flea-username').value.trim();
+            if (val) {
+                ctx.S.username = val;
+                All.save();
+                renderFleaMarket();
+            } else {
+                All.toast('Tên không được để trống!');
+            }
+        };
+        return;
+    }
+
     All.$id('trade-body').innerHTML = `
         <div class="flea-header">
             <h3>Chợ Trời Khởi Nguyên</h3>
@@ -257,6 +279,26 @@ function getFleaItemIcon(id) {
     return '';
 }
 
+function getFleaItemDesc(id) {
+    if (id === 'coins') return 'Tiền tệ chung của Nông trại.';
+    if (id === 'norm') return 'Vé quay gacha thường.';
+    if (id === 'spec') return 'Vé quay gacha đặc biệt.';
+    if (id === 'super') return 'Vé quay gacha siêu cấp.';
+    if (id === 'prism') return 'Mảnh ghép quý hiếm dùng để đổi phần thưởng lớn.';
+    if (id === 'star') return 'Mảnh ghép nâng cấp đặc biệt.';
+    if (id === 'legend') return 'Mảnh ghép huyền thoại cực hiếm.';
+    if (id === 'compost') return 'Giảm 25% thời gian phát triển của cây trồng.';
+    if (id === 'shiny') return 'Tăng 50% tốc độ lớn và tăng 25% tỷ lệ đột biến.';
+    if (id.startsWith('unique@')) {
+        return ctx.S.uniques?.[id]?.desc || 'Một bảo vật bí ẩn không rõ nguồn gốc.';
+    }
+    if (id.includes('@')) {
+        const parts = id.split('@');
+        return CROPS[parts[1]]?.desc || 'Cây trồng đột biến đặc biệt.';
+    }
+    return CROPS[id]?.desc || 'Vật phẩm nông trại.';
+}
+
 let selectedFleaType = null;
 let selectedFleaId = null;
 let selectedFleaMax = 0;
@@ -266,7 +308,11 @@ export function uiSelectFleaAdd(type, id, max) {
     selectedFleaId = id;
     selectedFleaMax = max;
     All.$id('flea-post-act').style.display = 'flex';
-    All.$id('lbl-flea-sel').innerHTML = `Đã chọn: <span style="color:#d32f2f;">${getFleaItemName(id)}</span>`;
+    let iconStr = getFleaItemIcon(id);
+    iconStr = iconStr.replace(/width="20"/g, 'width="48"').replace(/height="20"/g, 'height="48"');
+    All.$id('lbl-flea-sel-icon').innerHTML = iconStr;
+    All.$id('lbl-flea-sel-name').innerText = getFleaItemName(id);
+    All.$id('lbl-flea-sel-desc').innerText = getFleaItemDesc(id);
     All.$id('flea-post-amount').value = 1;
     All.$id('flea-post-amount').max = max;
 }
@@ -313,26 +359,38 @@ function renderPostItem() {
             <h3>Đăng Bán</h3>
             <button id="flea-back" class="btn">Quay lại Chợ</button>
         </div>
-        <div class="flea-post-form" style="margin-top:10px;">
+        <div class="flea-post-form" style="margin-top:10px; position:relative;">
             <input type="text" id="flea-search" placeholder="Tìm kiếm món đồ..." style="width:100%; padding:6px; margin-bottom:8px; border:2px inset #c9a273; border-radius:4px; box-sizing:border-box;">
             <div id="flea-post-list" style="display:flex; flex-wrap:wrap; gap:6px; max-height:350px; overflow-y:auto; padding:10px; border:2px inset #c9a273; background:rgba(0,0,0,0.05); border-radius:8px;">
                 ${html || '<div style="width:100%; text-align:center; color:#a3763d; font-style:italic;">Không có đồ để đăng bán</div>'}
             </div>
             
-            <div id="flea-post-act" style="display:none; flex-direction:column; gap:8px; margin-top:12px; padding:10px; border:2px dashed #b08a5c; border-radius:8px; background: #fffaf0;">
-                <div id="lbl-flea-sel" style="font-size:12px; font-weight:bold; color:#7a5c38; text-align:center;"></div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <label style="font-size:12px; font-weight:bold; color:#6b4f2e;">Số lượng:</label>
-                    <input type="number" id="flea-post-amount" class="inp" min="1" value="1" style="width:100px;">
+            <div id="flea-post-act" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:99; border-radius: 8px;">
+                <div style="background:#fffaf0; padding:20px; border:3px solid #c9a273; border-radius:12px; width:85%; max-width:320px; display:flex; flex-direction:column; gap:12px; position:relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                    <button onclick="document.getElementById('flea-post-act').style.display='none'" style="position:absolute; top:8px; right:10px; background:none; border:none; font-weight:bold; cursor:pointer; color:#7a5c38; font-size:16px;">✕</button>
+                    
+                    <div style="display:flex; gap:15px; align-items:center;">
+                        <div id="lbl-flea-sel-icon" style="font-size:32px; background:#f0e6d2; padding:10px; border-radius:8px; border:1px solid #d4b895; display:flex; justify-content:center; align-items:center; width:64px; height:64px;"></div>
+                        <div style="flex:1;">
+                            <div id="lbl-flea-sel-name" style="font-size:15px; font-weight:bold; color:#d32f2f; margin-bottom:5px;"></div>
+                            <div id="lbl-flea-sel-desc" style="font-size:11px; color:#555; line-height:1.3;"></div>
+                        </div>
+                    </div>
+                    
+                    <hr style="border:0; border-top:1px dashed #d4b895; margin:5px 0;">
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label style="font-size:13px; font-weight:bold; color:#6b4f2e;">Số lượng bán:</label>
+                        <input type="number" id="flea-post-amount" class="inp" min="1" value="1" style="width:100px;">
+                    </div>
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label style="font-size:13px; font-weight:bold; color:#6b4f2e;">Giá tổng (Vàng):</label>
+                        <input type="number" id="flea-post-price" class="inp" min="1" value="10" style="width:100px;">
+                    </div>
+                    
+                    <button id="flea-post-submit" class="buy" style="margin-top: 5px; width: 100%; text-align:center; padding: 10px; font-size: 14px;">Xác nhận Đăng Bán</button>
                 </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <label style="font-size:12px; font-weight:bold; color:#6b4f2e;">Giá tổng cộng (Vàng):</label>
-                    <input type="number" id="flea-post-price" class="inp" min="1" value="10" style="width:100px;">
-                </div>
-                
-                <button id="flea-post-submit" class="buy" style="margin-top: 5px; width: 100%; text-align:center;">Đăng Lên Chợ</button>
             </div>
         </div>
     `;
