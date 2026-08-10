@@ -849,5 +849,18 @@ export const blackjackStyles = `
 .bj-btn-ready.not-ready { background: linear-gradient(#e74c3c, #c0392b) !important; border-color: #e74c3c !important; }
 .bj-coin-anim { position: absolute; color: #f1c40f; font-weight: bold; font-size: 16px; animation: bjCoinFly 1.5s ease-out forwards; pointer-events: none; text-shadow: 0 0 5px #000; z-index: 20; }
 @keyframes bjCoinFly { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.5); } }
+
+@media (max-width: 640px) {
+    .bj-chat-wrap.mobile-chat-focus {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 100000;
+        background: rgba(0,0,0,0.95);
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
+        border-top: 2px solid #d4af37;
+    }
+}
 `;
 

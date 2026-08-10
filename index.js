@@ -3148,6 +3148,19 @@ var init_style = __esm({
 .bj-btn-ready.not-ready { background: linear-gradient(#e74c3c, #c0392b) !important; border-color: #e74c3c !important; }
 .bj-coin-anim { position: absolute; color: #f1c40f; font-weight: bold; font-size: 16px; animation: bjCoinFly 1.5s ease-out forwards; pointer-events: none; text-shadow: 0 0 5px #000; z-index: 20; }
 @keyframes bjCoinFly { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.5); } }
+
+@media (max-width: 640px) {
+    .bj-chat-wrap.mobile-chat-focus {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 100000;
+        background: rgba(0,0,0,0.95);
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
+        border-top: 2px solid #d4af37;
+    }
+}
 `;
   }
 });
@@ -50280,7 +50293,7 @@ function bjRenderRoom() {
     }
   }
   html += `</div>
-    <div class="bj-chat-wrap">
+    <div class="bj-chat-wrap" id="bj-chat-wrap">
         <div class="bj-chat-log" id="bj-chat-log">${bjChatLog.slice(-20).map(
     (e2) => `<div class="bj-chat-line"><b>${e2.name}:</b> ${e2.msg.replace(/</g, "&lt;")}</div>`
   ).join("")}</div>
@@ -50389,7 +50402,7 @@ function bjBindMyActions() {
     const inp = $id("bj-room-bet-inp");
     bjRoomPlaceBet(parseInt(inp?.value || "0") || 0);
   });
-  document.querySelectorAll(".bj-rquick").forEach((b2) => {
+  $id("bj-win").querySelectorAll(".bj-rquick").forEach((b2) => {
     b2.addEventListener("click", () => {
       const inp = $id("bj-room-bet-inp");
       const q = parseInt(b2.getAttribute("data-q") || "1");
@@ -50450,19 +50463,34 @@ function bjRenderChat() {
 }
 function bjBindChat() {
   const send = () => {
-    const inp = $id("bj-chat-inp");
-    const msg = (inp?.value || "").trim();
+    const inp2 = $id("bj-chat-inp");
+    const msg = (inp2?.value || "").trim();
     if (!msg) return;
-    if (inp) inp.value = "";
+    if (inp2) inp2.value = "";
     bjChatLog.push({ name: bjMyName(), msg, ts: Date.now() });
     if (bjChatLog.length > 50) bjChatLog.shift();
     bjRenderChat();
     bjBroadcast({ type: "CHAT", msg });
   };
   $id("bj-chat-send")?.addEventListener("click", send);
-  $id("bj-chat-inp")?.addEventListener("keydown", (e2) => {
-    if (e2.key === "Enter") send();
-  });
+  const inp = $id("bj-chat-inp");
+  if (inp) {
+    inp.addEventListener("keydown", (e2) => {
+      if (e2.key === "Enter") send();
+    });
+    inp.addEventListener("focus", () => {
+      if (window.innerWidth <= 640) {
+        const wrap2 = $id("bj-chat-wrap");
+        if (wrap2) wrap2.classList.add("mobile-chat-focus");
+      }
+    });
+    inp.addEventListener("blur", () => {
+      if (window.innerWidth <= 640) {
+        const wrap2 = $id("bj-chat-wrap");
+        if (wrap2) wrap2.classList.remove("mobile-chat-focus");
+      }
+    });
+  }
 }
 function openBlackjackPicker() {
   const win = $id("bj-win");

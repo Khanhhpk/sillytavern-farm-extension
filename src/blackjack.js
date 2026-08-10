@@ -1171,7 +1171,7 @@ function bjRenderRoom() {
     }
 
     html += `</div>
-    <div class="bj-chat-wrap">
+    <div class="bj-chat-wrap" id="bj-chat-wrap">
         <div class="bj-chat-log" id="bj-chat-log">${bjChatLog.slice(-20).map(e =>
             `<div class="bj-chat-line"><b>${e.name}:</b> ${e.msg.replace(/</g,'&lt;')}</div>`
         ).join('')}</div>
@@ -1280,7 +1280,7 @@ function bjBindMyActions() {
         const inp = All.$id('bj-room-bet-inp');
         bjRoomPlaceBet(parseInt(inp?.value||'0')||0);
     });
-    document.querySelectorAll('.bj-rquick').forEach(b => {
+    All.$id('bj-win').querySelectorAll('.bj-rquick').forEach(b => {
         b.addEventListener('click', () => {
             const inp = All.$id('bj-room-bet-inp');
             const q = parseInt(b.getAttribute('data-q') || '1');
@@ -1340,7 +1340,22 @@ function bjBindChat() {
         bjBroadcast({ type: 'CHAT', msg });
     };
     All.$id('bj-chat-send')?.addEventListener('click', send);
-    All.$id('bj-chat-inp')?.addEventListener('keydown', e => { if (e.key==='Enter') send(); });
+    const inp = All.$id('bj-chat-inp');
+    if (inp) {
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+        inp.addEventListener('focus', () => {
+            if (window.innerWidth <= 640) {
+                const wrap = All.$id('bj-chat-wrap');
+                if (wrap) wrap.classList.add('mobile-chat-focus');
+            }
+        });
+        inp.addEventListener('blur', () => {
+            if (window.innerWidth <= 640) {
+                const wrap = All.$id('bj-chat-wrap');
+                if (wrap) wrap.classList.remove('mobile-chat-focus');
+            }
+        });
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
