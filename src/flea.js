@@ -663,7 +663,10 @@ function renderPostItem() {
 
     All.$id('flea-back').addEventListener('click', renderFleaMarket);
     
-    All.$id('flea-post-submit').addEventListener('click', async () => {
+    All.$id('flea-post-submit').addEventListener('click', async (e) => {
+        const btnEl = e.currentTarget;
+        if (btnEl.disabled) return;
+        
         if (!selectedFleaType || !selectedFleaId) return All.toast("Chưa chọn món đồ nào");
         const itemType = selectedFleaType;
         const itemId = selectedFleaId;
@@ -686,6 +689,9 @@ function renderPostItem() {
         if (itemType === 'uniques' && amount > 1) {
             return All.toast("Chỉ được bán 1 Bảo vật một lúc!");
         }
+        
+        btnEl.disabled = true;
+        btnEl.innerText = 'Đang xử lý...';
         
         let itemData = null;
         // Trừ đồ trong kho
@@ -727,6 +733,8 @@ function renderPostItem() {
             }
             All.save();
             All.toast("Lỗi khi đăng bán: " + e.message);
+            btnEl.disabled = false;
+            btnEl.innerText = 'Xác nhận Đăng Bán';
         }
     });
 }

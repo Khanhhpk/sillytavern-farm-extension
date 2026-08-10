@@ -48520,7 +48520,9 @@ function renderPostItem() {
     });
   });
   $id("flea-back").addEventListener("click", renderFleaMarket);
-  $id("flea-post-submit").addEventListener("click", async () => {
+  $id("flea-post-submit").addEventListener("click", async (e2) => {
+    const btnEl = e2.currentTarget;
+    if (btnEl.disabled) return;
     if (!selectedFleaType || !selectedFleaId) return toast("Ch\u01B0a ch\u1ECDn m\xF3n \u0111\u1ED3 n\xE0o");
     const itemType = selectedFleaType;
     const itemId = selectedFleaId;
@@ -48537,6 +48539,8 @@ function renderPostItem() {
     if (itemType === "uniques" && amount > 1) {
       return toast("Ch\u1EC9 \u0111\u01B0\u1EE3c b\xE1n 1 B\u1EA3o v\u1EADt m\u1ED9t l\xFAc!");
     }
+    btnEl.disabled = true;
+    btnEl.innerText = "\u0110ang x\u1EED l\xFD...";
     let itemData = null;
     if (itemType === "uniques") {
       itemData = ctx.S.uniques[itemId];
@@ -48563,7 +48567,7 @@ function renderPostItem() {
       await addDoc(collection(db, "flea_market"), docData);
       toast("\u0110\xE3 \u0111\u0103ng b\xE1n th\xE0nh c\xF4ng!");
       renderFleaMarket();
-    } catch (e2) {
+    } catch (e3) {
       if (itemType === "uniques") {
         if (!ctx.S.uniques) ctx.S.uniques = {};
         ctx.S.uniques[itemId] = itemData;
@@ -48572,7 +48576,9 @@ function renderPostItem() {
         ctx.S[itemType][itemId] = (ctx.S[itemType][itemId] || 0) + amount;
       }
       save();
-      toast("L\u1ED7i khi \u0111\u0103ng b\xE1n: " + e2.message);
+      toast("L\u1ED7i khi \u0111\u0103ng b\xE1n: " + e3.message);
+      btnEl.disabled = false;
+      btnEl.innerText = "X\xE1c nh\u1EADn \u0110\u0103ng B\xE1n";
     }
   });
 }
