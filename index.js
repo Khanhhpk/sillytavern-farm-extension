@@ -49897,8 +49897,8 @@ function bjHostStartRound() {
   if (active.length === 0) return toast("C\u1EA7n \xEDt nh\u1EA5t 1 ng\u01B0\u1EDDi ch\u01A1i");
   const seed = (Date.now() ^ Math.floor(Math.random() * 4294967295)) & 4294967295;
   const msg = { type: "ROUND_START", seed, turnOrder: active, betDeadline: Date.now() + 3e4 };
-  bjHandleMsg(bjMyId, msg);
   bjBroadcast(msg);
+  bjHandleMsg(bjMyId, msg);
 }
 function bjCheckAllBetsIn() {
   if (!bjGameState || bjGameState.phase !== "betting") return;
@@ -49931,8 +49931,8 @@ function bjHostDealCards() {
   gs.phase = phase2;
   gs.currentTurn = phase2 === "player" ? gs.turnOrder[0] : null;
   const msg = { type: "DEAL_CARDS", hands: gs.hands, dealerHand: gs.dealerHand, phase: phase2, currentTurn: gs.currentTurn, shoeIdx: gs.shoeIdx };
-  bjHandleMsg(bjMyId, msg);
   bjBroadcast(msg);
+  bjHandleMsg(bjMyId, msg);
   if (phase2 === "dealer_bj") setTimeout(() => bjHostEndRound(), 1500);
   else if (phase2 === "player") bjAutoStandBJs();
 }
@@ -50169,8 +50169,8 @@ function bjRoomPlaceBet(amount) {
   save();
   renderStatus();
   const msg = { type: "BET_PLACED", pid: bjMyId, bet: amount };
-  bjHandleMsg(bjMyId, msg);
   bjBroadcast(msg);
+  bjHandleMsg(bjMyId, msg);
 }
 function bjRoomAction(actionType, extra) {
   const msg = { type: "ACTION", actionType, pid: bjMyId, ...extra || {} };

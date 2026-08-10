@@ -802,7 +802,7 @@ function bjHostStartRound() {
     if (active.length === 0) return toast('C\u1ea7n \u00edt nh\u1ea5t 1 ng\u01b0\u1eddi ch\u01a1i');
     const seed = (Date.now() ^ Math.floor(Math.random() * 0xffffffff)) & 0xffffffff;
     const msg = { type: 'ROUND_START', seed, turnOrder: active, betDeadline: Date.now() + 30000 };
-    bjHandleMsg(bjMyId, msg); bjBroadcast(msg);
+    bjBroadcast(msg); bjHandleMsg(bjMyId, msg);
 }
 
 function bjCheckAllBetsIn() {
@@ -837,7 +837,7 @@ function bjHostDealCards() {
     gs.phase = phase; gs.currentTurn = phase === 'player' ? gs.turnOrder[0] : null;
 
     const msg = { type: 'DEAL_CARDS', hands: gs.hands, dealerHand: gs.dealerHand, phase, currentTurn: gs.currentTurn, shoeIdx: gs.shoeIdx };
-    bjHandleMsg(bjMyId, msg); bjBroadcast(msg);
+    bjBroadcast(msg); bjHandleMsg(bjMyId, msg);
     if (phase === 'dealer_bj') setTimeout(() => bjHostEndRound(), 1500);
     else if (phase === 'player') bjAutoStandBJs();
 }
@@ -1037,7 +1037,7 @@ function bjRoomPlaceBet(amount) {
     if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return toast(`C\u01b0\u1ee3c t\u1ed1i \u0111a ${bjSettings.maxBet}G`);
     ctx.S.coins = coins - amount; save(); renderStatus();
     const msg = { type: 'BET_PLACED', pid: bjMyId, bet: amount };
-    bjHandleMsg(bjMyId, msg); bjBroadcast(msg);
+    bjBroadcast(msg); bjHandleMsg(bjMyId, msg);
 }
 
 function bjRoomAction(actionType, extra) {
