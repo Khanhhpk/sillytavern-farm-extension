@@ -48180,7 +48180,8 @@ function renderPostItem() {
             <button id="flea-back" class="btn">Quay l\u1EA1i Ch\u1EE3</button>
         </div>
         <div class="flea-post-form" style="margin-top:10px;">
-            <div id="flea-post-list" style="display:flex; flex-wrap:wrap; gap:6px; max-height:200px; overflow-y:auto; padding:10px; border:2px inset #c9a273; background:rgba(0,0,0,0.05); border-radius:8px;">
+            <input type="text" id="flea-search" placeholder="T\xECm ki\u1EBFm m\xF3n \u0111\u1ED3..." style="width:100%; padding:6px; margin-bottom:8px; border:2px inset #c9a273; border-radius:4px; box-sizing:border-box;">
+            <div id="flea-post-list" style="display:flex; flex-wrap:wrap; gap:6px; max-height:350px; overflow-y:auto; padding:10px; border:2px inset #c9a273; background:rgba(0,0,0,0.05); border-radius:8px;">
                 ${html || '<div style="width:100%; text-align:center; color:#a3763d; font-style:italic;">Kh\xF4ng c\xF3 \u0111\u1ED3 \u0111\u1EC3 \u0111\u0103ng b\xE1n</div>'}
             </div>
             
@@ -48201,6 +48202,29 @@ function renderPostItem() {
             </div>
         </div>
     `;
+  $id("flea-search")?.addEventListener("input", (e2) => {
+    const query2 = e2.target.value.toLowerCase();
+    const list = $id("flea-post-list");
+    const picks = list.querySelectorAll(".trade-pick");
+    picks.forEach((p2) => {
+      if (p2.textContent.toLowerCase().includes(query2)) p2.style.display = "block";
+      else p2.style.display = "none";
+    });
+    Array.from(list.children).forEach((el) => {
+      if (!el.classList.contains("trade-pick")) {
+        let next = el.nextElementSibling;
+        let hasVisible = false;
+        while (next && next.classList.contains("trade-pick")) {
+          if (next.style.display !== "none") {
+            hasVisible = true;
+            break;
+          }
+          next = next.nextElementSibling;
+        }
+        el.style.display = hasVisible ? "block" : "none";
+      }
+    });
+  });
   $id("flea-back").addEventListener("click", renderFleaMarket);
   $id("flea-post-submit").addEventListener("click", async () => {
     if (!selectedFleaType || !selectedFleaId) return toast("Ch\u01B0a ch\u1ECDn m\xF3n \u0111\u1ED3 n\xE0o");

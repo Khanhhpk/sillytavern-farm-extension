@@ -314,7 +314,8 @@ function renderPostItem() {
             <button id="flea-back" class="btn">Quay lại Chợ</button>
         </div>
         <div class="flea-post-form" style="margin-top:10px;">
-            <div id="flea-post-list" style="display:flex; flex-wrap:wrap; gap:6px; max-height:200px; overflow-y:auto; padding:10px; border:2px inset #c9a273; background:rgba(0,0,0,0.05); border-radius:8px;">
+            <input type="text" id="flea-search" placeholder="Tìm kiếm món đồ..." style="width:100%; padding:6px; margin-bottom:8px; border:2px inset #c9a273; border-radius:4px; box-sizing:border-box;">
+            <div id="flea-post-list" style="display:flex; flex-wrap:wrap; gap:6px; max-height:350px; overflow-y:auto; padding:10px; border:2px inset #c9a273; background:rgba(0,0,0,0.05); border-radius:8px;">
                 ${html || '<div style="width:100%; text-align:center; color:#a3763d; font-style:italic;">Không có đồ để đăng bán</div>'}
             </div>
             
@@ -336,6 +337,32 @@ function renderPostItem() {
         </div>
     `;
     
+    All.$id('flea-search')?.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const list = All.$id('flea-post-list');
+        const picks = list.querySelectorAll('.trade-pick');
+        picks.forEach(p => {
+            if (p.textContent.toLowerCase().includes(query)) p.style.display = 'block';
+            else p.style.display = 'none';
+        });
+        // Ẩn tiêu đề nếu không có món đồ nào hiển thị dưới nó
+        Array.from(list.children).forEach(el => {
+            if (!el.classList.contains('trade-pick')) {
+                // el is a header
+                let next = el.nextElementSibling;
+                let hasVisible = false;
+                while (next && next.classList.contains('trade-pick')) {
+                    if (next.style.display !== 'none') {
+                        hasVisible = true;
+                        break;
+                    }
+                    next = next.nextElementSibling;
+                }
+                el.style.display = hasVisible ? 'block' : 'none';
+            }
+        });
+    });
+
     All.$id('flea-back').addEventListener('click', renderFleaMarket);
     
     All.$id('flea-post-submit').addEventListener('click', async () => {
