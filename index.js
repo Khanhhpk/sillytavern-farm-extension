@@ -48182,16 +48182,10 @@ async function buyItem(docId, price) {
     return;
   }
   try {
-    const docRef = doc(db, "flea_market", docId);
-    ctx.S.coins -= price;
-    save();
-    renderStatus();
     const { getDoc: getDoc2 } = await Promise.resolve().then(() => (init_index_esm7(), index_esm_exports));
+    const docRef = doc(db, "flea_market", docId);
     const docSnap = await getDoc2(docRef);
     if (!docSnap.exists() || docSnap.data().status !== "active") {
-      ctx.S.coins += price;
-      save();
-      renderStatus();
       toast("M\xF3n h\xE0ng n\xE0y \u0111\xE3 b\u1ECB ng\u01B0\u1EDDi kh\xE1c mua m\u1EA5t ho\u1EB7c b\u1ECB g\u1EE1!");
       loadFleaList();
       return;
@@ -48201,6 +48195,7 @@ async function buyItem(docId, price) {
       status: "sold",
       buyerName: ctx.S.username || "Ng\u01B0\u1EDDi mua \u1EA9n danh"
     });
+    ctx.S.coins -= price;
     if (data.itemType === "bag") {
       ctx.S.bag[data.itemId] = (ctx.S.bag[data.itemId] || 0) + data.amount;
     } else if (data.itemType === "seeds") {
@@ -48219,6 +48214,7 @@ async function buyItem(docId, price) {
       ctx.S.bag[data.itemId] = (ctx.S.bag[data.itemId] || 0) + data.amount;
     }
     save();
+    renderStatus();
     toast("Mua th\xE0nh c\xF4ng!");
     loadFleaList();
   } catch (e2) {
@@ -48230,8 +48226,13 @@ async function cancelItem(docId) {
     const { getDoc: getDoc2 } = await Promise.resolve().then(() => (init_index_esm7(), index_esm_exports));
     const docRef = doc(db, "flea_market", docId);
     const docSnap = await getDoc2(docRef);
-    if (!docSnap.exists()) return;
+    if (!docSnap.exists() || docSnap.data().status !== "active") {
+      toast("Kh\xF4ng th\u1EC3 g\u1EE1! M\xF3n h\xE0ng n\xE0y c\xF3 th\u1EC3 \u0111\xE3 \u0111\u01B0\u1EE3c ng\u01B0\u1EDDi kh\xE1c mua.");
+      loadFleaList();
+      return;
+    }
     const data = docSnap.data();
+    await deleteDoc(docRef);
     if (data.itemType === "uniques") {
       if (!ctx.S.uniques) ctx.S.uniques = {};
       ctx.S.uniques[data.itemId] = data.itemData;
@@ -48241,7 +48242,6 @@ async function cancelItem(docId) {
       ctx.S[data.itemType][data.itemId] = (ctx.S[data.itemType][data.itemId] || 0) + data.amount;
     }
     save();
-    await deleteDoc(docRef);
     toast("\u0110\xE3 g\u1EE1 m\xF3n h\xE0ng xu\u1ED1ng");
     loadFleaList();
   } catch (e2) {

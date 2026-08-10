@@ -277,21 +277,11 @@ async function buyItem(docId, price) {
     }
     
     try {
-        const docRef = doc(db, "flea_market", docId);
-        // Trừ tiền ngay lập tức để tránh double click
-        ctx.S.coins -= price;
-        All.save();
-        All.renderStatus();
-        
-        // Đọc lại doc xem còn active không (tránh race condition cơ bản)
         const { getDoc } = await import('firebase/firestore');
+        const docRef = doc(db, "flea_market", docId);
         const docSnap = await getDoc(docRef);
         
         if (!docSnap.exists() || docSnap.data().status !== 'active') {
-            // Hoàn tiền
-            ctx.S.coins += price;
-            All.save();
-            All.renderStatus();
             All.toast("Món hàng này đã bị người khác mua mất hoặc bị gỡ!");
             loadFleaList();
             return;
@@ -299,11 +289,14 @@ async function buyItem(docId, price) {
         
         const data = docSnap.data();
         
-        // Đổi trạng thái sang sold
+        // Đổi trạng thái sang sold trên server trước để chốt giao dịch
         await updateDoc(docRef, { 
             status: 'sold',
             buyerName: ctx.S.username || "Người mua ẩn danh"
         });
+        
+        // Giao dịch server thành công mới trừ tiền và nhận đồ ở local
+        ctx.S.coins -= price;
         
         // Thêm vào kho
         if (data.itemType === 'bag') {
@@ -323,7 +316,9 @@ async function buyItem(docId, price) {
             ctx.S.uniques[data.itemId] = data.itemData;
             ctx.S.bag[data.itemId] = (ctx.S.bag[data.itemId] || 0) + data.amount;
         }
+        
         All.save();
+        All.renderStatus();
         All.toast("Mua thành công!");
         loadFleaList();
         
@@ -338,10 +333,18 @@ async function cancelItem(docId) {
         const docRef = doc(db, "flea_market", docId);
         const docSnap = await getDoc(docRef);
         
-        if (!docSnap.exists()) return;
+        if (!docSnap.exists() || docSnap.data().status !== 'active') {
+            All.toast("Không thể gỡ! Món hàng này có thể đã được người khác mua.");
+            loadFleaList();
+            return;
+        }
+        
         const data = docSnap.data();
         
-        // Hoàn trả đồ
+        // Xóa trên server TRƯỚC để tránh clone đồ nếu rớt mạng
+        await deleteDoc(docRef);
+        
+        // Hoàn trả đồ về kho
         if (data.itemType === 'uniques') {
             if (!ctx.S.uniques) ctx.S.uniques = {};
             ctx.S.uniques[data.itemId] = data.itemData;
@@ -352,7 +355,6 @@ async function cancelItem(docId) {
         }
         
         All.save();
-        await deleteDoc(docRef);
         All.toast("Đã gỡ món hàng xuống");
         loadFleaList();
     } catch (e) {
