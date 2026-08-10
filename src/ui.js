@@ -160,7 +160,7 @@ export function initUI() {
     
     <div class="modal" id="trade-win" onclick="if(event.target === this) FarmAll.closeTradeModal()">
       <div class="mpanel" style="width: min(600px, 96%);">
-        <div class="mtitle"><span>Trao đổi</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">×</div></div>
+        <div class="mtitle"><span id="trade-win-title">Giao dịch</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">×</div></div>
         <div class="mbody" id="trade-body" style="min-height: 200px;"></div>
       </div>
     </div>

@@ -59,9 +59,10 @@ export async function renderFleaMarket() {
         return;
     }
 
+    if (All.$id('trade-win-title')) All.$id('trade-win-title').innerText = 'Chợ Trời Khởi Nguyên';
+    
     All.$id('trade-body').innerHTML = `
-        <div class="flea-header">
-            <h3>Chợ Trời Khởi Nguyên</h3>
+        <div class="flea-header" style="justify-content: flex-end;">
             <div style="display: flex; gap: 5px;">
                 <button id="flea-history-btn" class="btn">Lịch sử</button>
                 <button id="flea-refresh" class="btn">Làm mới</button>
@@ -222,10 +223,10 @@ async function cancelItem(docId) {
 }
 
 async function renderHistory() {
+    if (All.$id('trade-win-title')) All.$id('trade-win-title').innerText = 'Lịch Sử Giao Dịch';
     const body = All.$id('trade-body');
     body.innerHTML = `
-        <div class="flea-header">
-            <h3>Lịch Sử Giao Dịch</h3>
+        <div class="flea-header" style="justify-content: flex-end;">
             <button id="flea-back-hist" class="btn">Quay lại Chợ</button>
         </div>
         <div id="flea-hist-list" style="margin-top: 10px; max-height: 400px; overflow-y: auto;">Đang tải...</div>
@@ -445,6 +446,8 @@ function renderPostItem() {
     ['norm', 'spec', 'super'].forEach(k => { if (ctx.S.tickets && ctx.S.tickets[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectFleaAdd('tickets', '${k}', ${ctx.S.tickets[k]})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${ctx.S.tickets[k]})</div>`; });
     ['prism', 'star', 'legend'].forEach(k => { if (ctx.S.shards && ctx.S.shards[k] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectFleaAdd('shards', '${k}', ${ctx.S.shards[k]})">${getFleaItemIcon(k)} ${getFleaItemName(k)} (Có: ${ctx.S.shards[k]})</div>`; });
 
+    if (All.$id('trade-win-title')) All.$id('trade-win-title').innerText = 'Đăng Bán Sản Phẩm';
+
     let html = '';
     if (catBag) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">NÔNG SẢN</div>` + catBag;
     if (catSeeds) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">HẠT GIỐNG</div>` + catSeeds;
@@ -453,8 +456,7 @@ function renderPostItem() {
     if (catGacha) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">ĐỒ GACHA</div>` + catGacha;
 
     All.$id('trade-body').innerHTML = `
-        <div class="flea-header">
-            <h3>Đăng Bán</h3>
+        <div class="flea-header" style="justify-content: flex-end;">
             <button id="flea-back" class="btn">Quay lại Chợ</button>
         </div>
         <div class="flea-post-form" style="margin-top:10px; position:relative;">
@@ -465,7 +467,7 @@ function renderPostItem() {
             
             <div id="flea-post-act" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:99; border-radius: 8px;">
                 <div style="background:#fffaf0; padding:20px; border:3px solid #c9a273; border-radius:12px; width:85%; max-width:320px; display:flex; flex-direction:column; gap:12px; position:relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                    <button onclick="document.getElementById('flea-post-act').style.display='none'" style="position:absolute; top:8px; right:10px; background:none; border:none; font-weight:bold; cursor:pointer; color:#7a5c38; font-size:16px;">✕</button>
+                    <button onclick="FarmAll.$id('flea-post-act').style.display='none'" style="position:absolute; top:8px; right:10px; background:none; border:none; font-weight:bold; cursor:pointer; color:#7a5c38; font-size:16px;">✕</button>
                     
                     <div style="display:flex; gap:15px; align-items:center;">
                         <div id="lbl-flea-sel-icon" style="font-size:32px; background:#f0e6d2; padding:10px; border-radius:8px; border:1px solid #d4b895; display:flex; justify-content:center; align-items:center; width:64px; height:64px;"></div>

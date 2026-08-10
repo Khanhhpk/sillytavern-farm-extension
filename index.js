@@ -3029,7 +3029,7 @@ function initUI() {
     
     <div class="modal" id="trade-win" onclick="if(event.target === this) FarmAll.closeTradeModal()">
       <div class="mpanel" style="width: min(600px, 96%);">
-        <div class="mtitle"><span>Trao \u0111\u1ED5i</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">\xD7</div></div>
+        <div class="mtitle"><span id="trade-win-title">Giao d\u1ECBch</span><span class="grow"></span><div class="close-x" onclick="FarmAll.closeTradeModal()">\xD7</div></div>
         <div class="mbody" id="trade-body" style="min-height: 200px;"></div>
       </div>
     </div>
@@ -16021,6 +16021,7 @@ function getItemIcon(id) {
   return "";
 }
 function openTradeModal() {
+  if ($id("trade-win-title")) $id("trade-win-title").innerText = "Trung T\xE2m Giao D\u1ECBch";
   $id("trade-win").classList.add("open");
   resetTradeState();
   renderTradeMenu();
@@ -47966,9 +47967,9 @@ async function renderFleaMarket() {
     };
     return;
   }
+  if ($id("trade-win-title")) $id("trade-win-title").innerText = "Ch\u1EE3 Tr\u1EDDi Kh\u1EDFi Nguy\xEAn";
   $id("trade-body").innerHTML = `
-        <div class="flea-header">
-            <h3>Ch\u1EE3 Tr\u1EDDi Kh\u1EDFi Nguy\xEAn</h3>
+        <div class="flea-header" style="justify-content: flex-end;">
             <div style="display: flex; gap: 5px;">
                 <button id="flea-history-btn" class="btn">L\u1ECBch s\u1EED</button>
                 <button id="flea-refresh" class="btn">L\xE0m m\u1EDBi</button>
@@ -48096,10 +48097,10 @@ async function cancelItem(docId) {
   }
 }
 async function renderHistory() {
+  if ($id("trade-win-title")) $id("trade-win-title").innerText = "L\u1ECBch S\u1EED Giao D\u1ECBch";
   const body = $id("trade-body");
   body.innerHTML = `
-        <div class="flea-header">
-            <h3>L\u1ECBch S\u1EED Giao D\u1ECBch</h3>
+        <div class="flea-header" style="justify-content: flex-end;">
             <button id="flea-back-hist" class="btn">Quay l\u1EA1i Ch\u1EE3</button>
         </div>
         <div id="flea-hist-list" style="margin-top: 10px; max-height: 400px; overflow-y: auto;">\u0110ang t\u1EA3i...</div>
@@ -48297,6 +48298,7 @@ function renderPostItem() {
   ["prism", "star", "legend"].forEach((k2) => {
     if (ctx.S.shards && ctx.S.shards[k2] > 0) catTickets += `<div class="trade-pick" onclick="FarmAll.uiSelectFleaAdd('shards', '${k2}', ${ctx.S.shards[k2]})">${getFleaItemIcon(k2)} ${getFleaItemName(k2)} (C\xF3: ${ctx.S.shards[k2]})</div>`;
   });
+  if ($id("trade-win-title")) $id("trade-win-title").innerText = "\u0110\u0103ng B\xE1n S\u1EA3n Ph\u1EA9m";
   let html = "";
   if (catBag) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">N\xD4NG S\u1EA2N</div>` + catBag;
   if (catSeeds) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">H\u1EA0T GI\u1ED0NG</div>` + catSeeds;
@@ -48304,8 +48306,7 @@ function renderPostItem() {
   if (catTickets) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">V\xC9 & M\u1EA2NH</div>` + catTickets;
   if (catGacha) html += `<div style="font-size:11px; font-weight:bold; color:#7a5c38; margin-top:4px; width:100%;">\u0110\u1ED2 GACHA</div>` + catGacha;
   $id("trade-body").innerHTML = `
-        <div class="flea-header">
-            <h3>\u0110\u0103ng B\xE1n</h3>
+        <div class="flea-header" style="justify-content: flex-end;">
             <button id="flea-back" class="btn">Quay l\u1EA1i Ch\u1EE3</button>
         </div>
         <div class="flea-post-form" style="margin-top:10px; position:relative;">
@@ -48316,7 +48317,7 @@ function renderPostItem() {
             
             <div id="flea-post-act" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:99; border-radius: 8px;">
                 <div style="background:#fffaf0; padding:20px; border:3px solid #c9a273; border-radius:12px; width:85%; max-width:320px; display:flex; flex-direction:column; gap:12px; position:relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                    <button onclick="document.getElementById('flea-post-act').style.display='none'" style="position:absolute; top:8px; right:10px; background:none; border:none; font-weight:bold; cursor:pointer; color:#7a5c38; font-size:16px;">\u2715</button>
+                    <button onclick="FarmAll.$id('flea-post-act').style.display='none'" style="position:absolute; top:8px; right:10px; background:none; border:none; font-weight:bold; cursor:pointer; color:#7a5c38; font-size:16px;">\u2715</button>
                     
                     <div style="display:flex; gap:15px; align-items:center;">
                         <div id="lbl-flea-sel-icon" style="font-size:32px; background:#f0e6d2; padding:10px; border-radius:8px; border:1px solid #d4b895; display:flex; justify-content:center; align-items:center; width:64px; height:64px;"></div>
