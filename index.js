@@ -48018,6 +48018,7 @@ async function renderFleaMarket() {
                       <div id="lbl-flea-dtl-icon" style="font-size:32px; background:#f0e6d2; padding:10px; border-radius:8px; border:1px solid #d4b895; display:flex; justify-content:center; align-items:center; width:64px; height:64px;"></div>
                       <div style="flex:1;">
                           <div id="lbl-flea-dtl-name" style="font-size:15px; font-weight:bold; color:#d32f2f; margin-bottom:5px;"></div>
+                          <div id="lbl-flea-dtl-extra"></div>
                       </div>
                   </div>
                   <div id="lbl-flea-dtl-desc" style="font-size:13px; color:#555; line-height:1.4; padding:5px 0;"></div>
@@ -48050,7 +48051,7 @@ async function loadFleaList() {
       let shortDesc = "";
       if (desc && data.itemId.includes("@")) {
         const words = desc.split(" ");
-        shortDesc = words.slice(0, 15).join(" ") + (words.length > 15 ? "..." : "");
+        shortDesc = words.slice(0, 30).join(" ") + (words.length > 30 ? "..." : "");
       }
       html += `
                 <div class="flea-item ${isMine ? "mine" : ""}">
@@ -48490,8 +48491,14 @@ function showFleaItemDetail(docId) {
   iconStr = iconStr.replace(/width="20"/g, 'width="48"').replace(/height="20"/g, 'height="48"');
   const ui = $id("flea-detail-act");
   if (!ui) return;
+  let extraHtml = "";
+  if (data.itemId.startsWith("unique@") && data.itemData && data.itemData.rarity) {
+    extraHtml = `<div style="font-size:12px; font-weight:bold; color:${data.itemData.color || "#ff8000"}; margin-bottom:5px;">\u0110\u1ED9 hi\u1EBFm: ${data.itemData.rarity}</div>`;
+  }
   $id("lbl-flea-dtl-icon").innerHTML = iconStr;
   $id("lbl-flea-dtl-name").innerText = name3;
+  const extraEl = $id("lbl-flea-dtl-extra");
+  if (extraEl) extraEl.innerHTML = extraHtml;
   $id("lbl-flea-dtl-desc").innerText = desc || "Kh\xF4ng c\xF3 th\xF4ng tin chi ti\u1EBFt.";
   ui.style.display = "flex";
 }
