@@ -6239,7 +6239,7 @@ function renderPlots() {
         if (hBtn) hBtn.addEventListener("click", () => openHeroPanel());
         const fBtn = $id("eslot-flea");
         if (fBtn) fBtn.addEventListener("click", () => {
-          const ui = document.getElementById("trade-win");
+          const ui = $id("trade-win");
           if (ui) ui.classList.add("open");
           openFleaMarket();
         });

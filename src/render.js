@@ -145,7 +145,7 @@ export function renderPlots() {
         if (hBtn) hBtn.addEventListener('click', () => All.openHeroPanel());
         const fBtn = All.$id('eslot-flea');
         if (fBtn) fBtn.addEventListener('click', () => {
-            const ui = document.getElementById('trade-win');
+            const ui = All.$id('trade-win');
             if (ui) ui.classList.add('open');
             All.openFleaMarket();
         });
