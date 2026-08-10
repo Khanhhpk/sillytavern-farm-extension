@@ -16021,7 +16021,7 @@ function getItemIcon(id) {
   return "";
 }
 function openTradeModal() {
-  if ($id("trade-win-title")) $id("trade-win-title").innerText = "Trung T\xE2m Giao D\u1ECBch";
+  if ($id("trade-win-title")) $id("trade-win-title").innerText = "Trung T\xE2m Trao \u0110\u1ED5i";
   $id("trade-win").classList.add("open");
   resetTradeState();
   renderTradeMenu();

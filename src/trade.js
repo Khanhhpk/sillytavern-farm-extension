@@ -86,7 +86,7 @@ function getItemIcon(id) {
 }
 
 export function openTradeModal() {
-    if (All.$id('trade-win-title')) All.$id('trade-win-title').innerText = 'Trung Tâm Giao Dịch';
+    if (All.$id('trade-win-title')) All.$id('trade-win-title').innerText = 'Trung Tâm Trao Đổi';
     All.$id('trade-win').classList.add('open');
     resetTradeState();
     renderTradeMenu();
