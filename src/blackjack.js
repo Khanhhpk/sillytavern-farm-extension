@@ -74,12 +74,16 @@ function is10Value(rank) {
 }
 
 function cardHTML(card, small) {
+    let animCls = '';
+    if (card.isNew) { animCls = ' bj-anim-deal'; delete card.isNew; }
+    else if (card.justRevealed) { animCls = ' bj-anim-flip'; delete card.justRevealed; }
+    
     if (card.hidden) {
-        return `<div class="bj-card back${small ? ' small' : ''}"><div class="bj-card-back-inner"></div></div>`;
+        return `<div class="bj-card back${small ? ' small' : ''}${animCls}"><div class="bj-card-back-inner"></div></div>`;
     }
     const isRed = card.suit === '\u2665' || card.suit === '\u2666';
     const col = isRed ? '#c0392b' : '#1a1a2e';
-    return `<div class="bj-card${small ? ' small' : ''}" style="color:${col}">
+    return `<div class="bj-card${small ? ' small' : ''}${animCls}" style="color:${col}">
         <div class="bj-card-corner tl">${card.rank}<br><span>${card.suit}</span></div>
         <div class="bj-card-center">${card.suit}</div>
         <div class="bj-card-corner br">${card.rank}<br><span>${card.suit}</span></div>
@@ -121,7 +125,7 @@ function soloDrawCard(hidden) {
         s.shoe = buildShoe(s.settings.numDecks, Date.now() & 0xffffffff);
         s.shoeIdx = 0;
     }
-    return { ...s.shoe[s.shoeIdx++], hidden: !!hidden };
+    return { ...s.shoe[s.shoeIdx++], hidden: !!hidden, isNew: true };
 }
 
 function buildSoloUI() {
@@ -392,12 +396,11 @@ function soloSplit() {
 
 function soloSurrender() {
     const s = soloState;
+    s.playerHands[s.activeHandIdx].surrendered = true;
     const refund = Math.floor(s.bets[0] / 2);
     ctx.S.coins = (ctx.S.coins || 0) + refund;
     save(); renderStatus();
-    s.dealerHand[1].hidden = false; s.phase = 'done';
-    showMsg(`Surrender \u2014 Nh\u1eadn l\u1ea1i ${refund.toLocaleString()}G`);
-    soloRender();
+    soloNextHand();
 }
 
 function soloNextHand() {
@@ -410,6 +413,7 @@ function soloNextHand() {
 function soloRunDealer() {
     const s = soloState;
     s.dealerHand[1].hidden = false;
+    s.dealerHand[1].justRevealed = true;
     s.phase = 'dealer';
     soloRender();
     const allBust = s.playerHands.every(h => handTotal(h) > 21);
@@ -810,7 +814,7 @@ function bjHostDealCards() {
     const gs = bjGameState;
     const shoe = gs.shoe;
     let idx = gs.shoeIdx;
-    const draw = (hidden) => ({ ...shoe[idx++], hidden: !!hidden });
+    const draw = (hidden) => ({ ...shoe[idx++], hidden: !!hidden, isNew: true });
 
     for (const pid of gs.turnOrder) {
         if (!gs.hands[pid]) gs.hands[pid] = { cards: [[]], bet: [0], stood: [false], doubled: [false], activeHandIdx: 0, splitAceIdxs: [], insuranceBet: 0, surrendered: false };
@@ -905,18 +909,18 @@ function bjHandleRoomAction(fromPid, data) {
     const idx = h.activeHandIdx || 0;
 
     if (data.actionType === 'HIT') {
-        h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++] });
+        h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++], isNew: true });
         if (handTotal(h.cards[idx]) > 21) h.stood[idx] = true;
     } else if (data.actionType === 'STAND') {
         h.stood[idx] = true;
         if (idx + 1 < h.cards.length) h.activeHandIdx = idx + 1;
     } else if (data.actionType === 'DOUBLE') {
-        h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++] });
+        h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++], isNew: true });
         h.bet[idx] *= 2; h.stood[idx] = true; h.doubled[idx] = true;
     } else if (data.actionType === 'SPLIT') {
         const sc = h.cards[idx].splice(1, 1)[0];
-        const nh = [sc, { ...gs.shoe[gs.shoeIdx++] }];
-        h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++] });
+        const nh = [sc, { ...gs.shoe[gs.shoeIdx++], isNew: true }];
+        h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++], isNew: true });
         h.cards.splice(idx + 1, 0, nh);
         h.bet.splice(idx + 1, 0, h.bet[idx]);
         h.stood.splice(idx + 1, 0, false);
@@ -938,7 +942,9 @@ function bjHandleRoomAction(fromPid, data) {
 
 function bjHostRunDealer() {
     const gs = bjGameState;
-    gs.dealerHand[1].hidden = false; gs.phase = 'dealer';
+    gs.dealerHand[1].hidden = false;
+    gs.dealerHand[1].justRevealed = true;
+    gs.phase = 'dealer';
     const allBust = gs.turnOrder.every(p => {
         const h = gs.hands[p];
         return h && h.cards.every(c => handTotal(c) > 21) || h?.surrendered;
