@@ -47932,12 +47932,10 @@ async function checkSoldItemsNotif() {
     const histBtn = $id("flea-history-btn");
     if (histBtn) {
       if (!snapshot.empty) {
-        histBtn.style.color = "#fff";
-        histBtn.style.background = "#d32f2f";
-        histBtn.innerHTML = `L\u1ECBch s\u1EED (${snapshot.size})`;
+        histBtn.style.position = "relative";
+        histBtn.innerHTML = `L\u1ECBch s\u1EED <span style="position: absolute; top: -6px; right: -6px; background: #e53935; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.5); font-weight: bold;">${snapshot.size}</span>`;
       } else {
-        histBtn.style.color = "";
-        histBtn.style.background = "";
+        histBtn.style.position = "";
         histBtn.innerHTML = `L\u1ECBch s\u1EED`;
       }
     }
