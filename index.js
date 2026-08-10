@@ -5918,7 +5918,7 @@ function openSpriteViewerModal() {
   });
   html += `</div>`;
   html += `<div style="margin-top:12px;text-align:center">
-      <span class="buy plain" onclick="document.querySelector('[data-open=\\'cfg\\']').click()">Quay l\u1EA1i C\xE0i \u0111\u1EB7t</span>
+      <span class="buy plain" onclick="FarmAll.openPanel('cfg')">Quay l\u1EA1i C\xE0i \u0111\u1EB7t</span>
   </div>`;
   openModal("Th\u01B0 Vi\u1EC7n Sprite", html);
 }

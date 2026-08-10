@@ -711,7 +711,7 @@ export function openSpriteViewerModal() {
 
   html += `</div>`;
   html += `<div style="margin-top:12px;text-align:center">
-      <span class="buy plain" onclick="document.querySelector('[data-open=\\'cfg\\']').click()">Quay lại Cài đặt</span>
+      <span class="buy plain" onclick="FarmAll.openPanel('cfg')">Quay lại Cài đặt</span>
   </div>`;
   
   openModal('Thư Viện Sprite', html);
