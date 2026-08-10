@@ -48120,6 +48120,9 @@ function getFleaItemIcon(id, itemData = null) {
   if (id === "compost" || id === "shiny") return spriteSVG("fert_" + id, 20);
   if (id.startsWith("unique@")) {
     const item = itemData || ctx.S.uniques?.[id] || { sp: "strawhat", color: "#4a90e2" };
+    if (item.spriteMap && item.sp) {
+      registerDynamicSprite(item.sp, item.spriteMap);
+    }
     return `<span style="color:${item.color}">${spriteSVG(item.sp, 20)}</span>`;
   }
   if (id.includes("@")) {
