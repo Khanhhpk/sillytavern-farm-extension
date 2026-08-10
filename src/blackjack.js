@@ -698,13 +698,17 @@ function bjHandleMsg(fromPid, data) {
             bjRenderRoom(); break;
         case 'BET_PLACED':
             if (bjGameState) {
-                const h = bjGameState.hands[data.pid];
-                if (h) h.bet[0] = data.bet;
+                if (!bjGameState.hands[data.pid]) {
+                    bjGameState.hands[data.pid] = { cards: [[]], bet: [0], stood: [false], doubled: [false], activeHandIdx: 0, splitAceIdxs: [], insuranceBet: 0, surrendered: false };
+                }
+                bjGameState.hands[data.pid].bet[0] = data.bet;
+                bjGameState.betsIn = bjGameState.betsIn || {};
+                bjGameState.betsIn[data.pid] = data.bet;
                 if (bjIsHost && bjPlayers[data.pid]) {
                     bjPlayers[data.pid].netProfit = (bjPlayers[data.pid].netProfit || 0) - data.bet;
                     bjBroadcastProfits();
                 }
-                const allBet = bjGameState.turnOrder.every(p => bjGameState.hands[p]?.bet?.[0] > 0);
+                const allBet = bjGameState.turnOrder.every(p => bjGameState.betsIn?.[p] > 0);
                 if (allBet && bjIsHost) {
                     if (bjGameState.betTimer) clearTimeout(bjGameState.betTimer);
                     bjHostRunDealerInitial();
@@ -1007,10 +1011,23 @@ function bjHandleRoomAction(fromPid, data) {
         gs.dealerHand = data.dealerHand; bjRenderRoom(); return;
     }
     
-    if (data.actionType === 'INSURANCE_ANSWER' && bjIsHost) {
-        gs.insuranceAnswers = gs.insuranceAnswers || {};
-        gs.insuranceAnswers[fromPid] = data.answer;
-        bjCheckInsuranceAnswers(); return;
+    if (data.actionType === 'INSURANCE_ANSWER') {
+        if (bjIsHost) {
+            gs.insuranceAnswers = gs.insuranceAnswers || {};
+            gs.insuranceAnswers[fromPid] = data.answer;
+            bjCheckInsuranceAnswers();
+        }
+        return;
+    }
+
+    // Non-host clients: apply hand updates from broadcast
+    if (!bjIsHost) {
+        if (data.hand) {
+            gs.hands[data.pid] = data.hand;
+            if (data.shoeIdx !== undefined) gs.shoeIdx = data.shoeIdx;
+        }
+        bjRenderRoom();
+        return;
     }
 
     const h = gs.hands[fromPid];
@@ -1190,6 +1207,7 @@ function bjRenderRoom() {
             <div class="bj-room-topbar">
                 <div class="bj-room-code-badge" id="bj-room-code-badge" title="Copy mã phòng">🃋 ${bjRoomId}</div>
                 <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} — ${(ctx.S.coins||0).toLocaleString()}G${bjMyStatus==='spectator'?' 👁':''}</div>
+                <div class="buy plain" id="bj-show-players" style="font-size:11px;margin-right:5px;">👥 Danh Sách</div>
                 <div class="buy plain" id="bj-out-room-ingame" style="font-size:11px;">← Thoát</div>
                 <div class="bj-chat-toggle" id="bj-chat-toggle">💬 Chat ${bjUnreadChat > 0 ? `<span style="background:#e74c3c;color:white;border-radius:10px;padding:1px 5px;margin-left:5px;font-size:10px;">${bjUnreadChat}</span>` : ''}</div>
             </div>
