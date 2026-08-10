@@ -801,10 +801,12 @@ export const blackjackStyles = `
 .bj-msg-sm { font-size: 13px; color: #ddd; font-weight: bold; text-align: center; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
 
 /* ROOM MODE */
-.bj-room-layout { display: flex; flex-direction: column; height: 100%; }
+.bj-room-layout { display: flex; flex-direction: row; height: 100%; position: relative; overflow: hidden; }
+.bj-room-main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
 .bj-room-topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 2px solid #111; background: rgba(0,0,0,0.6); box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
 .bj-room-code-badge { background: linear-gradient(45deg, #b8860b, #d4af37); color: #000; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; letter-spacing: 1px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); cursor: pointer; }
 .bj-room-code-badge:hover { filter: brightness(1.1); }
+.bj-chat-toggle { display: none; cursor: pointer; background: rgba(0,0,0,0.5); border: 1px solid #d4af37; border-radius: 6px; padding: 4px 10px; color: #d4af37; font-weight: bold; font-size: 12px; margin-left: 10px; }
 .bj-players-grid { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 10px; width: 100%; z-index: 1; margin-top: 10px; }
 .bj-player-slot { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; background: rgba(0,0,0,0.4); border-radius: 10px; min-width: 100px; border: 2px solid transparent; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
 .bj-player-slot.me { border-color: rgba(212,175,55,0.5); }
@@ -823,7 +825,9 @@ export const blackjackStyles = `
 .bj-kick-btn:hover { opacity: 1; }
 
 .bj-settings-host { background: rgba(0,0,0,0.6); padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.1); }
-.bj-chat-wrap { display: flex; flex-direction: column; height: 180px; background: rgba(0,0,0,0.5); border-top: 2px solid #111; }
+.bj-chat-wrap { display: flex; flex-direction: column; width: 280px; height: 100%; background: rgba(0,0,0,0.65); border-left: 2px solid #111; box-shadow: -2px 0 10px rgba(0,0,0,0.5); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); flex-shrink: 0; }
+.bj-chat-header { display: none; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(0,0,0,0.8); border-bottom: 2px solid #111; color: #d4af37; font-weight: bold; font-size: 14px; }
+.bj-chat-close { cursor: pointer; color: #e74c3c; font-size: 16px; }
 .bj-chat-log { flex: 1; padding: 10px; overflow-y: auto; font-size: 12px; display: flex; flex-direction: column; gap: 4px; color: #ddd; }
 .bj-chat-line { word-break: break-word; line-height: 1.4; }
 .bj-chat-line b { color: #d4af37; }
@@ -851,15 +855,23 @@ export const blackjackStyles = `
 @keyframes bjCoinFly { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.5); } }
 
 @media (max-width: 640px) {
-    .bj-chat-wrap.mobile-chat-focus {
-        position: fixed;
-        bottom: 0;
-        left: 0;
+    .bj-chat-wrap {
+        position: absolute;
+        top: 0;
         right: 0;
-        z-index: 100000;
+        bottom: 0;
+        z-index: 100;
         background: rgba(0,0,0,0.95);
-        box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
-        border-top: 2px solid #d4af37;
+        transform: translateX(100%);
+    }
+    .bj-chat-wrap.open {
+        transform: translateX(0);
+    }
+    .bj-chat-header {
+        display: flex;
+    }
+    .bj-chat-toggle {
+        display: block;
     }
 }
 `;

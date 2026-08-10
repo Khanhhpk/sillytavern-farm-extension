@@ -1066,12 +1066,14 @@ function bjRenderRoom() {
     const allPids = Object.keys(bjPlayers);
 
     let html = `<div class="bj-room-layout">
-        <div class="bj-room-topbar">
-            <div class="bj-room-code-badge" id="bj-room-code-badge" title="Copy m\u00e3 ph\u00f2ng">\uD83C\uDCCB ${bjRoomId}</div>
-            <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} \u2014 ${(ctx.S.coins||0).toLocaleString()}G${bjMyStatus==='spectator'?' \uD83D\uDC41':''}</div>
-            <div class="buy plain" id="bj-out-room-ingame" style="font-size:11px;">\u2190 Tho\u00e1t</div>
-        </div>
-        <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 10px;">`;
+        <div class="bj-room-main">
+            <div class="bj-room-topbar">
+                <div class="bj-room-code-badge" id="bj-room-code-badge" title="Copy m\u00e3 ph\u00f2ng">\uD83C\uDCCB ${bjRoomId}</div>
+                <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} \u2014 ${(ctx.S.coins||0).toLocaleString()}G${bjMyStatus==='spectator'?' \uD83D\uDC41':''}</div>
+                <div class="buy plain" id="bj-out-room-ingame" style="font-size:11px;">\u2190 Tho\u00e1t</div>
+                <div class="bj-chat-toggle" id="bj-chat-toggle">\uD83D\uDCAC Chat</div>
+            </div>
+            <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 10px;">`;
 
     if (bjRoomPhase === 'lobby') {
         const isAllReady = allPids.filter(p => p !== bjMyId && bjPlayers[p].status !== 'spectator').every(p => bjPlayers[p].status === 'ready');
@@ -1170,8 +1172,12 @@ function bjRenderRoom() {
         }
     }
 
-    html += `</div>
+    html += `</div></div>
     <div class="bj-chat-wrap" id="bj-chat-wrap">
+        <div class="bj-chat-header" id="bj-chat-close">
+            <span>\uD83D\uDCAC Chat</span>
+            <span class="bj-chat-close">\u274C</span>
+        </div>
         <div class="bj-chat-log" id="bj-chat-log">${bjChatLog.slice(-20).map(e =>
             `<div class="bj-chat-line"><b>${e.name}:</b> ${e.msg.replace(/</g,'&lt;')}</div>`
         ).join('')}</div>
@@ -1340,6 +1346,12 @@ function bjBindChat() {
         bjBroadcast({ type: 'CHAT', msg });
     };
     All.$id('bj-chat-send')?.addEventListener('click', send);
+    All.$id('bj-chat-toggle')?.addEventListener('click', () => {
+        All.$id('bj-chat-wrap')?.classList.add('open');
+    });
+    All.$id('bj-chat-close')?.addEventListener('click', () => {
+        All.$id('bj-chat-wrap')?.classList.remove('open');
+    });
     const inp = All.$id('bj-chat-inp');
     if (inp) {
         inp.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
