@@ -17,22 +17,31 @@ let totalGold = 0;
 let shopGold = 0;
 
 const PET_STATS = {
-    slime: { name: 'Slime Xanh', desc: 'Chiến binh cân bằng, không có gì nổi bật.', hp: 130, atk: 12, range: 40, speed: 40, cd: 1 },
-    octo: { name: 'Bạch Tuộc', desc: 'Đánh nhanh thắng nhanh. Đánh càng lâu tốc đánh càng cao.', hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: 'frenzy' },
+    // HP Slime Xanh: 130→150 (thêm ngầm +10% giáp)
+    slime: { name: 'Slime Xanh', desc: 'Chiến binh cân bằng, có giáp nội tạng giảm 10% sát thương nhận vào.', hp: 150, atk: 12, range: 40, speed: 40, cd: 1, armor: 0.10 },
+    octo: { name: 'Bạch Tuộc', desc: 'Đánh nhanh thắng nhanh. Đánh càng lâu tốc đánh càng cao (tối đa +50%).', hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: 'frenzy' },
     slimePink: { name: 'Slime Hồng', desc: 'Hồi máu đơn mục tiêu cho đồng minh yếu nhất.', hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: 'heal' },
-    peach_soda: { name: 'Soda Đào', desc: 'Đánh xa xuyên thấu mọi kẻ địch trên đường bay.', hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: 'pierce' },
-    octoCream: { name: 'Bạch Tuộc Kem', desc: '20% tỷ lệ làm choáng kẻ địch 1 giây.', hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: 'stun' },
-    jellyfish: { name: 'Sứa Xoăn', desc: 'Xạ thủ: Bắn càng xa sát thương càng lớn.', hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: 'sniper' },
-    mystery_blob: { name: 'Bé Bí Ẩn', desc: 'Hồi máu cho bản thân bằng 50% sát thương gây ra.', hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: 'lifesteal' },
-    ghostBlob: { name: 'Ma Trắng', desc: 'Sát thủ: Luôn nhắm vào kẻ thù xa nhất.', hp: 80, atk: 45, range: 40, speed: 100, cd: 1.2, skill: 'assassin' },
-    impBlob: { name: 'Quỷ Nhỏ', desc: 'Đánh lan: Gây sát thương AoE xung quanh mục tiêu.', hp: 70, atk: 50, range: 40, speed: 60, cd: 1, skill: 'cleave' },
+    peach_soda: { name: 'Soda Đào', desc: 'Đánh xa xuyên thấu mọi kẻ địch trên đường bay (sát thương giảm 20% qua mỗi mục tiêu).', hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: 'pierce' },
+    // Bạch Tuộc Kem: stun 20%→25%
+    octoCream: { name: 'Bạch Tuộc Kem', desc: '25% tỷ lệ làm choáng kẻ địch 1 giây.', hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: 'stun' },
+    jellyfish: { name: 'Sứa Xoăn', desc: 'Xạ thủ: Bắn càng xa sát thương càng lớn (tối đa x2 ở tầm xa nhất).', hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: 'sniper' },
+    // Bé Bí Ẩn: lifesteal 50%→40%
+    mystery_blob: { name: 'Bé Bí Ẩn', desc: 'Hồi máu cho bản thân bằng 40% sát thương gây ra.', hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: 'lifesteal' },
+    // Ma Trắng: hp 80→110, atk 45→40, dodge gốc 15%→25%
+    ghostBlob: { name: 'Ma Trắng', desc: 'Sát thủ: Luôn nhắm vào kẻ thù xa nhất. Né tránh cao.', hp: 110, atk: 40, range: 40, speed: 100, cd: 1.2, skill: 'assassin' },
+    // Quỷ Nhỏ: hp 70→120, atk 50→45, + giảm 15% DMG nhận
+    impBlob: { name: 'Quỷ Nhỏ', desc: 'Đánh lan: Gây sát thương AoE xung quanh mục tiêu. Giảm 15% sát thương nhận vào.', hp: 120, atk: 45, range: 40, speed: 60, cd: 1, skill: 'cleave', armor: 0.15 },
     angelBlob: { name: 'Thiên Thần', desc: 'Hồi máu diện rộng cho các đồng minh lân cận.', hp: 140, atk: 12, range: 80, speed: 40, cd: 1.2, skill: 'aoe_heal' },
     starBell: { name: 'Chuông Sao', desc: 'Tăng 20% sát thương cho đồng minh lân cận.', hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: 'buff_atk' },
-    cloudMallow: { name: 'Kẹo Dẻo Mây', desc: 'Khiêu khích: Buộc kẻ địch tấn công mình.', hp: 250, atk: 10, range: 40, speed: 30, cd: 2, skill: 'taunt' },
-    dewSprout: { name: 'Mầm Sương', desc: '25% tỷ lệ trói chân kẻ địch trong 2 giây.', hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: 'root' },
-    prismBlob: { name: 'Lăng Kính', desc: 'Bắn 3 tia sáng cùng lúc (sát thương chia nửa).', hp: 100, atk: 25, range: 140, speed: 40, cd: 1.4, skill: 'multishot' },
-    penguin: { name: 'Cánh Cụt', desc: 'Đòn đánh làm giảm tốc độ di chuyển và tốc đánh.', hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: 'freeze' },
-    naoyaSlime: { name: 'Naoya', desc: 'Kỹ năng chủ động (10s): Đầu Xạ Chú Pháp - Lướt 24 khung hình công kích toàn map và đóng băng quái 1s.', hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: 'projection_sorcery', maxSkillCd: 10 },
+    // Kẹo Dẻo Mây: hp 250→320, cd 2.0→1.5, + 20% giáp khi Taunt
+    cloudMallow: { name: 'Kẹo Dẻo Mây', desc: 'Khiêu khích: Buộc kẻ địch tấn công mình. Nhận 20% giáp khi đang Taunt.', hp: 320, atk: 10, range: 40, speed: 30, cd: 1.5, skill: 'taunt' },
+    // Mầm Sương: root 25%→30%
+    dewSprout: { name: 'Mầm Sương', desc: '30% tỷ lệ trói chân kẻ địch trong 2 giây.', hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: 'root' },
+    // Lăng Kính: atk 25→20
+    prismBlob: { name: 'Lăng Kính', desc: 'Bắn 3 tia sáng cùng lúc (mỗi tia 50% ATK).', hp: 100, atk: 20, range: 140, speed: 40, cd: 1.4, skill: 'multishot' },
+    penguin: { name: 'Cánh Cụt', desc: 'Đòn đánh làm giảm 30% tốc độ di chuyển và tốc đánh.', hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: 'freeze' },
+    // Naoya: maxSkillCd 10s→12s
+    naoyaSlime: { name: 'Naoya', desc: 'Kỹ năng chủ động (12s): Đầu Xạ Chú Pháp - Lướt 24 khung hình công kích toàn map và đóng băng quái 1s.', hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: 'projection_sorcery', maxSkillCd: 12 },
     default: { name: 'Pet Vô Danh', desc: 'Không có kỹ năng đặc biệt.', hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
 };
 
@@ -44,13 +53,15 @@ const ENEMY_TYPES = [
     { id: 'chuncai', name: 'Rau Thuần', desc: 'Đeo bám dai dẳng.', hp: 150, atk: 15, range: 40, speed: 25, cd: 1.2, ai: 'melee', gold: 6 },
     { id: 'lingjiao', name: 'Củ Ấu Giáp', desc: 'Cận chiến có giáp.', hp: 180, atk: 20, range: 40, speed: 20, cd: 1.5, ai: 'melee', gold: 8 },
     { id: 'pumpkin', name: 'Bí Ngô Khổng Lồ', desc: 'Tanker chậm chạp.', hp: 300, atk: 30, range: 50, speed: 15, cd: 3, ai: 'tank', gold: 15 },
-    { id: 'fangW', name: 'Hoa Bá Vương', desc: 'Pháp sư bắn từ xa.', hp: 60, atk: 15, range: 100, speed: 20, cd: 1.8, ai: 'ranged', gold: 8 },
+    // Hoa Bá Vương: range 100→130, cd 1.8→2.2
+    { id: 'fangW', name: 'Hoa Bá Vương', desc: 'Pháp sư bắn từ xa.', hp: 60, atk: 15, range: 130, speed: 20, cd: 2.2, ai: 'ranged', gold: 8 },
     { id: 'starbush', name: 'Bụi Sao', desc: 'Xạ thủ 3 tia.', hp: 70, atk: 8, range: 120, speed: 25, cd: 2.0, ai: 'ranged', skill: 'multishot', gold: 10 },
     { id: 'opalvine', name: 'Dây Leo Opal', desc: 'Trói chân đối thủ.', hp: 130, atk: 15, range: 90, speed: 20, cd: 1.5, ai: 'ranged', skill: 'root', gold: 12 },
     { id: 'lianou', name: 'Củ Sen Khổng Lồ', desc: 'Ném bùn từ xa.', hp: 200, atk: 18, range: 100, speed: 15, cd: 2.5, ai: 'ranged', gold: 20 },
     { id: 'dragoncry', name: 'Long Tinh', desc: 'Boss: Cực khỏe.', hp: 700, atk: 60, range: 60, speed: 20, cd: 2, ai: 'tank', skill: 'cleave', elite: true, gold: 100 },
     { id: 'pumpkin', name: 'Vua Bí Ngô', desc: 'Boss: Tank AoE slam.', hp: 1000, atk: 50, range: 50, speed: 15, cd: 2.5, ai: 'tank', skill: 'cleave', elite: true, sp: 'pumpkin', gold: 150 },
-    { id: 'fangW', name: 'Phù Thủy Hoa', desc: 'Boss: Pháo đài bắn xa.', hp: 500, atk: 70, range: 160, speed: 18, cd: 1.8, ai: 'ranged', skill: 'multishot', elite: true, sp: 'fangW', gold: 120 }
+    // Phù Thủy Hoa: range 160→130, cd 1.8→2.2
+    { id: 'fangW', name: 'Phù Thủy Hoa', desc: 'Boss: Pháo đài bắn xa.', hp: 500, atk: 70, range: 130, speed: 18, cd: 2.2, ai: 'ranged', skill: 'multishot', elite: true, sp: 'fangW', gold: 120 }
 ];
 
 export function openDungeonView() {
@@ -78,16 +89,28 @@ export function openDungeonView() {
         };
     }
     
-    All.dungeonView.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:white; text-align:center; padding: 20px;">
-            <h2 style="color:#e06578; margin-bottom:20px; font-size:24px;">🚧 Đang Thi Công 🚧</h2>
-            <div style="font-size:16px; max-width:400px; line-height:1.5;">
-                Hệ thống Hầm Ngục đang được tạm khóa để bảo trì và cân bằng lại toàn bộ thông số kinh tế.<br><br>
-                Vui lòng quay lại sau nhé!
+    if (ctx.S.dungeonSave) {
+        All.dungeonView.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:white;">
+                <h2 style="color:#d9ba8a; margin-bottom:20px;">Hầm Ngục Đang Dang Dở</h2>
+                <div style="margin-bottom:30px; font-size:16px;">Bạn có một lượt chơi đang dang dở ở Ải ${ctx.S.dungeonSave.currentWave}. Bạn muốn tiếp tục hay chơi mới?</div>
+                <div style="display:flex; gap:20px;">
+                    <div class="buy plain" id="dg-load-new" style="background:#e06578; color:white; width:120px; text-align:center; display:flex; justify-content:center; align-items:center; border-color:#c25566; box-shadow:inset 0 -3px 0 #c25566, 0 3px 0 #a34a52;">Chơi Mới</div>
+                    <div class="buy" id="dg-load-continue" style="width:120px; text-align:center; display:flex; justify-content:center; align-items:center;">Tiếp Tục</div>
+                </div>
             </div>
-        </div>
-    `;
-    return;
+        `;
+        All.$id('dg-load-new').onclick = () => {
+            delete ctx.S.dungeonSave;
+            All.save();
+            initPlacementPhase();
+        };
+        All.$id('dg-load-continue').onclick = () => {
+            loadDungeonState(ctx.S.dungeonSave);
+        };
+    } else {
+        initPlacementPhase();
+    }
 }
 export function closeDungeonView() {
     if (!isDungeonOpen) return;
@@ -173,16 +196,20 @@ function loadDungeonState(saveData) {
         arena.appendChild(el);
         const stat = PET_STATS[savedP.id] || PET_STATS.default;
         
-        // Recalibrate stats to fix old exponential inflation
+        // Recalibrate stats with new balance (dungeon_stats_Kaiz)
         const u = savedP.upgrades || {};
         const oldMax = savedP.maxHp > 0 ? savedP.maxHp : 1;
         const hpPercent = (savedP.hp !== undefined ? savedP.hp : oldMax) / oldMax;
         
-        savedP.maxHp = Math.round(stat.hp * Math.pow(1.10, u.hp || 0));
+        // HP & ATK: +15%/level (1.10→1.15)
+        savedP.maxHp = Math.round(stat.hp * Math.pow(1.15, u.hp || 0));
         savedP.hp = Math.round(savedP.maxHp * hpPercent);
-        savedP.atk = Math.round(stat.atk * Math.pow(1.10, u.atk || 0));
+        savedP.atk = Math.round(stat.atk * Math.pow(1.15, u.atk || 0));
         savedP.speed = Math.round(stat.speed * Math.pow(1.05, u.spd || 0));
         savedP.range = Math.round(stat.range * Math.pow(1.05, u.range || 0));
+        // ATK SPD: 8%/level, sàn 0.15s; dodge ghostBlob 25%
+        savedP.maxCd = Math.max(0.15, stat.cd * Math.pow(0.92, u.aspd || 0));
+        if (savedP.dodge === undefined) savedP.dodge = savedP.id === 'ghostBlob' ? 0.25 : 0.05;
 
         return { 
             ...savedP, 
@@ -610,9 +637,9 @@ function _doStartWave() {
         
         arena.appendChild(el);
         
-        // Scale hp and atk based on pure exponential wave
-        let hpMultiplier = Math.pow(1.10, currentWave - 1); // Giảm xuống 1.10 để chống lạm phát
-        let atkMultiplier = Math.pow(1.10, currentWave - 1); // Giảm xuống 1.10 để chống lạm phát
+        // Scale hp: 1.12x/wave, atk: 1.10x/wave (theo dungeon_stats_Kaiz)
+        let hpMultiplier = Math.pow(1.12, currentWave - 1);
+        let atkMultiplier = Math.pow(1.10, currentWave - 1);
         if (isBossWave) {
             hpMultiplier *= 1.5;
             atkMultiplier *= 1.2;
@@ -625,7 +652,7 @@ function _doStartWave() {
             atk: Math.round(type.atk * atkMultiplier),
             range: type.range, speed: type.speed, cd: 0, maxCd: type.cd,
             skillCd: type.maxSkillCd || 0, maxSkillCd: type.maxSkillCd || 0, el, type: 'enemy',
-            skill: type.skill, ai: type.ai, gold: Math.round((type.gold || 5) * 2 * Math.pow(1.10, currentWave - 1))
+            skill: type.skill, ai: type.ai, gold: Math.round((type.gold || 5) * 2 * Math.pow(1.12, currentWave - 1))
         });
     }
     
@@ -783,7 +810,8 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     
     // Dodge check (pets only)
     if (target.type === 'pet') {
-        const dodgeChance = target.dodge !== undefined ? target.dodge : (target.id === 'ghostBlob' ? 0.15 : 0.05);
+        // Ma Trắng: dodge gốc 15%→25%
+        const dodgeChance = target.dodge !== undefined ? target.dodge : (target.id === 'ghostBlob' ? 0.25 : 0.05);
         if (Math.random() < dodgeChance) {
             spawnDmg(target, 0, 'miss');
             target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - atk);
@@ -810,9 +838,14 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
         }
     }
     
-    // Armor reduction
-    if (target.armor && target.armor > 0) {
-        finalDmg = Math.round(finalDmg * (1 - target.armor));
+    // Armor reduction (base armor từ stat + taunt bonus)
+    let effectiveArmor = target.armor || 0;
+    // Kẹo Dẻo Mây nhận thêm 20% giáp khi đang Taunt
+    if (target.skill === 'taunt' && target.status && target.status.taunt > 0) {
+        effectiveArmor = Math.min(0.75, effectiveArmor + 0.20);
+    }
+    if (effectiveArmor > 0) {
+        finalDmg = Math.round(finalDmg * (1 - effectiveArmor));
     }
     
     if (skill === 'sniper' && attacker) {
@@ -827,8 +860,9 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     if (attacker && attacker.type === 'pet') attacker.waveDmgDealt = (attacker.waveDmgDealt || 0) + finalDmg;
     if (target.type === 'pet') target.waveDmgTaken = (target.waveDmgTaken || 0) + finalDmg;
     
+    // Lifesteal: 50%→40%
     if (skill === 'lifesteal' && attacker) {
-        const ls = Math.floor(finalDmg * 0.5);
+        const ls = Math.floor(finalDmg * 0.4);
         const amount = Math.min(attacker.maxHp - attacker.hp, ls);
         attacker.hp += amount;
         if (attacker.type === 'pet') attacker.waveHealDone = (attacker.waveHealDone || 0) + amount;
@@ -836,10 +870,12 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     }
     
     if (!target.status) target.status = {};
-    if (skill === 'stun' && Math.random() < 0.2) target.status.stun = 1;
+    // Bạch Tuộc Kem stun: 20%→25%
+    if (skill === 'stun' && Math.random() < 0.25) target.status.stun = 1;
     if (skill === 'poison') target.status.poison = 3;
     if (skill === 'freeze') target.status.freeze = 3;
-    if (skill === 'root' && Math.random() < 0.25) target.status.root = 2;
+    // Mầm Sương root: 25%→30%
+    if (skill === 'root' && Math.random() < 0.30) target.status.root = 2;
     
     if (skill === 'cleave' && attacker) {
         enemyGroup.forEach(e => {
@@ -1169,6 +1205,7 @@ function updateEntities(groupA, groupB, dt) {
                     
                     if (a.skill === 'frenzy') {
                         if (!a.frenzyStacks) a.frenzyStacks = 0;
+                        // Frenzy tối đa +50% tốc đánh (10 stacks x 5% = 50%)
                         a.frenzyStacks = Math.min(10, a.frenzyStacks + 1);
                         a.cd = a.maxCd / (atkSpdMult * (1 + a.frenzyStacks * 0.05));
                     }
@@ -1296,9 +1333,9 @@ function showWaveRewards(isLoaded = false) {
         projectiles.forEach(p => p.el.remove());
         projectiles = [];
         
-        // Calculate gold for this wave
+        // Calculate gold for this wave (shop gold scale: 1.10→1.12)
         const isBoss = currentWave % 10 === 0;
-        const waveGold = Math.round(500 * Math.pow(1.10, currentWave - 1)) * (isBoss ? 3 : 1);
+        const waveGold = Math.round(500 * Math.pow(1.12, currentWave - 1)) * (isBoss ? 3 : 1);
         // Tiền thưởng ngoài farm scale tuyến tính
         const waveHomeGold = (10 + currentWave * 2) * (isBoss ? 3 : 1);
         totalGold += waveHomeGold;
@@ -1316,10 +1353,12 @@ function showWaveRewards(isLoaded = false) {
             p.status = {};
             if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0, dodge: 0 };
             const baseStat = PET_STATS[p.id] || PET_STATS.default;
-            p.maxCd = baseStat.cd * Math.pow(0.9, p.upgrades.aspd || 0);
+            // ATK SPD: giảm 10%→8% CD/level, sàn 0.1s→0.15s
+            p.maxCd = Math.max(0.15, baseStat.cd * Math.pow(0.92, p.upgrades.aspd || 0));
             if (p.critRate === undefined) p.critRate = 0.05;
             if (p.critDmg === undefined) p.critDmg = 1.5;
-            if (p.dodge === undefined) p.dodge = p.id === 'ghostBlob' ? 0.15 : 0.05;
+            // Ma Trắng dodge gốc: 15%→25%
+            if (p.dodge === undefined) p.dodge = p.id === 'ghostBlob' ? 0.25 : 0.05;
         });
         team = [...fullTeam];
         
@@ -1401,21 +1440,22 @@ function showWaveRewards(isLoaded = false) {
         if (selectedPet) {
             const u = selectedPet.upgrades;
             const hpMissingPet = selectedPet.maxHp - selectedPet.hp;
-            const waveBaseGold = Math.round(500 * Math.pow(1.10, currentWave - 1));
+            const waveBaseGold = Math.round(500 * Math.pow(1.12, currentWave - 1));
             const healPetCost = Math.max(10, Math.floor(waveBaseGold * 0.2 * (hpMissingPet / selectedPet.maxHp)));
             
             const totalMaxHp = fullTeam.reduce((acc, member) => acc + member.maxHp, 0);
             const hpMissingTeam = fullTeam.reduce((acc, member) => acc + (member.maxHp - member.hp), 0);
             const healTeamCost = Math.max(30, totalMaxHp > 0 ? Math.floor(waveBaseGold * 0.5 * (hpMissingTeam / totalMaxHp)) : 30);
             
-            // Công thức tính giá: Giá gốc * 1.2^Level.
-            // Độ dốc cân bằng hơn để phù hợp với lượng tiền kiếm được ở late game.
-            const calc = (base, lv) => Math.floor(base * Math.pow(1.12, lv));
+            // Giá Shop: 1.12→1.18 /level (chống lạm phát giá)
+            const calc = (base, lv) => Math.floor(base * Math.pow(1.18, lv));
             
             const stats = [
-                { id: 'hp', name: 'Max HP (+10%)', val: selectedPet.maxHp, lv: u.hp, cost: calc(80, u.hp) },
-                { id: 'atk', name: 'ATK (+10%)', val: selectedPet.atk, lv: u.atk, cost: calc(80, u.atk) },
-                { id: 'aspd', name: 'ATK SPD (+10%)', val: selectedPet.maxCd.toFixed(2)+'s', lv: u.aspd, cost: calc(100, u.aspd), forceCanBuy: selectedPet.maxCd > 0.11 },
+                // Hiệu quả HP & ATK upgrade: +10%→+15%
+                { id: 'hp', name: 'Max HP (+15%)', val: selectedPet.maxHp, lv: u.hp, cost: calc(80, u.hp) },
+                { id: 'atk', name: 'ATK (+15%)', val: selectedPet.atk, lv: u.atk, cost: calc(80, u.atk) },
+                // ATK SPD: giảm 8%/level, sàn 0.15s
+                { id: 'aspd', name: 'ATK SPD (+8%)', val: selectedPet.maxCd.toFixed(2)+'s', lv: u.aspd, cost: calc(100, u.aspd), forceCanBuy: selectedPet.maxCd > 0.16 },
                 { id: 'spd', name: 'Move Speed (+5%)', val: selectedPet.speed, lv: u.spd, cost: calc(50, u.spd), forceCanBuy: selectedPet.speed < 150 },
                 { id: 'critR', name: 'Crit Rate (+5%)', val: (selectedPet.critRate*100).toFixed(0)+'%', lv: u.critR, cost: calc(90, u.critR), forceCanBuy: selectedPet.critRate < 0.59 },
                 { id: 'critD', name: 'Crit Dmg (+20%)', val: (selectedPet.critDmg*100).toFixed(0)+'%', lv: u.critD, cost: calc(90, u.critD) },
@@ -1480,12 +1520,14 @@ function showWaveRewards(isLoaded = false) {
                     const stat = PET_STATS[p.id] || PET_STATS.default;
                     const oldMax = p.maxHp > 0 ? p.maxHp : 1;
                     const hpPercent = p.hp / oldMax;
-                    p.maxHp = Math.round(stat.hp * Math.pow(1.10, p.upgrades.hp || 0));
+                    // HP & ATK upgrade: 1.10→1.15 (+15%/level)
+                    p.maxHp = Math.round(stat.hp * Math.pow(1.15, p.upgrades.hp || 0));
                     p.hp = Math.round(p.maxHp * hpPercent);
-                    p.atk = Math.round(stat.atk * Math.pow(1.10, p.upgrades.atk || 0));
+                    p.atk = Math.round(stat.atk * Math.pow(1.15, p.upgrades.atk || 0));
                     p.speed = Math.round(stat.speed * Math.pow(1.05, p.upgrades.spd || 0));
                     p.range = Math.round(stat.range * Math.pow(1.05, p.upgrades.range || 0));
-                    p.maxCd = Math.max(0.1, stat.cd * Math.pow(0.9, p.upgrades.aspd || 0));
+                    // ATK SPD: 0.9→0.92 (giảm 8%/level), sàn 0.15s
+                    p.maxCd = Math.max(0.15, stat.cd * Math.pow(0.92, p.upgrades.aspd || 0));
 
                     if (statId === 'heal_pet') { p.hp = p.maxHp; }
                     if (statId === 'heal_team') {
