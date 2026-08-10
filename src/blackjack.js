@@ -569,7 +569,7 @@ function bjRenderMenu() {
             const v = (All.$id('bj-inp-name').value || '').trim();
             if (!v) return bjToast('Tên không được trống!');
             ctx.S.username = v;
-            import('./state.js').then(m => m.save());
+            save();
             bjRenderMenu();
         };
         return;
