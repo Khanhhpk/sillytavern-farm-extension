@@ -104,6 +104,17 @@ export async function renderFleaMarket() {
                   <div id="lbl-flea-dtl-desc" style="font-size:13px; color:#555; line-height:1.4; padding:5px 0;"></div>
               </div>
           </div>
+          
+          <div id="flea-confirm-act" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:100; border-radius: 8px;">
+              <div style="background:#fffaf0; padding:20px; border:3px solid #c9a273; border-radius:12px; width:85%; max-width:280px; display:flex; flex-direction:column; gap:12px; position:relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align:center;">
+                  <div style="font-weight:bold; color:#d32f2f; font-size:16px;">Xác nhận mua</div>
+                  <div id="lbl-flea-cfm-msg" style="font-size:14px; color:#555; line-height:1.5;"></div>
+                  <div style="display:flex; justify-content:center; gap:10px; margin-top:10px;">
+                      <button id="btn-flea-cfm-yes" class="buy" style="padding:8px 20px;">Đồng ý</button>
+                      <button onclick="FarmAll.$id('flea-confirm-act').style.display='none'" class="btn" style="padding:8px 20px;">Hủy</button>
+                  </div>
+              </div>
+          </div>
     `;
     
     All.$id('flea-history-btn').addEventListener('click', renderHistory);
@@ -236,8 +247,21 @@ export function renderFleaItems() {
         btn.addEventListener('click', (e) => {
             const itemName = e.target.dataset.name;
             const price = parseInt(e.target.dataset.price);
-            if (confirm(`Bạn có chắc chắn muốn mua "${itemName}" với giá ${price} G không?`)) {
-                buyItem(e.target.dataset.id, price);
+            const docId = e.target.dataset.id;
+            
+            const cfmUi = All.$id('flea-confirm-act');
+            if (cfmUi) {
+                All.$id('lbl-flea-cfm-msg').innerHTML = `Bạn có chắc chắn muốn mua <b>${itemName}</b> với giá <b style="color:#d32f2f;">${price} G</b> không?`;
+                cfmUi.style.display = 'flex';
+                All.$id('btn-flea-cfm-yes').onclick = () => {
+                    cfmUi.style.display = 'none';
+                    buyItem(docId, price);
+                };
+            } else {
+                // Fallback to browser confirm
+                if (confirm(`Bạn có chắc chắn muốn mua "${itemName}" với giá ${price} G không?`)) {
+                    buyItem(docId, price);
+                }
             }
         });
     });
