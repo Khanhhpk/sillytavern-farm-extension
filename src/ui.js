@@ -23,14 +23,19 @@ export function applyTheme() { ctx.ui.classList.remove('theme-sakura', 'theme-sk
 
 export function applyPageSkin() {
   const isExplore = ctx.S && ctx.S.view === 'explore';
-  fieldEl.classList.toggle('pg2', !isExplore && ctx.S.page === 2);
-  fieldEl.classList.toggle('pg3', !isExplore && ctx.S.page === 3);
+  const isCasino = ctx.S && ctx.S.view === 'casino';
+  fieldEl.classList.toggle('pg2', !isExplore && !isCasino && ctx.S.page === 2);
+  fieldEl.classList.toggle('pg3', !isExplore && !isCasino && ctx.S.page === 3);
   
   const titleH1 = sh.querySelector('.titlebar h1');
   if (isExplore) {
     fieldEl.style.backgroundImage = 'none';
     fieldEl.style.backgroundColor = '#d3c3a0';
     if (titleH1) titleH1.innerHTML = `${spriteSVG('mapIcon', 16)}Dạo quanh nào...`;
+  } else if (isCasino) {
+    fieldEl.style.backgroundImage = 'none';
+    fieldEl.style.backgroundColor = '#0a0210';
+    if (titleH1) titleH1.innerHTML = `${spriteSVG('casinoNeonGoldMap', 16)} Sòng bạc hoàng gia`;
   } else {
     // @ts-ignore
     fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? 'water' : ctx.S.page === 3 ? 'mine' : 'grass', 4242);
@@ -44,6 +49,7 @@ export function applyPageSkin() {
 /* ---------- Hàm tập trung quản lý trạng thái chuyển tab Nông trại / Khám phá ---------- */
 export function applyViewState() {
   const isExplore = ctx.S && ctx.S.view === 'explore';
+  const isCasino = ctx.S && ctx.S.view === 'casino';
   const ctrlrow = sh.querySelector('.ctrlrow');
   const mascots = $id('mascots');
   const witch = $id('witch');
@@ -52,31 +58,38 @@ export function applyViewState() {
   const statBlocks = $id('stat-blocks');
   
   // Ẩn/hiện các thành phần chỉ thuộc về Nông trại
-  if (ctrlrow) ctrlrow.style.display = isExplore ? 'none' : 'flex';
-  if (mascots) mascots.style.display = isExplore ? 'none' : '';
-  if (decoLayer) decoLayer.style.display = isExplore ? 'none' : '';
-  if (witch) witch.style.display = isExplore ? 'none' : '';
-  if (banner) banner.style.display = isExplore ? 'none' : '';
-  if (statBlocks) statBlocks.style.display = isExplore ? 'none' : '';
+  if (ctrlrow) ctrlrow.style.display = (isExplore || isCasino) ? 'none' : 'flex';
+  if (mascots) mascots.style.display = (isExplore || isCasino) ? 'none' : '';
+  if (decoLayer) decoLayer.style.display = (isExplore || isCasino) ? 'none' : '';
+  if (witch) witch.style.display = (isExplore || isCasino) ? 'none' : '';
+  if (banner) banner.style.display = (isExplore || isCasino) ? 'none' : '';
+  if (statBlocks) statBlocks.style.display = (isExplore || isCasino) ? 'none' : '';
   
-  // Cập nhật class nền cho tab Khám phá
+  // Cập nhật class nền cho tab Khám phá / Casino
   const field = sh.querySelector('.field');
   if (field) {
     if (isExplore) field.classList.add('explore-mode');
     else field.classList.remove('explore-mode');
+
+    if (isCasino) field.classList.add('casino-mode');
+    else field.classList.remove('casino-mode');
   }
 
   // Cập nhật nút chuyển tab
   if (viewToggle) {
-    viewToggle.innerHTML = isExplore
-      ? `${spriteSVG('strawhat', 16)} <span>Về Nông Trại</span>`
-      : `${spriteSVG('mapIcon', 16)} <span>Khám phá</span>`;
+    if (isCasino) {
+      viewToggle.innerHTML = `${spriteSVG('mapIcon', 16)} <span>Về Khám phá</span>`;
+    } else if (isExplore) {
+      viewToggle.innerHTML = `${spriteSVG('strawhat', 16)} <span>Về Nông Trại</span>`;
+    } else {
+      viewToggle.innerHTML = `${spriteSVG('mapIcon', 16)} <span>Khám phá</span>`;
+    }
   }
 }
 
 export function renderPager() {
   const pager = $id('pager');
-  if (ctx.S && ctx.S.view === 'explore') {
+  if (ctx.S && (ctx.S.view === 'explore' || ctx.S.view === 'casino')) {
     pager.style.display = 'none';
     return;
   }
@@ -267,7 +280,7 @@ if (pagerEl) pagerEl.addEventListener('click', e => {
   swX = null; swY = null;
 // @ts-ignore
 fieldEl.addEventListener('touchstart', e => { 
-  if (ctx.S && ctx.S.view === 'explore') { swX = null; return; }
+  if (ctx.S && (ctx.S.view === 'explore' || ctx.S.view === 'casino')) { swX = null; return; }
   if (e.touches.length === 1 && (!ctx.S.dragPet || !e.target.closest('.pet'))) { 
     swX = e.touches[0].clientX; 
     swY = e.touches[0].clientY; 
@@ -294,14 +307,22 @@ fieldEl.addEventListener('touchend', e => {
   const viewToggle = $id('viewToggle');
   if (viewToggle) {
     viewToggle.addEventListener('click', () => {
-      ctx.S.view = ctx.S.view === 'explore' ? 'farm' : 'explore';
+      if (ctx.S.view === 'casino') {
+        ctx.S.view = 'explore';
+        toast('Bản đồ Khám phá');
+      } else if (ctx.S.view === 'explore') {
+        ctx.S.view = 'farm';
+        toast('Trở về Nông trại');
+      } else {
+        ctx.S.view = 'explore';
+        toast('Bản đồ Khám phá');
+      }
       save();
       applyPageSkin();
       applyViewState();
       renderPlots();
       renderToolbar();
       renderPager();
-      toast(ctx.S.view === 'explore' ? 'Bản đồ Khám phá' : 'Trở về Nông trại');
     });
   }
 }

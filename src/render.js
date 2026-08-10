@@ -30,7 +30,7 @@ export const TOOLS = [
 export let toolbarOpen = false;
 export function renderToolbar() {
   const tb = All.$id('toolbar');
-  if (ctx.S && ctx.S.view === 'explore') {
+  if (ctx.S && (ctx.S.view === 'explore' || ctx.S.view === 'casino')) {
     tb.style.display = 'none';
     const tip = All.$id('modetip');
     if (tip) tip.style.display = 'none';
@@ -112,6 +112,8 @@ export function renderPlots() {
   
   if (ctx.S && ctx.S.view === 'explore') {
     if (wrap) wrap.style.display = 'none';
+    const casWrap = All.$id('casino-blocks');
+    if (casWrap) casWrap.style.display = 'none';
     if (expWrap && !All.isDungeonOpen) {
       expWrap.style.display = 'flex';
       if (!expWrap.hasChildNodes()) {
@@ -120,27 +122,35 @@ export function renderPlots() {
             ${spriteSVG('dungeonGate', 48)}
             <div class="feature-name">Hầm ngục</div>
           </div>
-          <div class="explore-slot" id="eslot-bet">
-            ${spriteSVG('diceIcon', 48)}
-            <div class="feature-name">Đỏ Đen</div>
-          </div>
           <div class="explore-slot" id="eslot-hero">
             ${spriteSVG('threeSlimesWalking', 64)}
             <div class="feature-name">Thám Hiểm</div>
           </div>
-          <div class="explore-slot" id="eslot-flea" style="background: rgba(40, 100, 200, 0.8); border-color: #64b5f6; box-shadow: 0 4px 0 #1976d2, inset 0 0 0 3px rgba(100,181,246,0.4);">
+          <div class="explore-slot" id="eslot-flea" style="border-color: #64b5f6; box-shadow: 0 4px 0 #1976d2, inset 0 0 0 3px rgba(100,181,246,0.4);">
             ${spriteSVG('fleaIcon', 48) || '🛒'}
             <div class="feature-name" style="color: #e3f2fd; text-shadow: 0 1px 2px #000;">Chợ Trời</div>
           </div>
-          <div class="explore-slot" id="eslot-achiv" style="background: rgba(60, 40, 20, 0.8); border-color: #f2c231; box-shadow: 0 4px 0 #8a6a1c, inset 0 0 0 3px rgba(242,194,49,0.4);">
+          <div class="explore-slot" id="eslot-achiv" style="border-color: #f2c231; box-shadow: 0 4px 0 #8a6a1c, inset 0 0 0 3px rgba(242,194,49,0.4);">
             ${spriteSVG('achivStar', 48)}
             <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Thành Tựu</div>
           </div>
+          <div class="explore-slot" id="eslot-casino" style="border-color: #ffd94d; box-shadow: 0 4px 0 #b08a5c, inset 0 0 0 3px rgba(255,217,77,0.4);">
+            <div style="width:64px;height:64px;position:relative;">${spriteSVG('casinoNeonGoldMap', 64)}</div>
+            <div class="feature-name" style="color: #ffd94d; text-shadow: 0 1px 2px #000;">Casino</div>
+          </div>
         `;
+        const cBtn = All.$id('eslot-casino');
+        if (cBtn) cBtn.addEventListener('click', () => {
+          ctx.S.view = 'casino';
+          All.save();
+          All.applyPageSkin();
+          All.applyViewState();
+          All.renderToolbar();
+          All.renderPager();
+          All.renderPlots();
+        });
         const dBtn = All.$id('eslot-dungeon');
         if (dBtn) dBtn.addEventListener('click', () => All.openPanel('dungeon'));
-        const bBtn = All.$id('eslot-bet');
-        if (bBtn) bBtn.addEventListener('click', () => All.openPanel('bet'));
         const hBtn = All.$id('eslot-hero');
         if (hBtn) hBtn.addEventListener('click', () => All.openHeroPanel());
         const fBtn = All.$id('eslot-flea');
@@ -156,8 +166,37 @@ export function renderPlots() {
     return;
   }
   
-  if (wrap) wrap.style.display = '';
+  if (ctx.S && ctx.S.view === 'casino') {
+    if (wrap) wrap.style.display = 'none';
+    if (expWrap) expWrap.style.display = 'none';
+    let casWrap = All.$id('casino-blocks');
+    if (!casWrap) {
+      casWrap = document.createElement('div');
+      casWrap.id = 'casino-blocks';
+      casWrap.className = 'casino-blocks';
+      All.fieldEl.appendChild(casWrap);
+    }
+    casWrap.style.display = 'flex';
+    casWrap.style.flexWrap = 'wrap';
+    casWrap.style.alignContent = 'flex-start';
+    casWrap.style.justifyContent = 'center';
+    casWrap.innerHTML = `
+      <div style="width:100%; display:flex; gap:16px; justify-content:center; margin-bottom:40px;">
+        <div class="explore-slot" id="cslot-bet">
+          ${spriteSVG('hiloIcon', 48)}
+          <div class="feature-name">Hi-Lo</div>
+        </div>
+      </div>
+    `;
+    const bBtn = All.$id('cslot-bet');
+    if (bBtn) bBtn.addEventListener('click', () => All.openPanel('bet'));
+    return;
+  }
+
   if (expWrap) expWrap.style.display = 'none';
+  const casWrap = All.$id('casino-blocks');
+  if (casWrap) casWrap.style.display = 'none';
+  if (wrap) wrap.style.display = '';
 
   const pg = ctx.S.page, plots = curPlots(), nb = curBlocks();
   
