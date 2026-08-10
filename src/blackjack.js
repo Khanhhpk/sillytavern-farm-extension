@@ -1206,19 +1206,27 @@ function bjRenderRoom() {
     const body = All.$id('bj-body');
     if (!body) return;
 
-    let chatOpen = false;
-    let chatInput = '';
-    let chatFocused = false;
-    const oldWrap = All.$id('bj-chat-wrap');
-    if (oldWrap) {
-        chatOpen = oldWrap.classList.contains('open');
-        const oldInp = All.$id('bj-chat-inp');
-        if (oldInp) {
-            chatInput = oldInp.value;
-            chatFocused = (oldInp.getRootNode().activeElement === oldInp);
-        }
+    if (!All.$id('bj-game-layer')) {
+        body.innerHTML = `
+            <div id="bj-game-layer" style="width:100%; height:100%; display:flex; flex-direction:column; overflow-y:hidden; overflow-x:hidden;"></div>
+            <div class="bj-chat-wrap" id="bj-chat-wrap">
+                <div class="bj-chat-header" id="bj-chat-close">
+                    <span>💬 Chat</span>
+                    <span class="bj-chat-close">❌</span>
+                </div>
+                <div class="bj-chat-log" id="bj-chat-log"></div>
+                <div class="bj-chat-inp-row">
+                    <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin tiền">💰</div>
+                    <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
+                    <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">Gửi</div>
+                </div>
+            </div>
+        `;
+        bjBindChatBase();
+        bjRenderChat();
     }
 
+    const gameLayer = All.$id('bj-game-layer');
     const gs = bjGameState;
     const allPids = Object.keys(bjPlayers);
 
@@ -1330,32 +1338,14 @@ function bjRenderRoom() {
         }
     }
 
-    html += `</div></div>
-    <div class="bj-chat-wrap" id="bj-chat-wrap">
-        <div class="bj-chat-header" id="bj-chat-close">
-            <span>💬 Chat</span>
-            <span class="bj-chat-close">❌</span>
-        </div>
-        <div class="bj-chat-log" id="bj-chat-log"></div>
-        <div class="bj-chat-inp-row">
-            <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin tiền">💰</div>
-            <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
-            <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">Gửi</div>
-        </div>
-    </div></div>`;
+    html += `</div></div>`;
+    
+    gameLayer.innerHTML = html;
 
-    body.innerHTML = html;
-
-    const newWrap = All.$id('bj-chat-wrap');
-    if (newWrap && chatOpen) newWrap.classList.add('open');
-    const newInp = All.$id('bj-chat-inp');
-    if (newInp) {
-        if (chatInput) newInp.value = chatInput;
-        if (chatFocused) {
-            newInp.focus();
-            newInp.setSelectionRange(chatInput.length, chatInput.length);
-        }
-    }
+    All.$id('bj-chat-toggle')?.addEventListener('click', () => {
+        All.$id('bj-chat-wrap')?.classList.add('open');
+        if (bjUnreadChat > 0) { bjUnreadChat = 0; bjRenderRoom(); }
+    });
 
     All.$id('bj-out-room-ingame')?.addEventListener('click', closeBlackjack);
     All.$id('bj-show-players')?.addEventListener('click', () => {
@@ -1398,8 +1388,6 @@ function bjRenderRoom() {
         }
     }));
     bjBindMyActions();
-    bjBindChat();
-    bjRenderChat();
 }
 
 function bjRenderPlayerListModal() {
@@ -1542,7 +1530,7 @@ function bjRenderChat() {
     setTimeout(() => { if (el) el.scrollTop = el.scrollHeight + 100; }, 10);
 }
 
-function bjBindChat() {
+function bjBindChatBase() {
     const send = () => {
         const inp = All.$id('bj-chat-inp');
         const msg = (inp?.value||'').trim();
@@ -1563,10 +1551,6 @@ function bjBindChat() {
             bjHandleMsg(bjMyId, msg);
             bjBroadcast(msg);
         }
-    });
-    All.$id('bj-chat-toggle')?.addEventListener('click', () => {
-        All.$id('bj-chat-wrap')?.classList.add('open');
-        if (bjUnreadChat > 0) { bjUnreadChat = 0; bjRenderRoom(); }
     });
     All.$id('bj-chat-close')?.addEventListener('click', () => {
         All.$id('bj-chat-wrap')?.classList.remove('open');
