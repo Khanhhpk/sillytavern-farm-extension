@@ -208,17 +208,17 @@ export function renderFleaItems() {
         }
 
         html += `
-            <div class="flea-item ${isMine ? 'mine' : ''}" style="border:1px solid #4caf50; border-radius:8px; padding:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; background:#e8f5e9;">
+            <div class="flea-item ${isMine ? 'mine' : ''}">
                 <div style="display:flex; flex:1; align-items:center; cursor:pointer;" onclick="FarmAll.showFleaItemDetail('${docSnapId}')">
                     <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
                     <div class="flea-item-info">
-                        <div class="flea-item-name" style="font-size:16px; font-weight:bold; color:#5d4037;">${itemName} x${data.amount}${rarityBadge}</div>
+                        <div class="flea-item-name">${itemName} x${data.amount}${rarityBadge}</div>
                         <div class="flea-item-seller" style="font-size: 11px; color: #777; margin-top: 2px;">Người bán: ${item.sellerName}</div>
                         ${shortDesc ? `<div style="font-size: 10px; color: #555; margin-top: 2px; font-style: italic;">${shortDesc}</div>` : ''}
                     </div>
                 </div>
                 <div class="flea-item-action">
-                    <div class="flea-item-price" style="font-weight:bold; margin-bottom:4px; text-align:right;">${data.price} G</div>
+                    <div class="flea-item-price">${data.price} G</div>
                     ${isMine ? 
                         `<button class="btn flea-cancel" data-id="${docSnapId}">Gỡ Xuống</button>` :
                         `<button class="btn flea-buy" data-id="${docSnapId}" data-price="${data.price}">Mua</button>`
