@@ -69,6 +69,25 @@ export async function renderFleaMarket() {
                 <button id="flea-post" class="btn">Đăng Bán</button>
             </div>
         </div>
+        
+        <div class="flea-filters" style="display:flex; flex-wrap:wrap; gap:5px; margin:10px 0; padding:10px; border:2px inset #c9a273; background:rgba(0,0,0,0.05); border-radius:8px;">
+            <input type="text" id="inp-flea-search" class="inp" placeholder="Tìm tên đồ, người bán..." style="flex:1; min-width:140px; padding:6px; box-sizing:border-box;">
+            <select id="sel-flea-type" class="inp" style="max-width:120px; padding:6px;">
+                <option value="all">Tất cả</option>
+                <option value="uniques">Bảo vật (Gacha)</option>
+                <option value="mutants">Đột biến</option>
+                <option value="crops">Nông sản</option>
+                <option value="seeds">Hạt giống</option>
+                <option value="ferts">Vật phẩm</option>
+                <option value="tickets">Vé / Mảnh</option>
+            </select>
+            <select id="sel-flea-sort" class="inp" style="max-width:130px; padding:6px;">
+                <option value="default">Mặc định</option>
+                <option value="rarity-desc">Độ hiếm ⬇</option>
+                <option value="rarity-asc">Độ hiếm ⬆</option>
+            </select>
+        </div>
+        
         <div id="flea-list" class="flea-list">Đang tải danh sách...</div>
           
           <div id="flea-detail-act" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:99; border-radius: 8px;">
@@ -91,6 +110,10 @@ export async function renderFleaMarket() {
     All.$id('flea-refresh').addEventListener('click', loadFleaList);
     All.$id('flea-post').addEventListener('click', renderPostItem);
     
+    All.$id('inp-flea-search').addEventListener('input', renderFleaItems);
+    All.$id('sel-flea-type').addEventListener('change', renderFleaItems);
+    All.$id('sel-flea-sort').addEventListener('change', renderFleaItems);
+    
     loadFleaList();
     checkSoldItemsNotif();
 }
@@ -104,60 +127,12 @@ async function loadFleaList() {
         const q = query(collection(db, "flea_market"), where("status", "==", "active"));
         const snapshot = await getDocs(q);
         
-        let html = '';
         currentFleaItems = {};
         snapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            currentFleaItems[docSnap.id] = data;
-            const isMine = data.sellerId === ctx.S.playerId;
-            
-            const itemName = getFleaItemName(data.itemId, data.itemData);
-            let icon = getFleaItemIcon(data.itemId, data.itemData);
-            icon = icon.replace(/width="20"/g, 'width="32"').replace(/height="20"/g, 'height="32"');
-            
-            const desc = getFleaItemDesc(data.itemId, data.itemData);
-            let shortDesc = '';
-            if (desc && data.itemId.includes('@')) {
-                const words = desc.split(' ');
-                shortDesc = words.slice(0, 30).join(' ') + (words.length > 30 ? '...' : '');
-            }
-            
-            let rarityBadge = '';
-            if (data.itemId.startsWith('unique@') && data.itemData && data.itemData.rarity) {
-                rarityBadge = `<span style="font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || '#ff8000'}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
-            }
-
-            html += `
-                <div class="flea-item ${isMine ? 'mine' : ''}">
-                    <div style="display:flex; flex:1; align-items:center; cursor:pointer;" onclick="FarmAll.showFleaItemDetail('${docSnap.id}')">
-                        <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
-                        <div class="flea-item-info">
-                            <div class="flea-item-name">${itemName} x${data.amount}${rarityBadge}</div>
-                            <div class="flea-item-seller" style="font-size: 11px; color: #777; margin-top: 2px;">Người bán: ${data.sellerName || data.sellerId.substring(0, 6)}</div>
-                            ${shortDesc ? `<div style="font-size: 10px; color: #555; margin-top: 2px; font-style: italic;">${shortDesc}</div>` : ''}
-                        </div>
-                    </div>
-                    <div class="flea-item-action">
-                        <div class="flea-item-price">${data.price} G</div>
-                        ${isMine ? 
-                            `<button class="btn flea-cancel" data-id="${docSnap.id}">Gỡ Xuống</button>` :
-                            `<button class="btn flea-buy" data-id="${docSnap.id}" data-price="${data.price}">Mua</button>`
-                        }
-                    </div>
-                </div>
-            `;
+            currentFleaItems[docSnap.id] = docSnap.data();
         });
         
-        if (html === '') html = '<div class="empty-market">Chợ hiện đang trống. Hãy đăng bán gì đó nhé!</div>';
-        listEl.innerHTML = html;
-        
-        // Gắn sự kiện
-        listEl.querySelectorAll('.flea-buy').forEach(btn => {
-            btn.addEventListener('click', (e) => buyItem(e.target.dataset.id, parseInt(e.target.dataset.price)));
-        });
-        listEl.querySelectorAll('.flea-cancel').forEach(btn => {
-            btn.addEventListener('click', (e) => cancelItem(e.target.dataset.id));
-        });
+        renderFleaItems();
         
     } catch (e) {
         listEl.innerHTML = `<div class="error">Lỗi khi tải chợ: ${e.message}</div>`;
