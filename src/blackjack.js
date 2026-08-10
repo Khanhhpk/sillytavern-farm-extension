@@ -1382,7 +1382,7 @@ function bjRenderPlayerListModal() {
     modal.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid #444;padding-bottom:10px;">
             <div style="font-weight:bold;color:#ffd94d;">DANH SÁCH NGƯỜI CHƠI</div>
-            <div class="buy plain" style="padding:2px 8px;" onclick="document.getElementById('bj-player-list-modal').remove()">Đóng</div>
+            <div class="buy plain" id="bj-player-list-close" style="padding:2px 8px;cursor:pointer;">Đóng</div>
         </div>
         <table class="bj-summary-table" style="width:100%; text-align:left;">
             <tr><th>Tên</th><th>Vai trò</th><th>Lợi nhuận</th></tr>
@@ -1399,6 +1399,7 @@ function bjRenderPlayerListModal() {
             }).join('')}
         </table>
     `;
+    All.$id('bj-player-list-close')?.addEventListener('click', () => modal.remove());
 }
 
 function bjBuildMyActions() {
