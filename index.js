@@ -49636,7 +49636,8 @@ async function bjJoinRoom() {
   if (!code) return bjUpdateStatus("Nh\u1EADp m\xE3 ph\xF2ng!", "#e05");
   bjUpdateStatus("\u0110ang k\u1EBFt n\u1ED1i...", "#ffd94d");
   const peerOpts = await buildPeerConfigAsync();
-  bjPeer = new $416260bce337df90$export$ecd1fc136c422448(void 0, peerOpts);
+  const myShortId = "bj-" + Math.random().toString(36).substr(2, 6);
+  bjPeer = new $416260bce337df90$export$ecd1fc136c422448(myShortId, peerOpts);
   bjIsHost = false;
   bjPeer.on("open", () => {
     const conn2 = bjPeer.connect(code, { reliable: true });
@@ -50166,7 +50167,7 @@ function bjRenderRoom() {
   const allPids = Object.keys(bjPlayers);
   let html = `<div class="bj-room-layout">
         <div class="bj-room-topbar">
-            <div class="bj-room-code-badge" title="Copy m\xE3 ph\xF2ng" onclick="navigator.clipboard.writeText('${bjRoomId}'); All.showToast('Copy m\xE3 ph\xF2ng!')">\u{1F0CB} ${bjRoomId}</div>
+            <div class="bj-room-code-badge" id="bj-room-code-badge" title="Copy m\xE3 ph\xF2ng">\u{1F0CB} ${bjRoomId}</div>
             <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} \u2014 ${(ctx.S.coins || 0).toLocaleString()}G${bjMyStatus === "spectator" ? " \u{1F441}" : ""}</div>
             <div class="buy plain" id="bj-out-room-ingame" style="font-size:11px;">\u2190 Tho\xE1t</div>
         </div>`;
@@ -50275,14 +50276,18 @@ function bjRenderRoom() {
     </div></div>`;
   body.innerHTML = html;
   $id("bj-out-room-ingame")?.addEventListener("click", closeBlackjack);
+  $id("bj-room-code-badge")?.addEventListener("click", () => {
+    navigator.clipboard.writeText(bjRoomId).then(() => toast("Copy m\xE3 ph\xF2ng!"));
+  });
   $id("bj-start-room-btn")?.addEventListener("click", () => {
     if (bjIsHost) bjHostStartRound();
   });
   $id("bj-cfg-apply")?.addEventListener("click", bjApplySettings);
   $id("bj-ready-btn")?.addEventListener("click", () => {
-    bjMyStatus = bjPlayers[bjMyId].status === "ready" ? "idle" : "ready";
-    bjRoomAction("READY", { ready: bjMyStatus === "ready" });
-    bjRenderRoom();
+    const isReady = bjPlayers[bjMyId].status !== "ready";
+    const msg = { type: "READY", ready: isReady };
+    bjHandleMsg(bjMyId, msg);
+    if (!bjIsHost) bjBroadcast(msg);
   });
   $id("bj-skip-btn")?.addEventListener("click", () => {
     if (bjIsHost) {
