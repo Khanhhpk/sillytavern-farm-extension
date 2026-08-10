@@ -30,7 +30,7 @@ export const TOOLS = [
 export let toolbarOpen = false;
 export function renderToolbar() {
   const tb = All.$id('toolbar');
-  if (ctx.S && ctx.S.view === 'explore') {
+  if (ctx.S && (ctx.S.view === 'explore' || ctx.S.view === 'casino')) {
     tb.style.display = 'none';
     const tip = All.$id('modetip');
     if (tip) tip.style.display = 'none';

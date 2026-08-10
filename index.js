@@ -6275,7 +6275,7 @@ function setMode(val) {
 }
 function renderToolbar() {
   const tb = $id("toolbar");
-  if (ctx.S && ctx.S.view === "explore") {
+  if (ctx.S && (ctx.S.view === "explore" || ctx.S.view === "casino")) {
     tb.style.display = "none";
     const tip2 = $id("modetip");
     if (tip2) tip2.style.display = "none";
