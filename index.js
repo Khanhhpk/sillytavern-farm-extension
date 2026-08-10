@@ -50341,6 +50341,26 @@ function bjApplySettings() {
 function bjRenderRoom() {
   const body = $id("bj-body");
   if (!body) return;
+  if (!$id("bj-game-layer")) {
+    body.innerHTML = `
+            <div id="bj-game-layer" style="width:100%; height:100%; display:flex; flex-direction:column; overflow-y:hidden; overflow-x:hidden;"></div>
+            <div class="bj-chat-wrap" id="bj-chat-wrap">
+                <div class="bj-chat-header" id="bj-chat-close">
+                    <span>\u{1F4AC} Chat</span>
+                    <span class="bj-chat-close">\u274C</span>
+                </div>
+                <div class="bj-chat-log" id="bj-chat-log"></div>
+                <div class="bj-chat-inp-row">
+                    <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin ti\u1EC1n">\u{1F4B0}</div>
+                    <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
+                    <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">G\u1EEDi</div>
+                </div>
+            </div>
+        `;
+    bjBindChatBase();
+    bjRenderChat();
+  }
+  const gameLayer = $id("bj-game-layer");
   const gs = bjGameState;
   const allPids = Object.keys(bjPlayers);
   let html = `<div class="bj-room-layout">
@@ -50447,20 +50467,15 @@ function bjRenderRoom() {
             </div>`;
     }
   }
-  html += `</div></div>
-    <div class="bj-chat-wrap" id="bj-chat-wrap">
-        <div class="bj-chat-header" id="bj-chat-close">
-            <span>\u{1F4AC} Chat</span>
-            <span class="bj-chat-close">\u274C</span>
-        </div>
-        <div class="bj-chat-log" id="bj-chat-log"></div>
-        <div class="bj-chat-inp-row">
-            <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin ti\u1EC1n">\u{1F4B0}</div>
-            <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
-            <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">G\u1EEDi</div>
-        </div>
-    </div></div>`;
-  body.innerHTML = html;
+  html += `</div></div>`;
+  gameLayer.innerHTML = html;
+  $id("bj-chat-toggle")?.addEventListener("click", () => {
+    $id("bj-chat-wrap")?.classList.add("open");
+    if (bjUnreadChat > 0) {
+      bjUnreadChat = 0;
+      bjRenderRoom();
+    }
+  });
   $id("bj-out-room-ingame")?.addEventListener("click", closeBlackjack);
   $id("bj-show-players")?.addEventListener("click", () => {
     const modalId = "bj-player-list-modal";
@@ -50507,8 +50522,6 @@ function bjRenderRoom() {
     }
   }));
   bjBindMyActions();
-  bjBindChat();
-  bjRenderChat();
 }
 function bjRenderPlayerListModal() {
   const modal = $id("bj-player-list-modal");
@@ -50658,7 +50671,7 @@ function bjRenderChat() {
     if (el) el.scrollTop = el.scrollHeight + 100;
   }, 10);
 }
-function bjBindChat() {
+function bjBindChatBase() {
   const send = () => {
     const inp2 = $id("bj-chat-inp");
     const msg = (inp2?.value || "").trim();
@@ -50678,13 +50691,6 @@ function bjBindChat() {
       const msg = { type: "CHAT_REQ", reqData: { reqId, pid: bjMyId, amount: amt, fulfilled: 0 } };
       bjHandleMsg(bjMyId, msg);
       bjBroadcast(msg);
-    }
-  });
-  $id("bj-chat-toggle")?.addEventListener("click", () => {
-    $id("bj-chat-wrap")?.classList.add("open");
-    if (bjUnreadChat > 0) {
-      bjUnreadChat = 0;
-      bjRenderRoom();
     }
   });
   $id("bj-chat-close")?.addEventListener("click", () => {
