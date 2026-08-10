@@ -9,29 +9,27 @@ export async function openFleaMarket() {
         All.toast("Tính năng Chợ Trời yêu cầu cấu hình Firebase. Vui lòng thêm config vào .env");
         return;
     }
-    checkSoldItems(); // Check if any of our items were sold
     renderFleaMarket();
 }
 
 // Kiểm tra xem có đơn hàng nào của mình đã được bán không
-async function checkSoldItems() {
+async function checkSoldItemsNotif() {
     if (!db || !ctx.S.playerId) return;
     try {
         const q = query(collection(db, "flea_market"), where("sellerId", "==", ctx.S.playerId), where("status", "==", "sold"));
         const snapshot = await getDocs(q);
-        let goldGained = 0;
         
-        snapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            goldGained += data.price;
-            deleteDoc(docSnap.ref); // Xóa khỏi DB sau khi đã nhận tiền
-        });
-
-        if (goldGained > 0) {
-            ctx.S.coins += goldGained;
-            All.save();
-            All.toast(`Bạn vừa nhận được ${goldGained} Vàng từ đồ bán trong Chợ Trời!`);
-            All.renderStatus();
+        const histBtn = All.$id('flea-history-btn');
+        if (histBtn) {
+            if (!snapshot.empty) {
+                histBtn.style.color = '#fff';
+                histBtn.style.background = '#d32f2f'; // Highlight red
+                histBtn.innerHTML = `Lịch sử (${snapshot.size})`;
+            } else {
+                histBtn.style.color = '';
+                histBtn.style.background = '';
+                histBtn.innerHTML = `Lịch sử`;
+            }
         }
     } catch (e) {
         console.error("Lỗi khi kiểm tra hàng đã bán:", e);
@@ -64,16 +62,21 @@ export async function renderFleaMarket() {
     All.$id('trade-body').innerHTML = `
         <div class="flea-header">
             <h3>Chợ Trời Khởi Nguyên</h3>
-            <button id="flea-refresh" class="btn">Làm mới</button>
-            <button id="flea-post" class="btn">Đăng Bán</button>
+            <div style="display: flex; gap: 5px;">
+                <button id="flea-history-btn" class="btn">Lịch sử</button>
+                <button id="flea-refresh" class="btn">Làm mới</button>
+                <button id="flea-post" class="btn">Đăng Bán</button>
+            </div>
         </div>
         <div id="flea-list" class="flea-list">Đang tải danh sách...</div>
     `;
     
+    All.$id('flea-history-btn').addEventListener('click', renderHistory);
     All.$id('flea-refresh').addEventListener('click', loadFleaList);
     All.$id('flea-post').addEventListener('click', renderPostItem);
     
     loadFleaList();
+    checkSoldItemsNotif();
 }
 
 async function loadFleaList() {
@@ -158,7 +161,10 @@ async function buyItem(docId, price) {
         const data = docSnap.data();
         
         // Đổi trạng thái sang sold
-        await updateDoc(docRef, { status: 'sold' });
+        await updateDoc(docRef, { 
+            status: 'sold',
+            buyerName: ctx.S.username || "Người mua ẩn danh"
+        });
         
         // Thêm vào kho
         if (data.itemType === 'bag') {
@@ -212,6 +218,116 @@ async function cancelItem(docId) {
         loadFleaList();
     } catch (e) {
         All.toast("Lỗi khi gỡ hàng: " + e.message);
+    }
+}
+
+async function renderHistory() {
+    const body = All.$id('trade-body');
+    body.innerHTML = `
+        <div class="flea-header">
+            <h3>Lịch Sử Giao Dịch</h3>
+            <button id="flea-back-hist" class="btn">Quay lại Chợ</button>
+        </div>
+        <div id="flea-hist-list" style="margin-top: 10px; max-height: 400px; overflow-y: auto;">Đang tải...</div>
+    `;
+    
+    All.$id('flea-back-hist').addEventListener('click', renderFleaMarket);
+    
+    const listEl = All.$id('flea-hist-list');
+    
+    try {
+        const q = query(collection(db, "flea_market"), where("sellerId", "==", ctx.S.playerId), where("status", "==", "sold"));
+        const snapshot = await getDocs(q);
+        
+        let html = '';
+        let totalGold = 0;
+        let soldDocs = [];
+
+        snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            soldDocs.push({ id: docSnap.id, ...data });
+            totalGold += data.price;
+            
+            const itemName = getFleaItemName(data.itemId, data.itemData);
+            let icon = getFleaItemIcon(data.itemId, data.itemData);
+            icon = icon.replace(/width="20"/g, 'width="32"').replace(/height="20"/g, 'height="32"');
+
+            html += `
+                <div class="flea-item" style="border-color: #4caf50; background: #e8f5e9;">
+                    <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
+                    <div class="flea-item-info">
+                        <div class="flea-item-name">${itemName} x${data.amount}</div>
+                        <div class="flea-item-seller" style="font-size: 11px; color: #2e7d32; margin-top: 2px;">Người mua: ${data.buyerName || "Người mua ẩn danh"}</div>
+                    </div>
+                    <div class="flea-item-action">
+                        <div class="flea-item-price" style="color: #2e7d32;">+${data.price} G</div>
+                        <button class="btn flea-claim-one" data-id="${docSnap.id}" data-price="${data.price}">Nhận</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        if (html === '') {
+            html = '<div class="empty-market">Không có giao dịch nào chưa nhận tiền.</div>';
+        } else {
+            html += `
+                <div style="margin-top: 15px; text-align: center;">
+                    <button class="buy" id="flea-claim-all" style="width: 100%; padding: 10px; font-size: 14px;">Nhận tất cả (+${totalGold} G)</button>
+                </div>
+            `;
+        }
+        
+        listEl.innerHTML = html;
+
+        listEl.querySelectorAll('.flea-claim-one').forEach(btn => {
+            btn.onclick = async (e) => {
+                const btnEl = e.target;
+                btnEl.disabled = true;
+                btnEl.innerText = 'Đang nhận...';
+                const docId = btnEl.dataset.id;
+                const price = parseInt(btnEl.dataset.price);
+                
+                try {
+                    await deleteDoc(doc(db, "flea_market", docId));
+                    ctx.S.coins += price;
+                    All.save();
+                    All.renderStatus();
+                    All.toast(`Đã nhận ${price} Vàng!`);
+                    renderHistory(); // Reload
+                } catch(err) {
+                    All.toast("Lỗi nhận tiền!");
+                    btnEl.disabled = false;
+                }
+            };
+        });
+
+        const claimAllBtn = All.$id('flea-claim-all');
+        if (claimAllBtn) {
+            claimAllBtn.onclick = async () => {
+                claimAllBtn.disabled = true;
+                claimAllBtn.innerText = 'Đang xử lý...';
+                let claimed = 0;
+                for (let d of soldDocs) {
+                    try {
+                        await deleteDoc(doc(db, "flea_market", d.id));
+                        claimed += d.price;
+                    } catch(err) {
+                        console.error("Lỗi xóa doc", err);
+                    }
+                }
+                if (claimed > 0) {
+                    ctx.S.coins += claimed;
+                    All.save();
+                    All.renderStatus();
+                    All.toast(`Đã nhận tổng cộng ${claimed} Vàng!`);
+                }
+                renderHistory();
+            };
+        }
+        
+    } catch (e) {
+        console.error("Lỗi tải lịch sử:", e);
+        listEl.innerHTML = '<div class="empty-market">Lỗi kết nối.</div>';
     }
 }
 

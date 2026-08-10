@@ -47921,25 +47921,24 @@ async function openFleaMarket() {
     toast("T\xEDnh n\u0103ng Ch\u1EE3 Tr\u1EDDi y\xEAu c\u1EA7u c\u1EA5u h\xECnh Firebase. Vui l\xF2ng th\xEAm config v\xE0o .env");
     return;
   }
-  checkSoldItems();
   renderFleaMarket();
 }
-async function checkSoldItems() {
+async function checkSoldItemsNotif() {
   if (!db || !ctx.S.playerId) return;
   try {
     const q = query(collection(db, "flea_market"), where("sellerId", "==", ctx.S.playerId), where("status", "==", "sold"));
     const snapshot = await getDocs(q);
-    let goldGained = 0;
-    snapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      goldGained += data.price;
-      deleteDoc(docSnap.ref);
-    });
-    if (goldGained > 0) {
-      ctx.S.coins += goldGained;
-      save();
-      toast(`B\u1EA1n v\u1EEBa nh\u1EADn \u0111\u01B0\u1EE3c ${goldGained} V\xE0ng t\u1EEB \u0111\u1ED3 b\xE1n trong Ch\u1EE3 Tr\u1EDDi!`);
-      renderStatus();
+    const histBtn = $id("flea-history-btn");
+    if (histBtn) {
+      if (!snapshot.empty) {
+        histBtn.style.color = "#fff";
+        histBtn.style.background = "#d32f2f";
+        histBtn.innerHTML = `L\u1ECBch s\u1EED (${snapshot.size})`;
+      } else {
+        histBtn.style.color = "";
+        histBtn.style.background = "";
+        histBtn.innerHTML = `L\u1ECBch s\u1EED`;
+      }
     }
   } catch (e2) {
     console.error("L\u1ED7i khi ki\u1EC3m tra h\xE0ng \u0111\xE3 b\xE1n:", e2);
@@ -47970,14 +47969,19 @@ async function renderFleaMarket() {
   $id("trade-body").innerHTML = `
         <div class="flea-header">
             <h3>Ch\u1EE3 Tr\u1EDDi Kh\u1EDFi Nguy\xEAn</h3>
-            <button id="flea-refresh" class="btn">L\xE0m m\u1EDBi</button>
-            <button id="flea-post" class="btn">\u0110\u0103ng B\xE1n</button>
+            <div style="display: flex; gap: 5px;">
+                <button id="flea-history-btn" class="btn">L\u1ECBch s\u1EED</button>
+                <button id="flea-refresh" class="btn">L\xE0m m\u1EDBi</button>
+                <button id="flea-post" class="btn">\u0110\u0103ng B\xE1n</button>
+            </div>
         </div>
         <div id="flea-list" class="flea-list">\u0110ang t\u1EA3i danh s\xE1ch...</div>
     `;
+  $id("flea-history-btn").addEventListener("click", renderHistory);
   $id("flea-refresh").addEventListener("click", loadFleaList);
   $id("flea-post").addEventListener("click", renderPostItem);
   loadFleaList();
+  checkSoldItemsNotif();
 }
 async function loadFleaList() {
   const listEl = $id("flea-list");
@@ -48040,7 +48044,10 @@ async function buyItem(docId, price) {
       return;
     }
     const data = docSnap.data();
-    await updateDoc(docRef, { status: "sold" });
+    await updateDoc(docRef, {
+      status: "sold",
+      buyerName: ctx.S.username || "Ng\u01B0\u1EDDi mua \u1EA9n danh"
+    });
     if (data.itemType === "bag") {
       ctx.S.bag[data.itemId] = (ctx.S.bag[data.itemId] || 0) + data.amount;
     } else if (data.itemType === "seeds") {
@@ -48086,6 +48093,102 @@ async function cancelItem(docId) {
     loadFleaList();
   } catch (e2) {
     toast("L\u1ED7i khi g\u1EE1 h\xE0ng: " + e2.message);
+  }
+}
+async function renderHistory() {
+  const body = $id("trade-body");
+  body.innerHTML = `
+        <div class="flea-header">
+            <h3>L\u1ECBch S\u1EED Giao D\u1ECBch</h3>
+            <button id="flea-back-hist" class="btn">Quay l\u1EA1i Ch\u1EE3</button>
+        </div>
+        <div id="flea-hist-list" style="margin-top: 10px; max-height: 400px; overflow-y: auto;">\u0110ang t\u1EA3i...</div>
+    `;
+  $id("flea-back-hist").addEventListener("click", renderFleaMarket);
+  const listEl = $id("flea-hist-list");
+  try {
+    const q = query(collection(db, "flea_market"), where("sellerId", "==", ctx.S.playerId), where("status", "==", "sold"));
+    const snapshot = await getDocs(q);
+    let html = "";
+    let totalGold2 = 0;
+    let soldDocs = [];
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      soldDocs.push({ id: docSnap.id, ...data });
+      totalGold2 += data.price;
+      const itemName = getFleaItemName(data.itemId, data.itemData);
+      let icon = getFleaItemIcon(data.itemId, data.itemData);
+      icon = icon.replace(/width="20"/g, 'width="32"').replace(/height="20"/g, 'height="32"');
+      html += `
+                <div class="flea-item" style="border-color: #4caf50; background: #e8f5e9;">
+                    <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
+                    <div class="flea-item-info">
+                        <div class="flea-item-name">${itemName} x${data.amount}</div>
+                        <div class="flea-item-seller" style="font-size: 11px; color: #2e7d32; margin-top: 2px;">Ng\u01B0\u1EDDi mua: ${data.buyerName || "Ng\u01B0\u1EDDi mua \u1EA9n danh"}</div>
+                    </div>
+                    <div class="flea-item-action">
+                        <div class="flea-item-price" style="color: #2e7d32;">+${data.price} G</div>
+                        <button class="btn flea-claim-one" data-id="${docSnap.id}" data-price="${data.price}">Nh\u1EADn</button>
+                    </div>
+                </div>
+            `;
+    });
+    if (html === "") {
+      html = '<div class="empty-market">Kh\xF4ng c\xF3 giao d\u1ECBch n\xE0o ch\u01B0a nh\u1EADn ti\u1EC1n.</div>';
+    } else {
+      html += `
+                <div style="margin-top: 15px; text-align: center;">
+                    <button class="buy" id="flea-claim-all" style="width: 100%; padding: 10px; font-size: 14px;">Nh\u1EADn t\u1EA5t c\u1EA3 (+${totalGold2} G)</button>
+                </div>
+            `;
+    }
+    listEl.innerHTML = html;
+    listEl.querySelectorAll(".flea-claim-one").forEach((btn) => {
+      btn.onclick = async (e2) => {
+        const btnEl = e2.target;
+        btnEl.disabled = true;
+        btnEl.innerText = "\u0110ang nh\u1EADn...";
+        const docId = btnEl.dataset.id;
+        const price = parseInt(btnEl.dataset.price);
+        try {
+          await deleteDoc(doc(db, "flea_market", docId));
+          ctx.S.coins += price;
+          save();
+          renderStatus();
+          toast(`\u0110\xE3 nh\u1EADn ${price} V\xE0ng!`);
+          renderHistory();
+        } catch (err) {
+          toast("L\u1ED7i nh\u1EADn ti\u1EC1n!");
+          btnEl.disabled = false;
+        }
+      };
+    });
+    const claimAllBtn = $id("flea-claim-all");
+    if (claimAllBtn) {
+      claimAllBtn.onclick = async () => {
+        claimAllBtn.disabled = true;
+        claimAllBtn.innerText = "\u0110ang x\u1EED l\xFD...";
+        let claimed = 0;
+        for (let d of soldDocs) {
+          try {
+            await deleteDoc(doc(db, "flea_market", d.id));
+            claimed += d.price;
+          } catch (err) {
+            console.error("L\u1ED7i x\xF3a doc", err);
+          }
+        }
+        if (claimed > 0) {
+          ctx.S.coins += claimed;
+          save();
+          renderStatus();
+          toast(`\u0110\xE3 nh\u1EADn t\u1ED5ng c\u1ED9ng ${claimed} V\xE0ng!`);
+        }
+        renderHistory();
+      };
+    }
+  } catch (e2) {
+    console.error("L\u1ED7i t\u1EA3i l\u1ECBch s\u1EED:", e2);
+    listEl.innerHTML = '<div class="empty-market">L\u1ED7i k\u1EBFt n\u1ED1i.</div>';
   }
 }
 function getFleaItemName(id, itemData = null) {
