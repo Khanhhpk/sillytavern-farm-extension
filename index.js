@@ -50620,14 +50620,14 @@ var init_blackjack = __esm({
     bjSummaryTimeLeft = 0;
     bjSummaryData = null;
     MAX_PLAYERS = 4;
-    window.bjGiveMoney = function(reqId) {
+    window["bjGiveMoney"] = function(reqId) {
       const log2 = bjChatLog.find((e2) => e2.reqData && e2.reqData.reqId === reqId);
       if (!log2) return;
       const rd = log2.reqData;
       if (rd.pid === bjMyId) return toast("B\u1EA1n kh\xF4ng th\u1EC3 t\u1EF1 cho ti\u1EC1n m\xECnh!");
       const remaining = rd.amount - rd.fulfilled;
       if (remaining <= 0) return toast("\u0110\xE3 \u0111\u1EE7 ti\u1EC1n r\u1ED3i!");
-      const amtStr = prompt(`Cho ti\u1EC1n ${log2.name} (T\u1ED1i \u0111a: ${remaining.toLocaleString()}G):`, remaining);
+      const amtStr = prompt(`Cho ti\u1EC1n ${log2.name} (T\u1ED1i \u0111a: ${remaining.toLocaleString()}G):`, String(remaining));
       const amt = parseInt(amtStr);
       if (isNaN(amt) || amt <= 0) return;
       const coins = ctx.S.coins || 0;

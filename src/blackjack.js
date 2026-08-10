@@ -1444,7 +1444,7 @@ export function openBlackjackPicker() {
     All.$id('bj-room-pick').addEventListener('click', openBlackjackRoom);
 }
 
-window.bjGiveMoney = function(reqId) {
+window['bjGiveMoney'] = function(reqId) {
     const log = bjChatLog.find(e => e.reqData && e.reqData.reqId === reqId);
     if (!log) return;
     const rd = log.reqData;
@@ -1452,7 +1452,7 @@ window.bjGiveMoney = function(reqId) {
     const remaining = rd.amount - rd.fulfilled;
     if (remaining <= 0) return toast('\u0110\u00e3 \u0111\u1ee7 ti\u1ec1n r\u1ed3i!');
     
-    const amtStr = prompt(`Cho ti\u1ec1n ${log.name} (T\u1ed1i \u0111a: ${remaining.toLocaleString()}G):`, remaining);
+    const amtStr = prompt(`Cho ti\u1ec1n ${log.name} (T\u1ed1i \u0111a: ${remaining.toLocaleString()}G):`, String(remaining));
     const amt = parseInt(amtStr);
     if (isNaN(amt) || amt <= 0) return;
     
