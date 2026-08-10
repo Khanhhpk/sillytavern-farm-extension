@@ -50333,7 +50333,7 @@ function bjApplySettings() {
   const min = parseInt($id("bj-cfg-min")?.value) || 10;
   const max = parseInt($id("bj-cfg-max")?.value) || 0;
   const decks = Math.min(8, Math.max(1, parseInt($id("bj-cfg-decks")?.value) || 6));
-  const delay = Math.min(30, Math.max(5, parseInt($id("bj-cfg-delay")?.value) || 10));
+  const delay = Math.max(5, parseInt($id("bj-cfg-delay")?.value) || 10);
   bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks, delay };
   bjBroadcast({ type: "SETTINGS_UPDATE", settings: bjSettings });
   bjToast(`\u0110\xE3 c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ch\u1EDD ${delay}s`);
@@ -50377,7 +50377,7 @@ function bjRenderRoom() {
                         <label style="font-size:11px;color:#ddd;">Min <input class="inp" id="bj-cfg-min" type="number" value="${bjSettings.minBet}" min="1" style="width:50px;padding:4px;font-size:11px"></label>
                         <label style="font-size:11px;color:#ddd;">Max <input class="inp" id="bj-cfg-max" type="number" value="${bjSettings.maxBet}" min="0" style="width:50px;padding:4px;font-size:11px"></label>
                         <label style="font-size:11px;color:#ddd;">B\u1ED9 <input class="inp" id="bj-cfg-decks" type="number" value="${bjSettings.numDecks}" min="1" max="8" style="width:40px;padding:4px;font-size:11px"></label>
-                        <label style="font-size:11px;color:#ddd;">Ch\u1EDD(s) <input class="inp" id="bj-cfg-delay" type="number" value="${bjSettings.delay}" min="5" max="30" style="width:40px;padding:4px;font-size:11px"></label>
+                        <label style="font-size:11px;color:#ddd;">Ch\u1EDD(s) <input class="inp" id="bj-cfg-delay" type="number" value="${bjSettings.delay}" min="5" style="width:40px;padding:4px;font-size:11px"></label>
                         <div class="buy plain" id="bj-cfg-apply" style="font-size:11px;padding:4px 8px">L\u01B0u</div>
                     </div>
                 </div>
