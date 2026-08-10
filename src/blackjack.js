@@ -8,6 +8,29 @@ import { Peer } from 'peerjs';
 import * as All from './all.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
+export function bjToast(msg) {
+    let t = All.$id('bj-toast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'bj-toast';
+        t.style.cssText = 'position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;pointer-events:none;opacity:0;transition:opacity 0.3s;z-index:100000;box-shadow:0 4px 12px rgba(0,0,0,0.5);text-align:center;font-weight:bold;min-width:200px;';
+        const win = All.$id('bj-win');
+        if (win) win.appendChild(t);
+        else document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    if (t._timer) clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+function bjSystemChat(msg) {
+    bjChatLog.push({ name: 'Hệ thống', msg, ts: Date.now(), isSystem: true });
+    if (bjChatLog.length > 50) bjChatLog.shift();
+    const wrap = All.$id('bj-chat-wrap');
+    if (!wrap || !wrap.classList.contains('open')) { bjUnreadChat++; bjRenderRoom(); }
+    bjRenderChat();
+}
 //  CARD ENGINE
 // ─────────────────────────────────────────────────────────────────────────────
 const SUITS = ['\u2660', '\u2665', '\u2666', '\u2663'];
@@ -275,9 +298,9 @@ function soloStartRound() {
     const coins = ctx.S.coins || 0;
     const inp = All.$id('bj-bet-inp');
     const want = Math.max(0, parseInt(inp ? inp.value : '0') || 0);
-    if (want < s.settings.minBet) return toast(`C\u01b0\u1ee3c t\u1ed1i thi\u1ec3u ${s.settings.minBet}G`);
-    if (s.settings.maxBet > 0 && want > s.settings.maxBet) return toast(`C\u01b0\u1ee3c t\u1ed1i \u0111a ${s.settings.maxBet}G`);
-    if (want > coins) return toast(`Kh\u00f4ng \u0111\u1ee7 v\u00e0ng (${coins.toLocaleString()}G)`);
+    if (want < s.settings.minBet) return bjToast(`C\u01b0\u1ee3c t\u1ed1i thi\u1ec3u ${s.settings.minBet}G`);
+    if (s.settings.maxBet > 0 && want > s.settings.maxBet) return bjToast(`C\u01b0\u1ee3c t\u1ed1i \u0111a ${s.settings.maxBet}G`);
+    if (want > coins) return bjToast(`Kh\u00f4ng \u0111\u1ee7 v\u00e0ng (${coins.toLocaleString()}G)`);
 
     ctx.S.coins = (ctx.S.coins || 0) - want;
     save();
@@ -324,7 +347,7 @@ function soloEvenMoney() {
 
 function soloBuyInsurance(amount) {
     const s = soloState;
-    if ((ctx.S.coins || 0) < amount) return toast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng mua b\u1ea3o hi\u1ec3m');
+    if ((ctx.S.coins || 0) < amount) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng mua b\u1ea3o hi\u1ec3m');
     ctx.S.coins = (ctx.S.coins || 0) - amount;
     s.insuranceBet = amount;
     save();
@@ -366,7 +389,7 @@ function soloDouble() {
     const s = soloState;
     const idx = s.activeHandIdx;
     const bet = s.bets[idx];
-    if ((ctx.S.coins || 0) < bet) return toast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng Double');
+    if ((ctx.S.coins || 0) < bet) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng Double');
     ctx.S.coins = (ctx.S.coins || 0) - bet;
     s.bets[idx] *= 2;
     save();
@@ -379,7 +402,7 @@ function soloSplit() {
     const s = soloState;
     const idx = s.activeHandIdx;
     const bet = s.bets[idx];
-    if ((ctx.S.coins || 0) < bet) return toast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng Split');
+    if ((ctx.S.coins || 0) < bet) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng Split');
     ctx.S.coins = (ctx.S.coins || 0) - bet;
     save();
     const hand = s.playerHands[idx];
@@ -544,7 +567,7 @@ function bjRenderMenu() {
         </div>`;
         All.$id('bj-save-name').onclick = () => {
             const v = (All.$id('bj-inp-name').value || '').trim();
-            if (!v) return toast('T\u00ean kh\u00f4ng \u0111\u01b0\u1ee3c tr\u1ed1ng!');
+            if (!v) return bjToast('T\u00ean kh\u00f4ng \u0111\u01b0\u1ee3c tr\u1ed1ng!');
             ctx.S.username = v;
             import('./state.js').then(m => m.save());
             bjRenderMenu();
@@ -665,10 +688,10 @@ function bjHandleMsg(fromPid, data) {
             bjRenderRoom(); break;
         case 'SETTINGS_UPDATE':
             bjSettings = data.settings;
-            toast(`Host c\u1eadp nh\u1eadt: min ${bjSettings.minBet}G, ch\u1edd ${bjSettings.delay}s`);
+            bjSystemChat(`Host c\u1eadp nh\u1eadt: min ${bjSettings.minBet}G, ch\u1edd ${bjSettings.delay}s`);
             bjRenderRoom(); break;
         case 'KICKED':
-            toast('B\u1ea1n \u0111\u00e3 b\u1ecb \u0111u\u1ed5i kh\u1ecfi ph\u00f2ng.');
+            bjToast('B\u1ea1n \u0111\u00e3 b\u1ecb \u0111u\u1ed5i kh\u1ecfi ph\u00f2ng.');
             closeBlackjack(); break;
         case 'ROUND_START':
             bjGameState = {
@@ -717,7 +740,7 @@ function bjHandleMsg(fromPid, data) {
                 if (payout > 0) {
                     ctx.S.coins = (ctx.S.coins || 0) + payout;
                     save(); renderStatus();
-                    toast(`Nh\u1eadn ${payout.toLocaleString()}G t\u1eeb b\u00e0n!`);
+                    bjToast(`Nh\u1eadn ${payout.toLocaleString()}G t\u1eeb b\u00e0n!`);
                 }
             }
             for (const p of Object.keys(bjPlayers)) {
@@ -758,7 +781,7 @@ function bjHandleMsg(fromPid, data) {
                 if (log.reqData.pid === bjMyId) {
                     ctx.S.coins = (ctx.S.coins || 0) + data.amount;
                     save(); renderStatus();
-                    toast(`${data.from} \u0111\u00e3 cho b\u1ea1n ${data.amount.toLocaleString()}G!`);
+                    bjSystemChat(`${data.from} \u0111\u00e3 cho b\u1ea1n ${data.amount.toLocaleString()}G!`);
                 }
                 bjRenderChat();
             }
@@ -768,11 +791,11 @@ function bjHandleMsg(fromPid, data) {
             if (data.targetPid === bjMyId) {
                 ctx.S.coins = (ctx.S.coins || 0) + data.amount;
                 save(); renderStatus();
-                toast(`${bjPlayers[fromPid]?.name || '?'} g\u1eedi b\u1ea1n ${data.amount.toLocaleString()}G!`);
+                bjSystemChat(`${bjPlayers[fromPid]?.name || '?'} g\u1eedi b\u1ea1n ${data.amount.toLocaleString()}G!`);
             }
             break;
         case 'ROOM_FULL':
-            toast('Ph\u00f2ng \u0111\u00e3 \u0111\u1ea7y!'); closeBlackjack(); break;
+            bjToast('Ph\u00f2ng \u0111\u00e3 \u0111\u1ea7y!'); closeBlackjack(); break;
     }
 }
 
@@ -783,7 +806,7 @@ function bjHandleDisconnect(pid) {
     if (bjPlayers[pid]) {
         const name = bjPlayers[pid].name;
         delete bjPlayers[pid];
-        toast(`${name} \u0111\u00e3 r\u1eddi ph\u00f2ng`);
+        bjSystemChat(`${name} \u0111\u00e3 r\u1eddi ph\u00f2ng`);
         if (bjIsHost) {
             if (bjGameState) {
                 bjGameState.turnOrder = bjGameState.turnOrder.filter(p => p !== pid);
@@ -804,7 +827,7 @@ function bjHandleDisconnect(pid) {
                 if (newHostId === bjMyId) {
                     bjIsHost = true;
                     bjRoomId = bjMyId;
-                    toast(`Host c\u0169 tho\u00e1t. B\u1ea1n \u0111\u00e3 tr\u1edf th\u00e0nh Host m\u1edbi!`);
+                    bjSystemChat(`Host c\u0169 tho\u00e1t. B\u1ea1n \u0111\u00e3 tr\u1edf th\u00e0nh Host m\u1edbi!`);
                     if (bjGameState) {
                         bjGameState.turnOrder = bjGameState.turnOrder.filter(p => p !== pid);
                         if (bjGameState.currentTurn === pid) bjAdvanceTurn();
@@ -824,17 +847,17 @@ function bjHandleDisconnect(pid) {
                     bjRenderRoom();
                 } else {
                     bjRoomId = newHostId;
-                    toast(`Host c\u0169 tho\u00e1t. \u0110ang \u0111\u1ed5i Host t\u1edbi ${bjPlayers[newHostId]?.name || 'ng\u01b0\u1eddi ch\u01a1i kh\u00e1c'}...`);
+                    bjSystemChat(`Host c\u0169 tho\u00e1t. \u0110ang \u0111\u1ed5i Host t\u1edbi ${bjPlayers[newHostId]?.name || 'ng\u01b0\u1eddi ch\u01a1i kh\u00e1c'}...`);
                     const conn = bjPeer.connect(newHostId, { reliable: true });
                     bjConns[newHostId] = conn;
                     conn.on('open', () => {
                         bjSetupConn(conn);
                         conn.send({ type: 'HELLO', name: bjMyName(), id: bjMyId });
                     });
-                    conn.on('error', () => { toast('Kh\u00f4ng th\u1ec3 k\u1ebft n\u1ed1i \u0111\u1ebfn Host m\u1edbi!'); closeBlackjack(); });
+                    conn.on('error', () => { bjToast('Kh\u00f4ng th\u1ec3 k\u1ebft n\u1ed1i \u0111\u1ebfn Host m\u1edbi!'); closeBlackjack(); });
                 }
             } else {
-                closeBlackjack(); toast('Ph\u00f2ng \u0111\u00e3 \u0111\u00f3ng.');
+                closeBlackjack(); bjToast('Ph\u00f2ng \u0111\u00e3 \u0111\u00f3ng.');
             }
         } else {
             bjRenderRoom();
@@ -846,7 +869,7 @@ function bjHostStartRound() {
     const connPids = Object.keys(bjConns).filter(p => bjConns[p] && bjConns[p].open);
     const pids = [bjMyId, ...connPids];
     const active = pids.filter(p => bjPlayers[p] && bjPlayers[p].status !== 'spectator');
-    if (active.length === 0) return toast('C\u1ea7n \u00edt nh\u1ea5t 1 ng\u01b0\u1eddi ch\u01a1i');
+    if (active.length === 0) return bjToast('C\u1ea7n \u00edt nh\u1ea5t 1 ng\u01b0\u1eddi ch\u01a1i');
     const seed = (Date.now() ^ Math.floor(Math.random() * 0xffffffff)) & 0xffffffff;
     const msg = { type: 'ROUND_START', seed, turnOrder: active, betDeadline: Date.now() + 30000 };
     bjBroadcast(msg); bjHandleMsg(bjMyId, msg);
@@ -1079,9 +1102,9 @@ function bjHostEndSummary() {
 
 function bjRoomPlaceBet(amount) {
     const coins = ctx.S.coins || 0;
-    if (coins < amount) return toast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng!');
-    if (amount < bjSettings.minBet) return toast(`C\u01b0\u1ee3c t\u1ed1i thi\u1ec3u ${bjSettings.minBet}G`);
-    if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return toast(`C\u01b0\u1ee3c t\u1ed1i \u0111a ${bjSettings.maxBet}G`);
+    if (coins < amount) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng!');
+    if (amount < bjSettings.minBet) return bjToast(`C\u01b0\u1ee3c t\u1ed1i thi\u1ec3u ${bjSettings.minBet}G`);
+    if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return bjToast(`C\u01b0\u1ee3c t\u1ed1i \u0111a ${bjSettings.maxBet}G`);
     ctx.S.coins = coins - amount; save(); renderStatus();
     const msg = { type: 'BET_PLACED', pid: bjMyId, bet: amount };
     bjBroadcast(msg); bjHandleMsg(bjMyId, msg);
@@ -1100,7 +1123,7 @@ function bjApplySettings() {
     const delay = Math.min(30, Math.max(5, parseInt(All.$id('bj-cfg-delay')?.value) || 10));
     bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks, delay };
     bjBroadcast({ type: 'SETTINGS_UPDATE', settings: bjSettings });
-    toast(`\u0110\u00e3 c\u1eadp nh\u1eadt: min ${bjSettings.minBet}G, ch\u1edd ${delay}s`);
+    bjToast(`\u0110\u00e3 c\u1eadp nh\u1eadt: min ${bjSettings.minBet}G, ch\u1edd ${delay}s`);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1238,7 +1261,7 @@ function bjRenderRoom() {
     body.innerHTML = html;
     All.$id('bj-out-room-ingame')?.addEventListener('click', closeBlackjack);
     All.$id('bj-room-code-badge')?.addEventListener('click', () => {
-        navigator.clipboard.writeText(bjRoomId).then(() => toast('Copy m\u00e3 ph\u00f2ng!'));
+        navigator.clipboard.writeText(bjRoomId).then(() => bjToast('Copy m\u00e3 ph\u00f2ng!'));
     });
     All.$id('bj-start-room-btn')?.addEventListener('click', () => { if (bjIsHost) bjHostStartRound(); });
     All.$id('bj-cfg-apply')?.addEventListener('click', bjApplySettings);
@@ -1353,7 +1376,7 @@ function bjBindMyActions() {
     All.$id('bj-rm-buy-ins')?.addEventListener('click', () => {
         const h = gs?.hands?.[bjMyId];
         const ins = Math.floor((h?.bet[0]||0)/2);
-        if ((ctx.S.coins||0)<ins) return toast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng');
+        if ((ctx.S.coins||0)<ins) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng');
         ctx.S.coins=(ctx.S.coins||0)-ins; save();
         bjRoomAction('INSURANCE_ANSWER',{answer:'ins'});
     });
@@ -1362,12 +1385,12 @@ function bjBindMyActions() {
     All.$id('bj-rm-stand')?.addEventListener('click',()=>bjRoomAction('STAND'));
     All.$id('bj-rm-double')?.addEventListener('click',()=>{
         const h=gs?.hands?.[bjMyId]; const idx=h?.activeHandIdx||0; const bet=h?.bet[idx]||0;
-        if((ctx.S.coins||0)<bet) return toast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng Double');
+        if((ctx.S.coins||0)<bet) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng Double');
         ctx.S.coins=(ctx.S.coins||0)-bet; save(); bjRoomAction('DOUBLE');
     });
     All.$id('bj-rm-split')?.addEventListener('click',()=>{
         const h=gs?.hands?.[bjMyId]; const idx=h?.activeHandIdx||0; const bet=h?.bet[idx]||0;
-        if((ctx.S.coins||0)<bet) return toast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng Split');
+        if((ctx.S.coins||0)<bet) return bjToast('Kh\u00f4ng \u0111\u1ee7 v\u00e0ng Split');
         ctx.S.coins=(ctx.S.coins||0)-bet; save(); bjRoomAction('SPLIT');
     });
     All.$id('bj-rm-surrender')?.addEventListener('click',()=>bjRoomAction('SURRENDER'));
@@ -1377,6 +1400,7 @@ function bjRenderChat() {
     const el = All.$id('bj-chat-log');
     if (!el) return;
     el.innerHTML = bjChatLog.slice(-50).map(e => {
+        if (e.isSystem) return `<div class="bj-chat-line" style="color:#ffd94d; font-style:italic"><b>Hệ thống:</b> ${e.msg.replace(/</g,'&lt;')}</div>`;
         if (e.isReq) {
             const rd = e.reqData;
             const isDone = rd.fulfilled >= rd.amount;
@@ -1464,16 +1488,16 @@ window['bjGiveMoney'] = function(reqId) {
     const log = bjChatLog.find(e => e.reqData && e.reqData.reqId === reqId);
     if (!log) return;
     const rd = log.reqData;
-    if (rd.pid === bjMyId) return toast('B\u1ea1n kh\u00f4ng th\u1ec3 t\u1ef1 cho ti\u1ec1n m\u00ecnh!');
+    if (rd.pid === bjMyId) return bjToast('B\u1ea1n kh\u00f4ng th\u1ec3 t\u1ef1 cho ti\u1ec1n m\u00ecnh!');
     const remaining = rd.amount - rd.fulfilled;
-    if (remaining <= 0) return toast('\u0110\u00e3 \u0111\u1ee7 ti\u1ec1n r\u1ed3i!');
+    if (remaining <= 0) return bjToast('\u0110\u00e3 \u0111\u1ee7 ti\u1ec1n r\u1ed3i!');
     
     const amtStr = prompt(`Cho ti\u1ec1n ${log.name} (T\u1ed1i \u0111a: ${remaining.toLocaleString()}G):`, String(remaining));
     const amt = parseInt(amtStr);
     if (isNaN(amt) || amt <= 0) return;
     
     const coins = ctx.S.coins || 0;
-    if (coins < amt) return toast('B\u1ea1n kh\u00f4ng \u0111\u1ee7 ti\u1ec1n!');
+    if (coins < amt) return bjToast('B\u1ea1n kh\u00f4ng \u0111\u1ee7 ti\u1ec1n!');
     
     const give = Math.min(amt, remaining);
     ctx.S.coins = coins - give;

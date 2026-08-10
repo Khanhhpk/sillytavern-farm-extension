@@ -49049,6 +49049,33 @@ var init_flea = __esm({
 });
 
 // src/blackjack.js
+function bjToast(msg) {
+  let t2 = $id("bj-toast");
+  if (!t2) {
+    t2 = document.createElement("div");
+    t2.id = "bj-toast";
+    t2.style.cssText = "position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;pointer-events:none;opacity:0;transition:opacity 0.3s;z-index:100000;box-shadow:0 4px 12px rgba(0,0,0,0.5);text-align:center;font-weight:bold;min-width:200px;";
+    const win = $id("bj-win");
+    if (win) win.appendChild(t2);
+    else document.body.appendChild(t2);
+  }
+  t2.textContent = msg;
+  t2.style.opacity = "1";
+  if (t2._timer) clearTimeout(t2._timer);
+  t2._timer = setTimeout(() => {
+    t2.style.opacity = "0";
+  }, 2500);
+}
+function bjSystemChat(msg) {
+  bjChatLog.push({ name: "H\u1EC7 th\u1ED1ng", msg, ts: Date.now(), isSystem: true });
+  if (bjChatLog.length > 50) bjChatLog.shift();
+  const wrap2 = $id("bj-chat-wrap");
+  if (!wrap2 || !wrap2.classList.contains("open")) {
+    bjUnreadChat++;
+    bjRenderRoom();
+  }
+  bjRenderChat();
+}
 function cardValue(rank) {
   if (rank === "A") return 11;
   if (["J", "Q", "K"].includes(rank)) return 10;
@@ -49299,9 +49326,9 @@ function soloStartRound() {
   const coins = ctx.S.coins || 0;
   const inp = $id("bj-bet-inp");
   const want = Math.max(0, parseInt(inp ? inp.value : "0") || 0);
-  if (want < s2.settings.minBet) return toast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${s2.settings.minBet}G`);
-  if (s2.settings.maxBet > 0 && want > s2.settings.maxBet) return toast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${s2.settings.maxBet}G`);
-  if (want > coins) return toast(`Kh\xF4ng \u0111\u1EE7 v\xE0ng (${coins.toLocaleString()}G)`);
+  if (want < s2.settings.minBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${s2.settings.minBet}G`);
+  if (s2.settings.maxBet > 0 && want > s2.settings.maxBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${s2.settings.maxBet}G`);
+  if (want > coins) return bjToast(`Kh\xF4ng \u0111\u1EE7 v\xE0ng (${coins.toLocaleString()}G)`);
   ctx.S.coins = (ctx.S.coins || 0) - want;
   save();
   s2.bets = [want];
@@ -49359,7 +49386,7 @@ function soloEvenMoney() {
 }
 function soloBuyInsurance(amount) {
   const s2 = soloState;
-  if ((ctx.S.coins || 0) < amount) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng mua b\u1EA3o hi\u1EC3m");
+  if ((ctx.S.coins || 0) < amount) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng mua b\u1EA3o hi\u1EC3m");
   ctx.S.coins = (ctx.S.coins || 0) - amount;
   s2.insuranceBet = amount;
   save();
@@ -49405,7 +49432,7 @@ function soloDouble() {
   const s2 = soloState;
   const idx = s2.activeHandIdx;
   const bet = s2.bets[idx];
-  if ((ctx.S.coins || 0) < bet) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Double");
+  if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Double");
   ctx.S.coins = (ctx.S.coins || 0) - bet;
   s2.bets[idx] *= 2;
   save();
@@ -49417,7 +49444,7 @@ function soloSplit() {
   const s2 = soloState;
   const idx = s2.activeHandIdx;
   const bet = s2.bets[idx];
-  if ((ctx.S.coins || 0) < bet) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Split");
+  if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Split");
   ctx.S.coins = (ctx.S.coins || 0) - bet;
   save();
   const hand = s2.playerHands[idx];
@@ -49607,7 +49634,7 @@ function bjRenderMenu() {
         </div>`;
     $id("bj-save-name").onclick = () => {
       const v2 = ($id("bj-inp-name").value || "").trim();
-      if (!v2) return toast("T\xEAn kh\xF4ng \u0111\u01B0\u1EE3c tr\u1ED1ng!");
+      if (!v2) return bjToast("T\xEAn kh\xF4ng \u0111\u01B0\u1EE3c tr\u1ED1ng!");
       ctx.S.username = v2;
       Promise.resolve().then(() => (init_state(), state_exports)).then((m2) => m2.save());
       bjRenderMenu();
@@ -49739,11 +49766,11 @@ function bjHandleMsg(fromPid, data) {
       break;
     case "SETTINGS_UPDATE":
       bjSettings = data.settings;
-      toast(`Host c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ch\u1EDD ${bjSettings.delay}s`);
+      bjSystemChat(`Host c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ch\u1EDD ${bjSettings.delay}s`);
       bjRenderRoom();
       break;
     case "KICKED":
-      toast("B\u1EA1n \u0111\xE3 b\u1ECB \u0111u\u1ED5i kh\u1ECFi ph\xF2ng.");
+      bjToast("B\u1EA1n \u0111\xE3 b\u1ECB \u0111u\u1ED5i kh\u1ECFi ph\xF2ng.");
       closeBlackjack();
       break;
     case "ROUND_START":
@@ -49813,7 +49840,7 @@ function bjHandleMsg(fromPid, data) {
           ctx.S.coins = (ctx.S.coins || 0) + payout;
           save();
           renderStatus();
-          toast(`Nh\u1EADn ${payout.toLocaleString()}G t\u1EEB b\xE0n!`);
+          bjToast(`Nh\u1EADn ${payout.toLocaleString()}G t\u1EEB b\xE0n!`);
         }
       }
       for (const p2 of Object.keys(bjPlayers)) {
@@ -49866,7 +49893,7 @@ function bjHandleMsg(fromPid, data) {
           ctx.S.coins = (ctx.S.coins || 0) + data.amount;
           save();
           renderStatus();
-          toast(`${data.from} \u0111\xE3 cho b\u1EA1n ${data.amount.toLocaleString()}G!`);
+          bjSystemChat(`${data.from} \u0111\xE3 cho b\u1EA1n ${data.amount.toLocaleString()}G!`);
         }
         bjRenderChat();
       }
@@ -49877,11 +49904,11 @@ function bjHandleMsg(fromPid, data) {
         ctx.S.coins = (ctx.S.coins || 0) + data.amount;
         save();
         renderStatus();
-        toast(`${bjPlayers[fromPid]?.name || "?"} g\u1EEDi b\u1EA1n ${data.amount.toLocaleString()}G!`);
+        bjSystemChat(`${bjPlayers[fromPid]?.name || "?"} g\u1EEDi b\u1EA1n ${data.amount.toLocaleString()}G!`);
       }
       break;
     case "ROOM_FULL":
-      toast("Ph\xF2ng \u0111\xE3 \u0111\u1EA7y!");
+      bjToast("Ph\xF2ng \u0111\xE3 \u0111\u1EA7y!");
       closeBlackjack();
       break;
   }
@@ -49892,7 +49919,7 @@ function bjHandleDisconnect(pid) {
   if (bjPlayers[pid]) {
     const name3 = bjPlayers[pid].name;
     delete bjPlayers[pid];
-    toast(`${name3} \u0111\xE3 r\u1EDDi ph\xF2ng`);
+    bjSystemChat(`${name3} \u0111\xE3 r\u1EDDi ph\xF2ng`);
     if (bjIsHost) {
       if (bjGameState) {
         bjGameState.turnOrder = bjGameState.turnOrder.filter((p2) => p2 !== pid);
@@ -49911,7 +49938,7 @@ function bjHandleDisconnect(pid) {
         if (newHostId === bjMyId) {
           bjIsHost = true;
           bjRoomId = bjMyId;
-          toast(`Host c\u0169 tho\xE1t. B\u1EA1n \u0111\xE3 tr\u1EDF th\xE0nh Host m\u1EDBi!`);
+          bjSystemChat(`Host c\u0169 tho\xE1t. B\u1EA1n \u0111\xE3 tr\u1EDF th\xE0nh Host m\u1EDBi!`);
           if (bjGameState) {
             bjGameState.turnOrder = bjGameState.turnOrder.filter((p2) => p2 !== pid);
             if (bjGameState.currentTurn === pid) bjAdvanceTurn();
@@ -49931,7 +49958,7 @@ function bjHandleDisconnect(pid) {
           bjRenderRoom();
         } else {
           bjRoomId = newHostId;
-          toast(`Host c\u0169 tho\xE1t. \u0110ang \u0111\u1ED5i Host t\u1EDBi ${bjPlayers[newHostId]?.name || "ng\u01B0\u1EDDi ch\u01A1i kh\xE1c"}...`);
+          bjSystemChat(`Host c\u0169 tho\xE1t. \u0110ang \u0111\u1ED5i Host t\u1EDBi ${bjPlayers[newHostId]?.name || "ng\u01B0\u1EDDi ch\u01A1i kh\xE1c"}...`);
           const conn2 = bjPeer.connect(newHostId, { reliable: true });
           bjConns[newHostId] = conn2;
           conn2.on("open", () => {
@@ -49939,13 +49966,13 @@ function bjHandleDisconnect(pid) {
             conn2.send({ type: "HELLO", name: bjMyName(), id: bjMyId });
           });
           conn2.on("error", () => {
-            toast("Kh\xF4ng th\u1EC3 k\u1EBFt n\u1ED1i \u0111\u1EBFn Host m\u1EDBi!");
+            bjToast("Kh\xF4ng th\u1EC3 k\u1EBFt n\u1ED1i \u0111\u1EBFn Host m\u1EDBi!");
             closeBlackjack();
           });
         }
       } else {
         closeBlackjack();
-        toast("Ph\xF2ng \u0111\xE3 \u0111\xF3ng.");
+        bjToast("Ph\xF2ng \u0111\xE3 \u0111\xF3ng.");
       }
     } else {
       bjRenderRoom();
@@ -49956,7 +49983,7 @@ function bjHostStartRound() {
   const connPids = Object.keys(bjConns).filter((p2) => bjConns[p2] && bjConns[p2].open);
   const pids = [bjMyId, ...connPids];
   const active = pids.filter((p2) => bjPlayers[p2] && bjPlayers[p2].status !== "spectator");
-  if (active.length === 0) return toast("C\u1EA7n \xEDt nh\u1EA5t 1 ng\u01B0\u1EDDi ch\u01A1i");
+  if (active.length === 0) return bjToast("C\u1EA7n \xEDt nh\u1EA5t 1 ng\u01B0\u1EDDi ch\u01A1i");
   const seed = (Date.now() ^ Math.floor(Math.random() * 4294967295)) & 4294967295;
   const msg = { type: "ROUND_START", seed, turnOrder: active, betDeadline: Date.now() + 3e4 };
   bjBroadcast(msg);
@@ -50224,9 +50251,9 @@ function bjHostEndSummary() {
 }
 function bjRoomPlaceBet(amount) {
   const coins = ctx.S.coins || 0;
-  if (coins < amount) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng!");
-  if (amount < bjSettings.minBet) return toast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${bjSettings.minBet}G`);
-  if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return toast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${bjSettings.maxBet}G`);
+  if (coins < amount) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng!");
+  if (amount < bjSettings.minBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${bjSettings.minBet}G`);
+  if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${bjSettings.maxBet}G`);
   ctx.S.coins = coins - amount;
   save();
   renderStatus();
@@ -50246,7 +50273,7 @@ function bjApplySettings() {
   const delay = Math.min(30, Math.max(5, parseInt($id("bj-cfg-delay")?.value) || 10));
   bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks, delay };
   bjBroadcast({ type: "SETTINGS_UPDATE", settings: bjSettings });
-  toast(`\u0110\xE3 c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ch\u1EDD ${delay}s`);
+  bjToast(`\u0110\xE3 c\u1EADp nh\u1EADt: min ${bjSettings.minBet}G, ch\u1EDD ${delay}s`);
 }
 function bjRenderRoom() {
   const body = $id("bj-body");
@@ -50374,7 +50401,7 @@ function bjRenderRoom() {
   body.innerHTML = html;
   $id("bj-out-room-ingame")?.addEventListener("click", closeBlackjack);
   $id("bj-room-code-badge")?.addEventListener("click", () => {
-    navigator.clipboard.writeText(bjRoomId).then(() => toast("Copy m\xE3 ph\xF2ng!"));
+    navigator.clipboard.writeText(bjRoomId).then(() => bjToast("Copy m\xE3 ph\xF2ng!"));
   });
   $id("bj-start-room-btn")?.addEventListener("click", () => {
     if (bjIsHost) bjHostStartRound();
@@ -50492,7 +50519,7 @@ function bjBindMyActions() {
   $id("bj-rm-buy-ins")?.addEventListener("click", () => {
     const h = gs?.hands?.[bjMyId];
     const ins = Math.floor((h?.bet[0] || 0) / 2);
-    if ((ctx.S.coins || 0) < ins) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng");
+    if ((ctx.S.coins || 0) < ins) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng");
     ctx.S.coins = (ctx.S.coins || 0) - ins;
     save();
     bjRoomAction("INSURANCE_ANSWER", { answer: "ins" });
@@ -50504,7 +50531,7 @@ function bjBindMyActions() {
     const h = gs?.hands?.[bjMyId];
     const idx = h?.activeHandIdx || 0;
     const bet = h?.bet[idx] || 0;
-    if ((ctx.S.coins || 0) < bet) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Double");
+    if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Double");
     ctx.S.coins = (ctx.S.coins || 0) - bet;
     save();
     bjRoomAction("DOUBLE");
@@ -50513,7 +50540,7 @@ function bjBindMyActions() {
     const h = gs?.hands?.[bjMyId];
     const idx = h?.activeHandIdx || 0;
     const bet = h?.bet[idx] || 0;
-    if ((ctx.S.coins || 0) < bet) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Split");
+    if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Split");
     ctx.S.coins = (ctx.S.coins || 0) - bet;
     save();
     bjRoomAction("SPLIT");
@@ -50524,6 +50551,7 @@ function bjRenderChat() {
   const el = $id("bj-chat-log");
   if (!el) return;
   el.innerHTML = bjChatLog.slice(-50).map((e2) => {
+    if (e2.isSystem) return `<div class="bj-chat-line" style="color:#ffd94d; font-style:italic"><b>H\u1EC7 th\u1ED1ng:</b> ${e2.msg.replace(/</g, "&lt;")}</div>`;
     if (e2.isReq) {
       const rd = e2.reqData;
       const isDone = rd.fulfilled >= rd.amount;
@@ -50640,14 +50668,14 @@ var init_blackjack = __esm({
       const log2 = bjChatLog.find((e2) => e2.reqData && e2.reqData.reqId === reqId);
       if (!log2) return;
       const rd = log2.reqData;
-      if (rd.pid === bjMyId) return toast("B\u1EA1n kh\xF4ng th\u1EC3 t\u1EF1 cho ti\u1EC1n m\xECnh!");
+      if (rd.pid === bjMyId) return bjToast("B\u1EA1n kh\xF4ng th\u1EC3 t\u1EF1 cho ti\u1EC1n m\xECnh!");
       const remaining = rd.amount - rd.fulfilled;
-      if (remaining <= 0) return toast("\u0110\xE3 \u0111\u1EE7 ti\u1EC1n r\u1ED3i!");
+      if (remaining <= 0) return bjToast("\u0110\xE3 \u0111\u1EE7 ti\u1EC1n r\u1ED3i!");
       const amtStr = prompt(`Cho ti\u1EC1n ${log2.name} (T\u1ED1i \u0111a: ${remaining.toLocaleString()}G):`, String(remaining));
       const amt = parseInt(amtStr);
       if (isNaN(amt) || amt <= 0) return;
       const coins = ctx.S.coins || 0;
-      if (coins < amt) return toast("B\u1EA1n kh\xF4ng \u0111\u1EE7 ti\u1EC1n!");
+      if (coins < amt) return bjToast("B\u1EA1n kh\xF4ng \u0111\u1EE7 ti\u1EC1n!");
       const give = Math.min(amt, remaining);
       ctx.S.coins = coins - give;
       save();
@@ -50700,6 +50728,7 @@ __export(all_exports, {
   bagSel: () => bagSel,
   bagSellMode: () => bagSellMode,
   bagTab: () => bagTab,
+  bjToast: () => bjToast,
   blockPrice: () => blockPrice,
   buildEventPrompt: () => buildEventPrompt,
   buildTicket: () => buildTicket,
