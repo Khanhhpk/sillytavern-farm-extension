@@ -47982,15 +47982,14 @@ async function renderFleaMarket() {
     $id("trade-body").innerHTML = `
             <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
                 <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">T\u1EA1o T\xEAn Ng\u01B0\u1EDDi Ch\u01A1i</div>
-                <div style="font-size: 12px; color: #555;">Vui l\xF2ng nh\u1EADp t\xEAn \u0111\u1EC3 hi\u1EC3n th\u1ECB khi giao d\u1ECBch tr\xEAn Ch\u1EE3 Tr\u1EDDi. (T\u1ED1i \u0111a 16 k\xFD t\u1EF1)</div>
-                <input type="text" id="inp-flea-username" class="inp" placeholder="Nh\u1EADp t\xEAn c\u1EE7a b\u1EA1n..." maxlength="16">
+                <div style="font-size: 12px; color: #555;">Vui l\xF2ng nh\u1EADp t\xEAn \u0111\u1EC3 hi\u1EC3n th\u1ECB khi giao d\u1ECBch tr\xEAn Ch\u1EE3 Tr\u1EDDi.</div>
+                <input type="text" id="inp-flea-username" class="inp" placeholder="Nh\u1EADp t\xEAn c\u1EE7a b\u1EA1n...">
                 <div class="buy" id="btn-flea-save-username" style="padding: 10px;">L\u01B0u t\xEAn</div>
             </div>
         `;
     $id("btn-flea-save-username").onclick = () => {
       const val = $id("inp-flea-username").value.trim();
       if (val) {
-        if (val.length > 16) return toast("T\xEAn t\u1ED1i \u0111a 16 k\xFD t\u1EF1!");
         ctx.S.username = val;
         save();
         renderFleaMarket();

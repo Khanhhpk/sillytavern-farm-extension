@@ -41,15 +41,14 @@ export async function renderFleaMarket() {
         All.$id('trade-body').innerHTML = `
             <div style="display:flex; flex-direction:column; gap: 15px; padding: 20px; text-align: center;">
                 <div style="font-size: 14px; color: #7a5c38; font-weight: bold;">Tạo Tên Người Chơi</div>
-                <div style="font-size: 12px; color: #555;">Vui lòng nhập tên để hiển thị khi giao dịch trên Chợ Trời. (Tối đa 16 ký tự)</div>
-                <input type="text" id="inp-flea-username" class="inp" placeholder="Nhập tên của bạn..." maxlength="16">
+                <div style="font-size: 12px; color: #555;">Vui lòng nhập tên để hiển thị khi giao dịch trên Chợ Trời.</div>
+                <input type="text" id="inp-flea-username" class="inp" placeholder="Nhập tên của bạn...">
                 <div class="buy" id="btn-flea-save-username" style="padding: 10px;">Lưu tên</div>
             </div>
         `;
         All.$id('btn-flea-save-username').onclick = () => {
             const val = All.$id('inp-flea-username').value.trim();
             if (val) {
-                if (val.length > 16) return All.toast('Tên tối đa 16 ký tự!');
                 ctx.S.username = val;
                 All.save();
                 renderFleaMarket();
