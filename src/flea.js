@@ -90,37 +90,16 @@ async function loadFleaList() {
             const data = docSnap.data();
             const isMine = data.sellerId === ctx.S.playerId;
             
-            let itemName = data.itemId;
-            let icon = '';
-            if (data.itemType === 'bag') {
-                const baseId = data.itemId.includes('@') ? data.itemId.split('@')[1] : data.itemId;
-                const c = CROPS[baseId];
-                const prefix = data.itemId.includes('@') ? `[Đột biến ${data.itemId.split('@')[0]}] ` : '';
-                itemName = c ? prefix + c.name : data.itemId;
-                icon = c ? c.icon || '📦' : '📦';
-            } else if (data.itemType === 'seeds') {
-                const c = CROPS[data.itemId];
-                itemName = c ? `Hạt ${c.name}` : data.itemId;
-                icon = '🌱';
-            } else if (data.itemType === 'ferts') {
-                const f = FERTS[data.itemId];
-                itemName = f ? f.name : data.itemId;
-                icon = '🧪';
-            } else if (data.itemType === 'uniques') {
-                itemName = data.itemData ? data.itemData.name : 'Bảo vật';
-                icon = '✨';
-            } else if (data.itemType === 'shards') {
-                const shardNames = { prism: 'Mảnh lăng quang', star: 'Mảnh ngôi sao', legend: 'Mảnh huyền thoại' };
-                itemName = shardNames[data.itemId] || 'Mảnh';
-                icon = '💎';
-            }
+            const itemName = getFleaItemName(data.itemId, data.itemData);
+            let icon = getFleaItemIcon(data.itemId, data.itemData);
+            icon = icon.replace(/width="20"/g, 'width="32"').replace(/height="20"/g, 'height="32"');
 
             html += `
                 <div class="flea-item ${isMine ? 'mine' : ''}">
-                    <div class="flea-item-icon">${icon}</div>
+                    <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
                     <div class="flea-item-info">
                         <div class="flea-item-name">${itemName} x${data.amount}</div>
-                        <div class="flea-item-seller">Người bán: ${data.sellerId.substring(0, 6)}</div>
+                        <div class="flea-item-seller" style="font-size: 11px; color: #777; margin-top: 2px;">Người bán: ${data.sellerName || data.sellerId.substring(0, 6)}</div>
                     </div>
                     <div class="flea-item-action">
                         <div class="flea-item-price">${data.price} G</div>
@@ -236,7 +215,7 @@ async function cancelItem(docId) {
     }
 }
 
-function getFleaItemName(id) {
+function getFleaItemName(id, itemData = null) {
     if (id === 'coins') return 'Tiền xu';
     if (id === 'norm') return 'Vé Thường';
     if (id === 'spec') return 'Vé Đặc Biệt';
@@ -247,7 +226,7 @@ function getFleaItemName(id) {
     if (id === 'compost') return 'Phân Hữu Cơ';
     if (id === 'shiny') return 'Phân Bón Bạc';
     if (id.startsWith('unique@')) {
-        return ctx.S.uniques?.[id]?.name || 'Bảo vật bí ẩn';
+        return itemData?.name || ctx.S.uniques?.[id]?.name || 'Bảo vật bí ẩn';
     }
     if (id.includes('@')) {
         const parts = id.split('@');
@@ -256,7 +235,7 @@ function getFleaItemName(id) {
     return CROPS[id]?.name || id;
 }
 
-function getFleaItemIcon(id) {
+function getFleaItemIcon(id, itemData = null) {
     if (id === 'coins') return All.spriteSVG('coin', 20);
     if (id === 'norm' || id === 'spec' || id === 'super') {
         const tId = id.charAt(0).toUpperCase() + id.slice(1);
@@ -268,7 +247,7 @@ function getFleaItemIcon(id) {
     }
     if (id === 'compost' || id === 'shiny') return All.spriteSVG('fert_' + id, 20);
     if (id.startsWith('unique@')) {
-        const item = ctx.S.uniques?.[id] || { sp: 'strawhat', color: '#4a90e2' };
+        const item = itemData || ctx.S.uniques?.[id] || { sp: 'strawhat', color: '#4a90e2' };
         return `<span style="color:${item.color}">${All.spriteSVG(item.sp, 20)}</span>`;
     }
     if (id.includes('@')) {
