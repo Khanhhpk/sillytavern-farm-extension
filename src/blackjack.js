@@ -1208,17 +1208,19 @@ function bjRenderRoom() {
 
     if (!All.$id('bj-game-layer')) {
         body.innerHTML = `
-            <div id="bj-game-layer" style="width:100%; height:100%; display:flex; flex-direction:column; overflow-y:hidden; overflow-x:hidden;"></div>
-            <div class="bj-chat-wrap" id="bj-chat-wrap">
-                <div class="bj-chat-header" id="bj-chat-close">
-                    <span>💬 Chat</span>
-                    <span class="bj-chat-close">❌</span>
-                </div>
-                <div class="bj-chat-log" id="bj-chat-log"></div>
-                <div class="bj-chat-inp-row">
-                    <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin tiền">💰</div>
-                    <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
-                    <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">Gửi</div>
+            <div class="bj-room-layout" style="width:100%; height:100%;">
+                <div id="bj-game-layer" style="flex:1; display:flex; flex-direction:column; overflow-y:hidden; overflow-x:hidden;"></div>
+                <div class="bj-chat-wrap" id="bj-chat-wrap">
+                    <div class="bj-chat-header" id="bj-chat-close">
+                        <span>💬 Chat</span>
+                        <span class="bj-chat-close">❌</span>
+                    </div>
+                    <div class="bj-chat-log" id="bj-chat-log"></div>
+                    <div class="bj-chat-inp-row">
+                        <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin tiền">💰</div>
+                        <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
+                        <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">Gửi</div>
+                    </div>
                 </div>
             </div>
         `;
@@ -1230,8 +1232,8 @@ function bjRenderRoom() {
     const gs = bjGameState;
     const allPids = Object.keys(bjPlayers);
 
-    let html = `<div class="bj-room-layout">
-        <div class="bj-room-main">
+    let html = `
+        <div class="bj-room-main" style="flex:1; display:flex; flex-direction:column;">
             <div class="bj-room-topbar">
                 <div class="bj-room-code-badge" id="bj-room-code-badge" title="Copy mã phòng">🃋 ${bjRoomId}</div>
                 <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} — ${(ctx.S.coins||0).toLocaleString()}G${bjMyStatus==='spectator'?' 👁':''}</div>
@@ -1338,7 +1340,7 @@ function bjRenderRoom() {
         }
     }
 
-    html += `</div></div>`;
+    html += `</div>`;
     
     gameLayer.innerHTML = html;
 
