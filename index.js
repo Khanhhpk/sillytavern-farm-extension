@@ -499,6 +499,40 @@ var init_graphics = __esm({
       sun: ["................", ".......C........", "...C...C...C....", "....C.....C.....", "......CCC.......", ".....CCCCC......", "..CC.CCWCC.CC...", ".....CCCCC......", "......CCC.......", "....C.....C.....", "...C...C...C....", ".......C........", "................", "................", "................", "................"],
       flower: ["................", "................", "................", "....nnn.nnn.....", "...npppnpppn....", "...nppnCnppn....", "....nnCCCnn.....", "...nppnCnppn....", "...npppnpppn....", "....nnn.nnn.....", "................", "................", "................", "................", "................", "................"],
       shopIcon: ["................", "................", "................", "....fpf.fpf.....", "....fppffppf....", ".....ffFFff.....", "..qddddFFddddq..", "..qqqqqFFqqqqq..", "...qdddFFdddq...", "...qFFFFFFFFq...", "...qdddFFdddq...", "...qdddFFdddq...", "...qqqqqqqqqq...", "................", "................", "................"],
+      fleaIcon: [
+        "................................",
+        "................................",
+        "................................",
+        "................................",
+        "....WWpppWWWpppWWWpppWWWpppW....",
+        "....WWpppWWWpppWWWpppWWWpppW....",
+        "....WWpppWWWpppWWWpppWWWpppW....",
+        "....WWpppWWWpppWWWpppWWWpppW....",
+        "....WWpppWWWpppWWWpppWWWpppW....",
+        "....WWpppWWWpppWWWpppWWWpppW....",
+        "...WWWpppWWWpppWWWpppWWWpppWW...",
+        "......w..................w......",
+        "......w..................w......",
+        "......w..................w......",
+        "......w..................w......",
+        "......w..................w......",
+        "......w..................w......",
+        "......w..................w......",
+        "....ccwccccccccccccccccccwcc....",
+        "....cccccccccccccccccccccccc....",
+        "....cccccccccccccccccccccccc....",
+        "....cccccccccccccccccccccccc....",
+        "....cccccccccccccccccccccccc....",
+        "....cccccccccccccccccccccccc....",
+        "....cccccccccccccccccccccccc....",
+        "........KKK..........KKK........",
+        ".......KKKKK........KKKKK.......",
+        ".......KKKKK........KKKKK.......",
+        ".......KKKKK........KKKKK.......",
+        "........KKK..........KKK........",
+        "................................",
+        "................................"
+      ],
       tradeIcon: [
         "........................",
         "...............K........",
@@ -6223,7 +6257,7 @@ function renderPlots() {
             <div class="feature-name">Th\xE1m Hi\u1EC3m</div>
           </div>
           <div class="explore-slot" id="eslot-flea" style="background: rgba(40, 100, 200, 0.8); border-color: #64b5f6; box-shadow: 0 4px 0 #1976d2, inset 0 0 0 3px rgba(100,181,246,0.4);">
-            ${spriteSVG("tradeIcon", 48) || "\u{1F6D2}"}
+            ${spriteSVG("fleaIcon", 48) || "\u{1F6D2}"}
             <div class="feature-name" style="color: #e3f2fd; text-shadow: 0 1px 2px #000;">Ch\u1EE3 Tr\u1EDDi</div>
           </div>
           <div class="explore-slot" id="eslot-achiv" style="background: rgba(60, 40, 20, 0.8); border-color: #f2c231; box-shadow: 0 4px 0 #8a6a1c, inset 0 0 0 3px rgba(242,194,49,0.4);">
