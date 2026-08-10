@@ -136,7 +136,21 @@ export function renderPlots() {
             ${spriteSVG('achivStar', 48)}
             <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Thành Tựu</div>
           </div>
+          <div class="explore-slot" id="eslot-casino" style="background: rgba(20, 5, 40, 0.8); border-color: #ffd94d; box-shadow: 0 4px 0 #b08a5c, inset 0 0 0 3px rgba(255,217,77,0.4);">
+            <div style="width:64px;height:64px;position:relative;">${spriteSVG('casinoNeonGoldMap', 64) || '🎰'}</div>
+            <div class="feature-name" style="color: #ffd94d; text-shadow: 0 1px 2px #000;">Casino</div>
+          </div>
         `;
+        const cBtn = All.$id('eslot-casino');
+        if (cBtn) cBtn.addEventListener('click', () => {
+          ctx.S.view = 'casino';
+          All.save();
+          All.applyPageSkin();
+          All.applyViewState();
+          All.renderToolbar();
+          All.renderPager();
+          All.renderPlots();
+        });
         const dBtn = All.$id('eslot-dungeon');
         if (dBtn) dBtn.addEventListener('click', () => All.openPanel('dungeon'));
         const bBtn = All.$id('eslot-bet');
@@ -156,8 +170,30 @@ export function renderPlots() {
     return;
   }
   
-  if (wrap) wrap.style.display = '';
+  if (ctx.S && ctx.S.view === 'casino') {
+    if (wrap) wrap.style.display = 'none';
+    if (expWrap) expWrap.style.display = 'none';
+    let casWrap = All.$id('casino-blocks');
+    if (!casWrap) {
+      casWrap = document.createElement('div');
+      casWrap.id = 'casino-blocks';
+      casWrap.className = 'casino-blocks';
+      All.fieldEl.appendChild(casWrap);
+    }
+    casWrap.style.display = 'flex';
+    casWrap.innerHTML = `
+      <div style="text-align:center; color: #ffd94d; font-size: 24px; text-shadow: 0 2px 4px #000;">
+        <div style="font-size: 64px; margin-bottom: 20px;">🎰</div>
+        Sòng bạc đang được xây dựng...
+      </div>
+    `;
+    return;
+  }
+
   if (expWrap) expWrap.style.display = 'none';
+  const casWrap = All.$id('casino-blocks');
+  if (casWrap) casWrap.style.display = 'none';
+  if (wrap) wrap.style.display = 'block';
 
   const pg = ctx.S.page, plots = curPlots(), nb = curBlocks();
   

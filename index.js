@@ -638,6 +638,72 @@ var init_graphics = __esm({
         ".....fFFFFFFMKKKKKKMFFFFFFf.....",
         ".....ffffffffffffffffffffff....."
       ],
+      casinoNeonGoldMap: [
+        "................................................................",
+        "................................................................",
+        "................................................................",
+        "................................................................",
+        "..........W.....................................................",
+        ".........WCW....................................................",
+        "..........W.....................................................",
+        "................................C...............................",
+        "..........................CCCCCCvCCCCCC.........................",
+        "........................CCVVVVVVVVVVVVVCC.......................",
+        "......................CCVvvVvvVvvVvvVvvVvCC.....................",
+        "....................CCvvVvvVvvVvvVvvVvvVvvVCC.....W.............",
+        "...................CVVVVVVVVVVVVVVVVVVVVVVVVVC...WBW............",
+        "..................CvvVvvVvvVvvVvvVvvVvvVvvVvvVC...W.............",
+        ".................CVvvVvvVvvVvvVvvVvvVvvVvvVvvVvC................",
+        "................CVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVC...............",
+        "...............CvvVvvVvvVvvVvvVvvVvvVvvVvvVvvVvvVC..............",
+        "...............CvvVvvVvvVvvVvvVvvVvvVvvVvvVvvVvvVC.....U........",
+        "..............CVCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCVVC...UCU.......",
+        "........W.....CVCEFEFEFEFEFEFEFEFEFEFEFEFEFEFEECVvC....U........",
+        ".......WFW...CvVCFKKKKKKKKKKKKKKKKKKKKKKKKKKKKFCVvvC............",
+        "........W....CVVCEKKKKKKKKKKKKKKKKKKKKKKKKKKKKECVVVC............",
+        "............CvvVCFKKKKKKKKKKKKKKKKKKKKKKKKKKKKFCVvvVC...........",
+        "............CvvVCEKKEEKKBBKKCCKKFFKKppKKCCKKBBECVvvVC...........",
+        "............CVVVCFKKEWKKBWKKCWKKFWKKpWKKCWKKBWFCVVVVC...........",
+        "............CvvVCEKKEEKKBBKKCCKKFFKKppKKCCKKBBECVvvVC...........",
+        "......CCCCCCCvvVCFKKKKKKKKKKKKKKKKKKKKKKKKKKKKFCVvvVCCCCCC......",
+        "......CUBBBBBBBBCEKKKKKKKKKKKKKKKKKKKKKKKKKKKKECBBBBBBBBUC......",
+        "......CUBBBBBBBBCFFEFEFEFEFEFEFEFEFEFEFEFEFEFEFCBBBBBBBBUC......",
+        "......CCCCbbbbbbCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCbbbbbbCCCC......",
+        "...........KUBBUWWWWWWWWWWUUUUWWWWUUUUWWWWWWWWWWUBBUK...........",
+        "...........KUBBUWWWWWWWWWWUUUUWWWWUUUUWWWWWWWWWWUBBUK...........",
+        "...........KUBBCCCCCCCCCCWUUUUWWWWUUUUWCCCCCCCCCCBBUK...........",
+        "...........KUBBCBBBBBBBBCWUUUUWWWWUUUUWCFFFFFFFFCBBUK...........",
+        "...........KUBBCBFBBBEBBCWUUUUWWWWUUUUWCFWFFFWFFCBBUK...........",
+        "...........KUBBCBBBCBBBBCWUUUUWWWWUUUUWCFFFWFFFFCBBUK...........",
+        "...........KUBBCBBBBBBBBCWUUUUWWWWUUUUWCFFFFFFFFCBBUK...........",
+        "...........KUBBCCCCCCCCCCWUUUUWWWWUUUUWCCCCCCCCCCBBUK...........",
+        "...........KUBBUWWWWWWWWWWUUUUWWWWUUUUWWWWWWWWWWUBBUK...........",
+        "...........KUBBUWWWWWWWWWWUUUUWWWWUUUUWWWWWWWWWWUBBUK...........",
+        "...........KUBBUCCCCCCCCWWUUUUWWWWUUUUWWCCCCCCCCUBBUK...........",
+        "...........KUBBUCBBBBBBCWWUUUUWWWWUUUUWWCFFFFFFCUBBUK...........",
+        "...........KUBBUCBWWWWBCWWUUUUWWWWUUUUWWCFWWWWFCUBBUK...........",
+        "...........KUBBUCBWWWWBCWWUUUUWWWWUUUUWWCFWWWWFCUBBUK...........",
+        "...........KUBBUCBWWWWBCWWUUEEEEEEEEUUWWCFWWWWFCUBBUK...........",
+        "...........KUBBUCBWWWWBCWWUUESSSSSSEUUWWCFWWWWFCUBBUK...........",
+        "...........KUBBUCBWWWWBCWWUUESTTTTSEUUWWCFWWWWFCUBBUK...........",
+        "...........KUBBUCBWWWWBCWWUUESTTTTSEUUWWCFWWWWFCUBBUK...........",
+        "...........KUBBUCBWWWWBCWWUUESTTTTSEUUWWCFWWWWFCUBBUK...........",
+        "...........KUBBUCBWWWWBCWWUUESTTTTSEUUWWCFWWWWFCUBBUK...........",
+        "...........KUBBUCBBBBBBCWWUUESTTTTSEUUWWCFFFFFFCUBBUK...........",
+        "...........KUBBUCCCCCCCCWWUUESTTTTSEUUWWCCCCCCCCUBBUK...........",
+        "...........KUBBUWWWWWWWWWWUUESCTTCSEUUWWWWWWWWWWUBBUK...........",
+        "...........KUBBUWWWWWWWWWWUUESTTTTSEUUWWWWWWWWWWUBBUK...........",
+        "...........KUBBUWWWWWWWWWWUUESTTTTSEUUWWWWWWWWWWUBBUK...........",
+        "...........KUBBUWWWWWWWWWWUUESTTTTSEUUWWWWWWWWWWUBBUK...........",
+        "...........KUUUUUUUUUUUUUUUUESTTTTSEUUUUUUUUUUUUUUUUK...........",
+        "...........KFFEFFFFFFFFFFFFFESTTTTSEFFFFFFFFFFFFFFFFK...........",
+        "..........CCCCCECCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCFCCCC..........",
+        "..........CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC..........",
+        "..........KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..........",
+        "..........KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..........",
+        "..........KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..........",
+        "..........KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK.........."
+      ],
       dungeonGate: [
         "................",
         "....MMMMMMMM....",
@@ -2307,11 +2373,13 @@ var init_style = __esm({
     }
     .field.explore-mode { background: radial-gradient(circle at 50% 50%, #2b1b54 0%, #0d0614 100%) !important; border-color: #4b3082 !important; overflow: hidden; }
     .field.explore-mode::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.8) 1px, transparent 1px), radial-gradient(circle at 70% 60%, rgba(255,255,255,0.8) 1px, transparent 1px), radial-gradient(circle at 40% 80%, rgba(255,255,255,0.8) 1.5px, transparent 1.5px), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.8) 1px, transparent 1px);
-      background-size: 100px 100px; opacity: 0.5; pointer-events: none; z-index: 0;
+      content: ''; position: absolute; inset: 0; background: url('data:image/svg+xml;utf8,<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="1.5" fill="%23ffffff22"/></svg>'); opacity: 0.5; z-index: 0; pointer-events: none;
     }
-    .explore-blocks { padding: 18px 24px 70px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; min-height: 280px; align-content: flex-start; position: relative; z-index: 1; }
+    .field.casino-mode { background: radial-gradient(circle at 50% 50%, #280a3a 0%, #0a0210 100%) !important; border-color: #ffd94d !important; overflow: hidden; }
+    .field.casino-mode::before {
+      content: ''; position: absolute; inset: 0; background: url('data:image/svg+xml;utf8,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><path d="M30 10 L35 25 L50 30 L35 35 L30 50 L25 35 L10 30 L25 25 Z" fill="%23ffd94d11"/><circle cx="10" cy="10" r="2" fill="%23ffb8c422"/></svg>'); opacity: 0.6; z-index: 0; pointer-events: none;
+    }
+    .explore-blocks, .casino-blocks { padding: 18px 24px 70px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; min-height: 280px; align-content: flex-start; position: relative; z-index: 1; }
     .explore-slot { width: 84px; height: 104px; background: rgba(255,255,255,0.7); border: 3px solid #8a6844; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; box-shadow: inset 0 0 0 3px rgba(255,255,255,0.5), 0 4px 0 #8a6844; transition: transform 0.1s; position: relative; z-index: 10; pointer-events: auto; }
     .explore-slot:active { transform: translateY(4px); box-shadow: inset 0 0 0 3px rgba(255,255,255,0.5), 0 0 0 #8a6844; }
     .explore-slot .feature-name { font-size: 13px; font-weight: bold; color: #7a5c38; margin-top: 8px; text-align: center; }
@@ -2944,13 +3012,18 @@ function applyTheme() {
 }
 function applyPageSkin() {
   const isExplore = ctx.S && ctx.S.view === "explore";
-  fieldEl.classList.toggle("pg2", !isExplore && ctx.S.page === 2);
-  fieldEl.classList.toggle("pg3", !isExplore && ctx.S.page === 3);
+  const isCasino = ctx.S && ctx.S.view === "casino";
+  fieldEl.classList.toggle("pg2", !isExplore && !isCasino && ctx.S.page === 2);
+  fieldEl.classList.toggle("pg3", !isExplore && !isCasino && ctx.S.page === 3);
   const titleH1 = sh.querySelector(".titlebar h1");
   if (isExplore) {
     fieldEl.style.backgroundImage = "none";
     fieldEl.style.backgroundColor = "#d3c3a0";
     if (titleH1) titleH1.innerHTML = `${spriteSVG("mapIcon", 16)}D\u1EA1o quanh n\xE0o...`;
+  } else if (isCasino) {
+    fieldEl.style.backgroundImage = "none";
+    fieldEl.style.backgroundColor = "#0a0210";
+    if (titleH1) titleH1.innerHTML = `\u{1F3B0} S\xF2ng b\u1EA1c ho\xE0ng gia`;
   } else {
     fieldEl.style.backgroundImage = tileURI(ctx.S.page === 2 ? "water" : ctx.S.page === 3 ? "mine" : "grass", 4242);
     fieldEl.style.backgroundColor = "";
@@ -2960,30 +3033,33 @@ function applyPageSkin() {
 }
 function applyViewState() {
   const isExplore = ctx.S && ctx.S.view === "explore";
+  const isCasino = ctx.S && ctx.S.view === "casino";
   const ctrlrow = sh.querySelector(".ctrlrow");
   const mascots = $id("mascots");
   const witch = $id("witch");
   const banner = $id("banner");
   const viewToggle = $id("viewToggle");
   const statBlocks = $id("stat-blocks");
-  if (ctrlrow) ctrlrow.style.display = isExplore ? "none" : "flex";
-  if (mascots) mascots.style.display = isExplore ? "none" : "";
-  if (decoLayer) decoLayer.style.display = isExplore ? "none" : "";
-  if (witch) witch.style.display = isExplore ? "none" : "";
-  if (banner) banner.style.display = isExplore ? "none" : "";
-  if (statBlocks) statBlocks.style.display = isExplore ? "none" : "";
+  if (ctrlrow) ctrlrow.style.display = isExplore || isCasino ? "none" : "flex";
+  if (mascots) mascots.style.display = isExplore || isCasino ? "none" : "";
+  if (decoLayer) decoLayer.style.display = isExplore || isCasino ? "none" : "";
+  if (witch) witch.style.display = isExplore || isCasino ? "none" : "";
+  if (banner) banner.style.display = isExplore || isCasino ? "none" : "";
+  if (statBlocks) statBlocks.style.display = isExplore || isCasino ? "none" : "";
   const field = sh.querySelector(".field");
   if (field) {
     if (isExplore) field.classList.add("explore-mode");
     else field.classList.remove("explore-mode");
+    if (isCasino) field.classList.add("casino-mode");
+    else field.classList.remove("casino-mode");
   }
   if (viewToggle) {
-    viewToggle.innerHTML = isExplore ? `${spriteSVG("strawhat", 16)} <span>V\u1EC1 N\xF4ng Tr\u1EA1i</span>` : `${spriteSVG("mapIcon", 16)} <span>Kh\xE1m ph\xE1</span>`;
+    viewToggle.innerHTML = isExplore || isCasino ? `${spriteSVG("strawhat", 16)} <span>V\u1EC1 N\xF4ng Tr\u1EA1i</span>` : `${spriteSVG("mapIcon", 16)} <span>Kh\xE1m ph\xE1</span>`;
   }
 }
 function renderPager() {
   const pager = $id("pager");
-  if (ctx.S && ctx.S.view === "explore") {
+  if (ctx.S && (ctx.S.view === "explore" || ctx.S.view === "casino")) {
     pager.style.display = "none";
     return;
   }
@@ -3172,7 +3248,7 @@ function initUI() {
   swX = null;
   swY = null;
   fieldEl.addEventListener("touchstart", (e2) => {
-    if (ctx.S && ctx.S.view === "explore") {
+    if (ctx.S && (ctx.S.view === "explore" || ctx.S.view === "casino")) {
       swX = null;
       return;
     }
@@ -3205,14 +3281,19 @@ function initUI() {
   const viewToggle = $id("viewToggle");
   if (viewToggle) {
     viewToggle.addEventListener("click", () => {
-      ctx.S.view = ctx.S.view === "explore" ? "farm" : "explore";
+      if (ctx.S.view === "explore" || ctx.S.view === "casino") {
+        ctx.S.view = "farm";
+        toast("Tr\u1EDF v\u1EC1 N\xF4ng tr\u1EA1i");
+      } else {
+        ctx.S.view = "explore";
+        toast("B\u1EA3n \u0111\u1ED3 Kh\xE1m ph\xE1");
+      }
       save();
       applyPageSkin();
       applyViewState();
       renderPlots();
       renderToolbar();
       renderPager();
-      toast(ctx.S.view === "explore" ? "B\u1EA3n \u0111\u1ED3 Kh\xE1m ph\xE1" : "Tr\u1EDF v\u1EC1 N\xF4ng tr\u1EA1i");
     });
   }
 }
@@ -6293,7 +6374,21 @@ function renderPlots() {
             ${spriteSVG("achivStar", 48)}
             <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Th\xE0nh T\u1EF1u</div>
           </div>
+          <div class="explore-slot" id="eslot-casino" style="background: rgba(20, 5, 40, 0.8); border-color: #ffd94d; box-shadow: 0 4px 0 #b08a5c, inset 0 0 0 3px rgba(255,217,77,0.4);">
+            <div style="width:64px;height:64px;position:relative;">${spriteSVG("casinoNeonGoldMap", 64) || "\u{1F3B0}"}</div>
+            <div class="feature-name" style="color: #ffd94d; text-shadow: 0 1px 2px #000;">Casino</div>
+          </div>
         `;
+        const cBtn = $id("eslot-casino");
+        if (cBtn) cBtn.addEventListener("click", () => {
+          ctx.S.view = "casino";
+          save();
+          applyPageSkin();
+          applyViewState();
+          renderToolbar();
+          renderPager();
+          renderPlots();
+        });
         const dBtn = $id("eslot-dungeon");
         if (dBtn) dBtn.addEventListener("click", () => openPanel("dungeon"));
         const bBtn = $id("eslot-bet");
@@ -6312,8 +6407,29 @@ function renderPlots() {
     }
     return;
   }
-  if (wrap2) wrap2.style.display = "";
+  if (ctx.S && ctx.S.view === "casino") {
+    if (wrap2) wrap2.style.display = "none";
+    if (expWrap) expWrap.style.display = "none";
+    let casWrap2 = $id("casino-blocks");
+    if (!casWrap2) {
+      casWrap2 = document.createElement("div");
+      casWrap2.id = "casino-blocks";
+      casWrap2.className = "casino-blocks";
+      fieldEl.appendChild(casWrap2);
+    }
+    casWrap2.style.display = "flex";
+    casWrap2.innerHTML = `
+      <div style="text-align:center; color: #ffd94d; font-size: 24px; text-shadow: 0 2px 4px #000;">
+        <div style="font-size: 64px; margin-bottom: 20px;">\u{1F3B0}</div>
+        S\xF2ng b\u1EA1c \u0111ang \u0111\u01B0\u1EE3c x\xE2y d\u1EF1ng...
+      </div>
+    `;
+    return;
+  }
   if (expWrap) expWrap.style.display = "none";
+  const casWrap = $id("casino-blocks");
+  if (casWrap) casWrap.style.display = "none";
+  if (wrap2) wrap2.style.display = "block";
   const pg = ctx.S.page, plots = curPlots(), nb = curBlocks();
   if (wrap2.children.length !== 6 || wrap2.dataset.pg !== String(pg)) {
     wrap2.dataset.pg = pg;
