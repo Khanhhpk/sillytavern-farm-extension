@@ -6359,6 +6359,8 @@ function renderPlots() {
   const expWrap = $id("explore-blocks");
   if (ctx.S && ctx.S.view === "explore") {
     if (wrap2) wrap2.style.display = "none";
+    const casWrap2 = $id("casino-blocks");
+    if (casWrap2) casWrap2.style.display = "none";
     if (expWrap && !isDungeonOpen) {
       expWrap.style.display = "flex";
       if (!expWrap.hasChildNodes()) {

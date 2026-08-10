@@ -112,6 +112,8 @@ export function renderPlots() {
   
   if (ctx.S && ctx.S.view === 'explore') {
     if (wrap) wrap.style.display = 'none';
+    const casWrap = All.$id('casino-blocks');
+    if (casWrap) casWrap.style.display = 'none';
     if (expWrap && !All.isDungeonOpen) {
       expWrap.style.display = 'flex';
       if (!expWrap.hasChildNodes()) {
