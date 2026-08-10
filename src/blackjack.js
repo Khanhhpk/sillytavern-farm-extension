@@ -485,6 +485,7 @@ let bjGameState = null;
 let bjSettings = { minBet: 10, maxBet: 0, numDecks: 6, delay: 10 };
 let bjMyStatus = 'idle';
 let bjChatLog = [];
+let bjUnreadChat = 0;
 let bjRoomPhase = 'lobby'; // 'lobby' | 'ingame' | 'summary'
 let bjSummaryTimer = null;
 let bjSummaryTimeLeft = 0;
@@ -517,7 +518,7 @@ export function closeBlackjack() {
 
 function bjResetState() {
     bjConns = {}; bjIsHost = false; bjMyId = ''; bjRoomId = '';
-    bjPlayers = {}; bjGameState = null; bjMyStatus = 'idle'; bjChatLog = [];
+    bjPlayers = {}; bjGameState = null; bjMyStatus = 'idle'; bjChatLog = []; bjUnreadChat = 0;
     bjRoomPhase = 'lobby';
     if (bjSummaryTimer) clearInterval(bjSummaryTimer);
     bjSummaryTimer = null;
@@ -638,7 +639,7 @@ function bjHandleMsg(fromPid, data) {
             bjPlayers[fromPid] = { name: data.name || 'Kh\u00e1ch', status };
             if (bjIsHost) {
                 bjBroadcast({ type: 'PLAYER_JOIN', pid: fromPid, name: data.name, status }, fromPid);
-                bjConns[fromPid].send({ type: 'WELCOME', players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData });
+                bjConns[fromPid].send({ type: 'WELCOME', players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData, chatLog: bjChatLog });
             }
             bjRenderRoom();
             break;
@@ -648,6 +649,7 @@ function bjHandleMsg(fromPid, data) {
             bjGameState = data.gameState || null;
             bjRoomPhase = data.roomPhase || (bjGameState ? 'ingame' : 'lobby');
             bjSummaryData = data.summaryData || null;
+            if (data.chatLog) bjChatLog = data.chatLog;
             bjMyStatus = (bjGameState && bjRoomPhase !== 'summary') ? 'spectator' : 'idle';
             bjRenderRoom(); break;
         case 'PLAYER_JOIN':
@@ -655,7 +657,7 @@ function bjHandleMsg(fromPid, data) {
             bjRenderRoom(); break;
         case 'PLAYER_LEFT':
             delete bjPlayers[data.pid];
-            if (bjGameState && bjGameState.currentTurn === data.pid && bjIsHost) bjAdvanceTurn();
+            if (bjGameState) bjGameState.turnOrder = bjGameState.turnOrder.filter(p => p !== data.pid);
             bjRenderRoom(); break;
         case 'READY':
             if (bjPlayers[fromPid]) bjPlayers[fromPid].status = data.ready ? 'ready' : 'idle';
@@ -738,7 +740,30 @@ function bjHandleMsg(fromPid, data) {
         case 'CHAT':
             bjChatLog.push({ name: bjPlayers[fromPid]?.name || '?', msg: data.msg, ts: Date.now() });
             if (bjChatLog.length > 50) bjChatLog.shift();
-            bjRenderChat(); break;
+            if (!All.$id('bj-chat-wrap')?.classList.contains('open')) { bjUnreadChat++; bjRenderRoom(); }
+            bjRenderChat();
+            if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
+            break;
+        case 'CHAT_REQ':
+            bjChatLog.push({ name: bjPlayers[fromPid]?.name || fromPid, isReq: true, reqData: data.reqData, ts: Date.now() });
+            if (bjChatLog.length > 50) bjChatLog.shift();
+            if (!All.$id('bj-chat-wrap')?.classList.contains('open')) { bjUnreadChat++; bjRenderRoom(); }
+            bjRenderChat();
+            if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
+            break;
+        case 'GIVE_MONEY':
+            const log = bjChatLog.find(e => e.reqData && e.reqData.reqId === data.reqId);
+            if (log) {
+                log.reqData.fulfilled += data.amount;
+                if (log.reqData.pid === bjMyId) {
+                    ctx.S.coins = (ctx.S.coins || 0) + data.amount;
+                    save(); renderStatus();
+                    toast(`${data.from} \u0111\u00e3 cho b\u1ea1n ${data.amount.toLocaleString()}G!`);
+                }
+                bjRenderChat();
+            }
+            if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
+            break;
         case 'GOLD_SEND':
             if (data.targetPid === bjMyId) {
                 ctx.S.coins = (ctx.S.coins || 0) + data.amount;
@@ -758,15 +783,19 @@ function bjHandleDisconnect(pid) {
     if (bjPlayers[pid]) {
         const name = bjPlayers[pid].name;
         delete bjPlayers[pid];
-        if (bjGameState && bjGameState.currentTurn === pid && bjIsHost) bjAdvanceTurn();
         toast(`${name} \u0111\u00e3 r\u1eddi ph\u00f2ng`);
+        if (bjIsHost) {
+            if (bjGameState) {
+                bjGameState.turnOrder = bjGameState.turnOrder.filter(p => p !== pid);
+                if (bjGameState.currentTurn === pid) bjAdvanceTurn();
+                else bjCheckAllBetsIn();
+            }
+            bjBroadcast({ type: 'PLAYER_LEFT', pid });
+            bjRenderRoom();
+        }
     }
     
-    if (bjIsHost) {
-        bjBroadcast({ type: 'PLAYER_LEFT', pid });
-        bjRenderRoom();
-        if (bjGameState) bjCheckAllBetsIn();
-    } else {
+    if (!bjIsHost) {
         if (pid === bjRoomId) {
             // Host disconnected! Host Migration
             const remainingPids = Object.keys(bjPlayers).sort();
@@ -1073,7 +1102,7 @@ function bjRenderRoom() {
                 <div class="bj-room-code-badge" id="bj-room-code-badge" title="Copy m\u00e3 ph\u00f2ng">\uD83C\uDCCB ${bjRoomId}</div>
                 <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} \u2014 ${(ctx.S.coins||0).toLocaleString()}G${bjMyStatus==='spectator'?' \uD83D\uDC41':''}</div>
                 <div class="buy plain" id="bj-out-room-ingame" style="font-size:11px;">\u2190 Tho\u00e1t</div>
-                <div class="bj-chat-toggle" id="bj-chat-toggle">\uD83D\uDCAC Chat</div>
+                <div class="bj-chat-toggle" id="bj-chat-toggle">\uD83D\uDCAC Chat ${bjUnreadChat > 0 ? `<span style="background:#e74c3c;color:white;border-radius:10px;padding:1px 5px;margin-left:5px;font-size:10px;">${bjUnreadChat}</span>` : ''}</div>
             </div>
             <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 10px;">`;
 
@@ -1184,6 +1213,7 @@ function bjRenderRoom() {
             `<div class="bj-chat-line"><b>${e.name}:</b> ${e.msg.replace(/</g,'&lt;')}</div>`
         ).join('')}</div>
         <div class="bj-chat-inp-row">
+            <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin ti\u1ec1n">\uD83D\uDCB0</div>
             <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
             <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">G\u1eedi</div>
         </div>
@@ -1330,9 +1360,15 @@ function bjBindMyActions() {
 function bjRenderChat() {
     const el = All.$id('bj-chat-log');
     if (!el) return;
-    el.innerHTML = bjChatLog.slice(-20).map(e =>
-        `<div class="bj-chat-line"><b>${e.name}:</b> ${e.msg.replace(/</g,'&lt;')}</div>`
-    ).join('');
+    el.innerHTML = bjChatLog.slice(-50).map(e => {
+        if (e.isReq) {
+            const rd = e.reqData;
+            const isDone = rd.fulfilled >= rd.amount;
+            const btn = `<button class="buy ${isDone ? 'plain' : ''}" style="font-size:10px;padding:2px 5px;margin-left:5px;" ${isDone?'disabled':''} onclick="bjGiveMoney('${rd.reqId}')">${isDone ? 'Xong' : 'Cho'}</button>`;
+            return `<div class="bj-chat-line"><b>${e.name}</b> xin <b>${rd.amount.toLocaleString()}G</b> (\u0110\u00e3 nh\u1eadn: ${rd.fulfilled.toLocaleString()})${btn}</div>`;
+        }
+        return `<div class="bj-chat-line"><b>${e.name}:</b> ${e.msg.replace(/</g,'&lt;')}</div>`;
+    }).join('');
     setTimeout(() => { if (el) el.scrollTop = el.scrollHeight + 100; }, 10);
 }
 
@@ -1348,8 +1384,19 @@ function bjBindChat() {
         bjBroadcast({ type: 'CHAT', msg });
     };
     All.$id('bj-chat-send')?.addEventListener('click', send);
+    All.$id('bj-chat-req-btn')?.addEventListener('click', () => {
+        const amtStr = prompt('Nh\u1eadp s\u1ed1 ti\u1ec1n mu\u1ed1n xin (G):');
+        const amt = parseInt(amtStr);
+        if (!isNaN(amt) && amt > 0) {
+            const reqId = bjMyId + '-' + Date.now();
+            const msg = { type: 'CHAT_REQ', reqData: { reqId, pid: bjMyId, amount: amt, fulfilled: 0 } };
+            bjHandleMsg(bjMyId, msg);
+            bjBroadcast(msg);
+        }
+    });
     All.$id('bj-chat-toggle')?.addEventListener('click', () => {
         All.$id('bj-chat-wrap')?.classList.add('open');
+        if (bjUnreadChat > 0) { bjUnreadChat = 0; bjRenderRoom(); }
     });
     All.$id('bj-chat-close')?.addEventListener('click', () => {
         All.$id('bj-chat-wrap')?.classList.remove('open');
@@ -1395,4 +1442,29 @@ export function openBlackjackPicker() {
     
     All.$id('bj-solo-pick').addEventListener('click', openBlackjackSolo);
     All.$id('bj-room-pick').addEventListener('click', openBlackjackRoom);
+}
+
+window.bjGiveMoney = function(reqId) {
+    const log = bjChatLog.find(e => e.reqData && e.reqData.reqId === reqId);
+    if (!log) return;
+    const rd = log.reqData;
+    if (rd.pid === bjMyId) return toast('B\u1ea1n kh\u00f4ng th\u1ec3 t\u1ef1 cho ti\u1ec1n m\u00ecnh!');
+    const remaining = rd.amount - rd.fulfilled;
+    if (remaining <= 0) return toast('\u0110\u00e3 \u0111\u1ee7 ti\u1ec1n r\u1ed3i!');
+    
+    const amtStr = prompt(`Cho ti\u1ec1n ${log.name} (T\u1ed1i \u0111a: ${remaining.toLocaleString()}G):`, remaining);
+    const amt = parseInt(amtStr);
+    if (isNaN(amt) || amt <= 0) return;
+    
+    const coins = ctx.S.coins || 0;
+    if (coins < amt) return toast('B\u1ea1n kh\u00f4ng \u0111\u1ee7 ti\u1ec1n!');
+    
+    const give = Math.min(amt, remaining);
+    ctx.S.coins = coins - give;
+    save(); renderStatus();
+    
+    const msg = { type: 'GIVE_MONEY', reqId, from: bjMyName(), amount: give };
+    bjHandleMsg(bjMyId, msg);
+    if (bjIsHost) bjBroadcast(msg);
+    else bjBroadcast(msg); // Clients send to host, host will broadcast it to others? Wait, clients only send to Host! Host needs to broadcast it!
 }
