@@ -109,6 +109,7 @@ export function openBlackjackSolo() {
     const body = All.$id('bj-body');
     if (win && body) {
         win.style.display = 'flex';
+        All.placeBjWin();
         body.innerHTML = buildSoloUI();
         soloRender();
     }
@@ -489,6 +490,7 @@ export function openBlackjackRoom() {
     if (win) {
         win.classList.add('open');
         win.style.display = 'flex';
+        All.placeBjWin();
     }
     bjResetState();
     bjRenderMenu();
@@ -1169,6 +1171,7 @@ export function openBlackjackPicker() {
             </div>
         </div>`;
     win.style.display = 'flex';
+    All.placeBjWin();
     
     All.$id('bj-solo-pick').addEventListener('click', openBlackjackSolo);
     All.$id('bj-room-pick').addEventListener('click', openBlackjackRoom);

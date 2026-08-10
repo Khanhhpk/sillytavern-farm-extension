@@ -193,12 +193,12 @@ export function initUI() {
     <div class="toast" id="toast"></div>
   </div>
 
-  <div class="dialog-win" id="bj-win" style="display:none; left:50%; top:50%; transform:translate(-50%, -50%); z-index:99999; flex-direction:column; background:#f8efe0; border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px; max-width: 600px; width: 96vw; max-height: 90vh;">
+  <div id="bj-win" class="dungeon-win" style="display:none; z-index:99999;">
     <div class="titlebar" id="bj-drag">
       <h1>${spriteSVG('spadeIcon', 16)} Phân khu Giải Trí</h1>
       <div class="close-x" onclick="FarmAll.closeBlackjack()">×</div>
     </div>
-    <div id="bj-body" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
+    <div id="bj-body" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; padding-bottom: 20px;"></div>
   </div>
   
   <div id="hero-bar" class="hero-bar" style="display:none">

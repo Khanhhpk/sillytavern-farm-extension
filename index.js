@@ -3260,12 +3260,12 @@ function initUI() {
     <div class="toast" id="toast"></div>
   </div>
 
-  <div class="dialog-win" id="bj-win" style="display:none; left:50%; top:50%; transform:translate(-50%, -50%); z-index:99999; flex-direction:column; background:#f8efe0; border: 4px solid #c9a273; outline: 4px solid var(--frameOut); border-radius: 10px; max-width: 600px; width: 96vw; max-height: 90vh;">
+  <div id="bj-win" class="dungeon-win" style="display:none; z-index:99999;">
     <div class="titlebar" id="bj-drag">
       <h1>${spriteSVG("spadeIcon", 16)} Ph\xE2n khu Gi\u1EA3i Tr\xED</h1>
       <div class="close-x" onclick="FarmAll.closeBlackjack()">\xD7</div>
     </div>
-    <div id="bj-body" style="flex:1; overflow-y:auto; display:flex; flex-direction:column;"></div>
+    <div id="bj-body" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; padding-bottom: 20px;"></div>
   </div>
   
   <div id="hero-bar" class="hero-bar" style="display:none">
@@ -6159,6 +6159,16 @@ function placeDungeonWin() {
   dungeonWin.style.left = Math.min(Math.max(x2, 0), Math.max(vw - w2, 0)) + "px";
   dungeonWin.style.top = Math.min(Math.max(y2, 0), vh - 60) + "px";
 }
+function placeBjWin() {
+  const bjWin = $id("bj-win");
+  if (!bjWin) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const w2 = Math.min(600, vw * 0.96);
+  let x2 = ctx.S.bjWin ? ctx.S.bjWin.fx * vw : (vw - w2) / 2;
+  let y2 = ctx.S.bjWin ? ctx.S.bjWin.fy * vh : vh * 0.04;
+  bjWin.style.left = Math.min(Math.max(x2, 0), Math.max(vw - w2, 0)) + "px";
+  bjWin.style.top = Math.min(Math.max(y2, 0), vh - 60) + "px";
+}
 function toggleWin() {
   try {
     if (ctx.win.classList.contains("open")) {
@@ -6254,6 +6264,34 @@ function initWindows() {
       dungeonWg = null;
       const dungeonWin = $id("dungeon-win");
       ctx.S.dungeonWin = { fx: dungeonWin.offsetLeft / window.innerWidth, fy: dungeonWin.offsetTop / window.innerHeight };
+      save();
+    });
+  }
+  const bjDragBar = $id("bj-drag");
+  let bjWg = null;
+  if (bjDragBar) {
+    bjDragBar.addEventListener("pointerdown", (e2) => {
+      if (e2.target.classList.contains("close-x")) return;
+      if (window.innerWidth <= 640) return;
+      bjDragBar.setPointerCapture(e2.pointerId);
+      const bjWin = $id("bj-win");
+      bjWg = { id: e2.pointerId, sx: e2.clientX, sy: e2.clientY, ox: bjWin.offsetLeft, oy: bjWin.offsetTop };
+    });
+    bjDragBar.addEventListener("pointermove", (e2) => {
+      if (!bjWg || e2.pointerId !== bjWg.id) return;
+      const bjWin = $id("bj-win");
+      bjWin.style.left = bjWg.ox + e2.clientX - bjWg.sx + "px";
+      bjWin.style.top = bjWg.oy + e2.clientY - bjWg.sy + "px";
+    });
+    bjDragBar.addEventListener("pointerup", (e2) => {
+      if (!bjWg || e2.pointerId !== bjWg.id) return;
+      try {
+        bjDragBar.releasePointerCapture(e2.pointerId);
+      } catch (er2) {
+      }
+      bjWg = null;
+      const bjWin = $id("bj-win");
+      ctx.S.bjWin = { fx: bjWin.offsetLeft / window.innerWidth, fy: bjWin.offsetTop / window.innerHeight };
       save();
     });
   }
@@ -49028,6 +49066,7 @@ function openBlackjackSolo() {
   const body = $id("bj-body");
   if (win && body) {
     win.style.display = "flex";
+    placeBjWin();
     body.innerHTML = buildSoloUI();
     soloRender();
   }
@@ -49433,6 +49472,7 @@ function openBlackjackRoom() {
   if (win) {
     win.classList.add("open");
     win.style.display = "flex";
+    placeBjWin();
   }
   bjResetState();
   bjRenderMenu();
@@ -50189,6 +50229,7 @@ function openBlackjackPicker() {
             </div>
         </div>`;
   win.style.display = "flex";
+  placeBjWin();
   $id("bj-solo-pick").addEventListener("click", openBlackjackSolo);
   $id("bj-room-pick").addEventListener("click", openBlackjackRoom);
 }
@@ -50395,6 +50436,7 @@ __export(all_exports, {
   petTouch: () => petTouch,
   pickFrom: () => pickFrom,
   pileWith: () => pileWith,
+  placeBjWin: () => placeBjWin,
   placeDungeonWin: () => placeDungeonWin,
   placeHeroBar: () => placeHeroBar,
   placeOrb: () => placeOrb,
