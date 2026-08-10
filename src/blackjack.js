@@ -1205,6 +1205,20 @@ function bjApplySettings() {
 function bjRenderRoom() {
     const body = All.$id('bj-body');
     if (!body) return;
+
+    let chatOpen = false;
+    let chatInput = '';
+    let chatFocused = false;
+    const oldWrap = All.$id('bj-chat-wrap');
+    if (oldWrap) {
+        chatOpen = oldWrap.classList.contains('open');
+        const oldInp = All.$id('bj-chat-inp');
+        if (oldInp) {
+            chatInput = oldInp.value;
+            chatFocused = (oldInp.getRootNode().activeElement === oldInp);
+        }
+    }
+
     const gs = bjGameState;
     const allPids = Object.keys(bjPlayers);
 
@@ -1331,6 +1345,18 @@ function bjRenderRoom() {
     </div></div>`;
 
     body.innerHTML = html;
+
+    const newWrap = All.$id('bj-chat-wrap');
+    if (newWrap && chatOpen) newWrap.classList.add('open');
+    const newInp = All.$id('bj-chat-inp');
+    if (newInp) {
+        if (chatInput) newInp.value = chatInput;
+        if (chatFocused) {
+            newInp.focus();
+            newInp.setSelectionRange(chatInput.length, chatInput.length);
+        }
+    }
+
     All.$id('bj-out-room-ingame')?.addEventListener('click', closeBlackjack);
     All.$id('bj-show-players')?.addEventListener('click', () => {
         const modalId = 'bj-player-list-modal';
