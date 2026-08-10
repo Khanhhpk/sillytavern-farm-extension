@@ -184,6 +184,18 @@ function loadDungeonState(saveData) {
         el.style.transform = `translate3d(${savedP.x - 16}px, ${savedP.y - 16}px, 0)`;
         arena.appendChild(el);
         const stat = PET_STATS[savedP.id] || PET_STATS.default;
+        
+        // Recalibrate stats to fix old exponential inflation
+        const u = savedP.upgrades || {};
+        const oldMax = savedP.maxHp > 0 ? savedP.maxHp : 1;
+        const hpPercent = (savedP.hp !== undefined ? savedP.hp : oldMax) / oldMax;
+        
+        savedP.maxHp = Math.round(stat.hp * Math.pow(1.10, u.hp || 0));
+        savedP.hp = Math.round(savedP.maxHp * hpPercent);
+        savedP.atk = Math.round(stat.atk * Math.pow(1.10, u.atk || 0));
+        savedP.speed = Math.round(stat.speed * Math.pow(1.05, u.spd || 0));
+        savedP.range = Math.round(stat.range * Math.pow(1.05, u.range || 0));
+
         return { 
             ...savedP, 
             el: el,
@@ -611,8 +623,8 @@ function _doStartWave() {
         arena.appendChild(el);
         
         // Scale hp and atk based on pure exponential wave
-        let hpMultiplier = Math.pow(1.12, currentWave - 1); // Giảm từ 1.15 xuống 1.12
-        let atkMultiplier = Math.pow(1.15, currentWave - 1); // Giảm từ 1.20 xuống 1.15
+        let hpMultiplier = Math.pow(1.10, currentWave - 1); // Giảm xuống 1.10 để chống lạm phát
+        let atkMultiplier = Math.pow(1.10, currentWave - 1); // Giảm xuống 1.10 để chống lạm phát
         if (isBossWave) {
             hpMultiplier *= 1.5;
             atkMultiplier *= 1.2;
@@ -625,7 +637,7 @@ function _doStartWave() {
             atk: Math.round(type.atk * atkMultiplier),
             range: type.range, speed: type.speed, cd: 0, maxCd: type.cd,
             skillCd: type.maxSkillCd || 0, maxSkillCd: type.maxSkillCd || 0, el, type: 'enemy',
-            skill: type.skill, ai: type.ai, gold: Math.round((type.gold || 5) * 2 * Math.pow(1.15, currentWave - 1))
+            skill: type.skill, ai: type.ai, gold: Math.round((type.gold || 5) * 2 * Math.pow(1.10, currentWave - 1))
         });
     }
     
@@ -1296,7 +1308,7 @@ function showWaveRewards(isLoaded = false) {
         
         // Calculate gold for this wave
         const isBoss = currentWave % 10 === 0;
-        const waveGold = Math.round(500 * Math.pow(1.2, currentWave - 1)) * (isBoss ? 3 : 1);
+        const waveGold = Math.round(500 * Math.pow(1.10, currentWave - 1)) * (isBoss ? 3 : 1);
         totalGold += Math.floor(waveGold * 0.3);
         shopGold += waveGold;
         
@@ -1397,7 +1409,7 @@ function showWaveRewards(isLoaded = false) {
         if (selectedPet) {
             const u = selectedPet.upgrades;
             const hpMissingPet = selectedPet.maxHp - selectedPet.hp;
-            const waveBaseGold = Math.round(500 * Math.pow(1.2, currentWave - 1));
+            const waveBaseGold = Math.round(500 * Math.pow(1.10, currentWave - 1));
             const healPetCost = Math.max(10, Math.floor(waveBaseGold * 0.2 * (hpMissingPet / selectedPet.maxHp)));
             
             const totalMaxHp = fullTeam.reduce((acc, member) => acc + member.maxHp, 0);
@@ -1406,20 +1418,20 @@ function showWaveRewards(isLoaded = false) {
             
             // Công thức tính giá: Giá gốc * 1.2^Level.
             // Độ dốc cân bằng hơn để phù hợp với lượng tiền kiếm được ở late game.
-            const calc = (base, lv) => Math.floor(base * Math.pow(1.2, lv));
+            const calc = (base, lv) => Math.floor(base * Math.pow(1.12, lv));
             
             const stats = [
-                { id: 'hp', name: 'Max HP (+25%)', val: selectedPet.maxHp, lv: u.hp, cost: calc(80, u.hp) },
-                { id: 'atk', name: 'ATK (+25%)', val: selectedPet.atk, lv: u.atk, cost: calc(80, u.atk) },
+                { id: 'hp', name: 'Max HP (+10%)', val: selectedPet.maxHp, lv: u.hp, cost: calc(80, u.hp) },
+                { id: 'atk', name: 'ATK (+10%)', val: selectedPet.atk, lv: u.atk, cost: calc(80, u.atk) },
                 { id: 'aspd', name: 'ATK SPD (+10%)', val: selectedPet.maxCd.toFixed(2)+'s', lv: u.aspd, cost: calc(100, u.aspd), forceCanBuy: selectedPet.maxCd > 0.11 },
-                { id: 'spd', name: 'Move Speed (+10%)', val: selectedPet.speed, lv: u.spd, cost: calc(50, u.spd), forceCanBuy: selectedPet.speed < 150 },
+                { id: 'spd', name: 'Move Speed (+5%)', val: selectedPet.speed, lv: u.spd, cost: calc(50, u.spd), forceCanBuy: selectedPet.speed < 150 },
                 { id: 'critR', name: 'Crit Rate (+5%)', val: (selectedPet.critRate*100).toFixed(0)+'%', lv: u.critR, cost: calc(90, u.critR), forceCanBuy: selectedPet.critRate < 0.59 },
                 { id: 'critD', name: 'Crit Dmg (+20%)', val: (selectedPet.critDmg*100).toFixed(0)+'%', lv: u.critD, cost: calc(90, u.critD) },
                 { id: 'dodge', name: 'Né Tránh (+5%)', val: (selectedPet.dodge*100).toFixed(0)+'%', lv: u.dodge || 0, cost: calc(100, u.dodge || 0), forceCanBuy: selectedPet.dodge < 0.39 }
             ];
 
             if (PET_STATS[selectedPet.id] && PET_STATS[selectedPet.id].range > 60) {
-                stats.push({ id: 'range', name: 'Tầm Đánh (+10%)', val: Math.round(selectedPet.range), lv: u.range || 0, cost: calc(70, u.range || 0), forceCanBuy: selectedPet.range < 400 });
+                stats.push({ id: 'range', name: 'Tầm Đánh (+5%)', val: Math.round(selectedPet.range), lv: u.range || 0, cost: calc(70, u.range || 0), forceCanBuy: selectedPet.range < 400 });
             }
 
             stats.push(
@@ -1463,14 +1475,26 @@ function showWaveRewards(isLoaded = false) {
                 if (shopGold >= cost) {
                     shopGold -= cost;
                     const p = selectedPet;
-                    if (statId === 'hp') { p.maxHp = Math.round(p.maxHp * 1.25); p.hp = Math.round(p.hp * 1.25); p.upgrades.hp++; }
-                    if (statId === 'atk') { p.atk = Math.round(p.atk * 1.25); p.upgrades.atk++; }
-                    if (statId === 'aspd') { p.maxCd = Math.max(0.1, p.maxCd * 0.9); p.upgrades.aspd++; }
-                    if (statId === 'spd') { p.speed = Math.round(p.speed * 1.1); p.upgrades.spd++; }
+                    if (statId === 'hp') { p.upgrades.hp++; }
+                    if (statId === 'atk') { p.upgrades.atk++; }
+                    if (statId === 'aspd') { p.upgrades.aspd++; }
+                    if (statId === 'spd') { p.upgrades.spd++; }
                     if (statId === 'critR') { p.critRate = Math.min(0.6, p.critRate + 0.05); p.upgrades.critR++; }
                     if (statId === 'critD') { p.critDmg = Math.round((p.critDmg + 0.2)*10)/10; p.upgrades.critD++; }
                     if (statId === 'dodge') { p.dodge = Math.min(0.4, p.dodge + 0.05); p.upgrades.dodge = (p.upgrades.dodge || 0) + 1; }
-                    if (statId === 'range') { p.range = Math.round(p.range * 1.1); p.upgrades.range = (p.upgrades.range || 0) + 1; }
+                    if (statId === 'range') { p.upgrades.range = (p.upgrades.range || 0) + 1; }
+                    
+                    // Recalibrate base stats based on upgrades
+                    const stat = PET_STATS[p.id] || PET_STATS.default;
+                    const oldMax = p.maxHp > 0 ? p.maxHp : 1;
+                    const hpPercent = p.hp / oldMax;
+                    p.maxHp = Math.round(stat.hp * Math.pow(1.10, p.upgrades.hp || 0));
+                    p.hp = Math.round(p.maxHp * hpPercent);
+                    p.atk = Math.round(stat.atk * Math.pow(1.10, p.upgrades.atk || 0));
+                    p.speed = Math.round(stat.speed * Math.pow(1.05, p.upgrades.spd || 0));
+                    p.range = Math.round(stat.range * Math.pow(1.05, p.upgrades.range || 0));
+                    p.maxCd = Math.max(0.1, stat.cd * Math.pow(0.9, p.upgrades.aspd || 0));
+
                     if (statId === 'heal_pet') { p.hp = p.maxHp; }
                     if (statId === 'heal_team') {
                         fullTeam.forEach(member => {
