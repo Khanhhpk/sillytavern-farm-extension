@@ -1286,17 +1286,6 @@ function updateEntities(groupA, groupB, dt) {
                         setTimeout(() => { if(a.el) a.el.classList.remove('dg-shield-wall'); }, 3000);
                     }
                     else if (a.activeSkill === 'burst_heal') {
-                        const flash = document.createElement('div');
-                        flash.style.position = 'absolute';
-                        flash.style.inset = '0';
-                        flash.style.backgroundColor = 'rgba(100, 255, 100, 0.4)';
-                        flash.style.zIndex = '9999';
-                        flash.style.pointerEvents = 'none';
-                        flash.style.transition = 'opacity 0.5s';
-                        arena.appendChild(flash);
-                        setTimeout(() => flash.style.opacity = '0', 50);
-                        setTimeout(() => flash.remove(), 550);
-                        
                         groupA.forEach(ally => {
                             if (ally.hp > 0) {
                                 const heal = ally.maxHp * 0.3;
