@@ -1058,14 +1058,28 @@ function updateEntities(groupA, groupB, dt) {
             a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
             a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
             
+            let hitOther = false;
             groupA.forEach(other => {
-               if (other !== a && other.hp > 0 && Math.hypot(other.x - a.x, other.y - a.y) < 30) {
+               if (!hitOther && other !== a && other.hp > 0 && Math.hypot(other.x - a.x, other.y - a.y) < 40) {
                    if (!other.status) other.status = {};
-                   if (!other.status.stun) { 
+                   if (!other.status.stun) {
+                       hitOther = true;
                        other.status.stun = 1.0;
+                       
+                       const boom = document.createElement('div');
+                       boom.className = 'dg-boom-effect';
+                       boom.style.left = other.x + 'px';
+                       boom.style.top = other.y + 'px';
+                       arena.appendChild(boom);
+                       setTimeout(() => boom.remove(), 400);
                    }
                }
             });
+            
+            if (hitOther) {
+                a.kb.time = 0;
+            }
+            
             return;
         }
         
@@ -1392,8 +1406,6 @@ function updateEntities(groupA, groupB, dt) {
                         });
                     }
                 }
-            } else if (a.skill === 'projection_sorcery') {
-                return; // Auto attack handled by skillCd for Naoya
             }
 
 
@@ -1494,6 +1506,8 @@ function updateEntities(groupA, groupB, dt) {
             } 
             
             if (inRange) {
+                if (a.skill === 'projection_sorcery') return;
+                
                 if (a.cd <= 0 || isDashing) {
                     if (isDashing) {
                         a.status.dashing = false;
