@@ -20,3 +20,4 @@ export * from './sync.js';
 export * from './flea.js';
 export * from './blackjack.js';
 export * from './race.js';
+export * from './cooking.js';
