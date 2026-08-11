@@ -4653,7 +4653,12 @@ var init_prompt = __esm({
       "V\u1EF1c h\xE0ng h\u1EA3i/h\xE0ng kh\xF4ng: Thuy\u1EC1n, bu\u1ED3m, m\u1ECF neo, la b\xE0n, b\u1EBFn c\u1EA3ng, ng\u1ECDn h\u1EA3i \u0111\u0103ng, v\u1EADt tr\xF4i d\u1EA1t, v\xE9 t\xE0u, khoang h\xE0ng, phao ti\xEAu, tinh \u0111\u1ED3 h\xE0ng ti\xEAu.",
       "V\u1EF1c gi\u1EA3i tr\xED: B\xE0n c\u1EDD, th\u1EBB b\xE0i, x\xFAc x\u1EAFc, s\xE2n kh\u1EA5u, k\u1ECBch b\u1EA3n, \u0111\u1ED3 ch\u01A1i, b\u1EA3n nh\u1EA1c, m\xE1y nh\u1ECBp, v\xE9 s\u1ED1, h\u1ED9p b\xED \u1EA9n, thi\u1EBFt b\u1ECB khu vui ch\u01A1i.",
       "V\u1EF1c y t\u1EBF: H\u1ED9p thu\u1ED1c, b\u0103ng g\u1EA1c, b\u1EC7nh \xE1n, ph\u1EE5c h\u1ED3i, v\u1EAFc-xin, th\u1EA3o d\u01B0\u1EE3c, d\u1EE5ng c\u1EE5 ph\u1EABu thu\u1EADt, khoang an d\u01B0\u1EE1ng, gi\u1EA3m \u0111au, ph\u1EE5c h\u1ED3i ch\u1EE9c n\u0103ng.",
-      "V\u1EF1c kh\u1EA3o c\u1ED5: Di ch\u1EC9, b\u1EA3n d\u1EADp, bia \u0111\xE1 v\u1EE1, m\u1EA3nh g\u1ED1m, ch\xECa kh\xF3a c\u0169, h\u1EA7m m\u1ED9, \u0111\u1ECBa t\u1EA7ng, c\xF4ng c\u1EE5 c\u1ED5 \u0111\u1EA1i, b\u1EA3n \u0111\u1ED3 t\xE0n khuy\u1EBFt, s\u1ED1 hi\u1EC7u di v\u1EADt."
+      "V\u1EF1c kh\u1EA3o c\u1ED5: Di ch\u1EC9, b\u1EA3n d\u1EADp, bia \u0111\xE1 v\u1EE1, m\u1EA3nh g\u1ED1m, ch\xECa kh\xF3a c\u0169, h\u1EA7m m\u1ED9, \u0111\u1ECBa t\u1EA7ng, c\xF4ng c\u1EE5 c\u1ED5 \u0111\u1EA1i, b\u1EA3n \u0111\u1ED3 t\xE0n khuy\u1EBFt, s\u1ED1 hi\u1EC7u di v\u1EADt.",
+      "V\u1EF1c t\xEDn ng\u01B0\u1EE1ng/t\xE2m linh: B\xE0n th\u1EDD mini, t\u01B0\u1EE3ng th\u1EA7n s\u1EE9t m\u1EBB, l\u1EDDi nguy\u1EC1n, b\xF9a ch\xFA, v\u1EADt hi\u1EBFn t\u1EBF, chu\u1ED7i h\u1EA1t, tro c\u1ED1t, th\xE1nh th\u01B0.",
+      "V\u1EF1c v\u0169 tr\u1EE5/chi\xEAm tinh: M\u1EA3nh h\u1ED1 \u0111en, thi\xEAn th\u1EA1ch, b\u1EE5i sao, m\xF4 h\xECnh qu\u1EF9 \u0111\u1EA1o, nh\u1EADt th\u1EF1c b\u1ECF t\xFAi, cung ho\xE0ng \u0111\u1EA1o, v\u1EADt ch\u1EA5t t\u1ED1i.",
+      "V\u1EF1c h\xF3a h\u1ECDc/gi\u1EA3 kim: B\xECnh dung d\u1ECBch s\u1EE7i b\u1ECDt, kim lo\u1EA1i l\u1ECFng, ch\u1EA5t x\xFAc t\xE1c, thu\u1ED1c th\u1EED, cao su nh\xE2n t\u1EA1o, kh\xF3i \u0111\u1ED9c.",
+      "V\u1EF1c k\u1EF9 thu\u1EADt s\u1ED1: \u1ED4 c\u1EE9ng r\u1EC9 s\xE9t, m\xE3 ngu\u1ED3n h\u1ECFng, virus m\xE1y t\xEDnh t\xE0ng h\xECnh, c\xE1p quang, hologram ch\u1EADp ch\u1EDDn, s\xF3ng wifi.",
+      "V\u1EF1c ngh\u1EC7 thu\u1EADt: B\u1EE9c tranh ch\u01B0a ho\xE0n thi\u1EC7n, c\u1ECD v\u1EBD d\xEDnh m\xE1u, kh\u1ED1i \u0111i\xEAu kh\u1EAFc tr\u1EEBu t\u01B0\u1EE3ng, khung tranh tr\u1ED1ng, n\u1ED1t nh\u1EA1c bay l\u01A1 l\u1EEDng."
     ];
     GAMEPLAY_DOMAINS = [
       "Thao t\xE1c ch\u1EE7 \u0111\u1ED9ng: Kh\u1EDFi \u0111\u1ED9ng, d\u1EEBng l\u1EA1i, chuy\u1EC3n \u0111\u1ED5i, \u0111i\u1EC1u ch\u1EC9nh, n\xE9m ra, \u0111\xE1nh d\u1EA5u, thu h\u1ED3i.",
@@ -4679,7 +4684,12 @@ var init_prompt = __esm({
       "Nu\xF4i tr\u1ED3ng sinh th\xE1i: Gieo h\u1EA1t, thu\u1EA7n h\xF3a, sinh s\u1EA3n, thanh l\u1ECDc, thu ho\u1EA1ch, ki\u1EC3m so\xE1t d\u1ECBch b\u1EC7nh, ph\u1EE5c h\u1ED3i m\xF4i tr\u01B0\u1EDDng.",
       "Kinh doanh x\xE3 giao: T\u1EA1o d\u1EF1ng danh ti\u1EBFng, g\u1EEDi thi\u1EC7p m\u1EDDi, duy tr\xEC m\u1ED1i quan h\u1EC7, t\u1EA1o l\u1ED1i tho\xE1t, trao g\u1EEDi qu\xE0 t\u1EB7ng.",
       "C\u1EE9u h\u1ED9 kh\u1EA9n c\u1EA5p: T\u1ECB n\u1EA1n t\u1EA1m th\u1EDDi, s\u01A1 t\xE1n, ng\u0103n ch\u1EB7n nguy hi\u1EC3m, phong t\u1ECFa \xF4 nhi\u1EC5m, kh\xF4i ph\u1EE5c tr\u1EADt t\u1EF1.",
-      "S\u01B0u t\u1EA7m tr\u01B0ng b\xE0y: Tr\u01B0ng b\xE0y, \u0111\xE1nh s\u1ED1, l\u01B0u tr\u1EEF, tri\u1EC3n l\xE3m, th\u01B0\u1EDFng th\u1EE9c, trao \u0111\u1ED5i, b\u1ED9 s\u01B0u t\u1EADp."
+      "S\u01B0u t\u1EA7m tr\u01B0ng b\xE0y: Tr\u01B0ng b\xE0y, \u0111\xE1nh s\u1ED1, l\u01B0u tr\u1EEF, tri\u1EC3n l\xE3m, th\u01B0\u1EDFng th\u1EE9c, trao \u0111\u1ED5i, b\u1ED9 s\u01B0u t\u1EADp.",
+      "Thao t\xFAng t\xE2m l\xFD/k\xFD \u1EE9c: C\u1EA5y gh\xE9p suy ngh\u0129, x\xF3a tr\xED nh\u1EDB t\u1EA1m th\u1EDDi, \u0111\u1ECDc l\xE9n b\xED m\u1EADt c\u1EE7a NPC, giao ti\u1EBFp v\u1EDBi \u0111\u1ED3 v\u1EADt v\xF4 tri.",
+      "Bi\u1EBFn \u0111\u1ED5i v\u1EADt l\xFD si\xEAu th\u1EF1c: \u0110\u1EA3o ng\u01B0\u1EE3c tr\u1ECDng l\u1EF1c c\u1EE5c b\u1ED9, bi\u1EBFn \u0111\u1ED3 c\u1EE9ng th\xE0nh ch\u1EA5t l\u1ECFng, thay \u0111\u1ED5i nhi\u1EC7t \u0111\u1ED9 m\xF4i tr\u01B0\u1EDDng, ph\xF3ng to/thu nh\u1ECF m\u1EE5c ti\xEAu.",
+      "Ph\xE1 v\u1EE1 B\u1EE9c t\u01B0\u1EDDng th\u1EE9 4 (Meta-game): Ch\u01A1i kh\u0103m giao di\u1EC7n h\u1EC7 th\u1ED1ng, t\u1EF1 \u0111\u1ED9ng click n\xFAt, thay \u0111\u1ED5i text/t\xEAn c\u1EE7a v\u1EADt ph\u1EA9m kh\xE1c, t\u01B0\u01A1ng t\xE1c tr\u1EF1c ti\u1EBFp v\u1EDBi UI.",
+      "Nguy\u1EC1n r\u1EE7a/K\xFD sinh: \xC1p \u0111\u1EB7t hi\u1EC7u \u1EE9ng x\u1EA5u l\xEAn k\u1EBB \u0111\u1ECBch (ho\u1EB7c b\u1EA3n th\xE2n), b\xFAp b\xEA voodoo, tr\xF3i bu\u1ED9c s\u1ED1 ph\u1EADn, h\xFAt sinh l\u1EF1c t\u1EEB t\u1EEB.",
+      "Gacha l\u1ED3ng Gacha (May r\u1EE7i \u0111a t\u1EA7ng): \u0110\xE1nh c\u01B0\u1EE3c ch\u1EC9 s\u1ED1, c\xF2 quay nga, h\u1ED9p m\xF9 sinh ra h\u1ED9p m\xF9, hy sinh v\u1EADt ph\u1EA9m \u0111\u1EC3 l\u1EA5y t\u1EC9 l\u1EC7 ph\u1EA7n tr\u0103m."
     ];
   }
 });

@@ -20,7 +20,12 @@ const THEME_DOMAINS = [
   "Vực hàng hải/hàng không: Thuyền, buồm, mỏ neo, la bàn, bến cảng, ngọn hải đăng, vật trôi dạt, vé tàu, khoang hàng, phao tiêu, tinh đồ hàng tiêu.",
   "Vực giải trí: Bàn cờ, thẻ bài, xúc xắc, sân khấu, kịch bản, đồ chơi, bản nhạc, máy nhịp, vé số, hộp bí ẩn, thiết bị khu vui chơi.",
   "Vực y tế: Hộp thuốc, băng gạc, bệnh án, phục hồi, vắc-xin, thảo dược, dụng cụ phẫu thuật, khoang an dưỡng, giảm đau, phục hồi chức năng.",
-  "Vực khảo cổ: Di chỉ, bản dập, bia đá vỡ, mảnh gốm, chìa khóa cũ, hầm mộ, địa tầng, công cụ cổ đại, bản đồ tàn khuyết, số hiệu di vật."
+  "Vực khảo cổ: Di chỉ, bản dập, bia đá vỡ, mảnh gốm, chìa khóa cũ, hầm mộ, địa tầng, công cụ cổ đại, bản đồ tàn khuyết, số hiệu di vật.",
+  "Vực tín ngưỡng/tâm linh: Bàn thờ mini, tượng thần sứt mẻ, lời nguyền, bùa chú, vật hiến tế, chuỗi hạt, tro cốt, thánh thư.",
+  "Vực vũ trụ/chiêm tinh: Mảnh hố đen, thiên thạch, bụi sao, mô hình quỹ đạo, nhật thực bỏ túi, cung hoàng đạo, vật chất tối.",
+  "Vực hóa học/giả kim: Bình dung dịch sủi bọt, kim loại lỏng, chất xúc tác, thuốc thử, cao su nhân tạo, khói độc.",
+  "Vực kỹ thuật số: Ổ cứng rỉ sét, mã nguồn hỏng, virus máy tính tàng hình, cáp quang, hologram chập chờn, sóng wifi.",
+  "Vực nghệ thuật: Bức tranh chưa hoàn thiện, cọ vẽ dính máu, khối điêu khắc trừu tượng, khung tranh trống, nốt nhạc bay lơ lửng."
 ];
 
 const GAMEPLAY_DOMAINS = [
@@ -47,7 +52,12 @@ const GAMEPLAY_DOMAINS = [
   "Nuôi trồng sinh thái: Gieo hạt, thuần hóa, sinh sản, thanh lọc, thu hoạch, kiểm soát dịch bệnh, phục hồi môi trường.",
   "Kinh doanh xã giao: Tạo dựng danh tiếng, gửi thiệp mời, duy trì mối quan hệ, tạo lối thoát, trao gửi quà tặng.",
   "Cứu hộ khẩn cấp: Tị nạn tạm thời, sơ tán, ngăn chặn nguy hiểm, phong tỏa ô nhiễm, khôi phục trật tự.",
-  "Sưu tầm trưng bày: Trưng bày, đánh số, lưu trữ, triển lãm, thưởng thức, trao đổi, bộ sưu tập."
+  "Sưu tầm trưng bày: Trưng bày, đánh số, lưu trữ, triển lãm, thưởng thức, trao đổi, bộ sưu tập.",
+  "Thao túng tâm lý/ký ức: Cấy ghép suy nghĩ, xóa trí nhớ tạm thời, đọc lén bí mật của NPC, giao tiếp với đồ vật vô tri.",
+  "Biến đổi vật lý siêu thực: Đảo ngược trọng lực cục bộ, biến đồ cứng thành chất lỏng, thay đổi nhiệt độ môi trường, phóng to/thu nhỏ mục tiêu.",
+  "Phá vỡ Bức tường thứ 4 (Meta-game): Chơi khăm giao diện hệ thống, tự động click nút, thay đổi text/tên của vật phẩm khác, tương tác trực tiếp với UI.",
+  "Nguyền rủa/Ký sinh: Áp đặt hiệu ứng xấu lên kẻ địch (hoặc bản thân), búp bê voodoo, trói buộc số phận, hút sinh lực từ từ.",
+  "Gacha lồng Gacha (May rủi đa tầng): Đánh cược chỉ số, cò quay nga, hộp mù sinh ra hộp mù, hy sinh vật phẩm để lấy tỉ lệ phần trăm."
 ];
 
 export function getGachaPrompt() {
