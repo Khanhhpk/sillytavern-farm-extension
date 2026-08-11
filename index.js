@@ -11517,7 +11517,6 @@ function updateEntities(groupA, groupB, dt2) {
         a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
       }
       if (inRange) {
-        if (a.skill === "projection_sorcery") return;
         if (a.cd <= 0 || isDashing) {
           if (isDashing) {
             a.status.dashing = false;

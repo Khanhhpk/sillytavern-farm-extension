@@ -1506,8 +1506,6 @@ function updateEntities(groupA, groupB, dt) {
             } 
             
             if (inRange) {
-                if (a.skill === 'projection_sorcery') return;
-                
                 if (a.cd <= 0 || isDashing) {
                     if (isDashing) {
                         a.status.dashing = false;
