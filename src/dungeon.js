@@ -748,6 +748,14 @@ function combatLoop() {
                 p.el.remove();
                 return false;
             }
+            if (Math.random() < 0.1) {
+                const bubble = document.createElement('div');
+                bubble.className = 'dg-poison-bubble-particle';
+                bubble.style.left = (p.x + Math.random() * 80 - 40) + 'px';
+                bubble.style.top = (p.y + Math.random() * 40 - 20) + 'px';
+                arena.appendChild(bubble);
+                setTimeout(() => bubble.remove(), 1000);
+            }
             if (!p.lastTick || p.lifetime < p.lastTick - 1) {
                 p.lastTick = p.lifetime;
                 p.groupB.forEach(e => {
@@ -757,6 +765,45 @@ function combatLoop() {
                         const dmg = Math.floor(p.a.atk * 0.5);
                         e.hp -= dmg;
                         spawnDmg(e, -dmg, 'poison');
+                    }
+                });
+            }
+            return true;
+        }
+
+        if (p.isLaserSweep) {
+            p.lifetime -= stepDt;
+            if (p.lifetime <= 0) {
+                p.el.remove();
+                return false;
+            }
+            
+            if (!p.lastTick || p.lifetime < p.lastTick - 0.05) {
+                p.lastTick = p.lifetime;
+                const progress = (p.maxLifetime - p.lifetime) / p.maxLifetime;
+                const currentAngle = progress * Math.PI * 6;
+                const dmg = Math.max(1, Math.floor(p.a.atk * 0.5));
+                
+                p.groupB.forEach(e => {
+                    if (e.hp > 0) {
+                        const dx = e.x - p.x;
+                        const dy = e.y - p.y;
+                        const dist = Math.hypot(dx, dy);
+                        if (dist > 0) {
+                            let a2 = Math.atan2(dy, dx);
+                            let normalizedAngle = currentAngle % (Math.PI * 2);
+                            if (normalizedAngle > Math.PI) normalizedAngle -= Math.PI * 2;
+                            
+                            let diff = Math.abs(a2 - normalizedAngle);
+                            if (diff > Math.PI) diff = 2 * Math.PI - diff;
+                            if (diff < 0.3) {
+                                if (!e._lastLaserHit || p.lifetime < e._lastLaserHit - 0.3) {
+                                    e._lastLaserHit = p.lifetime;
+                                    e.hp -= dmg;
+                                    spawnDmg(e, -dmg, 'crit');
+                                }
+                            }
+                        }
                     }
                 });
             }
@@ -1198,8 +1245,8 @@ function updateEntities(groupA, groupB, dt) {
                     if (a.activeSkill === 'shield_wall') {
                         if (!a.status) a.status = {};
                         a.status.shield = 3;
-                        a.el.style.boxShadow = '0 0 20px 5px pink';
-                        setTimeout(() => { if(a.el) a.el.style.boxShadow = ''; }, 3000);
+                        a.el.classList.add('dg-shield-wall');
+                        setTimeout(() => { if(a.el) a.el.classList.remove('dg-shield-wall'); }, 3000);
                     }
                     else if (a.activeSkill === 'burst_heal') {
                         const flash = document.createElement('div');
@@ -1218,6 +1265,13 @@ function updateEntities(groupA, groupB, dt) {
                                 const heal = ally.maxHp * 0.5;
                                 ally.hp = Math.min(ally.maxHp, ally.hp + heal);
                                 spawnDmg(ally, heal, 'heal');
+                                const p = document.createElement('div');
+                                p.className = 'dg-heal-particle';
+                                p.textContent = '+';
+                                p.style.left = ally.x + 'px';
+                                p.style.top = ally.y + 'px';
+                                arena.appendChild(p);
+                                setTimeout(() => p.remove(), 800);
                             }
                         });
                     }
@@ -1226,16 +1280,22 @@ function updateEntities(groupA, groupB, dt) {
                             if (ally.hp > 0) {
                                 if (!ally.status) ally.status = {};
                                 ally.status.invuln = 3;
-                                ally.el.style.boxShadow = '0 0 20px 5px gold';
-                                setTimeout(() => { if(ally.el) ally.el.style.boxShadow = ''; }, 3000);
+                                ally.el.classList.add('dg-invuln-aura');
+                                setTimeout(() => { if(ally.el) ally.el.classList.remove('dg-invuln-aura'); }, 3000);
                             }
                         });
                     }
                     else if (a.activeSkill === 'invisible') {
                         if (!a.status) a.status = {};
                         a.status.invis = 4;
-                        a.el.style.opacity = '0.3';
-                        setTimeout(() => { if(a.el) a.el.style.opacity = '1'; }, 4000);
+                        a.el.classList.add('dg-invis-mode');
+                        const smoke = document.createElement('div');
+                        smoke.className = 'dg-smoke-particle';
+                        smoke.style.left = (a.x - 10) + 'px';
+                        smoke.style.top = (a.y - 10) + 'px';
+                        arena.appendChild(smoke);
+                        setTimeout(() => smoke.remove(), 500);
+                        setTimeout(() => { if(a.el) a.el.classList.remove('dg-invis-mode'); }, 4000);
                     }
                     else if (a.activeSkill === 'dash_knockup') {
                         const target = closest.b;
@@ -1244,8 +1304,23 @@ function updateEntities(groupA, groupB, dt) {
                         target.el.style.transform = `scaleX(${target.dx < 0 ? -1 : 1}) translateY(-20px)`;
                         setTimeout(() => { if (target.el) target.el.style.transform = `scaleX(${target.dx < 0 ? -1 : 1}) translateY(0px)`; }, 1500);
                         
+                        const ghost = a.el.cloneNode(true);
+                        ghost.className = 'dg-dash-ghost';
+                        ghost.style.left = a.x + 'px';
+                        ghost.style.top = a.y + 'px';
+                        arena.appendChild(ghost);
+                        setTimeout(() => ghost.remove(), 300);
+
                         a.x = target.x - (closest.dx / closest.dist) * 20;
                         a.y = target.y - (closest.dy / closest.dist) * 20;
+                        
+                        const boom = document.createElement('div');
+                        boom.className = 'dg-boom-effect';
+                        boom.style.left = target.x + 'px';
+                        boom.style.top = target.y + 'px';
+                        arena.appendChild(boom);
+                        setTimeout(() => boom.remove(), 400);
+
                         const dmg = a.atk * 2;
                         target.hp -= dmg;
                         spawnDmg(target, -dmg);
@@ -1254,6 +1329,20 @@ function updateEntities(groupA, groupB, dt) {
                         const target = closest.b;
                         a.x = target.x - (closest.dx / closest.dist) * 20;
                         a.y = target.y - (closest.dy / closest.dist) * 20;
+                        
+                        const boom = document.createElement('div');
+                        boom.className = 'dg-boom-effect';
+                        boom.style.width = '80px';
+                        boom.style.height = '80px';
+                        boom.style.left = target.x + 'px';
+                        boom.style.top = target.y + 'px';
+                        boom.style.background = 'radial-gradient(circle, rgba(255,50,0,1) 0%, rgba(255,0,0,0) 70%)';
+                        arena.appendChild(boom);
+                        setTimeout(() => boom.remove(), 400);
+                        
+                        arena.style.animation = 'dg-shake 0.4s';
+                        setTimeout(() => { arena.style.animation = ''; }, 400);
+
                         const dmg = a.atk * 5;
                         target.hp -= dmg;
                         spawnDmg(target, -dmg, 'crit');
@@ -1263,13 +1352,14 @@ function updateEntities(groupA, groupB, dt) {
                         const puddle = document.createElement('div');
                         puddle.className = 'dg-poison-puddle';
                         puddle.style.position = 'absolute';
-                        puddle.style.width = '100px';
-                        puddle.style.height = '60px';
+                        puddle.style.width = '120px';
+                        puddle.style.height = '70px';
                         puddle.style.borderRadius = '50%';
-                        puddle.style.backgroundColor = 'rgba(0, 255, 0, 0.4)';
-                        puddle.style.left = (target.x - 50) + 'px';
-                        puddle.style.top = (target.y - 30) + 'px';
+                        puddle.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
+                        puddle.style.left = (target.x - 60) + 'px';
+                        puddle.style.top = (target.y - 35) + 'px';
                         puddle.style.zIndex = '0';
+                        puddle.style.animation = 'dg-puddle-pulse 2s infinite';
                         arena.appendChild(puddle);
                         
                         projectiles.push({
@@ -1283,36 +1373,24 @@ function updateEntities(groupA, groupB, dt) {
                     else if (a.activeSkill === 'laser_beam') {
                         const laser = document.createElement('div');
                         laser.style.position = 'absolute';
-                        laser.style.height = '15px';
+                        laser.style.height = '30px';
                         laser.style.width = '1500px';
-                        laser.style.background = 'linear-gradient(90deg, rgba(255,0,0,0) 0%, rgba(255,0,0,1) 50%, rgba(255,0,0,0) 100%)';
+                        laser.style.background = 'linear-gradient(90deg, rgba(255,255,255,0.8) 0%, rgba(0,255,255,1) 10%, rgba(255,0,255,0.8) 50%, rgba(255,0,0,0) 100%)';
                         laser.style.left = a.x + 'px';
-                        laser.style.top = (a.y - 7) + 'px';
+                        laser.style.top = (a.y - 15) + 'px';
                         laser.style.transformOrigin = '0 50%';
-                        const angle = Math.atan2(closest.dy, closest.dx);
-                        laser.style.transform = `rotate(${angle}rad)`;
                         laser.style.zIndex = '100';
                         laser.style.pointerEvents = 'none';
+                        laser.style.animation = 'dg-laser-sweep 1.5s linear forwards';
                         arena.appendChild(laser);
                         
-                        setTimeout(() => laser.remove(), 500);
-                        
-                        const dmg = a.atk * 3;
-                        groupB.forEach(e => {
-                            if (e.hp > 0) {
-                                const dx = e.x - a.x;
-                                const dy = e.y - a.y;
-                                const dist = Math.hypot(dx, dy);
-                                if (dist > 0) {
-                                    let a2 = Math.atan2(dy, dx);
-                                    let diff = Math.abs(a2 - angle);
-                                    if (diff > Math.PI) diff = 2 * Math.PI - diff;
-                                    if (diff < 0.2) {
-                                        e.hp -= dmg;
-                                        spawnDmg(e, -dmg, 'crit');
-                                    }
-                                }
-                            }
+                        projectiles.push({
+                            isLaserSweep: true,
+                            lifetime: 1.5,
+                            maxLifetime: 1.5,
+                            el: laser,
+                            groupB, a,
+                            x: a.x, y: a.y
                         });
                     }
                 }

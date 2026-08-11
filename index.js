@@ -2745,6 +2745,38 @@ var init_style = __esm({
     .dg-dmg.heal { color: #a4dc8c; }
     .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
+    
+    /* Active Skills Effects */
+    @keyframes dg-pulse-shield { 0% { box-shadow: 0 0 10px 2px pink; } 50% { box-shadow: 0 0 25px 8px pink; } 100% { box-shadow: 0 0 10px 2px pink; } }
+    .dg-shield-wall { animation: dg-pulse-shield 1s infinite; border-radius: 50%; }
+    .dg-shield-wall::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid rgba(255, 192, 203, 0.7); box-sizing: content-box; pointer-events: none; }
+    
+    @keyframes dg-heal-up { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 100% { opacity: 0; transform: translate(-50%, -40px) scale(1.5); } }
+    .dg-heal-particle { position: absolute; color: #a4dc8c; font-size: 20px; font-weight: bold; pointer-events: none; animation: dg-heal-up 0.8s ease-out forwards; z-index: 10; text-shadow: 1px 1px 0 #000; }
+    
+    @keyframes dg-pulse-invuln { 0% { box-shadow: 0 0 10px 2px gold; filter: brightness(1); } 50% { box-shadow: 0 0 30px 10px gold; filter: brightness(1.5); } 100% { box-shadow: 0 0 10px 2px gold; filter: brightness(1); } }
+    .dg-invuln-aura { animation: dg-pulse-invuln 1s infinite; border-radius: 50%; }
+    .dg-invuln-aura::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 2px dashed rgba(255, 215, 0, 0.8); box-sizing: content-box; pointer-events: none; animation: dg-spin 4s linear infinite; }
+    @keyframes dg-spin { 100% { transform: rotate(360deg); } }
+    
+    .dg-invis-mode { opacity: 0.3; filter: grayscale(0.5) sepia(1) hue-rotate(240deg); transition: opacity 0.5s, filter 0.5s; }
+    @keyframes dg-smoke-puff { 0% { transform: scale(0.5); opacity: 0.8; } 100% { transform: scale(2); opacity: 0; } }
+    .dg-smoke-particle { position: absolute; width: 20px; height: 20px; background: #888; border-radius: 50%; pointer-events: none; animation: dg-smoke-puff 0.5s ease-out forwards; z-index: 5; }
+    
+    @keyframes dg-dash-trail { 0% { opacity: 0.6; transform: scale(1); } 100% { opacity: 0; transform: scale(0.5); } }
+    .dg-dash-ghost { position: absolute; width: 32px; height: 32px; pointer-events: none; z-index: 1; filter: sepia(1) hue-rotate(180deg); animation: dg-dash-trail 0.3s ease-out forwards; }
+    
+    @keyframes dg-boom { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 50% { opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; } }
+    .dg-boom-effect { position: absolute; width: 40px; height: 40px; border-radius: 50%; background: radial-gradient(circle, rgba(255,100,0,1) 0%, rgba(255,0,0,0) 70%); pointer-events: none; animation: dg-boom 0.4s ease-out forwards; z-index: 5; }
+    
+    @keyframes dg-shake { 0% { transform: translate(2px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(0px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(2px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(2px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+    
+    @keyframes dg-poison-bubble { 0% { transform: translateY(0) scale(1); opacity: 0.8; } 100% { transform: translateY(-20px) scale(1.5); opacity: 0; } }
+    .dg-poison-bubble-particle { position: absolute; width: 6px; height: 6px; background: #0f0; border-radius: 50%; pointer-events: none; animation: dg-poison-bubble 1s ease-out forwards; }
+    @keyframes dg-puddle-pulse { 0% { transform: scale(1); opacity: 0.4; } 50% { transform: scale(1.05); opacity: 0.6; } 100% { transform: scale(1); opacity: 0.4; } }
+    
+    @keyframes dg-laser-sweep { 0% { transform: rotate(0deg); } 100% { transform: rotate(1080deg); } }
+
     .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; overflow-y: auto; padding: 15px; box-sizing: border-box; }
 
     /* Shop UI */
@@ -10828,6 +10860,14 @@ function combatLoop() {
           p2.el.remove();
           return false;
         }
+        if (Math.random() < 0.1) {
+          const bubble = document.createElement("div");
+          bubble.className = "dg-poison-bubble-particle";
+          bubble.style.left = p2.x + Math.random() * 80 - 40 + "px";
+          bubble.style.top = p2.y + Math.random() * 40 - 20 + "px";
+          arena.appendChild(bubble);
+          setTimeout(() => bubble.remove(), 1e3);
+        }
         if (!p2.lastTick || p2.lifetime < p2.lastTick - 1) {
           p2.lastTick = p2.lifetime;
           p2.groupB.forEach((e2) => {
@@ -10837,6 +10877,41 @@ function combatLoop() {
               const dmg = Math.floor(p2.a.atk * 0.5);
               e2.hp -= dmg;
               spawnDmg(e2, -dmg, "poison");
+            }
+          });
+        }
+        return true;
+      }
+      if (p2.isLaserSweep) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          return false;
+        }
+        if (!p2.lastTick || p2.lifetime < p2.lastTick - 0.05) {
+          p2.lastTick = p2.lifetime;
+          const progress = (p2.maxLifetime - p2.lifetime) / p2.maxLifetime;
+          const currentAngle = progress * Math.PI * 6;
+          const dmg = Math.max(1, Math.floor(p2.a.atk * 0.5));
+          p2.groupB.forEach((e2) => {
+            if (e2.hp > 0) {
+              const dx2 = e2.x - p2.x;
+              const dy2 = e2.y - p2.y;
+              const dist2 = Math.hypot(dx2, dy2);
+              if (dist2 > 0) {
+                let a2 = Math.atan2(dy2, dx2);
+                let normalizedAngle = currentAngle % (Math.PI * 2);
+                if (normalizedAngle > Math.PI) normalizedAngle -= Math.PI * 2;
+                let diff = Math.abs(a2 - normalizedAngle);
+                if (diff > Math.PI) diff = 2 * Math.PI - diff;
+                if (diff < 0.3) {
+                  if (!e2._lastLaserHit || p2.lifetime < e2._lastLaserHit - 0.3) {
+                    e2._lastLaserHit = p2.lifetime;
+                    e2.hp -= dmg;
+                    spawnDmg(e2, -dmg, "crit");
+                  }
+                }
+              }
             }
           });
         }
@@ -11211,9 +11286,9 @@ function updateEntities(groupA, groupB, dt2) {
           if (a.activeSkill === "shield_wall") {
             if (!a.status) a.status = {};
             a.status.shield = 3;
-            a.el.style.boxShadow = "0 0 20px 5px pink";
+            a.el.classList.add("dg-shield-wall");
             setTimeout(() => {
-              if (a.el) a.el.style.boxShadow = "";
+              if (a.el) a.el.classList.remove("dg-shield-wall");
             }, 3e3);
           } else if (a.activeSkill === "burst_heal") {
             const flash = document.createElement("div");
@@ -11231,6 +11306,13 @@ function updateEntities(groupA, groupB, dt2) {
                 const heal = ally.maxHp * 0.5;
                 ally.hp = Math.min(ally.maxHp, ally.hp + heal);
                 spawnDmg(ally, heal, "heal");
+                const p2 = document.createElement("div");
+                p2.className = "dg-heal-particle";
+                p2.textContent = "+";
+                p2.style.left = ally.x + "px";
+                p2.style.top = ally.y + "px";
+                arena.appendChild(p2);
+                setTimeout(() => p2.remove(), 800);
               }
             });
           } else if (a.activeSkill === "invulnerable") {
@@ -11238,18 +11320,24 @@ function updateEntities(groupA, groupB, dt2) {
               if (ally.hp > 0) {
                 if (!ally.status) ally.status = {};
                 ally.status.invuln = 3;
-                ally.el.style.boxShadow = "0 0 20px 5px gold";
+                ally.el.classList.add("dg-invuln-aura");
                 setTimeout(() => {
-                  if (ally.el) ally.el.style.boxShadow = "";
+                  if (ally.el) ally.el.classList.remove("dg-invuln-aura");
                 }, 3e3);
               }
             });
           } else if (a.activeSkill === "invisible") {
             if (!a.status) a.status = {};
             a.status.invis = 4;
-            a.el.style.opacity = "0.3";
+            a.el.classList.add("dg-invis-mode");
+            const smoke = document.createElement("div");
+            smoke.className = "dg-smoke-particle";
+            smoke.style.left = a.x - 10 + "px";
+            smoke.style.top = a.y - 10 + "px";
+            arena.appendChild(smoke);
+            setTimeout(() => smoke.remove(), 500);
             setTimeout(() => {
-              if (a.el) a.el.style.opacity = "1";
+              if (a.el) a.el.classList.remove("dg-invis-mode");
             }, 4e3);
           } else if (a.activeSkill === "dash_knockup") {
             const target = closest.b;
@@ -11259,8 +11347,20 @@ function updateEntities(groupA, groupB, dt2) {
             setTimeout(() => {
               if (target.el) target.el.style.transform = `scaleX(${target.dx < 0 ? -1 : 1}) translateY(0px)`;
             }, 1500);
+            const ghost = a.el.cloneNode(true);
+            ghost.className = "dg-dash-ghost";
+            ghost.style.left = a.x + "px";
+            ghost.style.top = a.y + "px";
+            arena.appendChild(ghost);
+            setTimeout(() => ghost.remove(), 300);
             a.x = target.x - closest.dx / closest.dist * 20;
             a.y = target.y - closest.dy / closest.dist * 20;
+            const boom = document.createElement("div");
+            boom.className = "dg-boom-effect";
+            boom.style.left = target.x + "px";
+            boom.style.top = target.y + "px";
+            arena.appendChild(boom);
+            setTimeout(() => boom.remove(), 400);
             const dmg = a.atk * 2;
             target.hp -= dmg;
             spawnDmg(target, -dmg);
@@ -11268,6 +11368,19 @@ function updateEntities(groupA, groupB, dt2) {
             const target = closest.b;
             a.x = target.x - closest.dx / closest.dist * 20;
             a.y = target.y - closest.dy / closest.dist * 20;
+            const boom = document.createElement("div");
+            boom.className = "dg-boom-effect";
+            boom.style.width = "80px";
+            boom.style.height = "80px";
+            boom.style.left = target.x + "px";
+            boom.style.top = target.y + "px";
+            boom.style.background = "radial-gradient(circle, rgba(255,50,0,1) 0%, rgba(255,0,0,0) 70%)";
+            arena.appendChild(boom);
+            setTimeout(() => boom.remove(), 400);
+            arena.style.animation = "dg-shake 0.4s";
+            setTimeout(() => {
+              arena.style.animation = "";
+            }, 400);
             const dmg = a.atk * 5;
             target.hp -= dmg;
             spawnDmg(target, -dmg, "crit");
@@ -11276,13 +11389,14 @@ function updateEntities(groupA, groupB, dt2) {
             const puddle = document.createElement("div");
             puddle.className = "dg-poison-puddle";
             puddle.style.position = "absolute";
-            puddle.style.width = "100px";
-            puddle.style.height = "60px";
+            puddle.style.width = "120px";
+            puddle.style.height = "70px";
             puddle.style.borderRadius = "50%";
-            puddle.style.backgroundColor = "rgba(0, 255, 0, 0.4)";
-            puddle.style.left = target.x - 50 + "px";
-            puddle.style.top = target.y - 30 + "px";
+            puddle.style.backgroundColor = "rgba(0, 255, 0, 0.3)";
+            puddle.style.left = target.x - 60 + "px";
+            puddle.style.top = target.y - 35 + "px";
             puddle.style.zIndex = "0";
+            puddle.style.animation = "dg-puddle-pulse 2s infinite";
             arena.appendChild(puddle);
             projectiles.push({
               x: target.x,
@@ -11296,34 +11410,25 @@ function updateEntities(groupA, groupB, dt2) {
           } else if (a.activeSkill === "laser_beam") {
             const laser = document.createElement("div");
             laser.style.position = "absolute";
-            laser.style.height = "15px";
+            laser.style.height = "30px";
             laser.style.width = "1500px";
-            laser.style.background = "linear-gradient(90deg, rgba(255,0,0,0) 0%, rgba(255,0,0,1) 50%, rgba(255,0,0,0) 100%)";
+            laser.style.background = "linear-gradient(90deg, rgba(255,255,255,0.8) 0%, rgba(0,255,255,1) 10%, rgba(255,0,255,0.8) 50%, rgba(255,0,0,0) 100%)";
             laser.style.left = a.x + "px";
-            laser.style.top = a.y - 7 + "px";
+            laser.style.top = a.y - 15 + "px";
             laser.style.transformOrigin = "0 50%";
-            const angle = Math.atan2(closest.dy, closest.dx);
-            laser.style.transform = `rotate(${angle}rad)`;
             laser.style.zIndex = "100";
             laser.style.pointerEvents = "none";
+            laser.style.animation = "dg-laser-sweep 1.5s linear forwards";
             arena.appendChild(laser);
-            setTimeout(() => laser.remove(), 500);
-            const dmg = a.atk * 3;
-            groupB.forEach((e2) => {
-              if (e2.hp > 0) {
-                const dx = e2.x - a.x;
-                const dy = e2.y - a.y;
-                const dist = Math.hypot(dx, dy);
-                if (dist > 0) {
-                  let a2 = Math.atan2(dy, dx);
-                  let diff = Math.abs(a2 - angle);
-                  if (diff > Math.PI) diff = 2 * Math.PI - diff;
-                  if (diff < 0.2) {
-                    e2.hp -= dmg;
-                    spawnDmg(e2, -dmg, "crit");
-                  }
-                }
-              }
+            projectiles.push({
+              isLaserSweep: true,
+              lifetime: 1.5,
+              maxLifetime: 1.5,
+              el: laser,
+              groupB,
+              a,
+              x: a.x,
+              y: a.y
             });
           }
         }
