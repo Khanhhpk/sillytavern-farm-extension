@@ -11096,8 +11096,8 @@ function combatLoop() {
           }
           const boom = document.createElement("div");
           boom.className = "dg-boom-effect";
-          boom.style.width = p2.isMeteor ? "160px" : "160px";
-          boom.style.height = p2.isMeteor ? "160px" : "160px";
+          boom.style.width = p2.isMeteor ? "160px" : "240px";
+          boom.style.height = p2.isMeteor ? "160px" : "240px";
           boom.style.left = p2.targetX + "px";
           boom.style.top = p2.targetY + "px";
           boom.style.background = p2.isMeteor ? "radial-gradient(circle, rgba(255,200,0,1) 0%, rgba(255,100,0,0) 70%)" : "radial-gradient(circle, rgba(255,100,100,1) 0%, rgba(255,50,50,0) 70%)";
@@ -11124,11 +11124,11 @@ function combatLoop() {
               y: p2.targetY
             });
           }
-          const radius = p2.isMeteor ? 80 : 80;
+          const radius = p2.isMeteor ? 80 : 120;
           p2.groupB.forEach((e2) => {
             if (e2.hp > 0 && Math.hypot(e2.x - p2.targetX, e2.y - p2.targetY) < radius) {
               if (p2.isGasExplosion) {
-                const dmg = p2.a.atk * 2.5;
+                const dmg = p2.a.atk * 3;
                 e2.hp -= dmg;
                 spawnDmg(e2, -dmg, "crit");
               } else {
@@ -11241,13 +11241,16 @@ function combatLoop() {
         p2.el.style.top = p2.y - 30 + "px";
         const rot = p2.lifetime * 500 % 360;
         p2.el.style.transform = `rotate(${rot}deg)`;
+        const arenaRect = p2.el.parentElement.getBoundingClientRect();
+        const rightBound = arenaRect.width - 30;
+        const bottomBound = arenaRect.height - 30;
         let bounced = false;
         if (p2.x < 30) {
           p2.x = 30;
           p2.vx *= -1;
           bounced = true;
-        } else if (p2.x > 930) {
-          p2.x = 930;
+        } else if (p2.x > rightBound) {
+          p2.x = rightBound;
           p2.vx *= -1;
           bounced = true;
         }
@@ -11255,8 +11258,8 @@ function combatLoop() {
           p2.y = 30;
           p2.vy *= -1;
           bounced = true;
-        } else if (p2.y > 420) {
-          p2.y = 420;
+        } else if (p2.y > bottomBound) {
+          p2.y = bottomBound;
           p2.vy *= -1;
           bounced = true;
         }

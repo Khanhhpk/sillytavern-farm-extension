@@ -846,8 +846,8 @@ function combatLoop() {
                 
                 const boom = document.createElement('div');
                 boom.className = 'dg-boom-effect';
-                boom.style.width = p.isMeteor ? '160px' : '160px'; // Both 160
-                boom.style.height = p.isMeteor ? '160px' : '160px';
+                boom.style.width = p.isMeteor ? '160px' : '240px';
+                boom.style.height = p.isMeteor ? '160px' : '240px';
                 boom.style.left = p.targetX + 'px';
                 boom.style.top = p.targetY + 'px';
                 boom.style.background = p.isMeteor ? 'radial-gradient(circle, rgba(255,200,0,1) 0%, rgba(255,100,0,0) 70%)' : 'radial-gradient(circle, rgba(255,100,100,1) 0%, rgba(255,50,50,0) 70%)';
@@ -873,11 +873,11 @@ function combatLoop() {
                     });
                 }
                 
-                const radius = p.isMeteor ? 80 : 80;
+                const radius = p.isMeteor ? 80 : 120;
                 p.groupB.forEach(e => {
                     if (e.hp > 0 && Math.hypot(e.x - p.targetX, e.y - p.targetY) < radius) {
                         if (p.isGasExplosion) {
-                            const dmg = p.a.atk * 2.5;
+                            const dmg = p.a.atk * 3.0;
                             e.hp -= dmg;
                             spawnDmg(e, -dmg, 'crit');
                         } else {
@@ -994,13 +994,17 @@ function combatLoop() {
             
             const rot = (p.lifetime * 500) % 360;
             p.el.style.transform = `rotate(${rot}deg)`;
+            
+            const arenaRect = p.el.parentElement.getBoundingClientRect();
+            const rightBound = arenaRect.width - 30;
+            const bottomBound = arenaRect.height - 30;
 
             let bounced = false;
             if (p.x < 30) { p.x = 30; p.vx *= -1; bounced = true; }
-            else if (p.x > 930) { p.x = 930; p.vx *= -1; bounced = true; }
+            else if (p.x > rightBound) { p.x = rightBound; p.vx *= -1; bounced = true; }
             
             if (p.y < 30) { p.y = 30; p.vy *= -1; bounced = true; }
-            else if (p.y > 420) { p.y = 420; p.vy *= -1; bounced = true; }
+            else if (p.y > bottomBound) { p.y = bottomBound; p.vy *= -1; bounced = true; }
             
             if (bounced) {
                 p.bounces++;
