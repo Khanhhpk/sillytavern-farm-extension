@@ -578,6 +578,53 @@ function _doStartWave() {
     enemies = [];
     projectiles = [];
     fullTeam.forEach(p => { p.waveDmgDealt = 0; p.waveDmgTaken = 0; p.waveHealDone = 0; });
+    if (All.getActiveCookingBuffs) {
+        const buffs = All.getActiveCookingBuffs();
+        if (buffs.length > 0) {
+            fullTeam.forEach(p => {
+                if (!p._cookBuffApplied) {
+                    let hpM = 1, atkM = 1, spdM = 1, addCrit = 0, addDodge = 0;
+                    buffs.forEach(b => {
+                        if (b.type === 'hero_hp') hpM += b.val;
+                        if (b.type === 'hero_atk') atkM += b.val;
+                        if (b.type === 'hero_speed') spdM += b.val;
+                        if (b.type === 'hero_crit') addCrit += b.val;
+                        if (b.type === 'hero_dodge') addDodge += b.val;
+                        if (b.type === 'hero_stats_boost') { atkM += (b.atkVal - 1); hpM += (b.hpVal - 1); }
+                    });
+
+                    p.maxHp = Math.floor(p.maxHp * hpM);
+                    p.hp = p.maxHp; 
+                    p.atk = Math.floor(p.atk * atkM);
+                    p.maxCd = p.maxCd / spdM;
+                    p.critRate = (p.critRate !== undefined ? p.critRate : 0.05) + addCrit;
+                    p.dodge = (p.dodge !== undefined ? p.dodge : (p.id === 'ghostBlob' ? 0.25 : 0.05)) + addDodge;
+                    
+                    p._cookBuffApplied = true;
+                }
+
+                setTimeout(() => {
+                    if (p.el) {
+                        const fl = document.createElement('div');
+                        fl.className = 'dg-dmg heal';
+                        fl.style.color = '#ff88dd';
+                        fl.style.textShadow = '0 1px 2px #000, 0 0 5px #000';
+                        fl.textContent = 'YUMMY BUFF!';
+                        fl.style.left = p.x + 'px';
+                        fl.style.top = (p.y - 20) + 'px';
+                        fl.style.zIndex = '999';
+                        All.$id('dg-arena').appendChild(fl);
+                        setTimeout(() => fl.remove(), 1200);
+                        
+                        if (!p.el.dataset.cookAura) {
+                            p.el.dataset.cookAura = '1';
+                            p.el.style.filter = 'drop-shadow(0 0 5px #ff88dd)';
+                        }
+                    }
+                }, 400);
+            });
+        }
+    }
     const arena = All.$id('dg-arena');
     const w = arena.clientWidth;
     const h = arena.clientHeight;
@@ -1355,6 +1402,13 @@ function showWaveRewards(isLoaded = false) {
             const baseStat = PET_STATS[p.id] || PET_STATS.default;
             // ATK SPD: giảm 10%→8% CD/level, sàn 0.1s→0.15s
             p.maxCd = Math.max(0.15, baseStat.cd * Math.pow(0.92, p.upgrades.aspd || 0));
+            if (All.getActiveCookingBuffs) {
+                let spdM = 1;
+                All.getActiveCookingBuffs().forEach(b => {
+                    if (b.type === 'hero_speed') spdM += b.val;
+                });
+                p.maxCd = p.maxCd / spdM;
+            }
             if (p.critRate === undefined) p.critRate = 0.05;
             if (p.critDmg === undefined) p.critDmg = 1.5;
             // Ma Trắng dodge gốc: 15%→25%
@@ -1528,6 +1582,28 @@ function showWaveRewards(isLoaded = false) {
                     p.range = Math.round(stat.range * Math.pow(1.05, p.upgrades.range || 0));
                     // ATK SPD: 0.9→0.92 (giảm 8%/level), sàn 0.15s
                     p.maxCd = Math.max(0.15, stat.cd * Math.pow(0.92, p.upgrades.aspd || 0));
+
+                    // Re-apply cooking buff multipliers so they are not lost after shop upgrades
+                    if (All.getActiveCookingBuffs && p._cookBuffApplied) {
+                        const buffs = All.getActiveCookingBuffs();
+                        if (buffs.length > 0) {
+                            let hpM = 1, atkM = 1, spdM = 1, addCrit = 0, addDodge = 0;
+                            buffs.forEach(b => {
+                                if (b.type === 'hero_hp') hpM += b.val;
+                                if (b.type === 'hero_atk') atkM += b.val;
+                                if (b.type === 'hero_speed') spdM += b.val;
+                                if (b.type === 'hero_crit') addCrit += b.val;
+                                if (b.type === 'hero_dodge') addDodge += b.val;
+                                if (b.type === 'hero_stats_boost') { atkM += (b.atkVal - 1); hpM += (b.hpVal - 1); }
+                            });
+                            p.maxHp = Math.floor(p.maxHp * hpM);
+                            p.hp = Math.round(p.maxHp * hpPercent);
+                            p.atk = Math.floor(p.atk * atkM);
+                            p.maxCd = p.maxCd / spdM;
+                            p.critRate = (p.critRate !== undefined ? p.critRate : 0.05) + addCrit;
+                            p.dodge = (p.dodge !== undefined ? p.dodge : (p.id === 'ghostBlob' ? 0.25 : 0.05)) + addDodge;
+                        }
+                    }
 
                     if (statId === 'heal_pet') { p.hp = p.maxHp; }
                     if (statId === 'heal_team') {
