@@ -741,6 +741,7 @@ function combatLoop() {
     
     // Update projectiles
     const arena = All.$id('dg-arena');
+    let newProjs = [];
     projectiles = projectiles.filter(p => {
         if (p.isPuddle) {
             p.lifetime -= stepDt;
@@ -847,8 +848,8 @@ function combatLoop() {
                 boom.className = 'dg-boom-effect';
                 boom.style.width = p.isMeteor ? '160px' : '160px'; // Both 160
                 boom.style.height = p.isMeteor ? '160px' : '160px';
-                boom.style.left = (p.targetX - 80) + 'px';
-                boom.style.top = (p.targetY - 80) + 'px';
+                boom.style.left = p.targetX + 'px';
+                boom.style.top = p.targetY + 'px';
                 boom.style.background = p.isMeteor ? 'radial-gradient(circle, rgba(255,200,0,1) 0%, rgba(255,100,0,0) 70%)' : 'radial-gradient(circle, rgba(255,100,100,1) 0%, rgba(255,50,50,0) 70%)';
                 arena.appendChild(boom);
                 setTimeout(() => boom.remove(), 400);
@@ -856,15 +857,15 @@ function combatLoop() {
                 if (p.isMeteor) {
                     const fire = document.createElement('div');
                     fire.style.position = 'absolute';
-                    fire.style.width = '100px';
-                    fire.style.height = '100px';
-                    fire.style.left = (p.targetX - 50) + 'px';
-                    fire.style.top = (p.targetY - 50) + 'px';
+                    fire.style.width = '200px';
+                    fire.style.height = '200px';
+                    fire.style.left = (p.targetX - 100) + 'px';
+                    fire.style.top = (p.targetY - 100) + 'px';
                     fire.style.background = 'rgba(255, 0, 0, 0.3)';
                     fire.style.borderRadius = '50%';
                     fire.style.pointerEvents = 'none';
                     arena.appendChild(fire);
-                    projectiles.push({
+                    newProjs.push({
                         isFireZone: true,
                         lifetime: 5,
                         el: fire, a: p.a, groupB: p.groupB,
@@ -902,7 +903,7 @@ function combatLoop() {
             if (!p.nextTick || p.lifetime < p.nextTick) {
                 p.nextTick = p.lifetime - 1;
                 p.groupB.forEach(e => {
-                    if (e.hp > 0 && Math.hypot(e.x - p.x, e.y - p.y) < 50) {
+                    if (e.hp > 0 && Math.hypot(e.x - p.x, e.y - p.y) < 100) {
                         const dmg = Math.max(1, Math.floor(e.maxHp * 0.1));
                         e.hp -= dmg;
                         spawnDmg(e, -dmg, 'poison');
@@ -984,11 +985,10 @@ function combatLoop() {
                 p.el.remove();
                 return false;
             }
-            p.x += 230 * stepDt;
             if (!p.nextTick || p.lifetime < p.nextTick) {
                 p.nextTick = p.lifetime - 0.5;
                 p.groupB.forEach(e => {
-                    if (e.hp > 0 && Math.abs(e.x - p.x) < 200) {
+                    if (e.hp > 0) {
                         if (!e.status) e.status = {};
                         e.status.freeze = 2;
                         const dmg = Math.max(1, Math.floor(p.a.atk * 0.2));
@@ -1686,9 +1686,6 @@ function updateEntities(groupA, groupB, dt) {
                             `;
                             const bx = a.x + (Math.random() - 0.5) * 80;
                             const by = a.y + (Math.random() - 0.5) * 80;
-                            batEl.style.position = 'absolute';
-                            batEl.style.left = bx + 'px';
-                            batEl.style.top = by + 'px';
                             batEl.style.zIndex = '10';
                             arena.appendChild(batEl);
                             
@@ -1770,22 +1767,20 @@ function updateEntities(groupA, groupB, dt) {
                     }
                     else if (a.activeSkill === 'blizzard') {
                         const blz = document.createElement('div');
-                        blz.innerHTML = spriteSVG('blizzard', 500);
                         blz.style.position = 'absolute';
-                        blz.style.left = '-250px'; 
-                        blz.style.top = '50px';
-                        blz.style.transition = 'left 5s linear';
+                        blz.style.left = '0';
+                        blz.style.top = '0';
+                        blz.style.width = '100%';
+                        blz.style.height = '100%';
+                        blz.style.backgroundColor = 'rgba(150, 200, 255, 0.4)';
+                        blz.style.pointerEvents = 'none';
                         blz.style.zIndex = '50';
-                        blz.style.opacity = '0.7';
                         arena.appendChild(blz);
-                        
-                        setTimeout(() => { blz.style.left = '900px'; }, 50);
                         
                         projectiles.push({
                             isBlizzard: true,
                             lifetime: 5, maxLifetime: 5,
                             el: blz, a, groupB,
-                            x: 0, y: 50,
                             nextTick: 0.5
                         });
                     }
@@ -1990,6 +1985,7 @@ function updateEntities(groupA, groupB, dt) {
             }
         }
     });
+    projectiles.push(...newProjs);
 }
 
 function endDungeon(isWin) {

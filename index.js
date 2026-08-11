@@ -10997,6 +10997,7 @@ function combatLoop() {
     updateEntities(team, enemies, stepDt);
     updateEntities(enemies, team, stepDt);
     const arena = $id("dg-arena");
+    let newProjs2 = [];
     projectiles = projectiles.filter((p2) => {
       if (p2.isPuddle) {
         p2.lifetime -= stepDt;
@@ -11097,23 +11098,23 @@ function combatLoop() {
           boom.className = "dg-boom-effect";
           boom.style.width = p2.isMeteor ? "160px" : "160px";
           boom.style.height = p2.isMeteor ? "160px" : "160px";
-          boom.style.left = p2.targetX - 80 + "px";
-          boom.style.top = p2.targetY - 80 + "px";
+          boom.style.left = p2.targetX + "px";
+          boom.style.top = p2.targetY + "px";
           boom.style.background = p2.isMeteor ? "radial-gradient(circle, rgba(255,200,0,1) 0%, rgba(255,100,0,0) 70%)" : "radial-gradient(circle, rgba(255,100,100,1) 0%, rgba(255,50,50,0) 70%)";
           arena.appendChild(boom);
           setTimeout(() => boom.remove(), 400);
           if (p2.isMeteor) {
             const fire = document.createElement("div");
             fire.style.position = "absolute";
-            fire.style.width = "100px";
-            fire.style.height = "100px";
-            fire.style.left = p2.targetX - 50 + "px";
-            fire.style.top = p2.targetY - 50 + "px";
+            fire.style.width = "200px";
+            fire.style.height = "200px";
+            fire.style.left = p2.targetX - 100 + "px";
+            fire.style.top = p2.targetY - 100 + "px";
             fire.style.background = "rgba(255, 0, 0, 0.3)";
             fire.style.borderRadius = "50%";
             fire.style.pointerEvents = "none";
             arena.appendChild(fire);
-            projectiles.push({
+            newProjs2.push({
               isFireZone: true,
               lifetime: 5,
               el: fire,
@@ -11152,7 +11153,7 @@ function combatLoop() {
         if (!p2.nextTick || p2.lifetime < p2.nextTick) {
           p2.nextTick = p2.lifetime - 1;
           p2.groupB.forEach((e2) => {
-            if (e2.hp > 0 && Math.hypot(e2.x - p2.x, e2.y - p2.y) < 50) {
+            if (e2.hp > 0 && Math.hypot(e2.x - p2.x, e2.y - p2.y) < 100) {
               const dmg = Math.max(1, Math.floor(e2.maxHp * 0.1));
               e2.hp -= dmg;
               spawnDmg(e2, -dmg, "poison");
@@ -11234,11 +11235,10 @@ function combatLoop() {
           p2.el.remove();
           return false;
         }
-        p2.x += 230 * stepDt;
         if (!p2.nextTick || p2.lifetime < p2.nextTick) {
           p2.nextTick = p2.lifetime - 0.5;
           p2.groupB.forEach((e2) => {
-            if (e2.hp > 0 && Math.abs(e2.x - p2.x) < 200) {
+            if (e2.hp > 0) {
               if (!e2.status) e2.status = {};
               e2.status.freeze = 2;
               const dmg = Math.max(1, Math.floor(p2.a.atk * 0.2));
@@ -11869,9 +11869,6 @@ function updateEntities(groupA, groupB, dt2) {
                             `;
               const bx = a.x + (Math.random() - 0.5) * 80;
               const by = a.y + (Math.random() - 0.5) * 80;
-              batEl.style.position = "absolute";
-              batEl.style.left = bx + "px";
-              batEl.style.top = by + "px";
               batEl.style.zIndex = "10";
               arena.appendChild(batEl);
               groupA.push({
@@ -11960,17 +11957,15 @@ function updateEntities(groupA, groupB, dt2) {
             }
           } else if (a.activeSkill === "blizzard") {
             const blz = document.createElement("div");
-            blz.innerHTML = spriteSVG("blizzard", 500);
             blz.style.position = "absolute";
-            blz.style.left = "-250px";
-            blz.style.top = "50px";
-            blz.style.transition = "left 5s linear";
+            blz.style.left = "0";
+            blz.style.top = "0";
+            blz.style.width = "100%";
+            blz.style.height = "100%";
+            blz.style.backgroundColor = "rgba(150, 200, 255, 0.4)";
+            blz.style.pointerEvents = "none";
             blz.style.zIndex = "50";
-            blz.style.opacity = "0.7";
             arena.appendChild(blz);
-            setTimeout(() => {
-              blz.style.left = "900px";
-            }, 50);
             projectiles.push({
               isBlizzard: true,
               lifetime: 5,
@@ -11978,8 +11973,6 @@ function updateEntities(groupA, groupB, dt2) {
               el: blz,
               a,
               groupB,
-              x: 0,
-              y: 50,
               nextTick: 0.5
             });
           }
@@ -12157,6 +12150,7 @@ function updateEntities(groupA, groupB, dt2) {
       }
     }
   });
+  projectiles.push(...newProjs);
 }
 function endDungeon(isWin) {
   phase = "end";
