@@ -299,6 +299,7 @@ function soloStartRound() {
     const inp = All.$id('bj-bet-inp');
     const want = Math.max(0, parseInt(inp ? inp.value : '0') || 0);
     if (want < s.settings.minBet) return bjToast(`Cược tối thiểu ${s.settings.minBet}G`);
+    if (want > 500000) return bjToast('Hệ thống giới hạn cược tối đa 500,000G mỗi ván!');
     if (s.settings.maxBet > 0 && want > s.settings.maxBet) return bjToast(`Cược tối đa ${s.settings.maxBet}G`);
     if (want > coins) return bjToast(`Không đủ vàng (${coins.toLocaleString()}G)`);
 
@@ -1177,6 +1178,7 @@ function bjRoomPlaceBet(amount) {
     const coins = ctx.S.coins || 0;
     if (coins < amount) return bjToast('Không đủ vàng!');
     if (amount < bjSettings.minBet) return bjToast(`Cược tối thiểu ${bjSettings.minBet}G`);
+    if (amount > 500000) return bjToast('Hệ thống giới hạn cược tối đa 500,000G mỗi ván!');
     if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return bjToast(`Cược tối đa ${bjSettings.maxBet}G`);
     ctx.S.coins = coins - amount; save(); renderStatus();
     const msg = { type: 'BET_PLACED', pid: bjMyId, bet: amount };
@@ -1191,7 +1193,12 @@ function bjRoomAction(actionType, extra) {
 
 function bjApplySettings() {
     const min = parseInt(All.$id('bj-cfg-min')?.value) || 10;
-    const max = parseInt(All.$id('bj-cfg-max')?.value) || 0;
+    let max = parseInt(All.$id('bj-cfg-max')?.value) || 0;
+    if (max > 500000) {
+        max = 500000;
+        if (All.$id('bj-cfg-max')) All.$id('bj-cfg-max').value = 500000;
+        bjToast('Cảnh báo: Max bet không được vượt quá 500,000G');
+    }
     const decks = Math.min(8, Math.max(1, parseInt(All.$id('bj-cfg-decks')?.value) || 6));
     const delay = Math.max(5, parseInt(All.$id('bj-cfg-delay')?.value) || 10);
     bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks, delay };
