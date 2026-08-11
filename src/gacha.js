@@ -129,14 +129,14 @@ Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối c�
     }
 
     const rarityGuidance = rarity === 'Huyền thoại' 
-      ? "[Đột phá Quy tắc] Vật phẩm độc nhất vô nhị, xứng danh phẩm chất của nó. Mang tới đủ thứ cho người dùng. Là một vật phẩm danh xứng với thực."
+      ? "[Bậc 4] Vật phẩm độc nhất vô nhị, xứng danh phẩm chất của nó. Mang tới đủ thứ cho người dùng. Là một vật phẩm danh xứng với thực."
       : rarity === 'Sử thi' 
-      ? "[Hảo phẩm] Đồ vật mang tính thay đổi lối chơi (Game-changer). Có sức mạnh lớn, đa dụng, hoặc tự động hóa một quy trình phức tạp. Tuy nhiên, để phát huy tối đa cần có sự tính toán của người chơi. Không quá lỗi game, nhưng có trong tay thì sẽ rất thích."
+      ? "[Bậc 3] Đồ vật mang tính trọng trị (Giá trị cao). Có sức mạnh lớn, đa dụng, giống như sở hữu bậc kì tài. Tuy nhiên, để phát huy tối đa cần có sự tính toán của người chơi. Không quá lỗi game, nhưng có trong tay thì sẽ rất thích."
       : rarity === 'Hiếm'
-      ? "[Cơ chế Đặc biệt] Vật phẩm bắt đầu có 'cơ chế hoạt động' riêng biệt. Có thể có ích, tác dụng thú vị, mang lại lợi ích rõ rệt nhưng sẽ có vài giới hạn nhỏ."
+      ? "[Bậc 2] Vật phẩm bắt đầu có 'cơ chế hoạt động' riêng biệt. Có thể có ích, tác dụng thú vị, mang lại lợi ích rõ rệt nhưng sẽ có vài giới hạn nhỏ."
       : rarity === 'Thường'
-      ? "[Công cụ Cơ bản] Vật phẩm có ích hoặc là thường phẩm thú vị tuy công năng đơn giản, nhưng sở hữu cũng khá thú vị, giới hạn rõ ràng."
-      : "[Vật phẩm] Những món đồ kỳ cục, hỏng hóc hoặc có công dụng cực kỳ vô thưởng vô phạt. Chúng tồn tại chủ yếu để gây cười, tạo tình huống trớ trêu trong tương tác đời thường.";
+      ? "[Bậc 1] Vật phẩm có ích hoặc là thường phẩm thú vị tuy công năng đơn giản, nhưng sở hữu cũng khá thú vị, giới hạn rõ ràng."
+      : "[Bậc 0] Những món đồ kỳ cục, hỏng hóc hoặc có công dụng cực kỳ vô thưởng vô phạt. Chúng tồn tại chủ yếu để gây cười, tạo tình huống trớ trêu trong tương tác đời thường.";
 
     const basePrice = rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : rarity === 'Hiếm' ? 2500 : rarity === 'Thường' ? 500 : 100;
 
