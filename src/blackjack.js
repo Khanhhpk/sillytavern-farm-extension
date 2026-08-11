@@ -1062,7 +1062,7 @@ function bjHandleRoomAction(fromPid, data) {
         h.bet.splice(idx + 1, 0, h.bet[idx]);
         h.stood.splice(idx + 1, 0, false);
         h.doubled.splice(idx + 1, 0, false);
-        if (sc.rank === 'A') {
+        if (c2.rank === 'A') {
             h.splitAceIdxs = h.splitAceIdxs || [];
             h.splitAceIdxs.push(idx, idx + 1);
             h.stood[idx] = true; h.stood[idx + 1] = true;
@@ -1092,7 +1092,7 @@ function bjHostRunDealer() {
     const step = () => {
         if (allBust) { bjHostEndRound(); return; }
         const tot = handTotal(gs.dealerHand);
-        if (tot < 17 || (isSoft(gs.dealerHand) && tot === 16)) {
+        if (tot < 17 || (isSoft(gs.dealerHand) && tot === 17)) {
             gs.dealerHand.push({ ...gs.shoe[gs.shoeIdx++] });
             const hitMsg = { type: 'ACTION', actionType: 'DEALER_HIT', dealerHand: gs.dealerHand };
             bjBroadcast(hitMsg); bjHandleMsg(bjMyId, hitMsg);
