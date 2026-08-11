@@ -838,31 +838,53 @@ function combatLoop() {
             p.lifetime -= stepDt;
             if (p.lifetime <= 0) {
                 p.el.remove();
+                if (p.isGasExplosion && p.targetEnemy && p.targetEnemy.hp > 0) {
+                    p.targetX = p.targetEnemy.x;
+                    p.targetY = p.targetEnemy.y;
+                }
+                
                 const boom = document.createElement('div');
                 boom.className = 'dg-boom-effect';
-                boom.style.width = p.isMeteor ? '160px' : '240px';
-                boom.style.height = p.isMeteor ? '160px' : '240px';
-                boom.style.left = (p.targetX - (p.isMeteor ? 80 : 120)) + 'px';
-                boom.style.top = (p.targetY - (p.isMeteor ? 80 : 120)) + 'px';
+                boom.style.width = p.isMeteor ? '160px' : '160px'; // Both 160
+                boom.style.height = p.isMeteor ? '160px' : '160px';
+                boom.style.left = (p.targetX - 80) + 'px';
+                boom.style.top = (p.targetY - 80) + 'px';
                 boom.style.background = p.isMeteor ? 'radial-gradient(circle, rgba(255,200,0,1) 0%, rgba(255,100,0,0) 70%)' : 'radial-gradient(circle, rgba(255,100,100,1) 0%, rgba(255,50,50,0) 70%)';
                 arena.appendChild(boom);
                 setTimeout(() => boom.remove(), 400);
                 
-                const radius = p.isMeteor ? 80 : 120;
+                if (p.isMeteor) {
+                    const fire = document.createElement('div');
+                    fire.style.position = 'absolute';
+                    fire.style.width = '100px';
+                    fire.style.height = '100px';
+                    fire.style.left = (p.targetX - 50) + 'px';
+                    fire.style.top = (p.targetY - 50) + 'px';
+                    fire.style.background = 'rgba(255, 0, 0, 0.3)';
+                    fire.style.borderRadius = '50%';
+                    fire.style.pointerEvents = 'none';
+                    arena.appendChild(fire);
+                    projectiles.push({
+                        isFireZone: true,
+                        lifetime: 5,
+                        el: fire, a: p.a, groupB: p.groupB,
+                        x: p.targetX, y: p.targetY
+                    });
+                }
+                
+                const radius = p.isMeteor ? 80 : 80;
                 p.groupB.forEach(e => {
                     if (e.hp > 0 && Math.hypot(e.x - p.targetX, e.y - p.targetY) < radius) {
                         if (p.isGasExplosion) {
-                            const dmg = p.a.atk * 4;
+                            const dmg = p.a.atk * 2.5;
                             e.hp -= dmg;
                             spawnDmg(e, -dmg, 'crit');
-                            e.x += (e.x - p.targetX) > 0 ? 10 : -10;
-                            e.y -= 20;
                         } else {
                             const dmg = p.a.atk * 2;
                             e.hp -= dmg;
                             spawnDmg(e, -dmg);
                             if(!e.status) e.status = {};
-                            e.status.stunned = 1;
+                            e.status.stun = 1;
                         }
                     }
                 });
@@ -871,6 +893,25 @@ function combatLoop() {
             return true;
         }
         
+        if (p.isFireZone) {
+            p.lifetime -= stepDt;
+            if (p.lifetime <= 0) {
+                p.el.remove();
+                return false;
+            }
+            if (!p.nextTick || p.lifetime < p.nextTick) {
+                p.nextTick = p.lifetime - 1;
+                p.groupB.forEach(e => {
+                    if (e.hp > 0 && Math.hypot(e.x - p.x, e.y - p.y) < 50) {
+                        const dmg = Math.max(1, Math.floor(e.maxHp * 0.1));
+                        e.hp -= dmg;
+                        spawnDmg(e, -dmg, 'poison');
+                    }
+                });
+            }
+            return true;
+        }
+
         if (p.isBat) {
             p.lifetime -= stepDt;
             if (p.lifetime <= 0) {
@@ -943,7 +984,7 @@ function combatLoop() {
                 p.el.remove();
                 return false;
             }
-            p.x += 150 * stepDt;
+            p.x += 230 * stepDt;
             if (!p.nextTick || p.lifetime < p.nextTick) {
                 p.nextTick = p.lifetime - 0.5;
                 p.groupB.forEach(e => {
@@ -1608,6 +1649,7 @@ function updateEntities(groupA, groupB, dt) {
                                 isGasExplosion: true,
                                 lifetime: 0.55,
                                 el: bomb, a, groupB,
+                                targetEnemy: farthest,
                                 targetX: farthest.x, targetY: farthest.y
                             });
                         } else {
@@ -1632,24 +1674,37 @@ function updateEntities(groupA, groupB, dt) {
                         });
                     }
                     else if (a.activeSkill === 'bat_swarm') {
-                        for(let i=0; i<10; i++) {
-                            const bat = document.createElement('div');
-                            bat.innerHTML = spriteSVG('bat', 48);
-                            bat.style.position = 'absolute';
-                            bat.style.left = '0px';
-                            bat.style.top = '0px';
-                            bat.style.zIndex = '10';
-                            bat.style.transition = 'all 0.2s';
-                            arena.appendChild(bat);
+                        let batCount = 0;
+                        groupA.forEach(m => { if (m.isBatMinion && m.hp > 0) batCount++; });
+                        const maxSpawn = 8 - batCount;
+                        for(let i = 0; i < maxSpawn; i++) {
+                            const batEl = document.createElement('div');
+                            batEl.className = 'dg-entity dg-pet';
+                            batEl.innerHTML = `
+                                <div class="dg-sprite">${spriteSVG('bat', 48)}</div>
+                                <div class="dg-hp-bar"><div class="dg-hp-fill" style="width:100%;"></div></div>
+                            `;
+                            const bx = a.x + (Math.random() - 0.5) * 80;
+                            const by = a.y + (Math.random() - 0.5) * 80;
+                            batEl.style.position = 'absolute';
+                            batEl.style.left = bx + 'px';
+                            batEl.style.top = by + 'px';
+                            batEl.style.zIndex = '10';
+                            arena.appendChild(batEl);
                             
-                            projectiles.push({
-                                isBat: true,
-                                lifetime: 5,
-                                el: bat, a, groupB, groupA,
-                                x: a.x, y: a.y,
-                                dx: (Math.random() - 0.5) * 50,
-                                dy: (Math.random() - 0.5) * 50,
-                                speed: 150
+                            groupA.push({
+                                isMinion: true,
+                                isBatMinion: true,
+                                type: 'pet',
+                                id: 'bat_minion',
+                                hp: 10, maxHp: 10,
+                                atk: Math.floor(a.atk * 0.5),
+                                speed: 120,
+                                range: 25,
+                                x: bx, y: by,
+                                el: batEl,
+                                cd: 0, maxCd: 1.5,
+                                sourcePet: a
                             });
                         }
                     }
@@ -1662,11 +1717,10 @@ function updateEntities(groupA, groupB, dt) {
                             setTimeout(() => { if(ally.el) ally.el.style.filter = ''; }, 5000);
                         });
                         
-                        const count = 3 + Math.floor(Math.random() * 3);
+                        const count = 5 + Math.floor(Math.random() * 4);
                         for(let i=0; i<count; i++) {
-                            const target = groupB[Math.floor(Math.random() * groupB.length)];
-                            if(!target || target.hp <= 0) continue;
-                            const tx = target.x, ty = target.y;
+                            const tx = 50 + Math.random() * 700;
+                            const ty = 50 + Math.random() * 300;
                             
                             const m = document.createElement('div');
                             m.innerHTML = spriteSVG('meteor', 64);
@@ -1731,7 +1785,7 @@ function updateEntities(groupA, groupB, dt) {
                             isBlizzard: true,
                             lifetime: 5, maxLifetime: 5,
                             el: blz, a, groupB,
-                            x: -250, y: 50,
+                            x: 0, y: 50,
                             nextTick: 0.5
                         });
                     }
@@ -1920,6 +1974,17 @@ function updateEntities(groupA, groupB, dt) {
                     } else {
                         closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
                         applyEffect(a, closest.b, groupA, targetGroup);
+                        
+                        if (a.isBatMinion) {
+                            const realPets = groupA.filter(p => p.type === 'pet' && !p.isBatMinion && p.hp > 0);
+                            const ally = realPets[Math.floor(Math.random() * realPets.length)];
+                            if (ally) {
+                                ally.hp = Math.min(ally.maxHp, ally.hp + a.atk);
+                                spawnDmg(ally, a.atk, 'heal');
+                            }
+                            a.hp = 0;
+                            spawnDmg(a, -999);
+                        }
                     }
                 }
             }

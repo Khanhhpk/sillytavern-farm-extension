@@ -11089,34 +11089,75 @@ function combatLoop() {
         p2.lifetime -= stepDt;
         if (p2.lifetime <= 0) {
           p2.el.remove();
+          if (p2.isGasExplosion && p2.targetEnemy && p2.targetEnemy.hp > 0) {
+            p2.targetX = p2.targetEnemy.x;
+            p2.targetY = p2.targetEnemy.y;
+          }
           const boom = document.createElement("div");
           boom.className = "dg-boom-effect";
-          boom.style.width = p2.isMeteor ? "160px" : "240px";
-          boom.style.height = p2.isMeteor ? "160px" : "240px";
-          boom.style.left = p2.targetX - (p2.isMeteor ? 80 : 120) + "px";
-          boom.style.top = p2.targetY - (p2.isMeteor ? 80 : 120) + "px";
+          boom.style.width = p2.isMeteor ? "160px" : "160px";
+          boom.style.height = p2.isMeteor ? "160px" : "160px";
+          boom.style.left = p2.targetX - 80 + "px";
+          boom.style.top = p2.targetY - 80 + "px";
           boom.style.background = p2.isMeteor ? "radial-gradient(circle, rgba(255,200,0,1) 0%, rgba(255,100,0,0) 70%)" : "radial-gradient(circle, rgba(255,100,100,1) 0%, rgba(255,50,50,0) 70%)";
           arena.appendChild(boom);
           setTimeout(() => boom.remove(), 400);
-          const radius = p2.isMeteor ? 80 : 120;
+          if (p2.isMeteor) {
+            const fire = document.createElement("div");
+            fire.style.position = "absolute";
+            fire.style.width = "100px";
+            fire.style.height = "100px";
+            fire.style.left = p2.targetX - 50 + "px";
+            fire.style.top = p2.targetY - 50 + "px";
+            fire.style.background = "rgba(255, 0, 0, 0.3)";
+            fire.style.borderRadius = "50%";
+            fire.style.pointerEvents = "none";
+            arena.appendChild(fire);
+            projectiles.push({
+              isFireZone: true,
+              lifetime: 5,
+              el: fire,
+              a: p2.a,
+              groupB: p2.groupB,
+              x: p2.targetX,
+              y: p2.targetY
+            });
+          }
+          const radius = p2.isMeteor ? 80 : 80;
           p2.groupB.forEach((e2) => {
             if (e2.hp > 0 && Math.hypot(e2.x - p2.targetX, e2.y - p2.targetY) < radius) {
               if (p2.isGasExplosion) {
-                const dmg = p2.a.atk * 4;
+                const dmg = p2.a.atk * 2.5;
                 e2.hp -= dmg;
                 spawnDmg(e2, -dmg, "crit");
-                e2.x += e2.x - p2.targetX > 0 ? 10 : -10;
-                e2.y -= 20;
               } else {
                 const dmg = p2.a.atk * 2;
                 e2.hp -= dmg;
                 spawnDmg(e2, -dmg);
                 if (!e2.status) e2.status = {};
-                e2.status.stunned = 1;
+                e2.status.stun = 1;
               }
             }
           });
           return false;
+        }
+        return true;
+      }
+      if (p2.isFireZone) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          return false;
+        }
+        if (!p2.nextTick || p2.lifetime < p2.nextTick) {
+          p2.nextTick = p2.lifetime - 1;
+          p2.groupB.forEach((e2) => {
+            if (e2.hp > 0 && Math.hypot(e2.x - p2.x, e2.y - p2.y) < 50) {
+              const dmg = Math.max(1, Math.floor(e2.maxHp * 0.1));
+              e2.hp -= dmg;
+              spawnDmg(e2, -dmg, "poison");
+            }
+          });
         }
         return true;
       }
@@ -11193,7 +11234,7 @@ function combatLoop() {
           p2.el.remove();
           return false;
         }
-        p2.x += 150 * stepDt;
+        p2.x += 230 * stepDt;
         if (!p2.nextTick || p2.lifetime < p2.nextTick) {
           p2.nextTick = p2.lifetime - 0.5;
           p2.groupB.forEach((e2) => {
@@ -11788,6 +11829,7 @@ function updateEntities(groupA, groupB, dt2) {
                 el: bomb,
                 a,
                 groupB,
+                targetEnemy: farthest,
                 targetX: farthest.x,
                 targetY: farthest.y
               });
@@ -11813,27 +11855,41 @@ function updateEntities(groupA, groupB, dt2) {
               }, 4e3);
             });
           } else if (a.activeSkill === "bat_swarm") {
-            for (let i2 = 0; i2 < 10; i2++) {
-              const bat = document.createElement("div");
-              bat.innerHTML = spriteSVG("bat", 48);
-              bat.style.position = "absolute";
-              bat.style.left = "0px";
-              bat.style.top = "0px";
-              bat.style.zIndex = "10";
-              bat.style.transition = "all 0.2s";
-              arena.appendChild(bat);
-              projectiles.push({
-                isBat: true,
-                lifetime: 5,
-                el: bat,
-                a,
-                groupB,
-                groupA,
-                x: a.x,
-                y: a.y,
-                dx: (Math.random() - 0.5) * 50,
-                dy: (Math.random() - 0.5) * 50,
-                speed: 150
+            let batCount = 0;
+            groupA.forEach((m2) => {
+              if (m2.isBatMinion && m2.hp > 0) batCount++;
+            });
+            const maxSpawn = 8 - batCount;
+            for (let i2 = 0; i2 < maxSpawn; i2++) {
+              const batEl = document.createElement("div");
+              batEl.className = "dg-entity dg-pet";
+              batEl.innerHTML = `
+                                <div class="dg-sprite">${spriteSVG("bat", 48)}</div>
+                                <div class="dg-hp-bar"><div class="dg-hp-fill" style="width:100%;"></div></div>
+                            `;
+              const bx = a.x + (Math.random() - 0.5) * 80;
+              const by = a.y + (Math.random() - 0.5) * 80;
+              batEl.style.position = "absolute";
+              batEl.style.left = bx + "px";
+              batEl.style.top = by + "px";
+              batEl.style.zIndex = "10";
+              arena.appendChild(batEl);
+              groupA.push({
+                isMinion: true,
+                isBatMinion: true,
+                type: "pet",
+                id: "bat_minion",
+                hp: 10,
+                maxHp: 10,
+                atk: Math.floor(a.atk * 0.5),
+                speed: 120,
+                range: 25,
+                x: bx,
+                y: by,
+                el: batEl,
+                cd: 0,
+                maxCd: 1.5,
+                sourcePet: a
               });
             }
           } else if (a.activeSkill === "shooting_star") {
@@ -11846,11 +11902,10 @@ function updateEntities(groupA, groupB, dt2) {
                 if (ally.el) ally.el.style.filter = "";
               }, 5e3);
             });
-            const count2 = 3 + Math.floor(Math.random() * 3);
+            const count2 = 5 + Math.floor(Math.random() * 4);
             for (let i2 = 0; i2 < count2; i2++) {
-              const target = groupB[Math.floor(Math.random() * groupB.length)];
-              if (!target || target.hp <= 0) continue;
-              const tx = target.x, ty = target.y;
+              const tx = 50 + Math.random() * 700;
+              const ty = 50 + Math.random() * 300;
               const m2 = document.createElement("div");
               m2.innerHTML = spriteSVG("meteor", 64);
               m2.style.position = "absolute";
@@ -11923,7 +11978,7 @@ function updateEntities(groupA, groupB, dt2) {
               el: blz,
               a,
               groupB,
-              x: -250,
+              x: 0,
               y: 50,
               nextTick: 0.5
             });
@@ -12087,6 +12142,16 @@ function updateEntities(groupA, groupB, dt2) {
           } else {
             closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
             applyEffect(a, closest.b, groupA, targetGroup);
+            if (a.isBatMinion) {
+              const realPets = groupA.filter((p2) => p2.type === "pet" && !p2.isBatMinion && p2.hp > 0);
+              const ally = realPets[Math.floor(Math.random() * realPets.length)];
+              if (ally) {
+                ally.hp = Math.min(ally.maxHp, ally.hp + a.atk);
+                spawnDmg(ally, a.atk, "heal");
+              }
+              a.hp = 0;
+              spawnDmg(a, -999);
+            }
           }
         }
       }
