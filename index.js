@@ -3241,8 +3241,11 @@ var init_style = __esm({
     .race-lane:last-child { border-bottom:0; }
     .race-finish { position:absolute; top:0; bottom:0; right:8px; width:6px;
       background:repeating-linear-gradient(180deg,#fffdf4 0 6px,#3a2c22 6px 12px); }
+    /* V\u1ECB tr\xED \u0111\u1EB7t qua translate (kh\xF4ng ph\u1EA3i transform) \u0111\u1EC3 rotate c\u1EE7a .stumble
+       kh\xF4ng xoay lu\xF4n vector d\u1EDDi ch\u1ED7 \u2014 xem gi\u1EA3i th\xEDch \u1EDF race.js ch\u1ED7 g\xE1n
+       el.style.translate. transition/will-change \u0111\u1ED5i theo cho kh\u1EDBp. */
     .race-runner { position:absolute; bottom:2px; left:0; width:36px; height:36px;
-      transition:transform .05s linear; will-change:transform; }
+      transition:translate .05s linear; will-change:translate; }
     .race-runner.flip { scale:-1 1; }
     .race-runner.stumble { rotate:-14deg; filter:saturate(.6); }
     .race-runner.burst { filter:drop-shadow(0 0 6px #f2c231); }
@@ -3270,6 +3273,24 @@ var init_style = __esm({
     .race-help ol { margin: 3px 0 6px 18px; padding: 0; }
     .race-help li { margin-bottom: 2px; }
     .race-help-note { margin-top: 4px; color: #6b4f2e; }
+    /* Bong b\xF3ng tho\u1EA1i tr\xEAn \u0111\u01B0\u1EDDng \u0111ua. Kh\xE1c n\xF4ng tr\u1EA1i \u1EDF ch\u1ED7 neo:
+       .pbubble g\u1ED1c neo PH\xCDA TR\xCAN con th\xFA, m\xE0 m\u1ED7i l\xE0n \u0111ua ch\u1EC9 cao 44px n\xEAn n\xF3
+       s\u1EBD c\u1EAFn sang l\xE0n k\u1EBF v\xE0 che con th\xFA \u1EDF l\xE0n tr\u01B0\u1EDBc. Neo sang TR\xC1I th\xEC bong
+       b\xF3ng n\u1EB1m tr\xEAn qu\xE3ng \u0111\u01B0\u1EDDng con th\xFA \u0111\xE3 ch\u1EA1y qua \u2014 ch\u1ED7 \u0111\xF3 tr\u1ED1ng, v\xE0 n\xF3 \u1EDF
+       nguy\xEAn trong d\u1EA3i l\xE0n c\u1EE7a m\xECnh.
+       Kh\xF4ng d\xF9ng transform \u0111\u1EC3 \u0111\u1ECBnh v\u1ECB: keyframes pbfloat \u0111\xE3 chi\u1EBFm thu\u1ED9c t\xEDnh
+       transform, \u0111\u1EB7t th\xEAm \u1EDF \u0111\xE2y s\u1EBD b\u1ECB ho\u1EA1t \u1EA3nh ghi \u0111\xE8. D\xF9ng top c\u1ED1 \u0111\u1ECBnh 8px
+       \u0111\u1EC3 c\u0103n gi\u1EEFa theo chi\u1EC1u d\u1ECDc so v\u1EDBi con th\xFA cao 36px. */
+    .pbubble.rb { right: calc(100% + 4px); left: auto; bottom: auto; top: 8px;
+      white-space: normal; max-width: 120px; line-height: 1.25;
+      border-radius: 8px 8px 0 8px; text-align: center; }
+    /* S\xE1t v\u1EA1ch xu\u1EA5t ph\xE1t th\xEC bong b\xF3ng b\xEAn tr\xE1i s\u1EBD tr\xE0n ra ngo\xE0i v\xE0 b\u1ECB
+       overflow:hidden c\u1EE7a .race-track c\u1EAFt c\u1EE5t \u2014 l\u1EADt sang ph\u1EA3i. */
+    .pbubble.rb.flip { left: calc(100% + 4px); right: auto; border-radius: 8px 8px 8px 0; }
+    /* .race-runner.stumble nghi\xEAng c\u1EA3 con th\xFA l\u1EABn bong b\xF3ng con c\u1EE7a n\xF3.
+       Xoay ng\u01B0\u1EE3c l\u1EA1i \u0111\xFAng b\u1EB1ng ng\u1EA7n \u1EA5y \u0111\u1EC3 ch\u1EEF v\u1EABn th\u1EB3ng \u2014 v\u1EA5p l\xE0 l\xFAc hay c\xF3
+       tho\u1EA1i nh\u1EA5t n\xEAn kh\xF4ng th\u1EC3 \u0111\u1EC3 ch\u1EEF nghi\xEAng ng\u1EA3. */
+    .race-runner.stumble .pbubble.rb { rotate: 14deg; }
     /* .race-help gi\u1EDD l\xE0 <details>: b\u1ECF d\u1EA5u tam gi\xE1c m\u1EB7c \u0111\u1ECBnh c\u1EE7a tr\xECnh duy\u1EC7t v\xEC
        n\xF3 l\u1EC7ch t\xF4ng v\u1EDBi c\xE1c icon v\u1EBD tay c\xF2n l\u1EA1i c\u1EE7a giao di\u1EC7n, thay b\u1EB1ng ch\u1EEF \u0111\u1EADm
        + con tr\u1ECF tay \u0111\u1EC3 v\u1EABn r\xF5 l\xE0 b\u1EA5m \u0111\u01B0\u1EE3c. Gi\u1EEF \u0111\xFAng b\u1EA3ng m\xE0u #6b4f2e/#a3763d
@@ -4028,10 +4049,10 @@ __export(pets_exports, {
   walkTo: () => walkTo,
   wander: () => wander
 });
-function petBubble(el, txt) {
+function petBubble(el, txt, extraClass) {
   el.querySelector(".pbubble")?.remove();
   const b2 = document.createElement("span");
-  b2.className = "pbubble";
+  b2.className = extraClass ? "pbubble " + extraClass : "pbubble";
   b2.textContent = txt;
   el.appendChild(b2);
   window.setTimeout(() => b2.remove(), 1700);
@@ -4256,13 +4277,13 @@ function petPlant(el, cry) {
   const empty = [];
   for (let pi = 0; pi < curBlocks() * 4; pi++) if (!curPlots()[pi].crop) empty.push(pi);
   if (!empty.length) return petBubble(el, cry + " h\u1EBFt ch\u1ED7 tr\u1ED1ng r\u1ED3i");
-  const usable = {};
+  const usable2 = {};
   Object.keys(ctx.S.seeds).forEach((id) => {
     if (!(ctx.S.seeds[id] > 0) || !CROPS[id]) return;
-    if (id === "mystery" || (CROPS[id].zone || 1) === ctx.S.page) usable[id] = ctx.S.seeds[id];
+    if (id === "mystery" || (CROPS[id].zone || 1) === ctx.S.page) usable2[id] = ctx.S.seeds[id];
   });
-  if (!Object.keys(usable).length) return petBubble(el, cry + " kh\xF4ng c\xF3 h\u1EA1t n\xE0o tr\u1ED3ng \u0111\u01B0\u1EE3c \u1EDF " + ZONE_NAME[ctx.S.page] + "\u2026");
-  pickFrom("B\xE9 m\u1EA7m s\u01B0\u01A1ng: l\u1EA7n n\xE0y tr\u1ED3ng g\xEC \u0111\xE2y?", usable, (x2) => CROPS[x2].name, (sid) => {
+  if (!Object.keys(usable2).length) return petBubble(el, cry + " kh\xF4ng c\xF3 h\u1EA1t n\xE0o tr\u1ED3ng \u0111\u01B0\u1EE3c \u1EDF " + ZONE_NAME[ctx.S.page] + "\u2026");
+  pickFrom("B\xE9 m\u1EA7m s\u01B0\u01A1ng: l\u1EA7n n\xE0y tr\u1ED3ng g\xEC \u0111\xE2y?", usable2, (x2) => CROPS[x2].name, (sid) => {
     let k2 = 0;
     for (const pi of empty) {
       if (!(ctx.S.seeds[sid] > 0)) break;
@@ -52281,6 +52302,162 @@ var init_race_sim = __esm({
   }
 });
 
+// src/race-lines.js
+function usable(a) {
+  return Array.isArray(a) ? a.filter((s2) => typeof s2 === "string" && s2.trim().length > 0) : [];
+}
+function pickLine(rid, event, cryLines, rnd = Math.random) {
+  const r2 = typeof rnd === "function" ? rnd : Math.random;
+  const own = usable(RUNNER_LINES[rid] && RUNNER_LINES[rid][event]);
+  const shared = usable(EVENT_LINES[event]);
+  const farm = event === "start" ? usable(cryLines) : [];
+  const other = shared.concat(farm);
+  let pool;
+  if (own.length && other.length) pool = r2() < OWN_WEIGHT ? own : other;
+  else if (own.length) {
+    r2();
+    pool = own;
+  } else {
+    r2();
+    pool = other;
+  }
+  if (!pool.length) return FALLBACK;
+  const i2 = Math.min(pool.length - 1, Math.floor(r2() * pool.length));
+  return pool[i2];
+}
+var EVENT_LINES, RUNNER_LINES, OWN_WEIGHT, EVENT_RANK, FALLBACK;
+var init_race_lines = __esm({
+  "src/race-lines.js"() {
+    EVENT_LINES = {
+      start: [
+        "V\xE0o ch\u1ED7\u2026 v\xE0o ch\u1ED7 n\xE0o ta?",
+        "H\xF4m nay ch\xE2n nh\u1EB9 l\u1EAFm!",
+        "Ch\u1EA1y l\xE0 ch\u1EA1y, h\u1ECFi nhi\u1EC1u l\xE0m g\xEC.",
+        "Ai cho t\xF4i m\u01B0\u1EE3n c\xE1i ch\xE2n?",
+        "\u0110\u1EEBng ai chen nh\xE9!"
+      ],
+      stumble: [
+        "\u1ED0i!",
+        "\u01A0\u2026 \u0111\u01B0\u1EDDng tr\u01A1n m\xE0!",
+        "T\xF4i c\u1ED1 \xFD \u0111\u1EA5y.",
+        "H\u1EE5t ch\xE2n r\u1ED3i!",
+        "\u0110\u1EE3i t\xF4i t\xED\u2026"
+      ],
+      burst: [
+        "Ch\u01B0a h\u1EBFt \u0111\xE2u!",
+        "N\xE3y gi\u1EDD t\xF4i \u0111i b\u1ED9 th\xF4i!",
+        "Nh\u01B0\u1EDDng \u0111\u01B0\u1EDDng!",
+        "Gi\u1EDD m\u1EDBi v\xE0o vi\u1EC7c.",
+        "Bung h\u1EBFt s\u1EE9c!"
+      ],
+      lead: [
+        "Nh\u1EA5t r\u1ED3i nh\xE9!",
+        "Ph\xEDa sau \u0111\xF4ng vui kh\xF4ng?",
+        "B\xE1m k\u1ECBp th\xEC b\xE1m \u0111i.",
+        "Gi\xF3 \u1EDF \u0111\xE2y m\xE1t gh\xEA.",
+        "T\xF4i d\u1EABn \u0111\u01B0\u1EDDng cho."
+      ],
+      win: [
+        "V\u1EC1 nh\u1EA5t!",
+        "D\u1EC5 m\xE0.",
+        "Ai \u0111\u1EB7t c\u01B0\u1EE3c t\xF4i th\xEC c\u1EA3m \u01A1n nh\xE9!",
+        "Ghi v\xE0o s\u1ED5 \u0111i!",
+        "C\xF2n ai mu\u1ED1n thi l\u1EA1i kh\xF4ng?"
+      ],
+      last: [
+        "Ph\xF9\u2026 m\u1EC7t.",
+        "Ch\u1EDD t\xF4i v\u1EDBi\u2026",
+        "V\u1EC1 \u0111\xEDch l\xE0 th\u1EAFng r\u1ED3i.",
+        "T\xF4i ch\u1EA1y \u0111\u01B0\u1EDDng d\xE0i c\u01A1.",
+        "H\xF4m nay gi\xF3 ng\u01B0\u1EE3c."
+      ],
+      /* Vượt qua MỘT đối thủ bất kỳ, chưa chắc đã dẫn đầu — khác 'lead' (chiếm ngôi
+         nhất). Đo thực tế cho thấy đây là sự kiện dày đặc nhất và trải đều cả chặng
+         (xem race.js), nên giọng phải nhẹ, thoáng qua, không hô hào như 'burst'/'lead'. */
+      overtake: [
+        "Xin l\u1ED7i nh\xE9, cho qua!",
+        "M\u1ED9t ng\u01B0\u1EDDi r\u1ED3i \u0111\xF3 nha.",
+        "Nh\xEDch l\xEAn t\xED th\xF4i m\xE0.",
+        "\u0110\u1EEBng bu\u1ED3n, c\xF2n d\xE0i m\xE0.",
+        "Qua m\u1EB7t r\u1ED3i \u0111\xF3 nh\xE9~",
+        "T\u1EEB t\u1EEB v\u01B0\u1EE3t l\xEAn \u0111\xE2y."
+      ]
+    };
+    RUNNER_LINES = {
+      r_slime: {
+        start: ["B\u1EE5p! S\u1EB5n s\xE0ng b\u1EE5p!"],
+        burst: ["B\u1EE5p nhanh! B\u1EE5p nhanh!"],
+        overtake: ["B\u1EE5p qua lu\xF4n nh\xE9!"],
+        win: ["T\u1ED5 ti\xEAn b\xE9 tr\xF2n kh\xF4ng thua!"]
+      },
+      r_octo: {
+        lead: ["T\xE1m ch\xE2n, t\xE1m l\u1EA7n nhanh h\u01A1n."],
+        stumble: ["R\u1ED1i ch\xE2n r\u1ED3i\u2026 t\xE1m c\xE1i l\u1EADn!"],
+        overtake: ["T\xE1m ch\xE2n len qua khe h\u1EB9p l\xE0 \u0111\u01B0\u1EE3c."],
+        win: ["\u1EE4c b\u1ED1p! T\xF4i nh\u1EA5t!"]
+      },
+      r_pink: {
+        start: ["Th\u01A1m m\xF9i d\xE2u ch\u01B0a?"],
+        burst: ["H\xEC h\xEC, bay \u0111\xE2y!"],
+        last: ["D\xE2u ch\xEDn ch\u1EADm m\xE0 ng\u1ECDt."]
+      },
+      r_cream: {
+        start: ["T\u1EEB t\u1EEB\u2026 \u0111\xE3 ai ch\u1EA1y \u0111\xE2u."],
+        burst: ["\u01A0, t\xF4i c\u0169ng nhanh \u0111\u01B0\u1EE3c \u0111\u1EA5y ch\u1EE9?"],
+        overtake: ["\u01A0, v\u01B0\u1EE3t \u0111\u01B0\u1EE3c m\u1ED9t ng\u01B0\u1EDDi k\xECa."],
+        last: ["Ch\u1EADm r\xEC r\xEC\u2026 nh\u01B0ng v\u1EABn v\u1EC1."]
+      },
+      r_cloud: {
+        start: ["B\xF4ng b\xF4ng~ \u0111\u1EC3 t\xF4i n\u1ED5i l\xEAn \u0111\xE3."],
+        lead: ["Bay th\xEC nhanh h\u01A1n ch\u1EA1y m\xE0."],
+        stumble: ["Gi\xF3 th\u1ED5i l\u1EC7ch m\u1EA5t r\u1ED3i!"]
+      },
+      r_ghost: {
+        burst: ["Xuy\xEAn qua lu\xF4n nh\xE9!"],
+        lead: ["Uuu~ ai th\u1EA5y t\xF4i kh\xF4ng?"],
+        win: ["Ma th\xEC kh\xF4ng bi\u1EBFt m\u1EC7t."]
+      },
+      r_mystery: {
+        start: ["\u2026\u2026?"],
+        stumble: ["(nghi\xEAng \u0111\u1EA7u kh\xF3 hi\u1EC3u)"],
+        lead: ["(v\u1EABn kh\xF4ng n\xF3i g\xEC)"],
+        win: ["\u2026\u2026!"]
+      },
+      r_jelly: {
+        stumble: ["X\xFAc tu qu\u1EA5n v\xE0o nhau r\u1ED3i!"],
+        burst: ["Cu\u1ED9n cu\u1ED9n\u2026 tr\xF4i nhanh!"],
+        last: ["Tr\xF4i t\u1EDBi \u0111\xE2u hay t\u1EDBi \u0111\xF3."]
+      },
+      r_imp: {
+        stumble: ["H\u01B0! Ai v\u1EEBa \u0111\u1EA9y t\xF4i?"],
+        lead: ["H\xEC h\xEC, t\xF4i c\xF3 b\xED quy\u1EBFt."],
+        overtake: ["L\xE9n qua m\u1EB7t, kh\xF4ng ai \u0111\u1EC3 \xFD \u0111\xE2u."],
+        win: ["Kh\xF4ng ai th\u1EA5y g\xEC \u0111\xFAng kh\xF4ng?"]
+      },
+      r_angel: {
+        lead: ["Xin ph\xE9p \u0111i tr\u01B0\u1EDBc nh\xE9."],
+        stumble: ["Ting\u2026 xin l\u1ED7i v\xEC l\xE0m phi\u1EC1n."],
+        overtake: ["Xin ph\xE9p v\u01B0\u1EE3t l\xEAn m\u1ED9t ch\xFAt."],
+        win: ["Ch\xFAc ph\xFAc cho c\xE1c b\u1EA1n v\u1EC1 sau."]
+      },
+      r_peach: {
+        start: ["X\xEC~ s\u1EE7i b\u1ECDt c\xE1i \u0111\xE3."],
+        burst: ["B\u1ED1p\u2014\u2014! Ga h\u1EBFt c\u1EE1!"],
+        last: ["H\u1EBFt ga r\u1ED3i\u2026"]
+      },
+      r_penguin: {
+        start: ["Tr\u01B0\u1EE3t tuy\u1EBFt n\xE0o!"],
+        stumble: ["N\xFAp n\xFAp\u2026 \xE0 kh\xF4ng, ng\xE3."],
+        burst: ["N\u1EB1m s\u1EA5p tr\u01B0\u1EE3t nhanh h\u01A1n!"],
+        win: ["Pingu nh\u1EA5t!"]
+      }
+    };
+    OWN_WEIGHT = 0.6;
+    EVENT_RANK = { win: 6, last: 5, lead: 4, burst: 3, stumble: 2, overtake: 1, start: 0 };
+    FALLBACK = "\u2026";
+  }
+});
+
 // src/race.js
 function openRaceView() {
   if (isRaceOpen) return;
@@ -52631,6 +52808,47 @@ function playRace(lapLog, finishTicks, onDone) {
   const width = Math.max(60, tr2.clientWidth - 52);
   const t0 = performance.now();
   let ended = false;
+  const n2 = els.length;
+  const lastSayAt = new Array(n2).fill(-Infinity);
+  const sayUntil = new Array(n2).fill(0);
+  const wasStalled = new Array(n2).fill(false);
+  const wasBurst = new Array(n2).fill(false);
+  const doneLane = new Array(n2).fill(false);
+  let leader = -1;
+  let prevRank = null;
+  let saidStart = false, saidWin = false, saidLast = false;
+  const stepMedian = new Array(n2).fill(0);
+  for (let lane = 0; lane < n2; lane++) {
+    const steps = [];
+    for (let t2 = 1; t2 < lapLog.length; t2++) {
+      const a = lapLog[t2 - 1][lane], b2 = lapLog[t2][lane];
+      if (a >= TRACK) continue;
+      steps.push(b2 - a);
+    }
+    steps.sort((x2, y2) => x2 - y2);
+    stepMedian[lane] = steps.length ? steps[Math.floor(steps.length / 2)] : 0;
+  }
+  let winLane = 0, lastLane = 0;
+  for (let i2 = 1; i2 < n2; i2++) {
+    if (finishTicks[i2] < finishTicks[winLane]) winLane = i2;
+    if (finishTicks[i2] > finishTicks[lastLane]) lastLane = i2;
+  }
+  const trySay = (lane, event, now2, x2) => {
+    if (now2 - lastSayAt[lane] < SAY_COOLDOWN_MS) return false;
+    let onScreen = 0;
+    for (let i2 = 0; i2 < n2; i2++) if (now2 < sayUntil[i2]) onScreen++;
+    if (onScreen >= SAY_MAX_ON_SCREEN) return false;
+    const el = els[lane];
+    if (!el) return false;
+    const rid = r2.entrants[lane].rid;
+    const run = runnerById(rid);
+    const cry = run && PETS[run.sp] ? PETS[run.sp].cry : [];
+    const txt = pickLine(rid, event, cry);
+    petBubble(el, txt, x2 < SAY_FLIP_X ? "rb flip" : "rb");
+    lastSayAt[lane] = now2;
+    sayUntil[lane] = now2 + SAY_LIFE_MS;
+    return true;
+  };
   const finish = () => {
     if (ended) return;
     ended = true;
@@ -52646,6 +52864,9 @@ function playRace(lapLog, finishTicks, onDone) {
     const i0 = Math.min(lapLog.length - 1, Math.floor(tick2));
     const i1 = Math.min(lapLog.length - 1, i0 + 1);
     const frac = tick2 - Math.floor(tick2);
+    const cands = [];
+    const posNow = new Array(n2).fill(0);
+    const xNow = new Array(n2).fill(0);
     for (let lane = 0; lane < els.length; lane++) {
       const el = els[lane];
       if (!el) continue;
@@ -52659,28 +52880,88 @@ function playRace(lapLog, finishTicks, onDone) {
         const ph = elapsed % g.dur / g.dur;
         y2 = -Math.sin(ph * Math.PI) * g.hy;
       }
-      el.style.transform = `translate(${x2}px, ${y2}px)`;
-      const stalled = Math.abs(b2 - a) < 0.35 && pos < TRACK;
+      el.style.translate = `${x2}px ${y2}px`;
+      const stalled = b2 - a < STUMBLE_RATIO * stepMedian[lane] && pos < TRACK;
+      const bursting = pos / TRACK > 0.75 && b2 - a > 15;
       el.classList.toggle("stumble", stalled);
-      el.classList.toggle("burst", pos / TRACK > 0.75 && b2 - a > 15);
+      el.classList.toggle("burst", bursting);
+      if (stalled && !wasStalled[lane]) cands.push({ lane, event: "stumble", x: x2 });
+      if (bursting && !wasBurst[lane]) cands.push({ lane, event: "burst", x: x2 });
+      wasStalled[lane] = stalled;
+      wasBurst[lane] = bursting;
+      posNow[lane] = pos;
+      xNow[lane] = x2;
+      if (pos >= TRACK) doneLane[lane] = true;
     }
+    if (!saidStart) {
+      saidStart = true;
+      const order = [];
+      for (let i2 = 0; i2 < n2; i2++) order.push(i2);
+      for (let i2 = order.length - 1; i2 > 0; i2--) {
+        const j = Math.floor(Math.random() * (i2 + 1));
+        const t2 = order[i2];
+        order[i2] = order[j];
+        order[j] = t2;
+      }
+      for (const lane of order.slice(0, SAY_START_COUNT)) cands.push({ lane, event: "start", x: xNow[lane] });
+    }
+    let top = 0;
+    for (let i2 = 1; i2 < n2; i2++) if (posNow[i2] > posNow[top]) top = i2;
+    let leadFiredLane = -1;
+    if (leader === -1) leader = top;
+    else if (top !== leader) {
+      leader = top;
+      leadFiredLane = top;
+      cands.push({ lane: top, event: "lead", x: xNow[top] });
+    }
+    const rankNow = new Array(n2);
+    for (let lane = 0; lane < n2; lane++) {
+      let better = 0;
+      for (let j = 0; j < n2; j++) if (j !== lane && posNow[j] > posNow[lane]) better++;
+      rankNow[lane] = better + 1;
+    }
+    if (prevRank) {
+      for (let lane = 0; lane < n2; lane++) {
+        if (doneLane[lane]) continue;
+        if (lane === leadFiredLane) continue;
+        if (rankNow[lane] < prevRank[lane]) cands.push({ lane, event: "overtake", x: xNow[lane] });
+      }
+    }
+    prevRank = rankNow;
+    if (!saidWin && doneLane[winLane]) {
+      saidWin = true;
+      cands.push({ lane: winLane, event: "win", x: xNow[winLane] });
+    }
+    if (!saidLast && doneLane.every(Boolean)) {
+      saidLast = true;
+      cands.push({ lane: lastLane, event: "last", x: xNow[lastLane] });
+    }
+    cands.sort((p2, q) => EVENT_RANK[q.event] - EVENT_RANK[p2.event]);
+    for (const c2 of cands) trySay(c2.lane, c2.event, elapsed, c2.x);
     if (elapsed >= totalMs) return finish();
     animFrame = window.requestAnimationFrame(step);
   };
   animFrame = window.requestAnimationFrame(step);
 }
-var isRaceOpen, sel, RACE_GAITS, RACE_FLOATY, gaitOf2, animFrame, animEnd, PLACE_LABEL;
+var isRaceOpen, sel, RACE_GAITS, RACE_FLOATY, gaitOf2, SAY_COOLDOWN_MS, SAY_MAX_ON_SCREEN, SAY_LIFE_MS, SAY_FLIP_X, SAY_START_COUNT, STUMBLE_RATIO, animFrame, animEnd, PLACE_LABEL;
 var init_race = __esm({
   "src/race.js"() {
     init_store();
     init_all();
     init_race_sim();
     init_state();
+    init_race_lines();
     isRaceOpen = false;
     sel = null;
     RACE_GAITS = { octo: { dur: 260, hy: 4 }, octoCream: { dur: 290, hy: 4 }, _: { dur: 330, hy: 9 } };
     RACE_FLOATY = { cloudMallow: 1, ghostBlob: 1, jellyfish: 1 };
     gaitOf2 = (sp) => RACE_GAITS[sp] || RACE_GAITS._;
+    SAY_COOLDOWN_MS = 3e3;
+    SAY_MAX_ON_SCREEN = 3;
+    SAY_LIFE_MS = 1700;
+    SAY_FLIP_X = 130;
+    SAY_START_COUNT = 2;
+    STUMBLE_RATIO = 0.7;
     animFrame = null;
     animEnd = null;
     PLACE_LABEL = `V\u1EC1 top ${PLACE_TOP}`;
