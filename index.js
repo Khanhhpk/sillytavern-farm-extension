@@ -10900,7 +10900,8 @@ function _doStartWave() {
       });
     }
   }
-  const arena = $id("dg-arena");
+  arenaEl = $id("dg-arena");
+  const arena = arenaEl;
   const w2 = arena.clientWidth;
   const h = arena.clientHeight;
   updateHUD();
@@ -10992,7 +10993,7 @@ function combatLoop() {
   lastTime = now2;
   if (dt2 > 1) dt2 = 1;
   let steps = 0;
-  const arena = $id("dg-arena");
+  const arena = arenaEl || $id("dg-arena");
   const arenaRect = arena ? arena.getBoundingClientRect() : { width: 960, height: 450 };
   while (dt2 > 0 && steps < 60) {
     let stepDt = Math.min(dt2, 0.016);
@@ -11243,8 +11244,8 @@ function combatLoop() {
         p2.el.style.top = p2.y - 30 + "px";
         const rot = p2.lifetime * 500 % 360;
         p2.el.style.transform = `rotate(${rot}deg)`;
-        const rightBound = (p2.el.parentElement.clientWidth || 960) - 30;
-        const bottomBound = (p2.el.parentElement.clientHeight || 450) - 30;
+        const rightBound = p2.rightBound || 930;
+        const bottomBound = p2.bottomBound || 420;
         let bounced = false;
         if (p2.x < 30) {
           p2.x = 30;
@@ -11481,10 +11482,10 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
 }
 function updateEntities(groupA, groupB, dt2, arenaRect) {
   if (!arenaRect) {
-    const arena2 = $id("dg-arena");
-    arenaRect = arena2 ? arena2.getBoundingClientRect() : { width: 960, height: 450 };
+    const a = arenaEl || $id("dg-arena");
+    arenaRect = a ? a.getBoundingClientRect() : { width: 960, height: 450 };
   }
-  const arena = $id("dg-arena");
+  const arena = arenaEl || $id("dg-arena");
   groupA.forEach((a) => {
     if (a.hp <= 0) return;
     if (a.kb && a.kb.time > 0) {
@@ -12018,6 +12019,8 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
               x: a.x,
               y: a.y,
               hitTargets: /* @__PURE__ */ new Set(),
+              rightBound: arenaRect.width - 30,
+              bottomBound: arenaRect.height - 30,
               el: ball,
               a,
               groupB
@@ -12531,7 +12534,7 @@ function nextWaveSequence(overlay) {
   });
   startWave();
 }
-var isDungeonOpen, phase, gameLoopId, lastTime, team, enemies, projectiles, currentWave, totalGold, shopGold, PET_STATS2, ENEMY_TYPES, fullTeam;
+var isDungeonOpen, phase, gameLoopId, lastTime, team, enemies, projectiles, arenaEl, currentWave, totalGold, shopGold, PET_STATS2, ENEMY_TYPES, fullTeam;
 var init_dungeon = __esm({
   "src/dungeon.js"() {
     init_store();
@@ -12545,6 +12548,7 @@ var init_dungeon = __esm({
     team = [];
     enemies = [];
     projectiles = [];
+    arenaEl = null;
     currentWave = 1;
     totalGold = 0;
     shopGold = 0;

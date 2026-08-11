@@ -11,6 +11,7 @@ let lastTime = 0;
 let team = []; // Currently placed pets
 let enemies = []; // Spawned enemies
 let projectiles = []; // Active projectiles
+let arenaEl = null; // Cached arena element - set once per wave
 
 let currentWave = 1;
 let totalGold = 0;
@@ -627,7 +628,8 @@ function _doStartWave() {
             });
         }
     }
-    const arena = All.$id('dg-arena');
+    arenaEl = All.$id('dg-arena');
+    const arena = arenaEl;
     const w = arena.clientWidth;
     const h = arena.clientHeight;
     
@@ -733,7 +735,7 @@ function combatLoop() {
     
     // Chạy ngầm nhiều bước nhỏ nếu dt lớn
     let steps = 0;
-    const arena = All.$id('dg-arena');
+    const arena = arenaEl || All.$id('dg-arena');
     const arenaRect = arena ? arena.getBoundingClientRect() : { width: 960, height: 450 };
     while (dt > 0 && steps < 60) {
         let stepDt = Math.min(dt, 0.016);
@@ -998,8 +1000,8 @@ function combatLoop() {
             const rot = (p.lifetime * 500) % 360;
             p.el.style.transform = `rotate(${rot}deg)`;
 
-            const rightBound = (p.el.parentElement.clientWidth || 960) - 30;
-            const bottomBound = (p.el.parentElement.clientHeight || 450) - 30;
+            const rightBound = p.rightBound || 930;
+            const bottomBound = p.bottomBound || 420;
 
             let bounced = false;
             if (p.x < 30) { p.x = 30; p.vx *= -1; bounced = true; }
@@ -1269,8 +1271,8 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
 }
 
 function updateEntities(groupA, groupB, dt, arenaRect) {
-    if (!arenaRect) { const arena = All.$id('dg-arena'); arenaRect = arena ? arena.getBoundingClientRect() : { width: 960, height: 450 }; }
-    const arena = All.$id('dg-arena');
+    if (!arenaRect) { const a = arenaEl || All.$id('dg-arena'); arenaRect = a ? a.getBoundingClientRect() : { width: 960, height: 450 }; }
+    const arena = arenaEl || All.$id('dg-arena');
     
     groupA.forEach(a => {
         if (a.hp <= 0) return;
@@ -1822,6 +1824,8 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
                             vx: vx, vy: vy,
                             x: a.x, y: a.y,
                             hitTargets: new Set(),
+                            rightBound: arenaRect.width - 30,
+                            bottomBound: arenaRect.height - 30,
                             el: ball, a, groupB
                         });
                     }
