@@ -11674,9 +11674,12 @@ function showWaveRewards(isLoaded = false) {
       const pct = Math.max(0, p2.hp / p2.maxHp) * 100;
       p2.el.querySelector(".dg-hp-fill").style.width = pct + "%";
       p2.status = {};
-      if (!p2.upgrades) p2.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0, dodge: 0 };
+      if (!p2.upgrades) p2.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0, dodge: 0, skillCdR: 0 };
       const baseStat = PET_STATS2[p2.id] || PET_STATS2.default;
       p2.maxCd = Math.max(0.15, baseStat.cd * Math.pow(0.92, p2.upgrades.aspd || 0));
+      if (baseStat.maxSkillCd) {
+        p2.maxSkillCd = baseStat.maxSkillCd * (1 - (p2.upgrades.skillCdR || 0) * 0.05);
+      }
       if (getActiveCookingBuffs) {
         let spdM = 1;
         getActiveCookingBuffs().forEach((b2) => {
@@ -11800,6 +11803,9 @@ function showWaveRewards(isLoaded = false) {
       if (PET_STATS2[selectedPet.id] && PET_STATS2[selectedPet.id].range > 60) {
         stats.push({ id: "range", name: "T\u1EA7m \u0110\xE1nh (+5%)", val: Math.round(selectedPet.range), lv: u2.range || 0, cost: calc(70, u2.range || 0), forceCanBuy: selectedPet.range < 400 });
       }
+      if (selectedPet.maxSkillCd > 0) {
+        stats.push({ id: "skillCdR", name: "Gi\u1EA3m H\u1ED3i Chi\xEAu (+5%)", val: selectedPet.maxSkillCd.toFixed(1) + "s", lv: u2.skillCdR || 0, cost: Math.floor(200 * Math.pow(1.25, u2.skillCdR || 0)), forceCanBuy: (u2.skillCdR || 0) < 10 });
+      }
       stats.push(
         { id: "heal_pet", name: "H\u1ED3i M\xE1u (Full)", val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: "", cost: healPetCost, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
         { id: "heal_team", name: "H\u1ED3i M\xE1u Team (Full)", val: "T\u1EA5t c\u1EA3", lv: "", cost: healTeamCost, forceCanBuy: hpMissingTeam > 0 }
@@ -11863,6 +11869,9 @@ function showWaveRewards(isLoaded = false) {
           if (statId === "range") {
             p2.upgrades.range = (p2.upgrades.range || 0) + 1;
           }
+          if (statId === "skillCdR") {
+            p2.upgrades.skillCdR = (p2.upgrades.skillCdR || 0) + 1;
+          }
           const stat = PET_STATS2[p2.id] || PET_STATS2.default;
           const oldMax = p2.maxHp > 0 ? p2.maxHp : 1;
           const hpPercent = p2.hp / oldMax;
@@ -11872,6 +11881,9 @@ function showWaveRewards(isLoaded = false) {
           p2.speed = Math.round(stat.speed * Math.pow(1.05, p2.upgrades.spd || 0));
           p2.range = Math.round(stat.range * Math.pow(1.05, p2.upgrades.range || 0));
           p2.maxCd = Math.max(0.15, stat.cd * Math.pow(0.92, p2.upgrades.aspd || 0));
+          if (stat.maxSkillCd) {
+            p2.maxSkillCd = stat.maxSkillCd * (1 - (p2.upgrades.skillCdR || 0) * 0.05);
+          }
           if (getActiveCookingBuffs && p2._cookBuffApplied) {
             const buffs = getActiveCookingBuffs();
             if (buffs.length > 0) {

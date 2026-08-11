@@ -1685,10 +1685,13 @@ function showWaveRewards(isLoaded = false) {
             const pct = Math.max(0, p.hp / p.maxHp) * 100;
             p.el.querySelector('.dg-hp-fill').style.width = pct + '%';
             p.status = {};
-            if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0, dodge: 0 };
+            if (!p.upgrades) p.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0, dodge: 0, skillCdR: 0 };
             const baseStat = PET_STATS[p.id] || PET_STATS.default;
             // ATK SPD: giảm 10%→8% CD/level, sàn 0.1s→0.15s
             p.maxCd = Math.max(0.15, baseStat.cd * Math.pow(0.92, p.upgrades.aspd || 0));
+            if (baseStat.maxSkillCd) {
+                p.maxSkillCd = baseStat.maxSkillCd * (1 - (p.upgrades.skillCdR || 0) * 0.05);
+            }
             if (All.getActiveCookingBuffs) {
                 let spdM = 1;
                 All.getActiveCookingBuffs().forEach(b => {
@@ -1806,6 +1809,9 @@ function showWaveRewards(isLoaded = false) {
             if (PET_STATS[selectedPet.id] && PET_STATS[selectedPet.id].range > 60) {
                 stats.push({ id: 'range', name: 'Tầm Đánh (+5%)', val: Math.round(selectedPet.range), lv: u.range || 0, cost: calc(70, u.range || 0), forceCanBuy: selectedPet.range < 400 });
             }
+            if (selectedPet.maxSkillCd > 0) {
+                stats.push({ id: 'skillCdR', name: 'Giảm Hồi Chiêu (+5%)', val: selectedPet.maxSkillCd.toFixed(1)+'s', lv: u.skillCdR || 0, cost: Math.floor(200 * Math.pow(1.25, u.skillCdR || 0)), forceCanBuy: (u.skillCdR || 0) < 10 });
+            }
 
             stats.push(
                 { id: 'heal_pet', name: 'Hồi Máu (Full)', val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: '', cost: healPetCost, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
@@ -1856,6 +1862,7 @@ function showWaveRewards(isLoaded = false) {
                     if (statId === 'critD') { p.critDmg = Math.round((p.critDmg + 0.2)*10)/10; p.upgrades.critD++; }
                     if (statId === 'dodge') { p.dodge = Math.min(0.4, p.dodge + 0.05); p.upgrades.dodge = (p.upgrades.dodge || 0) + 1; }
                     if (statId === 'range') { p.upgrades.range = (p.upgrades.range || 0) + 1; }
+                    if (statId === 'skillCdR') { p.upgrades.skillCdR = (p.upgrades.skillCdR || 0) + 1; }
                     
                     // Recalibrate base stats based on upgrades
                     const stat = PET_STATS[p.id] || PET_STATS.default;
@@ -1869,6 +1876,9 @@ function showWaveRewards(isLoaded = false) {
                     p.range = Math.round(stat.range * Math.pow(1.05, p.upgrades.range || 0));
                     // ATK SPD: 0.9→0.92 (giảm 8%/level), sàn 0.15s
                     p.maxCd = Math.max(0.15, stat.cd * Math.pow(0.92, p.upgrades.aspd || 0));
+                    if (stat.maxSkillCd) {
+                        p.maxSkillCd = stat.maxSkillCd * (1 - (p.upgrades.skillCdR || 0) * 0.05);
+                    }
 
                     // Re-apply cooking buff multipliers so they are not lost after shop upgrades
                     if (All.getActiveCookingBuffs && p._cookBuffApplied) {
