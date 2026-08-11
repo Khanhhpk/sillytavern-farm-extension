@@ -11165,54 +11165,6 @@ function combatLoop() {
         }
         return true;
       }
-      if (p2.isBat) {
-        p2.lifetime -= stepDt;
-        if (p2.lifetime <= 0) {
-          p2.el.remove();
-          return false;
-        }
-        if (!p2.target || p2.target.hp <= 0) {
-          let closest = null, minDist = Infinity;
-          p2.groupB.forEach((e2) => {
-            if (e2.hp > 0) {
-              const d = Math.hypot(e2.x - p2.x, e2.y - p2.y);
-              if (d < minDist) {
-                minDist = d;
-                closest = e2;
-              }
-            }
-          });
-          p2.target = closest;
-        }
-        if (p2.target) {
-          const dx2 = p2.target.x - p2.x;
-          const dy2 = p2.target.y - p2.y;
-          const dist2 = Math.max(0.1, Math.hypot(dx2, dy2));
-          if (dist2 < 15) {
-            const dmg = p2.a.atk;
-            p2.target.hp -= dmg;
-            spawnDmg(p2.target, -dmg);
-            const ally = p2.groupA[Math.floor(Math.random() * p2.groupA.length)];
-            if (ally && ally.hp > 0) {
-              ally.hp = Math.min(ally.maxHp, ally.hp + dmg);
-              spawnDmg(ally, dmg, "heal");
-            }
-            p2.el.remove();
-            return false;
-          }
-          const move = p2.speed * stepDt;
-          p2.dx = p2.dx * 0.9 + dx2 / dist2 * move * 0.3;
-          p2.dy = p2.dy * 0.9 + dy2 / dist2 * move * 0.3;
-          p2.x += p2.dx;
-          p2.y += p2.dy;
-          p2.el.style.transform = `translate3d(${p2.x - 16}px, ${p2.y - 16}px, 0) scaleX(${p2.dx > 0 ? -1 : 1})`;
-        } else {
-          p2.x += p2.dx * stepDt;
-          p2.y += p2.dy * stepDt;
-          p2.el.style.transform = `translate3d(${p2.x - 16}px, ${p2.y - 16}px, 0) scaleX(${p2.dx > 0 ? -1 : 1})`;
-        }
-        return true;
-      }
       if (p2.isOvergrowth) {
         p2.lifetime -= stepDt;
         if (p2.lifetime <= 0) {
@@ -11532,14 +11484,15 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
       }
       return;
     }
-    if (a.cd > 0) {
+    let currentlyStunned = a.status && a.status.stun > 0;
+    if (a.cd > 0 && !currentlyStunned) {
       a.cd -= dt2;
       if (a.status && a.status.rage > 0) a.cd -= dt2;
     }
     const cdPct = Math.max(0, Math.min(100, (1 - Math.max(0, a.cd) / a.maxCd) * 100));
     const cdFill = a.el.querySelector(".dg-cd-fill");
     if (cdFill) cdFill.style.width = cdPct + "%";
-    if (a.maxSkillCd > 0) {
+    if (a.maxSkillCd > 0 && !currentlyStunned) {
       if (a.skillCd > 0) a.skillCd -= dt2;
       const skillCdBar = a.el.querySelector(".dg-skill-cd-bar");
       if (skillCdBar) {
@@ -12349,6 +12302,7 @@ function showWaveRewards(isLoaded = false) {
         range: p2.range,
         maxCd: p2.maxCd,
         upgrades: { ...p2.upgrades },
+        _cookBuffApplied: p2._cookBuffApplied,
         type: p2.type,
         skill: p2.skill,
         ai: p2.ai,

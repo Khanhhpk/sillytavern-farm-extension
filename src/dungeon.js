@@ -919,52 +919,7 @@ function combatLoop() {
             return true;
         }
 
-        if (p.isBat) {
-            p.lifetime -= stepDt;
-            if (p.lifetime <= 0) {
-                p.el.remove();
-                return false;
-            }
-            if (!p.target || p.target.hp <= 0) {
-                let closest = null, minDist = Infinity;
-                p.groupB.forEach(e => {
-                    if (e.hp > 0) {
-                        const d = Math.hypot(e.x - p.x, e.y - p.y);
-                        if (d < minDist) { minDist = d; closest = e; }
-                    }
-                });
-                p.target = closest;
-            }
-            if (p.target) {
-                const dx = p.target.x - p.x;
-                const dy = p.target.y - p.y;
-                const dist = Math.max(0.1, Math.hypot(dx, dy));
-                if (dist < 15) {
-                    const dmg = p.a.atk;
-                    p.target.hp -= dmg;
-                    spawnDmg(p.target, -dmg);
-                    const ally = p.groupA[Math.floor(Math.random() * p.groupA.length)];
-                    if (ally && ally.hp > 0) {
-                        ally.hp = Math.min(ally.maxHp, ally.hp + dmg);
-                        spawnDmg(ally, dmg, 'heal');
-                    }
-                    p.el.remove();
-                    return false;
-                }
-                const move = p.speed * stepDt;
-                p.dx = (p.dx * 0.9) + (dx / dist * move * 0.3);
-                p.dy = (p.dy * 0.9) + (dy / dist * move * 0.3);
-                p.x += p.dx;
-                p.y += p.dy;
-                p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0) scaleX(${p.dx > 0 ? -1 : 1})`;
-            } else {
-                p.x += p.dx * stepDt;
-                p.y += p.dy * stepDt;
-                p.el.style.transform = `translate3d(${p.x - 16}px, ${p.y - 16}px, 0) scaleX(${p.dx > 0 ? -1 : 1})`;
-            }
-            return true;
-        }
-        
+
         if (p.isOvergrowth) {
             p.lifetime -= stepDt;
             if (p.lifetime <= 0) {
@@ -1328,8 +1283,10 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
             return;
         }
         
+        let currentlyStunned = a.status && a.status.stun > 0;
+        
         // Cooldown tick
-        if (a.cd > 0) {
+        if (a.cd > 0 && !currentlyStunned) {
             a.cd -= dt;
             if (a.status && a.status.rage > 0) a.cd -= dt;
         }
@@ -1338,7 +1295,7 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
         if (cdFill) cdFill.style.width = cdPct + '%';
         
         // --- ACTIVE SKILL TICK ---
-        if (a.maxSkillCd > 0) {
+        if (a.maxSkillCd > 0 && !currentlyStunned) {
             if (a.skillCd > 0) a.skillCd -= dt;
             const skillCdBar = a.el.querySelector('.dg-skill-cd-bar');
             if (skillCdBar) {
@@ -2194,7 +2151,7 @@ function showWaveRewards(isLoaded = false) {
             fullTeam: fullTeam.map(p => ({
                 id: p.id, x: p.x, y: p.y, hp: p.hp, maxHp: p.maxHp, atk: p.atk,
                 speed: p.speed, critRate: p.critRate, critDmg: p.critDmg, dodge: p.dodge, range: p.range,
-                maxCd: p.maxCd, upgrades: { ...p.upgrades },
+                maxCd: p.maxCd, upgrades: { ...p.upgrades }, _cookBuffApplied: p._cookBuffApplied,
                 type: p.type, skill: p.skill, ai: p.ai, cd: p.cd, skillCd: p.skillCd, maxSkillCd: p.maxSkillCd
             }))
         };
