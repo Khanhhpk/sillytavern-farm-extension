@@ -5493,7 +5493,7 @@ function openGachaRatesModal() {
     openGachaModal();
   });
 }
-async function generateAICauldronMerge(itemsData) {
+async function generateAICauldronMerge(itemsData, isSuccess) {
   if (!SEC.url || !SEC.model) return null;
   try {
     const simpleColors = Object.entries(GACHA_P).filter((e2) => typeof e2[1] === "string");
@@ -5515,15 +5515,16 @@ ${it2.spriteMap.join("\n")}`;
     }).join("\n\n");
     const totalValue = itemsData.reduce((sum2, it2) => sum2 + (it2.sell || 0), 0);
     const maxVal = totalValue * 5;
-    const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI qu\u1EA3n l\xFD "N\u1ED3i Ph\xF9 Thu\u1EF7" (Witch's Cauldron) v\xE0 chuy\xEAn gia Pixel Art (n x n, t\u1ED1i thi\u1EC3u 32x32).
+    const resultInstruction = isSuccess ? `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\xC0NH C\xD4NG. Luy\u1EC7n ho\xE1 \u0111\xE3 sinh ra m\u1ED9t v\u1EADt ph\u1EA9m v\u01B0\u1EE3t tr\u1ED9i ho\u1EB7c v\xF4 c\xF9ng th\xFA v\u1ECB. H\xE3y t\u0103ng gi\xE1 tr\u1ECB c\u1EE7a n\xF3 l\xEAn cao h\u01A1n (nh\u01B0ng KH\xD4NG QU\xC1 ${maxVal}G). \u0110\u1ED3 m\u1EDBi ph\u1EA3i c\xF3 \u0111\u1ED9 hi\u1EBFm t\u1EEB [Th\u01B0\u1EDDng] \u0111\u1EBFn [Huy\u1EC1n tho\u1EA1i].` : `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\u1EA4T B\u1EA0I. Qu\xE1 tr\xECnh luy\u1EC7n ho\xE1 \u0111\xE3 x\u1EA3y ra tai n\u1EA1n, sinh ra ph\u1EBF ph\u1EA9m ho\u1EB7c th\u1EE9 c\u1EF1c k\u1EF3 v\xF4 d\u1EE5ng t\u1EA5u h\xE0i. H\xE3y \xE9p gi\xE1 r\u1EDBt th\xEA th\u1EA3m (c\xF3 th\u1EC3 ch\u1EC9 v\xE0i ch\u1EE5c G). \u0110\u1ED3 m\u1EDBi B\u1EAET BU\u1ED8C ph\u1EA3i mang \u0111\u1ED9 hi\u1EBFm [R\xE1c] ho\u1EB7c [Th\u01B0\u1EDDng].`;
+    const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI qu\u1EA3n l\xFD "N\u1ED3i Luy\u1EC7n" (Witch's Cauldron) v\xE0 chuy\xEAn gia Pixel Art (n x n, t\u1ED1i thi\u1EC3u 32x32).
 Ng\u01B0\u1EDDi ch\u01A1i v\u1EEBa b\u1ECF c\xE1c V\u1EADt ph\u1EA9m \u0110\u1ED9c nh\u1EA5t sau v\xE0o n\u1ED3i \u0111\u1EC3 luy\u1EC7n ho\xE1 (dung h\u1EE3p):
 ${itemsDesc}
 
 Nhi\u1EC7m v\u1EE5 c\u1EE7a b\u1EA1n:
-Quy\u1EBFt \u0111\u1ECBnh k\u1EBFt qu\u1EA3 c\u1EE7a qu\xE1 tr\xECnh luy\u1EC7n ho\xE1 n\xE0y. 
-- N\xF3 c\xF3 th\u1EC3 TH\xC0NH C\xD4NG sinh ra m\u1ED9t si\xEAu v\u1EADt ph\u1EA9m m\u1EDBi, ho\u1EB7c TH\u1EA4T B\u1EA0I th\u1EA3m h\u1EA1i sinh ra \u0111\u1ED3 v\xF4 d\u1EE5ng. H\xE3y s\xE1ng t\u1EA1o!
-- C\xE2n b\u1EB1ng gi\xE1 tr\u1ECB (Price): T\u1ED5ng gi\xE1 tr\u1ECB \u0111\u1EA7u v\xE0o l\xE0 ${totalValue}G. N\u1EBFu th\xE0nh c\xF4ng xu\u1EA5t s\u1EAFc, gi\xE1 c\xF3 th\u1EC3 t\u0103ng nh\u01B0ng KH\xD4NG QU\xC1 ${maxVal}G. N\u1EBFu th\u1EA5t b\u1EA1i, gi\xE1 c\xF3 th\u1EC3 t\u1EE5t th\xEA th\u1EA3m. Ph\u1EA3i c\xF4ng b\u1EB1ng, th\xF4ng minh v\xE0 c\xF3 r\u1EE7i ro.
-- V\u1EC1 m\xF4 t\u1EA3: CH\u1EC8 nh\u1EAFc tho\xE1ng qua v\u1EC1 nguy\xEAn li\u1EC7u n\u1EC1n (n\u1EBFu c\u1EA7n), h\xE3y T\u1EACP TRUNG m\xF4 t\u1EA3 m\xF3n \u0111\u1ED3 m\u1EDBi n\xE0y nh\u01B0 m\u1ED9t B\u1EA3o V\u1EADt Gacha \u0111\u1ED9c l\u1EADp, v\u1EDBi c\u01A1 ch\u1EBF ho\u1EA1t \u0111\u1ED9ng ri\xEAng bi\u1EC7t, th\xFA v\u1ECB v\xE0 ph\xE1 v\u1EE1 s\xE1o r\u1ED7ng. \u0110\u1ED3 m\u1EDBi c\u0169ng ph\u1EA3i c\xF3 \u0111\u1ED9 hi\u1EBFm (R\xE1c, Th\u01B0\u1EDDng, Hi\u1EBFm, S\u1EED thi, Huy\u1EC1n tho\u1EA1i).
+Quy\u1EBFt \u0111\u1ECBnh chi ti\u1EBFt v\u1EADt ph\u1EA9m sinh ra t\u1EEB qu\xE1 tr\xECnh n\xE0y. 
+${resultInstruction}
+- C\xE2n b\u1EB1ng gi\xE1 tr\u1ECB (Price): T\u1ED5ng gi\xE1 tr\u1ECB \u0111\u1EA7u v\xE0o l\xE0 ${totalValue}G. Ph\u1EA3i c\xF4ng b\u1EB1ng, th\xF4ng minh v\xE0 ph\u1EA3n \xE1nh \u0111\xFAng m\u1EE9c \u0111\u1ED9 th\xE0nh c\xF4ng/th\u1EA5t b\u1EA1i \u0111\u01B0\u1EE3c giao ph\xF3 \u1EDF tr\xEAn.
+- V\u1EC1 m\xF4 t\u1EA3: CH\u1EC8 nh\u1EAFc tho\xE1ng qua v\u1EC1 nguy\xEAn li\u1EC7u n\u1EC1n (n\u1EBFu c\u1EA7n), h\xE3y T\u1EACP TRUNG m\xF4 t\u1EA3 m\xF3n \u0111\u1ED3 m\u1EDBi n\xE0y nh\u01B0 m\u1ED9t B\u1EA3o V\u1EADt Gacha \u0111\u1ED9c l\u1EADp, v\u1EDBi c\u01A1 ch\u1EBF ho\u1EA1t \u0111\u1ED9ng ri\xEAng bi\u1EC7t, th\xFA v\u1ECB v\xE0 ph\xE1 v\u1EE1 s\xE1o r\u1ED7ng.
 
 ${contextStr}
 
@@ -5535,8 +5536,8 @@ B\u1EA2NG M\xC0U PIXEL CHO PH\xC9P (K\xFD t\u1EF1: M\xE3 m\xE0u Hex):
 ${paletteStr}
 
 H\u01AF\u1EDANG D\u1EAAN T\u01AF DUY (B\u1EAFt bu\u1ED9c ph\u1EA3i c\xF3 th\u1EBB <thinking> tr\u01B0\u1EDBc khi xu\u1EA5t m\xE3):
-1. PH\xC2N T\xCDCH: \u0110\xE1nh gi\xE1 s\u1EF1 k\u1EBFt h\u1EE3p c\u1EE7a c\xE1c nguy\xEAn li\u1EC7u \u0111\u1EA7u v\xE0o. N\xF3 c\xF3 logic h\u1EE3p nh\u1EA5t kh\xF4ng?
-2. QUY\u1EBET \u0110\u1ECANH: Th\xE0nh c\xF4ng r\u1EF1c r\u1EE1, th\xE0nh c\xF4ng v\u1EEBa, hay th\u1EA5t b\u1EA1i th\u1EA3m h\u1EA1i? X\xE1c \u0111\u1ECBnh \u0110\u1ED9 hi\u1EBFm m\u1EDBi v\xE0 \u0110\u1ECBnh gi\xE1.
+1. PH\xC2N T\xCDCH: \u0110\xE1nh gi\xE1 s\u1EF1 k\u1EBFt h\u1EE3p c\u1EE7a c\xE1c nguy\xEAn li\u1EC7u \u0111\u1EA7u v\xE0o v\xE0 Tu\xE2n th\u1EE7 K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C.
+2. QUY\u1EBET \u0110\u1ECANH: X\xE1c \u0111\u1ECBnh \u0110\u1ED9 hi\u1EBFm m\u1EDBi v\xE0 \u0110\u1ECBnh gi\xE1.
 3. THI\u1EBET K\u1EBE: T\u1EA1o t\xEAn, m\xF4 t\u1EA3 c\u01A1 ch\u1EBF c\u1EE7a m\xF3n \u0111\u1ED3 m\u1EDBi.
 4. V\u1EBC PIXEL: Khung pixel t\u1ED1i thi\u1EC3u l\xE0 32x32. B\u1EAET BU\u1ED8C ph\u1EA3i l\xE0 l\u01B0\u1EDBi H\xCCNH VU\xD4NG n x n (s\u1ED1 d\xF2ng v\xE0 s\u1ED1 k\xFD t\u1EF1 m\u1ED7i d\xF2ng ph\u1EA3i b\u1EB1ng nhau).
 
@@ -5621,9 +5622,10 @@ async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   save();
   renderStatus();
   if (updateLoadingText) updateLoadingText("N\u1ED3i \u0111ang s\xF4i s\xF9ng s\u1EE5c...");
+  const isSuccess = Math.random() < 0.6;
   let resultData = null;
   for (let attempt = 1; attempt <= 3; attempt++) {
-    resultData = await generateAICauldronMerge(itemsData);
+    resultData = await generateAICauldronMerge(itemsData, isSuccess);
     if (resultData) break;
     if (updateLoadingText) updateLoadingText(`\u0110ang th\u1EED l\u1EA1i... (${attempt}/3)`);
   }
@@ -5703,8 +5705,9 @@ function openCauldronModal() {
   const bodyHTML = `
     <div style="display:flex; flex-direction:column; gap:12px; height:60vh; max-height:500px;">
       <div style="text-align:center; padding:10px; background:rgba(0,0,0,0.05); border-radius:8px;">
-        <div style="font-weight:bold; font-size:14px; color:#8a5cc0; margin-bottom:4px;">N\u1ED3i Ph\xF9 Thu\u1EF7 K\xEC Di\u1EC7u</div>
-        <div style="font-size:12px; color:#3a2c22;">B\u1ECF t\u1ED1i thi\u1EC3u 2 m\xF3n b\u1EA3o v\u1EADt Gacha v\xE0o n\u1ED3i. Ph\xF9 thu\u1EF7 s\u1EBD luy\u1EC7n ho\xE1 ch\xFAng th\xE0nh m\u1ED9t m\xF3n \u0111\u1ED3 ho\xE0n to\xE0n m\u1EDBi (c\xF3 th\u1EC3 th\xE0nh c\xF4ng r\u1EF1c r\u1EE1, ho\u1EB7c... th\u1EA5t b\u1EA1i th\u1EA3m h\u1EA1i). Qu\xE1 tr\xECnh n\xE0y ho\xE0n to\xE0n mi\u1EC5n ph\xED!</div>
+        <div style="font-weight:bold; font-size:14px; color:#8a5cc0; margin-bottom:4px;">N\u1ED3i Luy\u1EC7n K\xEC Di\u1EC7u</div>
+        <div style="font-size:12px; color:#3a2c22; margin-bottom:4px;">B\u1ECF t\u1ED1i thi\u1EC3u 2 m\xF3n b\u1EA3o v\u1EADt Gacha v\xE0o n\u1ED3i. Ph\xF9 thu\u1EF7 s\u1EBD luy\u1EC7n ho\xE1 ch\xFAng th\xE0nh m\u1ED9t m\xF3n \u0111\u1ED3 ho\xE0n to\xE0n m\u1EDBi (Qu\xE1 tr\xECnh mi\u1EC5n ph\xED).</div>
+        <div style="font-size:11px; font-weight:bold; color:#cc3700; background:rgba(204,55,0,0.1); padding:4px; border-radius:4px; border:1px dashed rgba(204,55,0,0.3); display:inline-block;">T\u1EC9 l\u1EC7 n\u1ED5 N\u1ED3i: 60% Th\xE0nh C\xF4ng - 40% Th\u1EA5t B\u1EA1i (R\xE1c)</div>
       </div>
       <div id="cauldronItemsList" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:4px;"></div>
       <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(138,92,192,0.1); border:2px solid #8a5cc0; padding:10px; border-radius:8px;">
@@ -5721,7 +5724,7 @@ function openCauldronModal() {
       </div>
     </div>
   `;
-  openModal("L\xF2 N\u1ED3i Ph\xF9 Thu\u1EF7", bodyHTML);
+  openModal("N\u1ED3i Luy\u1EC7n", bodyHTML);
   const updateSum = () => {
     const sum2 = Object.values(selected).reduce((a, b2) => a + b2, 0);
     const totEl = $id("cauldronTotalSel");

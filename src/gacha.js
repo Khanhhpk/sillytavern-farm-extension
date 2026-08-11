@@ -876,7 +876,7 @@ export function openGachaRatesModal() {
 
 // ---------------- LÒ NỒI PHÙ THUỶ (CAULDRON MERGE) ---------------- //
 
-export async function generateAICauldronMerge(itemsData) {
+export async function generateAICauldronMerge(itemsData, isSuccess) {
   if (!SEC.url || !SEC.model) return null;
   try {
     const simpleColors = Object.entries(GACHA_P).filter(e => typeof e[1] === 'string');
@@ -899,15 +899,19 @@ ${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể)'}`;
     const totalValue = itemsData.reduce((sum, it) => sum + (it.sell || 0), 0);
     const maxVal = totalValue * 5;
 
-    const sysPrompt = `Bạn là một AI quản lý "Nồi Phù Thuỷ" (Witch's Cauldron) và chuyên gia Pixel Art (n x n, tối thiểu 32x32).
+    const resultInstruction = isSuccess 
+      ? `[KẾT QUẢ BẮT BUỘC]: THÀNH CÔNG. Luyện hoá đã sinh ra một vật phẩm vượt trội hoặc vô cùng thú vị. Hãy tăng giá trị của nó lên cao hơn (nhưng KHÔNG QUÁ ${maxVal}G). Đồ mới phải có độ hiếm từ [Thường] đến [Huyền thoại].`
+      : `[KẾT QUẢ BẮT BUỘC]: THẤT BẠI. Quá trình luyện hoá đã xảy ra tai nạn, sinh ra phế phẩm hoặc thứ cực kỳ vô dụng tấu hài. Hãy ép giá rớt thê thảm (có thể chỉ vài chục G). Đồ mới BẮT BUỘC phải mang độ hiếm [Rác] hoặc [Thường].`;
+
+    const sysPrompt = `Bạn là một AI quản lý "Nồi Luyện" (Witch's Cauldron) và chuyên gia Pixel Art (n x n, tối thiểu 32x32).
 Người chơi vừa bỏ các Vật phẩm Độc nhất sau vào nồi để luyện hoá (dung hợp):
 ${itemsDesc}
 
 Nhiệm vụ của bạn:
-Quyết định kết quả của quá trình luyện hoá này. 
-- Nó có thể THÀNH CÔNG sinh ra một siêu vật phẩm mới, hoặc THẤT BẠI thảm hại sinh ra đồ vô dụng. Hãy sáng tạo!
-- Cân bằng giá trị (Price): Tổng giá trị đầu vào là ${totalValue}G. Nếu thành công xuất sắc, giá có thể tăng nhưng KHÔNG QUÁ ${maxVal}G. Nếu thất bại, giá có thể tụt thê thảm. Phải công bằng, thông minh và có rủi ro.
-- Về mô tả: CHỈ nhắc thoáng qua về nguyên liệu nền (nếu cần), hãy TẬP TRUNG mô tả món đồ mới này như một Bảo Vật Gacha độc lập, với cơ chế hoạt động riêng biệt, thú vị và phá vỡ sáo rỗng. Đồ mới cũng phải có độ hiếm (Rác, Thường, Hiếm, Sử thi, Huyền thoại).
+Quyết định chi tiết vật phẩm sinh ra từ quá trình này. 
+${resultInstruction}
+- Cân bằng giá trị (Price): Tổng giá trị đầu vào là ${totalValue}G. Phải công bằng, thông minh và phản ánh đúng mức độ thành công/thất bại được giao phó ở trên.
+- Về mô tả: CHỈ nhắc thoáng qua về nguyên liệu nền (nếu cần), hãy TẬP TRUNG mô tả món đồ mới này như một Bảo Vật Gacha độc lập, với cơ chế hoạt động riêng biệt, thú vị và phá vỡ sáo rỗng.
 
 ${contextStr}
 
@@ -919,8 +923,8 @@ BẢNG MÀU PIXEL CHO PHÉP (Ký tự: Mã màu Hex):
 ${paletteStr}
 
 HƯỚNG DẪN TƯ DUY (Bắt buộc phải có thẻ <thinking> trước khi xuất mã):
-1. PHÂN TÍCH: Đánh giá sự kết hợp của các nguyên liệu đầu vào. Nó có logic hợp nhất không?
-2. QUYẾT ĐỊNH: Thành công rực rỡ, thành công vừa, hay thất bại thảm hại? Xác định Độ hiếm mới và Định giá.
+1. PHÂN TÍCH: Đánh giá sự kết hợp của các nguyên liệu đầu vào và Tuân thủ KẾT QUẢ BẮT BUỘC.
+2. QUYẾT ĐỊNH: Xác định Độ hiếm mới và Định giá.
 3. THIẾT KẾ: Tạo tên, mô tả cơ chế của món đồ mới.
 4. VẼ PIXEL: Khung pixel tối thiểu là 32x32. BẮT BUỘC phải là lưới HÌNH VUÔNG n x n (số dòng và số ký tự mỗi dòng phải bằng nhau).
 
@@ -1015,9 +1019,11 @@ export async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   
   if (updateLoadingText) updateLoadingText("Nồi đang sôi sùng sục...");
 
+  const isSuccess = Math.random() < 0.6; // 60% success
+
   let resultData = null;
   for (let attempt = 1; attempt <= 3; attempt++) {
-    resultData = await generateAICauldronMerge(itemsData);
+    resultData = await generateAICauldronMerge(itemsData, isSuccess);
     if (resultData) break;
     if (updateLoadingText) updateLoadingText(`Đang thử lại... (${attempt}/3)`);
   }
@@ -1108,8 +1114,9 @@ export function openCauldronModal() {
   const bodyHTML = `
     <div style="display:flex; flex-direction:column; gap:12px; height:60vh; max-height:500px;">
       <div style="text-align:center; padding:10px; background:rgba(0,0,0,0.05); border-radius:8px;">
-        <div style="font-weight:bold; font-size:14px; color:#8a5cc0; margin-bottom:4px;">Nồi Phù Thuỷ Kì Diệu</div>
-        <div style="font-size:12px; color:#3a2c22;">Bỏ tối thiểu 2 món bảo vật Gacha vào nồi. Phù thuỷ sẽ luyện hoá chúng thành một món đồ hoàn toàn mới (có thể thành công rực rỡ, hoặc... thất bại thảm hại). Quá trình này hoàn toàn miễn phí!</div>
+        <div style="font-weight:bold; font-size:14px; color:#8a5cc0; margin-bottom:4px;">Nồi Luyện Kì Diệu</div>
+        <div style="font-size:12px; color:#3a2c22; margin-bottom:4px;">Bỏ tối thiểu 2 món bảo vật Gacha vào nồi. Phù thuỷ sẽ luyện hoá chúng thành một món đồ hoàn toàn mới (Quá trình miễn phí).</div>
+        <div style="font-size:11px; font-weight:bold; color:#cc3700; background:rgba(204,55,0,0.1); padding:4px; border-radius:4px; border:1px dashed rgba(204,55,0,0.3); display:inline-block;">Tỉ lệ nổ Nồi: 60% Thành Công - 40% Thất Bại (Rác)</div>
       </div>
       <div id="cauldronItemsList" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:4px;"></div>
       <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(138,92,192,0.1); border:2px solid #8a5cc0; padding:10px; border-radius:8px;">
@@ -1127,7 +1134,7 @@ export function openCauldronModal() {
     </div>
   `;
 
-  openModal('Lò Nồi Phù Thuỷ', bodyHTML);
+  openModal('Nồi Luyện', bodyHTML);
 
   const updateSum = () => {
     const sum = Object.values(selected).reduce((a, b) => a + b, 0);
