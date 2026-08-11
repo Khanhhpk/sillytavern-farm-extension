@@ -1368,20 +1368,20 @@ var init_graphics = __esm({
         "................"
       ],
       meteor: [
-        "................",
-        "...............W",
-        "..............WW",
-        ".............WW.",
-        "............UWW.",
-        "......C....UUW..",
-        ".....CCC..UUU...",
-        "....CCCCCUUU....",
-        "...CCCCCCCU.....",
-        "....CCCCC.......",
-        "...CC...CC......",
-        "..C.......C.....",
-        "................",
-        "................",
+        "..............W.",
+        ".............W..",
+        "............WR..",
+        "...........WRR..",
+        "..........WRR...",
+        ".........ORR....",
+        "........OOR.....",
+        ".......COOR.....",
+        "......CCOO......",
+        ".....CCCCO......",
+        "....CCCCCC......",
+        "....CCCCCC......",
+        ".....CCCC.......",
+        "......CC........",
         "................",
         "................"
       ],
@@ -11069,12 +11069,12 @@ function combatLoop() {
         }
         p2.x = p2.a.x;
         p2.y = p2.a.y;
-        p2.el.style.left = p2.x - 40 + "px";
-        p2.el.style.top = p2.y - 40 + "px";
+        p2.el.style.left = p2.x - 80 + "px";
+        p2.el.style.top = p2.y - 80 + "px";
         if (!p2.nextTick || p2.lifetime < p2.nextTick) {
           p2.nextTick = p2.lifetime - 0.2;
           p2.groupB.forEach((e2) => {
-            if (e2.hp > 0 && Math.hypot(e2.x - p2.x, e2.y - p2.y) < 80) {
+            if (e2.hp > 0 && Math.hypot(e2.x - p2.x, e2.y - p2.y) < 100) {
               const dmg = Math.max(1, Math.floor(p2.a.atk * 0.3));
               e2.hp -= dmg;
               spawnDmg(e2, -dmg);
@@ -11093,8 +11093,8 @@ function combatLoop() {
           boom.className = "dg-boom-effect";
           boom.style.width = p2.isMeteor ? "80px" : "120px";
           boom.style.height = p2.isMeteor ? "80px" : "120px";
-          boom.style.left = p2.targetX + "px";
-          boom.style.top = p2.targetY + "px";
+          boom.style.left = p2.targetX - (p2.isMeteor ? 40 : 60) + "px";
+          boom.style.top = p2.targetY - (p2.isMeteor ? 40 : 60) + "px";
           boom.style.background = p2.isMeteor ? "radial-gradient(circle, rgba(255,200,0,1) 0%, rgba(255,100,0,0) 70%)" : "radial-gradient(circle, rgba(255,100,100,1) 0%, rgba(255,50,50,0) 70%)";
           arena.appendChild(boom);
           setTimeout(() => boom.remove(), 400);
@@ -11351,6 +11351,9 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
   if (effectiveArmor > 0) {
     finalDmg = Math.round(finalDmg * (1 - effectiveArmor));
   }
+  if (target.status && target.status.brainFreeze > 0) {
+    finalDmg = Math.round(finalDmg * 1.2);
+  }
   if (skill === "sniper" && attacker) {
     const dist = Math.hypot(target.x - attacker.x, target.y - attacker.y);
     finalDmg += Math.floor(dist * 0.2);
@@ -11435,6 +11438,7 @@ function updateEntities(groupA, groupB, dt2) {
     }
     if (a.cd > 0) {
       a.cd -= dt2;
+      if (a.status && a.status.rage > 0) a.cd -= dt2;
     }
     const cdPct = Math.max(0, Math.min(100, (1 - Math.max(0, a.cd) / a.maxCd) * 100));
     const cdFill = a.el.querySelector(".dg-cd-fill");
@@ -11724,20 +11728,20 @@ function updateEntities(groupA, groupB, dt2) {
           } else if (a.activeSkill === "tentacle_storm") {
             const storm = document.createElement("div");
             storm.style.position = "absolute";
-            storm.style.width = "80px";
-            storm.style.height = "80px";
-            storm.style.left = a.x - 40 + "px";
-            storm.style.top = a.y - 40 + "px";
+            storm.style.width = "160px";
+            storm.style.height = "160px";
+            storm.style.left = a.x - 80 + "px";
+            storm.style.top = a.y - 80 + "px";
             storm.style.pointerEvents = "none";
             storm.style.zIndex = "0";
             for (let i2 = 0; i2 < 4; i2++) {
               const t2 = document.createElement("div");
               t2.style.position = "absolute";
-              t2.style.left = "32px";
+              t2.style.left = "48px";
               t2.style.top = "0";
-              t2.style.transformOrigin = "50% 40px";
+              t2.style.transformOrigin = "50% 80px";
               t2.style.transform = `rotate(${i2 * 90}deg)`;
-              t2.innerHTML = spriteSVG("tentacle", 2);
+              t2.innerHTML = spriteSVG("tentacle", 4);
               storm.appendChild(t2);
             }
             storm.style.animation = "dg-spin 0.5s linear infinite";
@@ -11766,16 +11770,16 @@ function updateEntities(groupA, groupB, dt2) {
             });
             if (farthest) {
               const bomb = document.createElement("div");
-              bomb.innerHTML = spriteSVG("soda_bomb", 2);
+              bomb.innerHTML = spriteSVG("soda_bomb", 4);
               bomb.style.position = "absolute";
-              bomb.style.left = a.x + "px";
-              bomb.style.top = a.y + "px";
+              bomb.style.left = a.x - 32 + "px";
+              bomb.style.top = a.y - 32 + "px";
               bomb.style.transition = "all 0.5s linear";
               bomb.style.zIndex = "100";
               arena.appendChild(bomb);
               setTimeout(() => {
-                bomb.style.left = farthest.x + "px";
-                bomb.style.top = farthest.y + "px";
+                bomb.style.left = farthest.x - 32 + "px";
+                bomb.style.top = farthest.y - 32 + "px";
                 bomb.style.transform = "rotate(360deg)";
               }, 50);
               projectiles.push({
@@ -11797,10 +11801,10 @@ function updateEntities(groupA, groupB, dt2) {
               e2.status.stunned = 4;
               e2.status.brainFreeze = 4;
               const ice = document.createElement("div");
-              ice.innerHTML = spriteSVG("ice_block", 2);
+              ice.innerHTML = spriteSVG("ice_block", 3);
               ice.style.position = "absolute";
-              ice.style.left = e2.x - 16 + "px";
-              ice.style.top = e2.y - 16 + "px";
+              ice.style.left = e2.x - 24 + "px";
+              ice.style.top = e2.y - 24 + "px";
               ice.style.zIndex = "5";
               ice.style.pointerEvents = "none";
               arena.appendChild(ice);
@@ -11811,10 +11815,10 @@ function updateEntities(groupA, groupB, dt2) {
           } else if (a.activeSkill === "bat_swarm") {
             for (let i2 = 0; i2 < 10; i2++) {
               const bat = document.createElement("div");
-              bat.innerHTML = spriteSVG("bat", 2);
+              bat.innerHTML = spriteSVG("bat", 3);
               bat.style.position = "absolute";
-              bat.style.left = a.x + "px";
-              bat.style.top = a.y + "px";
+              bat.style.left = a.x - 24 + "px";
+              bat.style.top = a.y - 24 + "px";
               bat.style.zIndex = "10";
               bat.style.transition = "all 0.2s";
               arena.appendChild(bat);
@@ -11848,7 +11852,7 @@ function updateEntities(groupA, groupB, dt2) {
               if (!target || target.hp <= 0) continue;
               const tx = target.x, ty = target.y;
               const m2 = document.createElement("div");
-              m2.innerHTML = spriteSVG("meteor", 3);
+              m2.innerHTML = spriteSVG("meteor", 4);
               m2.style.position = "absolute";
               m2.style.left = tx + 300 + "px";
               m2.style.top = ty - 300 + "px";
@@ -11856,8 +11860,8 @@ function updateEntities(groupA, groupB, dt2) {
               m2.style.zIndex = "100";
               arena.appendChild(m2);
               setTimeout(() => {
-                m2.style.left = tx - 30 + "px";
-                m2.style.top = ty - 30 + "px";
+                m2.style.left = tx - 32 + "px";
+                m2.style.top = ty - 32 + "px";
               }, 50);
               projectiles.push({
                 isMeteor: true,
@@ -11882,10 +11886,10 @@ function updateEntities(groupA, groupB, dt2) {
               cx /= count2;
               cy /= count2;
               const vortex = document.createElement("div");
-              vortex.innerHTML = spriteSVG("root_vortex", 4);
+              vortex.innerHTML = spriteSVG("root_vortex", 6);
               vortex.style.position = "absolute";
-              vortex.style.left = cx - 32 + "px";
-              vortex.style.top = cy - 32 + "px";
+              vortex.style.left = cx - 48 + "px";
+              vortex.style.top = cy - 48 + "px";
               vortex.style.animation = "dg-spin 2s linear infinite";
               vortex.style.zIndex = "0";
               arena.appendChild(vortex);
