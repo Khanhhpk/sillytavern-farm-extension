@@ -1049,6 +1049,26 @@ function updateEntities(groupA, groupB, dt) {
     groupA.forEach(a => {
         if (a.hp <= 0) return;
         
+        if (a.kb && a.kb.time > 0) {
+            a.kb.time -= dt;
+            a.x += a.kb.dx * a.kb.speed * dt;
+            a.y += a.kb.dy * a.kb.speed * dt;
+            const arenaRect = arena.getBoundingClientRect();
+            a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
+            a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
+            a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+            
+            groupA.forEach(other => {
+               if (other !== a && other.hp > 0 && Math.hypot(other.x - a.x, other.y - a.y) < 30) {
+                   if (!other.status) other.status = {};
+                   if (!other.status.stun) { 
+                       other.status.stun = 1.0;
+                   }
+               }
+            });
+            return;
+        }
+        
         // Cooldown tick
         if (a.cd > 0) {
             a.cd -= dt;
@@ -1078,6 +1098,8 @@ function updateEntities(groupA, groupB, dt) {
         let isRooted = false;
         let speedMult = 1;
         let atkSpdMult = 1;
+        let isDashing = a.status && a.status.dashing;
+        if (isDashing) speedMult *= 6;
         
         for (let eff in a.status) {
             if (a.status[eff] > 0) {
@@ -1298,32 +1320,8 @@ function updateEntities(groupA, groupB, dt) {
                         setTimeout(() => { if(a.el) a.el.classList.remove('dg-invis-mode'); }, 4000);
                     }
                     else if (a.activeSkill === 'dash_knockup') {
-                        const target = closest.b;
-                        if (!target.status) target.status = {};
-                        target.status.stun = 1.5;
-                        target.el.style.transform = `scaleX(${target.dx < 0 ? -1 : 1}) translateY(-20px)`;
-                        setTimeout(() => { if (target.el) target.el.style.transform = `scaleX(${target.dx < 0 ? -1 : 1}) translateY(0px)`; }, 1500);
-                        
-                        const ghost = a.el.cloneNode(true);
-                        ghost.className = 'dg-dash-ghost';
-                        ghost.style.left = a.x + 'px';
-                        ghost.style.top = a.y + 'px';
-                        arena.appendChild(ghost);
-                        setTimeout(() => ghost.remove(), 300);
-
-                        a.x = target.x - (closest.dx / closest.dist) * 20;
-                        a.y = target.y - (closest.dy / closest.dist) * 20;
-                        
-                        const boom = document.createElement('div');
-                        boom.className = 'dg-boom-effect';
-                        boom.style.left = target.x + 'px';
-                        boom.style.top = target.y + 'px';
-                        arena.appendChild(boom);
-                        setTimeout(() => boom.remove(), 400);
-
-                        const dmg = a.atk * 2;
-                        target.hp -= dmg;
-                        spawnDmg(target, -dmg);
+                        if (!a.status) a.status = {};
+                        a.status.dashing = true;
                     }
                     else if (a.activeSkill === 'nuke_crit') {
                         const target = closest.b;
@@ -1407,7 +1405,6 @@ function updateEntities(groupA, groupB, dt) {
             else if (closest.dx < -1 && a.type === 'enemy') a.el.classList.remove('flip');
             
             let isRanged = a.range >= 80 || a.ai === 'ranged';
-            let inRange = closest.dist <= a.range || (a.skill === 'heal' && closest.dist <= 10);
             
             let baseRange = a.range;
             if (a.type === 'pet' && PET_STATS[a.id]) baseRange = PET_STATS[a.id].range;
@@ -1415,6 +1412,9 @@ function updateEntities(groupA, groupB, dt) {
                 const en = ENEMY_TYPES.find(e => e.id === a.id);
                 if (en) baseRange = en.range;
             }
+            if (isDashing) baseRange = 25;
+
+            let inRange = closest.dist <= baseRange || (a.skill === 'heal' && closest.dist <= 10);
             let tooClose = isRanged && closest.dist < baseRange * 0.4 && closest.b.type !== a.type;
             
             if (a.panic > 0) a.panic -= dt;
@@ -1494,7 +1494,30 @@ function updateEntities(groupA, groupB, dt) {
             } 
             
             if (inRange) {
-                if (a.cd <= 0) {
+                if (a.cd <= 0 || isDashing) {
+                    if (isDashing) {
+                        a.status.dashing = false;
+                        const target = closest.b;
+                        const dmg = a.atk * 2;
+                        target.hp -= dmg;
+                        spawnDmg(target, -dmg);
+                        
+                        let kbDx = closest.dx / closest.dist;
+                        let kbDy = closest.dy / closest.dist;
+                        
+                        if (!target.status) target.status = {};
+                        target.status.stun = 1.5;
+                        target.kb = { dx: kbDx, dy: kbDy, time: 0.3, speed: 400 };
+                        
+                        const boom = document.createElement('div');
+                        boom.className = 'dg-boom-effect';
+                        boom.style.left = target.x + 'px';
+                        boom.style.top = target.y + 'px';
+                        arena.appendChild(boom);
+                        setTimeout(() => boom.remove(), 400);
+                        return;
+                    }
+
                     a.cd = a.maxCd / atkSpdMult;
                     
                     a.el.classList.add('attack');
