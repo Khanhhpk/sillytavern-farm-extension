@@ -889,7 +889,13 @@ export async function generateAICauldronMerge(itemsData) {
 ${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể)'}`;
     }
 
-    const itemsDesc = itemsData.map((it, i) => `Nguyên liệu ${i+1}: Tên "${it.name}", Độ hiếm [${it.rarity}], Giá trị ${it.sell}G, Mô tả "${it.desc}"`).join('\n');
+    const itemsDesc = itemsData.map((it, i) => {
+      let spriteStr = "";
+      if (Array.isArray(it.spriteMap)) {
+        spriteStr = `\nSprite Map (Pixel Art):\n${it.spriteMap.join('\n')}`;
+      }
+      return `Nguyên liệu ${i+1}: Tên "${it.name}", Độ hiếm [${it.rarity}], Giá trị ${it.sell}G, Mô tả "${it.desc}"${spriteStr}`;
+    }).join('\n\n');
     const totalValue = itemsData.reduce((sum, it) => sum + (it.sell || 0), 0);
     const maxVal = totalValue * 5;
 

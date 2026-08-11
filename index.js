@@ -5504,7 +5504,15 @@ async function generateAICauldronMerge(itemsData) {
       contextStr = `Tr\xEDch xu\u1EA5t b\u1ED1i c\u1EA3nh th\u1EBF gi\u1EDBi (Worldbook) & L\u1ECBch s\u1EED tr\xF2 chuy\u1EC7n g\u1EA7n nh\u1EA5t:
 ${worldbook ? worldbook : "(Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u th\u1EBF gi\u1EDBi c\u1EE5 th\u1EC3)"}`;
     }
-    const itemsDesc = itemsData.map((it2, i2) => `Nguy\xEAn li\u1EC7u ${i2 + 1}: T\xEAn "${it2.name}", \u0110\u1ED9 hi\u1EBFm [${it2.rarity}], Gi\xE1 tr\u1ECB ${it2.sell}G, M\xF4 t\u1EA3 "${it2.desc}"`).join("\n");
+    const itemsDesc = itemsData.map((it2, i2) => {
+      let spriteStr = "";
+      if (Array.isArray(it2.spriteMap)) {
+        spriteStr = `
+Sprite Map (Pixel Art):
+${it2.spriteMap.join("\n")}`;
+      }
+      return `Nguy\xEAn li\u1EC7u ${i2 + 1}: T\xEAn "${it2.name}", \u0110\u1ED9 hi\u1EBFm [${it2.rarity}], Gi\xE1 tr\u1ECB ${it2.sell}G, M\xF4 t\u1EA3 "${it2.desc}"${spriteStr}`;
+    }).join("\n\n");
     const totalValue = itemsData.reduce((sum2, it2) => sum2 + (it2.sell || 0), 0);
     const maxVal = totalValue * 5;
     const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI qu\u1EA3n l\xFD "N\u1ED3i Ph\xF9 Thu\u1EF7" (Witch's Cauldron) v\xE0 chuy\xEAn gia Pixel Art (n x n, t\u1ED1i thi\u1EC3u 32x32).
