@@ -192,7 +192,7 @@ export function renderPlots() {
         </div>
         <div class="explore-slot" id="cslot-race">
           ${spriteSVG('raceGate', 48)}
-          <div class="feature-name">Đua Ngựa</div>
+          <div class="feature-name">Trường Đua</div>
         </div>
       </div>
     `;

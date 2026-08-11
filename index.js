@@ -6779,7 +6779,7 @@ function renderPlots() {
         </div>
         <div class="explore-slot" id="cslot-race">
           ${spriteSVG("raceGate", 48)}
-          <div class="feature-name">\u0110ua Ng\u1EF1a</div>
+          <div class="feature-name">Tr\u01B0\u1EDDng \u0110ua</div>
         </div>
       </div>
     `;
