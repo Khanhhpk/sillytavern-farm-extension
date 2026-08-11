@@ -10011,10 +10011,10 @@ function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
   const scene2 = targets[0].closest(".hero-scene") || targets[0].closest("#dg-arena");
   if (!scene2) return onComplete && onComplete();
   const overlay = document.createElement("div");
-  overlay.style.cssText = "position:absolute; inset:0; z-index:20; opacity:0; transition:opacity 0.3s; background:radial-gradient(circle, transparent 20%, rgba(50,0,0,0.7) 100%); backdrop-filter:grayscale(1) contrast(1.2);";
+  overlay.style.cssText = "position:absolute; inset:0; z-index:20; opacity:0; transition:opacity 0.3s; background:radial-gradient(circle, transparent 20%, rgba(0,0,0,0.6) 100%); pointer-events:none;";
   const topBar = document.createElement("div");
   const botBar = document.createElement("div");
-  const barStyle = "position:absolute; left:0; right:0; height:18%; background:#000; z-index:21; transition:transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);";
+  const barStyle = "position:absolute; left:0; right:0; height:18%; background:#000; z-index:21; transition:transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); pointer-events:none;";
   topBar.style.cssText = barStyle + "top:0; transform:translateY(-100%);";
   botBar.style.cssText = barStyle + "bottom:0; transform:translateY(100%);";
   scene2.appendChild(overlay);
@@ -10061,7 +10061,7 @@ function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
     ghost.style.position = "absolute";
     ghost.style.zIndex = "24";
     ghost.style.opacity = "0.6";
-    ghost.style.filter = "grayscale(1) brightness(1.5)";
+    ghost.style.filter = "brightness(1.5)";
     ghost.style.pointerEvents = "none";
     scene2.appendChild(ghost);
     setTimeout(() => ghost.remove(), 100);
@@ -11943,31 +11943,31 @@ var init_dungeon = __esm({
     shopGold = 0;
     PET_STATS2 = {
       // HP Slime Xanh: 130→150 (thêm ngầm +10% giáp)
-      slime: { name: "Slime Xanh", desc: "Chi\u1EBFn binh c\xE2n b\u1EB1ng, c\xF3 gi\xE1p n\u1ED9i t\u1EA1ng gi\u1EA3m 10% s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o. Active (8s): L\u01B0\u1EDBt v\xE0 h\u1EA5t tung k\u1EBB \u0111\u1ECBch.", hp: 150, atk: 12, range: 40, speed: 40, cd: 1, armor: 0.1, activeSkill: "dash_knockup", maxSkillCd: 8 },
-      octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "\u0110\xE1nh nhanh th\u1EAFng nhanh. \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao (t\u1ED1i \u0111a +50%).", hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
-      slimePink: { name: "Slime H\u1ED3ng", desc: "H\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu. Active (12s): H\u1ED3i 50% m\xE1u t\u1ED1i \u0111a cho to\xE0n \u0111\u1ED9i.", hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: "heal", activeSkill: "burst_heal", maxSkillCd: 12 },
-      peach_soda: { name: "Soda \u0110\xE0o", desc: "\u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay (s\xE1t th\u01B0\u01A1ng gi\u1EA3m 20% qua m\u1ED7i m\u1EE5c ti\xEAu).", hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
+      slime: { name: "Slime Xanh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Gi\u1EA3m 10% s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o.<br><b>Ch\u1EE7 \u0111\u1ED9ng (8s):</b> L\u01B0\u1EDBt nhanh h\xFAc v\u0103ng v\xE0 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch.", hp: 150, atk: 12, range: 40, speed: 40, cd: 1, armor: 0.1, activeSkill: "dash_knockup", maxSkillCd: 8 },
+      octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao (t\u1ED1i \u0111a +50%).<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
+      slimePink: { name: "Slime H\u1ED3ng", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh th\u01B0\u1EDDng h\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> H\u1ED3i 50% m\xE1u t\u1ED1i \u0111a cho to\xE0n \u0111\u1ED9i.", hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: "heal", activeSkill: "burst_heal", maxSkillCd: 12 },
+      peach_soda: { name: "Soda \u0110\xE0o", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
       // Bạch Tuộc Kem: stun 20%→25%
-      octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "25% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.", hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: "stun" },
-      jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "X\u1EA1 th\u1EE7 t\u1EA7m xa. Active (12s): B\u1EAFn ra v\u0169ng \u0111\u1ED9c.", hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: "sniper", activeSkill: "poison_puddle", maxSkillCd: 12 },
+      octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> 25% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: "stun" },
+      jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> X\u1EA1 th\u1EE7 t\u1EA7m xa.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> B\u1EAFn ra v\u0169ng \u0111\u1ED9c g\xE2y s\xE1t th\u01B0\u01A1ng theo th\u1EDDi gian.", hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: "sniper", activeSkill: "poison_puddle", maxSkillCd: 12 },
       // Bé Bí Ẩn: lifesteal 50%→40%
-      mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "H\u1ED3i m\xE1u cho b\u1EA3n th\xE2n b\u1EB1ng 40% s\xE1t th\u01B0\u01A1ng g\xE2y ra.", hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: "lifesteal" },
+      mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> H\xFAt m\xE1u b\u1EB1ng 40% s\xE1t th\u01B0\u01A1ng g\xE2y ra.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: "lifesteal" },
       // Ma Trắng: hp 80→110, atk 45→40, dodge gốc 15%→25%
-      ghostBlob: { name: "Ma Tr\u1EAFng", desc: "S\xE1t th\u1EE7. Active (10s): Tr\u1EDF n\xEAn t\xE0ng h\xECnh trong 4s.", hp: 110, atk: 40, range: 40, speed: 100, cd: 1.2, skill: "assassin", activeSkill: "invisible", maxSkillCd: 10 },
+      ghostBlob: { name: "Ma Tr\u1EAFng", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> S\xE1t th\u1EE7 \xE1p s\xE1t.<br><b>Ch\u1EE7 \u0111\u1ED9ng (10s):</b> T\xE0ng h\xECnh trong 4s (kh\xF4ng b\u1ECB nh\u1EAFm m\u1EE5c ti\xEAu).", hp: 110, atk: 40, range: 40, speed: 100, cd: 1.2, skill: "assassin", activeSkill: "invisible", maxSkillCd: 10 },
       // Quỷ Nhỏ: hp 70→120, atk 50→45, + giảm 15% DMG nhận
-      impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "\u0110\xE1nh lan AoE. Active (14s): Lao t\u1EDBi ch\xE9m 1 \u0111\xF2n ch\xED m\u1EA1ng 500% s\xE1t th\u01B0\u01A1ng.", hp: 120, atk: 45, range: 40, speed: 60, cd: 1, skill: "cleave", armor: 0.15, activeSkill: "nuke_crit", maxSkillCd: 14 },
-      angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "H\u1ED3i m\xE1u AOE. Active (18s): Ban tr\u1EA1ng th\xE1i B\u1EA5t t\u1EED cho to\xE0n \u0111\u1ED9i trong 3s.", hp: 140, atk: 12, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal", activeSkill: "invulnerable", maxSkillCd: 18 },
-      starBell: { name: "Chu\xF4ng Sao", desc: "T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: "buff_atk" },
+      impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xE1nh lan AoE.<br><b>Ch\u1EE7 \u0111\u1ED9ng (14s):</b> Lao t\u1EDBi ch\xE9m 1 \u0111\xF2n ch\xED m\u1EA1ng 500% s\xE1t th\u01B0\u01A1ng.", hp: 120, atk: 45, range: 40, speed: 60, cd: 1, skill: "cleave", armor: 0.15, activeSkill: "nuke_crit", maxSkillCd: 14 },
+      angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> H\u1ED3i m\xE1u AoE.<br><b>Ch\u1EE7 \u0111\u1ED9ng (18s):</b> Ban tr\u1EA1ng th\xE1i B\u1EA5t t\u1EED cho to\xE0n \u0111\u1ED9i trong 3s.", hp: 140, atk: 12, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal", activeSkill: "invulnerable", maxSkillCd: 18 },
+      starBell: { name: "Chu\xF4ng Sao", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: "buff_atk" },
       // Kẹo Dẻo Mây: hp 250→320, cd 2.0→1.5, + 20% giáp khi Taunt
-      cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "Khi\xEAu kh\xEDch qu\xE1i. Active (15s): B\u1EADt khi\xEAn h\u1EA5p th\u1EE5 s\xE1t th\u01B0\u01A1ng th\xE0nh M\xE1u.", hp: 320, atk: 10, range: 40, speed: 30, cd: 1.5, skill: "taunt", activeSkill: "shield_wall", maxSkillCd: 15 },
+      cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Khi\xEAu kh\xEDch qu\xE1i.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> B\u1EADt khi\xEAn h\u1EA5p th\u1EE5 s\xE1t th\u01B0\u01A1ng th\xE0nh M\xE1u.", hp: 320, atk: 10, range: 40, speed: 30, cd: 1.5, skill: "taunt", activeSkill: "shield_wall", maxSkillCd: 15 },
       // Mầm Sương: root 25%→30%
-      dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "30% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.", hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: "root" },
+      dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> 30% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: "root" },
       // Lăng Kính: atk 25→20
-      prismBlob: { name: "L\u0103ng K\xEDnh", desc: "B\u1EAFn 3 tia s\xE1ng. Active (15s): B\u1EAFn Laser xuy\xEAn th\u1EA5u to\xE0n m\xE0n h\xECnh.", hp: 100, atk: 20, range: 140, speed: 40, cd: 1.4, skill: "multishot", activeSkill: "laser_beam", maxSkillCd: 15 },
-      penguin: { name: "C\xE1nh C\u1EE5t", desc: "\u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m 30% t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze" },
+      prismBlob: { name: "L\u0103ng K\xEDnh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> B\u1EAFn 3 tia s\xE1ng.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> B\u1EAFn Laser xuy\xEAn th\u1EA5u to\xE0n m\xE0n h\xECnh.", hp: 100, atk: 20, range: 140, speed: 40, cd: 1.4, skill: "multishot", activeSkill: "laser_beam", maxSkillCd: 15 },
+      penguin: { name: "C\xE1nh C\u1EE5t", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m 30% t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh c\u1EE7a qu\xE1i.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze" },
       // Naoya: maxSkillCd 10s→12s
-      naoyaSlime: { name: "Naoya", desc: "K\u1EF9 n\u0103ng ch\u1EE7 \u0111\u1ED9ng (12s): \u0110\u1EA7u X\u1EA1 Ch\xFA Ph\xE1p - L\u01B0\u1EDBt 24 khung h\xECnh c\xF4ng k\xEDch to\xE0n map v\xE0 \u0111\xF3ng b\u0103ng qu\xE1i 1s.", hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: "projection_sorcery", maxSkillCd: 12 },
-      default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
+      naoyaSlime: { name: "Naoya", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> \u0110\u1EA7u X\u1EA1 Ch\xFA Ph\xE1p - L\u01B0\u1EDBt 24 khung h\xECnh c\xF4ng k\xEDch to\xE0n map v\xE0 \u0111\xF3ng b\u0103ng qu\xE1i 1s.", hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: "projection_sorcery", maxSkillCd: 12 },
+      default: { name: "Pet V\xF4 Danh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
     };
     ENEMY_TYPES = [
       { id: "douya", name: "M\u1EA7m Non", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 50, atk: 12, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout", gold: 2 },

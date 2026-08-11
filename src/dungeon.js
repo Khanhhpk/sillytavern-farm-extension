@@ -18,31 +18,31 @@ let shopGold = 0;
 
 const PET_STATS = {
     // HP Slime Xanh: 130→150 (thêm ngầm +10% giáp)
-    slime: { name: 'Slime Xanh', desc: 'Chiến binh cân bằng, có giáp nội tạng giảm 10% sát thương nhận vào. Active (8s): Lướt và hất tung kẻ địch.', hp: 150, atk: 12, range: 40, speed: 40, cd: 1, armor: 0.10, activeSkill: 'dash_knockup', maxSkillCd: 8 },
-    octo: { name: 'Bạch Tuộc', desc: 'Đánh nhanh thắng nhanh. Đánh càng lâu tốc đánh càng cao (tối đa +50%).', hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: 'frenzy' },
-    slimePink: { name: 'Slime Hồng', desc: 'Hồi máu đơn mục tiêu. Active (12s): Hồi 50% máu tối đa cho toàn đội.', hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: 'heal', activeSkill: 'burst_heal', maxSkillCd: 12 },
-    peach_soda: { name: 'Soda Đào', desc: 'Đánh xa xuyên thấu mọi kẻ địch trên đường bay (sát thương giảm 20% qua mỗi mục tiêu).', hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: 'pierce' },
+    slime: { name: 'Slime Xanh', desc: '<b>Bị động:</b> Giảm 10% sát thương nhận vào.<br><b>Chủ động (8s):</b> Lướt nhanh húc văng và làm choáng kẻ địch.', hp: 150, atk: 12, range: 40, speed: 40, cd: 1, armor: 0.10, activeSkill: 'dash_knockup', maxSkillCd: 8 },
+    octo: { name: 'Bạch Tuộc', desc: '<b>Bị động:</b> Đánh càng lâu tốc đánh càng cao (tối đa +50%).<br><b>Chủ động:</b> Không có.', hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: 'frenzy' },
+    slimePink: { name: 'Slime Hồng', desc: '<b>Bị động:</b> Đòn đánh thường hồi máu đơn mục tiêu.<br><b>Chủ động (12s):</b> Hồi 50% máu tối đa cho toàn đội.', hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: 'heal', activeSkill: 'burst_heal', maxSkillCd: 12 },
+    peach_soda: { name: 'Soda Đào', desc: '<b>Bị động:</b> Đánh xa xuyên thấu mọi kẻ địch trên đường bay.<br><b>Chủ động:</b> Không có.', hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: 'pierce' },
     // Bạch Tuộc Kem: stun 20%→25%
-    octoCream: { name: 'Bạch Tuộc Kem', desc: '25% tỷ lệ làm choáng kẻ địch 1 giây.', hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: 'stun' },
-    jellyfish: { name: 'Sứa Xoăn', desc: 'Xạ thủ tầm xa. Active (12s): Bắn ra vũng độc.', hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: 'sniper', activeSkill: 'poison_puddle', maxSkillCd: 12 },
+    octoCream: { name: 'Bạch Tuộc Kem', desc: '<b>Bị động:</b> 25% tỷ lệ làm choáng kẻ địch 1 giây.<br><b>Chủ động:</b> Không có.', hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: 'stun' },
+    jellyfish: { name: 'Sứa Xoăn', desc: '<b>Bị động:</b> Xạ thủ tầm xa.<br><b>Chủ động (12s):</b> Bắn ra vũng độc gây sát thương theo thời gian.', hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: 'sniper', activeSkill: 'poison_puddle', maxSkillCd: 12 },
     // Bé Bí Ẩn: lifesteal 50%→40%
-    mystery_blob: { name: 'Bé Bí Ẩn', desc: 'Hồi máu cho bản thân bằng 40% sát thương gây ra.', hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: 'lifesteal' },
+    mystery_blob: { name: 'Bé Bí Ẩn', desc: '<b>Bị động:</b> Hút máu bằng 40% sát thương gây ra.<br><b>Chủ động:</b> Không có.', hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: 'lifesteal' },
     // Ma Trắng: hp 80→110, atk 45→40, dodge gốc 15%→25%
-    ghostBlob: { name: 'Ma Trắng', desc: 'Sát thủ. Active (10s): Trở nên tàng hình trong 4s.', hp: 110, atk: 40, range: 40, speed: 100, cd: 1.2, skill: 'assassin', activeSkill: 'invisible', maxSkillCd: 10 },
+    ghostBlob: { name: 'Ma Trắng', desc: '<b>Bị động:</b> Sát thủ áp sát.<br><b>Chủ động (10s):</b> Tàng hình trong 4s (không bị nhắm mục tiêu).', hp: 110, atk: 40, range: 40, speed: 100, cd: 1.2, skill: 'assassin', activeSkill: 'invisible', maxSkillCd: 10 },
     // Quỷ Nhỏ: hp 70→120, atk 50→45, + giảm 15% DMG nhận
-    impBlob: { name: 'Quỷ Nhỏ', desc: 'Đánh lan AoE. Active (14s): Lao tới chém 1 đòn chí mạng 500% sát thương.', hp: 120, atk: 45, range: 40, speed: 60, cd: 1, skill: 'cleave', armor: 0.15, activeSkill: 'nuke_crit', maxSkillCd: 14 },
-    angelBlob: { name: 'Thiên Thần', desc: 'Hồi máu AOE. Active (18s): Ban trạng thái Bất tử cho toàn đội trong 3s.', hp: 140, atk: 12, range: 80, speed: 40, cd: 1.2, skill: 'aoe_heal', activeSkill: 'invulnerable', maxSkillCd: 18 },
-    starBell: { name: 'Chuông Sao', desc: 'Tăng 20% sát thương cho đồng minh lân cận.', hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: 'buff_atk' },
+    impBlob: { name: 'Quỷ Nhỏ', desc: '<b>Bị động:</b> Đánh lan AoE.<br><b>Chủ động (14s):</b> Lao tới chém 1 đòn chí mạng 500% sát thương.', hp: 120, atk: 45, range: 40, speed: 60, cd: 1, skill: 'cleave', armor: 0.15, activeSkill: 'nuke_crit', maxSkillCd: 14 },
+    angelBlob: { name: 'Thiên Thần', desc: '<b>Bị động:</b> Hồi máu AoE.<br><b>Chủ động (18s):</b> Ban trạng thái Bất tử cho toàn đội trong 3s.', hp: 140, atk: 12, range: 80, speed: 40, cd: 1.2, skill: 'aoe_heal', activeSkill: 'invulnerable', maxSkillCd: 18 },
+    starBell: { name: 'Chuông Sao', desc: '<b>Bị động:</b> Tăng 20% sát thương cho đồng minh lân cận.<br><b>Chủ động:</b> Không có.', hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: 'buff_atk' },
     // Kẹo Dẻo Mây: hp 250→320, cd 2.0→1.5, + 20% giáp khi Taunt
-    cloudMallow: { name: 'Kẹo Dẻo Mây', desc: 'Khiêu khích quái. Active (15s): Bật khiên hấp thụ sát thương thành Máu.', hp: 320, atk: 10, range: 40, speed: 30, cd: 1.5, skill: 'taunt', activeSkill: 'shield_wall', maxSkillCd: 15 },
+    cloudMallow: { name: 'Kẹo Dẻo Mây', desc: '<b>Bị động:</b> Khiêu khích quái.<br><b>Chủ động (15s):</b> Bật khiên hấp thụ sát thương thành Máu.', hp: 320, atk: 10, range: 40, speed: 30, cd: 1.5, skill: 'taunt', activeSkill: 'shield_wall', maxSkillCd: 15 },
     // Mầm Sương: root 25%→30%
-    dewSprout: { name: 'Mầm Sương', desc: '30% tỷ lệ trói chân kẻ địch trong 2 giây.', hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: 'root' },
+    dewSprout: { name: 'Mầm Sương', desc: '<b>Bị động:</b> 30% tỷ lệ trói chân kẻ địch trong 2 giây.<br><b>Chủ động:</b> Không có.', hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: 'root' },
     // Lăng Kính: atk 25→20
-    prismBlob: { name: 'Lăng Kính', desc: 'Bắn 3 tia sáng. Active (15s): Bắn Laser xuyên thấu toàn màn hình.', hp: 100, atk: 20, range: 140, speed: 40, cd: 1.4, skill: 'multishot', activeSkill: 'laser_beam', maxSkillCd: 15 },
-    penguin: { name: 'Cánh Cụt', desc: 'Đòn đánh làm giảm 30% tốc độ di chuyển và tốc đánh.', hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: 'freeze' },
+    prismBlob: { name: 'Lăng Kính', desc: '<b>Bị động:</b> Bắn 3 tia sáng.<br><b>Chủ động (15s):</b> Bắn Laser xuyên thấu toàn màn hình.', hp: 100, atk: 20, range: 140, speed: 40, cd: 1.4, skill: 'multishot', activeSkill: 'laser_beam', maxSkillCd: 15 },
+    penguin: { name: 'Cánh Cụt', desc: '<b>Bị động:</b> Đòn đánh làm giảm 30% tốc độ di chuyển và tốc đánh của quái.<br><b>Chủ động:</b> Không có.', hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: 'freeze' },
     // Naoya: maxSkillCd 10s→12s
-    naoyaSlime: { name: 'Naoya', desc: 'Kỹ năng chủ động (12s): Đầu Xạ Chú Pháp - Lướt 24 khung hình công kích toàn map và đóng băng quái 1s.', hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: 'projection_sorcery', maxSkillCd: 12 },
-    default: { name: 'Pet Vô Danh', desc: 'Không có kỹ năng đặc biệt.', hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
+    naoyaSlime: { name: 'Naoya', desc: '<b>Bị động:</b> Không có.<br><b>Chủ động (12s):</b> Đầu Xạ Chú Pháp - Lướt 24 khung hình công kích toàn map và đóng băng quái 1s.', hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: 'projection_sorcery', maxSkillCd: 12 },
+    default: { name: 'Pet Vô Danh', desc: '<b>Bị động:</b> Không có.<br><b>Chủ động:</b> Không có.', hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
 };
 
 const ENEMY_TYPES = [
