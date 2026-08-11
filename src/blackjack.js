@@ -389,6 +389,7 @@ function soloStand() { soloNextHand(); }
 function soloDouble() {
     const s = soloState;
     const idx = s.activeHandIdx;
+    if (s.splitAceIdxs.has(idx)) return bjToast('Không thể Double sau khi Split Ace');
     const bet = s.bets[idx];
     if ((ctx.S.coins || 0) < bet) return bjToast('Không đủ vàng Double');
     ctx.S.coins = (ctx.S.coins || 0) - bet;
@@ -446,7 +447,7 @@ function soloRunDealer() {
     const iv = setInterval(() => {
         const total = handTotal(s.dealerHand);
         const soft = isSoft(s.dealerHand);
-        if (total < 17 || (soft && total === 16)) {
+        if (total < 17 || (soft && total === 17)) {
             s.dealerHand.push(soloDrawCard());
             soloRender();
         } else {
