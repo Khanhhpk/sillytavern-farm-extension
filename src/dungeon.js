@@ -733,14 +733,15 @@ function combatLoop() {
     
     // Chạy ngầm nhiều bước nhỏ nếu dt lớn
     let steps = 0;
+    const arena = All.$id('dg-arena');
+    const arenaRect = arena ? arena.getBoundingClientRect() : { width: 960, height: 450 };
     while (dt > 0 && steps < 60) {
         let stepDt = Math.min(dt, 0.016);
         
-        updateEntities(team, enemies, stepDt);
-        updateEntities(enemies, team, stepDt);
+        updateEntities(team, enemies, stepDt, arenaRect);
+        updateEntities(enemies, team, stepDt, arenaRect);
     
     // Update projectiles
-    const arena = All.$id('dg-arena');
     let newProjs = [];
     projectiles = projectiles.filter(p => {
         if (p.isPuddle) {
@@ -749,7 +750,9 @@ function combatLoop() {
                 p.el.remove();
                 return false;
             }
-            if (Math.random() < 0.1) {
+            // Throttled bubble particles - max 1 every 0.4s to prevent DOM spam
+            if (!p.lastBubble || p.lifetime < p.lastBubble - 0.4) {
+                p.lastBubble = p.lifetime;
                 const bubble = document.createElement('div');
                 bubble.className = 'dg-poison-bubble-particle';
                 bubble.style.left = (p.x + Math.random() * 80 - 40) + 'px';
@@ -994,10 +997,9 @@ function combatLoop() {
             
             const rot = (p.lifetime * 500) % 360;
             p.el.style.transform = `rotate(${rot}deg)`;
-            
-            const arenaRect = p.el.parentElement.getBoundingClientRect();
-            const rightBound = arenaRect.width - 30;
-            const bottomBound = arenaRect.height - 30;
+
+            const rightBound = (p.el.parentElement.clientWidth || 960) - 30;
+            const bottomBound = (p.el.parentElement.clientHeight || 450) - 30;
 
             let bounced = false;
             if (p.x < 30) { p.x = 30; p.vx *= -1; bounced = true; }
@@ -1266,7 +1268,8 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     }
 }
 
-function updateEntities(groupA, groupB, dt) {
+function updateEntities(groupA, groupB, dt, arenaRect) {
+    if (!arenaRect) { const arena = All.$id('dg-arena'); arenaRect = arena ? arena.getBoundingClientRect() : { width: 960, height: 450 }; }
     const arena = All.$id('dg-arena');
     
     groupA.forEach(a => {
@@ -1276,7 +1279,6 @@ function updateEntities(groupA, groupB, dt) {
             a.kb.time -= dt;
             a.x += a.kb.dx * a.kb.speed * dt;
             a.y += a.kb.dy * a.kb.speed * dt;
-            const arenaRect = arena.getBoundingClientRect();
             a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
             a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
             a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
@@ -1799,8 +1801,8 @@ function updateEntities(groupA, groupB, dt) {
                         ball.style.width = '60px';
                         ball.style.height = '60px';
                         ball.style.borderRadius = '50%';
-                        ball.style.background = 'radial-gradient(circle at 30% 30%, #ffffff, #88ccff)';
-                        ball.style.boxShadow = '0 0 10px #88ccff';
+                        ball.style.background = 'radial-gradient(circle at 35% 30%, #eef6ff, #aacfea)';
+                        ball.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
                         ball.style.zIndex = '40';
                         arena.appendChild(ball);
 
@@ -1851,7 +1853,6 @@ function updateEntities(groupA, groupB, dt) {
             
             if (a.panic > 0 && !isRooted) {
                 a.el.classList.add('walk');
-                const arenaRect = arena.getBoundingClientRect();
                 const speed = a.speed * speedMult * dt;
                 let cx = arenaRect.width / 2 - a.x;
                 let cy = arenaRect.height / 2 - a.y;
@@ -1864,7 +1865,6 @@ function updateEntities(groupA, groupB, dt) {
             } else if (tooClose && !isRooted) {
                 // Kite
                 a.el.classList.add('walk');
-                const arenaRect = arena.getBoundingClientRect();
                 const speed = a.speed * speedMult * dt;
                 
                 let kx = -(closest.dx / closest.dist);
@@ -1916,7 +1916,6 @@ function updateEntities(groupA, groupB, dt) {
                     a.y += (closest.dy / closest.dist) * speed;
                 }
                 
-                const arenaRect = arena.getBoundingClientRect();
                 a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
                 a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
                 
