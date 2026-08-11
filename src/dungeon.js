@@ -840,10 +840,10 @@ function combatLoop() {
                 p.el.remove();
                 const boom = document.createElement('div');
                 boom.className = 'dg-boom-effect';
-                boom.style.width = p.isMeteor ? '80px' : '120px';
-                boom.style.height = p.isMeteor ? '80px' : '120px';
-                boom.style.left = (p.targetX - (p.isMeteor ? 40 : 60)) + 'px';
-                boom.style.top = (p.targetY - (p.isMeteor ? 40 : 60)) + 'px';
+                boom.style.width = p.isMeteor ? '160px' : '240px';
+                boom.style.height = p.isMeteor ? '160px' : '240px';
+                boom.style.left = (p.targetX - (p.isMeteor ? 80 : 120)) + 'px';
+                boom.style.top = (p.targetY - (p.isMeteor ? 80 : 120)) + 'px';
                 boom.style.background = p.isMeteor ? 'radial-gradient(circle, rgba(255,200,0,1) 0%, rgba(255,100,0,0) 70%)' : 'radial-gradient(circle, rgba(255,100,100,1) 0%, rgba(255,50,50,0) 70%)';
                 arena.appendChild(boom);
                 setTimeout(() => boom.remove(), 400);
@@ -928,9 +928,9 @@ function combatLoop() {
                     const dx = p.x - e.x;
                     const dy = p.y - e.y;
                     const d = Math.hypot(dx, dy);
-                    if (d < 150 && d > 10) {
-                        e.x += (dx / d) * 80 * stepDt;
-                        e.y += (dy / d) * 80 * stepDt;
+                    if (d < 250 && d > 10) {
+                        e.x += (dx / d) * 200 * stepDt;
+                        e.y += (dy / d) * 200 * stepDt;
                     }
                 }
             });
@@ -950,7 +950,7 @@ function combatLoop() {
                     if (e.hp > 0 && Math.abs(e.x - p.x) < 200) {
                         if (!e.status) e.status = {};
                         e.status.freeze = 2;
-                        const dmg = Math.max(1, Math.floor(p.a.atk * 0.5));
+                        const dmg = Math.max(1, Math.floor(p.a.atk * 0.2));
                         e.hp -= dmg;
                         spawnDmg(e, -dmg, 'poison');
                     }
@@ -1274,7 +1274,7 @@ function updateEntities(groupA, groupB, dt) {
                 a.status[eff] -= dt;
                 if (eff === 'stun') isStunned = true;
                 if (eff === 'root') isRooted = true;
-                if (eff === 'freeze') { speedMult *= 0.5; atkSpdMult *= 0.5; }
+                if (eff === 'freeze') { speedMult *= 0.8; atkSpdMult *= 0.7; }
                 if (eff === 'poison' && Math.random() < dt) {
                     const dmg = Math.floor(a.maxHp * 0.05);
                     a.hp -= dmg;
@@ -1618,7 +1618,7 @@ function updateEntities(groupA, groupB, dt) {
                         groupB.forEach(e => {
                             if (e.hp <= 0) return;
                             if (!e.status) e.status = {};
-                            e.status.stunned = 4;
+                            e.status.stun = 4;
                             e.status.brainFreeze = 4; 
                             const ice = document.createElement('div');
                             ice.innerHTML = spriteSVG('ice_block', 48);
@@ -1636,8 +1636,8 @@ function updateEntities(groupA, groupB, dt) {
                             const bat = document.createElement('div');
                             bat.innerHTML = spriteSVG('bat', 48);
                             bat.style.position = 'absolute';
-                            bat.style.left = (a.x - 24) + 'px';
-                            bat.style.top = (a.y - 24) + 'px';
+                            bat.style.left = '0px';
+                            bat.style.top = '0px';
                             bat.style.zIndex = '10';
                             bat.style.transition = 'all 0.2s';
                             arena.appendChild(bat);
