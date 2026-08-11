@@ -1810,7 +1810,7 @@ function showWaveRewards(isLoaded = false) {
                 stats.push({ id: 'range', name: 'Tầm Đánh (+5%)', val: Math.round(selectedPet.range), lv: u.range || 0, cost: calc(70, u.range || 0), forceCanBuy: selectedPet.range < 400 });
             }
             if (selectedPet.maxSkillCd > 0) {
-                stats.push({ id: 'skillCdR', name: 'Giảm Hồi Chiêu (+5%)', val: selectedPet.maxSkillCd.toFixed(1)+'s', lv: u.skillCdR || 0, cost: Math.floor(200 * Math.pow(1.25, u.skillCdR || 0)), forceCanBuy: (u.skillCdR || 0) < 10 });
+                stats.push({ id: 'skillCdR', name: 'Giảm Hồi Chiêu (+5%)', val: selectedPet.maxSkillCd.toFixed(1)+'s', lv: u.skillCdR || 0, cost: Math.floor(1000 * Math.pow(1.5, u.skillCdR || 0)), forceCanBuy: (u.skillCdR || 0) < 10 });
             }
 
             stats.push(

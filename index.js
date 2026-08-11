@@ -11804,7 +11804,7 @@ function showWaveRewards(isLoaded = false) {
         stats.push({ id: "range", name: "T\u1EA7m \u0110\xE1nh (+5%)", val: Math.round(selectedPet.range), lv: u2.range || 0, cost: calc(70, u2.range || 0), forceCanBuy: selectedPet.range < 400 });
       }
       if (selectedPet.maxSkillCd > 0) {
-        stats.push({ id: "skillCdR", name: "Gi\u1EA3m H\u1ED3i Chi\xEAu (+5%)", val: selectedPet.maxSkillCd.toFixed(1) + "s", lv: u2.skillCdR || 0, cost: Math.floor(200 * Math.pow(1.25, u2.skillCdR || 0)), forceCanBuy: (u2.skillCdR || 0) < 10 });
+        stats.push({ id: "skillCdR", name: "Gi\u1EA3m H\u1ED3i Chi\xEAu (+5%)", val: selectedPet.maxSkillCd.toFixed(1) + "s", lv: u2.skillCdR || 0, cost: Math.floor(1e3 * Math.pow(1.5, u2.skillCdR || 0)), forceCanBuy: (u2.skillCdR || 0) < 10 });
       }
       stats.push(
         { id: "heal_pet", name: "H\u1ED3i M\xE1u (Full)", val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: "", cost: healPetCost, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
