@@ -11229,24 +11229,53 @@ function combatLoop() {
         });
         return true;
       }
-      if (p2.isBlizzard) {
+      if (p2.isSnowball) {
         p2.lifetime -= stepDt;
-        if (p2.lifetime <= 0) {
+        if (p2.lifetime <= 0 || p2.bounces >= 5) {
           p2.el.remove();
           return false;
         }
-        if (!p2.nextTick || p2.lifetime < p2.nextTick) {
-          p2.nextTick = p2.lifetime - 0.5;
-          p2.groupB.forEach((e2) => {
-            if (e2.hp > 0) {
-              if (!e2.status) e2.status = {};
-              e2.status.freeze = 2;
-              const dmg = Math.max(1, Math.floor(p2.a.atk * 0.2));
-              e2.hp -= dmg;
-              spawnDmg(e2, -dmg, "poison");
-            }
-          });
+        p2.x += p2.vx * stepDt;
+        p2.y += p2.vy * stepDt;
+        p2.el.style.left = p2.x - 30 + "px";
+        p2.el.style.top = p2.y - 30 + "px";
+        const rot = p2.lifetime * 500 % 360;
+        p2.el.style.transform = `rotate(${rot}deg)`;
+        let bounced = false;
+        if (p2.x < 30) {
+          p2.x = 30;
+          p2.vx *= -1;
+          bounced = true;
+        } else if (p2.x > 930) {
+          p2.x = 930;
+          p2.vx *= -1;
+          bounced = true;
         }
+        if (p2.y < 30) {
+          p2.y = 30;
+          p2.vy *= -1;
+          bounced = true;
+        } else if (p2.y > 420) {
+          p2.y = 420;
+          p2.vy *= -1;
+          bounced = true;
+        }
+        if (bounced) {
+          p2.bounces++;
+          p2.hitTargets.clear();
+        }
+        p2.groupB.forEach((e2) => {
+          if (e2.hp > 0 && !p2.hitTargets.has(e2)) {
+            if (Math.hypot(e2.x - p2.x, e2.y - p2.y) < 50) {
+              p2.hitTargets.add(e2);
+              if (!e2.status) e2.status = {};
+              e2.status.freeze = 3;
+              const dmg = Math.max(1, Math.floor(p2.a.atk * 2));
+              e2.hp -= dmg;
+              spawnDmg(e2, -dmg, "crit");
+            }
+          }
+        });
         return true;
       }
       if (!p2.target || p2.target.hp <= 0) {
@@ -11957,24 +11986,34 @@ function updateEntities(groupA, groupB, dt2) {
               });
             }
           } else if (a.activeSkill === "blizzard") {
-            const blz = document.createElement("div");
-            blz.style.position = "absolute";
-            blz.style.left = "0";
-            blz.style.top = "0";
-            blz.style.width = "100%";
-            blz.style.height = "100%";
-            blz.style.backgroundColor = "rgba(150, 200, 255, 0.4)";
-            blz.style.pointerEvents = "none";
-            blz.style.zIndex = "50";
-            arena.appendChild(blz);
+            const ball = document.createElement("div");
+            ball.style.position = "absolute";
+            ball.style.width = "60px";
+            ball.style.height = "60px";
+            ball.style.borderRadius = "50%";
+            ball.style.background = "radial-gradient(circle at 30% 30%, #ffffff, #88ccff)";
+            ball.style.boxShadow = "0 0 10px #88ccff";
+            ball.style.zIndex = "40";
+            arena.appendChild(ball);
+            const targets = groupB.filter((e2) => e2.hp > 0);
+            let target = targets[Math.floor(Math.random() * targets.length)];
+            if (!target) target = { x: a.x + 100, y: a.y };
+            const angle = Math.atan2(target.y - a.y, target.x - a.x);
+            const speed = 400;
+            const vx = Math.cos(angle) * speed;
+            const vy = Math.sin(angle) * speed;
             projectiles.push({
-              isBlizzard: true,
-              lifetime: 5,
-              maxLifetime: 5,
-              el: blz,
+              isSnowball: true,
+              lifetime: 10,
+              bounces: 0,
+              vx,
+              vy,
+              x: a.x,
+              y: a.y,
+              hitTargets: /* @__PURE__ */ new Set(),
+              el: ball,
               a,
-              groupB,
-              nextTick: 0.5
+              groupB
             });
           }
         }

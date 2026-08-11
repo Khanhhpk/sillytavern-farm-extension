@@ -979,24 +979,47 @@ function combatLoop() {
             return true;
         }
         
-        if (p.isBlizzard) {
+        if (p.isSnowball) {
             p.lifetime -= stepDt;
-            if (p.lifetime <= 0) {
+            if (p.lifetime <= 0 || p.bounces >= 5) {
                 p.el.remove();
                 return false;
             }
-            if (!p.nextTick || p.lifetime < p.nextTick) {
-                p.nextTick = p.lifetime - 0.5;
-                p.groupB.forEach(e => {
-                    if (e.hp > 0) {
-                        if (!e.status) e.status = {};
-                        e.status.freeze = 2;
-                        const dmg = Math.max(1, Math.floor(p.a.atk * 0.2));
-                        e.hp -= dmg;
-                        spawnDmg(e, -dmg, 'poison');
-                    }
-                });
+
+            p.x += p.vx * stepDt;
+            p.y += p.vy * stepDt;
+            
+            p.el.style.left = (p.x - 30) + 'px';
+            p.el.style.top = (p.y - 30) + 'px';
+            
+            const rot = (p.lifetime * 500) % 360;
+            p.el.style.transform = `rotate(${rot}deg)`;
+
+            let bounced = false;
+            if (p.x < 30) { p.x = 30; p.vx *= -1; bounced = true; }
+            else if (p.x > 930) { p.x = 930; p.vx *= -1; bounced = true; }
+            
+            if (p.y < 30) { p.y = 30; p.vy *= -1; bounced = true; }
+            else if (p.y > 420) { p.y = 420; p.vy *= -1; bounced = true; }
+            
+            if (bounced) {
+                p.bounces++;
+                p.hitTargets.clear();
             }
+
+            p.groupB.forEach(e => {
+                if (e.hp > 0 && !p.hitTargets.has(e)) {
+                    if (Math.hypot(e.x - p.x, e.y - p.y) < 50) {
+                        p.hitTargets.add(e);
+                        if (!e.status) e.status = {};
+                        e.status.freeze = 3;
+                        const dmg = Math.max(1, Math.floor(p.a.atk * 2.0));
+                        e.hp -= dmg;
+                        spawnDmg(e, -dmg, 'crit');
+                    }
+                }
+            });
+
             return true;
         }
 
@@ -1767,22 +1790,33 @@ function updateEntities(groupA, groupB, dt) {
                         }
                     }
                     else if (a.activeSkill === 'blizzard') {
-                        const blz = document.createElement('div');
-                        blz.style.position = 'absolute';
-                        blz.style.left = '0';
-                        blz.style.top = '0';
-                        blz.style.width = '100%';
-                        blz.style.height = '100%';
-                        blz.style.backgroundColor = 'rgba(150, 200, 255, 0.4)';
-                        blz.style.pointerEvents = 'none';
-                        blz.style.zIndex = '50';
-                        arena.appendChild(blz);
+                        const ball = document.createElement('div');
+                        ball.style.position = 'absolute';
+                        ball.style.width = '60px';
+                        ball.style.height = '60px';
+                        ball.style.borderRadius = '50%';
+                        ball.style.background = 'radial-gradient(circle at 30% 30%, #ffffff, #88ccff)';
+                        ball.style.boxShadow = '0 0 10px #88ccff';
+                        ball.style.zIndex = '40';
+                        arena.appendChild(ball);
+
+                        const targets = groupB.filter(e => e.hp > 0);
+                        let target = targets[Math.floor(Math.random() * targets.length)];
+                        if (!target) target = {x: a.x + 100, y: a.y};
                         
+                        const angle = Math.atan2(target.y - a.y, target.x - a.x);
+                        const speed = 400;
+                        const vx = Math.cos(angle) * speed;
+                        const vy = Math.sin(angle) * speed;
+
                         projectiles.push({
-                            isBlizzard: true,
-                            lifetime: 5, maxLifetime: 5,
-                            el: blz, a, groupB,
-                            nextTick: 0.5
+                            isSnowball: true,
+                            lifetime: 10,
+                            bounces: 0,
+                            vx: vx, vy: vy,
+                            x: a.x, y: a.y,
+                            hitTargets: new Set(),
+                            el: ball, a, groupB
                         });
                     }
                 }
