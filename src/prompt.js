@@ -17,11 +17,11 @@ Hệ thống sẽ chỉ định độ hiếm. Vị giai chỉ ràng buộc thư�
 <Hệ thống Độ hiếm & Tiêu chuẩn Vật phẩm>
 Hệ thống Gacha này ưu tiên sự sáng tạo, giá trị sử dụng và tính giải trí. Mỗi độ hiếm sẽ quyết định giới hạn sức mạnh, tính đa dụng và độ phức tạp trong cơ chế của vật phẩm:
 
-1. [Rác] (Vật phẩm Tấu hài/Vô dụng): Những món đồ kỳ cục, hỏng hóc hoặc có công dụng cực kỳ vô thưởng vô phạt. Chúng tồn tại chủ yếu để gây cười, tạo tình huống trớ trêu trong tương tác đời thường. (Ví dụ: Một hạt giống trồng ra cái ủng cũ, Bùa tàng hình nhưng chỉ tàng hình được quần áo).
-2. [Thường] (Công cụ Cơ bản): Vật phẩm có ích nhưng công năng đơn giản, giới hạn rõ ràng. Thường là đồ tiêu hao, công cụ hỗ trợ canh tác, sinh hoạt hoặc tăng chỉ số nhẹ. (Ví dụ: Bình tưới cây tự động trong 1 ngày, Bánh mì kẹp giúp hồi thể lực).
-3. [Hiếm] (Cơ chế Đặc biệt): Vật phẩm bắt đầu có "cơ chế hoạt động" riêng biệt. Có thể thay đổi một phần nhỏ cục diện, mang lại lợi ích rõ rệt nhưng sẽ có vài giới hạn nhỏ. (Ví dụ: Đồng hồ ngưng đọng thời gian khu vực nhỏ trong 5 giây, Cuốc chim tự động đào khoáng khi chủ nhân ngủ).
-4. [Sử thi] (Tài sản Chiến lược): Đồ vật mang tính thay đổi lối chơi (Game-changer). Có sức mạnh lớn, đa dụng, hoặc tự động hóa một quy trình phức tạp. Tuy nhiên, để phát huy tối đa cần có sự tính toán của người chơi. (Ví dụ: Cổng không gian mini nối liền hai địa điểm bất kỳ, Golem sinh học thay chủ nhân quản lý toàn bộ nông trại).
-5. [Huyền thoại] (Đột phá Quy tắc): Vật phẩm độc nhất vô nhị với khả năng bẻ cong hoặc viết lại một quy tắc cụ thể của trò chơi/thế giới. Sức mạnh vĩ mô, hiệu ứng hình ảnh hoành tráng. Dù cực mạnh, nó vẫn phải tuân theo logic của thế giới, không biến người chơi thành thần toàn năng nhàm chán. (Ví dụ: Hạt giống Cây Thế Giới có thể tạo ra một hệ sinh thái riêng, Đồng hồ cát đảo ngược hoàn toàn kết quả của một sự kiện trong ngày).
+1. [Rác] (Vật phẩm): Những món đồ kỳ cục, hỏng hóc hoặc có công dụng cực kỳ vô thưởng vô phạt. Chúng tồn tại chủ yếu để gây cười, tạo tình huống trớ trêu trong tương tác đời thường.
+2. [Thường] (Công cụ Cơ bản): Vật phẩm có ích hoặc là thường phẩm thú vị tuy công năng đơn giản, nhưng sở hữu cũng khá thú vị, giới hạn rõ ràng.
+3. [Hiếm] (Cơ chế Đặc biệt): Vật phẩm bắt đầu có "cơ chế hoạt động" riêng biệt. Có thể có ích, tác dụng thú vị, mang lại lợi ích rõ rệt nhưng sẽ có vài giới hạn nhỏ.
+4. [Sử thi] (Hảo phẩm): Đồ vật mang tính thay đổi lối chơi (Game-changer). Có sức mạnh lớn, đa dụng, hoặc tự động hóa một quy trình phức tạp. Tuy nhiên, để phát huy tối đa cần có sự tính toán của người chơi. Không quá lỗi game, nhưng có trong tay thì sẽ rất thích.
+5. [Huyền thoại] (Đột phá Quy tắc): Vật phẩm độc nhất vô nhị, xứng danh phẩm chất của nó. Mang tới đủ thứ cho người dùng. Là một vật phẩm danh xứng với thực.
 </Hệ thống Độ hiếm & Tiêu chuẩn Vật phẩm>
 
 ### HỆ TỌA ĐỘ LẤY MẪU CÓ THỂ MỞ RỘNG: VỰC ĐỀ TÀI VÀ VỰC LỐI CHƠI
