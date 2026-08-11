@@ -49676,17 +49676,30 @@ function soloAfterInsurance(boughtIns) {
 }
 function soloHit() {
   const s2 = soloState;
+  if (s2.phase !== "player") return;
   const hand = s2.playerHands[s2.activeHandIdx];
+  if (hand.surrendered || hand.stood || handTotal(hand) >= 21) return;
   hand.push(soloDrawCard());
   soloRender();
-  if (handTotal(hand) > 21) setTimeout(() => soloNextHand(), 700);
+  if (handTotal(hand) >= 21) {
+    hand.stood = true;
+    setTimeout(() => soloNextHand(), 700);
+  }
 }
 function soloStand() {
+  const s2 = soloState;
+  if (s2.phase !== "player") return;
+  const hand = s2.playerHands[s2.activeHandIdx];
+  if (hand.surrendered || hand.stood) return;
+  hand.stood = true;
   soloNextHand();
 }
 function soloDouble() {
   const s2 = soloState;
+  if (s2.phase !== "player") return;
   const idx = s2.activeHandIdx;
+  const hand = s2.playerHands[idx];
+  if (hand.surrendered || hand.stood) return;
   if (s2.splitAceIdxs.has(idx)) return bjToast("Kh\xF4ng th\u1EC3 Double sau khi Split Ace");
   const bet = s2.bets[idx];
   if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Double");
@@ -49694,17 +49707,20 @@ function soloDouble() {
   s2.bets[idx] *= 2;
   save();
   s2.playerHands[idx].push(soloDrawCard());
+  hand.stood = true;
   soloRender();
   setTimeout(() => soloNextHand(), 500);
 }
 function soloSplit() {
   const s2 = soloState;
+  if (s2.phase !== "player") return;
   const idx = s2.activeHandIdx;
+  const hand = s2.playerHands[idx];
+  if (hand.surrendered || hand.stood) return;
   const bet = s2.bets[idx];
   if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Split");
   ctx.S.coins = (ctx.S.coins || 0) - bet;
   save();
-  const hand = s2.playerHands[idx];
   const isSplitAce = hand[0].rank === "A";
   const splitCard = hand.splice(1, 1)[0];
   const newHand = [splitCard];
@@ -49720,7 +49736,11 @@ function soloSplit() {
 }
 function soloSurrender() {
   const s2 = soloState;
-  s2.playerHands[s2.activeHandIdx].surrendered = true;
+  if (s2.phase !== "player") return;
+  const hand = s2.playerHands[s2.activeHandIdx];
+  if (hand.surrendered || hand.stood) return;
+  hand.surrendered = true;
+  hand.stood = true;
   const refund = Math.floor(s2.bets[0] / 2);
   ctx.S.coins = (ctx.S.coins || 0) + refund;
   save();
@@ -49729,11 +49749,15 @@ function soloSurrender() {
 }
 function soloNextHand() {
   const s2 = soloState;
+  if (s2.phase !== "player") return;
   const next = s2.activeHandIdx + 1;
   if (next < s2.playerHands.length) {
     s2.activeHandIdx = next;
     soloRender();
-  } else soloRunDealer();
+  } else {
+    s2.phase = "dealer";
+    soloRunDealer();
+  }
 }
 function soloRunDealer() {
   const s2 = soloState;
@@ -50389,6 +50413,7 @@ function bjAdvanceTurn() {
     bjBroadcast(msg);
     bjHandleMsg(bjMyId, msg);
   } else {
+    gs.currentTurn = null;
     bjHostRunDealer();
   }
 }
@@ -50422,8 +50447,9 @@ function bjHandleRoomAction(fromPid, data) {
     return;
   }
   const h = gs.hands[fromPid];
-  if (!h || gs.currentTurn !== fromPid) return;
+  if (!h || gs.currentTurn !== fromPid || gs.phase !== "player") return;
   const idx = h.activeHandIdx || 0;
+  if (h.stood[idx] || h.surrendered) return;
   if (data.actionType === "HIT") {
     h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++], isNew: true });
     if (handTotal(h.cards[idx]) >= 21) {
