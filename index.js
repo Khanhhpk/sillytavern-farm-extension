@@ -48759,6 +48759,13 @@ async function buyItem(docId, price) {
     ctx.S.coins -= price;
     if (data.itemType === "bag") {
       ctx.S.bag[data.itemId] = (ctx.S.bag[data.itemId] || 0) + data.amount;
+      if (data.itemId.includes("@") && data.itemData && data.itemData.mutDesc) {
+        if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
+        const parts = data.itemId.split("@");
+        const mutCode = parts.slice(1).join("@");
+        const cname = (CROPS[parts[0]] || { name: "" }).name;
+        ctx.S.mutDesc[mutCode + "@" + cname] = data.itemData.mutDesc;
+      }
     } else if (data.itemType === "seeds") {
       ctx.S.seeds[data.itemId] = (ctx.S.seeds[data.itemId] || 0) + data.amount;
     } else if (data.itemType === "ferts") {
@@ -48801,6 +48808,13 @@ async function cancelItem(docId) {
     } else {
       if (!ctx.S[data.itemType]) ctx.S[data.itemType] = {};
       ctx.S[data.itemType][data.itemId] = (ctx.S[data.itemType][data.itemId] || 0) + data.amount;
+      if (data.itemId.includes("@") && data.itemData && data.itemData.mutDesc) {
+        if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
+        const parts = data.itemId.split("@");
+        const mutCode = parts.slice(1).join("@");
+        const cname = (CROPS[parts[0]] || { name: "" }).name;
+        ctx.S.mutDesc[mutCode + "@" + cname] = data.itemData.mutDesc;
+      }
     }
     save();
     toast("\u0110\xE3 g\u1EE1 m\xF3n h\xE0ng xu\u1ED1ng");
@@ -48925,7 +48939,8 @@ function getFleaItemName(id, itemData = null) {
   }
   if (id.includes("@")) {
     const parts = id.split("@");
-    return `[\u0110\u1ED9t bi\u1EBFn ${parts[0]}] ${CROPS[parts[1]]?.name || id}`;
+    const mutName = parts[1] || "\u0110\u1ED9t bi\u1EBFn";
+    return `[\u0110\u1ED9t bi\u1EBFn ${mutName}] ${CROPS[parts[0]]?.name || parts[0]}`;
   }
   return CROPS[id]?.name || id;
 }
@@ -48949,7 +48964,7 @@ function getFleaItemIcon(id, itemData = null) {
   }
   if (id.includes("@")) {
     const parts = id.split("@");
-    return spriteSVG(CROPS[parts[1]]?.sp || "sprout", 20);
+    return spriteSVG(CROPS[parts[0]]?.sp || "sprout", 20);
   }
   if (CROPS && CROPS[id]) return spriteSVG(CROPS[id].sp || id, 20);
   return "";
@@ -48968,8 +48983,15 @@ function getFleaItemDesc(id, itemData = null) {
     return itemData?.desc || ctx.S.uniques?.[id]?.desc || "M\u1ED9t b\u1EA3o v\u1EADt b\xED \u1EA9n kh\xF4ng r\xF5 ngu\u1ED3n g\u1ED1c.";
   }
   if (id.includes("@")) {
+    if (itemData && itemData.mutDesc) return itemData.mutDesc;
     const parts = id.split("@");
-    return CROPS[parts[1]]?.desc || "C\xE2y tr\u1ED3ng \u0111\u1ED9t bi\u1EBFn \u0111\u1EB7c bi\u1EC7t.";
+    if (parts[1] && ctx.S.mutDesc) {
+      const mutCode = parts.slice(1).join("@");
+      const cname = (CROPS[parts[0]] || { name: "" }).name;
+      const desc = ctx.S.mutDesc[mutCode + "@" + cname] || ctx.S.mutDesc[parts[1]];
+      if (desc) return desc;
+    }
+    return "C\xE2y tr\u1ED3ng \u0111\u1ED9t bi\u1EBFn \u0111\u1EB7c bi\u1EC7t.";
   }
   return CROPS[id]?.desc || "V\u1EADt ph\u1EA9m n\xF4ng tr\u1EA1i.";
 }
@@ -48981,7 +49003,14 @@ function uiSelectFleaAdd(type, id, max) {
   let iconStr = getFleaItemIcon(id);
   iconStr = iconStr.replace(/width="20"/g, 'width="48"').replace(/height="20"/g, 'height="48"');
   $id("lbl-flea-sel-icon").innerHTML = iconStr;
-  $id("lbl-flea-sel-name").innerText = getFleaItemName(id);
+  let nameHtml = getFleaItemName(id);
+  if (type === "uniques") {
+    const item = ctx.S.uniques?.[id];
+    if (item && item.rarity) {
+      nameHtml += ` <span style="font-size:12px; color:${item.color || "#ff8000"};">(${item.rarity})</span>`;
+    }
+  }
+  $id("lbl-flea-sel-name").innerHTML = nameHtml;
   $id("lbl-flea-sel-desc").innerText = getFleaItemDesc(id);
   $id("flea-post-amount").value = 1;
   $id("flea-post-amount").max = max;
@@ -49114,6 +49143,15 @@ function renderPostItem() {
       ctx.S.bag[itemId] -= amount;
       if (ctx.S.bag[itemId] <= 0) delete ctx.S.bag[itemId];
     } else {
+      if (itemId.includes("@")) {
+        const parts = itemId.split("@");
+        if (parts[1] && ctx.S.mutDesc) {
+          const mutCode = parts.slice(1).join("@");
+          const cname = (CROPS[parts[0]] || { name: "" }).name;
+          const desc = ctx.S.mutDesc[mutCode + "@" + cname] || ctx.S.mutDesc[parts[1]];
+          if (desc) itemData = { mutDesc: desc };
+        }
+      }
       ctx.S[itemType][itemId] -= amount;
       if (ctx.S[itemType][itemId] <= 0) delete ctx.S[itemType][itemId];
     }
