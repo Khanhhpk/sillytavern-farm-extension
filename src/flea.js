@@ -305,6 +305,13 @@ async function buyItem(docId, price) {
         // Thêm vào kho
         if (data.itemType === 'bag') {
             ctx.S.bag[data.itemId] = (ctx.S.bag[data.itemId] || 0) + data.amount;
+            if (data.itemId.includes('@') && data.itemData && data.itemData.mutDesc) {
+                if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
+                const parts = data.itemId.split('@');
+                const mutCode = parts.slice(1).join('@');
+                const cname = (CROPS[parts[0]] || { name: '' }).name;
+                ctx.S.mutDesc[mutCode + '@' + cname] = data.itemData.mutDesc;
+            }
         } else if (data.itemType === 'seeds') {
             ctx.S.seeds[data.itemId] = (ctx.S.seeds[data.itemId] || 0) + data.amount;
         } else if (data.itemType === 'ferts') {
@@ -356,6 +363,14 @@ async function cancelItem(docId) {
         } else {
             if (!ctx.S[data.itemType]) ctx.S[data.itemType] = {};
             ctx.S[data.itemType][data.itemId] = (ctx.S[data.itemType][data.itemId] || 0) + data.amount;
+            
+            if (data.itemId.includes('@') && data.itemData && data.itemData.mutDesc) {
+                if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
+                const parts = data.itemId.split('@');
+                const mutCode = parts.slice(1).join('@');
+                const cname = (CROPS[parts[0]] || { name: '' }).name;
+                ctx.S.mutDesc[mutCode + '@' + cname] = data.itemData.mutDesc;
+            }
         }
         
         All.save();
@@ -498,7 +513,8 @@ function getFleaItemName(id, itemData = null) {
     }
     if (id.includes('@')) {
         const parts = id.split('@');
-        return `[Đột biến ${parts[0]}] ${CROPS[parts[1]]?.name || id}`;
+        const mutName = parts[1] || 'Đột biến';
+        return `[Đột biến ${mutName}] ${CROPS[parts[0]]?.name || parts[0]}`;
     }
     return CROPS[id]?.name || id;
 }
@@ -523,7 +539,7 @@ function getFleaItemIcon(id, itemData = null) {
     }
     if (id.includes('@')) {
         const parts = id.split('@');
-        return All.spriteSVG(CROPS[parts[1]]?.sp || 'sprout', 20);
+        return All.spriteSVG(CROPS[parts[0]]?.sp || 'sprout', 20);
     }
     if (CROPS && CROPS[id]) return All.spriteSVG(CROPS[id].sp || id, 20);
     return '';
@@ -543,8 +559,15 @@ function getFleaItemDesc(id, itemData = null) {
         return itemData?.desc || ctx.S.uniques?.[id]?.desc || 'Một bảo vật bí ẩn không rõ nguồn gốc.';
     }
     if (id.includes('@')) {
+        if (itemData && itemData.mutDesc) return itemData.mutDesc;
         const parts = id.split('@');
-        return CROPS[parts[1]]?.desc || 'Cây trồng đột biến đặc biệt.';
+        if (parts[1] && ctx.S.mutDesc) {
+            const mutCode = parts.slice(1).join('@');
+            const cname = (CROPS[parts[0]] || { name: '' }).name;
+            const desc = ctx.S.mutDesc[mutCode + '@' + cname] || ctx.S.mutDesc[parts[1]];
+            if (desc) return desc;
+        }
+        return 'Cây trồng đột biến đặc biệt.';
     }
     return CROPS[id]?.desc || 'Vật phẩm nông trại.';
 }
@@ -561,7 +584,14 @@ export function uiSelectFleaAdd(type, id, max) {
     let iconStr = getFleaItemIcon(id);
     iconStr = iconStr.replace(/width="20"/g, 'width="48"').replace(/height="20"/g, 'height="48"');
     All.$id('lbl-flea-sel-icon').innerHTML = iconStr;
-    All.$id('lbl-flea-sel-name').innerText = getFleaItemName(id);
+    let nameHtml = getFleaItemName(id);
+    if (type === 'uniques') {
+        const item = ctx.S.uniques?.[id];
+        if (item && item.rarity) {
+            nameHtml += ` <span style="font-size:12px; color:${item.color || '#ff8000'};">(${item.rarity})</span>`;
+        }
+    }
+    All.$id('lbl-flea-sel-name').innerHTML = nameHtml;
     All.$id('lbl-flea-sel-desc').innerText = getFleaItemDesc(id);
     All.$id('flea-post-amount').value = 1;
     All.$id('flea-post-amount').max = max;
@@ -712,6 +742,15 @@ function renderPostItem() {
             ctx.S.bag[itemId] -= amount;
             if (ctx.S.bag[itemId] <= 0) delete ctx.S.bag[itemId];
         } else {
+            if (itemId.includes('@')) {
+                const parts = itemId.split('@');
+                if (parts[1] && ctx.S.mutDesc) {
+                    const mutCode = parts.slice(1).join('@');
+                    const cname = (CROPS[parts[0]] || { name: '' }).name;
+                    const desc = ctx.S.mutDesc[mutCode + '@' + cname] || ctx.S.mutDesc[parts[1]];
+                    if (desc) itemData = { mutDesc: desc };
+                }
+            }
             ctx.S[itemType][itemId] -= amount;
             if (ctx.S[itemType][itemId] <= 0) delete ctx.S[itemType][itemId];
         }
