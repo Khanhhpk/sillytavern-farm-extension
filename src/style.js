@@ -723,6 +723,66 @@ export const styleCSS = `
     .trib-btn-def { background: linear-gradient(#4a3461, #2a1a40); color: #c4a0e8; border: 1px solid #7a4aaa; }
     .trib-btn-def:hover { background: linear-gradient(#5a4070, #3a2550); }
     .trib-btn-def:active { transform: translateY(2px); }
+
+    /* ===== Trường Đua ===== */
+    /* Shadow root không có màu chữ mặc định: nếu bỏ trống, chữ sẽ thừa hưởng
+       màu của trang SillyTavern, mà giao diện tối cho chữ sáng -> chữ mờ tịt
+       trên nền kem #f8efe0 của .dungeon-win. Đặt màu tường minh cho cả khối. */
+    .race-view { display:none; flex-direction:column; gap:8px; padding:10px; overflow-y:auto; color:#6b4f2e; }
+    /* .race-view là flex column. Không đặt flex-shrink cho con thì mặc định là 1
+       (co được) — trên mobile .dungeon-win bị ép height:100vh (xem media query
+       max-width:640px ở trên), và khối "Cách chơi" đủ dài để đẩy tổng nội dung
+       vượt chiều cao đó. Hậu quả từng thấy trên ảnh chụp thật: flexbox co
+       .race-track (vốn cao ~220px tự nhiên) xuống còn ~10px, một sợi mỏng
+       không thấy con thú nào. .race-view đã overflow-y:auto sẵn, nên đúng ra
+       phải cuộn chứ không co — flex:none (=0 0 auto) cho MỌI con trực tiếp để
+       khoá chiều cao tự nhiên của từng khối. Nếu triệu chứng "đường đua/bảng bị
+       bóp còn một sợi" tái diễn, kiểm tra trước tiên xem con mới thêm có thiếu
+       flex:none ở đây không. */
+    .race-hud, .race-track, .race-result, .race-tbl, .race-betrow, .race-help,
+    .race-view > .note { flex: none; }
+    .race-hud { display:flex; justify-content:space-between; align-items:center; font-size:12px; padding:0 2px; color:#a3763d; }
+    .race-track { position:relative; background:#3b3020; border:2px solid #2a2118; border-radius:6px; overflow:hidden; }
+    .race-lane { position:relative; height:44px; border-bottom:1px dashed rgba(255,253,244,.22); }
+    .race-lane:last-child { border-bottom:0; }
+    .race-finish { position:absolute; top:0; bottom:0; right:8px; width:6px;
+      background:repeating-linear-gradient(180deg,#fffdf4 0 6px,#3a2c22 6px 12px); }
+    .race-runner { position:absolute; bottom:2px; left:0; width:36px; height:36px;
+      transition:transform .05s linear; will-change:transform; }
+    .race-runner.flip { scale:-1 1; }
+    .race-runner.stumble { rotate:-14deg; filter:saturate(.6); }
+    .race-runner.burst { filter:drop-shadow(0 0 6px #f2c231); }
+    .race-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+    .race-tbl th { text-align:left; font-weight:600; color:#a3763d; padding:3px 4px; }
+    .race-tbl td { padding:3px 4px; border-top:1px solid rgba(138,130,116,.25); color:#6b4f2e; }
+    .odds-cell { cursor:pointer; border:1px solid rgba(138,130,116,.5); border-radius:4px;
+      padding:2px 6px; display:inline-block; min-width:52px; text-align:center; color:#7a5c38; }
+    .odds-cell.sel { background:#f2c231; color:#3a2c22; font-weight:700; }
+    /* Ô khoá cần phân biệt bằng HÌNH DẠNG (viền đứt) chứ không chỉ độ mờ:
+       ở .35 nó nhoè tới mức ảnh chụp màn hình trông như lỗi vẽ chứ không phải
+       trạng thái cố ý. .5 vẫn đủ tối để đọc được "—" mà vẫn rõ là bị vô hiệu. */
+    .odds-cell.off { opacity:.5; cursor:default; border-style:dashed; }
+    .race-form { font-variant-numeric:tabular-nums; letter-spacing:.5px; color:#a3763d; }
+    .race-betrow { display:flex; gap:6px; align-items:center; justify-content:center; flex-wrap:wrap; margin-top:4px; }
+    .race-result { text-align:center; font-size:13px; min-height:20px; color:#6b4f2e; }
+    /* Khối hướng dẫn lấp khoảng trống dưới hàng nút. Chỉ render khi đang 'betting'
+       (xem race.js renderRace()) nên không cần quy tắc ẩn/hiện ở đây theo phase.
+       Nền #f8efe0 trùng màu nền cửa sổ (.dungeon-win) nên viền + đường kẻ trên
+       mảnh là thứ duy nhất tách khối này khỏi phần chơi phía trên — cố tình làm
+       mờ hơn bảng odds để không lấn át, nhưng vẫn đủ rõ để đọc lướt qua. */
+    .race-help { margin-top: 6px; padding: 8px 10px 6px; border-top: 1px dashed rgba(138,130,116,.4);
+      font-size: 11px; line-height: 1.6; color: #a3763d; }
+    .race-help b { color: #6b4f2e; }
+    .race-help ol { margin: 3px 0 6px 18px; padding: 0; }
+    .race-help li { margin-bottom: 2px; }
+    .race-help-note { margin-top: 4px; color: #6b4f2e; }
+    /* .race-help giờ là <details>: bỏ dấu tam giác mặc định của trình duyệt vì
+       nó lệch tông với các icon vẽ tay còn lại của giao diện, thay bằng chữ đậm
+       + con trỏ tay để vẫn rõ là bấm được. Giữ đúng bảng màu #6b4f2e/#a3763d
+       đang dùng cho khối trường đua. */
+    .race-help summary { cursor: pointer; font-weight: 700; color: #6b4f2e; list-style: none; }
+    .race-help summary::-webkit-details-marker { display: none; }
+    .race-help[open] summary { margin-bottom: 2px; }
 `;
 export const fleaStyles = `
 .flea-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px dashed #c2a274; }

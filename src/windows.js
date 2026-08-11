@@ -37,6 +37,16 @@ export function placeBjWin() {
   bjWin.style.left = Math.min(Math.max(x, 0), Math.max(vw - w, 0)) + 'px';
   bjWin.style.top = Math.min(Math.max(y, 0), vh - 60) + 'px';
 }
+export function placeRaceWin() {
+  const raceWin = All.$id('race-win');
+  if (!raceWin) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const w = Math.min(600, vw * 0.96);
+  let x = ctx.S.raceWin ? ctx.S.raceWin.fx * vw : (vw - w) / 2;
+  let y = ctx.S.raceWin ? ctx.S.raceWin.fy * vh : vh * 0.04;
+  raceWin.style.left = Math.min(Math.max(x, 0), Math.max(vw - w, 0)) + 'px';
+  raceWin.style.top = Math.min(Math.max(y, 0), vh - 60) + 'px';
+}
 export function toggleWin() {
   try {
       if (ctx.win.classList.contains('open')) { closeWin(); return; }
@@ -151,6 +161,32 @@ export function initWindows() {
       bjWg = null;
       const bjWin = All.$id('bj-win');
       ctx.S.bjWin = { fx: bjWin.offsetLeft / window.innerWidth, fy: bjWin.offsetTop / window.innerHeight };
+      All.save();
+    });
+  }
+
+  const raceDragBar = All.$id('race-drag');
+  let raceWg = null;
+  if (raceDragBar) {
+    raceDragBar.addEventListener('pointerdown', e => {
+      if (e.target.classList.contains('close-x')) return;
+      if (window.innerWidth <= 640) return;
+      raceDragBar.setPointerCapture(e.pointerId);
+      const raceWin = All.$id('race-win');
+      raceWg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: raceWin.offsetLeft, oy: raceWin.offsetTop };
+    });
+    raceDragBar.addEventListener('pointermove', e => {
+      if (!raceWg || e.pointerId !== raceWg.id) return;
+      const raceWin = All.$id('race-win');
+      raceWin.style.left = raceWg.ox + e.clientX - raceWg.sx + 'px';
+      raceWin.style.top = raceWg.oy + e.clientY - raceWg.sy + 'px';
+    });
+    raceDragBar.addEventListener('pointerup', e => {
+      if (!raceWg || e.pointerId !== raceWg.id) return;
+      try { raceDragBar.releasePointerCapture(e.pointerId); } catch (er) {}
+      raceWg = null;
+      const raceWin = All.$id('race-win');
+      ctx.S.raceWin = { fx: raceWin.offsetLeft / window.innerWidth, fy: raceWin.offsetTop / window.innerHeight };
       All.save();
     });
   }

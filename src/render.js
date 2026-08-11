@@ -190,12 +190,18 @@ export function renderPlots() {
           ${spriteSVG('spadeIcon', 48)}
           <div class="feature-name">Blackjack</div>
         </div>
+        <div class="explore-slot" id="cslot-race">
+          ${spriteSVG('raceGate', 48)}
+          <div class="feature-name">Trường Đua</div>
+        </div>
       </div>
     `;
     const bBtn = All.$id('cslot-bet');
     if (bBtn) bBtn.addEventListener('click', () => All.openPanel('bet'));
     const bjBtn = All.$id('cslot-bj');
     if (bjBtn) bjBtn.addEventListener('click', () => All.openBlackjackPicker());
+    const raceBtn = All.$id('cslot-race');
+    if (raceBtn) raceBtn.addEventListener('click', () => All.openRaceView());
     return;
   }
 
