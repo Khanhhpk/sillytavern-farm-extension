@@ -5256,7 +5256,7 @@ function resultLabel(roll, kq, mult, nextAnchor) {
 var POT_CAP, HOUSE_RETURN, MIN_MULT, ANCHOR_MIN, ANCHOR_MAX;
 var init_bet_odds = __esm({
   "src/bet-odds.js"() {
-    POT_CAP = Number.MAX_SAFE_INTEGER;
+    POT_CAP = 2e8;
     HOUSE_RETURN = 97;
     MIN_MULT = 1.01;
     ANCHOR_MIN = 5;
@@ -49182,7 +49182,7 @@ function openBlackjackSolo() {
 }
 function soloDrawCard(hidden) {
   const s2 = soloState;
-  if (s2.shoeIdx >= s2.shoe.length) {
+  if (!s2.shoe || s2.shoe.length - s2.shoeIdx < s2.playerHands.length * 15 + 15) {
     s2.shoe = buildShoe(s2.settings.numDecks, Date.now() & 4294967295);
     s2.shoeIdx = 0;
   }
@@ -49327,6 +49327,7 @@ function soloStartRound() {
   const inp = $id("bj-bet-inp");
   const want = Math.max(0, parseInt(inp ? inp.value : "0") || 0);
   if (want < s2.settings.minBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${s2.settings.minBet}G`);
+  if (want > 1e8) return bjToast("H\u1EC7 th\u1ED1ng gi\u1EDBi h\u1EA1n c\u01B0\u1EE3c t\u1ED1i \u0111a 100,000,000G m\u1ED7i v\xE1n!");
   if (s2.settings.maxBet > 0 && want > s2.settings.maxBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${s2.settings.maxBet}G`);
   if (want > coins) return bjToast(`Kh\xF4ng \u0111\u1EE7 v\xE0ng (${coins.toLocaleString()}G)`);
   ctx.S.coins = (ctx.S.coins || 0) - want;
@@ -50180,7 +50181,7 @@ function bjHandleRoomAction(fromPid, data) {
     h.bet.splice(idx + 1, 0, h.bet[idx]);
     h.stood.splice(idx + 1, 0, false);
     h.doubled.splice(idx + 1, 0, false);
-    if (sc.rank === "A") {
+    if (c2.rank === "A") {
       h.splitAceIdxs = h.splitAceIdxs || [];
       h.splitAceIdxs.push(idx, idx + 1);
       h.stood[idx] = true;
@@ -50215,7 +50216,7 @@ function bjHostRunDealer() {
       return;
     }
     const tot = handTotal(gs.dealerHand);
-    if (tot < 17 || isSoft(gs.dealerHand) && tot === 16) {
+    if (tot < 17 || isSoft(gs.dealerHand) && tot === 17) {
       gs.dealerHand.push({ ...gs.shoe[gs.shoeIdx++] });
       const hitMsg = { type: "ACTION", actionType: "DEALER_HIT", dealerHand: gs.dealerHand };
       bjBroadcast(hitMsg);
@@ -50316,6 +50317,7 @@ function bjRoomPlaceBet(amount) {
   const coins = ctx.S.coins || 0;
   if (coins < amount) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng!");
   if (amount < bjSettings.minBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${bjSettings.minBet}G`);
+  if (amount > 1e8) return bjToast("H\u1EC7 th\u1ED1ng gi\u1EDBi h\u1EA1n c\u01B0\u1EE3c t\u1ED1i \u0111a 100,000,000G m\u1ED7i v\xE1n!");
   if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${bjSettings.maxBet}G`);
   ctx.S.coins = coins - amount;
   save();
@@ -50331,7 +50333,12 @@ function bjRoomAction(actionType, extra) {
 }
 function bjApplySettings() {
   const min = parseInt($id("bj-cfg-min")?.value) || 10;
-  const max = parseInt($id("bj-cfg-max")?.value) || 0;
+  let max = parseInt($id("bj-cfg-max")?.value) || 0;
+  if (max > 1e8) {
+    max = 1e8;
+    if ($id("bj-cfg-max")) $id("bj-cfg-max").value = 1e8;
+    bjToast("C\u1EA3nh b\xE1o: Max bet kh\xF4ng \u0111\u01B0\u1EE3c v\u01B0\u1EE3t qu\xE1 100,000,000G");
+  }
   const decks = Math.min(8, Math.max(1, parseInt($id("bj-cfg-decks")?.value) || 6));
   const delay = Math.max(5, parseInt($id("bj-cfg-delay")?.value) || 10);
   bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks, delay };
