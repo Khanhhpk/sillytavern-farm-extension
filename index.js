@@ -10340,7 +10340,9 @@ function loadDungeonState(saveData) {
       el,
       type: "pet",
       skill: savedP.skill || stat.skill,
+      activeSkill: savedP.activeSkill || stat.activeSkill,
       ai: savedP.ai || stat.ai,
+      armor: savedP.armor !== void 0 ? savedP.armor : stat.armor,
       cd: savedP.cd || 0,
       skillCd: savedP.skillCd || 0,
       maxSkillCd: savedP.maxSkillCd || stat.maxSkillCd || 0
@@ -10512,6 +10514,9 @@ function initPlacementPhase() {
           el,
           type: "pet",
           skill: stat.skill,
+          activeSkill: stat.activeSkill,
+          ai: stat.ai,
+          armor: stat.armor,
           dockSlot: currentSlot
         };
         team.push(memberObj);
