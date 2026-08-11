@@ -1383,8 +1383,8 @@ function showWaveRewards(isLoaded = false) {
         // Calculate gold for this wave (shop gold scale: 1.10→1.12)
         const isBoss = currentWave % 10 === 0;
         const waveGold = Math.round(500 * Math.pow(1.12, currentWave - 1)) * (isBoss ? 3 : 1);
-        // Tiền thưởng ngoài farm scale tuyến tính
-        const waveHomeGold = (10 + currentWave * 2) * (isBoss ? 3 : 1);
+        // Tiền thưởng ngoài farm scale mạnh hơn để xứng đáng với công cày
+        const waveHomeGold = (200 + currentWave * 50) * (isBoss ? 3 : 1);
         totalGold += waveHomeGold;
         shopGold += waveGold;
         

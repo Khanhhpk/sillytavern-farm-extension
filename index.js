@@ -11360,7 +11360,7 @@ function showWaveRewards(isLoaded = false) {
     projectiles = [];
     const isBoss = currentWave % 10 === 0;
     const waveGold = Math.round(500 * Math.pow(1.12, currentWave - 1)) * (isBoss ? 3 : 1);
-    const waveHomeGold = (10 + currentWave * 2) * (isBoss ? 3 : 1);
+    const waveHomeGold = (200 + currentWave * 50) * (isBoss ? 3 : 1);
     totalGold += waveHomeGold;
     shopGold += waveGold;
     fullTeam.forEach((p2) => {
