@@ -10997,7 +10997,7 @@ function combatLoop() {
     updateEntities(team, enemies, stepDt);
     updateEntities(enemies, team, stepDt);
     const arena = $id("dg-arena");
-    let newProjs2 = [];
+    let newProjs = [];
     projectiles = projectiles.filter((p2) => {
       if (p2.isPuddle) {
         p2.lifetime -= stepDt;
@@ -11114,7 +11114,7 @@ function combatLoop() {
             fire.style.borderRadius = "50%";
             fire.style.pointerEvents = "none";
             arena.appendChild(fire);
-            newProjs2.push({
+            newProjs.push({
               isFireZone: true,
               lifetime: 5,
               el: fire,
@@ -11291,6 +11291,7 @@ function combatLoop() {
       }
       return true;
     });
+    projectiles.push(...newProjs);
     if (enemies.length === 0 || team.length === 0) {
       break;
     }
@@ -12150,7 +12151,6 @@ function updateEntities(groupA, groupB, dt2) {
       }
     }
   });
-  projectiles.push(...newProjs);
 }
 function endDungeon(isWin) {
   phase = "end";

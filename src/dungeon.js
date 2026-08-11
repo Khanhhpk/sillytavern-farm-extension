@@ -1052,6 +1052,7 @@ function combatLoop() {
         }
         return true;
     });
+    projectiles.push(...newProjs);
     
         if (enemies.length === 0 || team.length === 0) {
             break;
@@ -1985,7 +1986,6 @@ function updateEntities(groupA, groupB, dt) {
             }
         }
     });
-    projectiles.push(...newProjs);
 }
 
 function endDungeon(isWin) {
