@@ -7,7 +7,7 @@ import { toast, openBuyDlg } from './witch.js';
 import { renderStatus } from './render.js';
 import { openModal } from './shop.js';
 import { charName, CS, SEC, extractJson, collectWorldbook } from './events.js';
-import { GACHA_PROMPT } from './prompt.js';
+import { getGachaPrompt } from './prompt.js';
 
 export const GACHA_SPEC_PITY = 100;
 export const GACHA_SUPER_PITY = 200;
@@ -145,7 +145,7 @@ Hãy sáng tạo 1 KỲ VẬT ĐỘC NHẤT phẩm chất [${rarity}].
 ${contextStr}
 
 --- QUY TẮC CỐT LÕI TỪ VẠN HỮU ĐẠO NGUYÊN ---
-${GACHA_PROMPT}
+${getGachaPrompt()}
 --- KẾT THÚC QUY TẮC CỐT LÕI ---
 
 BẢNG MÀU PIXEL CHO PHÉP (Ký tự: Mã màu Hex):
@@ -916,7 +916,7 @@ ${resultInstruction}
 ${contextStr}
 
 --- QUY TẮC CỐT LÕI TỪ VẠN HỮU ĐẠO NGUYÊN ---
-${GACHA_PROMPT}
+${getGachaPrompt()}
 --- KẾT THÚC QUY TẮC CỐT LÕI ---
 
 BẢNG MÀU PIXEL CHO PHÉP (Ký tự: Mã màu Hex):
