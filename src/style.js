@@ -779,8 +779,11 @@ export const styleCSS = `
     .race-lane:last-child { border-bottom:0; }
     .race-finish { position:absolute; top:0; bottom:0; right:8px; width:6px;
       background:repeating-linear-gradient(180deg,#fffdf4 0 6px,#3a2c22 6px 12px); }
+    /* Vị trí đặt qua translate (không phải transform) để rotate của .stumble
+       không xoay luôn vector dời chỗ — xem giải thích ở race.js chỗ gán
+       el.style.translate. transition/will-change đổi theo cho khớp. */
     .race-runner { position:absolute; bottom:2px; left:0; width:36px; height:36px;
-      transition:transform .05s linear; will-change:transform; }
+      transition:translate .05s linear; will-change:translate; }
     .race-runner.flip { scale:-1 1; }
     .race-runner.stumble { rotate:-14deg; filter:saturate(.6); }
     .race-runner.burst { filter:drop-shadow(0 0 6px #f2c231); }
@@ -808,6 +811,24 @@ export const styleCSS = `
     .race-help ol { margin: 3px 0 6px 18px; padding: 0; }
     .race-help li { margin-bottom: 2px; }
     .race-help-note { margin-top: 4px; color: #6b4f2e; }
+    /* Bong bóng thoại trên đường đua. Khác nông trại ở chỗ neo:
+       .pbubble gốc neo PHÍA TRÊN con thú, mà mỗi làn đua chỉ cao 44px nên nó
+       sẽ cắn sang làn kế và che con thú ở làn trước. Neo sang TRÁI thì bong
+       bóng nằm trên quãng đường con thú đã chạy qua — chỗ đó trống, và nó ở
+       nguyên trong dải làn của mình.
+       Không dùng transform để định vị: keyframes pbfloat đã chiếm thuộc tính
+       transform, đặt thêm ở đây sẽ bị hoạt ảnh ghi đè. Dùng top cố định 8px
+       để căn giữa theo chiều dọc so với con thú cao 36px. */
+    .pbubble.rb { right: calc(100% + 4px); left: auto; bottom: auto; top: 8px;
+      white-space: normal; max-width: 120px; line-height: 1.25;
+      border-radius: 8px 8px 0 8px; text-align: center; }
+    /* Sát vạch xuất phát thì bong bóng bên trái sẽ tràn ra ngoài và bị
+       overflow:hidden của .race-track cắt cụt — lật sang phải. */
+    .pbubble.rb.flip { left: calc(100% + 4px); right: auto; border-radius: 8px 8px 8px 0; }
+    /* .race-runner.stumble nghiêng cả con thú lẫn bong bóng con của nó.
+       Xoay ngược lại đúng bằng ngần ấy để chữ vẫn thẳng — vấp là lúc hay có
+       thoại nhất nên không thể để chữ nghiêng ngả. */
+    .race-runner.stumble .pbubble.rb { rotate: 14deg; }
     /* .race-help giờ là <details>: bỏ dấu tam giác mặc định của trình duyệt vì
        nó lệch tông với các icon vẽ tay còn lại của giao diện, thay bằng chữ đậm
        + con trỏ tay để vẫn rõ là bấm được. Giữ đúng bảng màu #6b4f2e/#a3763d

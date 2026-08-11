@@ -9,10 +9,15 @@ import { renderStatus, pickFrom } from './render.js';
 import { plant, harvest, fertilize } from './logic.js';
 
 /* ---------- Thú cưng: render động + chọc chọc (uỷ quyền listener, bong bóng trên đầu, đủ 10 phút mới thật sự rơi tiền) ---------- */
-export function petBubble(el, txt) {
+/* extraClass tuỳ chọn: trường đua truyền 'rb' để đổi chỗ neo bong bóng.
+   Thêm tham số thay vì nhân bản hàm cho trường đua, để chỉ tồn tại MỘT bản
+   cài đặt vòng đời bong bóng — tạo, thay câu cũ, tự xoá sau 1.7 giây.
+   Bỏ trống thì hành vi trên nông trại không đổi một chút nào. */
+export function petBubble(el, txt, extraClass) {
   el.querySelector('.pbubble')?.remove();
   const b = document.createElement('span');
-  b.className = 'pbubble'; b.textContent = txt;
+  b.className = extraClass ? 'pbubble ' + extraClass : 'pbubble';
+  b.textContent = txt;
   el.appendChild(b);
   window.setTimeout(() => b.remove(), 1700);
 }

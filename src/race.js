@@ -11,6 +11,7 @@ import {
   playbackTiming, TRACK,
 } from './race-sim.js';
 import { save } from './state.js';
+import { pickLine, EVENT_RANK } from './race-lines.js';
 
 export let isRaceOpen = false;
 
@@ -72,6 +73,30 @@ let sel = null;                      // Cửa đang chọn: { kind, lane } hoặ
 const RACE_GAITS = { octo: { dur: 260, hy: 4 }, octoCream: { dur: 290, hy: 4 }, _: { dur: 330, hy: 9 } };
 const RACE_FLOATY = { cloudMallow: 1, ghostBlob: 1, jellyfish: 1 };
 const gaitOf = sp => RACE_GAITS[sp] || RACE_GAITS._;
+
+/* Tiết chế lời thoại. Rủi ro lớn nhất của lớp này không phải sai kết quả mà là
+   CHE KÍN ĐƯỜNG ĐUA: 5 làn trong 16 giây, bong bóng sống 1,7 giây, một ván trời
+   mưa có nhiều cú vấp sẽ thành bức tường chữ. */
+const SAY_COOLDOWN_MS = 3000;     // Mỗi làn nghỉ ngần này giữa hai câu của chính nó
+const SAY_MAX_ON_SCREEN = 3;      // Trần số bong bóng hiện cùng lúc
+const SAY_LIFE_MS = 1700;         // Khớp với vòng đời trong petBubble, dùng để đếm cái đang hiện
+const SAY_FLIP_X = 130;           // Con thú còn cách mép trái dưới ngần này thì lật bong bóng sang phải
+const SAY_START_COUNT = 2;        // Lúc xuất phát chỉ ngần này con được nói, không phải cả 5
+/* Ngưỡng bắt vấp. TỪNG là hằng số tuyệt đối (|bước| < 0.35) viết như thể
+   STUMBLE_V làm con thú ĐỨNG YÊN — sai: STUMBLE_V = 0.5 trong race-sim.js chỉ
+   làm ĐÔI tốc độ, không dừng hẳn. Đo thực tế một ván: bước mỗi tick nằm trong
+   khoảng 10.47–17.37, 0/362 bước lọt dưới 0.35 — cờ `stalled` chưa từng đúng,
+   nghĩa là class CSS '.stumble' và lời thoại lúc vấp chưa từng nổ kể từ khi
+   minigame ra mắt.
+   Sửa đúng: so bước hiện tại với TRUNG VỊ của chính làn đó (tính một lần từ
+   lapLog trước khi phát lại — lapLog có sẵn toàn bộ ngay từ đầu nên trung vị
+   một lần là chính xác, không cần trung bình trượt). Đã kiểm phân tách trên
+   dữ liệu đo: bước bình thường nhỏ nhất 10.47, còn 0.7 × trung vị mẫu (13.46)
+   ≈ 9.42, trong khi bước lúc vấp rơi vào khoảng 5–8 — tách sạch, không chồng
+   lấn. ĐỪNG dọn hằng số này về lại một số tuyệt đối: base tốc độ mỗi tầu khác
+   nhau (13.0–15.0, xem RUNNERS ở race-sim.js) nên một ngưỡng tuyệt đối không
+   thể đúng cho mọi làn cùng lúc — phải tương đối theo trung vị của chính làn. */
+const STUMBLE_RATIO = 0.7;
 
 let animFrame = null;
 let animEnd = null;                  // Hàm chạy khi hoạt cảnh kết thúc (hoặc bị bỏ qua)
@@ -494,6 +519,62 @@ function playRace(lapLog, finishTicks, onDone) {
   const t0 = performance.now();
   let ended = false;
 
+  /* Trạng thái phát hiện sự kiện, cấp riêng cho mỗi lần phát lại. */
+  const n = els.length;
+  const lastSayAt = new Array(n).fill(-Infinity);   // Thời điểm làn đó nói câu gần nhất
+  const sayUntil = new Array(n).fill(0);            // Thời điểm bong bóng của làn đó tắt
+  const wasStalled = new Array(n).fill(false);
+  const wasBurst = new Array(n).fill(false);
+  const doneLane = new Array(n).fill(false);
+  let leader = -1;
+  let prevRank = null;          // Xếp hạng khung hình trước, để phát hiện overtake bằng sườn lên
+  let saidStart = false, saidWin = false, saidLast = false;
+
+  /* Bước đi TRUNG VỊ của từng làn, tính một lần từ toàn bộ lapLog trước khi
+     phát lại (lapLog đã có sẵn trong tay ngay từ đầu — xem STUMBLE_RATIO ở
+     trên). Bỏ qua các bước sau khi làn đã cán vạch: pos đứng yên ở đó không
+     phải vấp, tính vào trung vị sẽ kéo trung vị xuống sai lệch. */
+  const stepMedian = new Array(n).fill(0);
+  for (let lane = 0; lane < n; lane++) {
+    const steps = [];
+    for (let t = 1; t < lapLog.length; t++) {
+      const a = lapLog[t - 1][lane], b = lapLog[t][lane];
+      if (a >= TRACK) continue;
+      steps.push(b - a);
+    }
+    steps.sort((x, y) => x - y);
+    stepMedian[lane] = steps.length ? steps[Math.floor(steps.length / 2)] : 0;
+  }
+
+  /* Con nhất và con bét lấy thẳng từ finishTicks, không đoán qua khoảng vượt
+     vạch: finishTicks là sự thật do sim quyết định, còn vị trí trên màn hình
+     chỉ là nội suy giữa hai tick nên hai con về sát nhau có thể đảo chỗ. */
+  let winLane = 0, lastLane = 0;
+  for (let i = 1; i < n; i++) {
+    if (finishTicks[i] < finishTicks[winLane]) winLane = i;
+    if (finishTicks[i] > finishTicks[lastLane]) lastLane = i;
+  }
+
+  /* Bắn một câu nếu tiết chế cho phép. Trả về true nếu thật sự nói. */
+  const trySay = (lane, event, now, x) => {
+    if (now - lastSayAt[lane] < SAY_COOLDOWN_MS) return false;
+    let onScreen = 0;
+    for (let i = 0; i < n; i++) if (now < sayUntil[i]) onScreen++;
+    if (onScreen >= SAY_MAX_ON_SCREEN) return false;
+
+    const el = els[lane];
+    if (!el) return false;
+    const rid = r.entrants[lane].rid;
+    const run = runnerById(rid);
+    const cry = run && All.PETS[run.sp] ? All.PETS[run.sp].cry : [];
+    const txt = pickLine(rid, event, cry);
+    All.petBubble(el, txt, x < SAY_FLIP_X ? 'rb flip' : 'rb');
+
+    lastSayAt[lane] = now;
+    sayUntil[lane] = now + SAY_LIFE_MS;
+    return true;
+  };
+
   const finish = () => {
     if (ended) return;
     ended = true;
@@ -511,6 +592,10 @@ function playRace(lapLog, finishTicks, onDone) {
     const i1 = Math.min(lapLog.length - 1, i0 + 1);
     const frac = tick - Math.floor(tick);
 
+    const cands = [];                       // Sự kiện nổ trong khung hình này
+    const posNow = new Array(n).fill(0);
+    const xNow = new Array(n).fill(0);
+
     for (let lane = 0; lane < els.length; lane++) {
       const el = els[lane];
       if (!el) continue;
@@ -525,12 +610,91 @@ function playRace(lapLog, finishTicks, onDone) {
         const ph = (elapsed % g.dur) / g.dur;
         y = -Math.sin(ph * Math.PI) * g.hy;
       }
-      el.style.transform = `translate(${x}px, ${y}px)`;
+      // CSS hợp thành translate -> rotate -> scale -> transform, với transform
+      // áp TRONG CÙNG. Nếu đặt dời chỗ bằng transform, khi .stumble gắn
+      // rotate:-14deg thì vector dời chỗ bị xoay theo nó: ở cuối đường đua
+      // x ~700px, phần hất lên là 700 * sin(14 deg) ~= 169px -> con thú bay
+      // khỏi đường đua. Dùng thuộc tính translate riêng (ngoài cùng, không bị
+      // rotate xoay) để chỉ nghiêng tại chỗ. Cú pháp translate là hai giá trị
+      // cách nhau bằng khoảng trắng, không phải translate(...) như transform.
+      // Cùng cách pets.js di chuyển pet trên nông trại (el.style.translate).
+      el.style.translate = `${x}px ${y}px`;
 
-      const stalled = Math.abs(b - a) < 0.35 && pos < TRACK;   // Đứng gần như tại chỗ = đang vấp
+      // Vấp = bước hiện tại thấp hơn hẳn bước bình thường CỦA CHÍNH LÀN ĐÓ (xem
+      // giải thích đầy đủ ở STUMBLE_RATIO — ngưỡng tuyệt đối cũ chưa từng nổ).
+      const stalled = (b - a) < STUMBLE_RATIO * stepMedian[lane] && pos < TRACK;
+      const bursting = pos / TRACK > 0.75 && (b - a) > 15;
       el.classList.toggle('stumble', stalled);
-      el.classList.toggle('burst', pos / TRACK > 0.75 && (b - a) > 15);
+      el.classList.toggle('burst', bursting);
+
+      // Bắt SƯỜN LÊN chứ không đọc trạng thái tức thời: vấp kéo dài nhiều khung
+      // hình, đọc tức thời sẽ bắn lại câu mỗi khung hình.
+      if (stalled && !wasStalled[lane]) cands.push({ lane, event: 'stumble', x });
+      if (bursting && !wasBurst[lane]) cands.push({ lane, event: 'burst', x });
+      wasStalled[lane] = stalled;
+      wasBurst[lane] = bursting;
+
+      posNow[lane] = pos;
+      xNow[lane] = x;
+      if (pos >= TRACK) doneLane[lane] = true;
     }
+
+    // Xuất phát: chỉ SAY_START_COUNT con được nói, bốc ngẫu nhiên.
+    // Cho cả 5 cùng nói thì ngay giây đầu đã tranh chỗ và ba con bị bỏ.
+    if (!saidStart) {
+      saidStart = true;
+      const order = [];
+      for (let i = 0; i < n; i++) order.push(i);
+      for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = order[i]; order[i] = order[j]; order[j] = t;
+      }
+      for (const lane of order.slice(0, SAY_START_COUNT)) cands.push({ lane, event: 'start', x: xNow[lane] });
+    }
+
+    // Đổi ngôi dẫn đầu. Bỏ qua lần gán đầu tiên: lúc đó chưa ai "vượt" ai cả.
+    let top = 0;
+    for (let i = 1; i < n; i++) if (posNow[i] > posNow[top]) top = i;
+    let leadFiredLane = -1;
+    if (leader === -1) leader = top;
+    else if (top !== leader) { leader = top; leadFiredLane = top; cands.push({ lane: top, event: 'lead', x: xNow[top] }); }
+
+    /* overtake: làn nào cải thiện THỨ HẠNG BẤT KỲ (không chỉ tranh ngôi nhất)
+       so với khung hình trước. Đo mật độ sự kiện theo 5 phần đường đua cho
+       thấy 'burst' (chặn bởi pos/TRACK > 0.75) và 'lead' (chỉ tính đổi ngôi
+       NHẤT, hiếm sau vài giây đầu) để trống gần như cả giữa chặng — overtake
+       trải đều cả 5 phần, đúng thứ cần để lấp khoảng lặng đó. */
+    const rankNow = new Array(n);
+    for (let lane = 0; lane < n; lane++) {
+      let better = 0;
+      for (let j = 0; j < n; j++) if (j !== lane && posNow[j] > posNow[lane]) better++;
+      rankNow[lane] = better + 1;
+    }
+    if (prevRank) {                                     // Khung hình đầu chưa có hạng trước để so
+      for (let lane = 0; lane < n; lane++) {
+        if (doneLane[lane]) continue;                    // Đã cán vạch thì không còn "vượt" ai nữa
+        if (lane === leadFiredLane) continue;             // Vừa chiếm ngôi nhất — đã có câu 'lead' rồi
+        if (rankNow[lane] < prevRank[lane]) cands.push({ lane, event: 'overtake', x: xNow[lane] });
+      }
+    }
+    prevRank = rankNow;
+
+    // Về nhất: bắn khi con nhất theo finishTicks cán vạch trên màn hình
+    if (!saidWin && doneLane[winLane]) {
+      saidWin = true;
+      cands.push({ lane: winLane, event: 'win', x: xNow[winLane] });
+    }
+
+    // Về bét: chỉ khi TẤT CẢ đã cán vạch. Ván bị cắt cứng ở giây 20 thì con bét
+    // chưa thật sự về đích nên không có gì để bình luận — nhánh này không chạy.
+    if (!saidLast && doneLane.every(Boolean)) {
+      saidLast = true;
+      cands.push({ lane: lastLane, event: 'last', x: xNow[lastLane] });
+    }
+
+    // Điểm cao nói trước; cái thua tranh chỗ thì bỏ luôn, không xếp hàng.
+    cands.sort((p, q) => EVENT_RANK[q.event] - EVENT_RANK[p.event]);
+    for (const c of cands) trySay(c.lane, c.event, elapsed, c.x);
 
     if (elapsed >= totalMs) return finish();
     animFrame = window.requestAnimationFrame(step);
