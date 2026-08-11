@@ -1241,6 +1241,24 @@ var init_graphics = __esm({
         "................",
         "................"
       ],
+      witchCauldron: [
+        ".......V........",
+        "......vVv.......",
+        "....K..v..K.....",
+        "...KKVVvVVKK....",
+        "..KKKvvVvvKKK...",
+        "..KvvvvvvvvvK...",
+        ".KKKKKKKKKKKKK.",
+        ".KKKKKKKKKKKKK.",
+        ".KKKKKKKKKKKKK.",
+        ".KKKKKKKKKKKKK.",
+        ".KKKKKKKKKKKKK.",
+        "..KKKKKKKKKKK...",
+        "...KKKKKKKKK....",
+        "....KKKKKKK.....",
+        ".....K...K......",
+        "................"
+      ],
       bloodFx: [
         "................",
         ".......f........",
@@ -2644,6 +2662,9 @@ var init_style = __esm({
       background: #2a2650; border: 2px solid #8f86d9; border-radius: 6px; padding: 1px 7px;
       box-shadow: 0 0 8px rgba(143,134,217,.5); }
     .pbubble.wb { border-color: #8f86d9; color: #5a52a0; background: #f4f2ff; }
+    .witch-cauldron-sprite { cursor: pointer; transition: transform 0.2s, filter 0.2s; padding-bottom: 4px; pointer-events: auto; animation: petfloat 3.2s ease-in-out infinite; }
+    .witch-cauldron-sprite:hover { filter: drop-shadow(0 0 6px rgba(180, 138, 224, 0.8)); transform: scale(1.1); }
+    .witch-cauldron-sprite:active { transform: scale(0.95); }
     /* v0.8b: trang \u0111\u01A1n h\xE0ng qu\u1EF9 \u0111\u1EA1o sao A (b\u1EA3n thi\u1EBFt k\u1EBF ch\u1ED1t) */
     .wzwrap { background: linear-gradient(160deg,#1c1b33,#232145 60%,#1a1e3d); border: 3px double #8f86d9;
       border-radius: 10px; padding: 14px 12px 12px; box-shadow: 0 0 14px rgba(143,134,217,.3); }
@@ -4659,6 +4680,23 @@ V\u1EF1c l\u1ED1i ch\u01A1i quy\u1EBFt \u0111\u1ECBnh "k\u1EF3 v\u1EADt n\xE0y c
 });
 
 // src/gacha.js
+var gacha_exports = {};
+__export(gacha_exports, {
+  GACHA_NORM_PRICE: () => GACHA_NORM_PRICE,
+  GACHA_SPEC_PITY: () => GACHA_SPEC_PITY,
+  GACHA_SPEC_PRICE: () => GACHA_SPEC_PRICE,
+  GACHA_SUPER_PITY: () => GACHA_SUPER_PITY,
+  executeCauldronMerge: () => executeCauldronMerge,
+  executeGachaRoll: () => executeGachaRoll,
+  generateAICauldronMerge: () => generateAICauldronMerge,
+  generateAIUniqueItemData: () => generateAIUniqueItemData,
+  generateProcedural32x32Sprite: () => generateProcedural32x32Sprite,
+  generateUniqueItem: () => generateUniqueItem,
+  initGachaState: () => initGachaState,
+  openCauldronModal: () => openCauldronModal,
+  openGachaModal: () => openGachaModal,
+  openGachaRatesModal: () => openGachaRatesModal
+});
 function initGachaState() {
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
   if (ctx.S.tickets.super === void 0) ctx.S.tickets.super = 0;
@@ -5455,6 +5493,298 @@ function openGachaRatesModal() {
     openGachaModal();
   });
 }
+async function generateAICauldronMerge(itemsData) {
+  if (!SEC.url || !SEC.model) return null;
+  try {
+    const simpleColors = Object.entries(GACHA_P).filter((e2) => typeof e2[1] === "string");
+    const paletteStr = simpleColors.map(([k2, v2]) => `${k2}: ${v2}`).join(", ");
+    let contextStr = "";
+    if (CS.link) {
+      const worldbook = await collectWorldbook();
+      contextStr = `Tr\xEDch xu\u1EA5t b\u1ED1i c\u1EA3nh th\u1EBF gi\u1EDBi (Worldbook) & L\u1ECBch s\u1EED tr\xF2 chuy\u1EC7n g\u1EA7n nh\u1EA5t:
+${worldbook ? worldbook : "(Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u th\u1EBF gi\u1EDBi c\u1EE5 th\u1EC3)"}`;
+    }
+    const itemsDesc = itemsData.map((it2, i2) => `Nguy\xEAn li\u1EC7u ${i2 + 1}: T\xEAn "${it2.name}", \u0110\u1ED9 hi\u1EBFm [${it2.rarity}], Gi\xE1 tr\u1ECB ${it2.sell}G, M\xF4 t\u1EA3 "${it2.desc}"`).join("\n");
+    const totalValue = itemsData.reduce((sum2, it2) => sum2 + (it2.sell || 0), 0);
+    const maxVal = totalValue * 5;
+    const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI qu\u1EA3n l\xFD "N\u1ED3i Ph\xF9 Thu\u1EF7" (Witch's Cauldron) v\xE0 chuy\xEAn gia Pixel Art (n x n, t\u1ED1i thi\u1EC3u 32x32).
+Ng\u01B0\u1EDDi ch\u01A1i v\u1EEBa b\u1ECF c\xE1c V\u1EADt ph\u1EA9m \u0110\u1ED9c nh\u1EA5t sau v\xE0o n\u1ED3i \u0111\u1EC3 luy\u1EC7n ho\xE1 (dung h\u1EE3p):
+${itemsDesc}
+
+Nhi\u1EC7m v\u1EE5 c\u1EE7a b\u1EA1n:
+Quy\u1EBFt \u0111\u1ECBnh k\u1EBFt qu\u1EA3 c\u1EE7a qu\xE1 tr\xECnh luy\u1EC7n ho\xE1 n\xE0y. 
+- N\xF3 c\xF3 th\u1EC3 TH\xC0NH C\xD4NG sinh ra m\u1ED9t si\xEAu v\u1EADt ph\u1EA9m m\u1EDBi, ho\u1EB7c TH\u1EA4T B\u1EA0I th\u1EA3m h\u1EA1i sinh ra \u0111\u1ED3 v\xF4 d\u1EE5ng. H\xE3y s\xE1ng t\u1EA1o!
+- C\xE2n b\u1EB1ng gi\xE1 tr\u1ECB (Price): T\u1ED5ng gi\xE1 tr\u1ECB \u0111\u1EA7u v\xE0o l\xE0 ${totalValue}G. N\u1EBFu th\xE0nh c\xF4ng xu\u1EA5t s\u1EAFc, gi\xE1 c\xF3 th\u1EC3 t\u0103ng nh\u01B0ng KH\xD4NG QU\xC1 ${maxVal}G. N\u1EBFu th\u1EA5t b\u1EA1i, gi\xE1 c\xF3 th\u1EC3 t\u1EE5t th\xEA th\u1EA3m. Ph\u1EA3i c\xF4ng b\u1EB1ng, th\xF4ng minh v\xE0 c\xF3 r\u1EE7i ro.
+- V\u1EC1 m\xF4 t\u1EA3: CH\u1EC8 nh\u1EAFc tho\xE1ng qua v\u1EC1 nguy\xEAn li\u1EC7u n\u1EC1n (n\u1EBFu c\u1EA7n), h\xE3y T\u1EACP TRUNG m\xF4 t\u1EA3 m\xF3n \u0111\u1ED3 m\u1EDBi n\xE0y nh\u01B0 m\u1ED9t B\u1EA3o V\u1EADt Gacha \u0111\u1ED9c l\u1EADp, v\u1EDBi c\u01A1 ch\u1EBF ho\u1EA1t \u0111\u1ED9ng ri\xEAng bi\u1EC7t, th\xFA v\u1ECB v\xE0 ph\xE1 v\u1EE1 s\xE1o r\u1ED7ng. \u0110\u1ED3 m\u1EDBi c\u0169ng ph\u1EA3i c\xF3 \u0111\u1ED9 hi\u1EBFm (R\xE1c, Th\u01B0\u1EDDng, Hi\u1EBFm, S\u1EED thi, Huy\u1EC1n tho\u1EA1i).
+
+${contextStr}
+
+--- QUY T\u1EAEC C\u1ED0T L\xD5I T\u1EEA V\u1EA0N H\u1EEEU \u0110\u1EA0O NGUY\xCAN ---
+${GACHA_PROMPT}
+--- K\u1EBET TH\xDAC QUY T\u1EAEC C\u1ED0T L\xD5I ---
+
+B\u1EA2NG M\xC0U PIXEL CHO PH\xC9P (K\xFD t\u1EF1: M\xE3 m\xE0u Hex):
+${paletteStr}
+
+H\u01AF\u1EDANG D\u1EAAN T\u01AF DUY (B\u1EAFt bu\u1ED9c ph\u1EA3i c\xF3 th\u1EBB <thinking> tr\u01B0\u1EDBc khi xu\u1EA5t m\xE3):
+1. PH\xC2N T\xCDCH: \u0110\xE1nh gi\xE1 s\u1EF1 k\u1EBFt h\u1EE3p c\u1EE7a c\xE1c nguy\xEAn li\u1EC7u \u0111\u1EA7u v\xE0o. N\xF3 c\xF3 logic h\u1EE3p nh\u1EA5t kh\xF4ng?
+2. QUY\u1EBET \u0110\u1ECANH: Th\xE0nh c\xF4ng r\u1EF1c r\u1EE1, th\xE0nh c\xF4ng v\u1EEBa, hay th\u1EA5t b\u1EA1i th\u1EA3m h\u1EA1i? X\xE1c \u0111\u1ECBnh \u0110\u1ED9 hi\u1EBFm m\u1EDBi v\xE0 \u0110\u1ECBnh gi\xE1.
+3. THI\u1EBET K\u1EBE: T\u1EA1o t\xEAn, m\xF4 t\u1EA3 c\u01A1 ch\u1EBF c\u1EE7a m\xF3n \u0111\u1ED3 m\u1EDBi.
+4. V\u1EBC PIXEL: Khung pixel t\u1ED1i thi\u1EC3u l\xE0 32x32. B\u1EAET BU\u1ED8C ph\u1EA3i l\xE0 l\u01B0\u1EDBi H\xCCNH VU\xD4NG n x n (s\u1ED1 d\xF2ng v\xE0 s\u1ED1 k\xFD t\u1EF1 m\u1ED7i d\xF2ng ph\u1EA3i b\u1EB1ng nhau).
+
+QUY T\u1EAEC \u0110\u1EA6U RA B\u1EAET BU\u1ED8C:
+Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\u1ED1i m\xE3 \`\`\`json ch\u1EE9a c\u1EA5u tr\xFAc:
+{
+  "name": "T\xEAn v\u1EADt ph\u1EA9m m\u1EDBi (2~7 ch\u1EEF, \u1EA5n t\u01B0\u1EE3ng)",
+  "desc": "M\xF4 t\u1EA3 ng\u1EAFn g\u1ECDn C\u01A0 CH\u1EBE v\xE0 C\xC1CH S\u1EEC D\u1EE4NG c\u1EE7a v\u1EADt ph\u1EA9m m\u1EDBi (d\u01B0\u1EDBi 100 ch\u1EEF). Ph\u1EA3i r\xF5 r\xE0ng, th\xFA v\u1ECB, \u0111\u1ED9c l\u1EA1.",
+  "rarity": "\u0110\u1ED9 hi\u1EBFm c\u1EE7a v\u1EADt ph\u1EA9m (R\xE1c, Th\u01B0\u1EDDng, Hi\u1EBFm, S\u1EED thi, Huy\u1EC1n tho\u1EA1i)",
+  "price": S\u1ED1 nguy\xEAn \u0111\u1ECBnh gi\xE1. (T\u1ED1i \u0111a tuy\u1EC7t \u0111\u1ED1i: ${maxVal}G),
+  "spriteMap": [ m\u1EA3ng c\xE1c chu\u1ED7i. N\u1EBFu ch\u1ECDn k\xEDch th\u01B0\u1EDBc n x n, m\u1EA3ng PH\u1EA2I C\xD3 \u0110\xDANG n chu\u1ED7i, v\xE0 m\u1ED7i chu\u1ED7i D\xC0I CH\xCDNH X\xC1C n k\xFD t\u1EF1. Ph\u1EA3i l\xE0 h\xECnh vu\xF4ng (min 32x32). Ch\u1EC9 d\xF9ng k\xFD t\u1EF1 B\u1EA3ng m\xE0u v\xE0 d\u1EA5u '.' cho \u0111i\u1EC3m trong su\u1ED1t ]
+}`;
+    const userPrompt = `H\xE3y ti\u1EBFn h\xE0nh luy\u1EC7n ho\xE1 n\u1ED3i ph\xF9 thu\u1EF7 v\u1EDBi c\xE1c nguy\xEAn li\u1EC7u tr\xEAn. Quy\u1EBFt \u0111\u1ECBnh k\u1EBFt qu\u1EA3!`;
+    console.log(`
+================= CAULDRON AI DEBUG: REQUEST =================`);
+    console.log("[System Prompt]:\n", sysPrompt);
+    console.log("[User Prompt]:\n", userPrompt);
+    console.log(`==============================================================
+`);
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 15e4);
+    const res = await fetch(SEC.url.replace(/\/+$/, "") + "/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...SEC.key ? { Authorization: "Bearer " + SEC.key } : {} },
+      body: JSON.stringify({
+        model: SEC.model,
+        messages: [
+          { role: "system", content: sysPrompt },
+          { role: "user", content: userPrompt }
+        ]
+      }),
+      signal: ctrl.signal
+    });
+    clearTimeout(to);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content || "";
+    console.log(`
+================= CAULDRON AI DEBUG: RESPONSE ================`);
+    console.log("[Raw Content]:\n", content);
+    console.log(`==============================================================
+`);
+    let jsonStr = content;
+    const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (match) jsonStr = match[1];
+    let jtxt = extractJson(jsonStr) || extractJson(content);
+    if (jtxt) {
+      const o2 = JSON.parse(jtxt);
+      if (o2 && o2.name && o2.desc && o2.rarity && Array.isArray(o2.spriteMap)) {
+        const fixedMap = [];
+        const size = Math.max(32, o2.spriteMap.length);
+        for (let i2 = 0; i2 < size; i2++) {
+          let row = typeof o2.spriteMap[i2] === "string" ? o2.spriteMap[i2] : "";
+          if (row.length < size) row = row.padEnd(size, ".");
+          if (row.length > size) row = row.substring(0, size);
+          fixedMap.push(row);
+        }
+        o2.spriteMap = fixedMap;
+        if (typeof o2.price !== "number") o2.price = 100;
+        return o2;
+      }
+    }
+  } catch (e2) {
+  }
+  return null;
+}
+async function executeCauldronMerge(selectedKeys, updateLoadingText) {
+  initGachaState();
+  if (selectedKeys.length < 2) {
+    toast("C\u1EA7n \xEDt nh\u1EA5t 2 nguy\xEAn li\u1EC7u \u0111\u1EC3 luy\u1EC7n ho\xE1!");
+    return null;
+  }
+  const backupBag = { ...ctx.S.bag };
+  const itemsData = [];
+  for (const k2 of selectedKeys) {
+    if (!ctx.S.bag[k2] || ctx.S.bag[k2] <= 0) return null;
+    ctx.S.bag[k2]--;
+    if (ctx.S.bag[k2] === 0) delete ctx.S.bag[k2];
+    const u2 = ctx.S.uniques[k2];
+    if (u2) itemsData.push(u2);
+  }
+  save();
+  renderStatus();
+  if (updateLoadingText) updateLoadingText("N\u1ED3i \u0111ang s\xF4i s\xF9ng s\u1EE5c...");
+  let resultData = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    resultData = await generateAICauldronMerge(itemsData);
+    if (resultData) break;
+    if (updateLoadingText) updateLoadingText(`\u0110ang th\u1EED l\u1EA1i... (${attempt}/3)`);
+  }
+  if (!resultData) {
+    ctx.S.bag = backupBag;
+    save();
+    renderStatus();
+    toast("Luy\u1EC7n ho\xE1 th\u1EA5t b\u1EA1i do l\u1ED7i k\u1EBFt n\u1ED1i (API). \u0110\xE3 ho\xE0n tr\u1EA3 nguy\xEAn li\u1EC7u!");
+    return null;
+  }
+  const timestamp = now();
+  const randId = Math.floor(Math.random() * 1e4);
+  const key = `unique@${timestamp}_${randId}`;
+  const spKey = `cauldron_${timestamp}_${randId}`;
+  let color = "#9e9e9e";
+  if (resultData.rarity === "Huy\u1EC1n tho\u1EA1i") color = "#ff8000";
+  else if (resultData.rarity === "S\u1EED thi") color = "#a335ee";
+  else if (resultData.rarity === "Hi\u1EBFm") color = "#4a90e2";
+  else if (resultData.rarity === "Th\u01B0\u1EDDng") color = "#b0bec5";
+  registerDynamicSprite(spKey, resultData.spriteMap);
+  ctx.S.uniques[key] = {
+    key,
+    name: resultData.name,
+    rarity: resultData.rarity,
+    color,
+    desc: resultData.desc,
+    sell: resultData.price,
+    sp: spKey,
+    spriteMap: resultData.spriteMap
+  };
+  ctx.S.bag[key] = (ctx.S.bag[key] || 0) + 1;
+  save();
+  renderStatus();
+  return {
+    type: "unique",
+    name: resultData.name,
+    rarity: resultData.rarity,
+    color,
+    icon: spriteSVG(spKey, 64),
+    desc: resultData.desc,
+    sell: resultData.price,
+    spKey
+  };
+}
+function openCauldronModal() {
+  initGachaState();
+  const allKeys = Object.keys(ctx.S.bag).filter((k2) => k2.startsWith("unique@") && ctx.S.uniques[k2]);
+  let selected = {};
+  const renderList = () => {
+    let listHTML = "";
+    if (allKeys.length === 0) {
+      listHTML = `<div style="text-align:center; padding:20px; color:#5a3f78;">B\u1EA1n kh\xF4ng c\xF3 b\u1EA3o v\u1EADt n\xE0o trong t\xFAi \u0111\u1EC3 gh\xE9p c\u1EA3. Quay Gacha th\xEAm nh\xE9!</div>`;
+    } else {
+      listHTML = allKeys.map((k2) => {
+        const u2 = ctx.S.uniques[k2];
+        const count2 = ctx.S.bag[k2] || 0;
+        const selCount = selected[k2] || 0;
+        const avail = count2 - selCount;
+        return `
+          <div class="gacha-item-card" style="border:2px solid ${u2.color}; border-radius:8px; padding:6px 8px; background:#fff; display:flex; align-items:center; gap:8px; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
+            <div>${spriteSVG(u2.sp, 40)}</div>
+            <div style="flex:1;">
+              <div style="font-weight:bold; font-size:13px; color:#3a2c22;">${u2.name} <span style="font-size:10px; color:${u2.color};">(${u2.rarity})</span></div>
+              <div style="font-size:11px; color:#7a5c38;">Gi\xE1: ${u2.sell || 100}G | Kho: ${avail}</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+              <span class="buy c-add-btn" data-key="${k2}" style="padding:2px 8px; font-size:11px;">+Th\xEAm</span>
+              ${selCount > 0 ? `<span class="buy c-sub-btn" data-key="${k2}" style="padding:2px 8px; font-size:11px; background:#e06578; border-color:#a83a52;">-B\u1EDBt (${selCount})</span>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+    const listEl = $id("cauldronItemsList");
+    if (listEl) listEl.innerHTML = listHTML;
+  };
+  const bodyHTML = `
+    <div style="display:flex; flex-direction:column; gap:12px; height:60vh; max-height:500px;">
+      <div style="text-align:center; padding:10px; background:rgba(0,0,0,0.05); border-radius:8px;">
+        <div style="font-weight:bold; font-size:14px; color:#8a5cc0; margin-bottom:4px;">N\u1ED3i Ph\xF9 Thu\u1EF7 K\xEC Di\u1EC7u</div>
+        <div style="font-size:12px; color:#3a2c22;">B\u1ECF t\u1ED1i thi\u1EC3u 2 m\xF3n b\u1EA3o v\u1EADt Gacha v\xE0o n\u1ED3i. Ph\xF9 thu\u1EF7 s\u1EBD luy\u1EC7n ho\xE1 ch\xFAng th\xE0nh m\u1ED9t m\xF3n \u0111\u1ED3 ho\xE0n to\xE0n m\u1EDBi (c\xF3 th\u1EC3 th\xE0nh c\xF4ng r\u1EF1c r\u1EE1, ho\u1EB7c... th\u1EA5t b\u1EA1i th\u1EA3m h\u1EA1i). Qu\xE1 tr\xECnh n\xE0y ho\xE0n to\xE0n mi\u1EC5n ph\xED!</div>
+      </div>
+      <div id="cauldronItemsList" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:4px;"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(138,92,192,0.1); border:2px solid #8a5cc0; padding:10px; border-radius:8px;">
+        <div style="font-weight:bold; font-size:13px; color:#5a3f78;">\u0110\xE3 ch\u1ECDn: <span id="cauldronTotalSel">0</span> m\xF3n</div>
+        <span class="buy" id="btnCauldronBrew" style="background:linear-gradient(90deg, #8a5cc0, #6a4a9a); color:#fff; border-color:#4a3070; padding:8px 20px;">Luy\u1EC7n Ho\xE1!</span>
+      </div>
+      
+      <!-- Overlay \u0110ang N\u1EA5u -->
+      <div id="cauldronBrewingOverlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:30; flex-direction:column; justify-content:center; align-items:center; border-radius:8px; color:#fff;">
+        <div style="width:64px; height:64px; margin-bottom:20px; filter:drop-shadow(0 0 10px #b48ae0); animation: gachaShake 0.4s infinite alternate;">
+          ${spriteSVG("witchCauldron", 64)}
+        </div>
+        <div id="cauldronBrewingText" style="font-weight:bold; font-size:14px; letter-spacing:1px; color:#ead9f7; text-shadow:0 2px 4px rgba(0,0,0,0.5);">N\u1ED3i \u0111ang s\xF4i s\xF9ng s\u1EE5c...</div>
+      </div>
+    </div>
+  `;
+  openModal("L\xF2 N\u1ED3i Ph\xF9 Thu\u1EF7", bodyHTML);
+  const updateSum = () => {
+    const sum2 = Object.values(selected).reduce((a, b2) => a + b2, 0);
+    const totEl = $id("cauldronTotalSel");
+    if (totEl) totEl.textContent = sum2;
+  };
+  const listContainer = $id("cauldronItemsList");
+  if (listContainer) {
+    listContainer.addEventListener("click", (e2) => {
+      let btn = e2.target.closest(".c-add-btn");
+      if (btn) {
+        const key = btn.dataset.key;
+        const totalCount = ctx.S.bag[key] || 0;
+        const cur = selected[key] || 0;
+        if (cur < totalCount) selected[key] = cur + 1;
+        renderList();
+        updateSum();
+        return;
+      }
+      btn = e2.target.closest(".c-sub-btn");
+      if (btn) {
+        const key = btn.dataset.key;
+        const cur = selected[key] || 0;
+        if (cur > 0) {
+          selected[key] = cur - 1;
+          if (selected[key] === 0) delete selected[key];
+        }
+        renderList();
+        updateSum();
+        return;
+      }
+    });
+  }
+  renderList();
+  $id("btnCauldronBrew")?.addEventListener("click", async () => {
+    const sum2 = Object.values(selected).reduce((a, b2) => a + b2, 0);
+    if (sum2 < 2) return toast("C\u1EA7n \xEDt nh\u1EA5t 2 m\xF3n b\u1EA3o v\u1EADt \u0111\u1EC3 luy\u1EC7n ho\xE1!");
+    const selectedKeysArray = [];
+    for (const [k2, count2] of Object.entries(selected)) {
+      for (let i2 = 0; i2 < count2; i2++) selectedKeysArray.push(k2);
+    }
+    const overlay = $id("cauldronBrewingOverlay");
+    const txtEl = $id("cauldronBrewingText");
+    if (overlay) overlay.style.display = "flex";
+    if (txtEl) txtEl.textContent = "N\u1ED3i \u0111ang s\xF4i s\xF9ng s\u1EE5c...";
+    const result = await executeCauldronMerge(selectedKeysArray, (t2) => {
+      if (txtEl) txtEl.textContent = t2;
+    });
+    if (overlay) overlay.style.display = "none";
+    if (result) {
+      const showHTML = `
+        <div style="text-align:center; padding:10px;">
+          <div style="font-weight:bold; font-size:16px; color:#5a3f78; margin-bottom:15px;">K\u1EBFt qu\u1EA3 Luy\u1EC7n Ho\xE1!</div>
+          <div style="background:#fff; border:2px solid ${result.color}; border-radius:12px; padding:20px; box-shadow:0 0 20px ${result.color}80; display:inline-block; max-width:100%;">
+            <div style="font-size:12px; font-weight:bold; color:${result.color}; text-transform:uppercase; margin-bottom:10px;">${result.rarity}</div>
+            <div style="margin:10px auto; display:flex; justify-content:center;">${result.icon}</div>
+            <div style="font-size:18px; font-weight:bold; color:#3a2c22; margin:15px 0 8px;">${result.name}</div>
+            <div style="font-size:12px; color:#555; max-height:120px; overflow-y:auto; margin-bottom:10px;">${result.desc}</div>
+            <div style="font-size:11px; font-weight:bold; color:#a3763d;">\u0110\u1ECBnh gi\xE1: ${result.sell}G</div>
+          </div>
+          <div style="margin-top:20px;">
+            <span class="buy" id="btnCauldronDone" style="padding:8px 24px;">Tuy\u1EC7t v\u1EDDi!</span>
+          </div>
+        </div>
+      `;
+      openModal("K\u1EBFt Qu\u1EA3 Luy\u1EC7n Ho\xE1", showHTML);
+      $id("btnCauldronDone")?.addEventListener("click", () => {
+        Promise.resolve().then(() => (init_shop(), shop_exports)).then((m2) => m2.closeModal());
+      });
+    }
+  });
+}
 var GACHA_SPEC_PITY, GACHA_SUPER_PITY, GACHA_NORM_PRICE, GACHA_SPEC_PRICE;
 var init_gacha = __esm({
   "src/gacha.js"() {
@@ -5749,6 +6079,20 @@ var init_bet = __esm({
 });
 
 // src/shop.js
+var shop_exports = {};
+__export(shop_exports, {
+  bagSel: () => bagSel,
+  bagSellMode: () => bagSellMode,
+  bagTab: () => bagTab,
+  closeModal: () => closeModal,
+  gachaSortMode: () => gachaSortMode,
+  initShop: () => initShop,
+  openAchivModal: () => openAchivModal,
+  openModal: () => openModal,
+  openPanel: () => openPanel,
+  openSpriteViewerModal: () => openSpriteViewerModal,
+  shopTab: () => shopTab
+});
 function openModal(title, bodyHTML, keepBetTable) {
   if (!keepBetTable && cashOut) cashOut();
   $id("mtitle-text").textContent = title;
@@ -7438,7 +7782,19 @@ function renderWitch() {
   const el = $id("witch");
   const active = ctx.S.witch && ctx.S.witch.leaveAt > now() && ctx.S.passes.water;
   el.classList.toggle("show", !!active);
-  if (active && !el.innerHTML) el.innerHTML = `<span class="wtag">\u2726 \u0110\u01A1n h\xE0ng</span><span class="wbody">${petSVG("witchBlob", 48)}</span>`;
+  if (active && !el.innerHTML) {
+    el.innerHTML = `
+      <div style="display: flex; align-items: flex-end; gap: 8px; justify-content: center;">
+        <div class="witch-cauldron-sprite" title="N\u1ED3i Ph\xF9 Thu\u1EF7 - Gh\xE9p \u0110\u1ED3 Gacha">
+          ${spriteSVG("witchCauldron", 44)}
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <span class="wtag">\u2726 \u0110\u01A1n h\xE0ng</span>
+          <span class="wbody">${petSVG("witchBlob", 48)}</span>
+        </div>
+      </div>
+    `;
+  }
   if (!active) el.innerHTML = "";
 }
 function setTakeoutNote(val) {
@@ -7548,6 +7904,7 @@ function toast(msg) {
 }
 function initWitch() {
   $id("witch").addEventListener("click", (e2) => {
+    if (e2.target.closest(".witch-cauldron-sprite")) return Promise.resolve().then(() => (init_gacha(), gacha_exports)).then((m2) => m2.openCauldronModal());
     if (e2.target.closest(".wtag")) return openWitchDlg();
     const el = $id("witch");
     el.querySelector(".pbubble")?.remove();
@@ -53908,6 +54265,7 @@ __export(all_exports, {
   esc: () => esc,
   eventFresh: () => eventFresh,
   eventPending: () => eventPending,
+  executeCauldronMerge: () => executeCauldronMerge,
   executeGachaRoll: () => executeGachaRoll,
   executeSyncJoin: () => executeSyncJoin,
   extMenuBtn: () => extMenuBtn,
@@ -53923,6 +54281,7 @@ __export(all_exports, {
   gachaSortMode: () => gachaSortMode,
   gaitOf: () => gaitOf,
   gameDay: () => gameDay,
+  generateAICauldronMerge: () => generateAICauldronMerge,
   generateAIUniqueItemData: () => generateAIUniqueItemData,
   generateProcedural32x32Sprite: () => generateProcedural32x32Sprite,
   generateUniqueItem: () => generateUniqueItem,
@@ -53979,6 +54338,7 @@ __export(all_exports, {
   openBlackjackRoom: () => openBlackjackRoom,
   openBlackjackSolo: () => openBlackjackSolo,
   openBuyDlg: () => openBuyDlg,
+  openCauldronModal: () => openCauldronModal,
   openDungeonView: () => openDungeonView,
   openFleaMarket: () => openFleaMarket,
   openGachaModal: () => openGachaModal,

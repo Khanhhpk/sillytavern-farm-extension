@@ -807,6 +807,24 @@ export const SPR = {
     "................",
     "................"
   ],
+  witchCauldron: [
+    ".......V........",
+    "......vVv.......",
+    "....K..v..K.....",
+    "...KKVVvVVKK....",
+    "..KKKvvVvvKKK...",
+    "..KvvvvvvvvvK...",
+    ".KKKKKKKKKKKKK.",
+    ".KKKKKKKKKKKKK.",
+    ".KKKKKKKKKKKKK.",
+    ".KKKKKKKKKKKKK.",
+    ".KKKKKKKKKKKKK.",
+    "..KKKKKKKKKKK...",
+    "...KKKKKKKKK....",
+    "....KKKKKKK.....",
+    ".....K...K......",
+    "................"
+  ],
   bloodFx: [
     "................",
     ".......f........",

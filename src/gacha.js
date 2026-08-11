@@ -874,3 +874,333 @@ export function openGachaRatesModal() {
   });
 }
 
+// ---------------- LÒ NỒI PHÙ THUỶ (CAULDRON MERGE) ---------------- //
+
+export async function generateAICauldronMerge(itemsData) {
+  if (!SEC.url || !SEC.model) return null;
+  try {
+    const simpleColors = Object.entries(GACHA_P).filter(e => typeof e[1] === 'string');
+    const paletteStr = simpleColors.map(([k, v]) => `${k}: ${v}`).join(', ');
+
+    let contextStr = '';
+    if (CS.link) {
+      const worldbook = await collectWorldbook();
+      contextStr = `Trích xuất bối cảnh thế giới (Worldbook) & Lịch sử trò chuyện gần nhất:
+${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể)'}`;
+    }
+
+    const itemsDesc = itemsData.map((it, i) => `Nguyên liệu ${i+1}: Tên "${it.name}", Độ hiếm [${it.rarity}], Giá trị ${it.sell}G, Mô tả "${it.desc}"`).join('\n');
+    const totalValue = itemsData.reduce((sum, it) => sum + (it.sell || 0), 0);
+    const maxVal = totalValue * 5;
+
+    const sysPrompt = `Bạn là một AI quản lý "Nồi Phù Thuỷ" (Witch's Cauldron) và chuyên gia Pixel Art (n x n, tối thiểu 32x32).
+Người chơi vừa bỏ các Vật phẩm Độc nhất sau vào nồi để luyện hoá (dung hợp):
+${itemsDesc}
+
+Nhiệm vụ của bạn:
+Quyết định kết quả của quá trình luyện hoá này. 
+- Nó có thể THÀNH CÔNG sinh ra một siêu vật phẩm mới, hoặc THẤT BẠI thảm hại sinh ra đồ vô dụng. Hãy sáng tạo!
+- Cân bằng giá trị (Price): Tổng giá trị đầu vào là ${totalValue}G. Nếu thành công xuất sắc, giá có thể tăng nhưng KHÔNG QUÁ ${maxVal}G. Nếu thất bại, giá có thể tụt thê thảm. Phải công bằng, thông minh và có rủi ro.
+- Về mô tả: CHỈ nhắc thoáng qua về nguyên liệu nền (nếu cần), hãy TẬP TRUNG mô tả món đồ mới này như một Bảo Vật Gacha độc lập, với cơ chế hoạt động riêng biệt, thú vị và phá vỡ sáo rỗng. Đồ mới cũng phải có độ hiếm (Rác, Thường, Hiếm, Sử thi, Huyền thoại).
+
+${contextStr}
+
+--- QUY TẮC CỐT LÕI TỪ VẠN HỮU ĐẠO NGUYÊN ---
+${GACHA_PROMPT}
+--- KẾT THÚC QUY TẮC CỐT LÕI ---
+
+BẢNG MÀU PIXEL CHO PHÉP (Ký tự: Mã màu Hex):
+${paletteStr}
+
+HƯỚNG DẪN TƯ DUY (Bắt buộc phải có thẻ <thinking> trước khi xuất mã):
+1. PHÂN TÍCH: Đánh giá sự kết hợp của các nguyên liệu đầu vào. Nó có logic hợp nhất không?
+2. QUYẾT ĐỊNH: Thành công rực rỡ, thành công vừa, hay thất bại thảm hại? Xác định Độ hiếm mới và Định giá.
+3. THIẾT KẾ: Tạo tên, mô tả cơ chế của món đồ mới.
+4. VẼ PIXEL: Khung pixel tối thiểu là 32x32. BẮT BUỘC phải là lưới HÌNH VUÔNG n x n (số dòng và số ký tự mỗi dòng phải bằng nhau).
+
+QUY TẮC ĐẦU RA BẮT BUỘC:
+Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json chứa cấu trúc:
+{
+  "name": "Tên vật phẩm mới (2~7 chữ, ấn tượng)",
+  "desc": "Mô tả ngắn gọn CƠ CHẾ và CÁCH SỬ DỤNG của vật phẩm mới (dưới 100 chữ). Phải rõ ràng, thú vị, độc lạ.",
+  "rarity": "Độ hiếm của vật phẩm (Rác, Thường, Hiếm, Sử thi, Huyền thoại)",
+  "price": Số nguyên định giá. (Tối đa tuyệt đối: ${maxVal}G),
+  "spriteMap": [ mảng các chuỗi. Nếu chọn kích thước n x n, mảng PHẢI CÓ ĐÚNG n chuỗi, và mỗi chuỗi DÀI CHÍNH XÁC n ký tự. Phải là hình vuông (min 32x32). Chỉ dùng ký tự Bảng màu và dấu '.' cho điểm trong suốt ]
+}`;
+
+    const userPrompt = `Hãy tiến hành luyện hoá nồi phù thuỷ với các nguyên liệu trên. Quyết định kết quả!`;
+
+    console.log(`\n================= CAULDRON AI DEBUG: REQUEST =================`);
+    console.log('[System Prompt]:\n', sysPrompt);
+    console.log('[User Prompt]:\n', userPrompt);
+    console.log(`==============================================================\n`);
+
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 150000); 
+    const res = await fetch(SEC.url.replace(/\/+$/, '') + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(SEC.key ? { Authorization: 'Bearer ' + SEC.key } : {}) },
+      body: JSON.stringify({
+        model: SEC.model,
+        messages: [
+          { role: 'system', content: sysPrompt },
+          { role: 'user', content: userPrompt }
+        ]
+      }),
+      signal: ctrl.signal
+    });
+    clearTimeout(to);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content || '';
+    
+    console.log(`\n================= CAULDRON AI DEBUG: RESPONSE ================`);
+    console.log('[Raw Content]:\n', content);
+    console.log(`==============================================================\n`);
+
+    let jsonStr = content;
+    const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (match) jsonStr = match[1];
+
+    let jtxt = extractJson(jsonStr) || extractJson(content);
+    if (jtxt) {
+      const o = JSON.parse(jtxt);
+      if (o && o.name && o.desc && o.rarity && Array.isArray(o.spriteMap)) {
+        const fixedMap = [];
+        const size = Math.max(32, o.spriteMap.length);
+        for (let i = 0; i < size; i++) {
+          let row = typeof o.spriteMap[i] === 'string' ? o.spriteMap[i] : '';
+          if (row.length < size) row = row.padEnd(size, '.');
+          if (row.length > size) row = row.substring(0, size);
+          fixedMap.push(row);
+        }
+        o.spriteMap = fixedMap;
+        
+        if (typeof o.price !== 'number') o.price = 100;
+        return o;
+      }
+    }
+  } catch(e) {}
+  return null;
+}
+
+export async function executeCauldronMerge(selectedKeys, updateLoadingText) {
+  initGachaState();
+  
+  if (selectedKeys.length < 2) {
+    toast("Cần ít nhất 2 nguyên liệu để luyện hoá!");
+    return null;
+  }
+  
+  // Tạm trừ đồ từ túi
+  const backupBag = { ...ctx.S.bag };
+  const itemsData = [];
+  
+  for (const k of selectedKeys) {
+    if (!ctx.S.bag[k] || ctx.S.bag[k] <= 0) return null;
+    ctx.S.bag[k]--;
+    if (ctx.S.bag[k] === 0) delete ctx.S.bag[k];
+    const u = ctx.S.uniques[k];
+    if (u) itemsData.push(u);
+  }
+  
+  save();
+  renderStatus();
+  
+  if (updateLoadingText) updateLoadingText("Nồi đang sôi sùng sục...");
+
+  let resultData = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    resultData = await generateAICauldronMerge(itemsData);
+    if (resultData) break;
+    if (updateLoadingText) updateLoadingText(`Đang thử lại... (${attempt}/3)`);
+  }
+  
+  if (!resultData) {
+    // Hoàn trả
+    ctx.S.bag = backupBag;
+    save();
+    renderStatus();
+    toast("Luyện hoá thất bại do lỗi kết nối (API). Đã hoàn trả nguyên liệu!");
+    return null;
+  }
+  
+  const timestamp = now();
+  const randId = Math.floor(Math.random() * 10000);
+  const key = `unique@${timestamp}_${randId}`;
+  const spKey = `cauldron_${timestamp}_${randId}`;
+  
+  let color = '#9e9e9e';
+  if (resultData.rarity === 'Huyền thoại') color = '#ff8000';
+  else if (resultData.rarity === 'Sử thi') color = '#a335ee';
+  else if (resultData.rarity === 'Hiếm') color = '#4a90e2';
+  else if (resultData.rarity === 'Thường') color = '#b0bec5';
+
+  registerDynamicSprite(spKey, resultData.spriteMap);
+  
+  ctx.S.uniques[key] = {
+    key,
+    name: resultData.name,
+    rarity: resultData.rarity,
+    color,
+    desc: resultData.desc,
+    sell: resultData.price,
+    sp: spKey,
+    spriteMap: resultData.spriteMap
+  };
+  
+  ctx.S.bag[key] = (ctx.S.bag[key] || 0) + 1;
+  save();
+  renderStatus();
+  
+  return {
+    type: 'unique',
+    name: resultData.name,
+    rarity: resultData.rarity,
+    color,
+    icon: spriteSVG(spKey, 64),
+    desc: resultData.desc,
+    sell: resultData.price,
+    spKey
+  };
+}
+
+export function openCauldronModal() {
+  initGachaState();
+  const allKeys = Object.keys(ctx.S.bag).filter(k => k.startsWith('unique@') && ctx.S.uniques[k]);
+  let selected = {};
+
+  const renderList = () => {
+    let listHTML = '';
+    if (allKeys.length === 0) {
+      listHTML = `<div style="text-align:center; padding:20px; color:#5a3f78;">Bạn không có bảo vật nào trong túi để ghép cả. Quay Gacha thêm nhé!</div>`;
+    } else {
+      listHTML = allKeys.map(k => {
+        const u = ctx.S.uniques[k];
+        const count = ctx.S.bag[k] || 0;
+        const selCount = selected[k] || 0;
+        const avail = count - selCount;
+        return `
+          <div class="gacha-item-card" style="border:2px solid ${u.color}; border-radius:8px; padding:6px 8px; background:#fff; display:flex; align-items:center; gap:8px; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
+            <div>${spriteSVG(u.sp, 40)}</div>
+            <div style="flex:1;">
+              <div style="font-weight:bold; font-size:13px; color:#3a2c22;">${u.name} <span style="font-size:10px; color:${u.color};">(${u.rarity})</span></div>
+              <div style="font-size:11px; color:#7a5c38;">Giá: ${u.sell || 100}G | Kho: ${avail}</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+              <span class="buy c-add-btn" data-key="${k}" style="padding:2px 8px; font-size:11px;">+Thêm</span>
+              ${selCount > 0 ? `<span class="buy c-sub-btn" data-key="${k}" style="padding:2px 8px; font-size:11px; background:#e06578; border-color:#a83a52;">-Bớt (${selCount})</span>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    const listEl = All.$id('cauldronItemsList');
+    if (listEl) listEl.innerHTML = listHTML;
+  };
+
+  const bodyHTML = `
+    <div style="display:flex; flex-direction:column; gap:12px; height:60vh; max-height:500px;">
+      <div style="text-align:center; padding:10px; background:rgba(0,0,0,0.05); border-radius:8px;">
+        <div style="font-weight:bold; font-size:14px; color:#8a5cc0; margin-bottom:4px;">Nồi Phù Thuỷ Kì Diệu</div>
+        <div style="font-size:12px; color:#3a2c22;">Bỏ tối thiểu 2 món bảo vật Gacha vào nồi. Phù thuỷ sẽ luyện hoá chúng thành một món đồ hoàn toàn mới (có thể thành công rực rỡ, hoặc... thất bại thảm hại). Quá trình này hoàn toàn miễn phí!</div>
+      </div>
+      <div id="cauldronItemsList" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:4px;"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(138,92,192,0.1); border:2px solid #8a5cc0; padding:10px; border-radius:8px;">
+        <div style="font-weight:bold; font-size:13px; color:#5a3f78;">Đã chọn: <span id="cauldronTotalSel">0</span> món</div>
+        <span class="buy" id="btnCauldronBrew" style="background:linear-gradient(90deg, #8a5cc0, #6a4a9a); color:#fff; border-color:#4a3070; padding:8px 20px;">Luyện Hoá!</span>
+      </div>
+      
+      <!-- Overlay Đang Nấu -->
+      <div id="cauldronBrewingOverlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:30; flex-direction:column; justify-content:center; align-items:center; border-radius:8px; color:#fff;">
+        <div style="width:64px; height:64px; margin-bottom:20px; filter:drop-shadow(0 0 10px #b48ae0); animation: gachaShake 0.4s infinite alternate;">
+          ${spriteSVG('witchCauldron', 64)}
+        </div>
+        <div id="cauldronBrewingText" style="font-weight:bold; font-size:14px; letter-spacing:1px; color:#ead9f7; text-shadow:0 2px 4px rgba(0,0,0,0.5);">Nồi đang sôi sùng sục...</div>
+      </div>
+    </div>
+  `;
+
+  openModal('Lò Nồi Phù Thuỷ', bodyHTML);
+
+  const updateSum = () => {
+    const sum = Object.values(selected).reduce((a, b) => a + b, 0);
+    const totEl = All.$id('cauldronTotalSel');
+    if (totEl) totEl.textContent = sum;
+  };
+
+  const listContainer = All.$id('cauldronItemsList');
+  if (listContainer) {
+    listContainer.addEventListener('click', e => {
+      let btn = e.target.closest('.c-add-btn');
+      if (btn) {
+        const key = btn.dataset.key;
+        const totalCount = ctx.S.bag[key] || 0;
+        const cur = selected[key] || 0;
+        if (cur < totalCount) selected[key] = cur + 1;
+        renderList();
+        updateSum();
+        return;
+      }
+      btn = e.target.closest('.c-sub-btn');
+      if (btn) {
+        const key = btn.dataset.key;
+        const cur = selected[key] || 0;
+        if (cur > 0) {
+          selected[key] = cur - 1;
+          if (selected[key] === 0) delete selected[key];
+        }
+        renderList();
+        updateSum();
+        return;
+      }
+    });
+  }
+
+  renderList();
+
+  All.$id('btnCauldronBrew')?.addEventListener('click', async () => {
+    const sum = Object.values(selected).reduce((a, b) => a + b, 0);
+    if (sum < 2) return toast("Cần ít nhất 2 món bảo vật để luyện hoá!");
+    
+    const selectedKeysArray = [];
+    for (const [k, count] of Object.entries(selected)) {
+      for (let i = 0; i < count; i++) selectedKeysArray.push(k);
+    }
+
+    const overlay = All.$id('cauldronBrewingOverlay');
+    const txtEl = All.$id('cauldronBrewingText');
+    if (overlay) overlay.style.display = 'flex';
+    if (txtEl) txtEl.textContent = 'Nồi đang sôi sùng sục...';
+
+    const result = await executeCauldronMerge(selectedKeysArray, (t) => {
+      if (txtEl) txtEl.textContent = t;
+    });
+
+    if (overlay) overlay.style.display = 'none';
+
+    if (result) {
+      // Show result
+      const showHTML = `
+        <div style="text-align:center; padding:10px;">
+          <div style="font-weight:bold; font-size:16px; color:#5a3f78; margin-bottom:15px;">Kết quả Luyện Hoá!</div>
+          <div style="background:#fff; border:2px solid ${result.color}; border-radius:12px; padding:20px; box-shadow:0 0 20px ${result.color}80; display:inline-block; max-width:100%;">
+            <div style="font-size:12px; font-weight:bold; color:${result.color}; text-transform:uppercase; margin-bottom:10px;">${result.rarity}</div>
+            <div style="margin:10px auto; display:flex; justify-content:center;">${result.icon}</div>
+            <div style="font-size:18px; font-weight:bold; color:#3a2c22; margin:15px 0 8px;">${result.name}</div>
+            <div style="font-size:12px; color:#555; max-height:120px; overflow-y:auto; margin-bottom:10px;">${result.desc}</div>
+            <div style="font-size:11px; font-weight:bold; color:#a3763d;">Định giá: ${result.sell}G</div>
+          </div>
+          <div style="margin-top:20px;">
+            <span class="buy" id="btnCauldronDone" style="padding:8px 24px;">Tuyệt vời!</span>
+          </div>
+        </div>
+      `;
+      openModal('Kết Quả Luyện Hoá', showHTML);
+      All.$id('btnCauldronDone')?.addEventListener('click', () => {
+         import('./shop.js').then(m => m.closeModal());
+      });
+    }
+  });
+}
+

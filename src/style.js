@@ -182,6 +182,9 @@ export const styleCSS = `
       background: #2a2650; border: 2px solid #8f86d9; border-radius: 6px; padding: 1px 7px;
       box-shadow: 0 0 8px rgba(143,134,217,.5); }
     .pbubble.wb { border-color: #8f86d9; color: #5a52a0; background: #f4f2ff; }
+    .witch-cauldron-sprite { cursor: pointer; transition: transform 0.2s, filter 0.2s; padding-bottom: 4px; pointer-events: auto; animation: petfloat 3.2s ease-in-out infinite; }
+    .witch-cauldron-sprite:hover { filter: drop-shadow(0 0 6px rgba(180, 138, 224, 0.8)); transform: scale(1.1); }
+    .witch-cauldron-sprite:active { transform: scale(0.95); }
     /* v0.8b: trang đơn hàng quỹ đạo sao A (bản thiết kế chốt) */
     .wzwrap { background: linear-gradient(160deg,#1c1b33,#232145 60%,#1a1e3d); border: 3px double #8f86d9;
       border-radius: 10px; padding: 14px 12px 12px; box-shadow: 0 0 14px rgba(143,134,217,.3); }
