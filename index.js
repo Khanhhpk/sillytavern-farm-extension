@@ -49252,7 +49252,7 @@ function renderSoloActions() {
             </div>`;
     actEl.querySelectorAll(".bj-quick").forEach((b2) => b2.addEventListener("click", () => {
       const inp = $id("bj-bet-inp");
-      if (inp) inp.value = String(Math.max(min, Math.floor(coins / Number(b2.getAttribute("data-q")))));
+      if (inp) inp.value = String(Math.max(min, Math.floor(Math.min(coins, 1e8) / Number(b2.getAttribute("data-q")))));
     }));
     $id("bj-deal").addEventListener("click", soloStartRound);
     return;
@@ -49432,6 +49432,7 @@ function soloStand() {
 function soloDouble() {
   const s2 = soloState;
   const idx = s2.activeHandIdx;
+  if (s2.splitAceIdxs.has(idx)) return bjToast("Kh\xF4ng th\u1EC3 Double sau khi Split Ace");
   const bet = s2.bets[idx];
   if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Double");
   ctx.S.coins = (ctx.S.coins || 0) - bet;
@@ -49496,7 +49497,7 @@ function soloRunDealer() {
   const iv = setInterval(() => {
     const total = handTotal(s2.dealerHand);
     const soft = isSoft(s2.dealerHand);
-    if (total < 17 || soft && total === 16) {
+    if (total < 17 || soft && total === 17) {
       s2.dealerHand.push(soloDrawCard());
       soloRender();
     } else {
@@ -50626,7 +50627,7 @@ function bjBindMyActions() {
       const q = parseInt(b2.getAttribute("data-q") || "1");
       const coins = Number(ctx.S.coins) || 0;
       const min = Number(bjSettings.minBet) || 10;
-      if (inp) inp.value = String(Math.max(min, Math.floor(coins / q)));
+      if (inp) inp.value = String(Math.max(min, Math.floor(Math.min(coins, 1e8) / q)));
     });
   });
   $id("bj-rm-even")?.addEventListener("click", () => {

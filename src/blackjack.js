@@ -218,7 +218,7 @@ function renderSoloActions() {
             </div>`;
         actEl.querySelectorAll('.bj-quick').forEach(b => b.addEventListener('click', () => {
             const inp = All.$id('bj-bet-inp');
-            if (inp) inp.value = String(Math.max(min, Math.floor(coins / Number(b.getAttribute('data-q')))));
+            if (inp) inp.value = String(Math.max(min, Math.floor(Math.min(coins, 100000000) / Number(b.getAttribute('data-q')))));
         }));
         All.$id('bj-deal').addEventListener('click', soloStartRound);
         return;
@@ -1495,7 +1495,7 @@ function bjBindMyActions() {
             const q = parseInt(b.getAttribute('data-q') || '1');
             const coins = Number(ctx.S.coins) || 0;
             const min = Number(bjSettings.minBet) || 10;
-            if (inp) inp.value = String(Math.max(min, Math.floor(coins / q)));
+            if (inp) inp.value = String(Math.max(min, Math.floor(Math.min(coins, 100000000) / q)));
         });
     });
     All.$id('bj-rm-even')?.addEventListener('click', () => {
