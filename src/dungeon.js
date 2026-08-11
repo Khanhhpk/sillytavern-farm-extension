@@ -1447,7 +1447,7 @@ function updateEntities(groupA, groupB, dt) {
                                 spawnDmg(ally, heal, 'heal');
                                 const p = document.createElement('div');
                                 p.className = 'dg-heal-particle';
-                                p.innerHTML = spriteSVG('heal_cross', 2);
+                                p.innerHTML = spriteSVG('heal_cross', 24);
                                 p.style.left = ally.x + 'px';
                                 p.style.top = ally.y + 'px';
                                 arena.appendChild(p);
@@ -1565,7 +1565,7 @@ function updateEntities(groupA, groupB, dt) {
                             t.style.top = '0';
                             t.style.transformOrigin = '50% 80px';
                             t.style.transform = `rotate(${i * 90}deg)`;
-                            t.innerHTML = spriteSVG('tentacle', 4);
+                            t.innerHTML = spriteSVG('tentacle', 64);
                             storm.appendChild(t);
                         }
                         storm.style.animation = 'dg-spin 0.5s linear infinite';
@@ -1590,7 +1590,7 @@ function updateEntities(groupA, groupB, dt) {
                         });
                         if (farthest) {
                             const bomb = document.createElement('div');
-                            bomb.innerHTML = spriteSVG('soda_bomb', 4);
+                            bomb.innerHTML = spriteSVG('soda_bomb', 64);
                             bomb.style.position = 'absolute';
                             bomb.style.left = (a.x - 32) + 'px';
                             bomb.style.top = (a.y - 32) + 'px';
@@ -1621,7 +1621,7 @@ function updateEntities(groupA, groupB, dt) {
                             e.status.stunned = 4;
                             e.status.brainFreeze = 4; 
                             const ice = document.createElement('div');
-                            ice.innerHTML = spriteSVG('ice_block', 3);
+                            ice.innerHTML = spriteSVG('ice_block', 48);
                             ice.style.position = 'absolute';
                             ice.style.left = (e.x - 24) + 'px';
                             ice.style.top = (e.y - 24) + 'px';
@@ -1634,7 +1634,7 @@ function updateEntities(groupA, groupB, dt) {
                     else if (a.activeSkill === 'bat_swarm') {
                         for(let i=0; i<10; i++) {
                             const bat = document.createElement('div');
-                            bat.innerHTML = spriteSVG('bat', 3);
+                            bat.innerHTML = spriteSVG('bat', 48);
                             bat.style.position = 'absolute';
                             bat.style.left = (a.x - 24) + 'px';
                             bat.style.top = (a.y - 24) + 'px';
@@ -1669,7 +1669,7 @@ function updateEntities(groupA, groupB, dt) {
                             const tx = target.x, ty = target.y;
                             
                             const m = document.createElement('div');
-                            m.innerHTML = spriteSVG('meteor', 4);
+                            m.innerHTML = spriteSVG('meteor', 64);
                             m.style.position = 'absolute';
                             m.style.left = (tx + 300) + 'px';
                             m.style.top = (ty - 300) + 'px';
@@ -1698,7 +1698,7 @@ function updateEntities(groupA, groupB, dt) {
                         if (count > 0) {
                             cx /= count; cy /= count;
                             const vortex = document.createElement('div');
-                            vortex.innerHTML = spriteSVG('root_vortex', 6);
+                            vortex.innerHTML = spriteSVG('root_vortex', 96);
                             vortex.style.position = 'absolute';
                             vortex.style.left = (cx - 48) + 'px';
                             vortex.style.top = (cy - 48) + 'px';
@@ -1716,7 +1716,7 @@ function updateEntities(groupA, groupB, dt) {
                     }
                     else if (a.activeSkill === 'blizzard') {
                         const blz = document.createElement('div');
-                        blz.innerHTML = spriteSVG('blizzard', 16);
+                        blz.innerHTML = spriteSVG('blizzard', 500);
                         blz.style.position = 'absolute';
                         blz.style.left = '-250px'; 
                         blz.style.top = '50px';
