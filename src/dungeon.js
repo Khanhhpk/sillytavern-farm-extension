@@ -1295,12 +1295,28 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
                        hitOther = true;
                        other.status.stun = 1.0;
                        
+                       // ===== SLIME CHAIN: small AoE stun explosion on impact =====
+                       const impactX = other.x;
+                       const impactY = other.y;
                        const boom = document.createElement('div');
                        boom.className = 'dg-boom-effect';
-                       boom.style.left = other.x + 'px';
-                       boom.style.top = other.y + 'px';
+                       boom.style.width = '80px';
+                       boom.style.height = '80px';
+                       boom.style.left = (impactX - 8) + 'px';
+                       boom.style.top = (impactY - 8) + 'px';
+                       boom.style.background = 'radial-gradient(circle, rgba(255,220,80,1) 0%, rgba(255,120,0,0) 70%)';
                        arena.appendChild(boom);
                        setTimeout(() => boom.remove(), 400);
+                       
+                       // Stun nearby enemies in small radius 55px
+                       const CHAIN_RADIUS = 55;
+                       groupA.forEach(nearby => {
+                           if (nearby !== a && nearby !== other && nearby.hp > 0 &&
+                               Math.hypot(nearby.x - impactX, nearby.y - impactY) < CHAIN_RADIUS) {
+                               if (!nearby.status) nearby.status = {};
+                               nearby.status.stun = 0.6;
+                           }
+                       });
                    }
                }
             });
@@ -1338,6 +1354,28 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
         // Status Effects
         if (!a.status) a.status = {};
         if (a.skill === 'taunt') a.status.taunt = 3;
+        
+        // ===== OCTO FRENZY: CD shrinks the longer it stays in combat =====
+        if (a.skill === 'frenzy') {
+            if (!a._frenzyTimer) a._frenzyTimer = 0;
+            a._frenzyTimer += dt;
+            // Each 3 seconds in combat, attack 5% faster (cap at -50%)
+            const frenzyBonus = Math.min(0.5, Math.floor(a._frenzyTimer / 3) * 0.05);
+            a._frenzyMult = 1 - frenzyBonus;
+            if (!a._baseCd) a._baseCd = a.maxCd;
+            a.maxCd = a._baseCd * a._frenzyMult;
+        }
+        
+        // ===== STAR BELL AURA: grant buff_atk to allies within 90px =====
+        if (a.skill === 'buff_atk' && a.type === 'pet') {
+            groupA.forEach(ally => {
+                if (ally !== a && ally.hp > 0 && Math.hypot(ally.x - a.x, ally.y - a.y) < 90) {
+                    if (!ally.status) ally.status = {};
+                    ally.status.buff_atk = 0.1; // refresh every frame while in range
+                }
+            });
+        }
+        
         let isStunned = false;
         let isRooted = false;
         let speedMult = 1;
@@ -1460,7 +1498,7 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
                     a.skillCd = a.maxSkillCd;
                     const momentum = 1 / (a.maxCd || 1);
                     const finalDmg = a.atk;
-                    const projectionDmg = Math.floor(finalDmg * momentum);
+                    const projectionDmg = Math.max(1, Math.floor(finalDmg * momentum));
                     
                     const validTargets = targetGroup.filter(e => e.hp > 0 && e.el);
                     if (validTargets.length === 0) return;
@@ -1477,16 +1515,9 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
                     playNaoyaCutscene(a, a.el, targetEls, () => {
                         validTargets.forEach(e => {
                             if (e.hp > 0) {
-                                if (e !== closest.b) {
-                                    e.hp -= projectionDmg;
-                                    spawnDmg(e, -projectionDmg);
-                                } else {
-                                    const extraDmg = Math.max(0, projectionDmg - finalDmg);
-                                    if (extraDmg > 0) {
-                                        e.hp -= extraDmg;
-                                        spawnDmg(e, -extraDmg, 'crit');
-                                    }
-                                }
+                                // All targets receive full projectionDmg equally
+                                e.hp -= projectionDmg;
+                                spawnDmg(e, -projectionDmg, 'crit');
 
                                 if (arena && a.el) {
                                     const ghost = a.el.cloneNode(true);
