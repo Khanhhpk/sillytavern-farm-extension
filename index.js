@@ -11319,12 +11319,16 @@ function combatLoop() {
           totalGold += homeG;
           shopGold += e2.gold;
           spawnDmg({ x: e2.x, y: e2.y - 10 }, `+${e2.gold} \u{1F6E0}`, "gold");
-          updateHUD();
+          _hudDirty = true;
         }
         return false;
       }
       return true;
     });
+    if (_hudDirty) {
+      _hudDirty = false;
+      updateHUD();
+    }
     projectiles.push(...newProjs);
     if (enemies.length === 0 || team.length === 0) {
       break;
@@ -11346,7 +11350,7 @@ function spawnDmg(target, amount, type) {
   if (target && target.isBatMinion) return;
   const isStr = typeof amount === "string";
   if (!isStr) amount = Math.round(amount);
-  const arena = $id("dg-arena");
+  const arena = arenaEl || $id("dg-arena");
   const dmg = document.createElement("div");
   dmg.className = "dg-dmg" + (type ? " " + type : "");
   dmg.textContent = type === "miss" ? "MISS!" : isStr ? amount : (amount > 0 ? "+" : "") + amount;
@@ -12534,7 +12538,7 @@ function nextWaveSequence(overlay) {
   });
   startWave();
 }
-var isDungeonOpen, phase, gameLoopId, lastTime, team, enemies, projectiles, arenaEl, currentWave, totalGold, shopGold, PET_STATS2, ENEMY_TYPES, fullTeam;
+var isDungeonOpen, phase, gameLoopId, lastTime, team, enemies, projectiles, arenaEl, _hudDirty, currentWave, totalGold, shopGold, PET_STATS2, ENEMY_TYPES, fullTeam;
 var init_dungeon = __esm({
   "src/dungeon.js"() {
     init_store();
@@ -12549,6 +12553,7 @@ var init_dungeon = __esm({
     enemies = [];
     projectiles = [];
     arenaEl = null;
+    _hudDirty = false;
     currentWave = 1;
     totalGold = 0;
     shopGold = 0;

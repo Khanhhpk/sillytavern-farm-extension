@@ -12,6 +12,7 @@ let team = []; // Currently placed pets
 let enemies = []; // Spawned enemies
 let projectiles = []; // Active projectiles
 let arenaEl = null; // Cached arena element - set once per wave
+let _hudDirty = false; // Throttle HUD updates
 
 let currentWave = 1;
 let totalGold = 0;
@@ -1077,12 +1078,13 @@ function combatLoop() {
                 totalGold += homeG;
                 shopGold += e.gold;
                 spawnDmg({x: e.x, y: e.y - 10}, `+${e.gold} 🛠`, 'gold');
-                updateHUD();
+                _hudDirty = true;
             }
             return false;
         }
         return true;
     });
+    if (_hudDirty) { _hudDirty = false; updateHUD(); }
     projectiles.push(...newProjs);
     
         if (enemies.length === 0 || team.length === 0) {
@@ -1110,7 +1112,7 @@ function spawnDmg(target, amount, type) {
     if (target && target.isBatMinion) return;
     const isStr = typeof amount === 'string';
     if (!isStr) amount = Math.round(amount);
-    const arena = All.$id('dg-arena');
+    const arena = arenaEl || All.$id('dg-arena');
     const dmg = document.createElement('div');
     dmg.className = 'dg-dmg' + (type ? ' ' + type : '');
     dmg.textContent = type === 'miss' ? 'MISS!' : (isStr ? amount : (amount > 0 ? '+' : '') + amount);
