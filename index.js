@@ -11147,7 +11147,7 @@ function combatLoop() {
             const dmg = p2.a.atk;
             p2.target.hp -= dmg;
             spawnDmg(p2.target, -dmg);
-            const ally = groupA[Math.floor(Math.random() * groupA.length)];
+            const ally = p2.groupA[Math.floor(Math.random() * p2.groupA.length)];
             if (ally && ally.hp > 0) {
               ally.hp = Math.min(ally.maxHp, ally.hp + dmg);
               spawnDmg(ally, dmg, "heal");
@@ -11400,9 +11400,9 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     });
   }
 }
-function updateEntities(groupA2, groupB, dt2) {
+function updateEntities(groupA, groupB, dt2) {
   const arena = $id("dg-arena");
-  groupA2.forEach((a) => {
+  groupA.forEach((a) => {
     if (a.hp <= 0) return;
     if (a.kb && a.kb.time > 0) {
       a.kb.time -= dt2;
@@ -11413,7 +11413,7 @@ function updateEntities(groupA2, groupB, dt2) {
       a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
       a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
       let hitOther = false;
-      groupA2.forEach((other) => {
+      groupA.forEach((other) => {
         if (!hitOther && other !== a && other.hp > 0 && Math.hypot(other.x - a.x, other.y - a.y) < 40) {
           if (!other.status) other.status = {};
           if (!other.status.stun) {
@@ -11502,7 +11502,7 @@ function updateEntities(groupA2, groupB, dt2) {
     let taunters = groupB.filter((b2) => b2.hp > 0 && b2.status && b2.status.taunt > 0 && !(b2.status.invis > 0));
     let targetGroup = taunters.length > 0 ? taunters : groupB.filter((b2) => !(b2.status && b2.status.invis > 0));
     if (a.skill === "heal" || a.skill === "aoe_heal") {
-      targetGroup = groupA2;
+      targetGroup = groupA;
       let minHpPct = 1;
       targetGroup.forEach((ally) => {
         if (ally.hp <= 0) return;
@@ -11614,7 +11614,7 @@ function updateEntities(groupA2, groupB, dt2) {
               if (a.el) a.el.classList.remove("dg-shield-wall");
             }, 3e3);
           } else if (a.activeSkill === "burst_heal") {
-            groupA2.forEach((ally) => {
+            groupA.forEach((ally) => {
               if (ally.hp > 0) {
                 const heal = ally.maxHp * 0.3;
                 ally.hp = Math.min(ally.maxHp, ally.hp + heal);
@@ -11629,7 +11629,7 @@ function updateEntities(groupA2, groupB, dt2) {
               }
             });
           } else if (a.activeSkill === "invulnerable") {
-            groupA2.forEach((ally) => {
+            groupA.forEach((ally) => {
               if (ally.hp > 0) {
                 if (!ally.status) ally.status = {};
                 ally.status.invuln = 3;
@@ -11754,7 +11754,8 @@ function updateEntities(groupA2, groupB, dt2) {
               nextTick: 0.2
             });
           } else if (a.activeSkill === "gas_explosion") {
-            let farthest = null, maxD = -1;
+            let farthest = null;
+            let maxD = -1;
             groupB.forEach((e2) => {
               if (e2.hp <= 0) return;
               const d = Math.hypot(e2.x - a.x, e2.y - a.y);
@@ -11823,6 +11824,7 @@ function updateEntities(groupA2, groupB, dt2) {
                 el: bat,
                 a,
                 groupB,
+                groupA,
                 x: a.x,
                 y: a.y,
                 dx: (Math.random() - 0.5) * 50,
@@ -11831,7 +11833,7 @@ function updateEntities(groupA2, groupB, dt2) {
               });
             }
           } else if (a.activeSkill === "shooting_star") {
-            groupA2.forEach((ally) => {
+            groupA.forEach((ally) => {
               if (ally.hp <= 0) return;
               if (!ally.status) ally.status = {};
               ally.status.rage = 5;
@@ -12032,7 +12034,7 @@ function updateEntities(groupA2, groupB, dt2) {
           if (a.skill === "taunt") {
           }
           if (a.skill === "buff_atk") {
-            groupA2.forEach((ally) => {
+            groupA.forEach((ally) => {
               if (ally.hp > 0 && Math.hypot(ally.x - a.x, ally.y - a.y) < 100) {
                 if (!ally.status) ally.status = {};
                 ally.status.buff_atk = 2;
@@ -12050,7 +12052,7 @@ function updateEntities(groupA2, groupB, dt2) {
               atk: a.atk,
               skill: a.skill,
               from: a,
-              fromGroup: groupA2,
+              fromGroup: groupA,
               toGroup: targetGroup,
               speed: 300,
               el: document.createElement("div")
@@ -12080,7 +12082,7 @@ function updateEntities(groupA2, groupB, dt2) {
             }
           } else {
             closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
-            applyEffect(a, closest.b, groupA2, targetGroup);
+            applyEffect(a, closest.b, groupA, targetGroup);
           }
         }
       }

@@ -895,7 +895,7 @@ function combatLoop() {
                     const dmg = p.a.atk;
                     p.target.hp -= dmg;
                     spawnDmg(p.target, -dmg);
-                    const ally = groupA[Math.floor(Math.random() * groupA.length)];
+                    const ally = p.groupA[Math.floor(Math.random() * p.groupA.length)];
                     if (ally && ally.hp > 0) {
                         ally.hp = Math.min(ally.maxHp, ally.hp + dmg);
                         spawnDmg(ally, dmg, 'heal');
@@ -1575,7 +1575,9 @@ function updateEntities(groupA, groupB, dt) {
                         });
                     }
                     else if (a.activeSkill === 'gas_explosion') {
-                        let farthest = null, maxD = -1;
+                        /** @type {any} */
+                        let farthest = null;
+                        let maxD = -1;
                         groupB.forEach(e => {
                             if (e.hp <= 0) return;
                             const d = Math.hypot(e.x - a.x, e.y - a.y);
@@ -1638,7 +1640,7 @@ function updateEntities(groupA, groupB, dt) {
                             projectiles.push({
                                 isBat: true,
                                 lifetime: 5,
-                                el: bat, a, groupB,
+                                el: bat, a, groupB, groupA,
                                 x: a.x, y: a.y,
                                 dx: (Math.random() - 0.5) * 50,
                                 dy: (Math.random() - 0.5) * 50,
