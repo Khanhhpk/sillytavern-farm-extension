@@ -1076,6 +1076,7 @@ function combatLoop() {
 }
 
 function spawnDmg(target, amount, type) {
+    if (target && target.isBatMinion) return;
     const isStr = typeof amount === 'string';
     if (!isStr) amount = Math.round(amount);
     const arena = All.$id('dg-arena');
@@ -1683,7 +1684,6 @@ function updateEntities(groupA, groupB, dt) {
                             batEl.className = 'dg-entity dg-pet';
                             batEl.innerHTML = `
                                 <div class="dg-sprite">${spriteSVG('bat', 48)}</div>
-                                <div class="dg-hp-bar"><div class="dg-hp-fill" style="width:100%;"></div></div>
                             `;
                             const bx = a.x + (Math.random() - 0.5) * 80;
                             const by = a.y + (Math.random() - 0.5) * 80;
@@ -1997,6 +1997,9 @@ function endDungeon(isWin) {
     
     projectiles.forEach(p => p.el.remove());
     projectiles = [];
+    team.forEach(p => {
+        if (p.isBatMinion && p.el) p.el.remove();
+    });
     
     const surrenderBtn = All.$id('dg-surrender-btn');
     if (surrenderBtn) surrenderBtn.style.display = 'none';
@@ -2055,6 +2058,9 @@ function showWaveRewards(isLoaded = false) {
     if (!isLoaded) {
         projectiles.forEach(p => p.el.remove());
         projectiles = [];
+        team.forEach(p => {
+            if (p.isBatMinion && p.el) p.el.remove();
+        });
         
         // Calculate gold for this wave (shop gold scale: 1.10→1.12)
         const isBoss = currentWave % 10 === 0;

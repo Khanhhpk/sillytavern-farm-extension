@@ -11309,6 +11309,7 @@ function combatLoop() {
   gameLoopId = setTimeout(combatLoop, 16);
 }
 function spawnDmg(target, amount, type) {
+  if (target && target.isBatMinion) return;
   const isStr = typeof amount === "string";
   if (!isStr) amount = Math.round(amount);
   const arena = $id("dg-arena");
@@ -11866,7 +11867,6 @@ function updateEntities(groupA, groupB, dt2) {
               batEl.className = "dg-entity dg-pet";
               batEl.innerHTML = `
                                 <div class="dg-sprite">${spriteSVG("bat", 48)}</div>
-                                <div class="dg-hp-bar"><div class="dg-hp-fill" style="width:100%;"></div></div>
                             `;
               const bx = a.x + (Math.random() - 0.5) * 80;
               const by = a.y + (Math.random() - 0.5) * 80;
@@ -12159,6 +12159,9 @@ function endDungeon(isWin) {
   save();
   projectiles.forEach((p2) => p2.el.remove());
   projectiles = [];
+  team.forEach((p2) => {
+    if (p2.isBatMinion && p2.el) p2.el.remove();
+  });
   const surrenderBtn = $id("dg-surrender-btn");
   if (surrenderBtn) surrenderBtn.style.display = "none";
   const arena = $id("dg-arena");
@@ -12204,6 +12207,9 @@ function showWaveRewards(isLoaded = false) {
   if (!isLoaded) {
     projectiles.forEach((p2) => p2.el.remove());
     projectiles = [];
+    team.forEach((p2) => {
+      if (p2.isBatMinion && p2.el) p2.el.remove();
+    });
     const isBoss = currentWave % 10 === 0;
     const waveGold = Math.round(500 * Math.pow(1.12, currentWave - 1)) * (isBoss ? 3 : 1);
     const baseHomeGold = (200 + currentWave * 50) * (isBoss ? 3 : 1);
