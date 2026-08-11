@@ -144,7 +144,7 @@ export function openBlackjackSolo() {
 
 function soloDrawCard(hidden) {
     const s = soloState;
-    if (s.shoeIdx >= s.shoe.length) {
+    if (!s.shoe || s.shoe.length - s.shoeIdx < (s.playerHands.length * 15 + 15)) {
         s.shoe = buildShoe(s.settings.numDecks, Date.now() & 0xffffffff);
         s.shoeIdx = 0;
     }
