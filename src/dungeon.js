@@ -684,9 +684,14 @@ function _doStartWave() {
         
         arena.appendChild(el);
         
-        // Scale hp: 1.12x/wave, atk: 1.10x/wave (theo dungeon_stats_Kaiz)
-        let hpMultiplier = Math.pow(1.12, currentWave - 1);
-        let atkMultiplier = Math.pow(1.10, currentWave - 1);
+        // Scale hp: 1.12x/wave, atk: 1.10x/wave + 0.2% base mỗi 5 wave (Stressed)
+        let hpMultiplier = 1;
+        let atkMultiplier = 1;
+        for (let w = 2; w <= currentWave; w++) {
+            let stressed = Math.floor(w / 5);
+            hpMultiplier *= (1.12 + stressed * 0.002);
+            atkMultiplier *= (1.10 + stressed * 0.002);
+        }
         if (isBossWave) {
             hpMultiplier *= 1.5;
             atkMultiplier *= 1.2;
@@ -1383,8 +1388,9 @@ function showWaveRewards(isLoaded = false) {
         // Calculate gold for this wave (shop gold scale: 1.10→1.12)
         const isBoss = currentWave % 10 === 0;
         const waveGold = Math.round(500 * Math.pow(1.12, currentWave - 1)) * (isBoss ? 3 : 1);
-        // Tiền thưởng ngoài farm scale tuyến tính
-        const waveHomeGold = (10 + currentWave * 2) * (isBoss ? 3 : 1);
+        // Tiền thưởng ngoài farm scale mạnh cộng dồn 2% mỗi wave
+        const baseHomeGold = (200 + currentWave * 50) * (isBoss ? 3 : 1);
+        const waveHomeGold = Math.floor(baseHomeGold * Math.pow(1.02, currentWave - 1));
         totalGold += waveHomeGold;
         shopGold += waveGold;
         

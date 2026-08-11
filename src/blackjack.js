@@ -774,20 +774,30 @@ function bjHandleMsg(fromPid, data) {
         case 'BACK_TO_LOBBY':
             bjGameState = null; bjRoomPhase = 'lobby'; bjSummaryData = null;
             bjRenderRoom(); break;
-        case 'CHAT':
-            bjChatLog.push({ name: bjPlayers[fromPid]?.name || '?', msg: data.msg, ts: Date.now() });
+        case 'CHAT': {
+            const chatName = data.senderName || bjPlayers[fromPid]?.name || '?';
+            bjChatLog.push({ name: chatName, msg: data.msg, ts: Date.now() });
             if (bjChatLog.length > 50) bjChatLog.shift();
             if (!All.$id('bj-chat-wrap')?.classList.contains('open')) { bjUnreadChat++; bjRenderRoom(); }
             bjRenderChat();
-            if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
+            if (bjIsHost && fromPid !== bjMyId) {
+                if (!data.senderName) data.senderName = chatName;
+                bjBroadcast(data, fromPid);
+            }
             break;
-        case 'CHAT_REQ':
-            bjChatLog.push({ name: bjPlayers[fromPid]?.name || fromPid, isReq: true, reqData: data.reqData, ts: Date.now() });
+        }
+        case 'CHAT_REQ': {
+            const reqName = data.senderName || bjPlayers[fromPid]?.name || fromPid;
+            bjChatLog.push({ name: reqName, isReq: true, reqData: data.reqData, ts: Date.now() });
             if (bjChatLog.length > 50) bjChatLog.shift();
             if (!All.$id('bj-chat-wrap')?.classList.contains('open')) { bjUnreadChat++; bjRenderRoom(); }
             bjRenderChat();
-            if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
+            if (bjIsHost && fromPid !== bjMyId) {
+                if (!data.senderName) data.senderName = reqName;
+                bjBroadcast(data, fromPid);
+            }
             break;
+        }
         case 'GIVE_MONEY':
             const log = bjChatLog.find(e => e.reqData && e.reqData.reqId === data.reqId);
             if (log) {
@@ -806,19 +816,24 @@ function bjHandleMsg(fromPid, data) {
             }
             if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
             break;
-        case 'GOLD_SEND':
+        case 'GOLD_SEND': {
+            const senderName = data.senderName || bjPlayers[fromPid]?.name || '?';
             if (data.targetPid === bjMyId) {
                 ctx.S.coins = (ctx.S.coins || 0) + data.amount;
                 save(); renderStatus();
-                bjSystemChat(`${bjPlayers[fromPid]?.name || '?'} gửi bạn ${data.amount.toLocaleString()}G!`);
+                bjSystemChat(`${senderName} gửi bạn ${data.amount.toLocaleString()}G!`);
             }
             if (bjIsHost) {
                 if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - data.amount;
                 if (bjPlayers[data.targetPid]) bjPlayers[data.targetPid].netProfit = (bjPlayers[data.targetPid].netProfit || 0) + data.amount;
                 bjBroadcastProfits();
-                if (fromPid !== bjMyId) bjBroadcast(data, fromPid);
+                if (fromPid !== bjMyId) {
+                    if (!data.senderName) data.senderName = senderName;
+                    bjBroadcast(data, fromPid);
+                }
             }
             break;
+        }
         case 'UPDATE_PROFITS':
             if (data.profits) {
                 for (const p in data.profits) {

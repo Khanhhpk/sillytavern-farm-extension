@@ -10765,8 +10765,13 @@ function _doStartWave() {
     } while (!validSpawn && attempts < 50);
     el.style.transform = `translate3d(${x2 - 16}px, ${y2 - 16}px, 0)`;
     arena.appendChild(el);
-    let hpMultiplier = Math.pow(1.12, currentWave - 1);
-    let atkMultiplier = Math.pow(1.1, currentWave - 1);
+    let hpMultiplier = 1;
+    let atkMultiplier = 1;
+    for (let w3 = 2; w3 <= currentWave; w3++) {
+      let stressed2 = Math.floor(w3 / 5);
+      hpMultiplier *= 1.12 + stressed2 * 2e-3;
+      atkMultiplier *= 1.1 + stressed2 * 2e-3;
+    }
     if (isBossWave) {
       hpMultiplier *= 1.5;
       atkMultiplier *= 1.2;
@@ -11360,7 +11365,8 @@ function showWaveRewards(isLoaded = false) {
     projectiles = [];
     const isBoss = currentWave % 10 === 0;
     const waveGold = Math.round(500 * Math.pow(1.12, currentWave - 1)) * (isBoss ? 3 : 1);
-    const waveHomeGold = (10 + currentWave * 2) * (isBoss ? 3 : 1);
+    const baseHomeGold = (200 + currentWave * 50) * (isBoss ? 3 : 1);
+    const waveHomeGold = Math.floor(baseHomeGold * Math.pow(1.02, currentWave - 1));
     totalGold += waveHomeGold;
     shopGold += waveGold;
     fullTeam.forEach((p2) => {
@@ -50121,26 +50127,36 @@ function bjHandleMsg(fromPid, data) {
       bjSummaryData = null;
       bjRenderRoom();
       break;
-    case "CHAT":
-      bjChatLog.push({ name: bjPlayers[fromPid]?.name || "?", msg: data.msg, ts: Date.now() });
+    case "CHAT": {
+      const chatName = data.senderName || bjPlayers[fromPid]?.name || "?";
+      bjChatLog.push({ name: chatName, msg: data.msg, ts: Date.now() });
       if (bjChatLog.length > 50) bjChatLog.shift();
       if (!$id("bj-chat-wrap")?.classList.contains("open")) {
         bjUnreadChat++;
         bjRenderRoom();
       }
       bjRenderChat();
-      if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
+      if (bjIsHost && fromPid !== bjMyId) {
+        if (!data.senderName) data.senderName = chatName;
+        bjBroadcast(data, fromPid);
+      }
       break;
-    case "CHAT_REQ":
-      bjChatLog.push({ name: bjPlayers[fromPid]?.name || fromPid, isReq: true, reqData: data.reqData, ts: Date.now() });
+    }
+    case "CHAT_REQ": {
+      const reqName = data.senderName || bjPlayers[fromPid]?.name || fromPid;
+      bjChatLog.push({ name: reqName, isReq: true, reqData: data.reqData, ts: Date.now() });
       if (bjChatLog.length > 50) bjChatLog.shift();
       if (!$id("bj-chat-wrap")?.classList.contains("open")) {
         bjUnreadChat++;
         bjRenderRoom();
       }
       bjRenderChat();
-      if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
+      if (bjIsHost && fromPid !== bjMyId) {
+        if (!data.senderName) data.senderName = reqName;
+        bjBroadcast(data, fromPid);
+      }
       break;
+    }
     case "GIVE_MONEY":
       const log2 = bjChatLog.find((e2) => e2.reqData && e2.reqData.reqId === data.reqId);
       if (log2) {
@@ -50160,20 +50176,25 @@ function bjHandleMsg(fromPid, data) {
       }
       if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
       break;
-    case "GOLD_SEND":
+    case "GOLD_SEND": {
+      const senderName = data.senderName || bjPlayers[fromPid]?.name || "?";
       if (data.targetPid === bjMyId) {
         ctx.S.coins = (ctx.S.coins || 0) + data.amount;
         save();
         renderStatus();
-        bjSystemChat(`${bjPlayers[fromPid]?.name || "?"} g\u1EEDi b\u1EA1n ${data.amount.toLocaleString()}G!`);
+        bjSystemChat(`${senderName} g\u1EEDi b\u1EA1n ${data.amount.toLocaleString()}G!`);
       }
       if (bjIsHost) {
         if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - data.amount;
         if (bjPlayers[data.targetPid]) bjPlayers[data.targetPid].netProfit = (bjPlayers[data.targetPid].netProfit || 0) + data.amount;
         bjBroadcastProfits();
-        if (fromPid !== bjMyId) bjBroadcast(data, fromPid);
+        if (fromPid !== bjMyId) {
+          if (!data.senderName) data.senderName = senderName;
+          bjBroadcast(data, fromPid);
+        }
       }
       break;
+    }
     case "UPDATE_PROFITS":
       if (data.profits) {
         for (const p2 in data.profits) {
