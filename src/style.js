@@ -427,6 +427,38 @@ export const styleCSS = `
     .dg-dmg.heal { color: #a4dc8c; }
     .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
+    
+    /* Active Skills Effects */
+    @keyframes dg-pulse-shield { 0% { box-shadow: 0 0 10px 2px pink; } 50% { box-shadow: 0 0 25px 8px pink; } 100% { box-shadow: 0 0 10px 2px pink; } }
+    .dg-shield-wall { animation: dg-pulse-shield 1s infinite; border-radius: 50%; }
+    .dg-shield-wall::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid rgba(255, 192, 203, 0.7); box-sizing: content-box; pointer-events: none; }
+    
+    @keyframes dg-heal-up { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 100% { opacity: 0; transform: translate(-50%, -40px) scale(1.5); } }
+    .dg-heal-particle { position: absolute; color: #a4dc8c; font-size: 20px; font-weight: bold; pointer-events: none; animation: dg-heal-up 0.8s ease-out forwards; z-index: 10; text-shadow: 1px 1px 0 #000; }
+    
+    @keyframes dg-pulse-invuln { 0% { box-shadow: 0 0 10px 2px gold; filter: brightness(1); } 50% { box-shadow: 0 0 30px 10px gold; filter: brightness(1.5); } 100% { box-shadow: 0 0 10px 2px gold; filter: brightness(1); } }
+    .dg-invuln-aura { animation: dg-pulse-invuln 1s infinite; border-radius: 50%; }
+    .dg-invuln-aura::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 2px dashed rgba(255, 215, 0, 0.8); box-sizing: content-box; pointer-events: none; animation: dg-spin 4s linear infinite; }
+    @keyframes dg-spin { 100% { transform: rotate(360deg); } }
+    
+    .dg-invis-mode { opacity: 0.3; filter: grayscale(0.5) sepia(1) hue-rotate(240deg); transition: opacity 0.5s, filter 0.5s; }
+    @keyframes dg-smoke-puff { 0% { transform: scale(0.5); opacity: 0.8; } 100% { transform: scale(2); opacity: 0; } }
+    .dg-smoke-particle { position: absolute; width: 20px; height: 20px; background: #888; border-radius: 50%; pointer-events: none; animation: dg-smoke-puff 0.5s ease-out forwards; z-index: 5; }
+    
+    @keyframes dg-dash-trail { 0% { opacity: 0.6; transform: scale(1); } 100% { opacity: 0; transform: scale(0.5); } }
+    .dg-dash-ghost { position: absolute; width: 32px; height: 32px; pointer-events: none; z-index: 1; filter: sepia(1) hue-rotate(180deg); animation: dg-dash-trail 0.3s ease-out forwards; }
+    
+    @keyframes dg-boom { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 50% { opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; } }
+    .dg-boom-effect { position: absolute; width: 40px; height: 40px; border-radius: 50%; background: radial-gradient(circle, rgba(255,100,0,1) 0%, rgba(255,0,0,0) 70%); pointer-events: none; animation: dg-boom 0.4s ease-out forwards; z-index: 5; }
+    
+    @keyframes dg-shake { 0% { transform: translate(2px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(0px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(2px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(2px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+    
+    @keyframes dg-poison-bubble { 0% { transform: translateY(0) scale(1); opacity: 0.8; } 100% { transform: translateY(-20px) scale(1.5); opacity: 0; } }
+    .dg-poison-bubble-particle { position: absolute; width: 6px; height: 6px; background: #0f0; border-radius: 50%; pointer-events: none; animation: dg-poison-bubble 1s ease-out forwards; }
+    @keyframes dg-puddle-pulse { 0% { transform: scale(1); opacity: 0.4; } 50% { transform: scale(1.05); opacity: 0.6; } 100% { transform: scale(1); opacity: 0.4; } }
+    
+    @keyframes dg-laser-sweep { 0% { transform: rotate(0deg); } 100% { transform: rotate(1080deg); } }
+
     .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; overflow-y: auto; padding: 15px; box-sizing: border-box; }
 
     /* Shop UI */

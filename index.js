@@ -1294,6 +1294,150 @@ var init_graphics = __esm({
         "................",
         "................",
         "................"
+      ],
+      tentacle: [
+        "................",
+        ".......V........",
+        "......VVv.......",
+        ".....VVvv.......",
+        ".....Vvv........",
+        ".....Vv.........",
+        "....VVv.........",
+        "....Vvv.........",
+        "....Vv..........",
+        "...VVv..........",
+        "...VVv..........",
+        "...Vvv..........",
+        "...Vv...........",
+        "..VVv...........",
+        "..Vvv...........",
+        "..vv............"
+      ],
+      soda_bomb: [
+        "................",
+        ".......SS.......",
+        "......qSSq......",
+        "......qWWq......",
+        "......qppq......",
+        ".....qppppq.....",
+        "....qWppppFq....",
+        "...qWWppppFFq...",
+        "...qWppFFpFFq...",
+        "...qppppFFFFq...",
+        "...qppFpFFFFq...",
+        "...qppFFFFFFq...",
+        "...qppFFFFFFq...",
+        "...qFFffffffq...",
+        "....qqqqqqqq....",
+        "................"
+      ],
+      ice_block: [
+        "....BBBBBBBB....",
+        "...BBbbbbbbBB...",
+        "..BBbbbbbbbbBB..",
+        ".BBbWWbbbbbbbBB.",
+        ".BBbWWbbbbbbbBB.",
+        ".BBbbbbbbbbbbBB.",
+        ".BBbbbbBBbbbbBB.",
+        ".BBbbbbBBbbbbBB.",
+        ".BBbbbbbbbbbbBB.",
+        ".BBbbbbbbWWbbBB.",
+        ".BBbbbbbbWWbbBB.",
+        ".BBbbbbbbbbbbBB.",
+        "..BBbbbbbbbbBB..",
+        "...BBbbbbbbBB...",
+        "....BBBBBBBB....",
+        "................"
+      ],
+      bat: [
+        "................",
+        "................",
+        "................",
+        "...v........v...",
+        "..vvv......vvv..",
+        "..vvvv....vvvv..",
+        ".vvvvvKKKKvvvvv.",
+        ".vvv.KKKKKK.vvv.",
+        ".v...KRKKRK...v.",
+        ".....KKKKKK.....",
+        ".....K....K.....",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................"
+      ],
+      meteor: [
+        "..............W.",
+        ".............W..",
+        "............WR..",
+        "...........WRR..",
+        "..........WRR...",
+        ".........ORR....",
+        "........OOR.....",
+        ".......COOR.....",
+        "......CCOO......",
+        ".....CCCCO......",
+        "....CCCCCC......",
+        "....CCCCCC......",
+        ".....CCCC.......",
+        "......CC........",
+        "................",
+        "................"
+      ],
+      root_vortex: [
+        ".......DD.......",
+        ".....DD..DD.....",
+        "....D......D....",
+        "...D........D...",
+        "..D....DD....D..",
+        "..D...D..D...D..",
+        ".D....D..D...D..",
+        ".D....D..D....D.",
+        ".D...D....D...D.",
+        "..D...D..D....D.",
+        "..D....DD....D..",
+        "...D........D...",
+        "....D......D....",
+        ".....DD..DD.....",
+        ".......DD.......",
+        "................"
+      ],
+      blizzard: [
+        "................",
+        ".W..B......W....",
+        "........W.......",
+        "....B......B....",
+        "................",
+        "...W....B....W..",
+        "................",
+        ".B....W.........",
+        "............B...",
+        ".......B........",
+        "..W........W....",
+        "......B.........",
+        "................",
+        "....W......B....",
+        "................",
+        "................"
+      ],
+      heal_cross: [
+        "................",
+        "................",
+        "................",
+        "......EEEE......",
+        "......EEEE......",
+        "......EEEE......",
+        "...EEEEEEEEEE...",
+        "...EEEEEEEEEE...",
+        "...EEEEEEEEEE...",
+        "...EEEEEEEEEE...",
+        "......EEEE......",
+        "......EEEE......",
+        "......EEEE......",
+        "................",
+        "................",
+        "................"
       ]
     };
     P.k = P.k || "#c4e3f0";
@@ -2745,6 +2889,38 @@ var init_style = __esm({
     .dg-dmg.heal { color: #a4dc8c; }
     .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
+    
+    /* Active Skills Effects */
+    @keyframes dg-pulse-shield { 0% { box-shadow: 0 0 10px 2px pink; } 50% { box-shadow: 0 0 25px 8px pink; } 100% { box-shadow: 0 0 10px 2px pink; } }
+    .dg-shield-wall { animation: dg-pulse-shield 1s infinite; border-radius: 50%; }
+    .dg-shield-wall::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid rgba(255, 192, 203, 0.7); box-sizing: content-box; pointer-events: none; }
+    
+    @keyframes dg-heal-up { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 100% { opacity: 0; transform: translate(-50%, -40px) scale(1.5); } }
+    .dg-heal-particle { position: absolute; color: #a4dc8c; font-size: 20px; font-weight: bold; pointer-events: none; animation: dg-heal-up 0.8s ease-out forwards; z-index: 10; text-shadow: 1px 1px 0 #000; }
+    
+    @keyframes dg-pulse-invuln { 0% { box-shadow: 0 0 10px 2px gold; filter: brightness(1); } 50% { box-shadow: 0 0 30px 10px gold; filter: brightness(1.5); } 100% { box-shadow: 0 0 10px 2px gold; filter: brightness(1); } }
+    .dg-invuln-aura { animation: dg-pulse-invuln 1s infinite; border-radius: 50%; }
+    .dg-invuln-aura::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 2px dashed rgba(255, 215, 0, 0.8); box-sizing: content-box; pointer-events: none; animation: dg-spin 4s linear infinite; }
+    @keyframes dg-spin { 100% { transform: rotate(360deg); } }
+    
+    .dg-invis-mode { opacity: 0.3; filter: grayscale(0.5) sepia(1) hue-rotate(240deg); transition: opacity 0.5s, filter 0.5s; }
+    @keyframes dg-smoke-puff { 0% { transform: scale(0.5); opacity: 0.8; } 100% { transform: scale(2); opacity: 0; } }
+    .dg-smoke-particle { position: absolute; width: 20px; height: 20px; background: #888; border-radius: 50%; pointer-events: none; animation: dg-smoke-puff 0.5s ease-out forwards; z-index: 5; }
+    
+    @keyframes dg-dash-trail { 0% { opacity: 0.6; transform: scale(1); } 100% { opacity: 0; transform: scale(0.5); } }
+    .dg-dash-ghost { position: absolute; width: 32px; height: 32px; pointer-events: none; z-index: 1; filter: sepia(1) hue-rotate(180deg); animation: dg-dash-trail 0.3s ease-out forwards; }
+    
+    @keyframes dg-boom { 0% { transform: translate(-50%, -50%) scale(0); opacity: 1; } 50% { opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; } }
+    .dg-boom-effect { position: absolute; width: 40px; height: 40px; border-radius: 50%; background: radial-gradient(circle, rgba(255,100,0,1) 0%, rgba(255,0,0,0) 70%); pointer-events: none; animation: dg-boom 0.4s ease-out forwards; z-index: 5; }
+    
+    @keyframes dg-shake { 0% { transform: translate(2px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(0px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(2px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(2px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+    
+    @keyframes dg-poison-bubble { 0% { transform: translateY(0) scale(1); opacity: 0.8; } 100% { transform: translateY(-20px) scale(1.5); opacity: 0; } }
+    .dg-poison-bubble-particle { position: absolute; width: 6px; height: 6px; background: #0f0; border-radius: 50%; pointer-events: none; animation: dg-poison-bubble 1s ease-out forwards; }
+    @keyframes dg-puddle-pulse { 0% { transform: scale(1); opacity: 0.4; } 50% { transform: scale(1.05); opacity: 0.6; } 100% { transform: scale(1); opacity: 0.4; } }
+    
+    @keyframes dg-laser-sweep { 0% { transform: rotate(0deg); } 100% { transform: rotate(1080deg); } }
+
     .dg-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; overflow-y: auto; padding: 15px; box-sizing: border-box; }
 
     /* Shop UI */
@@ -9979,10 +10155,10 @@ function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
   const scene2 = targets[0].closest(".hero-scene") || targets[0].closest("#dg-arena");
   if (!scene2) return onComplete && onComplete();
   const overlay = document.createElement("div");
-  overlay.style.cssText = "position:absolute; inset:0; z-index:20; opacity:0; transition:opacity 0.3s; background:radial-gradient(circle, transparent 20%, rgba(50,0,0,0.7) 100%); backdrop-filter:grayscale(1) contrast(1.2);";
+  overlay.style.cssText = "position:absolute; inset:0; z-index:20; opacity:0; transition:opacity 0.3s; background:radial-gradient(circle, transparent 20%, rgba(0,0,0,0.6) 100%); pointer-events:none;";
   const topBar = document.createElement("div");
   const botBar = document.createElement("div");
-  const barStyle = "position:absolute; left:0; right:0; height:18%; background:#000; z-index:21; transition:transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);";
+  const barStyle = "position:absolute; left:0; right:0; height:18%; background:#000; z-index:21; transition:transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); pointer-events:none;";
   topBar.style.cssText = barStyle + "top:0; transform:translateY(-100%);";
   botBar.style.cssText = barStyle + "bottom:0; transform:translateY(100%);";
   scene2.appendChild(overlay);
@@ -10029,7 +10205,7 @@ function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
     ghost.style.position = "absolute";
     ghost.style.zIndex = "24";
     ghost.style.opacity = "0.6";
-    ghost.style.filter = "grayscale(1) brightness(1.5)";
+    ghost.style.filter = "brightness(1.5)";
     ghost.style.pointerEvents = "none";
     scene2.appendChild(ghost);
     setTimeout(() => ghost.remove(), 100);
@@ -10340,7 +10516,9 @@ function loadDungeonState(saveData) {
       el,
       type: "pet",
       skill: savedP.skill || stat.skill,
+      activeSkill: savedP.activeSkill || stat.activeSkill,
       ai: savedP.ai || stat.ai,
+      armor: savedP.armor !== void 0 ? savedP.armor : stat.armor,
       cd: savedP.cd || 0,
       skillCd: savedP.skillCd || 0,
       maxSkillCd: savedP.maxSkillCd || stat.maxSkillCd || 0
@@ -10512,6 +10690,9 @@ function initPlacementPhase() {
           el,
           type: "pet",
           skill: stat.skill,
+          activeSkill: stat.activeSkill,
+          ai: stat.ai,
+          armor: stat.armor,
           dockSlot: currentSlot
         };
         team.push(memberObj);
@@ -10719,7 +10900,8 @@ function _doStartWave() {
       });
     }
   }
-  const arena = $id("dg-arena");
+  arenaEl = $id("dg-arena");
+  const arena = arenaEl;
   const w2 = arena.clientWidth;
   const h = arena.clientHeight;
   updateHUD();
@@ -10811,12 +10993,248 @@ function combatLoop() {
   lastTime = now2;
   if (dt2 > 1) dt2 = 1;
   let steps = 0;
+  const arena = arenaEl || $id("dg-arena");
+  const arenaRect = arena ? arena.getBoundingClientRect() : { width: 960, height: 450 };
   while (dt2 > 0 && steps < 60) {
     let stepDt = Math.min(dt2, 0.016);
-    updateEntities(team, enemies, stepDt);
-    updateEntities(enemies, team, stepDt);
-    const arena = $id("dg-arena");
+    updateEntities(team, enemies, stepDt, arenaRect);
+    updateEntities(enemies, team, stepDt, arenaRect);
+    let newProjs = [];
     projectiles = projectiles.filter((p2) => {
+      if (p2.isPuddle) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          return false;
+        }
+        if (!p2.lastBubble || p2.lifetime < p2.lastBubble - 0.4) {
+          p2.lastBubble = p2.lifetime;
+          const bubble = document.createElement("div");
+          bubble.className = "dg-poison-bubble-particle";
+          bubble.style.left = p2.x + Math.random() * 80 - 40 + "px";
+          bubble.style.top = p2.y + Math.random() * 40 - 20 + "px";
+          arena.appendChild(bubble);
+          setTimeout(() => bubble.remove(), 1e3);
+        }
+        if (!p2.lastTick || p2.lifetime < p2.lastTick - 1) {
+          p2.lastTick = p2.lifetime;
+          p2.groupB.forEach((e2) => {
+            if (e2.hp > 0 && Math.hypot(e2.x - p2.x, e2.y - p2.y) < 60) {
+              if (!e2.status) e2.status = {};
+              e2.status.poison = 3;
+              const dmg = Math.floor(p2.a.atk * 0.5);
+              e2.hp -= dmg;
+              spawnDmg(e2, -dmg, "poison");
+            }
+          });
+        }
+        return true;
+      }
+      if (p2.isLaserSweep) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          return false;
+        }
+        if (!p2.lastTick || p2.lifetime < p2.lastTick - 0.05) {
+          p2.lastTick = p2.lifetime;
+          const progress = (p2.maxLifetime - p2.lifetime) / p2.maxLifetime;
+          const currentAngle = progress * Math.PI * 6;
+          const dmg = Math.max(1, Math.floor(p2.a.atk * 0.5));
+          p2.groupB.forEach((e2) => {
+            if (e2.hp > 0) {
+              const dx2 = e2.x - p2.x;
+              const dy2 = e2.y - p2.y;
+              const dist2 = Math.hypot(dx2, dy2);
+              if (dist2 > 0) {
+                let a2 = Math.atan2(dy2, dx2);
+                let normalizedAngle = currentAngle % (Math.PI * 2);
+                if (normalizedAngle > Math.PI) normalizedAngle -= Math.PI * 2;
+                let diff = Math.abs(a2 - normalizedAngle);
+                if (diff > Math.PI) diff = 2 * Math.PI - diff;
+                if (diff < 0.3) {
+                  if (!e2._lastLaserHit || p2.lifetime < e2._lastLaserHit - 0.3) {
+                    e2._lastLaserHit = p2.lifetime;
+                    e2.hp -= dmg;
+                    spawnDmg(e2, -dmg, "crit");
+                  }
+                }
+              }
+            }
+          });
+        }
+        return true;
+      }
+      if (p2.isTentacleStorm) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          return false;
+        }
+        p2.x = p2.a.x;
+        p2.y = p2.a.y;
+        p2.el.style.left = p2.x - 80 + "px";
+        p2.el.style.top = p2.y - 80 + "px";
+        if (!p2.nextTick || p2.lifetime < p2.nextTick) {
+          p2.nextTick = p2.lifetime - 0.2;
+          p2.groupB.forEach((e2) => {
+            if (e2.hp > 0 && Math.hypot(e2.x - p2.x, e2.y - p2.y) < 100) {
+              const dmg = Math.max(1, Math.floor(p2.a.atk * 0.3));
+              e2.hp -= dmg;
+              spawnDmg(e2, -dmg);
+              e2.x += e2.x - p2.x > 0 ? 5 : -5;
+              e2.y += e2.y - p2.y > 0 ? 5 : -5;
+            }
+          });
+        }
+        return true;
+      }
+      if (p2.isGasExplosion || p2.isMeteor) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          if (p2.isGasExplosion && p2.targetEnemy && p2.targetEnemy.hp > 0) {
+            p2.targetX = p2.targetEnemy.x;
+            p2.targetY = p2.targetEnemy.y;
+          }
+          const boom = document.createElement("div");
+          boom.className = "dg-boom-effect";
+          boom.style.width = p2.isMeteor ? "160px" : "240px";
+          boom.style.height = p2.isMeteor ? "160px" : "240px";
+          boom.style.left = p2.targetX + "px";
+          boom.style.top = p2.targetY + "px";
+          boom.style.background = p2.isMeteor ? "radial-gradient(circle, rgba(255,200,0,1) 0%, rgba(255,100,0,0) 70%)" : "radial-gradient(circle, rgba(255,100,100,1) 0%, rgba(255,50,50,0) 70%)";
+          arena.appendChild(boom);
+          setTimeout(() => boom.remove(), 400);
+          if (p2.isMeteor) {
+            const fire = document.createElement("div");
+            fire.style.position = "absolute";
+            fire.style.width = "200px";
+            fire.style.height = "200px";
+            fire.style.left = p2.targetX - 100 + "px";
+            fire.style.top = p2.targetY - 100 + "px";
+            fire.style.background = "rgba(255, 0, 0, 0.3)";
+            fire.style.borderRadius = "50%";
+            fire.style.pointerEvents = "none";
+            arena.appendChild(fire);
+            newProjs.push({
+              isFireZone: true,
+              lifetime: 5,
+              el: fire,
+              a: p2.a,
+              groupB: p2.groupB,
+              x: p2.targetX,
+              y: p2.targetY
+            });
+          }
+          const radius = p2.isMeteor ? 80 : 120;
+          p2.groupB.forEach((e2) => {
+            if (e2.hp > 0 && Math.hypot(e2.x - p2.targetX, e2.y - p2.targetY) < radius) {
+              if (p2.isGasExplosion) {
+                const dmg = p2.a.atk * 3;
+                e2.hp -= dmg;
+                spawnDmg(e2, -dmg, "crit");
+              } else {
+                const dmg = p2.a.atk * 2;
+                e2.hp -= dmg;
+                spawnDmg(e2, -dmg);
+                if (!e2.status) e2.status = {};
+                e2.status.stun = 1;
+              }
+            }
+          });
+          return false;
+        }
+        return true;
+      }
+      if (p2.isFireZone) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          return false;
+        }
+        if (!p2.nextTick || p2.lifetime < p2.nextTick) {
+          p2.nextTick = p2.lifetime - 1;
+          p2.groupB.forEach((e2) => {
+            if (e2.hp > 0 && Math.hypot(e2.x - p2.x, e2.y - p2.y) < 100) {
+              const dmg = Math.max(1, Math.floor(e2.maxHp * 0.1));
+              e2.hp -= dmg;
+              spawnDmg(e2, -dmg, "poison");
+            }
+          });
+        }
+        return true;
+      }
+      if (p2.isOvergrowth) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          return false;
+        }
+        p2.groupB.forEach((e2) => {
+          if (e2.hp > 0) {
+            const dx2 = p2.x - e2.x;
+            const dy2 = p2.y - e2.y;
+            const d = Math.hypot(dx2, dy2);
+            if (d < 250 && d > 10) {
+              e2.x += dx2 / d * 200 * stepDt;
+              e2.y += dy2 / d * 200 * stepDt;
+            }
+          }
+        });
+        return true;
+      }
+      if (p2.isSnowball) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0 || p2.bounces >= 5) {
+          p2.el.remove();
+          return false;
+        }
+        p2.x += p2.vx * stepDt;
+        p2.y += p2.vy * stepDt;
+        p2.el.style.left = p2.x - 30 + "px";
+        p2.el.style.top = p2.y - 30 + "px";
+        const rot = p2.lifetime * 500 % 360;
+        p2.el.style.transform = `rotate(${rot}deg)`;
+        const rightBound = p2.rightBound || 930;
+        const bottomBound = p2.bottomBound || 420;
+        let bounced = false;
+        if (p2.x < 30) {
+          p2.x = 30;
+          p2.vx *= -1;
+          bounced = true;
+        } else if (p2.x > rightBound) {
+          p2.x = rightBound;
+          p2.vx *= -1;
+          bounced = true;
+        }
+        if (p2.y < 30) {
+          p2.y = 30;
+          p2.vy *= -1;
+          bounced = true;
+        } else if (p2.y > bottomBound) {
+          p2.y = bottomBound;
+          p2.vy *= -1;
+          bounced = true;
+        }
+        if (bounced) {
+          p2.bounces++;
+          p2.hitTargets.clear();
+        }
+        p2.groupB.forEach((e2) => {
+          if (e2.hp > 0 && !p2.hitTargets.has(e2)) {
+            if (Math.hypot(e2.x - p2.x, e2.y - p2.y) < 50) {
+              p2.hitTargets.add(e2);
+              if (!e2.status) e2.status = {};
+              e2.status.freeze = 3;
+              const dmg = Math.max(1, Math.floor(p2.a.atk * 2));
+              e2.hp -= dmg;
+              spawnDmg(e2, -dmg, "crit");
+            }
+          }
+        });
+        return true;
+      }
       if (!p2.target || p2.target.hp <= 0) {
         p2.el.remove();
         return false;
@@ -10853,12 +11271,17 @@ function combatLoop() {
           totalGold += homeG;
           shopGold += e2.gold;
           spawnDmg({ x: e2.x, y: e2.y - 10 }, `+${e2.gold} \u{1F6E0}`, "gold");
-          updateHUD();
+          _hudDirty = true;
         }
         return false;
       }
       return true;
     });
+    if (_hudDirty) {
+      _hudDirty = false;
+      updateHUD();
+    }
+    projectiles.push(...newProjs);
     if (enemies.length === 0 || team.length === 0) {
       break;
     }
@@ -10876,9 +11299,10 @@ function combatLoop() {
   gameLoopId = setTimeout(combatLoop, 16);
 }
 function spawnDmg(target, amount, type) {
+  if (target && target.isBatMinion) return;
   const isStr = typeof amount === "string";
   if (!isStr) amount = Math.round(amount);
-  const arena = $id("dg-arena");
+  const arena = arenaEl || $id("dg-arena");
   const dmg = document.createElement("div");
   dmg.className = "dg-dmg" + (type ? " " + type : "");
   dmg.textContent = type === "miss" ? "MISS!" : isStr ? amount : (amount > 0 ? "+" : "") + amount;
@@ -10926,6 +11350,18 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     }
   }
   let finalDmg = atk;
+  if (target.status) {
+    if (target.status.invuln > 0) {
+      target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - atk);
+      return;
+    }
+    if (target.status.shield > 0) {
+      target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - atk);
+      target.hp = Math.min(target.maxHp, target.hp + atk);
+      spawnDmg(target, atk, "heal");
+      return;
+    }
+  }
   let isCrit = false;
   if (attacker) {
     if (attacker.status && attacker.status.buff_atk > 0) {
@@ -10947,6 +11383,9 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
   }
   if (effectiveArmor > 0) {
     finalDmg = Math.round(finalDmg * (1 - effectiveArmor));
+  }
+  if (target.status && target.status.brainFreeze > 0) {
+    finalDmg = Math.round(finalDmg * 1.2);
   }
   if (skill === "sniper" && attacker) {
     const dist = Math.hypot(target.x - attacker.x, target.y - attacker.y);
@@ -10997,17 +11436,63 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     });
   }
 }
-function updateEntities(groupA, groupB, dt2) {
-  const arena = $id("dg-arena");
+function updateEntities(groupA, groupB, dt2, arenaRect) {
+  if (!arenaRect) {
+    const a = arenaEl || $id("dg-arena");
+    arenaRect = a ? a.getBoundingClientRect() : { width: 960, height: 450 };
+  }
+  const arena = arenaEl || $id("dg-arena");
   groupA.forEach((a) => {
     if (a.hp <= 0) return;
-    if (a.cd > 0) {
+    if (a.kb && a.kb.time > 0) {
+      a.kb.time -= dt2;
+      a.x += a.kb.dx * a.kb.speed * dt2;
+      a.y += a.kb.dy * a.kb.speed * dt2;
+      a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
+      a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
+      a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+      let hitOther = false;
+      groupA.forEach((other) => {
+        if (!hitOther && other !== a && other.hp > 0 && Math.hypot(other.x - a.x, other.y - a.y) < 40) {
+          if (!other.status) other.status = {};
+          if (!other.status.stun) {
+            hitOther = true;
+            other.status.stun = 1.5;
+            const impactX = other.x;
+            const impactY = other.y;
+            const boom = document.createElement("div");
+            boom.className = "dg-boom-effect";
+            boom.style.width = "80px";
+            boom.style.height = "80px";
+            boom.style.left = impactX - 8 + "px";
+            boom.style.top = impactY - 8 + "px";
+            boom.style.background = "radial-gradient(circle, rgba(255,220,80,1) 0%, rgba(255,120,0,0) 70%)";
+            arena.appendChild(boom);
+            setTimeout(() => boom.remove(), 400);
+            const CHAIN_RADIUS = 55;
+            groupA.forEach((nearby) => {
+              if (nearby !== a && nearby !== other && nearby.hp > 0 && Math.hypot(nearby.x - impactX, nearby.y - impactY) < CHAIN_RADIUS) {
+                if (!nearby.status) nearby.status = {};
+                nearby.status.stun = 1;
+              }
+            });
+          }
+        }
+      });
+      if (hitOther) {
+        a.kb.time = 0;
+      }
+      return;
+    }
+    let currentlyStunned = a.status && a.status.stun > 0;
+    if (a.cd > 0 && !currentlyStunned) {
       a.cd -= dt2;
+      if (a.status && a.status.rage > 0) a.cd -= dt2;
     }
     const cdPct = Math.max(0, Math.min(100, (1 - Math.max(0, a.cd) / a.maxCd) * 100));
     const cdFill = a.el.querySelector(".dg-cd-fill");
     if (cdFill) cdFill.style.width = cdPct + "%";
-    if (a.maxSkillCd > 0) {
+    if (a.maxSkillCd > 0 && !currentlyStunned) {
       if (a.skillCd > 0) a.skillCd -= dt2;
       const skillCdBar = a.el.querySelector(".dg-skill-cd-bar");
       if (skillCdBar) {
@@ -11021,22 +11506,41 @@ function updateEntities(groupA, groupB, dt2) {
     }
     if (!a.status) a.status = {};
     if (a.skill === "taunt") a.status.taunt = 3;
+    if (a.skill === "frenzy") {
+      if (!a._frenzyTimer) a._frenzyTimer = 0;
+      a._frenzyTimer += dt2;
+      const frenzyBonus = Math.min(0.5, Math.floor(a._frenzyTimer / 3) * 0.05);
+      a._frenzyMult = 1 - frenzyBonus;
+      if (!a._baseCd) a._baseCd = a.maxCd;
+      a.maxCd = a._baseCd * a._frenzyMult;
+    }
+    if (a.skill === "buff_atk" && a.type === "pet") {
+      groupA.forEach((ally) => {
+        if (ally !== a && ally.hp > 0 && Math.hypot(ally.x - a.x, ally.y - a.y) < 90) {
+          if (!ally.status) ally.status = {};
+          ally.status.buff_atk = 0.1;
+        }
+      });
+    }
     let isStunned = false;
     let isRooted = false;
     let speedMult = 1;
     let atkSpdMult = 1;
+    let isDashing = a.status && a.status.dashing;
+    if (isDashing) speedMult *= 6;
     for (let eff in a.status) {
       if (a.status[eff] > 0) {
         a.status[eff] -= dt2;
         if (eff === "stun") isStunned = true;
         if (eff === "root") isRooted = true;
         if (eff === "freeze") {
-          speedMult *= 0.5;
-          atkSpdMult *= 0.5;
+          speedMult *= 0.8;
+          atkSpdMult *= 0.7;
         }
         if (eff === "poison" && Math.random() < dt2) {
-          a.hp -= 2;
-          spawnDmg(a, -2);
+          const dmg = Math.floor(a.maxHp * 0.05);
+          a.hp -= dmg;
+          spawnDmg(a, -dmg);
         }
       }
     }
@@ -11047,6 +11551,9 @@ function updateEntities(groupA, groupB, dt2) {
     if (a.status.root > 0) statusHtml += '<div class="dg-status-icon dg-status-root"></div>';
     if (a.status.taunt > 0) statusHtml += '<div class="dg-status-icon dg-status-taunt"></div>';
     if (a.status.buff_atk > 0) statusHtml += '<div class="dg-status-icon dg-status-buff"></div>';
+    if (a.status.shield > 0) statusHtml += '<div class="dg-status-icon" style="background: pink;"></div>';
+    if (a.status.invuln > 0) statusHtml += '<div class="dg-status-icon" style="background: gold;"></div>';
+    if (a.status.invis > 0) statusHtml += '<div class="dg-status-icon" style="background: gray; opacity: 0.5;"></div>';
     let statusDiv = a.el.querySelector(".dg-status");
     if (!statusDiv) {
       statusDiv = document.createElement("div");
@@ -11061,8 +11568,8 @@ function updateEntities(groupA, groupB, dt2) {
     if (isStunned) return;
     let closest = null;
     let minDist = Infinity;
-    let taunters = groupB.filter((b2) => b2.hp > 0 && b2.status && b2.status.taunt > 0);
-    let targetGroup = taunters.length > 0 ? taunters : groupB;
+    let taunters = groupB.filter((b2) => b2.hp > 0 && b2.status && b2.status.taunt > 0 && !(b2.status.invis > 0));
+    let targetGroup = taunters.length > 0 ? taunters : groupB.filter((b2) => !(b2.status && b2.status.invis > 0));
     if (a.skill === "heal" || a.skill === "aoe_heal") {
       targetGroup = groupA;
       let minHpPct = 1;
@@ -11122,68 +11629,399 @@ function updateEntities(groupA, groupB, dt2) {
     }
     a.el.classList.remove("walk");
     if (closest) {
-      if (a.maxSkillCd > 0 && a.skillCd <= 0 && a.skill === "projection_sorcery") {
-        a.skillCd = a.maxSkillCd;
-        const momentum = 1 / (a.maxCd || 1);
-        const finalDmg = a.atk;
-        const projectionDmg = Math.floor(finalDmg * momentum);
-        const validTargets = targetGroup.filter((e2) => e2.hp > 0 && e2.el);
-        if (validTargets.length === 0) return;
-        const targetEls = validTargets.map((e2) => e2.el);
-        validTargets.forEach((e2) => {
-          if (!e2.status) e2.status = {};
-          e2.status.stun = 1.3;
-        });
-        if (!a.status) a.status = {};
-        a.status.stun = 1.3;
-        playNaoyaCutscene(a, a.el, targetEls, () => {
+      if (a.maxSkillCd > 0 && a.skillCd <= 0) {
+        if (a.skill === "projection_sorcery") {
+          a.skillCd = a.maxSkillCd;
+          const momentum = 1 / (a.maxCd || 1);
+          const finalDmg = a.atk;
+          const projectionDmg = Math.max(1, Math.floor(finalDmg * momentum));
+          const validTargets = targetGroup.filter((e2) => e2.hp > 0 && e2.el);
+          if (validTargets.length === 0) return;
+          const targetEls = validTargets.map((e2) => e2.el);
           validTargets.forEach((e2) => {
-            if (e2.hp > 0) {
-              if (e2 !== closest.b) {
+            if (!e2.status) e2.status = {};
+            e2.status.stun = 1.3;
+          });
+          if (!a.status) a.status = {};
+          a.status.stun = 1.3;
+          playNaoyaCutscene(a, a.el, targetEls, () => {
+            validTargets.forEach((e2) => {
+              if (e2.hp > 0) {
                 e2.hp -= projectionDmg;
-                spawnDmg(e2, -projectionDmg);
-              } else {
-                const extraDmg = Math.max(0, projectionDmg - finalDmg);
-                if (extraDmg > 0) {
-                  e2.hp -= extraDmg;
-                  spawnDmg(e2, -extraDmg, "crit");
+                spawnDmg(e2, -projectionDmg, "crit");
+                if (arena && a.el) {
+                  const ghost = a.el.cloneNode(true);
+                  ghost.className = "dg-entity projection-ghost";
+                  ghost.style.position = "absolute";
+                  ghost.style.left = e2.x + "px";
+                  ghost.style.top = e2.y + "px";
+                  ghost.style.zIndex = "1";
+                  ghost.style.opacity = "0.5";
+                  ghost.style.filter = "grayscale(1) contrast(1.5)";
+                  ghost.style.pointerEvents = "none";
+                  arena.appendChild(ghost);
+                  setTimeout(() => ghost.remove(), 150);
                 }
               }
-              if (arena && a.el) {
-                const ghost = a.el.cloneNode(true);
-                ghost.className = "dg-entity projection-ghost";
-                ghost.style.position = "absolute";
-                ghost.style.left = e2.x + "px";
-                ghost.style.top = e2.y + "px";
-                ghost.style.zIndex = "1";
-                ghost.style.opacity = "0.5";
-                ghost.style.filter = "grayscale(1) contrast(1.5)";
-                ghost.style.pointerEvents = "none";
-                arena.appendChild(ghost);
-                setTimeout(() => ghost.remove(), 150);
-              }
-            }
+            });
           });
-        });
-        return;
+        } else if (a.activeSkill) {
+          a.skillCd = a.maxSkillCd;
+          if (a.activeSkill === "shield_wall") {
+            if (!a.status) a.status = {};
+            a.status.shield = 3;
+            a.el.classList.add("dg-shield-wall");
+            setTimeout(() => {
+              if (a.el) a.el.classList.remove("dg-shield-wall");
+            }, 3e3);
+          } else if (a.activeSkill === "burst_heal") {
+            groupA.forEach((ally) => {
+              if (ally.hp > 0) {
+                const heal = ally.maxHp * 0.3;
+                ally.hp = Math.min(ally.maxHp, ally.hp + heal);
+                spawnDmg(ally, heal, "heal");
+                const p2 = document.createElement("div");
+                p2.className = "dg-heal-particle";
+                p2.innerHTML = spriteSVG("heal_cross", 24);
+                p2.style.left = ally.x + "px";
+                p2.style.top = ally.y + "px";
+                arena.appendChild(p2);
+                setTimeout(() => p2.remove(), 800);
+              }
+            });
+          } else if (a.activeSkill === "invulnerable") {
+            groupA.forEach((ally) => {
+              if (ally.hp > 0) {
+                if (!ally.status) ally.status = {};
+                ally.status.invuln = 3;
+                ally.el.classList.add("dg-invuln-aura");
+                setTimeout(() => {
+                  if (ally.el) ally.el.classList.remove("dg-invuln-aura");
+                }, 3e3);
+              }
+            });
+          } else if (a.activeSkill === "invisible") {
+            if (!a.status) a.status = {};
+            a.status.invis = 4;
+            a.el.classList.add("dg-invis-mode");
+            const smoke = document.createElement("div");
+            smoke.className = "dg-smoke-particle";
+            smoke.style.left = a.x - 10 + "px";
+            smoke.style.top = a.y - 10 + "px";
+            arena.appendChild(smoke);
+            setTimeout(() => smoke.remove(), 500);
+            setTimeout(() => {
+              if (a.el) a.el.classList.remove("dg-invis-mode");
+            }, 4e3);
+          } else if (a.activeSkill === "dash_knockup") {
+            if (!a.status) a.status = {};
+            a.status.dashing = true;
+          } else if (a.activeSkill === "nuke_crit") {
+            const target = closest.b;
+            a.x = target.x - closest.dx / closest.dist * 20;
+            a.y = target.y - closest.dy / closest.dist * 20;
+            const boom = document.createElement("div");
+            boom.className = "dg-boom-effect";
+            boom.style.width = "80px";
+            boom.style.height = "80px";
+            boom.style.left = target.x + "px";
+            boom.style.top = target.y + "px";
+            boom.style.background = "radial-gradient(circle, rgba(255,50,0,1) 0%, rgba(255,0,0,0) 70%)";
+            arena.appendChild(boom);
+            setTimeout(() => boom.remove(), 400);
+            arena.style.animation = "dg-shake 0.4s";
+            setTimeout(() => {
+              arena.style.animation = "";
+            }, 400);
+            const dmg = a.atk * 5;
+            target.hp -= dmg;
+            spawnDmg(target, -dmg, "crit");
+          } else if (a.activeSkill === "poison_puddle") {
+            const target = closest.b;
+            const puddle = document.createElement("div");
+            puddle.className = "dg-poison-puddle";
+            puddle.style.position = "absolute";
+            puddle.style.width = "120px";
+            puddle.style.height = "70px";
+            puddle.style.borderRadius = "50%";
+            puddle.style.backgroundColor = "rgba(0, 255, 0, 0.3)";
+            puddle.style.left = target.x - 60 + "px";
+            puddle.style.top = target.y - 35 + "px";
+            puddle.style.zIndex = "0";
+            puddle.style.animation = "dg-puddle-pulse 2s infinite";
+            arena.appendChild(puddle);
+            projectiles.push({
+              x: target.x,
+              y: target.y,
+              isPuddle: true,
+              lifetime: 5,
+              el: puddle,
+              groupB,
+              a
+            });
+          } else if (a.activeSkill === "laser_beam") {
+            const laser = document.createElement("div");
+            laser.style.position = "absolute";
+            laser.style.height = "30px";
+            laser.style.width = "1500px";
+            laser.style.background = "linear-gradient(90deg, rgba(255,255,255,0.8) 0%, rgba(0,255,255,1) 10%, rgba(255,0,255,0.8) 50%, rgba(255,0,0,0) 100%)";
+            laser.style.left = a.x + "px";
+            laser.style.top = a.y - 15 + "px";
+            laser.style.transformOrigin = "0 50%";
+            laser.style.zIndex = "100";
+            laser.style.pointerEvents = "none";
+            laser.style.animation = "dg-laser-sweep 1.5s linear forwards";
+            arena.appendChild(laser);
+            projectiles.push({
+              isLaserSweep: true,
+              lifetime: 1.5,
+              maxLifetime: 1.5,
+              el: laser,
+              groupB,
+              a,
+              x: a.x,
+              y: a.y
+            });
+          } else if (a.activeSkill === "tentacle_storm") {
+            const storm = document.createElement("div");
+            storm.style.position = "absolute";
+            storm.style.width = "160px";
+            storm.style.height = "160px";
+            storm.style.left = a.x - 80 + "px";
+            storm.style.top = a.y - 80 + "px";
+            storm.style.pointerEvents = "none";
+            storm.style.zIndex = "0";
+            for (let i2 = 0; i2 < 4; i2++) {
+              const t2 = document.createElement("div");
+              t2.style.position = "absolute";
+              t2.style.left = "48px";
+              t2.style.top = "0";
+              t2.style.transformOrigin = "50% 80px";
+              t2.style.transform = `rotate(${i2 * 90}deg)`;
+              t2.innerHTML = spriteSVG("tentacle", 64);
+              storm.appendChild(t2);
+            }
+            storm.style.animation = "dg-spin 0.5s linear infinite";
+            arena.appendChild(storm);
+            projectiles.push({
+              isTentacleStorm: true,
+              lifetime: 3,
+              maxLifetime: 3,
+              el: storm,
+              a,
+              groupB,
+              x: a.x,
+              y: a.y,
+              nextTick: 0.2
+            });
+          } else if (a.activeSkill === "gas_explosion") {
+            let farthest = null;
+            let maxD = -1;
+            groupB.forEach((e2) => {
+              if (e2.hp <= 0) return;
+              const d = Math.hypot(e2.x - a.x, e2.y - a.y);
+              if (d > maxD) {
+                maxD = d;
+                farthest = e2;
+              }
+            });
+            if (farthest) {
+              const bomb = document.createElement("div");
+              bomb.innerHTML = spriteSVG("soda_bomb", 64);
+              bomb.style.position = "absolute";
+              bomb.style.left = a.x - 32 + "px";
+              bomb.style.top = a.y - 32 + "px";
+              bomb.style.transition = "all 0.5s linear";
+              bomb.style.zIndex = "100";
+              arena.appendChild(bomb);
+              setTimeout(() => {
+                bomb.style.left = farthest.x - 32 + "px";
+                bomb.style.top = farthest.y - 32 + "px";
+                bomb.style.transform = "rotate(360deg)";
+              }, 50);
+              projectiles.push({
+                isGasExplosion: true,
+                lifetime: 0.55,
+                el: bomb,
+                a,
+                groupB,
+                targetEnemy: farthest,
+                targetX: farthest.x,
+                targetY: farthest.y
+              });
+            } else {
+              a.skillCd = 1;
+            }
+          } else if (a.activeSkill === "brain_freeze") {
+            groupB.forEach((e2) => {
+              if (e2.hp <= 0) return;
+              if (!e2.status) e2.status = {};
+              e2.status.stun = 4;
+              e2.status.brainFreeze = 4;
+              const ice = document.createElement("div");
+              ice.innerHTML = spriteSVG("ice_block", 48);
+              ice.style.position = "absolute";
+              ice.style.left = e2.x - 24 + "px";
+              ice.style.top = e2.y - 24 + "px";
+              ice.style.zIndex = "5";
+              ice.style.pointerEvents = "none";
+              arena.appendChild(ice);
+              setTimeout(() => {
+                if (ice.parentNode) ice.remove();
+              }, 4e3);
+            });
+          } else if (a.activeSkill === "bat_swarm") {
+            let batCount = 0;
+            groupA.forEach((m2) => {
+              if (m2.isBatMinion && m2.hp > 0) batCount++;
+            });
+            const maxSpawn = 8 - batCount;
+            for (let i2 = 0; i2 < maxSpawn; i2++) {
+              const batEl = document.createElement("div");
+              batEl.className = "dg-entity dg-pet";
+              batEl.innerHTML = `
+                                <div class="dg-sprite">${spriteSVG("bat", 48)}</div>
+                            `;
+              const bx = a.x + (Math.random() - 0.5) * 80;
+              const by = a.y + (Math.random() - 0.5) * 80;
+              batEl.style.zIndex = "10";
+              arena.appendChild(batEl);
+              groupA.push({
+                isMinion: true,
+                isBatMinion: true,
+                type: "pet",
+                id: "bat_minion",
+                hp: 10,
+                maxHp: 10,
+                atk: Math.floor(a.atk * 0.5),
+                speed: 120,
+                range: 25,
+                x: bx,
+                y: by,
+                el: batEl,
+                cd: 0,
+                maxCd: 1.5,
+                sourcePet: a
+              });
+            }
+          } else if (a.activeSkill === "shooting_star") {
+            groupA.forEach((ally) => {
+              if (ally.hp <= 0) return;
+              if (!ally.status) ally.status = {};
+              ally.status.rage = 5;
+              ally.el.style.filter = "drop-shadow(0 0 5px yellow)";
+              setTimeout(() => {
+                if (ally.el) ally.el.style.filter = "";
+              }, 5e3);
+            });
+            const count2 = 5 + Math.floor(Math.random() * 4);
+            for (let i2 = 0; i2 < count2; i2++) {
+              const tx = 50 + Math.random() * 700;
+              const ty = 50 + Math.random() * 300;
+              const m2 = document.createElement("div");
+              m2.innerHTML = spriteSVG("meteor", 64);
+              m2.style.position = "absolute";
+              m2.style.left = tx + 300 + "px";
+              m2.style.top = ty - 300 + "px";
+              m2.style.transition = "all 0.5s linear";
+              m2.style.zIndex = "100";
+              arena.appendChild(m2);
+              setTimeout(() => {
+                m2.style.left = tx - 32 + "px";
+                m2.style.top = ty - 32 + "px";
+              }, 50);
+              projectiles.push({
+                isMeteor: true,
+                lifetime: 0.55,
+                el: m2,
+                a,
+                groupB,
+                targetX: tx,
+                targetY: ty
+              });
+            }
+          } else if (a.activeSkill === "overgrowth") {
+            let cx = 0, cy = 0, count2 = 0;
+            groupB.forEach((e2) => {
+              if (e2.hp > 0) {
+                cx += e2.x;
+                cy += e2.y;
+                count2++;
+              }
+            });
+            if (count2 > 0) {
+              cx /= count2;
+              cy /= count2;
+              const vortex = document.createElement("div");
+              vortex.innerHTML = spriteSVG("root_vortex", 96);
+              vortex.style.position = "absolute";
+              vortex.style.left = cx - 48 + "px";
+              vortex.style.top = cy - 48 + "px";
+              vortex.style.animation = "dg-spin 2s linear infinite";
+              vortex.style.zIndex = "0";
+              arena.appendChild(vortex);
+              projectiles.push({
+                isOvergrowth: true,
+                lifetime: 3,
+                el: vortex,
+                a,
+                groupB,
+                x: cx,
+                y: cy
+              });
+            }
+          } else if (a.activeSkill === "blizzard") {
+            const ball = document.createElement("div");
+            ball.style.position = "absolute";
+            ball.style.width = "60px";
+            ball.style.height = "60px";
+            ball.style.borderRadius = "50%";
+            ball.style.background = "radial-gradient(circle at 35% 30%, #eef6ff, #aacfea)";
+            ball.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
+            ball.style.zIndex = "40";
+            arena.appendChild(ball);
+            const targets = groupB.filter((e2) => e2.hp > 0);
+            let target = targets[Math.floor(Math.random() * targets.length)];
+            if (!target) target = { x: a.x + 100, y: a.y };
+            const angle = Math.atan2(target.y - a.y, target.x - a.x);
+            const speed = 400;
+            const vx = Math.cos(angle) * speed;
+            const vy = Math.sin(angle) * speed;
+            projectiles.push({
+              isSnowball: true,
+              lifetime: 10,
+              bounces: 0,
+              vx,
+              vy,
+              x: a.x,
+              y: a.y,
+              hitTargets: /* @__PURE__ */ new Set(),
+              rightBound: arenaRect.width - 30,
+              bottomBound: arenaRect.height - 30,
+              el: ball,
+              a,
+              groupB
+            });
+          }
+        }
       }
       if (closest.dx < -1 && a.type === "pet") a.el.classList.add("flip");
       else if (closest.dx > 1 && a.type === "pet") a.el.classList.remove("flip");
       if (closest.dx > 1 && a.type === "enemy") a.el.classList.add("flip");
       else if (closest.dx < -1 && a.type === "enemy") a.el.classList.remove("flip");
       let isRanged = a.range >= 80 || a.ai === "ranged";
-      let inRange = closest.dist <= a.range || a.skill === "heal" && closest.dist <= 10;
       let baseRange = a.range;
       if (a.type === "pet" && PET_STATS2[a.id]) baseRange = PET_STATS2[a.id].range;
       if (a.type === "enemy") {
         const en2 = ENEMY_TYPES.find((e2) => e2.id === a.id);
         if (en2) baseRange = en2.range;
       }
+      if (isDashing) baseRange = 25;
+      let inRange = closest.dist <= baseRange || a.skill === "heal" && closest.dist <= 10;
       let tooClose = isRanged && closest.dist < baseRange * 0.4 && closest.b.type !== a.type;
       if (a.panic > 0) a.panic -= dt2;
       if (a.panic > 0 && !isRooted) {
         a.el.classList.add("walk");
-        const arenaRect = arena.getBoundingClientRect();
         const speed = a.speed * speedMult * dt2;
         let cx = arenaRect.width / 2 - a.x;
         let cy = arenaRect.height / 2 - a.y;
@@ -11195,7 +12033,6 @@ function updateEntities(groupA, groupB, dt2) {
         a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
       } else if (tooClose && !isRooted) {
         a.el.classList.add("walk");
-        const arenaRect = arena.getBoundingClientRect();
         const speed = a.speed * speedMult * dt2;
         let kx = -(closest.dx / closest.dist);
         let ky = -(closest.dy / closest.dist);
@@ -11235,13 +12072,31 @@ function updateEntities(groupA, groupB, dt2) {
           a.x += closest.dx / closest.dist * speed;
           a.y += closest.dy / closest.dist * speed;
         }
-        const arenaRect = arena.getBoundingClientRect();
         a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
         a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
         a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
       }
       if (inRange) {
-        if (a.cd <= 0) {
+        if (a.cd <= 0 || isDashing) {
+          if (isDashing) {
+            a.status.dashing = false;
+            const target = closest.b;
+            const dmg = a.atk * 2;
+            target.hp -= dmg;
+            spawnDmg(target, -dmg);
+            let kbDx = closest.dx / closest.dist;
+            let kbDy = closest.dy / closest.dist;
+            if (!target.status) target.status = {};
+            target.status.stun = 2;
+            target.kb = { dx: kbDx, dy: kbDy, time: 0.3, speed: 400 };
+            const boom = document.createElement("div");
+            boom.className = "dg-boom-effect";
+            boom.style.left = target.x + "px";
+            boom.style.top = target.y + "px";
+            arena.appendChild(boom);
+            setTimeout(() => boom.remove(), 400);
+            return;
+          }
           a.cd = a.maxCd / atkSpdMult;
           a.el.classList.add("attack");
           setTimeout(() => {
@@ -11304,6 +12159,16 @@ function updateEntities(groupA, groupB, dt2) {
           } else {
             closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
             applyEffect(a, closest.b, groupA, targetGroup);
+            if (a.isBatMinion) {
+              const realPets = groupA.filter((p2) => p2.type === "pet" && !p2.isBatMinion && p2.hp > 0);
+              const ally = realPets[Math.floor(Math.random() * realPets.length)];
+              if (ally) {
+                ally.hp = Math.min(ally.maxHp, ally.hp + a.atk);
+                spawnDmg(ally, a.atk, "heal");
+              }
+              a.hp = 0;
+              spawnDmg(a, -999);
+            }
           }
         }
       }
@@ -11317,6 +12182,9 @@ function endDungeon(isWin) {
   save();
   projectiles.forEach((p2) => p2.el.remove());
   projectiles = [];
+  team.forEach((p2) => {
+    if (p2.isBatMinion && p2.el) p2.el.remove();
+  });
   const surrenderBtn = $id("dg-surrender-btn");
   if (surrenderBtn) surrenderBtn.style.display = "none";
   const arena = $id("dg-arena");
@@ -11362,6 +12230,9 @@ function showWaveRewards(isLoaded = false) {
   if (!isLoaded) {
     projectiles.forEach((p2) => p2.el.remove());
     projectiles = [];
+    team.forEach((p2) => {
+      if (p2.isBatMinion && p2.el) p2.el.remove();
+    });
     const isBoss = currentWave % 10 === 0;
     const waveGold = Math.round(500 * Math.pow(1.12, currentWave - 1)) * (isBoss ? 3 : 1);
     const baseHomeGold = (200 + currentWave * 50) * (isBoss ? 3 : 1);
@@ -11378,9 +12249,12 @@ function showWaveRewards(isLoaded = false) {
       const pct = Math.max(0, p2.hp / p2.maxHp) * 100;
       p2.el.querySelector(".dg-hp-fill").style.width = pct + "%";
       p2.status = {};
-      if (!p2.upgrades) p2.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0, dodge: 0 };
+      if (!p2.upgrades) p2.upgrades = { hp: 0, atk: 0, aspd: 0, spd: 0, critR: 0, critD: 0, range: 0, dodge: 0, skillCdR: 0 };
       const baseStat = PET_STATS2[p2.id] || PET_STATS2.default;
       p2.maxCd = Math.max(0.15, baseStat.cd * Math.pow(0.92, p2.upgrades.aspd || 0));
+      if (baseStat.maxSkillCd) {
+        p2.maxSkillCd = baseStat.maxSkillCd * (1 - (p2.upgrades.skillCdR || 0) * 0.05);
+      }
       if (getActiveCookingBuffs) {
         let spdM = 1;
         getActiveCookingBuffs().forEach((b2) => {
@@ -11428,6 +12302,7 @@ function showWaveRewards(isLoaded = false) {
         range: p2.range,
         maxCd: p2.maxCd,
         upgrades: { ...p2.upgrades },
+        _cookBuffApplied: p2._cookBuffApplied,
         type: p2.type,
         skill: p2.skill,
         ai: p2.ai,
@@ -11504,6 +12379,9 @@ function showWaveRewards(isLoaded = false) {
       if (PET_STATS2[selectedPet.id] && PET_STATS2[selectedPet.id].range > 60) {
         stats.push({ id: "range", name: "T\u1EA7m \u0110\xE1nh (+5%)", val: Math.round(selectedPet.range), lv: u2.range || 0, cost: calc(70, u2.range || 0), forceCanBuy: selectedPet.range < 400 });
       }
+      if (selectedPet.maxSkillCd > 0) {
+        stats.push({ id: "skillCdR", name: "Gi\u1EA3m H\u1ED3i Chi\xEAu (+5%)", val: selectedPet.maxSkillCd.toFixed(1) + "s", lv: u2.skillCdR || 0, cost: Math.floor(1e3 * Math.pow(1.5, u2.skillCdR || 0)), forceCanBuy: (u2.skillCdR || 0) < 10 });
+      }
       stats.push(
         { id: "heal_pet", name: "H\u1ED3i M\xE1u (Full)", val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: "", cost: healPetCost, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
         { id: "heal_team", name: "H\u1ED3i M\xE1u Team (Full)", val: "T\u1EA5t c\u1EA3", lv: "", cost: healTeamCost, forceCanBuy: hpMissingTeam > 0 }
@@ -11567,6 +12445,9 @@ function showWaveRewards(isLoaded = false) {
           if (statId === "range") {
             p2.upgrades.range = (p2.upgrades.range || 0) + 1;
           }
+          if (statId === "skillCdR") {
+            p2.upgrades.skillCdR = (p2.upgrades.skillCdR || 0) + 1;
+          }
           const stat = PET_STATS2[p2.id] || PET_STATS2.default;
           const oldMax = p2.maxHp > 0 ? p2.maxHp : 1;
           const hpPercent = p2.hp / oldMax;
@@ -11576,6 +12457,9 @@ function showWaveRewards(isLoaded = false) {
           p2.speed = Math.round(stat.speed * Math.pow(1.05, p2.upgrades.spd || 0));
           p2.range = Math.round(stat.range * Math.pow(1.05, p2.upgrades.range || 0));
           p2.maxCd = Math.max(0.15, stat.cd * Math.pow(0.92, p2.upgrades.aspd || 0));
+          if (stat.maxSkillCd) {
+            p2.maxSkillCd = stat.maxSkillCd * (1 - (p2.upgrades.skillCdR || 0) * 0.05);
+          }
           if (getActiveCookingBuffs && p2._cookBuffApplied) {
             const buffs = getActiveCookingBuffs();
             if (buffs.length > 0) {
@@ -11628,7 +12512,7 @@ function nextWaveSequence(overlay) {
   });
   startWave();
 }
-var isDungeonOpen, phase, gameLoopId, lastTime, team, enemies, projectiles, currentWave, totalGold, shopGold, PET_STATS2, ENEMY_TYPES, fullTeam;
+var isDungeonOpen, phase, gameLoopId, lastTime, team, enemies, projectiles, arenaEl, _hudDirty, currentWave, totalGold, shopGold, PET_STATS2, ENEMY_TYPES, fullTeam;
 var init_dungeon = __esm({
   "src/dungeon.js"() {
     init_store();
@@ -11642,36 +12526,38 @@ var init_dungeon = __esm({
     team = [];
     enemies = [];
     projectiles = [];
+    arenaEl = null;
+    _hudDirty = false;
     currentWave = 1;
     totalGold = 0;
     shopGold = 0;
     PET_STATS2 = {
       // HP Slime Xanh: 130→150 (thêm ngầm +10% giáp)
-      slime: { name: "Slime Xanh", desc: "Chi\u1EBFn binh c\xE2n b\u1EB1ng, c\xF3 gi\xE1p n\u1ED9i t\u1EA1ng gi\u1EA3m 10% s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o.", hp: 150, atk: 12, range: 40, speed: 40, cd: 1, armor: 0.1 },
-      octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "\u0110\xE1nh nhanh th\u1EAFng nhanh. \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao (t\u1ED1i \u0111a +50%).", hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
-      slimePink: { name: "Slime H\u1ED3ng", desc: "H\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu cho \u0111\u1ED3ng minh y\u1EBFu nh\u1EA5t.", hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: "heal" },
-      peach_soda: { name: "Soda \u0110\xE0o", desc: "\u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay (s\xE1t th\u01B0\u01A1ng gi\u1EA3m 20% qua m\u1ED7i m\u1EE5c ti\xEAu).", hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
+      slime: { name: "Slime Xanh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Gi\u1EA3m 10% s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o.<br><b>Ch\u1EE7 \u0111\u1ED9ng (8s):</b> L\u01B0\u1EDBt nhanh h\xFAc v\u0103ng v\xE0 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch.", hp: 150, atk: 12, range: 40, speed: 40, cd: 1, armor: 0.1, activeSkill: "dash_knockup", maxSkillCd: 8 },
+      octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao (t\u1ED1i \u0111a +50%).<br><b>Ch\u1EE7 \u0111\u1ED9ng (10s):</b> B\xE3o x\xFAc tu g\xE2y s\xE1t th\u01B0\u01A1ng v\xE0 \u0111\u1EA9y l\xF9i nh\u1EB9 xung quanh trong 3s.", hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: "frenzy", activeSkill: "tentacle_storm", maxSkillCd: 10 },
+      slimePink: { name: "Slime H\u1ED3ng", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh th\u01B0\u1EDDng h\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> H\u1ED3i 30% m\xE1u t\u1ED1i \u0111a cho to\xE0n \u0111\u1ED9i.", hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: "heal", activeSkill: "burst_heal", maxSkillCd: 12 },
+      peach_soda: { name: "Soda \u0110\xE0o", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.<br><b>Ch\u1EE7 \u0111\u1ED9ng (14s):</b> N\xE9m bom s\xF4-\u0111a h\u1EA5t tung v\xE0 g\xE2y 250% ATK di\u1EC7n r\u1ED9ng.", hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: "pierce", activeSkill: "gas_explosion", maxSkillCd: 14 },
       // Bạch Tuộc Kem: stun 20%→25%
-      octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "25% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.", hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: "stun" },
-      jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "X\u1EA1 th\u1EE7: B\u1EAFn c\xE0ng xa s\xE1t th\u01B0\u01A1ng c\xE0ng l\u1EDBn (t\u1ED1i \u0111a x2 \u1EDF t\u1EA7m xa nh\u1EA5t).", hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: "sniper" },
+      octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> 25% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.<br><b>Ch\u1EE7 \u0111\u1ED9ng (18s):</b> \u0110\xF3ng b\u0103ng to\xE0n b\u1ED9 k\u1EBB \u0111\u1ECBch tr\xEAn b\u1EA3n \u0111\u1ED3 trong 4 gi\xE2y. Qu\xE1i b\u1ECB \u0111\xF3ng b\u0103ng nh\u1EADn th\xEAm 20% s\xE1t th\u01B0\u01A1ng.", hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: "stun", activeSkill: "brain_freeze", maxSkillCd: 18 },
+      jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> X\u1EA1 th\u1EE7 t\u1EA7m xa.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> B\u1EAFn ra v\u0169ng \u0111\u1ED9c g\xE2y s\xE1t th\u01B0\u01A1ng theo th\u1EDDi gian.", hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: "sniper", activeSkill: "poison_puddle", maxSkillCd: 12 },
       // Bé Bí Ẩn: lifesteal 50%→40%
-      mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "H\u1ED3i m\xE1u cho b\u1EA3n th\xE2n b\u1EB1ng 40% s\xE1t th\u01B0\u01A1ng g\xE2y ra.", hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: "lifesteal" },
+      mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> H\xFAt m\xE1u b\u1EB1ng 40% s\xE1t th\u01B0\u01A1ng g\xE2y ra.<br><b>Ch\u1EE7 \u0111\u1ED9ng (16s):</b> G\u1ECDi t\u1ED1i \u0111a 8 con d\u01A1i t\u1EF1 \u0111\u1ED9ng c\u1EAFn qu\xE1i r\u1ED3i hi sinh \u0111\u1EC3 h\u1ED3i m\xE1u cho \u0111\u1ED3ng minh ng\u1EABu nhi\xEAn.", hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: "lifesteal", activeSkill: "bat_swarm", maxSkillCd: 16 },
       // Ma Trắng: hp 80→110, atk 45→40, dodge gốc 15%→25%
-      ghostBlob: { name: "Ma Tr\u1EAFng", desc: "S\xE1t th\u1EE7: Lu\xF4n nh\u1EAFm v\xE0o k\u1EBB th\xF9 xa nh\u1EA5t. N\xE9 tr\xE1nh cao.", hp: 110, atk: 40, range: 40, speed: 100, cd: 1.2, skill: "assassin" },
+      ghostBlob: { name: "Ma Tr\u1EAFng", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> S\xE1t th\u1EE7 \xE1p s\xE1t.<br><b>Ch\u1EE7 \u0111\u1ED9ng (10s):</b> T\xE0ng h\xECnh trong 4s (kh\xF4ng b\u1ECB nh\u1EAFm m\u1EE5c ti\xEAu).", hp: 110, atk: 40, range: 40, speed: 100, cd: 1.2, skill: "assassin", activeSkill: "invisible", maxSkillCd: 10 },
       // Quỷ Nhỏ: hp 70→120, atk 50→45, + giảm 15% DMG nhận
-      impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "\u0110\xE1nh lan: G\xE2y s\xE1t th\u01B0\u01A1ng AoE xung quanh m\u1EE5c ti\xEAu. Gi\u1EA3m 15% s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o.", hp: 120, atk: 45, range: 40, speed: 60, cd: 1, skill: "cleave", armor: 0.15 },
-      angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "H\u1ED3i m\xE1u di\u1EC7n r\u1ED9ng cho c\xE1c \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 140, atk: 12, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal" },
-      starBell: { name: "Chu\xF4ng Sao", desc: "T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.", hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: "buff_atk" },
+      impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xE1nh lan AoE.<br><b>Ch\u1EE7 \u0111\u1ED9ng (14s):</b> Lao t\u1EDBi ch\xE9m 1 \u0111\xF2n ch\xED m\u1EA1ng 500% s\xE1t th\u01B0\u01A1ng.", hp: 120, atk: 45, range: 40, speed: 60, cd: 1, skill: "cleave", armor: 0.15, activeSkill: "nuke_crit", maxSkillCd: 14 },
+      angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> H\u1ED3i m\xE1u AoE.<br><b>Ch\u1EE7 \u0111\u1ED9ng (18s):</b> Ban tr\u1EA1ng th\xE1i B\u1EA5t t\u1EED cho to\xE0n \u0111\u1ED9i trong 3s.", hp: 140, atk: 12, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal", activeSkill: "invulnerable", maxSkillCd: 18 },
+      starBell: { name: "Chu\xF4ng Sao", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.<br><b>Ch\u1EE7 \u0111\u1ED9ng (20s):</b> M\u01B0a sao b\u0103ng ng\u1EABu nhi\xEAn t\u1EA1o c\xE1c v\xF9ng l\u1EEDa t\u1ED3n t\u1EA1i 5s, thi\xEAu \u0111\u1ED1t 10% HP t\u1ED1i \u0111a m\u1ED7i gi\xE2y.", hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: "buff_atk", activeSkill: "shooting_star", maxSkillCd: 20 },
       // Kẹo Dẻo Mây: hp 250→320, cd 2.0→1.5, + 20% giáp khi Taunt
-      cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "Khi\xEAu kh\xEDch: Bu\u1ED9c k\u1EBB \u0111\u1ECBch t\u1EA5n c\xF4ng m\xECnh. Nh\u1EADn 20% gi\xE1p khi \u0111ang Taunt.", hp: 320, atk: 10, range: 40, speed: 30, cd: 1.5, skill: "taunt" },
+      cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Khi\xEAu kh\xEDch qu\xE1i.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> B\u1EADt khi\xEAn h\u1EA5p th\u1EE5 s\xE1t th\u01B0\u01A1ng th\xE0nh M\xE1u.", hp: 320, atk: 10, range: 40, speed: 30, cd: 1.5, skill: "taunt", activeSkill: "shield_wall", maxSkillCd: 15 },
       // Mầm Sương: root 25%→30%
-      dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "30% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.", hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: "root" },
+      dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> 30% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> T\u1EA1o l\u1ED1c r\u1EC5 c\xE2y gom t\u1EA5t c\u1EA3 qu\xE1i xung quanh l\u1EA1i m\u1ED9t c\u1EE5c trong 3s.", hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: "root", activeSkill: "overgrowth", maxSkillCd: 15 },
       // Lăng Kính: atk 25→20
-      prismBlob: { name: "L\u0103ng K\xEDnh", desc: "B\u1EAFn 3 tia s\xE1ng c\xF9ng l\xFAc (m\u1ED7i tia 50% ATK).", hp: 100, atk: 20, range: 140, speed: 40, cd: 1.4, skill: "multishot" },
-      penguin: { name: "C\xE1nh C\u1EE5t", desc: "\u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m 30% t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze" },
+      prismBlob: { name: "L\u0103ng K\xEDnh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> B\u1EAFn 3 tia s\xE1ng.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> B\u1EAFn Laser xuy\xEAn th\u1EA5u to\xE0n m\xE0n h\xECnh.", hp: 100, atk: 20, range: 140, speed: 40, cd: 1.4, skill: "multishot", activeSkill: "laser_beam", maxSkillCd: 15 },
+      penguin: { name: "C\xE1nh C\u1EE5t", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m 30% t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh c\u1EE7a qu\xE1i.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> S\xFAt m\u1ED9t qu\u1EA3 c\u1EA7u tuy\u1EBFt l\u0103n d\u1ED9i t\u01B0\u1EDDng 5 l\u1EA7n, g\xE2y 200% s\xE1t th\u01B0\u01A1ng v\xE0 \u0111\xF3ng b\u0103ng 3 gi\xE2y.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze", activeSkill: "blizzard", maxSkillCd: 15 },
       // Naoya: maxSkillCd 10s→12s
-      naoyaSlime: { name: "Naoya", desc: "K\u1EF9 n\u0103ng ch\u1EE7 \u0111\u1ED9ng (12s): \u0110\u1EA7u X\u1EA1 Ch\xFA Ph\xE1p - L\u01B0\u1EDBt 24 khung h\xECnh c\xF4ng k\xEDch to\xE0n map v\xE0 \u0111\xF3ng b\u0103ng qu\xE1i 1s.", hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: "projection_sorcery", maxSkillCd: 12 },
-      default: { name: "Pet V\xF4 Danh", desc: "Kh\xF4ng c\xF3 k\u1EF9 n\u0103ng \u0111\u1EB7c bi\u1EC7t.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
+      naoyaSlime: { name: "Naoya", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> \u0110\u1EA7u X\u1EA1 Ch\xFA Ph\xE1p - L\u01B0\u1EDBt 24 khung h\xECnh c\xF4ng k\xEDch to\xE0n map v\xE0 \u0111\xF3ng b\u0103ng qu\xE1i 1s.", hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: "projection_sorcery", maxSkillCd: 12 },
+      default: { name: "Pet V\xF4 Danh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
     };
     ENEMY_TYPES = [
       { id: "douya", name: "M\u1EA7m Non", desc: "L\xEDnh b\u1EA7y \u0111\xE0n.", hp: 50, atk: 12, range: 40, speed: 45, cd: 0.8, ai: "melee", sp: "sprout", gold: 2 },

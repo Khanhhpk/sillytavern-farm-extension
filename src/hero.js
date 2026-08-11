@@ -1682,12 +1682,12 @@ export function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
 
     // 1. Phủ màn Cinematic tĩnh (Letterbox + Grayscale Time-Stop)
     const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:absolute; inset:0; z-index:20; opacity:0; transition:opacity 0.3s; background:radial-gradient(circle, transparent 20%, rgba(50,0,0,0.7) 100%); backdrop-filter:grayscale(1) contrast(1.2);';
+    overlay.style.cssText = 'position:absolute; inset:0; z-index:20; opacity:0; transition:opacity 0.3s; background:radial-gradient(circle, transparent 20%, rgba(0,0,0,0.6) 100%); pointer-events:none;';
     
     // Viền phim rạp trên dưới
     const topBar = document.createElement('div');
     const botBar = document.createElement('div');
-    const barStyle = 'position:absolute; left:0; right:0; height:18%; background:#000; z-index:21; transition:transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);';
+    const barStyle = 'position:absolute; left:0; right:0; height:18%; background:#000; z-index:21; transition:transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); pointer-events:none;';
     topBar.style.cssText = barStyle + 'top:0; transform:translateY(-100%);';
     botBar.style.cssText = barStyle + 'bottom:0; transform:translateY(100%);';
 
@@ -1752,7 +1752,7 @@ export function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
         ghost.style.position = 'absolute';
         ghost.style.zIndex = '24';
         ghost.style.opacity = '0.6';
-        ghost.style.filter = 'grayscale(1) brightness(1.5)';
+        ghost.style.filter = 'brightness(1.5)';
         ghost.style.pointerEvents = 'none';
         scene.appendChild(ghost);
         setTimeout(() => ghost.remove(), 100);
