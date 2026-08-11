@@ -1293,7 +1293,7 @@ function updateEntities(groupA, groupB, dt) {
                                 spawnDmg(ally, heal, 'heal');
                                 const p = document.createElement('div');
                                 p.className = 'dg-heal-particle';
-                                p.textContent = '+';
+                                p.innerHTML = spriteSVG('heal_cross', 2);
                                 p.style.left = ally.x + 'px';
                                 p.style.top = ally.y + 'px';
                                 arena.appendChild(p);
