@@ -11061,6 +11061,153 @@ function combatLoop() {
         }
         return true;
       }
+      if (p2.isTentacleStorm) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          return false;
+        }
+        p2.x = p2.a.x;
+        p2.y = p2.a.y;
+        p2.el.style.left = p2.x - 40 + "px";
+        p2.el.style.top = p2.y - 40 + "px";
+        if (!p2.nextTick || p2.lifetime < p2.nextTick) {
+          p2.nextTick = p2.lifetime - 0.2;
+          p2.groupB.forEach((e2) => {
+            if (e2.hp > 0 && Math.hypot(e2.x - p2.x, e2.y - p2.y) < 80) {
+              const dmg = Math.max(1, Math.floor(p2.a.atk * 0.3));
+              e2.hp -= dmg;
+              spawnDmg(e2, -dmg);
+              e2.x += e2.x - p2.x > 0 ? 5 : -5;
+              e2.y += e2.y - p2.y > 0 ? 5 : -5;
+            }
+          });
+        }
+        return true;
+      }
+      if (p2.isGasExplosion || p2.isMeteor) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          const boom = document.createElement("div");
+          boom.className = "dg-boom-effect";
+          boom.style.width = p2.isMeteor ? "80px" : "120px";
+          boom.style.height = p2.isMeteor ? "80px" : "120px";
+          boom.style.left = p2.targetX + "px";
+          boom.style.top = p2.targetY + "px";
+          boom.style.background = p2.isMeteor ? "radial-gradient(circle, rgba(255,200,0,1) 0%, rgba(255,100,0,0) 70%)" : "radial-gradient(circle, rgba(255,100,100,1) 0%, rgba(255,50,50,0) 70%)";
+          arena.appendChild(boom);
+          setTimeout(() => boom.remove(), 400);
+          const radius = p2.isMeteor ? 80 : 120;
+          p2.groupB.forEach((e2) => {
+            if (e2.hp > 0 && Math.hypot(e2.x - p2.targetX, e2.y - p2.targetY) < radius) {
+              if (p2.isGasExplosion) {
+                const dmg = p2.a.atk * 4;
+                e2.hp -= dmg;
+                spawnDmg(e2, -dmg, "crit");
+                e2.x += e2.x - p2.targetX > 0 ? 10 : -10;
+                e2.y -= 20;
+              } else {
+                const dmg = p2.a.atk * 2;
+                e2.hp -= dmg;
+                spawnDmg(e2, -dmg);
+                if (!e2.status) e2.status = {};
+                e2.status.stunned = 1;
+              }
+            }
+          });
+          return false;
+        }
+        return true;
+      }
+      if (p2.isBat) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          return false;
+        }
+        if (!p2.target || p2.target.hp <= 0) {
+          let closest = null, minDist = Infinity;
+          p2.groupB.forEach((e2) => {
+            if (e2.hp > 0) {
+              const d = Math.hypot(e2.x - p2.x, e2.y - p2.y);
+              if (d < minDist) {
+                minDist = d;
+                closest = e2;
+              }
+            }
+          });
+          p2.target = closest;
+        }
+        if (p2.target) {
+          const dx2 = p2.target.x - p2.x;
+          const dy2 = p2.target.y - p2.y;
+          const dist2 = Math.max(0.1, Math.hypot(dx2, dy2));
+          if (dist2 < 15) {
+            const dmg = p2.a.atk;
+            p2.target.hp -= dmg;
+            spawnDmg(p2.target, -dmg);
+            const ally = groupA[Math.floor(Math.random() * groupA.length)];
+            if (ally && ally.hp > 0) {
+              ally.hp = Math.min(ally.maxHp, ally.hp + dmg);
+              spawnDmg(ally, dmg, "heal");
+            }
+            p2.el.remove();
+            return false;
+          }
+          const move = p2.speed * stepDt;
+          p2.dx = p2.dx * 0.9 + dx2 / dist2 * move * 0.3;
+          p2.dy = p2.dy * 0.9 + dy2 / dist2 * move * 0.3;
+          p2.x += p2.dx;
+          p2.y += p2.dy;
+          p2.el.style.transform = `translate3d(${p2.x - 16}px, ${p2.y - 16}px, 0) scaleX(${p2.dx > 0 ? -1 : 1})`;
+        } else {
+          p2.x += p2.dx * stepDt;
+          p2.y += p2.dy * stepDt;
+          p2.el.style.transform = `translate3d(${p2.x - 16}px, ${p2.y - 16}px, 0) scaleX(${p2.dx > 0 ? -1 : 1})`;
+        }
+        return true;
+      }
+      if (p2.isOvergrowth) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          return false;
+        }
+        p2.groupB.forEach((e2) => {
+          if (e2.hp > 0) {
+            const dx2 = p2.x - e2.x;
+            const dy2 = p2.y - e2.y;
+            const d = Math.hypot(dx2, dy2);
+            if (d < 150 && d > 10) {
+              e2.x += dx2 / d * 80 * stepDt;
+              e2.y += dy2 / d * 80 * stepDt;
+            }
+          }
+        });
+        return true;
+      }
+      if (p2.isBlizzard) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          return false;
+        }
+        p2.x += 150 * stepDt;
+        if (!p2.nextTick || p2.lifetime < p2.nextTick) {
+          p2.nextTick = p2.lifetime - 0.5;
+          p2.groupB.forEach((e2) => {
+            if (e2.hp > 0 && Math.abs(e2.x - p2.x) < 200) {
+              if (!e2.status) e2.status = {};
+              e2.status.freeze = 2;
+              const dmg = Math.max(1, Math.floor(p2.a.atk * 0.5));
+              e2.hp -= dmg;
+              spawnDmg(e2, -dmg, "poison");
+            }
+          });
+        }
+        return true;
+      }
       if (!p2.target || p2.target.hp <= 0) {
         p2.el.remove();
         return false;
@@ -11253,9 +11400,9 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     });
   }
 }
-function updateEntities(groupA, groupB, dt2) {
+function updateEntities(groupA2, groupB, dt2) {
   const arena = $id("dg-arena");
-  groupA.forEach((a) => {
+  groupA2.forEach((a) => {
     if (a.hp <= 0) return;
     if (a.kb && a.kb.time > 0) {
       a.kb.time -= dt2;
@@ -11266,7 +11413,7 @@ function updateEntities(groupA, groupB, dt2) {
       a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
       a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
       let hitOther = false;
-      groupA.forEach((other) => {
+      groupA2.forEach((other) => {
         if (!hitOther && other !== a && other.hp > 0 && Math.hypot(other.x - a.x, other.y - a.y) < 40) {
           if (!other.status) other.status = {};
           if (!other.status.stun) {
@@ -11355,7 +11502,7 @@ function updateEntities(groupA, groupB, dt2) {
     let taunters = groupB.filter((b2) => b2.hp > 0 && b2.status && b2.status.taunt > 0 && !(b2.status.invis > 0));
     let targetGroup = taunters.length > 0 ? taunters : groupB.filter((b2) => !(b2.status && b2.status.invis > 0));
     if (a.skill === "heal" || a.skill === "aoe_heal") {
-      targetGroup = groupA;
+      targetGroup = groupA2;
       let minHpPct = 1;
       targetGroup.forEach((ally) => {
         if (ally.hp <= 0) return;
@@ -11467,7 +11614,7 @@ function updateEntities(groupA, groupB, dt2) {
               if (a.el) a.el.classList.remove("dg-shield-wall");
             }, 3e3);
           } else if (a.activeSkill === "burst_heal") {
-            groupA.forEach((ally) => {
+            groupA2.forEach((ally) => {
               if (ally.hp > 0) {
                 const heal = ally.maxHp * 0.3;
                 ally.hp = Math.min(ally.maxHp, ally.hp + heal);
@@ -11482,7 +11629,7 @@ function updateEntities(groupA, groupB, dt2) {
               }
             });
           } else if (a.activeSkill === "invulnerable") {
-            groupA.forEach((ally) => {
+            groupA2.forEach((ally) => {
               if (ally.hp > 0) {
                 if (!ally.status) ally.status = {};
                 ally.status.invuln = 3;
@@ -11573,6 +11720,206 @@ function updateEntities(groupA, groupB, dt2) {
               a,
               x: a.x,
               y: a.y
+            });
+          } else if (a.activeSkill === "tentacle_storm") {
+            const storm = document.createElement("div");
+            storm.style.position = "absolute";
+            storm.style.width = "80px";
+            storm.style.height = "80px";
+            storm.style.left = a.x - 40 + "px";
+            storm.style.top = a.y - 40 + "px";
+            storm.style.pointerEvents = "none";
+            storm.style.zIndex = "0";
+            for (let i2 = 0; i2 < 4; i2++) {
+              const t2 = document.createElement("div");
+              t2.style.position = "absolute";
+              t2.style.left = "32px";
+              t2.style.top = "0";
+              t2.style.transformOrigin = "50% 40px";
+              t2.style.transform = `rotate(${i2 * 90}deg)`;
+              t2.innerHTML = spriteSVG("tentacle", 2);
+              storm.appendChild(t2);
+            }
+            storm.style.animation = "dg-spin 0.5s linear infinite";
+            arena.appendChild(storm);
+            projectiles.push({
+              isTentacleStorm: true,
+              lifetime: 3,
+              maxLifetime: 3,
+              el: storm,
+              a,
+              groupB,
+              x: a.x,
+              y: a.y,
+              nextTick: 0.2
+            });
+          } else if (a.activeSkill === "gas_explosion") {
+            let farthest = null, maxD = -1;
+            groupB.forEach((e2) => {
+              if (e2.hp <= 0) return;
+              const d = Math.hypot(e2.x - a.x, e2.y - a.y);
+              if (d > maxD) {
+                maxD = d;
+                farthest = e2;
+              }
+            });
+            if (farthest) {
+              const bomb = document.createElement("div");
+              bomb.innerHTML = spriteSVG("soda_bomb", 2);
+              bomb.style.position = "absolute";
+              bomb.style.left = a.x + "px";
+              bomb.style.top = a.y + "px";
+              bomb.style.transition = "all 0.5s linear";
+              bomb.style.zIndex = "100";
+              arena.appendChild(bomb);
+              setTimeout(() => {
+                bomb.style.left = farthest.x + "px";
+                bomb.style.top = farthest.y + "px";
+                bomb.style.transform = "rotate(360deg)";
+              }, 50);
+              projectiles.push({
+                isGasExplosion: true,
+                lifetime: 0.55,
+                el: bomb,
+                a,
+                groupB,
+                targetX: farthest.x,
+                targetY: farthest.y
+              });
+            } else {
+              a.skillCd = 1;
+            }
+          } else if (a.activeSkill === "brain_freeze") {
+            groupB.forEach((e2) => {
+              if (e2.hp <= 0) return;
+              if (!e2.status) e2.status = {};
+              e2.status.stunned = 4;
+              e2.status.brainFreeze = 4;
+              const ice = document.createElement("div");
+              ice.innerHTML = spriteSVG("ice_block", 2);
+              ice.style.position = "absolute";
+              ice.style.left = e2.x - 16 + "px";
+              ice.style.top = e2.y - 16 + "px";
+              ice.style.zIndex = "5";
+              ice.style.pointerEvents = "none";
+              arena.appendChild(ice);
+              setTimeout(() => {
+                if (ice.parentNode) ice.remove();
+              }, 4e3);
+            });
+          } else if (a.activeSkill === "bat_swarm") {
+            for (let i2 = 0; i2 < 10; i2++) {
+              const bat = document.createElement("div");
+              bat.innerHTML = spriteSVG("bat", 2);
+              bat.style.position = "absolute";
+              bat.style.left = a.x + "px";
+              bat.style.top = a.y + "px";
+              bat.style.zIndex = "10";
+              bat.style.transition = "all 0.2s";
+              arena.appendChild(bat);
+              projectiles.push({
+                isBat: true,
+                lifetime: 5,
+                el: bat,
+                a,
+                groupB,
+                x: a.x,
+                y: a.y,
+                dx: (Math.random() - 0.5) * 50,
+                dy: (Math.random() - 0.5) * 50,
+                speed: 150
+              });
+            }
+          } else if (a.activeSkill === "shooting_star") {
+            groupA2.forEach((ally) => {
+              if (ally.hp <= 0) return;
+              if (!ally.status) ally.status = {};
+              ally.status.rage = 5;
+              ally.el.style.filter = "drop-shadow(0 0 5px yellow)";
+              setTimeout(() => {
+                if (ally.el) ally.el.style.filter = "";
+              }, 5e3);
+            });
+            const count2 = 3 + Math.floor(Math.random() * 3);
+            for (let i2 = 0; i2 < count2; i2++) {
+              const target = groupB[Math.floor(Math.random() * groupB.length)];
+              if (!target || target.hp <= 0) continue;
+              const tx = target.x, ty = target.y;
+              const m2 = document.createElement("div");
+              m2.innerHTML = spriteSVG("meteor", 3);
+              m2.style.position = "absolute";
+              m2.style.left = tx + 300 + "px";
+              m2.style.top = ty - 300 + "px";
+              m2.style.transition = "all 0.5s linear";
+              m2.style.zIndex = "100";
+              arena.appendChild(m2);
+              setTimeout(() => {
+                m2.style.left = tx - 30 + "px";
+                m2.style.top = ty - 30 + "px";
+              }, 50);
+              projectiles.push({
+                isMeteor: true,
+                lifetime: 0.55,
+                el: m2,
+                a,
+                groupB,
+                targetX: tx,
+                targetY: ty
+              });
+            }
+          } else if (a.activeSkill === "overgrowth") {
+            let cx = 0, cy = 0, count2 = 0;
+            groupB.forEach((e2) => {
+              if (e2.hp > 0) {
+                cx += e2.x;
+                cy += e2.y;
+                count2++;
+              }
+            });
+            if (count2 > 0) {
+              cx /= count2;
+              cy /= count2;
+              const vortex = document.createElement("div");
+              vortex.innerHTML = spriteSVG("root_vortex", 4);
+              vortex.style.position = "absolute";
+              vortex.style.left = cx - 32 + "px";
+              vortex.style.top = cy - 32 + "px";
+              vortex.style.animation = "dg-spin 2s linear infinite";
+              vortex.style.zIndex = "0";
+              arena.appendChild(vortex);
+              projectiles.push({
+                isOvergrowth: true,
+                lifetime: 3,
+                el: vortex,
+                a,
+                groupB,
+                x: cx,
+                y: cy
+              });
+            }
+          } else if (a.activeSkill === "blizzard") {
+            const blz = document.createElement("div");
+            blz.innerHTML = spriteSVG("blizzard", 16);
+            blz.style.position = "absolute";
+            blz.style.left = "-250px";
+            blz.style.top = "50px";
+            blz.style.transition = "left 5s linear";
+            blz.style.zIndex = "50";
+            blz.style.opacity = "0.7";
+            arena.appendChild(blz);
+            setTimeout(() => {
+              blz.style.left = "900px";
+            }, 50);
+            projectiles.push({
+              isBlizzard: true,
+              lifetime: 5,
+              maxLifetime: 5,
+              el: blz,
+              a,
+              groupB,
+              x: -250,
+              y: 50,
+              nextTick: 0.5
             });
           }
         }
@@ -11685,7 +12032,7 @@ function updateEntities(groupA, groupB, dt2) {
           if (a.skill === "taunt") {
           }
           if (a.skill === "buff_atk") {
-            groupA.forEach((ally) => {
+            groupA2.forEach((ally) => {
               if (ally.hp > 0 && Math.hypot(ally.x - a.x, ally.y - a.y) < 100) {
                 if (!ally.status) ally.status = {};
                 ally.status.buff_atk = 2;
@@ -11703,7 +12050,7 @@ function updateEntities(groupA, groupB, dt2) {
               atk: a.atk,
               skill: a.skill,
               from: a,
-              fromGroup: groupA,
+              fromGroup: groupA2,
               toGroup: targetGroup,
               speed: 300,
               el: document.createElement("div")
@@ -11733,7 +12080,7 @@ function updateEntities(groupA, groupB, dt2) {
             }
           } else {
             closest.b.incomingDmg = (closest.b.incomingDmg || 0) + a.atk;
-            applyEffect(a, closest.b, groupA, targetGroup);
+            applyEffect(a, closest.b, groupA2, targetGroup);
           }
         }
       }
@@ -12090,27 +12437,27 @@ var init_dungeon = __esm({
     PET_STATS2 = {
       // HP Slime Xanh: 130→150 (thêm ngầm +10% giáp)
       slime: { name: "Slime Xanh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Gi\u1EA3m 10% s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o.<br><b>Ch\u1EE7 \u0111\u1ED9ng (8s):</b> L\u01B0\u1EDBt nhanh h\xFAc v\u0103ng v\xE0 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch.", hp: 150, atk: 12, range: 40, speed: 40, cd: 1, armor: 0.1, activeSkill: "dash_knockup", maxSkillCd: 8 },
-      octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao (t\u1ED1i \u0111a +50%).<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
+      octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao (t\u1ED1i \u0111a +50%).<br><b>Ch\u1EE7 \u0111\u1ED9ng (10s):</b> B\xE3o x\xFAc tu g\xE2y s\xE1t th\u01B0\u01A1ng v\xE0 \u0111\u1EA9y l\xF9i nh\u1EB9 xung quanh trong 3s.", hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: "frenzy", activeSkill: "tentacle_storm", maxSkillCd: 10 },
       slimePink: { name: "Slime H\u1ED3ng", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh th\u01B0\u1EDDng h\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> H\u1ED3i 30% m\xE1u t\u1ED1i \u0111a cho to\xE0n \u0111\u1ED9i.", hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: "heal", activeSkill: "burst_heal", maxSkillCd: 12 },
-      peach_soda: { name: "Soda \u0110\xE0o", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
+      peach_soda: { name: "Soda \u0110\xE0o", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.<br><b>Ch\u1EE7 \u0111\u1ED9ng (14s):</b> N\xE9m bom s\xF4-\u0111a kh\u1ED5ng l\u1ED3 h\u1EA5t tung v\xE0 g\xE2y 400% ATK di\u1EC7n r\u1ED9ng.", hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: "pierce", activeSkill: "gas_explosion", maxSkillCd: 14 },
       // Bạch Tuộc Kem: stun 20%→25%
-      octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> 25% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: "stun" },
+      octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> 25% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.<br><b>Ch\u1EE7 \u0111\u1ED9ng (18s):</b> \u0110\xF3ng b\u0103ng to\xE0n b\u1ED9 k\u1EBB \u0111\u1ECBch tr\xEAn b\u1EA3n \u0111\u1ED3 trong 4 gi\xE2y. Qu\xE1i b\u1ECB \u0111\xF3ng b\u0103ng nh\u1EADn th\xEAm 20% s\xE1t th\u01B0\u01A1ng.", hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: "stun", activeSkill: "brain_freeze", maxSkillCd: 18 },
       jellyfish: { name: "S\u1EE9a Xo\u0103n", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> X\u1EA1 th\u1EE7 t\u1EA7m xa.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> B\u1EAFn ra v\u0169ng \u0111\u1ED9c g\xE2y s\xE1t th\u01B0\u01A1ng theo th\u1EDDi gian.", hp: 90, atk: 30, range: 150, speed: 60, cd: 1.5, skill: "sniper", activeSkill: "poison_puddle", maxSkillCd: 12 },
       // Bé Bí Ẩn: lifesteal 50%→40%
-      mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> H\xFAt m\xE1u b\u1EB1ng 40% s\xE1t th\u01B0\u01A1ng g\xE2y ra.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: "lifesteal" },
+      mystery_blob: { name: "B\xE9 B\xED \u1EA8n", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> H\xFAt m\xE1u b\u1EB1ng 40% s\xE1t th\u01B0\u01A1ng g\xE2y ra.<br><b>Ch\u1EE7 \u0111\u1ED9ng (16s):</b> G\u1ECDi \u0111\xE0n d\u01A1i t\u1ECFa ra c\u1EAFn k\u1EBB \u0111\u1ECBch v\xE0 mang m\xE1u v\u1EC1 h\u1ED3i cho to\xE0n \u0111\u1ED9i.", hp: 110, atk: 18, range: 50, speed: 55, cd: 1.1, skill: "lifesteal", activeSkill: "bat_swarm", maxSkillCd: 16 },
       // Ma Trắng: hp 80→110, atk 45→40, dodge gốc 15%→25%
       ghostBlob: { name: "Ma Tr\u1EAFng", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> S\xE1t th\u1EE7 \xE1p s\xE1t.<br><b>Ch\u1EE7 \u0111\u1ED9ng (10s):</b> T\xE0ng h\xECnh trong 4s (kh\xF4ng b\u1ECB nh\u1EAFm m\u1EE5c ti\xEAu).", hp: 110, atk: 40, range: 40, speed: 100, cd: 1.2, skill: "assassin", activeSkill: "invisible", maxSkillCd: 10 },
       // Quỷ Nhỏ: hp 70→120, atk 50→45, + giảm 15% DMG nhận
       impBlob: { name: "Qu\u1EF7 Nh\u1ECF", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xE1nh lan AoE.<br><b>Ch\u1EE7 \u0111\u1ED9ng (14s):</b> Lao t\u1EDBi ch\xE9m 1 \u0111\xF2n ch\xED m\u1EA1ng 500% s\xE1t th\u01B0\u01A1ng.", hp: 120, atk: 45, range: 40, speed: 60, cd: 1, skill: "cleave", armor: 0.15, activeSkill: "nuke_crit", maxSkillCd: 14 },
       angelBlob: { name: "Thi\xEAn Th\u1EA7n", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> H\u1ED3i m\xE1u AoE.<br><b>Ch\u1EE7 \u0111\u1ED9ng (18s):</b> Ban tr\u1EA1ng th\xE1i B\u1EA5t t\u1EED cho to\xE0n \u0111\u1ED9i trong 3s.", hp: 140, atk: 12, range: 80, speed: 40, cd: 1.2, skill: "aoe_heal", activeSkill: "invulnerable", maxSkillCd: 18 },
-      starBell: { name: "Chu\xF4ng Sao", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: "buff_atk" },
+      starBell: { name: "Chu\xF4ng Sao", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> T\u0103ng 20% s\xE1t th\u01B0\u01A1ng cho \u0111\u1ED3ng minh l\xE2n c\u1EADn.<br><b>Ch\u1EE7 \u0111\u1ED9ng (20s):</b> M\u01B0a sao b\u0103ng g\xE2y cho\xE1ng v\xE0 buff Cu\u1ED3ng n\u1ED9 (x2 t\u1ED1c \u0111\xE1nh) cho to\xE0n \u0111\u1ED9i trong 5s.", hp: 120, atk: 15, range: 90, speed: 40, cd: 1, skill: "buff_atk", activeSkill: "shooting_star", maxSkillCd: 20 },
       // Kẹo Dẻo Mây: hp 250→320, cd 2.0→1.5, + 20% giáp khi Taunt
       cloudMallow: { name: "K\u1EB9o D\u1EBBo M\xE2y", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Khi\xEAu kh\xEDch qu\xE1i.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> B\u1EADt khi\xEAn h\u1EA5p th\u1EE5 s\xE1t th\u01B0\u01A1ng th\xE0nh M\xE1u.", hp: 320, atk: 10, range: 40, speed: 30, cd: 1.5, skill: "taunt", activeSkill: "shield_wall", maxSkillCd: 15 },
       // Mầm Sương: root 25%→30%
-      dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> 30% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: "root" },
+      dewSprout: { name: "M\u1EA7m S\u01B0\u01A1ng", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> 30% t\u1EF7 l\u1EC7 tr\xF3i ch\xE2n k\u1EBB \u0111\u1ECBch trong 2 gi\xE2y.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> T\u1EA1o l\u1ED1c r\u1EC5 c\xE2y gom t\u1EA5t c\u1EA3 qu\xE1i xung quanh l\u1EA1i m\u1ED9t c\u1EE5c trong 3s.", hp: 130, atk: 18, range: 50, speed: 45, cd: 1.2, skill: "root", activeSkill: "overgrowth", maxSkillCd: 15 },
       // Lăng Kính: atk 25→20
       prismBlob: { name: "L\u0103ng K\xEDnh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> B\u1EAFn 3 tia s\xE1ng.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> B\u1EAFn Laser xuy\xEAn th\u1EA5u to\xE0n m\xE0n h\xECnh.", hp: 100, atk: 20, range: 140, speed: 40, cd: 1.4, skill: "multishot", activeSkill: "laser_beam", maxSkillCd: 15 },
-      penguin: { name: "C\xE1nh C\u1EE5t", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m 30% t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh c\u1EE7a qu\xE1i.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze" },
+      penguin: { name: "C\xE1nh C\u1EE5t", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m 30% t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh c\u1EE7a qu\xE1i.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> Th\u1ED5i b\xE3o tuy\u1EBFt gi\u1EA3m 80% t\u1ED1c ch\u1EA1y v\xE0 g\xE2y s\xE1t th\u01B0\u01A1ng li\xEAn t\u1EE5c.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze", activeSkill: "blizzard", maxSkillCd: 15 },
       // Naoya: maxSkillCd 10s→12s
       naoyaSlime: { name: "Naoya", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> \u0110\u1EA7u X\u1EA1 Ch\xFA Ph\xE1p - L\u01B0\u1EDBt 24 khung h\xECnh c\xF4ng k\xEDch to\xE0n map v\xE0 \u0111\xF3ng b\u0103ng qu\xE1i 1s.", hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: "projection_sorcery", maxSkillCd: 12 },
       default: { name: "Pet V\xF4 Danh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
