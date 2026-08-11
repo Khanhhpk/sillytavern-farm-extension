@@ -144,7 +144,7 @@ export function openBlackjackSolo() {
 
 function soloDrawCard(hidden) {
     const s = soloState;
-    if (s.shoeIdx >= s.shoe.length) {
+    if (!s.shoe || s.shoe.length - s.shoeIdx < (s.playerHands.length * 15 + 15)) {
         s.shoe = buildShoe(s.settings.numDecks, Date.now() & 0xffffffff);
         s.shoeIdx = 0;
     }
@@ -218,7 +218,7 @@ function renderSoloActions() {
             </div>`;
         actEl.querySelectorAll('.bj-quick').forEach(b => b.addEventListener('click', () => {
             const inp = All.$id('bj-bet-inp');
-            if (inp) inp.value = String(Math.max(min, Math.floor(coins / Number(b.getAttribute('data-q')))));
+            if (inp) inp.value = String(Math.max(min, Math.floor(Math.min(coins, 100000000) / Number(b.getAttribute('data-q')))));
         }));
         All.$id('bj-deal').addEventListener('click', soloStartRound);
         return;
@@ -299,6 +299,7 @@ function soloStartRound() {
     const inp = All.$id('bj-bet-inp');
     const want = Math.max(0, parseInt(inp ? inp.value : '0') || 0);
     if (want < s.settings.minBet) return bjToast(`Cược tối thiểu ${s.settings.minBet}G`);
+    if (want > 100000000) return bjToast('Hệ thống giới hạn cược tối đa 100,000,000G mỗi ván!');
     if (s.settings.maxBet > 0 && want > s.settings.maxBet) return bjToast(`Cược tối đa ${s.settings.maxBet}G`);
     if (want > coins) return bjToast(`Không đủ vàng (${coins.toLocaleString()}G)`);
 
@@ -388,6 +389,7 @@ function soloStand() { soloNextHand(); }
 function soloDouble() {
     const s = soloState;
     const idx = s.activeHandIdx;
+    if (s.splitAceIdxs.has(idx)) return bjToast('Không thể Double sau khi Split Ace');
     const bet = s.bets[idx];
     if ((ctx.S.coins || 0) < bet) return bjToast('Không đủ vàng Double');
     ctx.S.coins = (ctx.S.coins || 0) - bet;
@@ -445,7 +447,7 @@ function soloRunDealer() {
     const iv = setInterval(() => {
         const total = handTotal(s.dealerHand);
         const soft = isSoft(s.dealerHand);
-        if (total < 17 || (soft && total === 16)) {
+        if (total < 17 || (soft && total === 17)) {
             s.dealerHand.push(soloDrawCard());
             soloRender();
         } else {
@@ -1062,7 +1064,7 @@ function bjHandleRoomAction(fromPid, data) {
         h.bet.splice(idx + 1, 0, h.bet[idx]);
         h.stood.splice(idx + 1, 0, false);
         h.doubled.splice(idx + 1, 0, false);
-        if (sc.rank === 'A') {
+        if (c2.rank === 'A') {
             h.splitAceIdxs = h.splitAceIdxs || [];
             h.splitAceIdxs.push(idx, idx + 1);
             h.stood[idx] = true; h.stood[idx + 1] = true;
@@ -1092,7 +1094,7 @@ function bjHostRunDealer() {
     const step = () => {
         if (allBust) { bjHostEndRound(); return; }
         const tot = handTotal(gs.dealerHand);
-        if (tot < 17 || (isSoft(gs.dealerHand) && tot === 16)) {
+        if (tot < 17 || (isSoft(gs.dealerHand) && tot === 17)) {
             gs.dealerHand.push({ ...gs.shoe[gs.shoeIdx++] });
             const hitMsg = { type: 'ACTION', actionType: 'DEALER_HIT', dealerHand: gs.dealerHand };
             bjBroadcast(hitMsg); bjHandleMsg(bjMyId, hitMsg);
@@ -1177,6 +1179,7 @@ function bjRoomPlaceBet(amount) {
     const coins = ctx.S.coins || 0;
     if (coins < amount) return bjToast('Không đủ vàng!');
     if (amount < bjSettings.minBet) return bjToast(`Cược tối thiểu ${bjSettings.minBet}G`);
+    if (amount > 100000000) return bjToast('Hệ thống giới hạn cược tối đa 100,000,000G mỗi ván!');
     if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return bjToast(`Cược tối đa ${bjSettings.maxBet}G`);
     ctx.S.coins = coins - amount; save(); renderStatus();
     const msg = { type: 'BET_PLACED', pid: bjMyId, bet: amount };
@@ -1191,7 +1194,12 @@ function bjRoomAction(actionType, extra) {
 
 function bjApplySettings() {
     const min = parseInt(All.$id('bj-cfg-min')?.value) || 10;
-    const max = parseInt(All.$id('bj-cfg-max')?.value) || 0;
+    let max = parseInt(All.$id('bj-cfg-max')?.value) || 0;
+    if (max > 100000000) {
+        max = 100000000;
+        if (All.$id('bj-cfg-max')) All.$id('bj-cfg-max').value = 100000000;
+        bjToast('Cảnh báo: Max bet không được vượt quá 100,000,000G');
+    }
     const decks = Math.min(8, Math.max(1, parseInt(All.$id('bj-cfg-decks')?.value) || 6));
     const delay = Math.max(5, parseInt(All.$id('bj-cfg-delay')?.value) || 10);
     bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks, delay };
@@ -1205,11 +1213,35 @@ function bjApplySettings() {
 function bjRenderRoom() {
     const body = All.$id('bj-body');
     if (!body) return;
+
+    if (!All.$id('bj-game-layer')) {
+        body.innerHTML = `
+            <div class="bj-room-layout" style="width:100%; height:100%;">
+                <div id="bj-game-layer" style="flex:1; display:flex; flex-direction:column; overflow-y:hidden; overflow-x:hidden;"></div>
+                <div class="bj-chat-wrap" id="bj-chat-wrap">
+                    <div class="bj-chat-header" id="bj-chat-close">
+                        <span>💬 Chat</span>
+                        <span class="bj-chat-close">❌</span>
+                    </div>
+                    <div class="bj-chat-log" id="bj-chat-log"></div>
+                    <div class="bj-chat-inp-row">
+                        <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin tiền">💰</div>
+                        <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
+                        <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">Gửi</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        bjBindChatBase();
+        bjRenderChat();
+    }
+
+    const gameLayer = All.$id('bj-game-layer');
     const gs = bjGameState;
     const allPids = Object.keys(bjPlayers);
 
-    let html = `<div class="bj-room-layout">
-        <div class="bj-room-main">
+    let html = `
+        <div class="bj-room-main" style="flex:1; display:flex; flex-direction:column;">
             <div class="bj-room-topbar">
                 <div class="bj-room-code-badge" id="bj-room-code-badge" title="Copy mã phòng">🃋 ${bjRoomId}</div>
                 <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} — ${(ctx.S.coins||0).toLocaleString()}G${bjMyStatus==='spectator'?' 👁':''}</div>
@@ -1316,21 +1348,15 @@ function bjRenderRoom() {
         }
     }
 
-    html += `</div></div>
-    <div class="bj-chat-wrap" id="bj-chat-wrap">
-        <div class="bj-chat-header" id="bj-chat-close">
-            <span>💬 Chat</span>
-            <span class="bj-chat-close">❌</span>
-        </div>
-        <div class="bj-chat-log" id="bj-chat-log"></div>
-        <div class="bj-chat-inp-row">
-            <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin tiền">💰</div>
-            <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
-            <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">Gửi</div>
-        </div>
-    </div></div>`;
+    html += `</div>`;
+    
+    gameLayer.innerHTML = html;
 
-    body.innerHTML = html;
+    All.$id('bj-chat-toggle')?.addEventListener('click', () => {
+        All.$id('bj-chat-wrap')?.classList.add('open');
+        if (bjUnreadChat > 0) { bjUnreadChat = 0; bjRenderRoom(); }
+    });
+
     All.$id('bj-out-room-ingame')?.addEventListener('click', closeBlackjack);
     All.$id('bj-show-players')?.addEventListener('click', () => {
         const modalId = 'bj-player-list-modal';
@@ -1372,8 +1398,6 @@ function bjRenderRoom() {
         }
     }));
     bjBindMyActions();
-    bjBindChat();
-    bjRenderChat();
 }
 
 function bjRenderPlayerListModal() {
@@ -1471,7 +1495,7 @@ function bjBindMyActions() {
             const q = parseInt(b.getAttribute('data-q') || '1');
             const coins = Number(ctx.S.coins) || 0;
             const min = Number(bjSettings.minBet) || 10;
-            if (inp) inp.value = String(Math.max(min, Math.floor(coins / q)));
+            if (inp) inp.value = String(Math.max(min, Math.floor(Math.min(coins, 100000000) / q)));
         });
     });
     All.$id('bj-rm-even')?.addEventListener('click', () => {
@@ -1516,7 +1540,7 @@ function bjRenderChat() {
     setTimeout(() => { if (el) el.scrollTop = el.scrollHeight + 100; }, 10);
 }
 
-function bjBindChat() {
+function bjBindChatBase() {
     const send = () => {
         const inp = All.$id('bj-chat-inp');
         const msg = (inp?.value||'').trim();
@@ -1537,10 +1561,6 @@ function bjBindChat() {
             bjHandleMsg(bjMyId, msg);
             bjBroadcast(msg);
         }
-    });
-    All.$id('bj-chat-toggle')?.addEventListener('click', () => {
-        All.$id('bj-chat-wrap')?.classList.add('open');
-        if (bjUnreadChat > 0) { bjUnreadChat = 0; bjRenderRoom(); }
     });
     All.$id('bj-chat-close')?.addEventListener('click', () => {
         All.$id('bj-chat-wrap')?.classList.remove('open');

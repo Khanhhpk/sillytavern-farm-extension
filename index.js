@@ -5256,7 +5256,7 @@ function resultLabel(roll, kq, mult, nextAnchor) {
 var POT_CAP, HOUSE_RETURN, MIN_MULT, ANCHOR_MIN, ANCHOR_MAX;
 var init_bet_odds = __esm({
   "src/bet-odds.js"() {
-    POT_CAP = Number.MAX_SAFE_INTEGER;
+    POT_CAP = 2e8;
     HOUSE_RETURN = 97;
     MIN_MULT = 1.01;
     ANCHOR_MIN = 5;
@@ -49182,7 +49182,7 @@ function openBlackjackSolo() {
 }
 function soloDrawCard(hidden) {
   const s2 = soloState;
-  if (s2.shoeIdx >= s2.shoe.length) {
+  if (!s2.shoe || s2.shoe.length - s2.shoeIdx < s2.playerHands.length * 15 + 15) {
     s2.shoe = buildShoe(s2.settings.numDecks, Date.now() & 4294967295);
     s2.shoeIdx = 0;
   }
@@ -49252,7 +49252,7 @@ function renderSoloActions() {
             </div>`;
     actEl.querySelectorAll(".bj-quick").forEach((b2) => b2.addEventListener("click", () => {
       const inp = $id("bj-bet-inp");
-      if (inp) inp.value = String(Math.max(min, Math.floor(coins / Number(b2.getAttribute("data-q")))));
+      if (inp) inp.value = String(Math.max(min, Math.floor(Math.min(coins, 1e8) / Number(b2.getAttribute("data-q")))));
     }));
     $id("bj-deal").addEventListener("click", soloStartRound);
     return;
@@ -49327,6 +49327,7 @@ function soloStartRound() {
   const inp = $id("bj-bet-inp");
   const want = Math.max(0, parseInt(inp ? inp.value : "0") || 0);
   if (want < s2.settings.minBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${s2.settings.minBet}G`);
+  if (want > 1e8) return bjToast("H\u1EC7 th\u1ED1ng gi\u1EDBi h\u1EA1n c\u01B0\u1EE3c t\u1ED1i \u0111a 100,000,000G m\u1ED7i v\xE1n!");
   if (s2.settings.maxBet > 0 && want > s2.settings.maxBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${s2.settings.maxBet}G`);
   if (want > coins) return bjToast(`Kh\xF4ng \u0111\u1EE7 v\xE0ng (${coins.toLocaleString()}G)`);
   ctx.S.coins = (ctx.S.coins || 0) - want;
@@ -49431,6 +49432,7 @@ function soloStand() {
 function soloDouble() {
   const s2 = soloState;
   const idx = s2.activeHandIdx;
+  if (s2.splitAceIdxs.has(idx)) return bjToast("Kh\xF4ng th\u1EC3 Double sau khi Split Ace");
   const bet = s2.bets[idx];
   if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Double");
   ctx.S.coins = (ctx.S.coins || 0) - bet;
@@ -49495,7 +49497,7 @@ function soloRunDealer() {
   const iv = setInterval(() => {
     const total = handTotal(s2.dealerHand);
     const soft = isSoft(s2.dealerHand);
-    if (total < 17 || soft && total === 16) {
+    if (total < 17 || soft && total === 17) {
       s2.dealerHand.push(soloDrawCard());
       soloRender();
     } else {
@@ -50180,7 +50182,7 @@ function bjHandleRoomAction(fromPid, data) {
     h.bet.splice(idx + 1, 0, h.bet[idx]);
     h.stood.splice(idx + 1, 0, false);
     h.doubled.splice(idx + 1, 0, false);
-    if (sc.rank === "A") {
+    if (c2.rank === "A") {
       h.splitAceIdxs = h.splitAceIdxs || [];
       h.splitAceIdxs.push(idx, idx + 1);
       h.stood[idx] = true;
@@ -50215,7 +50217,7 @@ function bjHostRunDealer() {
       return;
     }
     const tot = handTotal(gs.dealerHand);
-    if (tot < 17 || isSoft(gs.dealerHand) && tot === 16) {
+    if (tot < 17 || isSoft(gs.dealerHand) && tot === 17) {
       gs.dealerHand.push({ ...gs.shoe[gs.shoeIdx++] });
       const hitMsg = { type: "ACTION", actionType: "DEALER_HIT", dealerHand: gs.dealerHand };
       bjBroadcast(hitMsg);
@@ -50316,6 +50318,7 @@ function bjRoomPlaceBet(amount) {
   const coins = ctx.S.coins || 0;
   if (coins < amount) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng!");
   if (amount < bjSettings.minBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${bjSettings.minBet}G`);
+  if (amount > 1e8) return bjToast("H\u1EC7 th\u1ED1ng gi\u1EDBi h\u1EA1n c\u01B0\u1EE3c t\u1ED1i \u0111a 100,000,000G m\u1ED7i v\xE1n!");
   if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${bjSettings.maxBet}G`);
   ctx.S.coins = coins - amount;
   save();
@@ -50331,7 +50334,12 @@ function bjRoomAction(actionType, extra) {
 }
 function bjApplySettings() {
   const min = parseInt($id("bj-cfg-min")?.value) || 10;
-  const max = parseInt($id("bj-cfg-max")?.value) || 0;
+  let max = parseInt($id("bj-cfg-max")?.value) || 0;
+  if (max > 1e8) {
+    max = 1e8;
+    if ($id("bj-cfg-max")) $id("bj-cfg-max").value = 1e8;
+    bjToast("C\u1EA3nh b\xE1o: Max bet kh\xF4ng \u0111\u01B0\u1EE3c v\u01B0\u1EE3t qu\xE1 100,000,000G");
+  }
   const decks = Math.min(8, Math.max(1, parseInt($id("bj-cfg-decks")?.value) || 6));
   const delay = Math.max(5, parseInt($id("bj-cfg-delay")?.value) || 10);
   bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks, delay };
@@ -50341,10 +50349,32 @@ function bjApplySettings() {
 function bjRenderRoom() {
   const body = $id("bj-body");
   if (!body) return;
+  if (!$id("bj-game-layer")) {
+    body.innerHTML = `
+            <div class="bj-room-layout" style="width:100%; height:100%;">
+                <div id="bj-game-layer" style="flex:1; display:flex; flex-direction:column; overflow-y:hidden; overflow-x:hidden;"></div>
+                <div class="bj-chat-wrap" id="bj-chat-wrap">
+                    <div class="bj-chat-header" id="bj-chat-close">
+                        <span>\u{1F4AC} Chat</span>
+                        <span class="bj-chat-close">\u274C</span>
+                    </div>
+                    <div class="bj-chat-log" id="bj-chat-log"></div>
+                    <div class="bj-chat-inp-row">
+                        <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin ti\u1EC1n">\u{1F4B0}</div>
+                        <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
+                        <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">G\u1EEDi</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    bjBindChatBase();
+    bjRenderChat();
+  }
+  const gameLayer = $id("bj-game-layer");
   const gs = bjGameState;
   const allPids = Object.keys(bjPlayers);
-  let html = `<div class="bj-room-layout">
-        <div class="bj-room-main">
+  let html = `
+        <div class="bj-room-main" style="flex:1; display:flex; flex-direction:column;">
             <div class="bj-room-topbar">
                 <div class="bj-room-code-badge" id="bj-room-code-badge" title="Copy m\xE3 ph\xF2ng">\u{1F0CB} ${bjRoomId}</div>
                 <div style="font-size:11px;color:#ddd;flex:1;text-align:center;">${bjMyName()} \u2014 ${(ctx.S.coins || 0).toLocaleString()}G${bjMyStatus === "spectator" ? " \u{1F441}" : ""}</div>
@@ -50447,20 +50477,15 @@ function bjRenderRoom() {
             </div>`;
     }
   }
-  html += `</div></div>
-    <div class="bj-chat-wrap" id="bj-chat-wrap">
-        <div class="bj-chat-header" id="bj-chat-close">
-            <span>\u{1F4AC} Chat</span>
-            <span class="bj-chat-close">\u274C</span>
-        </div>
-        <div class="bj-chat-log" id="bj-chat-log"></div>
-        <div class="bj-chat-inp-row">
-            <div class="buy plain" id="bj-chat-req-btn" style="padding:4px 8px;" title="Xin ti\u1EC1n">\u{1F4B0}</div>
-            <input class="inp bj-chat-inp" id="bj-chat-inp" placeholder="Chat..." style="flex:1" enterkeyhint="send">
-            <div class="buy plain" id="bj-chat-send" style="white-space:nowrap">G\u1EEDi</div>
-        </div>
-    </div></div>`;
-  body.innerHTML = html;
+  html += `</div>`;
+  gameLayer.innerHTML = html;
+  $id("bj-chat-toggle")?.addEventListener("click", () => {
+    $id("bj-chat-wrap")?.classList.add("open");
+    if (bjUnreadChat > 0) {
+      bjUnreadChat = 0;
+      bjRenderRoom();
+    }
+  });
   $id("bj-out-room-ingame")?.addEventListener("click", closeBlackjack);
   $id("bj-show-players")?.addEventListener("click", () => {
     const modalId = "bj-player-list-modal";
@@ -50507,8 +50532,6 @@ function bjRenderRoom() {
     }
   }));
   bjBindMyActions();
-  bjBindChat();
-  bjRenderChat();
 }
 function bjRenderPlayerListModal() {
   const modal = $id("bj-player-list-modal");
@@ -50604,7 +50627,7 @@ function bjBindMyActions() {
       const q = parseInt(b2.getAttribute("data-q") || "1");
       const coins = Number(ctx.S.coins) || 0;
       const min = Number(bjSettings.minBet) || 10;
-      if (inp) inp.value = String(Math.max(min, Math.floor(coins / q)));
+      if (inp) inp.value = String(Math.max(min, Math.floor(Math.min(coins, 1e8) / q)));
     });
   });
   $id("bj-rm-even")?.addEventListener("click", () => {
@@ -50658,7 +50681,7 @@ function bjRenderChat() {
     if (el) el.scrollTop = el.scrollHeight + 100;
   }, 10);
 }
-function bjBindChat() {
+function bjBindChatBase() {
   const send = () => {
     const inp2 = $id("bj-chat-inp");
     const msg = (inp2?.value || "").trim();
@@ -50678,13 +50701,6 @@ function bjBindChat() {
       const msg = { type: "CHAT_REQ", reqData: { reqId, pid: bjMyId, amount: amt, fulfilled: 0 } };
       bjHandleMsg(bjMyId, msg);
       bjBroadcast(msg);
-    }
-  });
-  $id("bj-chat-toggle")?.addEventListener("click", () => {
-    $id("bj-chat-wrap")?.classList.add("open");
-    if (bjUnreadChat > 0) {
-      bjUnreadChat = 0;
-      bjRenderRoom();
     }
   });
   $id("bj-chat-close")?.addEventListener("click", () => {
