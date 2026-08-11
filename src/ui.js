@@ -17,6 +17,7 @@ export let fieldEl;
 export let decoLayer;
 export let fxLayer;
 export let dungeonView;
+export let raceView;
 let swX = null, swY = null;
 
 export function applyTheme() { ctx.ui.classList.remove('theme-sakura', 'theme-sky'); ctx.ui.classList.add('theme-' + (ctx.S && ctx.S.theme === 'sky' ? 'sky' : 'sakura')); }
@@ -230,6 +231,14 @@ export function initUI() {
       <div class="close-x" id="dungeon-close">×</div>
     </div>
     <div class="dungeon-view" id="dungeon-view"></div>
+  </div>
+  
+  <div id="race-win" class="dungeon-win" style="display:none">
+    <div class="titlebar" id="race-drag">
+      <h1>${spriteSVG('raceGate', 16)}Trường Đua Nông Trại</h1>
+      <div class="close-x" id="race-close">×</div>
+    </div>
+    <div class="race-view" id="race-view"></div>
   </div>`;
   sh.appendChild(ctx.ui);
   ctx.orb = $id('orb');
@@ -265,6 +274,7 @@ export function initUI() {
   fieldEl.appendChild(fxLayer);
 
   dungeonView = $id('dungeon-view');
+  raceView = $id('race-view');
 
 ctx.ui.addEventListener('click', e => {                     // Bấm bất cứ đâu ngoài pager = thu quả cầu lại (giai đoạn capture, chạy trước các xử lý click khác)
   const pager = $id('pager');

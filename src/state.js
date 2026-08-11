@@ -90,6 +90,9 @@ export function loadState() {
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
   if (!ctx.S.uniques) ctx.S.uniques = {};
   if (!ctx.S.dungeonBest) ctx.S.dungeonBest = { wave: 0, gold: 0 };
+  if (!ctx.S.raceForm) ctx.S.raceForm = {};
+  if (!ctx.S.raceStats) ctx.S.raceStats = { plays: 0, staked: 0, won: 0, net: 0, best: 0 };
+  if (ctx.S.race === undefined) ctx.S.race = null;
 
   Object.keys(ctx.S.uniques || {}).forEach(k => {
     const item = ctx.S.uniques[k];

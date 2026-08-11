@@ -605,6 +605,24 @@ var init_graphics = __esm({
         "................"
       ],
       gachaCapsuleSpec: ["................", ".....ffff.......", "...fYYYYYYf.....", "..fYYYYWYYYf....", "..fYYYYYYYYf....", "..ffffffffff....", "..fvvvvvvvvf....", "..fvvvvWvvvf....", "...fvvvvvvf.....", ".....ffff.......", "................", "................", "................", "................", "................", "................"],
+      raceGate: [
+        "................",
+        "................",
+        "....WKWKWKWK....",
+        "....KWKWKWKW....",
+        "....WKWKWKWK....",
+        "....KWKWKWKW....",
+        "....M...........",
+        "....M...........",
+        "....M...........",
+        "....M...........",
+        "....M...........",
+        "....M...........",
+        "...MM...........",
+        "..GGGGGGGGGGGG..",
+        ".GGGGGGGGGGGGGG.",
+        "................"
+      ],
       gachapon: [
         ".............ffffff.............",
         "...........ffFFFFFFff...........",
@@ -3023,6 +3041,66 @@ var init_style = __esm({
     .trib-btn-def { background: linear-gradient(#4a3461, #2a1a40); color: #c4a0e8; border: 1px solid #7a4aaa; }
     .trib-btn-def:hover { background: linear-gradient(#5a4070, #3a2550); }
     .trib-btn-def:active { transform: translateY(2px); }
+
+    /* ===== Tr\u01B0\u1EDDng \u0110ua ===== */
+    /* Shadow root kh\xF4ng c\xF3 m\xE0u ch\u1EEF m\u1EB7c \u0111\u1ECBnh: n\u1EBFu b\u1ECF tr\u1ED1ng, ch\u1EEF s\u1EBD th\u1EEBa h\u01B0\u1EDFng
+       m\xE0u c\u1EE7a trang SillyTavern, m\xE0 giao di\u1EC7n t\u1ED1i cho ch\u1EEF s\xE1ng -> ch\u1EEF m\u1EDD t\u1ECBt
+       tr\xEAn n\u1EC1n kem #f8efe0 c\u1EE7a .dungeon-win. \u0110\u1EB7t m\xE0u t\u01B0\u1EDDng minh cho c\u1EA3 kh\u1ED1i. */
+    .race-view { display:none; flex-direction:column; gap:8px; padding:10px; overflow-y:auto; color:#6b4f2e; }
+    /* .race-view l\xE0 flex column. Kh\xF4ng \u0111\u1EB7t flex-shrink cho con th\xEC m\u1EB7c \u0111\u1ECBnh l\xE0 1
+       (co \u0111\u01B0\u1EE3c) \u2014 tr\xEAn mobile .dungeon-win b\u1ECB \xE9p height:100vh (xem media query
+       max-width:640px \u1EDF tr\xEAn), v\xE0 kh\u1ED1i "C\xE1ch ch\u01A1i" \u0111\u1EE7 d\xE0i \u0111\u1EC3 \u0111\u1EA9y t\u1ED5ng n\u1ED9i dung
+       v\u01B0\u1EE3t chi\u1EC1u cao \u0111\xF3. H\u1EADu qu\u1EA3 t\u1EEBng th\u1EA5y tr\xEAn \u1EA3nh ch\u1EE5p th\u1EADt: flexbox co
+       .race-track (v\u1ED1n cao ~220px t\u1EF1 nhi\xEAn) xu\u1ED1ng c\xF2n ~10px, m\u1ED9t s\u1EE3i m\u1ECFng
+       kh\xF4ng th\u1EA5y con th\xFA n\xE0o. .race-view \u0111\xE3 overflow-y:auto s\u1EB5n, n\xEAn \u0111\xFAng ra
+       ph\u1EA3i cu\u1ED9n ch\u1EE9 kh\xF4ng co \u2014 flex:none (=0 0 auto) cho M\u1ECCI con tr\u1EF1c ti\u1EBFp \u0111\u1EC3
+       kho\xE1 chi\u1EC1u cao t\u1EF1 nhi\xEAn c\u1EE7a t\u1EEBng kh\u1ED1i. N\u1EBFu tri\u1EC7u ch\u1EE9ng "\u0111\u01B0\u1EDDng \u0111ua/b\u1EA3ng b\u1ECB
+       b\xF3p c\xF2n m\u1ED9t s\u1EE3i" t\xE1i di\u1EC5n, ki\u1EC3m tra tr\u01B0\u1EDBc ti\xEAn xem con m\u1EDBi th\xEAm c\xF3 thi\u1EBFu
+       flex:none \u1EDF \u0111\xE2y kh\xF4ng. */
+    .race-hud, .race-track, .race-result, .race-tbl, .race-betrow, .race-help,
+    .race-view > .note { flex: none; }
+    .race-hud { display:flex; justify-content:space-between; align-items:center; font-size:12px; padding:0 2px; color:#a3763d; }
+    .race-track { position:relative; background:#3b3020; border:2px solid #2a2118; border-radius:6px; overflow:hidden; }
+    .race-lane { position:relative; height:44px; border-bottom:1px dashed rgba(255,253,244,.22); }
+    .race-lane:last-child { border-bottom:0; }
+    .race-finish { position:absolute; top:0; bottom:0; right:8px; width:6px;
+      background:repeating-linear-gradient(180deg,#fffdf4 0 6px,#3a2c22 6px 12px); }
+    .race-runner { position:absolute; bottom:2px; left:0; width:36px; height:36px;
+      transition:transform .05s linear; will-change:transform; }
+    .race-runner.flip { scale:-1 1; }
+    .race-runner.stumble { rotate:-14deg; filter:saturate(.6); }
+    .race-runner.burst { filter:drop-shadow(0 0 6px #f2c231); }
+    .race-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+    .race-tbl th { text-align:left; font-weight:600; color:#a3763d; padding:3px 4px; }
+    .race-tbl td { padding:3px 4px; border-top:1px solid rgba(138,130,116,.25); color:#6b4f2e; }
+    .odds-cell { cursor:pointer; border:1px solid rgba(138,130,116,.5); border-radius:4px;
+      padding:2px 6px; display:inline-block; min-width:52px; text-align:center; color:#7a5c38; }
+    .odds-cell.sel { background:#f2c231; color:#3a2c22; font-weight:700; }
+    /* \xD4 kho\xE1 c\u1EA7n ph\xE2n bi\u1EC7t b\u1EB1ng H\xCCNH D\u1EA0NG (vi\u1EC1n \u0111\u1EE9t) ch\u1EE9 kh\xF4ng ch\u1EC9 \u0111\u1ED9 m\u1EDD:
+       \u1EDF .35 n\xF3 nho\xE8 t\u1EDBi m\u1EE9c \u1EA3nh ch\u1EE5p m\xE0n h\xECnh tr\xF4ng nh\u01B0 l\u1ED7i v\u1EBD ch\u1EE9 kh\xF4ng ph\u1EA3i
+       tr\u1EA1ng th\xE1i c\u1ED1 \xFD. .5 v\u1EABn \u0111\u1EE7 t\u1ED1i \u0111\u1EC3 \u0111\u1ECDc \u0111\u01B0\u1EE3c "\u2014" m\xE0 v\u1EABn r\xF5 l\xE0 b\u1ECB v\xF4 hi\u1EC7u. */
+    .odds-cell.off { opacity:.5; cursor:default; border-style:dashed; }
+    .race-form { font-variant-numeric:tabular-nums; letter-spacing:.5px; color:#a3763d; }
+    .race-betrow { display:flex; gap:6px; align-items:center; justify-content:center; flex-wrap:wrap; margin-top:4px; }
+    .race-result { text-align:center; font-size:13px; min-height:20px; color:#6b4f2e; }
+    /* Kh\u1ED1i h\u01B0\u1EDBng d\u1EABn l\u1EA5p kho\u1EA3ng tr\u1ED1ng d\u01B0\u1EDBi h\xE0ng n\xFAt. Ch\u1EC9 render khi \u0111ang 'betting'
+       (xem race.js renderRace()) n\xEAn kh\xF4ng c\u1EA7n quy t\u1EAFc \u1EA9n/hi\u1EC7n \u1EDF \u0111\xE2y theo phase.
+       N\u1EC1n #f8efe0 tr\xF9ng m\xE0u n\u1EC1n c\u1EEDa s\u1ED5 (.dungeon-win) n\xEAn vi\u1EC1n + \u0111\u01B0\u1EDDng k\u1EBB tr\xEAn
+       m\u1EA3nh l\xE0 th\u1EE9 duy nh\u1EA5t t\xE1ch kh\u1ED1i n\xE0y kh\u1ECFi ph\u1EA7n ch\u01A1i ph\xEDa tr\xEAn \u2014 c\u1ED1 t\xECnh l\xE0m
+       m\u1EDD h\u01A1n b\u1EA3ng odds \u0111\u1EC3 kh\xF4ng l\u1EA5n \xE1t, nh\u01B0ng v\u1EABn \u0111\u1EE7 r\xF5 \u0111\u1EC3 \u0111\u1ECDc l\u01B0\u1EDBt qua. */
+    .race-help { margin-top: 6px; padding: 8px 10px 6px; border-top: 1px dashed rgba(138,130,116,.4);
+      font-size: 11px; line-height: 1.6; color: #a3763d; }
+    .race-help b { color: #6b4f2e; }
+    .race-help ol { margin: 3px 0 6px 18px; padding: 0; }
+    .race-help li { margin-bottom: 2px; }
+    .race-help-note { margin-top: 4px; color: #6b4f2e; }
+    /* .race-help gi\u1EDD l\xE0 <details>: b\u1ECF d\u1EA5u tam gi\xE1c m\u1EB7c \u0111\u1ECBnh c\u1EE7a tr\xECnh duy\u1EC7t v\xEC
+       n\xF3 l\u1EC7ch t\xF4ng v\u1EDBi c\xE1c icon v\u1EBD tay c\xF2n l\u1EA1i c\u1EE7a giao di\u1EC7n, thay b\u1EB1ng ch\u1EEF \u0111\u1EADm
+       + con tr\u1ECF tay \u0111\u1EC3 v\u1EABn r\xF5 l\xE0 b\u1EA5m \u0111\u01B0\u1EE3c. Gi\u1EEF \u0111\xFAng b\u1EA3ng m\xE0u #6b4f2e/#a3763d
+       \u0111ang d\xF9ng cho kh\u1ED1i tr\u01B0\u1EDDng \u0111ua. */
+    .race-help summary { cursor: pointer; font-weight: 700; color: #6b4f2e; list-style: none; }
+    .race-help summary::-webkit-details-marker { display: none; }
+    .race-help[open] summary { margin-bottom: 2px; }
 `;
     fleaStyles = `
 .flea-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px dashed #c2a274; }
@@ -3371,6 +3449,14 @@ function initUI() {
       <div class="close-x" id="dungeon-close">\xD7</div>
     </div>
     <div class="dungeon-view" id="dungeon-view"></div>
+  </div>
+  
+  <div id="race-win" class="dungeon-win" style="display:none">
+    <div class="titlebar" id="race-drag">
+      <h1>${spriteSVG("raceGate", 16)}Tr\u01B0\u1EDDng \u0110ua N\xF4ng Tr\u1EA1i</h1>
+      <div class="close-x" id="race-close">\xD7</div>
+    </div>
+    <div class="race-view" id="race-view"></div>
   </div>`;
   sh.appendChild(ctx.ui);
   ctx.orb = $id("orb");
@@ -3400,6 +3486,7 @@ function initUI() {
   fxLayer.style.cssText = "position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:8;";
   fieldEl.appendChild(fxLayer);
   dungeonView = $id("dungeon-view");
+  raceView = $id("race-view");
   ctx.ui.addEventListener("click", (e2) => {
     const pager = $id("pager");
     if (pager && pager.classList.contains("open") && !e2.target.closest("#pager")) pager.classList.remove("open");
@@ -3483,7 +3570,7 @@ function initUI() {
     });
   }
 }
-var root, sh, $id, fieldEl, decoLayer, fxLayer, dungeonView, swX, swY;
+var root, sh, $id, fieldEl, decoLayer, fxLayer, dungeonView, raceView, swX, swY;
 var init_ui = __esm({
   "src/ui.js"() {
     init_store();
@@ -5233,7 +5320,7 @@ function resolveRoll(anchor2, side, roll) {
   return side === "hi" === roll > anchor2 ? "win" : "lose";
 }
 function resolveStake(want, coins) {
-  return Math.min(safeAmount(want), safeAmount(coins), POT_CAP);
+  return Math.min(safeAmount(want), safeAmount(coins), INITIAL_BET_CAP);
 }
 function nextPot(pot, mult) {
   const m2 = Number.isFinite(Number(mult)) && Number(mult) > 0 ? Number(mult) : 0;
@@ -5253,10 +5340,11 @@ function resultLabel(roll, kq, mult, nextAnchor) {
   const khac = Number.isFinite(Number(nextAnchor)) && Math.floor(Number(nextAnchor)) !== r2;
   return "Ra " + r2 + " \xB7 " + phan + (khac ? " \xB7 v\xE1n t\u1EDBi t\u1EEB " + Math.floor(Number(nextAnchor)) : "");
 }
-var POT_CAP, HOUSE_RETURN, MIN_MULT, ANCHOR_MIN, ANCHOR_MAX;
+var POT_CAP, INITIAL_BET_CAP, HOUSE_RETURN, MIN_MULT, ANCHOR_MIN, ANCHOR_MAX;
 var init_bet_odds = __esm({
   "src/bet-odds.js"() {
-    POT_CAP = 2e8;
+    POT_CAP = 8e8;
+    INITIAL_BET_CAP = 2e8;
     HOUSE_RETURN = 97;
     MIN_MULT = 1.01;
     ANCHOR_MIN = 5;
@@ -5356,7 +5444,7 @@ function openBetModal() {
          </div>`;
       $id("betStake").querySelectorAll("[data-quick]").forEach((b2) => b2.addEventListener("click", () => {
         const amt = $id("betAmt");
-        if (amt) amt.value = String(Math.max(1, Math.floor(safeAmount(ctx.S.coins) / Number(b2.dataset.quick))));
+        if (amt) amt.value = String(Math.max(1, Math.floor(Math.min(INITIAL_BET_CAP, safeAmount(ctx.S.coins)) / Number(b2.dataset.quick))));
       }));
     }
     ["hi", "lo"].forEach((side) => {
@@ -6243,6 +6331,16 @@ function placeBjWin() {
   bjWin.style.left = Math.min(Math.max(x2, 0), Math.max(vw - w2, 0)) + "px";
   bjWin.style.top = Math.min(Math.max(y2, 0), vh - 60) + "px";
 }
+function placeRaceWin() {
+  const raceWin = $id("race-win");
+  if (!raceWin) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const w2 = Math.min(600, vw * 0.96);
+  let x2 = ctx.S.raceWin ? ctx.S.raceWin.fx * vw : (vw - w2) / 2;
+  let y2 = ctx.S.raceWin ? ctx.S.raceWin.fy * vh : vh * 0.04;
+  raceWin.style.left = Math.min(Math.max(x2, 0), Math.max(vw - w2, 0)) + "px";
+  raceWin.style.top = Math.min(Math.max(y2, 0), vh - 60) + "px";
+}
 function toggleWin() {
   try {
     if (ctx.win.classList.contains("open")) {
@@ -6366,6 +6464,34 @@ function initWindows() {
       bjWg = null;
       const bjWin = $id("bj-win");
       ctx.S.bjWin = { fx: bjWin.offsetLeft / window.innerWidth, fy: bjWin.offsetTop / window.innerHeight };
+      save();
+    });
+  }
+  const raceDragBar = $id("race-drag");
+  let raceWg = null;
+  if (raceDragBar) {
+    raceDragBar.addEventListener("pointerdown", (e2) => {
+      if (e2.target.classList.contains("close-x")) return;
+      if (window.innerWidth <= 640) return;
+      raceDragBar.setPointerCapture(e2.pointerId);
+      const raceWin = $id("race-win");
+      raceWg = { id: e2.pointerId, sx: e2.clientX, sy: e2.clientY, ox: raceWin.offsetLeft, oy: raceWin.offsetTop };
+    });
+    raceDragBar.addEventListener("pointermove", (e2) => {
+      if (!raceWg || e2.pointerId !== raceWg.id) return;
+      const raceWin = $id("race-win");
+      raceWin.style.left = raceWg.ox + e2.clientX - raceWg.sx + "px";
+      raceWin.style.top = raceWg.oy + e2.clientY - raceWg.sy + "px";
+    });
+    raceDragBar.addEventListener("pointerup", (e2) => {
+      if (!raceWg || e2.pointerId !== raceWg.id) return;
+      try {
+        raceDragBar.releasePointerCapture(e2.pointerId);
+      } catch (er2) {
+      }
+      raceWg = null;
+      const raceWin = $id("race-win");
+      ctx.S.raceWin = { fx: raceWin.offsetLeft / window.innerWidth, fy: raceWin.offsetTop / window.innerHeight };
       save();
     });
   }
@@ -6651,12 +6777,18 @@ function renderPlots() {
           ${spriteSVG("spadeIcon", 48)}
           <div class="feature-name">Blackjack</div>
         </div>
+        <div class="explore-slot" id="cslot-race">
+          ${spriteSVG("raceGate", 48)}
+          <div class="feature-name">\u0110ua Ng\u1EF1a</div>
+        </div>
       </div>
     `;
     const bBtn = $id("cslot-bet");
     if (bBtn) bBtn.addEventListener("click", () => openPanel("bet"));
     const bjBtn = $id("cslot-bj");
     if (bjBtn) bjBtn.addEventListener("click", () => openBlackjackPicker());
+    const raceBtn = $id("cslot-race");
+    if (raceBtn) raceBtn.addEventListener("click", () => openRaceView());
     return;
   }
   if (expWrap) expWrap.style.display = "none";
@@ -7759,11 +7891,11 @@ function openSandbox() {
   `;
   openModal("X\u01B0\u1EDFng Ch\u1EBF T\xE1c", html);
   const ta2 = $id("sbCode");
-  const sel = $id("sbPalette");
+  const sel2 = $id("sbPalette");
   const sizeSel = $id("sbSize");
   const ctx2 = $id("sbCanvas").getContext("2d");
   function render() {
-    const isPet = sel.value === "PETS";
+    const isPet = sel2.value === "PETS";
     const palette = isPet ? PET_P : P;
     const size = parseInt(sizeSel.value) || 16;
     const canvasEl = $id("sbCanvas");
@@ -7792,7 +7924,7 @@ function openSandbox() {
     renderTimeout = setTimeout(render, 150);
   }
   ta2.addEventListener("input", debouncedRender);
-  sel.addEventListener("change", render);
+  sel2.addEventListener("change", render);
   sizeSel.addEventListener("change", render);
   $id("sbPayloadBtn").addEventListener("click", () => {
     const out = $id("sbPayloadOut");
@@ -7806,7 +7938,7 @@ function openSandbox() {
     $id("sbGenerate").style.opacity = "0.5";
     $id("sbStatus").textContent = "\u0110ang g\u1ECDi AI...";
     try {
-      const isPet = sel.value === "PETS";
+      const isPet = sel2.value === "PETS";
       const palette = isPet ? PET_P : P;
       const simpleColors = Object.entries(palette).filter((e2) => typeof e2[1] === "string");
       const paletteStr = simpleColors.map(([k2, v2]) => `${k2}: ${v2}`).join(", ");
@@ -8300,6 +8432,9 @@ function loadState() {
   if (!ctx.S.gachaPity) ctx.S.gachaPity = { norm: 0, spec: 0 };
   if (!ctx.S.uniques) ctx.S.uniques = {};
   if (!ctx.S.dungeonBest) ctx.S.dungeonBest = { wave: 0, gold: 0 };
+  if (!ctx.S.raceForm) ctx.S.raceForm = {};
+  if (!ctx.S.raceStats) ctx.S.raceStats = { plays: 0, staked: 0, won: 0, net: 0, best: 0 };
+  if (ctx.S.race === void 0) ctx.S.race = null;
   Object.keys(ctx.S.uniques || {}).forEach((k2) => {
     const item = ctx.S.uniques[k2];
     if (item && item.sp && item.spriteMap) {
@@ -50799,6 +50934,713 @@ var init_blackjack = __esm({
   }
 });
 
+// src/rng.js
+function mulberry322(a) {
+  return function() {
+    a |= 0;
+    a = a + 1831565813 | 0;
+    let t2 = Math.imul(a ^ a >>> 15, 1 | a);
+    t2 = t2 + Math.imul(t2 ^ t2 >>> 7, 61 | t2) ^ t2;
+    return ((t2 ^ t2 >>> 14) >>> 0) / 4294967296;
+  };
+}
+var init_rng = __esm({
+  "src/rng.js"() {
+  }
+});
+
+// src/race-sim.js
+function runnerById(rid) {
+  return RUNNER_MAP[rid] || null;
+}
+function laneRng(seed, lane) {
+  return mulberry322(seed ^ Math.imul(lane + 1, 2654435761) | 0);
+}
+function curveOf(style, u2) {
+  if (style === "front") return 1.1 - 0.18 * u2;
+  if (style === "closer") return 0.9 + 0.2 * u2;
+  return 1;
+}
+function fatigueOf(sta, u2) {
+  return 1 - (1 - sta) * 0.18 * u2 * u2;
+}
+function drawEntrants(drawSeed) {
+  const rnd = mulberry322(drawSeed);
+  const pool = RUNNERS.slice();
+  for (let i2 = pool.length - 1; i2 > 0; i2--) {
+    const j = Math.floor(rnd() * (i2 + 1));
+    const t2 = pool[i2];
+    pool[i2] = pool[j];
+    pool[j] = t2;
+  }
+  return pool.slice(0, LANES).map((r2, lane) => ({ rid: r2.rid, lane }));
+}
+function resolveEntrants(refs) {
+  if (!Array.isArray(refs) || refs.length === 0) return null;
+  const out = refs.map((e2) => runnerById(e2 && e2.rid));
+  return out.every(Boolean) ? out : null;
+}
+function applyRaceVoid(state) {
+  const r2 = state && state.race;
+  if (!r2 || r2.phase === "settled") return 0;
+  let back = 0;
+  const bets = r2.bets && typeof r2.bets === "object" ? r2.bets : {};
+  Object.keys(bets).forEach((k2) => {
+    back += safeAmount(bets[k2]);
+  });
+  state.coins = safeAmount(state.coins) + back;
+  state.race = null;
+  return back;
+}
+function simulateRace(seed, entrants, cond, withLog) {
+  const n2 = entrants.length;
+  const rain = !!(cond && cond.rain);
+  const pos = new Float32Array(n2);
+  const stumble = new Uint8Array(n2);
+  const finishTicks = new Array(n2).fill(-1);
+  const overshoot = new Float32Array(n2);
+  const rng = new Array(n2);
+  const tie = new Float32Array(n2);
+  const luck = new Float32Array(n2);
+  for (let i2 = 0; i2 < n2; i2++) {
+    rng[i2] = laneRng(seed, i2);
+    tie[i2] = laneRng(seed ^ 2654435769, i2)();
+    luck[i2] = 1 + (laneRng(seed ^ 625341585, i2)() * 2 - 1) * LUCK_MAX;
+  }
+  const lapLog = withLog ? [] : null;
+  const stumbleP = STUMBLE_P * (rain ? RAIN_STUMBLE_MULT : 1);
+  let done = 0;
+  for (let t2 = 0; t2 < TICKS_MAX && done < n2; t2++) {
+    for (let i2 = 0; i2 < n2; i2++) {
+      if (finishTicks[i2] >= 0) continue;
+      const e2 = entrants[i2];
+      const u2 = pos[i2] / TRACK;
+      const volEff = e2.vol * (rain ? RAIN_VOL_MULT : 1);
+      const baseEff = e2.base * luck[i2] * (rain && e2.floaty ? RAIN_FLOATY_MULT : 1);
+      const rNoise = rng[i2]();
+      const rStumble = rng[i2]();
+      let v2 = baseEff * curveOf(e2.style, u2) * fatigueOf(e2.sta, u2);
+      v2 *= 1 + (rNoise * 2 - 1) * volEff;
+      if (stumble[i2] === 0 && rStumble < stumbleP) stumble[i2] = STUMBLE_T;
+      if (stumble[i2] > 0) {
+        v2 *= STUMBLE_V;
+        stumble[i2]--;
+      }
+      if (v2 < 0) v2 = 0;
+      pos[i2] += v2;
+      if (pos[i2] >= TRACK) {
+        finishTicks[i2] = t2;
+        overshoot[i2] = pos[i2] - TRACK;
+        done++;
+      }
+    }
+    if (lapLog) {
+      const snap = new Float32Array(n2);
+      snap.set(pos);
+      lapLog.push(snap);
+    }
+  }
+  for (let i2 = 0; i2 < n2; i2++) {
+    if (finishTicks[i2] < 0) {
+      finishTicks[i2] = TICKS_MAX;
+      overshoot[i2] = pos[i2] - TRACK;
+    }
+  }
+  const order = [];
+  for (let i2 = 0; i2 < n2; i2++) order.push(i2);
+  order.sort((a, b2) => {
+    if (finishTicks[a] !== finishTicks[b2]) return finishTicks[a] - finishTicks[b2];
+    if (overshoot[a] !== overshoot[b2]) return overshoot[b2] - overshoot[a];
+    return tie[a] - tie[b2];
+  });
+  return { order, finishTicks, lapLog };
+}
+function playbackTiming(finishTicks) {
+  let winTick = Infinity, lastTick2 = 0;
+  for (const t2 of finishTicks) {
+    if (t2 < winTick) winTick = t2;
+    if (t2 > lastTick2) lastTick2 = t2;
+  }
+  if (!Number.isFinite(winTick)) winTick = 1;
+  winTick = Math.max(1, winTick);
+  lastTick2 = Math.max(winTick, lastTick2);
+  const msPerTick = WIN_AT_MS / winTick;
+  const totalMs = Math.min(HARD_CAP_MS, lastTick2 * msPerTick);
+  return { msPerTick, totalMs, winTick, lastTick: lastTick2 };
+}
+function floor2(x2) {
+  return Math.floor(x2 * 100) / 100;
+}
+function computeOdds(mcSeed, entrants, cond, n2) {
+  const N = n2 || MC_N;
+  const L2 = entrants.length;
+  const winCount = new Int32Array(L2);
+  const placeCount = new Int32Array(L2);
+  for (let k2 = 0; k2 < N; k2++) {
+    const s2 = Math.imul(mcSeed ^ k2 + 1, 2246822519) ^ k2 << 13 | 0;
+    const { order } = simulateRace(s2, entrants, cond, false);
+    winCount[order[0]]++;
+    for (let j = 0; j < PLACE_TOP && j < L2; j++) placeCount[order[j]]++;
+  }
+  const gate = (count2, delta) => {
+    const p2 = count2 / N;
+    if (p2 < MIN_P) return { p: p2, pPub: 0, mult: 0, locked: true };
+    const se = Math.sqrt(Math.max(p2 * (1 - p2), 1e-9) / N);
+    const pPub = (p2 + SAFETY_SIGMA * se) * (1 + delta);
+    const mult = floor2(HOUSE_RETURN2 / pPub);
+    if (!(mult >= MIN_MULT2)) return { p: p2, pPub, mult: 0, locked: true };
+    return { p: p2, pPub, mult, locked: false };
+  };
+  return {
+    win: entrants.map((e2, i2) => gate(winCount[i2], e2.delta)),
+    place: entrants.map((e2, i2) => gate(placeCount[i2], e2.delta))
+  };
+}
+function betKey(kind, lane) {
+  return kind + ":" + lane;
+}
+function newRaceState(drawSeed, refs, cond, odds) {
+  return {
+    drawSeed,
+    raceSeed: null,
+    // Chỉ sinh đúng lúc bấm Xuất phát, xem ghi chú trong kế hoạch
+    phase: "betting",
+    entrants: refs.map((e2) => ({ rid: e2.rid, lane: e2.lane })),
+    cond: { rain: !!(cond && cond.rain) },
+    odds,
+    bets: {},
+    staked: 0,
+    result: null
+  };
+}
+function applyRaceBet(state, key, want) {
+  const r2 = state && state.race;
+  if (!r2 || r2.phase !== "betting") return 0;
+  const coins = safeAmount(state.coins);
+  const amt = Math.min(safeAmount(want), coins);
+  if (amt < MIN_BET) return 0;
+  state.coins = coins - amt;
+  r2.bets[key] = safeAmount(r2.bets[key]) + amt;
+  r2.staked = safeAmount(r2.staked) + amt;
+  return amt;
+}
+function applyRaceRefund(state) {
+  const r2 = state && state.race;
+  if (!r2 || r2.phase !== "betting") return 0;
+  let back = 0;
+  Object.keys(r2.bets).forEach((k2) => {
+    back += safeAmount(r2.bets[k2]);
+  });
+  state.coins = safeAmount(state.coins) + back;
+  state.race = null;
+  return back;
+}
+function applyRaceSettle(state, order) {
+  const r2 = state && state.race;
+  if (!r2 || r2.phase === "settled") return null;
+  r2.phase = "settled";
+  const safeOrder = Array.isArray(order) ? order : [];
+  r2.result = safeOrder.slice();
+  const bets = r2.bets && typeof r2.bets === "object" ? r2.bets : {};
+  const top = safeOrder.slice(0, PLACE_TOP);
+  let payout = 0;
+  Object.keys(bets).forEach((key) => {
+    const amt = safeAmount(bets[key]);
+    if (amt <= 0) return;
+    const cut = key.indexOf(":");
+    const kind = key.slice(0, cut);
+    const lane = Number(key.slice(cut + 1));
+    const gates = r2.odds && r2.odds[kind];
+    const g = Array.isArray(gates) ? gates[lane] : void 0;
+    const multOk = g && Number.isFinite(g.mult) && g.mult >= 0;
+    if (!g || g.locked || !multOk) {
+      payout += amt;
+      return;
+    }
+    const hit = kind === "win" ? safeOrder[0] === lane : top.indexOf(lane) >= 0;
+    if (hit) payout += Math.floor(amt * g.mult);
+  });
+  payout = safeAmount(payout);
+  state.coins = safeAmount(state.coins) + payout;
+  return { payout, staked: safeAmount(r2.staked) };
+}
+function applyRaceForm(state, refs, order) {
+  if (!state.raceForm) state.raceForm = {};
+  const rank = new Array(order.length);
+  order.forEach((lane, i2) => {
+    rank[lane] = i2 + 1;
+  });
+  refs.forEach((e2) => {
+    const f = state.raceForm[e2.rid] || (state.raceForm[e2.rid] = { runs: 0, wins: 0, places: 0, last5: [] });
+    const pos = rank[e2.lane];
+    f.runs++;
+    if (pos === 1) f.wins++;
+    if (pos <= PLACE_TOP) f.places++;
+    f.last5 = f.last5.concat(pos).slice(-5);
+  });
+}
+function applyRaceStats(state, res) {
+  const st2 = state.raceStats || (state.raceStats = { plays: 0, staked: 0, won: 0, net: 0, best: 0 });
+  const payout = safeAmount(res && res.payout);
+  const staked = safeAmount(res && res.staked);
+  st2.plays++;
+  st2.staked = safeAmount(st2.staked) + staked;
+  st2.won = safeAmount(st2.won) + payout;
+  st2.net = (Number(st2.net) || 0) + payout - staked;
+  if (payout > safeAmount(st2.best)) st2.best = payout;
+  return st2;
+}
+var LANES, TRACK, TICKS_MAX, STUMBLE_P, STUMBLE_T, STUMBLE_V, LUCK_MAX, RAIN_VOL_MULT, RAIN_STUMBLE_MULT, RAIN_FLOATY_MULT, HOUSE_RETURN2, MC_N, SAFETY_SIGMA, MIN_P, MIN_MULT2, PLACE_TOP, MIN_BET, WIN_AT_MS, HARD_CAP_MS, RUNNERS, RUNNER_MAP;
+var init_race_sim = __esm({
+  "src/race-sim.js"() {
+    init_bet_odds();
+    init_rng();
+    LANES = 5;
+    TRACK = 1e3;
+    TICKS_MAX = 160;
+    STUMBLE_P = 6e-3;
+    STUMBLE_T = 3;
+    STUMBLE_V = 0.5;
+    LUCK_MAX = 0.11;
+    RAIN_VOL_MULT = 1.35;
+    RAIN_STUMBLE_MULT = 3;
+    RAIN_FLOATY_MULT = 0.96;
+    HOUSE_RETURN2 = 0.9;
+    MC_N = 3e4;
+    SAFETY_SIGMA = 1.5;
+    MIN_P = 0.03;
+    MIN_MULT2 = 1.01;
+    PLACE_TOP = 2;
+    MIN_BET = 10;
+    WIN_AT_MS = 16500;
+    HARD_CAP_MS = 2e4;
+    RUNNERS = [
+      { rid: "r_slime", sp: "slime", name: "B\u1EE5p S\u1EA5m", base: 14.2, sta: 0.85, vol: 0.09, style: "pace", delta: 0.05, floaty: false },
+      { rid: "r_octo", sp: "octo", name: "T\xE1m Tay T\xEDm", base: 15, sta: 0.55, vol: 0.11, style: "front", delta: -0.06, floaty: false },
+      { rid: "r_pink", sp: "slimePink", name: "D\xE2u Bay", base: 13.8, sta: 0.8, vol: 0.13, style: "closer", delta: 0.03, floaty: false },
+      { rid: "r_cream", sp: "octoCream", name: "Kem \xCC \u1EA0ch", base: 13, sta: 0.95, vol: 0.06, style: "pace", delta: -0.04, floaty: false },
+      { rid: "r_cloud", sp: "cloudMallow", name: "B\xF4ng Gi\xF3", base: 14.5, sta: 0.7, vol: 0.15, style: "front", delta: 0.07, floaty: true },
+      { rid: "r_ghost", sp: "ghostBlob", name: "B\xF3ng \u0110\xEAm", base: 14.8, sta: 0.6, vol: 0.14, style: "closer", delta: -0.08, floaty: true },
+      { rid: "r_mystery", sp: "mystery_blob", name: "D\u1EA5u H\u1ECFi", base: 13.5, sta: 0.9, vol: 0.16, style: "closer", delta: 0.02, floaty: false },
+      { rid: "r_jelly", sp: "jellyfish", name: "Xo\u0103n Tr\xF4i", base: 14, sta: 0.75, vol: 0.1, style: "pace", delta: -0.03, floaty: true },
+      { rid: "r_imp", sp: "impBlob", name: "Qu\u1EF7 L\u1ECFi", base: 14.6, sta: 0.65, vol: 0.12, style: "front", delta: 0.06, floaty: false },
+      { rid: "r_angel", sp: "angelBlob", name: "C\xE1nh Tr\u1EAFng", base: 13.6, sta: 0.92, vol: 0.07, style: "pace", delta: -0.05, floaty: false },
+      { rid: "r_peach", sp: "peach_soda", name: "S\u1EE7i \u0110\xE0o", base: 14.3, sta: 0.78, vol: 0.11, style: "closer", delta: 0.04, floaty: false },
+      { rid: "r_penguin", sp: "penguin", name: "Tr\u01B0\u1EE3t B\u0103ng", base: 14.9, sta: 0.58, vol: 0.08, style: "front", delta: -0.07, floaty: false }
+    ];
+    RUNNER_MAP = {};
+    RUNNERS.forEach((r2) => {
+      RUNNER_MAP[r2.rid] = r2;
+    });
+  }
+});
+
+// src/race.js
+function openRaceView() {
+  if (isRaceOpen) return;
+  isRaceOpen = true;
+  closeWin();
+  const win = $id("race-win");
+  if (win) {
+    win.style.display = "flex";
+    placeRaceWin();
+    win.classList.remove("open-anim");
+    void win.offsetWidth;
+    win.classList.add("open-anim");
+  }
+  if (raceView) raceView.style.display = "flex";
+  const closeBtn = $id("race-close");
+  if (closeBtn) closeBtn.onclick = () => closeRaceView();
+  renderRace();
+}
+function closeRaceView() {
+  if (!isRaceOpen) return;
+  isRaceOpen = false;
+  settleIfLocked();
+  stopRaceAnim();
+  const win = $id("race-win");
+  if (win) {
+    win.style.display = "none";
+    win.classList.remove("open-anim");
+  }
+  if (raceView) {
+    raceView.style.display = "none";
+    raceView.innerHTML = "";
+  }
+  $id("win").classList.add("open");
+  $id("viewToggle").style.display = "";
+  applyPageSkin();
+  applyViewState();
+  renderPager();
+  renderPlots();
+  renderToolbar();
+}
+function newRaceSession() {
+  const drawSeed = Math.random() * 2147483647 | 0;
+  const refs = drawEntrants(drawSeed);
+  const ents = resolveEntrants(refs);
+  if (!ents) {
+    ctx.S.race = null;
+    save(true);
+    return;
+  }
+  const cond = { rain: !!isRain() };
+  const odds = computeOdds(drawSeed ^ 1542469173, ents, cond);
+  ctx.S.race = newRaceState(drawSeed, refs, cond, odds);
+  sel = null;
+  save();
+}
+function fmt2(n2) {
+  return safeAmount(n2).toLocaleString();
+}
+function formCell(rid) {
+  const f = ctx.S.raceForm && ctx.S.raceForm[rid];
+  if (!f || !f.runs) return '<span class="race-form">\u2014</span>';
+  const last = f.last5.length ? f.last5.join("-") : "\u2014";
+  const rate = Math.round(f.wins / f.runs * 100);
+  return `<span class="race-form">${last}</span><span class="race-form" style="margin-left:6px;opacity:.75">${rate}%</span>`;
+}
+function oddsCell(kind, lane, g) {
+  if (g.locked) return `<span class="odds-cell off" title="Kh\u1EA3 n\u0103ng th\u1EAFng qu\xE1 th\u1EA5p \u2014 kh\xF4ng th\u1EC3 \u0111\u1EB7t c\u01B0\u1EE3c c\u1EEDa n\xE0y">\u2014</span>`;
+  const on3 = sel && sel.kind === kind && sel.lane === lane ? " sel" : "";
+  return `<span class="odds-cell${on3}" data-kind="${kind}" data-lane="${lane}">\xD7${g.mult.toFixed(2)}</span>`;
+}
+function renderRace() {
+  if (!raceView) return;
+  const prevAmtEl = $id("raceAmt");
+  const keptAmt = prevAmtEl ? prevAmtEl.value : null;
+  if (!ctx.S.race || ctx.S.race.phase === "settled") {
+    newRaceSession();
+  } else if (!resolveEntrants(ctx.S.race.entrants)) {
+    const back = applyRaceVoid(ctx.S);
+    save(true);
+    if (back > 0) toast("V\xE1n \u0111ua c\u0169 l\u1ED7i d\u1EEF li\u1EC7u, \u0111\xE3 ho\xE0n " + fmt2(back) + " G");
+    newRaceSession();
+  }
+  const r2 = ctx.S.race;
+  const betting = r2.phase === "betting";
+  const rows = r2.entrants.map((e2) => {
+    const run = runnerById(e2.rid);
+    return `<tr>
+      <td>${e2.lane + 1}</td>
+      <td>${run.name}</td>
+      <td>${formCell(e2.rid)}</td>
+      <td>${oddsCell("win", e2.lane, r2.odds.win[e2.lane])}</td>
+      <td>${oddsCell("place", e2.lane, r2.odds.place[e2.lane])}</td>
+    </tr>`;
+  }).join("");
+  const daBet = Object.keys(r2.bets).length ? '<div class="note">\u0110\xE3 \u0111\u1EB7t: ' + Object.keys(r2.bets).map((k2) => {
+    const [kind, lane] = k2.split(":");
+    const nm = runnerById(r2.entrants[Number(lane)].rid).name;
+    return `${nm} ${kind === "win" ? "Th\u1EAFng" : PLACE_LABEL} ${fmt2(r2.bets[k2])} G`;
+  }).join(" \xB7 ") + "</div>" : "";
+  const helpOpen = window.innerWidth > 640;
+  raceView.innerHTML = `
+    <div class="race-hud">
+      <span>${r2.cond.rain ? "\u{1F327} \u0110\u01B0\u1EDDng tr\u01A1n \u2014 k\u1EBFt qu\u1EA3 lo\u1EA1n h\u01A1n" : "\u2600 \u0110\u01B0\u1EDDng kh\xF4"}</span>
+      <span>V\xE0ng: <b id="raceCoins">${fmt2(ctx.S.coins)}</b> G</span>
+    </div>
+    <div class="race-track" id="raceTrack"></div>
+    <div class="race-result" id="raceResult"></div>
+    ${daBet}
+    <table class="race-tbl">
+      <tr><th>L\xE0n</th><th>T\u1EA7u</th><th>Phong \u0111\u1ED9 \xB7 T.th\u1EAFng</th><th>Th\u1EAFng</th><th>${PLACE_LABEL}</th></tr>
+      ${rows}
+    </table>
+    <div class="race-betrow" id="raceBetRow">
+      <input class="inp" id="raceAmt" type="number" min="${MIN_BET}" value="${keptAmt !== null ? keptAmt : Math.max(MIN_BET, Math.min(100, safeAmount(ctx.S.coins)))}" style="width:100px">
+      <span class="buy plain" data-quick="4">\xBC</span>
+      <span class="buy plain" data-quick="2">\xBD</span>
+      <span class="buy plain" data-quick="1">Max</span>
+      <span class="buy" id="raceBet">\u0110\u1EB7t c\u01B0\u1EE3c</span>
+      <span class="buy" id="raceGo">Xu\u1EA5t ph\xE1t</span>
+    </div>
+    ${betting ? `
+    <details class="race-help"${helpOpen ? " open" : ""}>
+      <summary>C\xE1ch ch\u01A1i</summary>
+      <ol>
+        <li>B\u1EA5m v\xE0o \xF4 t\u1EC9 l\u1EC7 \u0111\u1EC3 ch\u1ECDn c\u1EEDa (\xF4 s\u1EBD s\xE1ng v\xE0ng)</li>
+        <li>Nh\u1EADp s\u1ED1 v\xE0ng mu\u1ED1n c\u01B0\u1EE3c, ho\u1EB7c b\u1EA5m \xBC \xB7 \xBD \xB7 Max</li>
+        <li>B\u1EA5m <b>\u0110\u1EB7t c\u01B0\u1EE3c</b></li>
+        <li>\u0110\u1EB7t \u0111\u01B0\u1EE3c nhi\u1EC1u c\u1EEDa trong c\xF9ng m\u1ED9t v\xE1n; xong th\xEC b\u1EA5m <b>Xu\u1EA5t ph\xE1t</b></li>
+      </ol>
+      <div><b>Th\u1EAFng</b> \u2014 t\u1EA7u v\u1EC1 nh\u1EA5t. <b>${PLACE_LABEL}</b> \u2014 t\u1EA7u v\u1EC1 nh\u1EA5t ho\u1EB7c nh\xEC. H\u1EC7 s\u1ED1 \xD7N ngh\u0129a l\xE0 tr\xFAng th\xEC nh\u1EADn v\u1EC1 s\u1ED1 v\xE0ng \u0111\xE3 c\u01B0\u1EE3c nh\xE2n N; \xF4 "\u2014" l\xE0 c\u1EEDa kh\xF4ng \u0111\u1EB7t \u0111\u01B0\u1EE3c v\xEC kh\u1EA3 n\u0103ng th\u1EAFng qu\xE1 th\u1EA5p.</div>
+      <div><b>Phong \u0111\u1ED9 \xB7 T.th\u1EAFng</b>: th\u1EE9 h\u1EA1ng 5 v\xE1n g\u1EA7n nh\u1EA5t, v\xE0 t\u1EC9 l\u1EC7 th\u1EAFng t\xEDch lu\u1EF9 c\u1EE7a t\u1EA7u \u0111\xF3 qua to\xE0n b\u1ED9 s\u1ED1 v\xE1n b\u1EA1n \u0111\xE3 xem.</div>
+      <div>Tr\u1EDDi m\u01B0a l\xE0m k\u1EBFt qu\u1EA3 lo\u1EA1n h\u01A1n, kh\xF3 \u0111o\xE1n h\u01A1n.</div>
+      <div class="race-help-note">L\u01B0u \xFD: k\u1EBFt qu\u1EA3 \u0111\u01B0\u1EE3c ch\u1ED1t ngay khi b\u1EA5m Xu\u1EA5t ph\xE1t. \u0110\xF3ng c\u1EEDa s\u1ED5 hay t\u1EA3i l\u1EA1i trang gi\u1EEFa ch\u1EEBng v\u1EABn \u0111\u01B0\u1EE3c thanh to\xE1n \u0111\u1EA7y \u0111\u1EE7, ch\u1EC9 l\xE0 kh\xF4ng xem \u0111\u01B0\u1EE3c ho\u1EA1t c\u1EA3nh.</div>
+    </details>` : ""}`;
+  drawTrack();
+  if (!betting) raceView.querySelectorAll(".buy,.inp").forEach((el) => el.classList.add("off"));
+  const oddsCells = raceView.querySelectorAll(".odds-cell[data-kind]");
+  oddsCells.forEach((el) => {
+    el.addEventListener("click", () => {
+      if (ctx.S.race.phase !== "betting") return;
+      sel = { kind: el.dataset.kind, lane: Number(el.dataset.lane) };
+      oddsCells.forEach((c2) => {
+        c2.classList.toggle("sel", c2.dataset.kind === sel.kind && Number(c2.dataset.lane) === sel.lane);
+      });
+    });
+  });
+  raceView.querySelectorAll("[data-quick]").forEach((b2) => b2.addEventListener("click", () => {
+    const amt = $id("raceAmt");
+    if (amt) amt.value = String(Math.max(MIN_BET, Math.floor(safeAmount(ctx.S.coins) / Number(b2.dataset.quick))));
+  }));
+  const betBtn = $id("raceBet");
+  if (betBtn) betBtn.addEventListener("click", onBet);
+  const goBtn = $id("raceGo");
+  if (goBtn) goBtn.addEventListener("click", onGo);
+}
+function onBet() {
+  const r2 = ctx.S.race;
+  if (!r2 || r2.phase !== "betting") return;
+  if (!sel) return toast("B\u1EA5m v\xE0o \xF4 t\u1EC9 l\u1EC7 \u0111\u1EC3 ch\u1ECDn c\u1EEDa \u0111\xE3");
+  const g = r2.odds[sel.kind][sel.lane];
+  if (g.locked) return toast("C\u1EEDa n\xE0y kh\xF4ng \u0111\u1EB7t \u0111\u01B0\u1EE3c");
+  const want = safeAmount($id("raceAmt") && $id("raceAmt").value);
+  if (want < MIN_BET) return toast("C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u " + MIN_BET + " G");
+  const got = applyRaceBet(ctx.S, betKey(sel.kind, sel.lane), want);
+  if (!got) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng, b\u1EA1n ch\u1EC9 c\xF3 " + fmt2(ctx.S.coins) + " G");
+  if (got < want) toast("Ch\u1EC9 \u0111\u1EE7 " + fmt2(got) + " G, \u0111\xE3 h\u1EA1 xu\u1ED1ng");
+  save();
+  renderStatus();
+  renderRace();
+}
+function onGo() {
+  const r2 = ctx.S.race;
+  if (!r2 || r2.phase !== "betting") return;
+  if (!r2.staked) return toast("\u0110\u1EB7t c\u01B0\u1EE3c \u0111\xE3 r\u1ED3i h\xE3y xu\u1EA5t ph\xE1t");
+  r2.raceSeed = Math.random() * 2147483647 | 0;
+  r2.phase = "locked";
+  save(true);
+  const ents = resolveEntrants(r2.entrants);
+  if (!ents) {
+    const back = applyRaceVoid(ctx.S);
+    save(true);
+    toast("V\xE1n \u0111ua l\u1ED7i d\u1EEF li\u1EC7u, \u0111\xE3 ho\xE0n " + fmt2(back) + " G");
+    renderRace();
+    return;
+  }
+  const { order, finishTicks, lapLog } = simulateRace(r2.raceSeed, ents, r2.cond, true);
+  const row = $id("raceBetRow");
+  if (row) row.innerHTML = '<span class="buy" id="raceSkip">B\u1ECF qua</span>';
+  const skip = $id("raceSkip");
+  if (skip) skip.addEventListener("click", () => {
+    if (animEnd) animEnd();
+  });
+  const box = $id("raceResult");
+  if (box) box.textContent = "Xu\u1EA5t ph\xE1t!";
+  playRace(lapLog, finishTicks, () => settleNow(order));
+}
+function settleRaceOnBoot() {
+  const r2 = ctx.S && ctx.S.race;
+  if (!r2) return;
+  try {
+    if (r2.phase === "settled") {
+      ctx.S.race = null;
+      save(true);
+      return;
+    }
+    if (r2.phase === "betting") {
+      if (!r2.bets || typeof r2.bets !== "object") {
+        const back2 = applyRaceVoid(ctx.S);
+        save(true);
+        if (back2 > 0) {
+          try {
+            toast("V\xE1n \u0111ua d\u1EDF dang l\u1ED7i d\u1EEF li\u1EC7u, \u0111\xE3 ho\xE0n " + fmt2(back2) + " G");
+          } catch (e2) {
+          }
+        }
+        return;
+      }
+      const back = applyRaceRefund(ctx.S);
+      save(true);
+      if (back > 0) {
+        try {
+          toast("V\xE1n \u0111ua d\u1EDF dang, \u0111\xE3 ho\xE0n " + fmt2(back) + " G");
+        } catch (e2) {
+        }
+      }
+      return;
+    }
+    if (!Array.isArray(r2.entrants) || !r2.entrants.length || !Number.isFinite(r2.raceSeed)) {
+      const back = applyRaceVoid(ctx.S);
+      save(true);
+      if (back > 0) {
+        try {
+          toast("V\xE1n \u0111ua d\u1EDF dang l\u1ED7i d\u1EEF li\u1EC7u, \u0111\xE3 ho\xE0n " + fmt2(back) + " G");
+        } catch (e2) {
+        }
+      }
+      return;
+    }
+    const refs = r2.entrants;
+    const ents = resolveEntrants(refs);
+    if (!ents) {
+      const back = applyRaceVoid(ctx.S);
+      save(true);
+      if (back > 0) {
+        try {
+          toast("V\xE1n \u0111ua d\u1EDF dang l\u1ED7i d\u1EEF li\u1EC7u, \u0111\xE3 ho\xE0n " + fmt2(back) + " G");
+        } catch (e2) {
+        }
+      }
+      return;
+    }
+    const { order } = simulateRace(r2.raceSeed, ents, r2.cond, false);
+    const res = applyRaceSettle(ctx.S, order);
+    if (!res) {
+      ctx.S.race = null;
+      save(true);
+      return;
+    }
+    applyRaceForm(ctx.S, refs, order);
+    applyRaceStats(ctx.S, res);
+    ctx.S.race = null;
+    save(true);
+    try {
+      const nhat = runnerById(refs[order[0]].rid).name;
+      toast(`V\xE1n \u0111ua b\u1ECF d\u1EDF: ${nhat} v\u1EC1 nh\u1EA5t \xB7 nh\u1EADn ${fmt2(res.payout)} G`);
+    } catch (e2) {
+    }
+  } catch (e2) {
+    console.error("[Farm] settleRaceOnBoot l\u1ED7i l\xFAc thanh to\xE1n v\xE1n \u0111ua d\u1EDF dang, b\u1ECF qua \u0111\u1EC3 kh\xF4ng ch\u1EB7n kh\u1EDFi \u0111\u1ED9ng:", e2);
+    try {
+      applyRaceVoid(ctx.S);
+      save(true);
+    } catch (e22) {
+    }
+  }
+}
+function settleIfLocked() {
+  const r2 = ctx.S.race;
+  if (!r2 || r2.phase !== "locked") return;
+  const ents = resolveEntrants(r2.entrants);
+  if (!ents) {
+    const back = applyRaceVoid(ctx.S);
+    save(true);
+    try {
+      if (back > 0) toast("V\xE1n \u0111ua l\u1ED7i d\u1EEF li\u1EC7u, \u0111\xE3 ho\xE0n " + fmt2(back) + " G");
+    } catch (e2) {
+    }
+    return;
+  }
+  const { order } = simulateRace(r2.raceSeed, ents, r2.cond, false);
+  settleNow(order);
+}
+function settleNow(order) {
+  const r2 = ctx.S.race;
+  if (!r2) return;
+  const refs = r2.entrants;
+  const res = applyRaceSettle(ctx.S, order);
+  if (!res) return;
+  applyRaceForm(ctx.S, refs, order);
+  applyRaceStats(ctx.S, res);
+  save(true);
+  renderStatus();
+  const nhat = runnerById(refs[order[0]].rid).name;
+  const loi = res.payout - res.staked;
+  toast(`V\u1EC1 nh\u1EA5t: ${nhat} \xB7 ${loi >= 0 ? "L\xE3i" : "L\u1ED7"} ${fmt2(Math.abs(loi))} G`);
+  const coinEl = $id("raceCoins");
+  if (coinEl) coinEl.textContent = fmt2(ctx.S.coins);
+  const box = $id("raceResult");
+  if (box) {
+    box.innerHTML = order.map((lane, i2) => `${i2 + 1}. ${runnerById(refs[lane].rid).name}`).join(" \xB7 ") + `<br>Nh\u1EADn v\u1EC1 ${fmt2(res.payout)} G tr\xEAn ${fmt2(res.staked)} G \u0111\xE3 c\u01B0\u1EE3c`;
+  }
+  if (raceView) raceView.querySelectorAll(".odds-cell").forEach((el) => el.classList.add("off"));
+  const row = $id("raceBetRow");
+  if (row) {
+    row.innerHTML = '<span class="buy" id="raceAgain">\u0110ua v\xE1n m\u1EDBi</span>';
+    const again = $id("raceAgain");
+    if (again) again.addEventListener("click", () => {
+      newRaceSession();
+      renderRace();
+    });
+  }
+}
+function drawTrack() {
+  const tr2 = $id("raceTrack");
+  if (!tr2) return;
+  const r2 = ctx.S.race;
+  tr2.innerHTML = r2.entrants.map(
+    (e2) => `<div class="race-lane"><span class="race-runner" data-lane="${e2.lane}">${petSVG(runnerById(e2.rid).sp, 36)}</span></div>`
+  ).join("") + '<div class="race-finish"></div>';
+}
+function stopRaceAnim() {
+  if (animFrame !== null) {
+    window.cancelAnimationFrame(animFrame);
+    animFrame = null;
+  }
+  animEnd = null;
+}
+function playRace(lapLog, finishTicks, onDone) {
+  stopRaceAnim();
+  const { msPerTick, totalMs } = playbackTiming(finishTicks);
+  const tr2 = $id("raceTrack");
+  if (!tr2) return onDone();
+  const r2 = ctx.S.race;
+  const els = [];
+  for (let lane = 0; lane < r2.entrants.length; lane++) {
+    els.push(tr2.querySelector('.race-runner[data-lane="' + lane + '"]'));
+  }
+  const width = Math.max(60, tr2.clientWidth - 52);
+  const t0 = performance.now();
+  let ended = false;
+  const finish = () => {
+    if (ended) return;
+    ended = true;
+    stopRaceAnim();
+    onDone();
+  };
+  animEnd = finish;
+  const step = () => {
+    const el0 = $id("raceTrack");
+    if (!el0) return finish();
+    const elapsed = performance.now() - t0;
+    const tick2 = elapsed / msPerTick;
+    const i0 = Math.min(lapLog.length - 1, Math.floor(tick2));
+    const i1 = Math.min(lapLog.length - 1, i0 + 1);
+    const frac = tick2 - Math.floor(tick2);
+    for (let lane = 0; lane < els.length; lane++) {
+      const el = els[lane];
+      if (!el) continue;
+      const a = lapLog[i0][lane], b2 = lapLog[i1][lane];
+      const pos = Math.min(TRACK, a + (b2 - a) * frac);
+      const x2 = pos / TRACK * width;
+      const sp = runnerById(r2.entrants[lane].rid).sp;
+      let y2 = 0;
+      if (!RACE_FLOATY[sp]) {
+        const g = gaitOf2(sp);
+        const ph = elapsed % g.dur / g.dur;
+        y2 = -Math.sin(ph * Math.PI) * g.hy;
+      }
+      el.style.transform = `translate(${x2}px, ${y2}px)`;
+      const stalled = Math.abs(b2 - a) < 0.35 && pos < TRACK;
+      el.classList.toggle("stumble", stalled);
+      el.classList.toggle("burst", pos / TRACK > 0.75 && b2 - a > 15);
+    }
+    if (elapsed >= totalMs) return finish();
+    animFrame = window.requestAnimationFrame(step);
+  };
+  animFrame = window.requestAnimationFrame(step);
+}
+var isRaceOpen, sel, RACE_GAITS, RACE_FLOATY, gaitOf2, animFrame, animEnd, PLACE_LABEL;
+var init_race = __esm({
+  "src/race.js"() {
+    init_store();
+    init_all();
+    init_race_sim();
+    init_state();
+    isRaceOpen = false;
+    sel = null;
+    RACE_GAITS = { octo: { dur: 260, hy: 4 }, octoCream: { dur: 290, hy: 4 }, _: { dur: 330, hy: 9 } };
+    RACE_FLOATY = { cloudMallow: 1, ghostBlob: 1, jellyfish: 1 };
+    gaitOf2 = (sp) => RACE_GAITS[sp] || RACE_GAITS._;
+    animFrame = null;
+    animEnd = null;
+    PLACE_LABEL = `V\u1EC1 top ${PLACE_TOP}`;
+  }
+});
+
 // src/all.js
 var all_exports = {};
 __export(all_exports, {
@@ -50857,6 +51699,7 @@ __export(all_exports, {
   closeDungeonView: () => closeDungeonView,
   closeHeroMode: () => closeHeroMode,
   closeModal: () => closeModal,
+  closeRaceView: () => closeRaceView,
   closeTradeModal: () => closeTradeModal,
   closeWin: () => closeWin,
   collectWorldbook: () => collectWorldbook,
@@ -50912,6 +51755,7 @@ __export(all_exports, {
   initWindows: () => initWindows,
   initWitch: () => initWitch,
   isDungeonOpen: () => isDungeonOpen,
+  isRaceOpen: () => isRaceOpen,
   isRain: () => isRain,
   lastScene: () => lastScene,
   layout: () => layout,
@@ -50924,6 +51768,7 @@ __export(all_exports, {
   mutCountOf: () => mutCountOf,
   mutDescOf: () => mutDescOf,
   mutKeysOf: () => mutKeysOf,
+  newRaceSession: () => newRaceSession,
   nextSceneAt: () => nextSceneAt,
   now: () => now,
   onHeroDown: () => onHeroDown,
@@ -50948,6 +51793,7 @@ __export(all_exports, {
   openModal: () => openModal,
   openPanel: () => openPanel,
   openPassDlg: () => openPassDlg,
+  openRaceView: () => openRaceView,
   openSandbox: () => openSandbox,
   openSellDlg: () => openSellDlg,
   openSellSeedDlg: () => openSellSeedDlg,
@@ -50980,11 +51826,13 @@ __export(all_exports, {
   placeHeroBar: () => placeHeroBar,
   placeOrb: () => placeOrb,
   placePet: () => placePet,
+  placeRaceWin: () => placeRaceWin,
   placeWin: () => placeWin,
   plant: () => plant,
   playNaoyaCutscene: () => playNaoyaCutscene,
   plotEmote: () => plotEmote,
   plotHTML: () => plotHTML,
+  raceView: () => raceView,
   registerDynamicSprite: () => registerDynamicSprite,
   regrowMs: () => regrowMs,
   renderAll: () => renderAll,
@@ -51022,6 +51870,9 @@ __export(all_exports, {
   setTakeoutNote: () => setTakeoutNote,
   setTestMode: () => setTestMode,
   settle: () => settle,
+  settleIfLocked: () => settleIfLocked,
+  settleNow: () => settleNow,
+  settleRaceOnBoot: () => settleRaceOnBoot,
   setupExtButton: () => setupExtButton,
   setupSlashCommand: () => setupSlashCommand,
   sh: () => sh,
@@ -51034,6 +51885,7 @@ __export(all_exports, {
   startPoorTribulationNotice: () => startPoorTribulationNotice,
   startTribulationEvent: () => startTribulationEvent,
   stopHop: () => stopHop,
+  stopRaceAnim: () => stopRaceAnim,
   takeoutNote: () => takeoutNote,
   testMode: () => testMode,
   testSecApi: () => testSecApi,
@@ -51090,6 +51942,7 @@ var init_all = __esm({
     init_sync();
     init_flea();
     init_blackjack();
+    init_race();
   }
 });
 

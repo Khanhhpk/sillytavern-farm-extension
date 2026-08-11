@@ -3,7 +3,7 @@ import { ctx } from './store.js';
 import { save } from './state.js';
 import { toast } from './witch.js';
 import { renderStatus } from './render.js';
-import { safeAmount, applyCashOut, rollD100, rollAnchor, clampAnchor, oddsOf, resolveRoll, nextPot, resolveStake, resultLabel, POT_CAP } from './bet-odds.js';
+import { safeAmount, applyCashOut, rollD100, rollAnchor, clampAnchor, oddsOf, resolveRoll, nextPot, resolveStake, resultLabel, POT_CAP, INITIAL_BET_CAP } from './bet-odds.js';
 import * as All from './all.js';
 
 /* Tiền trên bàn nằm ở đúng một trường trong save. Không lưu số gốc, không lưu chuỗi roll —
@@ -115,7 +115,7 @@ export function openBetModal() {
          </div>`;
       All.$id('betStake').querySelectorAll('[data-quick]').forEach(b => b.addEventListener('click', () => {
         const amt = All.$id('betAmt');
-        if (amt) amt.value = String(Math.max(1, Math.floor(safeAmount(ctx.S.coins) / Number(b.dataset.quick))));
+        if (amt) amt.value = String(Math.max(1, Math.floor(Math.min(INITIAL_BET_CAP, safeAmount(ctx.S.coins)) / Number(b.dataset.quick))));
       }));
     }
 

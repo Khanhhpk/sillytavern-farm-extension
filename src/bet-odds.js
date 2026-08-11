@@ -2,7 +2,8 @@
    File này cố ý KHÔNG import gì và KHÔNG đụng tới DOM hay ctx,
    để chạy test bằng `node --test` thẳng trên nó. */
 
-export const POT_CAP = 200000000;        // Trần tiền trên bàn, chặn tràn số
+export const POT_CAP = 800000000;        // Trần tiền trên bàn, chặn tràn số
+export const INITIAL_BET_CAP = 200000000; // Sàn cược lúc đầu (200M) để khích lệ chuỗi
 export const HOUSE_RETURN = 97;          // Tử số công thức hệ số: nhà cái giữ lại 3%
 export const MIN_MULT = 1.01;            // Sàn hệ số: thắng mà vẫn lỗ thì rất phản cảm
 
@@ -92,7 +93,7 @@ export function resolveRoll(anchor, side, roll) {
    đường thắng liên tiếp) nên phải tự kẹp trần ở đây, nếu không người chơi
    nạp thẳng hơn 100 triệu vàng vào ô cược sẽ phá trần ngay từ đầu. */
 export function resolveStake(want, coins) {
-  return Math.min(safeAmount(want), safeAmount(coins), POT_CAP);
+  return Math.min(safeAmount(want), safeAmount(coins), INITIAL_BET_CAP);
 }
 
 export function nextPot(pot, mult) {
