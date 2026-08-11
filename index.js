@@ -11178,8 +11178,9 @@ function updateEntities(groupA, groupB, dt2) {
           atkSpdMult *= 0.5;
         }
         if (eff === "poison" && Math.random() < dt2) {
-          a.hp -= 2;
-          spawnDmg(a, -2);
+          const dmg = Math.floor(a.maxHp * 0.05);
+          a.hp -= dmg;
+          spawnDmg(a, -dmg);
         }
       }
     }
@@ -11334,7 +11335,7 @@ function updateEntities(groupA, groupB, dt2) {
             setTimeout(() => flash.remove(), 550);
             groupA.forEach((ally) => {
               if (ally.hp > 0) {
-                const heal = ally.maxHp * 0.5;
+                const heal = ally.maxHp * 0.3;
                 ally.hp = Math.min(ally.maxHp, ally.hp + heal);
                 spawnDmg(ally, heal, "heal");
                 const p2 = document.createElement("div");
@@ -11944,7 +11945,7 @@ var init_dungeon = __esm({
       // HP Slime Xanh: 130→150 (thêm ngầm +10% giáp)
       slime: { name: "Slime Xanh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Gi\u1EA3m 10% s\xE1t th\u01B0\u01A1ng nh\u1EADn v\xE0o.<br><b>Ch\u1EE7 \u0111\u1ED9ng (8s):</b> L\u01B0\u1EDBt nhanh h\xFAc v\u0103ng v\xE0 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch.", hp: 150, atk: 12, range: 40, speed: 40, cd: 1, armor: 0.1, activeSkill: "dash_knockup", maxSkillCd: 8 },
       octo: { name: "B\u1EA1ch Tu\u1ED9c", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xE1nh c\xE0ng l\xE2u t\u1ED1c \u0111\xE1nh c\xE0ng cao (t\u1ED1i \u0111a +50%).<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: "frenzy" },
-      slimePink: { name: "Slime H\u1ED3ng", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh th\u01B0\u1EDDng h\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> H\u1ED3i 50% m\xE1u t\u1ED1i \u0111a cho to\xE0n \u0111\u1ED9i.", hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: "heal", activeSkill: "burst_heal", maxSkillCd: 12 },
+      slimePink: { name: "Slime H\u1ED3ng", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh th\u01B0\u1EDDng h\u1ED3i m\xE1u \u0111\u01A1n m\u1EE5c ti\xEAu.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> H\u1ED3i 30% m\xE1u t\u1ED1i \u0111a cho to\xE0n \u0111\u1ED9i.", hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: "heal", activeSkill: "burst_heal", maxSkillCd: 12 },
       peach_soda: { name: "Soda \u0110\xE0o", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xE1nh xa xuy\xEAn th\u1EA5u m\u1ECDi k\u1EBB \u0111\u1ECBch tr\xEAn \u0111\u01B0\u1EDDng bay.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: "pierce" },
       // Bạch Tuộc Kem: stun 20%→25%
       octoCream: { name: "B\u1EA1ch Tu\u1ED9c Kem", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> 25% t\u1EF7 l\u1EC7 l\xE0m cho\xE1ng k\u1EBB \u0111\u1ECBch 1 gi\xE2y.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: "stun" },

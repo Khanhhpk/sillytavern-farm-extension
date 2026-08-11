@@ -20,7 +20,7 @@ const PET_STATS = {
     // HP Slime Xanh: 130→150 (thêm ngầm +10% giáp)
     slime: { name: 'Slime Xanh', desc: '<b>Bị động:</b> Giảm 10% sát thương nhận vào.<br><b>Chủ động (8s):</b> Lướt nhanh húc văng và làm choáng kẻ địch.', hp: 150, atk: 12, range: 40, speed: 40, cd: 1, armor: 0.10, activeSkill: 'dash_knockup', maxSkillCd: 8 },
     octo: { name: 'Bạch Tuộc', desc: '<b>Bị động:</b> Đánh càng lâu tốc đánh càng cao (tối đa +50%).<br><b>Chủ động:</b> Không có.', hp: 100, atk: 18, range: 60, speed: 50, cd: 0.8, skill: 'frenzy' },
-    slimePink: { name: 'Slime Hồng', desc: '<b>Bị động:</b> Đòn đánh thường hồi máu đơn mục tiêu.<br><b>Chủ động (12s):</b> Hồi 50% máu tối đa cho toàn đội.', hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: 'heal', activeSkill: 'burst_heal', maxSkillCd: 12 },
+    slimePink: { name: 'Slime Hồng', desc: '<b>Bị động:</b> Đòn đánh thường hồi máu đơn mục tiêu.<br><b>Chủ động (12s):</b> Hồi 30% máu tối đa cho toàn đội.', hp: 150, atk: 18, range: 80, speed: 35, cd: 1.5, skill: 'heal', activeSkill: 'burst_heal', maxSkillCd: 12 },
     peach_soda: { name: 'Soda Đào', desc: '<b>Bị động:</b> Đánh xa xuyên thấu mọi kẻ địch trên đường bay.<br><b>Chủ động:</b> Không có.', hp: 110, atk: 22, range: 100, speed: 45, cd: 1.2, skill: 'pierce' },
     // Bạch Tuộc Kem: stun 20%→25%
     octoCream: { name: 'Bạch Tuộc Kem', desc: '<b>Bị động:</b> 25% tỷ lệ làm choáng kẻ địch 1 giây.<br><b>Chủ động:</b> Không có.', hp: 180, atk: 15, range: 60, speed: 45, cd: 1.5, skill: 'stun' },
@@ -1122,8 +1122,9 @@ function updateEntities(groupA, groupB, dt) {
                 if (eff === 'root') isRooted = true;
                 if (eff === 'freeze') { speedMult *= 0.5; atkSpdMult *= 0.5; }
                 if (eff === 'poison' && Math.random() < dt) {
-                    a.hp -= 2;
-                    spawnDmg(a, -2);
+                    const dmg = Math.floor(a.maxHp * 0.05);
+                    a.hp -= dmg;
+                    spawnDmg(a, -dmg);
                 }
             }
         }
@@ -1298,7 +1299,7 @@ function updateEntities(groupA, groupB, dt) {
                         
                         groupA.forEach(ally => {
                             if (ally.hp > 0) {
-                                const heal = ally.maxHp * 0.5;
+                                const heal = ally.maxHp * 0.3;
                                 ally.hp = Math.min(ally.maxHp, ally.hp + heal);
                                 spawnDmg(ally, heal, 'heal');
                                 const p = document.createElement('div');
