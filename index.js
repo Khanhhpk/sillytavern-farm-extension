@@ -10765,8 +10765,13 @@ function _doStartWave() {
     } while (!validSpawn && attempts < 50);
     el.style.transform = `translate3d(${x2 - 16}px, ${y2 - 16}px, 0)`;
     arena.appendChild(el);
-    let hpMultiplier = Math.pow(1.12, currentWave - 1);
-    let atkMultiplier = Math.pow(1.1, currentWave - 1);
+    let hpMultiplier = 1;
+    let atkMultiplier = 1;
+    for (let w3 = 2; w3 <= currentWave; w3++) {
+      let stressed2 = Math.floor(w3 / 5);
+      hpMultiplier *= 1.12 + stressed2 * 2e-3;
+      atkMultiplier *= 1.1 + stressed2 * 2e-3;
+    }
     if (isBossWave) {
       hpMultiplier *= 1.5;
       atkMultiplier *= 1.2;
@@ -11360,7 +11365,8 @@ function showWaveRewards(isLoaded = false) {
     projectiles = [];
     const isBoss = currentWave % 10 === 0;
     const waveGold = Math.round(500 * Math.pow(1.12, currentWave - 1)) * (isBoss ? 3 : 1);
-    const waveHomeGold = (200 + currentWave * 50) * (isBoss ? 3 : 1);
+    const baseHomeGold = (200 + currentWave * 50) * (isBoss ? 3 : 1);
+    const waveHomeGold = Math.floor(baseHomeGold * Math.pow(1.02, currentWave - 1));
     totalGold += waveHomeGold;
     shopGold += waveGold;
     fullTeam.forEach((p2) => {
