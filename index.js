@@ -11457,7 +11457,7 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
           if (!other.status) other.status = {};
           if (!other.status.stun) {
             hitOther = true;
-            other.status.stun = 1;
+            other.status.stun = 1.5;
             const impactX = other.x;
             const impactY = other.y;
             const boom = document.createElement("div");
@@ -11473,7 +11473,7 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
             groupA.forEach((nearby) => {
               if (nearby !== a && nearby !== other && nearby.hp > 0 && Math.hypot(nearby.x - impactX, nearby.y - impactY) < CHAIN_RADIUS) {
                 if (!nearby.status) nearby.status = {};
-                nearby.status.stun = 0.6;
+                nearby.status.stun = 1;
               }
             });
           }
@@ -12087,7 +12087,7 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
             let kbDx = closest.dx / closest.dist;
             let kbDy = closest.dy / closest.dist;
             if (!target.status) target.status = {};
-            target.status.stun = 1.5;
+            target.status.stun = 2;
             target.kb = { dx: kbDx, dy: kbDy, time: 0.3, speed: 400 };
             const boom = document.createElement("div");
             boom.className = "dg-boom-effect";
