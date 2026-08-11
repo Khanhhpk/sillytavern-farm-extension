@@ -5514,7 +5514,7 @@ ${it2.spriteMap.join("\n")}`;
       return `Nguy\xEAn li\u1EC7u ${i2 + 1}: T\xEAn "${it2.name}", \u0110\u1ED9 hi\u1EBFm [${it2.rarity}], Gi\xE1 tr\u1ECB ${it2.sell}G, M\xF4 t\u1EA3 "${it2.desc}"${spriteStr}`;
     }).join("\n\n");
     const totalValue = itemsData.reduce((sum2, it2) => sum2 + (it2.sell || 0), 0);
-    const maxVal = totalValue * 5;
+    const maxVal = totalValue * 2;
     const resultInstruction = isSuccess ? `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\xC0NH C\xD4NG. Luy\u1EC7n ho\xE1 \u0111\xE3 sinh ra m\u1ED9t v\u1EADt ph\u1EA9m v\u01B0\u1EE3t tr\u1ED9i ho\u1EB7c v\xF4 c\xF9ng th\xFA v\u1ECB. H\xE3y t\u0103ng gi\xE1 tr\u1ECB c\u1EE7a n\xF3 l\xEAn cao h\u01A1n (nh\u01B0ng KH\xD4NG QU\xC1 ${maxVal}G). \u0110\u1ED3 m\u1EDBi ph\u1EA3i c\xF3 \u0111\u1ED9 hi\u1EBFm t\u1EEB [Th\u01B0\u1EDDng] \u0111\u1EBFn [Huy\u1EC1n tho\u1EA1i].` : `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\u1EA4T B\u1EA0I. Qu\xE1 tr\xECnh luy\u1EC7n ho\xE1 \u0111\xE3 x\u1EA3y ra tai n\u1EA1n, sinh ra ph\u1EBF ph\u1EA9m ho\u1EB7c th\u1EE9 c\u1EF1c k\u1EF3 v\xF4 d\u1EE5ng t\u1EA5u h\xE0i. H\xE3y \xE9p gi\xE1 r\u1EDBt th\xEA th\u1EA3m (c\xF3 th\u1EC3 ch\u1EC9 v\xE0i ch\u1EE5c G). \u0110\u1ED3 m\u1EDBi B\u1EAET BU\u1ED8C ph\u1EA3i mang \u0111\u1ED9 hi\u1EBFm [R\xE1c] ho\u1EB7c [Th\u01B0\u1EDDng].`;
     const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI qu\u1EA3n l\xFD "N\u1ED3i Luy\u1EC7n" (Witch's Cauldron) v\xE0 chuy\xEAn gia Pixel Art (n x n, t\u1ED1i thi\u1EC3u 32x32).
 Ng\u01B0\u1EDDi ch\u01A1i v\u1EEBa b\u1ECF c\xE1c V\u1EADt ph\u1EA9m \u0110\u1ED9c nh\u1EA5t sau v\xE0o n\u1ED3i \u0111\u1EC3 luy\u1EC7n ho\xE1 (dung h\u1EE3p):

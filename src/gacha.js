@@ -897,7 +897,7 @@ ${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể)'}`;
       return `Nguyên liệu ${i+1}: Tên "${it.name}", Độ hiếm [${it.rarity}], Giá trị ${it.sell}G, Mô tả "${it.desc}"${spriteStr}`;
     }).join('\n\n');
     const totalValue = itemsData.reduce((sum, it) => sum + (it.sell || 0), 0);
-    const maxVal = totalValue * 5;
+    const maxVal = totalValue * 2;
 
     const resultInstruction = isSuccess 
       ? `[KẾT QUẢ BẮT BUỘC]: THÀNH CÔNG. Luyện hoá đã sinh ra một vật phẩm vượt trội hoặc vô cùng thú vị. Hãy tăng giá trị của nó lên cao hơn (nhưng KHÔNG QUÁ ${maxVal}G). Đồ mới phải có độ hiếm từ [Thường] đến [Huyền thoại].`
