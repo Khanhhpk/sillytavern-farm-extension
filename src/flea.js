@@ -158,7 +158,7 @@ export function renderFleaItems() {
     const typeFilter = All.$id('sel-flea-type') ? All.$id('sel-flea-type').value : 'all';
     const sortVal = All.$id('sel-flea-sort') ? All.$id('sel-flea-sort').value : 'default';
     
-    const rarityMap = { 'Thần thoại': 6, 'Huyền thoại': 5, 'Sử thi': 4, 'Hiếm': 3, 'Thường': 2, 'Rác': 1 };
+    const rarityMap = { 'thần cấp': 6, 'huyền thoại': 5, 'sử thi': 4, 'hiếm': 3, 'thường': 2, 'rác': 1 };
     
     const escapeHtml = (str) => (str || '').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     
@@ -176,7 +176,7 @@ export function renderFleaItems() {
         else if (data.itemType === 'tickets' || data.itemType === 'shards') effType = 'tickets';
         
         let rVal = 0;
-        if (data.itemData && data.itemData.rarity) rVal = rarityMap[data.itemData.rarity] || 0;
+        if (data.itemData && data.itemData.rarity) rVal = rarityMap[data.itemData.rarity.toLowerCase()] || 0;
         
         return { id, data, itemName, sellerName, effType, rVal };
     });

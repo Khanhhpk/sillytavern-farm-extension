@@ -45,7 +45,13 @@ const THEME_DOMAINS = [
   "Vực quang học/ánh sáng",
   "Vực nguyên tố/tự nhiên",
   "Vực kích thước/tỉ lệ",
-  "Vực nhục dục/cám dỗ"
+  "Vực nhục dục/cám dỗ",
+  "Vực hư vô/sự vắng mặt",
+  "Vực ngôn ngữ/ký hiệu",
+  "Vực đa vũ trụ/không gian song song",
+  "Vực văn hóa đại chúng/meme",
+  "Vực phim ảnh/anime",
+  "Vực mạng xã hội/cyberculture"
 ];
 
 const GAMEPLAY_DOMAINS = [
@@ -98,7 +104,11 @@ const GAMEPLAY_DOMAINS = [
   "Viết lại/Chỉnh sửa quy tắc",
   "Tiên tri/Đọc tương lai",
   "Xóa sổ/Tịch thu",
-  "Hồi sinh/Khôi phục mốc thời gian"
+  "Hồi sinh/Khôi phục mốc thời gian",
+  "Thao túng thực tại",
+  "Đồng bộ hóa/Trí tuệ tập thể",
+  "Lan truyền/Gây bão",
+  "Tham chiếu châm biếm/Bắt chước"
 ];
 
 export function getGachaPrompt() {

@@ -2882,6 +2882,7 @@ var init_style = __esm({
     .gacha-item-card.rarity-Hi\u1EBFm { border-color: #4a90e2 !important; background: #f0f7ff !important; }
     .gacha-item-card.rarity-S\u1EED-thi { border-color: #a335ee !important; background: #faf0ff !important; }
     .gacha-item-card.rarity-Huy\u1EC1n-tho\u1EA1i { border-color: #ff8000 !important; background: #fff8f0 !important; box-shadow: 0 0 10px rgba(255,128,0,0.6) !important; }
+    .gacha-item-card.rarity-Th\u1EA7n-c\u1EA5p { border-color: #ff1493 !important; background: #fff0f5 !important; box-shadow: 0 0 15px rgba(255,20,147,0.8) !important; animation: popIn 1s infinite alternate; }
     /* Dungeon View */
     .dungeon-view { display: flex; flex: 1; width: 100%; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; box-sizing: border-box; }
     .dg-arena { flex: 1; position: relative; border: 4px solid #3f3a50; border-radius: 8px; background: rgba(0,0,0,0.1); overflow: hidden; }
@@ -4693,7 +4694,13 @@ var init_prompt = __esm({
       "V\u1EF1c quang h\u1ECDc/\xE1nh s\xE1ng",
       "V\u1EF1c nguy\xEAn t\u1ED1/t\u1EF1 nhi\xEAn",
       "V\u1EF1c k\xEDch th\u01B0\u1EDBc/t\u1EC9 l\u1EC7",
-      "V\u1EF1c nh\u1EE5c d\u1EE5c/c\xE1m d\u1ED7"
+      "V\u1EF1c nh\u1EE5c d\u1EE5c/c\xE1m d\u1ED7",
+      "V\u1EF1c h\u01B0 v\xF4/s\u1EF1 v\u1EAFng m\u1EB7t",
+      "V\u1EF1c ng\xF4n ng\u1EEF/k\xFD hi\u1EC7u",
+      "V\u1EF1c \u0111a v\u0169 tr\u1EE5/kh\xF4ng gian song song",
+      "V\u1EF1c v\u0103n h\xF3a \u0111\u1EA1i ch\xFAng/meme",
+      "V\u1EF1c phim \u1EA3nh/anime",
+      "V\u1EF1c m\u1EA1ng x\xE3 h\u1ED9i/cyberculture"
     ];
     GAMEPLAY_DOMAINS = [
       "Thao t\xE1c ch\u1EE7 \u0111\u1ED9ng",
@@ -4745,7 +4752,11 @@ var init_prompt = __esm({
       "Vi\u1EBFt l\u1EA1i/Ch\u1EC9nh s\u1EEDa quy t\u1EAFc",
       "Ti\xEAn tri/\u0110\u1ECDc t\u01B0\u01A1ng lai",
       "X\xF3a s\u1ED5/T\u1ECBch thu",
-      "H\u1ED3i sinh/Kh\xF4i ph\u1EE5c m\u1ED1c th\u1EDDi gian"
+      "H\u1ED3i sinh/Kh\xF4i ph\u1EE5c m\u1ED1c th\u1EDDi gian",
+      "Thao t\xFAng th\u1EF1c t\u1EA1i",
+      "\u0110\u1ED3ng b\u1ED9 h\xF3a/Tr\xED tu\u1EC7 t\u1EADp th\u1EC3",
+      "Lan truy\u1EC1n/G\xE2y b\xE3o",
+      "Tham chi\u1EBFu ch\xE2m bi\u1EBFm/B\u1EAFt ch\u01B0\u1EDBc"
     ];
   }
 });
@@ -4794,10 +4805,10 @@ async function pMap(array, asyncFn, concurrency) {
 function generateProcedural32x32Sprite(rarity) {
   const map = [];
   const borderChar = "K";
-  const mainChar = rarity === "Huy\u1EC1n tho\u1EA1i" ? "C" : rarity === "S\u1EED thi" ? "V" : rarity === "Hi\u1EBFm" ? "B" : rarity === "Th\u01B0\u1EDDng" ? "G" : "D";
-  const subChar = rarity === "Huy\u1EC1n tho\u1EA1i" ? "Y" : rarity === "S\u1EED thi" ? "v" : rarity === "Hi\u1EBFm" ? "b" : rarity === "Th\u01B0\u1EDDng" ? "g" : "d";
+  const mainChar = rarity === "Th\u1EA7n c\u1EA5p" ? "S" : rarity === "Huy\u1EC1n tho\u1EA1i" ? "C" : rarity === "S\u1EED thi" ? "V" : rarity === "Hi\u1EBFm" ? "B" : rarity === "Th\u01B0\u1EDDng" ? "G" : "D";
+  const subChar = rarity === "Th\u1EA7n c\u1EA5p" ? "s" : rarity === "Huy\u1EC1n tho\u1EA1i" ? "Y" : rarity === "S\u1EED thi" ? "v" : rarity === "Hi\u1EBFm" ? "b" : rarity === "Th\u01B0\u1EDDng" ? "g" : "d";
   const highlightChar = "W";
-  const accentChar = rarity === "Huy\u1EC1n tho\u1EA1i" ? "R" : rarity === "S\u1EED thi" ? "F" : rarity === "Hi\u1EBFm" ? "E" : rarity === "Th\u01B0\u1EDDng" ? "L" : "D";
+  const accentChar = rarity === "Th\u1EA7n c\u1EA5p" ? "M" : rarity === "Huy\u1EC1n tho\u1EA1i" ? "R" : rarity === "S\u1EED thi" ? "F" : rarity === "Hi\u1EBFm" ? "E" : rarity === "Th\u01B0\u1EDDng" ? "L" : "D";
   const type = Math.floor(Math.random() * 4);
   for (let y2 = 0; y2 < 32; y2++) {
     let row = "";
@@ -4866,7 +4877,7 @@ N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y thi\u1EBFt k\u1EBF k\u1EF3 v\u1EADt l
 3. V\u1EBC PIXEL: Khung pixel t\u1ED1i thi\u1EC3u l\xE0 32x32. B\u1EA1n c\xF3 th\u1EC3 m\u1EDF r\u1ED9ng k\xEDch th\u01B0\u1EDBc l\u1EDBn h\u01A1n (v\xED d\u1EE5 40x40, 48x48), nh\u01B0ng B\u1EAET BU\u1ED8C ph\u1EA3i l\xE0 l\u01B0\u1EDBi H\xCCNH VU\xD4NG n x n (s\u1ED1 d\xF2ng v\xE0 s\u1ED1 k\xFD t\u1EF1 m\u1ED7i d\xF2ng ph\u1EA3i b\u1EB1ng nhau).`;
     }
     const rarityGuidance = rarity === "Huy\u1EC1n tho\u1EA1i" ? "[B\u1EADc 4] V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t v\xF4 nh\u1ECB, x\u1EE9ng danh ph\u1EA9m ch\u1EA5t c\u1EE7a n\xF3. Mang t\u1EDBi \u0111\u1EE7 th\u1EE9 cho ng\u01B0\u1EDDi d\xF9ng. L\xE0 m\u1ED9t v\u1EADt ph\u1EA9m danh x\u1EE9ng v\u1EDBi th\u1EF1c." : rarity === "S\u1EED thi" ? "[B\u1EADc 3] \u0110\u1ED3 v\u1EADt mang t\xEDnh tr\u1ECDng tr\u1ECB (Gi\xE1 tr\u1ECB cao). C\xF3 s\u1EE9c m\u1EA1nh l\u1EDBn, \u0111a d\u1EE5ng, gi\u1ED1ng nh\u01B0 s\u1EDF h\u1EEFu b\u1EADc k\xEC t\xE0i. Tuy nhi\xEAn, \u0111\u1EC3 ph\xE1t huy t\u1ED1i \u0111a c\u1EA7n c\xF3 s\u1EF1 t\xEDnh to\xE1n c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i. Kh\xF4ng qu\xE1 l\u1ED7i game, nh\u01B0ng c\xF3 trong tay th\xEC s\u1EBD r\u1EA5t th\xEDch." : rarity === "Hi\u1EBFm" ? "[B\u1EADc 2] V\u1EADt ph\u1EA9m b\u1EAFt \u0111\u1EA7u c\xF3 'c\u01A1 ch\u1EBF ho\u1EA1t \u0111\u1ED9ng' ri\xEAng bi\u1EC7t. C\xF3 th\u1EC3 c\xF3 \xEDch, t\xE1c d\u1EE5ng th\xFA v\u1ECB, mang l\u1EA1i l\u1EE3i \xEDch r\xF5 r\u1EC7t nh\u01B0ng s\u1EBD c\xF3 v\xE0i gi\u1EDBi h\u1EA1n nh\u1ECF." : rarity === "Th\u01B0\u1EDDng" ? "[B\u1EADc 1] V\u1EADt ph\u1EA9m c\xF3 \xEDch ho\u1EB7c l\xE0 th\u01B0\u1EDDng ph\u1EA9m th\xFA v\u1ECB tuy c\xF4ng n\u0103ng \u0111\u01A1n gi\u1EA3n, nh\u01B0ng s\u1EDF h\u1EEFu c\u0169ng kh\xE1 th\xFA v\u1ECB, gi\u1EDBi h\u1EA1n r\xF5 r\xE0ng." : "[B\u1EADc 0] Nh\u1EEFng m\xF3n \u0111\u1ED3 k\u1EF3 c\u1EE5c, h\u1ECFng h\xF3c ho\u1EB7c c\xF3 c\xF4ng d\u1EE5ng c\u1EF1c k\u1EF3 v\xF4 th\u01B0\u1EDFng v\xF4 ph\u1EA1t. Ch\xFAng t\u1ED3n t\u1EA1i ch\u1EE7 y\u1EBFu \u0111\u1EC3 g\xE2y c\u01B0\u1EDDi, t\u1EA1o t\xECnh hu\u1ED1ng tr\u1EDB tr\xEAu trong t\u01B0\u01A1ng t\xE1c \u0111\u1EDDi th\u01B0\u1EDDng.";
-    const basePrice = rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "S\u1EED thi" ? 8e3 : rarity === "Hi\u1EBFm" ? 2500 : rarity === "Th\u01B0\u1EDDng" ? 500 : 100;
+    const basePrice = rarity === "Th\u1EA7n c\u1EA5p" ? 1e7 : rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e6 : rarity === "S\u1EED thi" ? 1e5 : rarity === "Hi\u1EBFm" ? 25e3 : rarity === "Th\u01B0\u1EDDng" ? 5e3 : 500;
     const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF "K\u1EF3 v\u1EADt d\u1ECB gi\u1EDBi" (Otherworldly Artifact) v\xE0 chuy\xEAn gia Pixel Art (n x n, t\u1ED1i thi\u1EC3u 32x32).
 H\xE3y s\xE1ng t\u1EA1o 1 K\u1EF2 V\u1EACT \u0110\u1ED8C NH\u1EA4T ph\u1EA9m ch\u1EA5t [${rarity}].
 ${contextStr}
@@ -4936,7 +4947,7 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
         }
         o2.spriteMap = fixedMap;
         if (typeof o2.price !== "number") {
-          o2.price = rarity === "S\u1EED thi" ? 8e3 : rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "Hi\u1EBFm" ? 2500 : rarity === "Th\u01B0\u1EDDng" ? 500 : 100;
+          o2.price = rarity === "Th\u1EA7n c\u1EA5p" ? o2.price || 1e7 : rarity === "S\u1EED thi" ? 1e5 : rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e6 : rarity === "Hi\u1EBFm" ? 25e3 : rarity === "Th\u01B0\u1EDDng" ? 5e3 : 500;
         }
         return o2;
       }
@@ -5046,15 +5057,15 @@ async function executeGachaRoll(ticketType, count2, updateLoadingText) {
         if (roll < legRate) {
           preRolledRarity = "Huy\u1EC1n tho\u1EA1i";
           preRolledColor = "#ff8000";
-          preRolledPrice = 2e4;
+          preRolledPrice = 2e6;
         } else if (roll < legRate + 50) {
           preRolledRarity = "S\u1EED thi";
           preRolledColor = "#a335ee";
-          preRolledPrice = 8e3;
+          preRolledPrice = 1e5;
         } else {
           preRolledRarity = "Hi\u1EBFm";
           preRolledColor = "#4a90e2";
-          preRolledPrice = 2500;
+          preRolledPrice = 25e3;
         }
         if (preRolledRarity === "Huy\u1EC1n tho\u1EA1i") {
           ctx.S.gachaPity.super = 0;
@@ -5064,42 +5075,42 @@ async function executeGachaRoll(ticketType, count2, updateLoadingText) {
         if (roll < 10) {
           preRolledRarity = "Huy\u1EC1n tho\u1EA1i";
           preRolledColor = "#ff8000";
-          preRolledPrice = 2e4;
+          preRolledPrice = 2e6;
         } else if (roll < 40) {
           preRolledRarity = "S\u1EED thi";
           preRolledColor = "#a335ee";
-          preRolledPrice = 8e3;
+          preRolledPrice = 1e5;
         } else if (roll < 80) {
           preRolledRarity = "Hi\u1EBFm";
           preRolledColor = "#4a90e2";
-          preRolledPrice = 2500;
+          preRolledPrice = 25e3;
         } else {
           preRolledRarity = "Th\u01B0\u1EDDng";
           preRolledColor = "#b0bec5";
-          preRolledPrice = 500;
+          preRolledPrice = 5e3;
         }
         ctx.S.gachaPity.spec = 0;
       } else {
         if (roll < 1) {
           preRolledRarity = "Huy\u1EC1n tho\u1EA1i";
           preRolledColor = "#ff8000";
-          preRolledPrice = 2e4;
+          preRolledPrice = 2e6;
         } else if (roll < 5) {
           preRolledRarity = "S\u1EED thi";
           preRolledColor = "#a335ee";
-          preRolledPrice = 8e3;
+          preRolledPrice = 1e5;
         } else if (roll < 25) {
           preRolledRarity = "Hi\u1EBFm";
           preRolledColor = "#4a90e2";
-          preRolledPrice = 2500;
+          preRolledPrice = 25e3;
         } else if (roll < 60) {
           preRolledRarity = "Th\u01B0\u1EDDng";
           preRolledColor = "#b0bec5";
-          preRolledPrice = 500;
+          preRolledPrice = 5e3;
         } else {
           preRolledRarity = "R\xE1c";
           preRolledColor = "#9e9e9e";
-          preRolledPrice = 100;
+          preRolledPrice = 500;
         }
       }
     }
@@ -5450,7 +5461,7 @@ function openGachaModal() {
     const loadText = $id("gachaLoadingText");
     if (loadOverlay) loadOverlay.style.display = "flex";
     if (loadText) loadText.textContent = "\u0110ang \u0111\u1ED5i M\u1EA3nh Huy\u1EC1n Tho\u1EA1i...";
-    const item = await generateUniqueItem({ rarity: "Huy\u1EC1n tho\u1EA1i", color: "#ff8000", sellPrice: 2e4, ticketType: "exchange" });
+    const item = await generateUniqueItem({ rarity: "Huy\u1EC1n tho\u1EA1i", color: "#ff8000", sellPrice: 2e6, ticketType: "exchange" });
     if (loadOverlay) loadOverlay.style.display = "none";
     const results = [{ type: "unique", name: item.name, rarity: item.rarity, color: item.color, icon: spriteSVG(item.sp, 48), desc: item.desc, spKey: item.sp, count: 1 }];
     triggerGridResult("exchange", 1, results);
@@ -5564,7 +5575,7 @@ function openGachaRatesModal() {
     openGachaModal();
   });
 }
-async function generateAICauldronMerge(itemsData, isSuccess) {
+async function generateAICauldronMerge(itemsData, isSuccess, isGodTier = false) {
   if (!SEC.url || !SEC.model) return null;
   try {
     const simpleColors = Object.entries(GACHA_P).filter((e2) => typeof e2[1] === "string");
@@ -5586,7 +5597,13 @@ ${it2.spriteMap.join("\n")}`;
     }).join("\n\n");
     const totalValue = itemsData.reduce((sum2, it2) => sum2 + (it2.sell || 0), 0);
     const maxVal = totalValue * 2;
-    const resultInstruction = isSuccess ? `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\xC0NH C\xD4NG. Luy\u1EC7n ho\xE1 \u0111\xE3 sinh ra m\u1ED9t v\u1EADt ph\u1EA9m v\u01B0\u1EE3t tr\u1ED9i ho\u1EB7c v\xF4 c\xF9ng th\xFA v\u1ECB. H\xE3y t\u0103ng gi\xE1 tr\u1ECB c\u1EE7a n\xF3 l\xEAn cao h\u01A1n (nh\u01B0ng KH\xD4NG QU\xC1 ${maxVal}G). \u0110\u1ED3 m\u1EDBi ph\u1EA3i c\xF3 \u0111\u1ED9 hi\u1EBFm t\u1EEB [Th\u01B0\u1EDDng] \u0111\u1EBFn [Huy\u1EC1n tho\u1EA1i].` : `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\u1EA4T B\u1EA0I. Qu\xE1 tr\xECnh luy\u1EC7n ho\xE1 \u0111\xE3 x\u1EA3y ra tai n\u1EA1n, sinh ra ph\u1EBF ph\u1EA9m ho\u1EB7c th\u1EE9 c\u1EF1c k\u1EF3 v\xF4 d\u1EE5ng t\u1EA5u h\xE0i. H\xE3y \xE9p gi\xE1 r\u1EDBt th\xEA th\u1EA3m (c\xF3 th\u1EC3 ch\u1EC9 v\xE0i ch\u1EE5c G). \u0110\u1ED3 m\u1EDBi B\u1EAET BU\u1ED8C ph\u1EA3i mang \u0111\u1ED9 hi\u1EBFm [R\xE1c] ho\u1EB7c [Th\u01B0\u1EDDng].`;
+    const maxValStr = isGodTier ? `Ch\xEDnh x\xE1c B\u1EB0NG ${totalValue * 5}G (Kh\xF4ng th\xEAm b\u1EDBt)` : `(T\u1ED1i \u0111a tuy\u1EC7t \u0111\u1ED1i: ${maxVal}G)`;
+    let resultInstruction = "";
+    if (isGodTier) {
+      resultInstruction = `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\u1EA6N C\u1EA4P (GOD TIER). Luy\u1EC7n ho\xE1 \u0111\xE3 t\u1EA1o ra m\u1ED9t K\u1EF2 T\xCDCH! M\xF3n \u0111\u1ED3 sinh ra mang quy\u1EC1n n\u0103ng tuy\u1EC7t \u0111\u1ED1i v\u01B0\u1EE3t ngo\xE0i m\u1ECDi gi\u1EDBi h\u1EA1n th\xF4ng th\u01B0\u1EDDng, v\xF4 c\xF9ng b\xE1 \u0111\u1EA1o, r\u1EF1c r\u1EE1 v\xE0 \u0111\u1ED9c nh\u1EA5t v\xF4 nh\u1ECB. Gi\xE1 tr\u1ECB kh\xF4ng gi\u1EDBi h\u1EA1n. \u0110\u1ED3 m\u1EDBi B\u1EAET BU\u1ED8C ph\u1EA3i mang \u0111\u1ED9 hi\u1EBFm [Th\u1EA7n C\u1EA5p].`;
+    } else {
+      resultInstruction = isSuccess ? `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\xC0NH C\xD4NG. Luy\u1EC7n ho\xE1 \u0111\xE3 sinh ra m\u1ED9t v\u1EADt ph\u1EA9m v\u01B0\u1EE3t tr\u1ED9i ho\u1EB7c v\xF4 c\xF9ng th\xFA v\u1ECB. H\xE3y t\u0103ng gi\xE1 tr\u1ECB c\u1EE7a n\xF3 l\xEAn cao h\u01A1n (nh\u01B0ng KH\xD4NG QU\xC1 ${maxVal}G). \u0110\u1ED3 m\u1EDBi ph\u1EA3i c\xF3 \u0111\u1ED9 hi\u1EBFm t\u1EEB [Th\u01B0\u1EDDng] \u0111\u1EBFn [Huy\u1EC1n tho\u1EA1i].` : `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\u1EA4T B\u1EA0I. Qu\xE1 tr\xECnh luy\u1EC7n ho\xE1 \u0111\xE3 x\u1EA3y ra tai n\u1EA1n, sinh ra ph\u1EBF ph\u1EA9m ho\u1EB7c th\u1EE9 c\u1EF1c k\u1EF3 v\xF4 d\u1EE5ng t\u1EA5u h\xE0i. H\xE3y \xE9p gi\xE1 r\u1EDBt th\xEA th\u1EA3m (c\xF3 th\u1EC3 ch\u1EC9 v\xE0i ch\u1EE5c G). \u0110\u1ED3 m\u1EDBi B\u1EAET BU\u1ED8C ph\u1EA3i mang \u0111\u1ED9 hi\u1EBFm [R\xE1c] ho\u1EB7c [Th\u01B0\u1EDDng].`;
+    }
     const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI qu\u1EA3n l\xFD "N\u1ED3i Luy\u1EC7n" (Witch's Cauldron) v\xE0 chuy\xEAn gia Pixel Art (n x n, t\u1ED1i thi\u1EC3u 32x32).
 Ng\u01B0\u1EDDi ch\u01A1i v\u1EEBa b\u1ECF c\xE1c V\u1EADt ph\u1EA9m \u0110\u1ED9c nh\u1EA5t sau v\xE0o n\u1ED3i \u0111\u1EC3 luy\u1EC7n ho\xE1 (dung h\u1EE3p):
 ${itemsDesc}
@@ -5617,8 +5634,8 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
 {
   "name": "T\xEAn v\u1EADt ph\u1EA9m m\u1EDBi (2~7 ch\u1EEF, \u1EA5n t\u01B0\u1EE3ng)",
   "desc": "M\xF4 t\u1EA3 ng\u1EAFn g\u1ECDn C\u01A0 CH\u1EBE v\xE0 C\xC1CH S\u1EEC D\u1EE4NG c\u1EE7a v\u1EADt ph\u1EA9m m\u1EDBi (d\u01B0\u1EDBi 100 ch\u1EEF). Ph\u1EA3i r\xF5 r\xE0ng, th\xFA v\u1ECB, \u0111\u1ED9c l\u1EA1.",
-  "rarity": "\u0110\u1ED9 hi\u1EBFm c\u1EE7a v\u1EADt ph\u1EA9m (R\xE1c, Th\u01B0\u1EDDng, Hi\u1EBFm, S\u1EED thi, Huy\u1EC1n tho\u1EA1i)",
-  "price": S\u1ED1 nguy\xEAn \u0111\u1ECBnh gi\xE1. (T\u1ED1i \u0111a tuy\u1EC7t \u0111\u1ED1i: ${maxVal}G),
+  "rarity": "\u0110\u1ED9 hi\u1EBFm c\u1EE7a v\u1EADt ph\u1EA9m (${isGodTier ? "B\u1EAET BU\u1ED8C \u0110I\u1EC0N: Th\u1EA7n C\u1EA5p" : "R\xE1c, Th\u01B0\u1EDDng, Hi\u1EBFm, S\u1EED thi, Huy\u1EC1n tho\u1EA1i"})",
+  "price": S\u1ED1 nguy\xEAn \u0111\u1ECBnh gi\xE1. ${maxValStr},
   "spriteMap": [ m\u1EA3ng c\xE1c chu\u1ED7i. N\u1EBFu ch\u1ECDn k\xEDch th\u01B0\u1EDBc n x n, m\u1EA3ng PH\u1EA2I C\xD3 \u0110\xDANG n chu\u1ED7i, v\xE0 m\u1ED7i chu\u1ED7i D\xC0I CH\xCDNH X\xC1C n k\xFD t\u1EF1. Ph\u1EA3i l\xE0 h\xECnh vu\xF4ng (min 32x32). Ch\u1EC9 d\xF9ng k\xFD t\u1EF1 B\u1EA3ng m\xE0u v\xE0 d\u1EA5u '.' cho \u0111i\u1EC3m trong su\u1ED1t ]
 }`;
     const userPrompt = `H\xE3y ti\u1EBFn h\xE0nh luy\u1EC7n ho\xE1 n\u1ED3i ph\xF9 thu\u1EF7 v\u1EDBi c\xE1c nguy\xEAn li\u1EC7u tr\xEAn. Quy\u1EBFt \u0111\u1ECBnh k\u1EBFt qu\u1EA3!`;
@@ -5693,10 +5710,17 @@ async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   save();
   renderStatus();
   if (updateLoadingText) updateLoadingText("N\u1ED3i \u0111ang s\xF4i s\xF9ng s\u1EE5c...");
+  const legendaryCount = itemsData.filter((it2) => it2.rarity && it2.rarity.toLowerCase().includes("huy\u1EC1n tho\u1EA1i")).length;
   const isSuccess = Math.random() < 0.6;
+  let isGodTier = false;
+  if (legendaryCount >= 2 && isSuccess) {
+    if (Math.random() < 0.1) {
+      isGodTier = true;
+    }
+  }
   let resultData = null;
   for (let attempt = 1; attempt <= 3; attempt++) {
-    resultData = await generateAICauldronMerge(itemsData, isSuccess);
+    resultData = await generateAICauldronMerge(itemsData, isSuccess, isGodTier);
     if (resultData) break;
     if (updateLoadingText) updateLoadingText(`\u0110ang th\u1EED l\u1EA1i... (${attempt}/3)`);
   }
@@ -5712,10 +5736,24 @@ async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   const key = `unique@${timestamp}_${randId}`;
   const spKey = `cauldron_${timestamp}_${randId}`;
   let color = "#9e9e9e";
-  if (resultData.rarity === "Huy\u1EC1n tho\u1EA1i") color = "#ff8000";
-  else if (resultData.rarity === "S\u1EED thi") color = "#a335ee";
-  else if (resultData.rarity === "Hi\u1EBFm") color = "#4a90e2";
-  else if (resultData.rarity === "Th\u01B0\u1EDDng") color = "#b0bec5";
+  if (/Thần cấp/i.test(resultData.rarity)) {
+    color = "#ff1493";
+    resultData.rarity = "Th\u1EA7n c\u1EA5p";
+  } else if (/Huyền thoại/i.test(resultData.rarity)) {
+    color = "#ff8000";
+    resultData.rarity = "Huy\u1EC1n tho\u1EA1i";
+  } else if (/Sử thi/i.test(resultData.rarity)) {
+    color = "#a335ee";
+    resultData.rarity = "S\u1EED thi";
+  } else if (/Hiếm/i.test(resultData.rarity)) {
+    color = "#4a90e2";
+    resultData.rarity = "Hi\u1EBFm";
+  } else if (/Thường/i.test(resultData.rarity)) {
+    color = "#b0bec5";
+    resultData.rarity = "Th\u01B0\u1EDDng";
+  } else {
+    resultData.rarity = "R\xE1c";
+  }
   registerDynamicSprite(spKey, resultData.spriteMap);
   ctx.S.uniques[key] = {
     key,
@@ -6380,17 +6418,17 @@ function openPanel(kind) {
     }
     if (bagTab === "gacha") {
       const gachaKeys = Object.keys(ctx.S.bag || {}).filter((k2) => k2.startsWith("unique@"));
-      const rarityVal = { "R\xE1c": 0, "Th\u01B0\u1EDDng": 1, "Hi\u1EBFm": 2, "S\u1EED thi": 3, "Huy\u1EC1n tho\u1EA1i": 4 };
+      const rarityVal = { "r\xE1c": 0, "th\u01B0\u1EDDng": 1, "hi\u1EBFm": 2, "s\u1EED thi": 3, "huy\u1EC1n tho\u1EA1i": 4, "th\u1EA7n c\u1EA5p": 5 };
       if (gachaSortMode === "desc") {
         gachaKeys.sort((a, b2) => {
-          const rA = ctx.S.uniques?.[a]?.rarity || "Th\u01B0\u1EDDng";
-          const rB = ctx.S.uniques?.[b2]?.rarity || "Th\u01B0\u1EDDng";
+          const rA = (ctx.S.uniques?.[a]?.rarity || "th\u01B0\u1EDDng").toLowerCase();
+          const rB = (ctx.S.uniques?.[b2]?.rarity || "th\u01B0\u1EDDng").toLowerCase();
           return (rarityVal[rB] || 0) - (rarityVal[rA] || 0);
         });
       } else if (gachaSortMode === "asc") {
         gachaKeys.sort((a, b2) => {
-          const rA = ctx.S.uniques?.[a]?.rarity || "Th\u01B0\u1EDDng";
-          const rB = ctx.S.uniques?.[b2]?.rarity || "Th\u01B0\u1EDDng";
+          const rA = (ctx.S.uniques?.[a]?.rarity || "th\u01B0\u1EDDng").toLowerCase();
+          const rB = (ctx.S.uniques?.[b2]?.rarity || "th\u01B0\u1EDDng").toLowerCase();
           return (rarityVal[rA] || 0) - (rarityVal[rB] || 0);
         });
       }
@@ -50071,7 +50109,7 @@ function renderFleaItems() {
   const searchStr = $id("inp-flea-search") ? $id("inp-flea-search").value.toLowerCase().trim() : "";
   const typeFilter = $id("sel-flea-type") ? $id("sel-flea-type").value : "all";
   const sortVal = $id("sel-flea-sort") ? $id("sel-flea-sort").value : "default";
-  const rarityMap = { "Th\u1EA7n tho\u1EA1i": 6, "Huy\u1EC1n tho\u1EA1i": 5, "S\u1EED thi": 4, "Hi\u1EBFm": 3, "Th\u01B0\u1EDDng": 2, "R\xE1c": 1 };
+  const rarityMap = { "th\u1EA7n c\u1EA5p": 6, "huy\u1EC1n tho\u1EA1i": 5, "s\u1EED thi": 4, "hi\u1EBFm": 3, "th\u01B0\u1EDDng": 2, "r\xE1c": 1 };
   const escapeHtml = (str) => (str || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   let itemsArr = Object.entries(currentFleaItems).map(([id, data]) => {
     const itemName = getFleaItemName(data.itemId, data.itemData);
@@ -50086,7 +50124,7 @@ function renderFleaItems() {
     else if (data.itemType === "ferts") effType = "ferts";
     else if (data.itemType === "tickets" || data.itemType === "shards") effType = "tickets";
     let rVal = 0;
-    if (data.itemData && data.itemData.rarity) rVal = rarityMap[data.itemData.rarity] || 0;
+    if (data.itemData && data.itemData.rarity) rVal = rarityMap[data.itemData.rarity.toLowerCase()] || 0;
     return { id, data, itemName, sellerName, effType, rVal };
   });
   itemsArr = itemsArr.filter((item) => {

@@ -46,10 +46,10 @@ async function pMap(array, asyncFn, concurrency) {
 export function generateProcedural32x32Sprite(rarity) {
   const map = [];
   const borderChar = 'K';
-  const mainChar = rarity === 'Huyền thoại' ? 'C' : rarity === 'Sử thi' ? 'V' : rarity === 'Hiếm' ? 'B' : rarity === 'Thường' ? 'G' : 'D';
-  const subChar = rarity === 'Huyền thoại' ? 'Y' : rarity === 'Sử thi' ? 'v' : rarity === 'Hiếm' ? 'b' : rarity === 'Thường' ? 'g' : 'd';
+  const mainChar = rarity === 'Thần cấp' ? 'S' : rarity === 'Huyền thoại' ? 'C' : rarity === 'Sử thi' ? 'V' : rarity === 'Hiếm' ? 'B' : rarity === 'Thường' ? 'G' : 'D';
+  const subChar = rarity === 'Thần cấp' ? 's' : rarity === 'Huyền thoại' ? 'Y' : rarity === 'Sử thi' ? 'v' : rarity === 'Hiếm' ? 'b' : rarity === 'Thường' ? 'g' : 'd';
   const highlightChar = 'W';
-  const accentChar = rarity === 'Huyền thoại' ? 'R' : rarity === 'Sử thi' ? 'F' : rarity === 'Hiếm' ? 'E' : rarity === 'Thường' ? 'L' : 'D';
+  const accentChar = rarity === 'Thần cấp' ? 'M' : rarity === 'Huyền thoại' ? 'R' : rarity === 'Sử thi' ? 'F' : rarity === 'Hiếm' ? 'E' : rarity === 'Thường' ? 'L' : 'D';
 
   const type = Math.floor(Math.random() * 4); 
 
@@ -138,7 +138,7 @@ Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối c�
       ? "[Bậc 1] Vật phẩm có ích hoặc là thường phẩm thú vị tuy công năng đơn giản, nhưng sở hữu cũng khá thú vị, giới hạn rõ ràng."
       : "[Bậc 0] Những món đồ kỳ cục, hỏng hóc hoặc có công dụng cực kỳ vô thưởng vô phạt. Chúng tồn tại chủ yếu để gây cười, tạo tình huống trớ trêu trong tương tác đời thường.";
 
-    const basePrice = rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : rarity === 'Hiếm' ? 2500 : rarity === 'Thường' ? 500 : 100;
+    const basePrice = rarity === 'Thần cấp' ? 10000000 : rarity === 'Huyền thoại' ? 2000000 : rarity === 'Sử thi' ? 100000 : rarity === 'Hiếm' ? 25000 : rarity === 'Thường' ? 5000 : 500;
 
     const sysPrompt = `Bạn là một AI thiết kế "Kỳ vật dị giới" (Otherworldly Artifact) và chuyên gia Pixel Art (n x n, tối thiểu 32x32).
 Hãy sáng tạo 1 KỲ VẬT ĐỘC NHẤT phẩm chất [${rarity}].
@@ -218,7 +218,7 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
         
         // Đảm bảo có giá để hiển thị, nếu AI thiếu thì fallback
         if (typeof o.price !== 'number') {
-           o.price = rarity === 'Sử thi' ? 8000 : (rarity === 'Huyền thoại' ? 20000 : (rarity === 'Hiếm' ? 2500 : (rarity === 'Thường' ? 500 : 100)));
+           o.price = rarity === 'Thần cấp' ? (o.price || 10000000) : (rarity === 'Sử thi' ? 100000 : (rarity === 'Huyền thoại' ? 2000000 : (rarity === 'Hiếm' ? 25000 : (rarity === 'Thường' ? 5000 : 500))));
         }
         return o;
       }
@@ -347,26 +347,26 @@ export async function executeGachaRoll(ticketType, count, updateLoadingText) {
         if (p > 100) legRate = 5 + (p - 100) * 0.95;
         if (p >= GACHA_SUPER_PITY) legRate = 100;
 
-        if (roll < legRate) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 20000; }
-        else if (roll < legRate + 50) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 8000; }
-        else { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 2500; }
+        if (roll < legRate) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 2000000; }
+        else if (roll < legRate + 50) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 100000; }
+        else { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 25000; }
         
         if (preRolledRarity === 'Huyền thoại') {
           ctx.S.gachaPity.super = 0;
           if (p >= GACHA_SUPER_PITY) isPity = true;
         }
       } else if (ticketType === 'spec') {
-        if (roll < 10) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 20000; }
-        else if (roll < 40) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 8000; }
-        else if (roll < 80) { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 2500; }
-        else { preRolledRarity = 'Thường'; preRolledColor = '#b0bec5'; preRolledPrice = 500; }
+        if (roll < 10) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 2000000; }
+        else if (roll < 40) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 100000; }
+        else if (roll < 80) { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 25000; }
+        else { preRolledRarity = 'Thường'; preRolledColor = '#b0bec5'; preRolledPrice = 5000; }
         ctx.S.gachaPity.spec = 0; 
       } else {
-        if (roll < 1) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 20000; }
-        else if (roll < 5) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 8000; }
-        else if (roll < 25) { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 2500; }
-        else if (roll < 60) { preRolledRarity = 'Thường'; preRolledColor = '#b0bec5'; preRolledPrice = 500; }
-        else { preRolledRarity = 'Rác'; preRolledColor = '#9e9e9e'; preRolledPrice = 100; }
+        if (roll < 1) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 2000000; }
+        else if (roll < 5) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 100000; }
+        else if (roll < 25) { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 25000; }
+        else if (roll < 60) { preRolledRarity = 'Thường'; preRolledColor = '#b0bec5'; preRolledPrice = 5000; }
+        else { preRolledRarity = 'Rác'; preRolledColor = '#9e9e9e'; preRolledPrice = 500; }
       }
     }
 
@@ -753,7 +753,7 @@ export function openGachaModal() {
     if (loadOverlay) loadOverlay.style.display = 'flex';
     if (loadText) loadText.textContent = 'Đang đổi Mảnh Huyền Thoại...';
     
-    const item = await generateUniqueItem({ rarity: 'Huyền thoại', color: '#ff8000', sellPrice: 20000, ticketType: 'exchange' });
+    const item = await generateUniqueItem({ rarity: 'Huyền thoại', color: '#ff8000', sellPrice: 2000000, ticketType: 'exchange' });
     
     if (loadOverlay) loadOverlay.style.display = 'none';
     
@@ -876,7 +876,7 @@ export function openGachaRatesModal() {
 
 // ---------------- LÒ NỒI PHÙ THUỶ (CAULDRON MERGE) ---------------- //
 
-export async function generateAICauldronMerge(itemsData, isSuccess) {
+export async function generateAICauldronMerge(itemsData, isSuccess, isGodTier = false) {
   if (!SEC.url || !SEC.model) return null;
   try {
     const simpleColors = Object.entries(GACHA_P).filter(e => typeof e[1] === 'string');
@@ -898,10 +898,16 @@ ${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể)'}`;
     }).join('\n\n');
     const totalValue = itemsData.reduce((sum, it) => sum + (it.sell || 0), 0);
     const maxVal = totalValue * 2;
+    const maxValStr = isGodTier ? `Chính xác BẰNG ${totalValue * 5}G (Không thêm bớt)` : `(Tối đa tuyệt đối: ${maxVal}G)`;
 
-    const resultInstruction = isSuccess 
-      ? `[KẾT QUẢ BẮT BUỘC]: THÀNH CÔNG. Luyện hoá đã sinh ra một vật phẩm vượt trội hoặc vô cùng thú vị. Hãy tăng giá trị của nó lên cao hơn (nhưng KHÔNG QUÁ ${maxVal}G). Đồ mới phải có độ hiếm từ [Thường] đến [Huyền thoại].`
-      : `[KẾT QUẢ BẮT BUỘC]: THẤT BẠI. Quá trình luyện hoá đã xảy ra tai nạn, sinh ra phế phẩm hoặc thứ cực kỳ vô dụng tấu hài. Hãy ép giá rớt thê thảm (có thể chỉ vài chục G). Đồ mới BẮT BUỘC phải mang độ hiếm [Rác] hoặc [Thường].`;
+    let resultInstruction = '';
+    if (isGodTier) {
+      resultInstruction = `[KẾT QUẢ BẮT BUỘC]: THẦN CẤP (GOD TIER). Luyện hoá đã tạo ra một KỲ TÍCH! Món đồ sinh ra mang quyền năng tuyệt đối vượt ngoài mọi giới hạn thông thường, vô cùng bá đạo, rực rỡ và độc nhất vô nhị. Giá trị không giới hạn. Đồ mới BẮT BUỘC phải mang độ hiếm [Thần Cấp].`;
+    } else {
+      resultInstruction = isSuccess 
+        ? `[KẾT QUẢ BẮT BUỘC]: THÀNH CÔNG. Luyện hoá đã sinh ra một vật phẩm vượt trội hoặc vô cùng thú vị. Hãy tăng giá trị của nó lên cao hơn (nhưng KHÔNG QUÁ ${maxVal}G). Đồ mới phải có độ hiếm từ [Thường] đến [Huyền thoại].`
+        : `[KẾT QUẢ BẮT BUỘC]: THẤT BẠI. Quá trình luyện hoá đã xảy ra tai nạn, sinh ra phế phẩm hoặc thứ cực kỳ vô dụng tấu hài. Hãy ép giá rớt thê thảm (có thể chỉ vài chục G). Đồ mới BẮT BUỘC phải mang độ hiếm [Rác] hoặc [Thường].`;
+    }
 
     const sysPrompt = `Bạn là một AI quản lý "Nồi Luyện" (Witch's Cauldron) và chuyên gia Pixel Art (n x n, tối thiểu 32x32).
 Người chơi vừa bỏ các Vật phẩm Độc nhất sau vào nồi để luyện hoá (dung hợp):
@@ -933,8 +939,8 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
 {
   "name": "Tên vật phẩm mới (2~7 chữ, ấn tượng)",
   "desc": "Mô tả ngắn gọn CƠ CHẾ và CÁCH SỬ DỤNG của vật phẩm mới (dưới 100 chữ). Phải rõ ràng, thú vị, độc lạ.",
-  "rarity": "Độ hiếm của vật phẩm (Rác, Thường, Hiếm, Sử thi, Huyền thoại)",
-  "price": Số nguyên định giá. (Tối đa tuyệt đối: ${maxVal}G),
+  "rarity": "Độ hiếm của vật phẩm (${isGodTier ? 'BẮT BUỘC ĐIỀN: Thần Cấp' : 'Rác, Thường, Hiếm, Sử thi, Huyền thoại'})",
+  "price": Số nguyên định giá. ${maxValStr},
   "spriteMap": [ mảng các chuỗi. Nếu chọn kích thước n x n, mảng PHẢI CÓ ĐÚNG n chuỗi, và mỗi chuỗi DÀI CHÍNH XÁC n ký tự. Phải là hình vuông (min 32x32). Chỉ dùng ký tự Bảng màu và dấu '.' cho điểm trong suốt ]
 }`;
 
@@ -1019,11 +1025,19 @@ export async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   
   if (updateLoadingText) updateLoadingText("Nồi đang sôi sùng sục...");
 
+  const legendaryCount = itemsData.filter(it => it.rarity && it.rarity.toLowerCase().includes('huyền thoại')).length;
   const isSuccess = Math.random() < 0.6; // 60% success
+  
+  let isGodTier = false;
+  if (legendaryCount >= 2 && isSuccess) {
+    if (Math.random() < 0.1) {
+      isGodTier = true; // 10% chance when success and >= 2 legendaries
+    }
+  }
 
   let resultData = null;
   for (let attempt = 1; attempt <= 3; attempt++) {
-    resultData = await generateAICauldronMerge(itemsData, isSuccess);
+    resultData = await generateAICauldronMerge(itemsData, isSuccess, isGodTier);
     if (resultData) break;
     if (updateLoadingText) updateLoadingText(`Đang thử lại... (${attempt}/3)`);
   }
@@ -1043,10 +1057,12 @@ export async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   const spKey = `cauldron_${timestamp}_${randId}`;
   
   let color = '#9e9e9e';
-  if (resultData.rarity === 'Huyền thoại') color = '#ff8000';
-  else if (resultData.rarity === 'Sử thi') color = '#a335ee';
-  else if (resultData.rarity === 'Hiếm') color = '#4a90e2';
-  else if (resultData.rarity === 'Thường') color = '#b0bec5';
+  if (/Thần cấp/i.test(resultData.rarity)) { color = '#ff1493'; resultData.rarity = 'Thần cấp'; }
+  else if (/Huyền thoại/i.test(resultData.rarity)) { color = '#ff8000'; resultData.rarity = 'Huyền thoại'; }
+  else if (/Sử thi/i.test(resultData.rarity)) { color = '#a335ee'; resultData.rarity = 'Sử thi'; }
+  else if (/Hiếm/i.test(resultData.rarity)) { color = '#4a90e2'; resultData.rarity = 'Hiếm'; }
+  else if (/Thường/i.test(resultData.rarity)) { color = '#b0bec5'; resultData.rarity = 'Thường'; }
+  else { resultData.rarity = 'Rác'; }
 
   registerDynamicSprite(spKey, resultData.spriteMap);
   

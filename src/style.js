@@ -402,6 +402,7 @@ export const styleCSS = `
     .gacha-item-card.rarity-Hiếm { border-color: #4a90e2 !important; background: #f0f7ff !important; }
     .gacha-item-card.rarity-Sử-thi { border-color: #a335ee !important; background: #faf0ff !important; }
     .gacha-item-card.rarity-Huyền-thoại { border-color: #ff8000 !important; background: #fff8f0 !important; box-shadow: 0 0 10px rgba(255,128,0,0.6) !important; }
+    .gacha-item-card.rarity-Thần-cấp { border-color: #ff1493 !important; background: #fff0f5 !important; box-shadow: 0 0 15px rgba(255,20,147,0.8) !important; animation: popIn 1s infinite alternate; }
     /* Dungeon View */
     .dungeon-view { display: flex; flex: 1; width: 100%; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; box-sizing: border-box; }
     .dg-arena { flex: 1; position: relative; border: 4px solid #3f3a50; border-radius: 8px; background: rgba(0,0,0,0.1); overflow: hidden; }
