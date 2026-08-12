@@ -54323,6 +54323,11 @@ var init_cooking = __esm({
 });
 
 // src/bank.js
+function getMaxLoan() {
+  const assets = (ctx.S.coins || 0) + (ctx.S.bankDeposit || 0) + (ctx.S.bankInvestPrincipal || 0);
+  const limit2 = Math.floor(assets * 0.5);
+  return Math.min(Math.max(limit2, 1e4), 1e6);
+}
 function calculateInterest() {
   const now2 = Date.now();
   if (ctx.S.bankDeposit) {
@@ -54403,16 +54408,28 @@ function checkLoanStatus() {
       save();
     }
   }
-  if (ctx.S.bankLockedDebt > 0) {
+  if (ctx.S.bankLockedDebt > 0 || ctx.S.bankEmergencyLoan > 0) {
     if (now2 - (ctx.S.bankLastCollectionTime || 0) >= ONE_HOUR) {
       ctx.S.bankLastCollectionTime = now2;
       if (ctx.S.coins > 0) {
-        if (ctx.S.coins >= ctx.S.bankLockedDebt) {
-          ctx.S.coins -= ctx.S.bankLockedDebt;
-          ctx.S.bankLockedDebt = 0;
-        } else {
-          ctx.S.bankLockedDebt -= ctx.S.coins;
-          ctx.S.coins = 0;
+        if (ctx.S.bankLockedDebt > 0) {
+          if (ctx.S.coins >= ctx.S.bankLockedDebt) {
+            ctx.S.coins -= ctx.S.bankLockedDebt;
+            ctx.S.bankLockedDebt = 0;
+          } else {
+            ctx.S.bankLockedDebt -= ctx.S.coins;
+            ctx.S.coins = 0;
+          }
+        }
+        if (ctx.S.coins > 0 && ctx.S.bankEmergencyLoan > 0) {
+          if (ctx.S.coins >= ctx.S.bankEmergencyLoan) {
+            ctx.S.coins -= ctx.S.bankEmergencyLoan;
+            ctx.S.bankEmergencyLoan = 0;
+            ctx.S.bankEmergencyLoanTime = 0;
+          } else {
+            ctx.S.bankEmergencyLoan -= ctx.S.coins;
+            ctx.S.coins = 0;
+          }
         }
         save();
       }
@@ -54477,7 +54494,7 @@ function renderBankUI() {
             <div class="note">L\xE3i su\u1EA5t 10% m\u1ED7i 4 gi\u1EDD. C\u1EF1c k\u1EF3 r\u1EE7i ro!</div>
             <div style="font-size:14px; margin-bottom:12px; color:#5c4033;">\u0110ang n\u1EE3 t\xEDn d\u1EE5ng \u0111en: <b>${(ctx.S.bankEmergencyLoan || 0).toLocaleString()}</b> G</div>
             <div style="display:flex; gap:8px; margin-top:8px;">
-                <input type="number" id="bank-emergency-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" style="flex:1;">
+                <input type="number" id="bank-emergency-amt" class="inp" placeholder="T\u1ED1i \u0111a 50,000" min="1" max="50000" style="flex:1;">
                 <div class="buy" style="background:#d35400;" onclick="FarmAll.uiBankAction('borrowEmergency')">Vay Kh\u1EA9n C\u1EA5p</div>
             </div>
             <div style="display:flex; gap:8px; margin-top:8px;">
@@ -54494,7 +54511,9 @@ function renderBankUI() {
                     <div class="buy" onclick="FarmAll.uiBankAction('repay')">Tr\u1EA3 N\u1EE3</div>
                 </div>`;
       } else {
+        const maxLoan = getMaxLoan();
         html += `<div style="font-size:14px; margin-bottom:12px; color:#7a5c38;">V\xED v\xE0ng hi\u1EC7n t\u1EA1i: <b>${ctx.S.coins.toLocaleString()}</b> G</div>
+                <div style="font-size:14px; margin-bottom:8px; color:#5c4033;">H\u1EA1n m\u1EE9c vay t\u1ED1i \u0111a: <b>${maxLoan.toLocaleString()}</b> G</div>
                 <div style="margin-bottom:8px;">
                     <select id="bank-loan-tier" class="inp" style="width:100%; padding:6px; background:#faf0dc; border:2px solid #bd923b; color:#5c4033; font-weight:bold; border-radius:6px; outline:none;">
                         <option value="1">Vay 1 Ng\xE0y (L\xE3i 5%)</option>
@@ -54503,7 +54522,7 @@ function renderBankUI() {
                     </select>
                 </div>
                 <div style="display:flex; gap:8px; margin-top:8px;">
-                    <input type="number" id="bank-borrow-amt" class="inp" placeholder="V\xE0ng mu\u1ED1n nh\u1EADn" min="1" style="flex:1;">
+                    <input type="number" id="bank-borrow-amt" class="inp" placeholder="V\xE0ng mu\u1ED1n nh\u1EADn" min="1" max="${maxLoan}" style="flex:1;">
                     <div class="buy" onclick="FarmAll.uiBankAction('borrow')">Vay N\u1EE3</div>
                 </div>`;
       }
@@ -54555,6 +54574,7 @@ function uiBankAction(action) {
   }
 }
 function deposit(amount) {
+  if (ctx.S.bankLockedDebt > 0 || ctx.S.bankEmergencyLoan > 0) return false;
   if (ctx.S.coins < amount) return false;
   calculateInterest();
   ctx.S.coins -= amount;
@@ -54580,6 +54600,7 @@ function withdrawDeposit(amount) {
   return true;
 }
 function invest(amount) {
+  if (ctx.S.bankLockedDebt > 0 || ctx.S.bankEmergencyLoan > 0) return false;
   if (ctx.S.coins < amount) return false;
   calculateInterest();
   ctx.S.coins -= amount;
@@ -54609,6 +54630,8 @@ function withdrawInvest(amount) {
 }
 function borrow(amount, tier) {
   if (ctx.S.bankLockedDebt > 0 || ctx.S.bankLoan > 0) return false;
+  const maxLoan = getMaxLoan();
+  if (amount > maxLoan) return false;
   let durationMultiplier = 1;
   let interestRate = 0.05;
   if (tier === 2) {
@@ -54642,7 +54665,8 @@ function repay(amount) {
   return false;
 }
 function borrowEmergency(amount) {
-  ctx.S.bankEmergencyLoan = (ctx.S.bankEmergencyLoan || 0) + amount;
+  if (ctx.S.bankEmergencyLoan > 0 || amount > 5e4) return false;
+  ctx.S.bankEmergencyLoan = amount;
   ctx.S.bankEmergencyLoanTime = Date.now();
   ctx.S.coins += amount;
   save();

@@ -7,6 +7,12 @@ const DEPOSIT_RATE = 0.005; // 0.5% per 4h simple interest
 const INVEST_RATE = 0.015; // 1.5% per 4h compound interest
 const EMERGENCY_LOAN_INTEREST = 0.1; // 10% per 4h
 
+function getMaxLoan() {
+    const assets = (ctx.S.coins || 0) + (ctx.S.bankDeposit || 0) + (ctx.S.bankInvestPrincipal || 0);
+    const limit = Math.floor(assets * 0.5);
+    return Math.min(Math.max(limit, 10000), 1000000); // Minimum 10,000, max 1,000,000
+}
+
 export function calculateInterest() {
     const now = Date.now();
     
@@ -105,16 +111,30 @@ export function checkLoanStatus() {
     }
     
     // Periodic debt collection
-    if (ctx.S.bankLockedDebt > 0) {
+    if (ctx.S.bankLockedDebt > 0 || ctx.S.bankEmergencyLoan > 0) {
         if (now - (ctx.S.bankLastCollectionTime || 0) >= ONE_HOUR) {
             ctx.S.bankLastCollectionTime = now;
             if (ctx.S.coins > 0) {
-                if (ctx.S.coins >= ctx.S.bankLockedDebt) {
-                    ctx.S.coins -= ctx.S.bankLockedDebt;
-                    ctx.S.bankLockedDebt = 0;
-                } else {
-                    ctx.S.bankLockedDebt -= ctx.S.coins;
-                    ctx.S.coins = 0;
+                // Collect locked debt first
+                if (ctx.S.bankLockedDebt > 0) {
+                    if (ctx.S.coins >= ctx.S.bankLockedDebt) {
+                        ctx.S.coins -= ctx.S.bankLockedDebt;
+                        ctx.S.bankLockedDebt = 0;
+                    } else {
+                        ctx.S.bankLockedDebt -= ctx.S.coins;
+                        ctx.S.coins = 0;
+                    }
+                }
+                // Collect emergency loan next
+                if (ctx.S.coins > 0 && ctx.S.bankEmergencyLoan > 0) {
+                    if (ctx.S.coins >= ctx.S.bankEmergencyLoan) {
+                        ctx.S.coins -= ctx.S.bankEmergencyLoan;
+                        ctx.S.bankEmergencyLoan = 0;
+                        ctx.S.bankEmergencyLoanTime = 0;
+                    } else {
+                        ctx.S.bankEmergencyLoan -= ctx.S.coins;
+                        ctx.S.coins = 0;
+                    }
                 }
                 All.save();
             }
@@ -188,7 +208,7 @@ export function renderBankUI() {
             <div class="note">Lãi suất 10% mỗi 4 giờ. Cực kỳ rủi ro!</div>
             <div style="font-size:14px; margin-bottom:12px; color:#5c4033;">Đang nợ tín dụng đen: <b>${(ctx.S.bankEmergencyLoan || 0).toLocaleString()}</b> G</div>
             <div style="display:flex; gap:8px; margin-top:8px;">
-                <input type="number" id="bank-emergency-amt" class="inp" placeholder="Số lượng" min="1" style="flex:1;">
+                <input type="number" id="bank-emergency-amt" class="inp" placeholder="Tối đa 50,000" min="1" max="50000" style="flex:1;">
                 <div class="buy" style="background:#d35400;" onclick="FarmAll.uiBankAction('borrowEmergency')">Vay Khẩn Cấp</div>
             </div>
             <div style="display:flex; gap:8px; margin-top:8px;">
@@ -205,7 +225,9 @@ export function renderBankUI() {
                     <div class="buy" onclick="FarmAll.uiBankAction('repay')">Trả Nợ</div>
                 </div>`;
             } else {
+                const maxLoan = getMaxLoan();
                 html += `<div style="font-size:14px; margin-bottom:12px; color:#7a5c38;">Ví vàng hiện tại: <b>${ctx.S.coins.toLocaleString()}</b> G</div>
+                <div style="font-size:14px; margin-bottom:8px; color:#5c4033;">Hạn mức vay tối đa: <b>${maxLoan.toLocaleString()}</b> G</div>
                 <div style="margin-bottom:8px;">
                     <select id="bank-loan-tier" class="inp" style="width:100%; padding:6px; background:#faf0dc; border:2px solid #bd923b; color:#5c4033; font-weight:bold; border-radius:6px; outline:none;">
                         <option value="1">Vay 1 Ngày (Lãi 5%)</option>
@@ -214,7 +236,7 @@ export function renderBankUI() {
                     </select>
                 </div>
                 <div style="display:flex; gap:8px; margin-top:8px;">
-                    <input type="number" id="bank-borrow-amt" class="inp" placeholder="Vàng muốn nhận" min="1" style="flex:1;">
+                    <input type="number" id="bank-borrow-amt" class="inp" placeholder="Vàng muốn nhận" min="1" max="${maxLoan}" style="flex:1;">
                     <div class="buy" onclick="FarmAll.uiBankAction('borrow')">Vay Nợ</div>
                 </div>`;
             }
@@ -275,6 +297,7 @@ export function uiBankAction(action) {
 }
 
 function deposit(amount) {
+    if (ctx.S.bankLockedDebt > 0 || ctx.S.bankEmergencyLoan > 0) return false;
     if (ctx.S.coins < amount) return false;
     calculateInterest();
     ctx.S.coins -= amount;
@@ -302,6 +325,7 @@ function withdrawDeposit(amount) {
 }
 
 function invest(amount) {
+    if (ctx.S.bankLockedDebt > 0 || ctx.S.bankEmergencyLoan > 0) return false;
     if (ctx.S.coins < amount) return false;
     calculateInterest();
     ctx.S.coins -= amount;
@@ -335,6 +359,9 @@ function withdrawInvest(amount) {
 function borrow(amount, tier) {
     if (ctx.S.bankLockedDebt > 0 || ctx.S.bankLoan > 0) return false;
     
+    const maxLoan = getMaxLoan();
+    if (amount > maxLoan) return false;
+    
     let durationMultiplier = 1; // 1 day = 6 * 4h
     let interestRate = 0.05;
     if (tier === 2) { durationMultiplier = 3; interestRate = 0.20; }
@@ -367,7 +394,8 @@ function repay(amount) {
 }
 
 function borrowEmergency(amount) {
-    ctx.S.bankEmergencyLoan = (ctx.S.bankEmergencyLoan || 0) + amount;
+    if (ctx.S.bankEmergencyLoan > 0 || amount > 50000) return false;
+    ctx.S.bankEmergencyLoan = amount;
     ctx.S.bankEmergencyLoanTime = Date.now();
     ctx.S.coins += amount;
     All.save();
