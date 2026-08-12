@@ -1660,9 +1660,6 @@ window['bjGiveMoney'] = function(reqId) {
     const remaining = rd.amount - rd.fulfilled;
     if (remaining <= 0) return bjToast('Đã đủ tiền rồi!');
     
-    const totalDebt = (ctx.S.bankLoan || 0) + (ctx.S.bankLockedDebt || 0) + (ctx.S.bankEmergencyLoan || 0);
-    if (totalDebt > 0) return bjToast(`Không thể cho tiền! Bạn đang nợ Ngân Hàng ${totalDebt.toLocaleString()}G.`);
-    
     const amtStr = prompt(`Cho tiền ${log.name} (Tối đa: ${remaining.toLocaleString()}G):`, String(remaining));
     const amt = parseInt(amtStr);
     if (isNaN(amt) || amt <= 0) return;
