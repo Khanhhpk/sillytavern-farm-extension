@@ -138,7 +138,7 @@ Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối c�
       ? "[Bậc 1] Vật phẩm có ích hoặc là thường phẩm thú vị tuy công năng đơn giản, nhưng sở hữu cũng khá thú vị, giới hạn rõ ràng."
       : "[Bậc 0] Những món đồ kỳ cục, hỏng hóc hoặc có công dụng cực kỳ vô thưởng vô phạt. Chúng tồn tại chủ yếu để gây cười, tạo tình huống trớ trêu trong tương tác đời thường.";
 
-    const basePrice = rarity === 'Thần cấp' ? 100000 : rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : rarity === 'Hiếm' ? 2500 : rarity === 'Thường' ? 500 : 100;
+    const basePrice = rarity === 'Thần cấp' ? 10000000 : rarity === 'Huyền thoại' ? 2000000 : rarity === 'Sử thi' ? 100000 : rarity === 'Hiếm' ? 25000 : rarity === 'Thường' ? 5000 : 500;
 
     const sysPrompt = `Bạn là một AI thiết kế "Kỳ vật dị giới" (Otherworldly Artifact) và chuyên gia Pixel Art (n x n, tối thiểu 32x32).
 Hãy sáng tạo 1 KỲ VẬT ĐỘC NHẤT phẩm chất [${rarity}].
@@ -218,7 +218,7 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
         
         // Đảm bảo có giá để hiển thị, nếu AI thiếu thì fallback
         if (typeof o.price !== 'number') {
-           o.price = rarity === 'Thần cấp' ? (o.price || 100000) : (rarity === 'Sử thi' ? 8000 : (rarity === 'Huyền thoại' ? 20000 : (rarity === 'Hiếm' ? 2500 : (rarity === 'Thường' ? 500 : 100))));
+           o.price = rarity === 'Thần cấp' ? (o.price || 10000000) : (rarity === 'Sử thi' ? 100000 : (rarity === 'Huyền thoại' ? 2000000 : (rarity === 'Hiếm' ? 25000 : (rarity === 'Thường' ? 5000 : 500))));
         }
         return o;
       }
@@ -347,26 +347,26 @@ export async function executeGachaRoll(ticketType, count, updateLoadingText) {
         if (p > 100) legRate = 5 + (p - 100) * 0.95;
         if (p >= GACHA_SUPER_PITY) legRate = 100;
 
-        if (roll < legRate) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 20000; }
-        else if (roll < legRate + 50) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 8000; }
-        else { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 2500; }
+        if (roll < legRate) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 2000000; }
+        else if (roll < legRate + 50) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 100000; }
+        else { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 25000; }
         
         if (preRolledRarity === 'Huyền thoại') {
           ctx.S.gachaPity.super = 0;
           if (p >= GACHA_SUPER_PITY) isPity = true;
         }
       } else if (ticketType === 'spec') {
-        if (roll < 10) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 20000; }
-        else if (roll < 40) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 8000; }
-        else if (roll < 80) { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 2500; }
-        else { preRolledRarity = 'Thường'; preRolledColor = '#b0bec5'; preRolledPrice = 500; }
+        if (roll < 10) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 2000000; }
+        else if (roll < 40) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 100000; }
+        else if (roll < 80) { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 25000; }
+        else { preRolledRarity = 'Thường'; preRolledColor = '#b0bec5'; preRolledPrice = 5000; }
         ctx.S.gachaPity.spec = 0; 
       } else {
-        if (roll < 1) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 20000; }
-        else if (roll < 5) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 8000; }
-        else if (roll < 25) { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 2500; }
-        else if (roll < 60) { preRolledRarity = 'Thường'; preRolledColor = '#b0bec5'; preRolledPrice = 500; }
-        else { preRolledRarity = 'Rác'; preRolledColor = '#9e9e9e'; preRolledPrice = 100; }
+        if (roll < 1) { preRolledRarity = 'Huyền thoại'; preRolledColor = '#ff8000'; preRolledPrice = 2000000; }
+        else if (roll < 5) { preRolledRarity = 'Sử thi'; preRolledColor = '#a335ee'; preRolledPrice = 100000; }
+        else if (roll < 25) { preRolledRarity = 'Hiếm'; preRolledColor = '#4a90e2'; preRolledPrice = 25000; }
+        else if (roll < 60) { preRolledRarity = 'Thường'; preRolledColor = '#b0bec5'; preRolledPrice = 5000; }
+        else { preRolledRarity = 'Rác'; preRolledColor = '#9e9e9e'; preRolledPrice = 500; }
       }
     }
 
@@ -753,7 +753,7 @@ export function openGachaModal() {
     if (loadOverlay) loadOverlay.style.display = 'flex';
     if (loadText) loadText.textContent = 'Đang đổi Mảnh Huyền Thoại...';
     
-    const item = await generateUniqueItem({ rarity: 'Huyền thoại', color: '#ff8000', sellPrice: 20000, ticketType: 'exchange' });
+    const item = await generateUniqueItem({ rarity: 'Huyền thoại', color: '#ff8000', sellPrice: 2000000, ticketType: 'exchange' });
     
     if (loadOverlay) loadOverlay.style.display = 'none';
     

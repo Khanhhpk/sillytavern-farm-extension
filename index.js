@@ -4877,7 +4877,7 @@ N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y thi\u1EBFt k\u1EBF k\u1EF3 v\u1EADt l
 3. V\u1EBC PIXEL: Khung pixel t\u1ED1i thi\u1EC3u l\xE0 32x32. B\u1EA1n c\xF3 th\u1EC3 m\u1EDF r\u1ED9ng k\xEDch th\u01B0\u1EDBc l\u1EDBn h\u01A1n (v\xED d\u1EE5 40x40, 48x48), nh\u01B0ng B\u1EAET BU\u1ED8C ph\u1EA3i l\xE0 l\u01B0\u1EDBi H\xCCNH VU\xD4NG n x n (s\u1ED1 d\xF2ng v\xE0 s\u1ED1 k\xFD t\u1EF1 m\u1ED7i d\xF2ng ph\u1EA3i b\u1EB1ng nhau).`;
     }
     const rarityGuidance = rarity === "Huy\u1EC1n tho\u1EA1i" ? "[B\u1EADc 4] V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t v\xF4 nh\u1ECB, x\u1EE9ng danh ph\u1EA9m ch\u1EA5t c\u1EE7a n\xF3. Mang t\u1EDBi \u0111\u1EE7 th\u1EE9 cho ng\u01B0\u1EDDi d\xF9ng. L\xE0 m\u1ED9t v\u1EADt ph\u1EA9m danh x\u1EE9ng v\u1EDBi th\u1EF1c." : rarity === "S\u1EED thi" ? "[B\u1EADc 3] \u0110\u1ED3 v\u1EADt mang t\xEDnh tr\u1ECDng tr\u1ECB (Gi\xE1 tr\u1ECB cao). C\xF3 s\u1EE9c m\u1EA1nh l\u1EDBn, \u0111a d\u1EE5ng, gi\u1ED1ng nh\u01B0 s\u1EDF h\u1EEFu b\u1EADc k\xEC t\xE0i. Tuy nhi\xEAn, \u0111\u1EC3 ph\xE1t huy t\u1ED1i \u0111a c\u1EA7n c\xF3 s\u1EF1 t\xEDnh to\xE1n c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i. Kh\xF4ng qu\xE1 l\u1ED7i game, nh\u01B0ng c\xF3 trong tay th\xEC s\u1EBD r\u1EA5t th\xEDch." : rarity === "Hi\u1EBFm" ? "[B\u1EADc 2] V\u1EADt ph\u1EA9m b\u1EAFt \u0111\u1EA7u c\xF3 'c\u01A1 ch\u1EBF ho\u1EA1t \u0111\u1ED9ng' ri\xEAng bi\u1EC7t. C\xF3 th\u1EC3 c\xF3 \xEDch, t\xE1c d\u1EE5ng th\xFA v\u1ECB, mang l\u1EA1i l\u1EE3i \xEDch r\xF5 r\u1EC7t nh\u01B0ng s\u1EBD c\xF3 v\xE0i gi\u1EDBi h\u1EA1n nh\u1ECF." : rarity === "Th\u01B0\u1EDDng" ? "[B\u1EADc 1] V\u1EADt ph\u1EA9m c\xF3 \xEDch ho\u1EB7c l\xE0 th\u01B0\u1EDDng ph\u1EA9m th\xFA v\u1ECB tuy c\xF4ng n\u0103ng \u0111\u01A1n gi\u1EA3n, nh\u01B0ng s\u1EDF h\u1EEFu c\u0169ng kh\xE1 th\xFA v\u1ECB, gi\u1EDBi h\u1EA1n r\xF5 r\xE0ng." : "[B\u1EADc 0] Nh\u1EEFng m\xF3n \u0111\u1ED3 k\u1EF3 c\u1EE5c, h\u1ECFng h\xF3c ho\u1EB7c c\xF3 c\xF4ng d\u1EE5ng c\u1EF1c k\u1EF3 v\xF4 th\u01B0\u1EDFng v\xF4 ph\u1EA1t. Ch\xFAng t\u1ED3n t\u1EA1i ch\u1EE7 y\u1EBFu \u0111\u1EC3 g\xE2y c\u01B0\u1EDDi, t\u1EA1o t\xECnh hu\u1ED1ng tr\u1EDB tr\xEAu trong t\u01B0\u01A1ng t\xE1c \u0111\u1EDDi th\u01B0\u1EDDng.";
-    const basePrice = rarity === "Th\u1EA7n c\u1EA5p" ? 1e5 : rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "S\u1EED thi" ? 8e3 : rarity === "Hi\u1EBFm" ? 2500 : rarity === "Th\u01B0\u1EDDng" ? 500 : 100;
+    const basePrice = rarity === "Th\u1EA7n c\u1EA5p" ? 1e7 : rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e6 : rarity === "S\u1EED thi" ? 1e5 : rarity === "Hi\u1EBFm" ? 25e3 : rarity === "Th\u01B0\u1EDDng" ? 5e3 : 500;
     const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF "K\u1EF3 v\u1EADt d\u1ECB gi\u1EDBi" (Otherworldly Artifact) v\xE0 chuy\xEAn gia Pixel Art (n x n, t\u1ED1i thi\u1EC3u 32x32).
 H\xE3y s\xE1ng t\u1EA1o 1 K\u1EF2 V\u1EACT \u0110\u1ED8C NH\u1EA4T ph\u1EA9m ch\u1EA5t [${rarity}].
 ${contextStr}
@@ -4947,7 +4947,7 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
         }
         o2.spriteMap = fixedMap;
         if (typeof o2.price !== "number") {
-          o2.price = rarity === "Th\u1EA7n c\u1EA5p" ? o2.price || 1e5 : rarity === "S\u1EED thi" ? 8e3 : rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "Hi\u1EBFm" ? 2500 : rarity === "Th\u01B0\u1EDDng" ? 500 : 100;
+          o2.price = rarity === "Th\u1EA7n c\u1EA5p" ? o2.price || 1e7 : rarity === "S\u1EED thi" ? 1e5 : rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e6 : rarity === "Hi\u1EBFm" ? 25e3 : rarity === "Th\u01B0\u1EDDng" ? 5e3 : 500;
         }
         return o2;
       }
@@ -5057,15 +5057,15 @@ async function executeGachaRoll(ticketType, count2, updateLoadingText) {
         if (roll < legRate) {
           preRolledRarity = "Huy\u1EC1n tho\u1EA1i";
           preRolledColor = "#ff8000";
-          preRolledPrice = 2e4;
+          preRolledPrice = 2e6;
         } else if (roll < legRate + 50) {
           preRolledRarity = "S\u1EED thi";
           preRolledColor = "#a335ee";
-          preRolledPrice = 8e3;
+          preRolledPrice = 1e5;
         } else {
           preRolledRarity = "Hi\u1EBFm";
           preRolledColor = "#4a90e2";
-          preRolledPrice = 2500;
+          preRolledPrice = 25e3;
         }
         if (preRolledRarity === "Huy\u1EC1n tho\u1EA1i") {
           ctx.S.gachaPity.super = 0;
@@ -5075,42 +5075,42 @@ async function executeGachaRoll(ticketType, count2, updateLoadingText) {
         if (roll < 10) {
           preRolledRarity = "Huy\u1EC1n tho\u1EA1i";
           preRolledColor = "#ff8000";
-          preRolledPrice = 2e4;
+          preRolledPrice = 2e6;
         } else if (roll < 40) {
           preRolledRarity = "S\u1EED thi";
           preRolledColor = "#a335ee";
-          preRolledPrice = 8e3;
+          preRolledPrice = 1e5;
         } else if (roll < 80) {
           preRolledRarity = "Hi\u1EBFm";
           preRolledColor = "#4a90e2";
-          preRolledPrice = 2500;
+          preRolledPrice = 25e3;
         } else {
           preRolledRarity = "Th\u01B0\u1EDDng";
           preRolledColor = "#b0bec5";
-          preRolledPrice = 500;
+          preRolledPrice = 5e3;
         }
         ctx.S.gachaPity.spec = 0;
       } else {
         if (roll < 1) {
           preRolledRarity = "Huy\u1EC1n tho\u1EA1i";
           preRolledColor = "#ff8000";
-          preRolledPrice = 2e4;
+          preRolledPrice = 2e6;
         } else if (roll < 5) {
           preRolledRarity = "S\u1EED thi";
           preRolledColor = "#a335ee";
-          preRolledPrice = 8e3;
+          preRolledPrice = 1e5;
         } else if (roll < 25) {
           preRolledRarity = "Hi\u1EBFm";
           preRolledColor = "#4a90e2";
-          preRolledPrice = 2500;
+          preRolledPrice = 25e3;
         } else if (roll < 60) {
           preRolledRarity = "Th\u01B0\u1EDDng";
           preRolledColor = "#b0bec5";
-          preRolledPrice = 500;
+          preRolledPrice = 5e3;
         } else {
           preRolledRarity = "R\xE1c";
           preRolledColor = "#9e9e9e";
-          preRolledPrice = 100;
+          preRolledPrice = 500;
         }
       }
     }
@@ -5461,7 +5461,7 @@ function openGachaModal() {
     const loadText = $id("gachaLoadingText");
     if (loadOverlay) loadOverlay.style.display = "flex";
     if (loadText) loadText.textContent = "\u0110ang \u0111\u1ED5i M\u1EA3nh Huy\u1EC1n Tho\u1EA1i...";
-    const item = await generateUniqueItem({ rarity: "Huy\u1EC1n tho\u1EA1i", color: "#ff8000", sellPrice: 2e4, ticketType: "exchange" });
+    const item = await generateUniqueItem({ rarity: "Huy\u1EC1n tho\u1EA1i", color: "#ff8000", sellPrice: 2e6, ticketType: "exchange" });
     if (loadOverlay) loadOverlay.style.display = "none";
     const results = [{ type: "unique", name: item.name, rarity: item.rarity, color: item.color, icon: spriteSVG(item.sp, 48), desc: item.desc, spKey: item.sp, count: 1 }];
     triggerGridResult("exchange", 1, results);
