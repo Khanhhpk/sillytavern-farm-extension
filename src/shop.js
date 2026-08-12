@@ -17,7 +17,7 @@ import { openBetModal } from './bet.js';
 /* ---------- Bảng ---------- */
 export function openModal(title, bodyHTML, keepBetTable) {
   if (!keepBetTable && All.cashOut) All.cashOut();                     // Mở bảng khác = rời bàn cược, rút tiền về trước đã
-  All.$id('mtitle-text').textContent = title;
+  All.$id('mtitle-text').innerHTML = title;
   All.$id('mbody').innerHTML = bodyHTML;
   All.$id('modal').classList.add('open');
 }
@@ -111,6 +111,9 @@ export let bagTab = 'crop';
 export let bagSellMode = false, bagSel = {};              // Bán một chạm: chế độ tick chọn (mặc định chọn hết)
 export let gachaSortMode = 'default';
 export function openPanel(kind) {
+  if (kind === 'bank') {
+    return All.renderBankUI();
+  }
   if (kind === 'gacha') {
     return openGachaModal();
   }

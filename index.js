@@ -1456,6 +1456,24 @@ var init_graphics = __esm({
         "................",
         "................",
         "................"
+      ],
+      lixiIcon: [
+        "................",
+        "................",
+        "...xxxxxxxxxx...",
+        "..xRRRRRRRRRRx..",
+        ".xRxRRRRRRRRxRx.",
+        ".xRRxRRRRRRxRRx.",
+        ".xRRRxRRRRxRRRx.",
+        ".xRRRRxRRxRRRRx.",
+        ".xRRRRRxxRRRRRx.",
+        ".xRRRRCCCCRRRRx.",
+        ".xRRRRCCCCRRRRx.",
+        ".xRRRRRxxRRRRRx.",
+        ".xRRRRRRRRRRRRx.",
+        "..xxxxxxxxxxxx..",
+        "................",
+        "................"
       ]
     };
     P.k = P.k || "#c4e3f0";
@@ -3788,6 +3806,44 @@ function initUI() {
     });
   }
 }
+function showResetAnnouncement() {
+  if (localStorage.getItem("farm_reset_announce_seen")) return;
+  console.log("[Farm Ext] B\u1EA3ng th\xF4ng b\xE1o Reset xu\u1EA5t hi\u1EC7n!");
+  if (ctx.win.querySelector("#farm-reset-modal")) return;
+  const m2 = document.createElement("div");
+  m2.id = "farm-reset-modal";
+  m2.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:20px; box-sizing:border-box; color:#fff; text-align:center; font-family:sans-serif; transition: opacity 0.5s;";
+  const box = document.createElement("div");
+  box.style.cssText = "background:#222; border: 2px solid #555; border-radius:12px; padding:30px; max-width:400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); line-height:1.6;";
+  box.innerHTML = `
+    <h2 style="color:#ff4444; margin-top:0; font-size:24px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #ff4444; padding-bottom:10px;">\u0110\u1EA1i Ki\u1EBFp Gi\xE1ng L\xE2m</h2>
+    <p style="font-size:16px; margin: 20px 0; font-style:italic;">Thi\xEAn c\u01A1 nhi\u1EC5u lo\u1EA1n, Thi\xEAn \u0111\u1EA1o suy t\xE0n, V\u1EA1n ch\xFAng suy vong. M\u1ED9t h\u01A1i t\xE0n, m\u1ED9t tia s\xE1ng, h\u1EBFt th\u1EA3y chuy\u1EC3n sinh, t\xE1i l\u1EADp t\u1EEB \u0111\u1EA7u.</p>
+    <p style="font-size:18px; font-weight:bold; color:#ffdd55; margin-bottom: 25px;">(C\xF2n 2 ng\xE0y n\u1EEFa l\xE0 reset to\xE0n b\u1ED9)</p>
+    <button id="reset-announce-btn" disabled style="background:#555; color:#999; border:none; padding:12px 24px; font-size:16px; border-radius:6px; cursor:not-allowed; transition:all 0.3s;">\u0110\xF3ng (5s)</button>
+  `;
+  m2.appendChild(box);
+  ctx.win.appendChild(m2);
+  const btn = box.querySelector("#reset-announce-btn");
+  let timeLeft = 5;
+  const iv = setInterval(() => {
+    timeLeft--;
+    if (timeLeft > 0) {
+      btn.textContent = `\u0110\xF3ng (${timeLeft}s)`;
+    } else {
+      clearInterval(iv);
+      btn.textContent = "\u0110\xE3 r\xF5, chu\u1EA9n b\u1ECB chuy\u1EC3n sinh";
+      btn.style.background = "#4CAF50";
+      btn.style.color = "#fff";
+      btn.style.cursor = "pointer";
+      btn.removeAttribute("disabled");
+    }
+  }, 1e3);
+  btn.addEventListener("click", () => {
+    localStorage.setItem("farm_reset_announce_seen", "1");
+    m2.style.opacity = "0";
+    setTimeout(() => m2.remove(), 500);
+  });
+}
 var root, sh, $id, fieldEl, decoLayer, fxLayer, dungeonView, raceView, swX, swY;
 var init_ui = __esm({
   "src/ui.js"() {
@@ -3802,6 +3858,10 @@ var init_ui = __esm({
     init_utils();
     swX = null;
     swY = null;
+    window.testFarmReset = () => {
+      localStorage.removeItem("farm_reset_announce_seen");
+      console.log("[Farm Ext] \u0110\xE3 x\xF3a c\u1EDD reset, h\xE3y \u0111\xF3ng m\u1EDF l\u1EA1i c\u1EEDa s\u1ED5 n\xF4ng tr\u1EA1i \u0111\u1EC3 xem b\u1EA3ng th\xF4ng b\xE1o.");
+    };
   }
 });
 
@@ -5711,11 +5771,18 @@ async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   renderStatus();
   if (updateLoadingText) updateLoadingText("N\u1ED3i \u0111ang s\xF4i s\xF9ng s\u1EE5c...");
   const legendaryCount = itemsData.filter((it2) => it2.rarity && it2.rarity.toLowerCase().includes("huy\u1EC1n tho\u1EA1i")).length;
+  const godTierCount = itemsData.filter((it2) => it2.rarity && it2.rarity.toLowerCase().includes("th\u1EA7n c\u1EA5p")).length;
   const isSuccess = Math.random() < 0.6;
   let isGodTier = false;
-  if (legendaryCount >= 2 && isSuccess) {
-    if (Math.random() < 0.1) {
+  if (isSuccess) {
+    if (godTierCount >= 2) {
       isGodTier = true;
+    } else if (godTierCount >= 1 && legendaryCount >= 1) {
+      if (Math.random() < 0.3) isGodTier = true;
+    } else if (godTierCount >= 1) {
+      if (Math.random() < 0.15) isGodTier = true;
+    } else if (legendaryCount >= 2) {
+      if (Math.random() < 0.1) isGodTier = true;
     }
   }
   let resultData = null;
@@ -5989,8 +6056,8 @@ function resultLabel(roll, kq, mult, nextAnchor) {
 var POT_CAP, INITIAL_BET_CAP, HOUSE_RETURN, MIN_MULT, ANCHOR_MIN, ANCHOR_MAX;
 var init_bet_odds = __esm({
   "src/bet-odds.js"() {
-    POT_CAP = 8e8;
-    INITIAL_BET_CAP = 2e8;
+    POT_CAP = 1e15;
+    INITIAL_BET_CAP = 1e15;
     HOUSE_RETURN = 97;
     MIN_MULT = 1.01;
     ANCHOR_MIN = 5;
@@ -6215,7 +6282,7 @@ __export(shop_exports, {
 });
 function openModal(title, bodyHTML, keepBetTable) {
   if (!keepBetTable && cashOut) cashOut();
-  $id("mtitle-text").textContent = title;
+  $id("mtitle-text").innerHTML = title;
   $id("mbody").innerHTML = bodyHTML;
   $id("modal").classList.add("open");
 }
@@ -6292,6 +6359,9 @@ function openAchivModal() {
   });
 }
 function openPanel(kind) {
+  if (kind === "bank") {
+    return renderBankUI();
+  }
   if (kind === "gacha") {
     return openGachaModal();
   }
@@ -7012,6 +7082,7 @@ function toggleWin() {
       return;
     }
     ctx.win.classList.add("open");
+    showResetAnnouncement();
     layout();
     placeWin();
     settle();
@@ -7382,9 +7453,17 @@ function renderPlots() {
             ${spriteSVG("achivStar", 48)}
             <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Th\xE0nh T\u1EF1u</div>
           </div>
+          <div class="explore-slot" id="eslot-lixi" style="border-color: #dc2626; box-shadow: 0 4px 0 #991b1b, inset 0 0 0 3px rgba(220,38,38,0.4);">
+            <div style="width:48px;height:48px;position:relative;margin:8px auto 0;">${spriteSVG("lixiIcon", 48)}</div>
+            <div class="feature-name" style="color: #fef08a; text-shadow: 0 1px 2px #000;">L\xEC X\xEC</div>
+          </div>
           <div class="explore-slot" id="eslot-casino" style="border-color: #ffd94d; box-shadow: 0 4px 0 #b08a5c, inset 0 0 0 3px rgba(255,217,77,0.4);">
             <div style="width:64px;height:64px;position:relative;">${spriteSVG("casinoNeonGoldMap", 64)}</div>
             <div class="feature-name" style="color: #ffd94d; text-shadow: 0 1px 2px #000;">Casino</div>
+          </div>
+          <div class="explore-slot" id="eslot-bank" style="border-color: #71b87a; box-shadow: 0 4px 0 #4a8251, inset 0 0 0 3px rgba(113,184,122,0.4);">
+            <div style="width:48px;height:48px;position:relative;margin:8px auto 0;">${spriteSVG("coin", 48)}</div>
+            <div class="feature-name" style="color: #c8f5cc; text-shadow: 0 1px 2px #000;">Ng\xE2n H\xE0ng</div>
           </div>
         `;
         const cBtn = $id("eslot-casino");
@@ -7407,6 +7486,12 @@ function renderPlots() {
           if (ui) ui.classList.add("open");
           openFleaMarket();
         });
+        const lixiBtn = $id("eslot-lixi");
+        if (lixiBtn) lixiBtn.addEventListener("click", () => {
+          openLixiModal();
+        });
+        const bBtn = $id("eslot-bank");
+        if (bBtn) bBtn.addEventListener("click", () => openPanel("bank"));
         const aBtn = $id("eslot-achiv");
         if (aBtn) aBtn.addEventListener("click", () => openAchivModal());
       }
@@ -8158,6 +8243,7 @@ var init_witch = __esm({
 
 // src/utils.js
 function settle() {
+  calculateInterest();
   if (CS.link && !eventFresh() && !eventPending) requestDayEvent();
   if (ctx.S.passes.water && ctx.S.witch) {
     const wz = ctx.S.witch;
@@ -9108,6 +9194,13 @@ function loadState() {
   if (!ctx.S.raceForm) ctx.S.raceForm = {};
   if (!ctx.S.raceStats) ctx.S.raceStats = { plays: 0, staked: 0, won: 0, net: 0, best: 0 };
   if (ctx.S.race === void 0) ctx.S.race = null;
+  if (ctx.S.bankDeposit === void 0) ctx.S.bankDeposit = 0;
+  if (ctx.S.bankDepositInterest === void 0) ctx.S.bankDepositInterest = 0;
+  if (ctx.S.bankInvestPrincipal === void 0) ctx.S.bankInvestPrincipal = 0;
+  if (ctx.S.bankInvestBalance === void 0) ctx.S.bankInvestBalance = 0;
+  if (ctx.S.bankInvestTime === void 0) ctx.S.bankInvestTime = 0;
+  if (ctx.S.bankDepositTime === void 0) ctx.S.bankDepositTime = Date.now();
+  if (ctx.S.bankLastCollectionTime === void 0) ctx.S.bankLastCollectionTime = 0;
   Object.keys(ctx.S.uniques || {}).forEach((k2) => {
     const item = ctx.S.uniques[k2];
     if (item && item.sp && item.spriteMap) {
@@ -50890,7 +50983,7 @@ function renderSoloActions() {
             </div>`;
     actEl.querySelectorAll(".bj-quick").forEach((b2) => b2.addEventListener("click", () => {
       const inp = $id("bj-bet-inp");
-      if (inp) inp.value = String(Math.max(min, Math.floor(Math.min(coins, 1e8) / Number(b2.getAttribute("data-q")))));
+      if (inp) inp.value = String(Math.max(min, Math.floor(coins / Number(b2.getAttribute("data-q")))));
     }));
     $id("bj-deal").addEventListener("click", soloStartRound);
     return;
@@ -50965,7 +51058,6 @@ function soloStartRound() {
   const inp = $id("bj-bet-inp");
   const want = Math.max(0, parseInt(inp ? inp.value : "0") || 0);
   if (want < s2.settings.minBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${s2.settings.minBet}G`);
-  if (want > 1e8) return bjToast("H\u1EC7 th\u1ED1ng gi\u1EDBi h\u1EA1n c\u01B0\u1EE3c t\u1ED1i \u0111a 100,000,000G m\u1ED7i v\xE1n!");
   if (s2.settings.maxBet > 0 && want > s2.settings.maxBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${s2.settings.maxBet}G`);
   if (want > coins) return bjToast(`Kh\xF4ng \u0111\u1EE7 v\xE0ng (${coins.toLocaleString()}G)`);
   ctx.S.coins = (ctx.S.coins || 0) - want;
@@ -51564,7 +51656,8 @@ function bjHandleMsg(fromPid, data) {
       }
       break;
     }
-    case "GIVE_MONEY":
+    case "GIVE_MONEY": {
+      if (typeof data.amount !== "number" || data.amount <= 0) break;
       const log2 = bjChatLog.find((e2) => e2.reqData && e2.reqData.reqId === data.reqId);
       if (log2) {
         log2.reqData.fulfilled += data.amount;
@@ -51583,7 +51676,9 @@ function bjHandleMsg(fromPid, data) {
       }
       if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
       break;
+    }
     case "GOLD_SEND": {
+      if (typeof data.amount !== "number" || data.amount <= 0) break;
       const senderName = data.senderName || bjPlayers[fromPid]?.name || "?";
       if (data.targetPid === bjMyId) {
         ctx.S.coins = (ctx.S.coins || 0) + data.amount;
@@ -51997,7 +52092,6 @@ function bjRoomPlaceBet(amount) {
   const coins = ctx.S.coins || 0;
   if (coins < amount) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng!");
   if (amount < bjSettings.minBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i thi\u1EC3u ${bjSettings.minBet}G`);
-  if (amount > 1e8) return bjToast("H\u1EC7 th\u1ED1ng gi\u1EDBi h\u1EA1n c\u01B0\u1EE3c t\u1ED1i \u0111a 100,000,000G m\u1ED7i v\xE1n!");
   if (bjSettings.maxBet > 0 && amount > bjSettings.maxBet) return bjToast(`C\u01B0\u1EE3c t\u1ED1i \u0111a ${bjSettings.maxBet}G`);
   ctx.S.coins = coins - amount;
   save();
@@ -52014,11 +52108,6 @@ function bjRoomAction(actionType, extra) {
 function bjApplySettings() {
   const min = parseInt($id("bj-cfg-min")?.value) || 10;
   let max = parseInt($id("bj-cfg-max")?.value) || 0;
-  if (max > 1e8) {
-    max = 1e8;
-    if ($id("bj-cfg-max")) $id("bj-cfg-max").value = 1e8;
-    bjToast("C\u1EA3nh b\xE1o: Max bet kh\xF4ng \u0111\u01B0\u1EE3c v\u01B0\u1EE3t qu\xE1 100,000,000G");
-  }
   const decks = Math.min(8, Math.max(1, parseInt($id("bj-cfg-decks")?.value) || 6));
   const delay = Math.max(5, parseInt($id("bj-cfg-delay")?.value) || 10);
   bjSettings = { minBet: Math.max(1, min), maxBet: Math.max(0, max), numDecks: decks, delay };
@@ -52306,7 +52395,7 @@ function bjBindMyActions() {
       const q = parseInt(b2.getAttribute("data-q") || "1");
       const coins = Number(ctx.S.coins) || 0;
       const min = Number(bjSettings.minBet) || 10;
-      if (inp) inp.value = String(Math.max(min, Math.floor(Math.min(coins, 1e8) / q)));
+      if (inp) inp.value = String(Math.max(min, Math.floor(coins / q)));
     });
   });
   $id("bj-rm-even")?.addEventListener("click", () => {
@@ -54304,6 +54393,385 @@ var init_cooking = __esm({
   }
 });
 
+// src/bank.js
+function calculateInterest() {
+  const now2 = Date.now();
+  if (ctx.S.bankDeposit) {
+    if (!ctx.S.bankDepositTime) ctx.S.bankDepositTime = now2;
+    const depositElapsed = now2 - ctx.S.bankDepositTime;
+    if (depositElapsed >= FOUR_HOURS) {
+      const cycles = Math.floor(depositElapsed / FOUR_HOURS);
+      ctx.S.bankDepositInterest = (ctx.S.bankDepositInterest || 0) + Math.floor(ctx.S.bankDeposit * DEPOSIT_RATE * cycles);
+      ctx.S.bankDepositTime = now2 - depositElapsed % FOUR_HOURS;
+      save();
+    }
+  }
+  if (ctx.S.bankInvestBalance) {
+    if (!ctx.S.bankInvestTime) ctx.S.bankInvestTime = now2;
+    const investElapsed = now2 - ctx.S.bankInvestTime;
+    if (investElapsed >= FOUR_HOURS) {
+      const cycles = Math.floor(investElapsed / FOUR_HOURS);
+      let balance = ctx.S.bankInvestBalance;
+      for (let i2 = 0; i2 < cycles; i2++) {
+        balance += Math.floor(balance * INVEST_RATE);
+      }
+      ctx.S.bankInvestBalance = balance;
+      ctx.S.bankInvestTime = now2 - investElapsed % FOUR_HOURS;
+      save();
+    }
+  }
+}
+function renderBankUI() {
+  calculateInterest();
+  const title = `${spriteSVG("coin", 16)} Ng\xE2n H\xE0ng Trung \u01AF\u01A1ng`;
+  let html = `<div class="tabs" style="margin-bottom:12px; display:flex; gap:8px;">
+        <div class="tab ${currentBankTab === "deposit" ? "active" : ""}" data-banktab="deposit">Ti\u1EBFt Ki\u1EC7m</div>
+        <div class="tab ${currentBankTab === "invest" ? "active" : ""}" data-banktab="invest">\u0110\u1EA7u T\u01B0</div>
+    </div>`;
+  if (currentBankTab === "deposit") {
+    const principal = ctx.S.bankDeposit || 0;
+    const interest = ctx.S.bankDepositInterest || 0;
+    html += `
+        <div class="note" style="margin-bottom:12px;">Ti\u1EBFt ki\u1EC7m an to\xE0n: L\xE3i \u0111\u01A1n 0.5% m\u1ED7i 4h \u0111\u1EDDi th\u1EF1c. L\xE3i t\xE1ch ri\xEAng, kh\xF4ng c\u1ED9ng d\u1ED3n v\xE0o g\u1ED1c.</div>
+        <div style="font-size:14px; margin-bottom:4px; color:#5c4033;">S\u1ED1 d\u01B0 g\u1ED1c: <b>${principal.toLocaleString()}</b> G</div>
+        <div style="font-size:14px; margin-bottom:12px; color:#10b981;">Ti\u1EC1n l\xE3i nh\u1EADn \u0111\u01B0\u1EE3c: <b>${interest.toLocaleString()}</b> G</div>
+        <div style="font-size:14px; margin-bottom:12px; color:#7a5c38;">V\xED v\xE0ng hi\u1EC7n t\u1EA1i: <b>${ctx.S.coins.toLocaleString()}</b> G</div>
+        <div style="display:flex; gap:8px;">
+            <input type="number" id="bank-deposit-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" max="${ctx.S.coins}" style="flex:1;">
+            <div class="buy" onclick="FarmAll.uiBankAction('deposit')">G\u1EEDi Ti\u1EC1n</div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+            <input type="number" id="bank-withdraw-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" max="${principal + interest}" style="flex:1;">
+            <div class="buy" onclick="FarmAll.uiBankAction('withdrawDeposit')">R\xFAt Ti\u1EC1n</div>
+        </div>`;
+  } else if (currentBankTab === "invest") {
+    const principal = ctx.S.bankInvestPrincipal || 0;
+    const balance = ctx.S.bankInvestBalance || 0;
+    const interest = balance - principal;
+    const isUnlocked = interest >= principal * 0.3;
+    html += `
+        <div class="note" style="margin-bottom:12px;">\u0110\u1EA7u t\u01B0 si\xEAu t\u1ED1c: L\xE3i k\xE9p 1.5% m\u1ED7i 4h. R\u1EE7i ro giam v\u1ED1n: <b>Ch\u1EC9 r\xFAt \u0111\u01B0\u1EE3c ti\u1EC1n g\u1ED1c khi Ti\u1EC1n L\xE3i &gt;= 30% Ti\u1EC1n G\u1ED1c.</b></div>
+        <div style="font-size:14px; margin-bottom:4px; color:#5c4033;">V\u1ED1n \u0111\u1EA7u t\u01B0: <b>${principal.toLocaleString()}</b> G</div>
+        <div style="font-size:14px; margin-bottom:12px; color:#10b981;">Ti\u1EC1n l\xE3i (l\xE3i k\xE9p): <b>${interest.toLocaleString()}</b> G</div>
+        <div style="font-size:14px; margin-bottom:12px; color:#7a5c38;">V\xED v\xE0ng hi\u1EC7n t\u1EA1i: <b>${ctx.S.coins.toLocaleString()}</b> G</div>
+        <div style="display:flex; gap:8px;">
+            <input type="number" id="bank-invest-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" max="${ctx.S.coins}" style="flex:1;">
+            <div class="buy" onclick="FarmAll.uiBankAction('invest')">\u0110\u1EA7u T\u01B0</div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+            <input type="number" id="bank-withdraw-invest-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" max="${isUnlocked ? balance : interest}" style="flex:1;">
+            <div class="buy" onclick="FarmAll.uiBankAction('withdrawInvest')">R\xFAt Ti\u1EC1n ${isUnlocked ? "(G\u1ED1c + L\xE3i)" : "(Ch\u1EC9 L\xE3i)"}</div>
+        </div>`;
+  }
+  openModal(title, html);
+  setTimeout(() => {
+    const modalBody = $id("mbody");
+    if (!modalBody) return;
+    modalBody.querySelectorAll("[data-banktab]").forEach((el) => {
+      el.addEventListener("click", () => {
+        currentBankTab = el.dataset.banktab;
+        renderBankUI();
+      });
+    });
+  }, 0);
+}
+function uiBankAction(action) {
+  let inputId = "";
+  if (action === "deposit") inputId = "bank-deposit-amt";
+  else if (action === "withdrawDeposit") inputId = "bank-withdraw-amt";
+  else if (action === "invest") inputId = "bank-invest-amt";
+  else if (action === "withdrawInvest") inputId = "bank-withdraw-invest-amt";
+  const amt = parseInt($id(inputId)?.value || "0", 10);
+  if (!amt || isNaN(amt) || amt <= 0) {
+    return toast("S\u1ED1 l\u01B0\u1EE3ng kh\xF4ng h\u1EE3p l\u1EC7");
+  }
+  let success = false;
+  if (action === "deposit") success = deposit(amt);
+  else if (action === "withdrawDeposit") success = withdrawDeposit(amt);
+  else if (action === "invest") success = invest(amt);
+  else if (action === "withdrawInvest") success = withdrawInvest(amt);
+  if (success) {
+    toast("Th\xE0nh c\xF4ng!");
+    renderStatus();
+    renderBankUI();
+  } else {
+    toast("Giao d\u1ECBch th\u1EA5t b\u1EA1i (S\u1ED1 d\u01B0 kh\xF4ng \u0111\u1EE7)");
+  }
+}
+function deposit(amount) {
+  if (ctx.S.coins < amount) return false;
+  calculateInterest();
+  ctx.S.coins -= amount;
+  ctx.S.bankDeposit = (ctx.S.bankDeposit || 0) + amount;
+  ctx.S.bankDepositTime = Date.now();
+  save();
+  return true;
+}
+function withdrawDeposit(amount) {
+  const total = (ctx.S.bankDeposit || 0) + (ctx.S.bankDepositInterest || 0);
+  if (amount > total) return false;
+  calculateInterest();
+  ctx.S.coins += amount;
+  if (amount <= (ctx.S.bankDepositInterest || 0)) {
+    ctx.S.bankDepositInterest -= amount;
+  } else {
+    const remainder = amount - (ctx.S.bankDepositInterest || 0);
+    ctx.S.bankDepositInterest = 0;
+    ctx.S.bankDeposit -= remainder;
+  }
+  ctx.S.bankDepositTime = Date.now();
+  save();
+  return true;
+}
+function invest(amount) {
+  if (ctx.S.coins < amount) return false;
+  calculateInterest();
+  ctx.S.coins -= amount;
+  ctx.S.bankInvestPrincipal = (ctx.S.bankInvestPrincipal || 0) + amount;
+  ctx.S.bankInvestBalance = (ctx.S.bankInvestBalance || 0) + amount;
+  ctx.S.bankInvestTime = Date.now();
+  save();
+  return true;
+}
+function withdrawInvest(amount) {
+  const principal = ctx.S.bankInvestPrincipal || 0;
+  const balance = ctx.S.bankInvestBalance || 0;
+  const interest = balance - principal;
+  const isUnlocked = interest >= principal * 0.3;
+  const maxWithdraw = isUnlocked ? balance : interest;
+  if (amount > maxWithdraw) return false;
+  calculateInterest();
+  ctx.S.coins += amount;
+  ctx.S.bankInvestBalance -= amount;
+  if (isUnlocked && amount > interest) {
+    ctx.S.bankInvestPrincipal -= amount - interest;
+    if (ctx.S.bankInvestPrincipal < 0) ctx.S.bankInvestPrincipal = 0;
+  }
+  ctx.S.bankInvestTime = Date.now();
+  save();
+  return true;
+}
+var FOUR_HOURS, ONE_HOUR, DEPOSIT_RATE, INVEST_RATE, currentBankTab;
+var init_bank = __esm({
+  "src/bank.js"() {
+    init_store();
+    init_all();
+    FOUR_HOURS = 4 * 60 * 60 * 1e3;
+    ONE_HOUR = 60 * 60 * 1e3;
+    DEPOSIT_RATE = 5e-3;
+    INVEST_RATE = 0.015;
+    currentBankTab = "deposit";
+  }
+});
+
+// src/lixi.js
+async function openLixiModal() {
+  if (!db) {
+    toast("H\u1EC7 th\u1ED1ng L\xEC X\xEC y\xEAu c\u1EA7u c\u1EA5u h\xECnh Firebase. Vui l\xF2ng th\xEAm config v\xE0o .env");
+    return;
+  }
+  renderLixiUI();
+}
+function renderLixiUI() {
+  let win = $id("lixi-win");
+  if (!win) {
+    win = document.createElement("div");
+    win.id = "lixi-win";
+    win.className = "modal";
+    win.style.zIndex = "9999";
+    $id("win").appendChild(win);
+  }
+  win.innerHTML = `
+      <div class="mpanel" style="width: min(400px, 96%);">
+        <div class="mtitle"><span id="lixi-win-title" style="display:flex; align-items:center; gap:8px;">${spriteSVG("lixiIcon", 18)} Ch\u1EE3 L\xEC X\xEC</span><span class="grow"></span><div class="close-x" id="lixi-close">\xD7</div></div>
+        <div class="mbody" style="min-height: 200px; padding: 12px; display: flex; flex-direction: column; gap: 10px;">
+            <div class="pager open" style="margin:0 auto; display:flex; position:static;">
+                <div class="ptab active" id="lixi-tab-list" style="cursor:pointer; flex:1; text-align:center; display:flex; align-items:center; justify-content:center; white-space:nowrap;">Nh\u1EADn L\xEC X\xEC</div>
+                <div class="ptab" id="lixi-tab-send" style="cursor:pointer; flex:1; text-align:center; display:flex; align-items:center; justify-content:center; white-space:nowrap;">Ph\xE1t L\xEC X\xEC</div>
+            </div>
+            <div id="lixi-body" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+                <!-- N\u1ED9i dung tab -->
+            </div>
+        </div>
+      </div>
+    `;
+  win.classList.add("open");
+  $id("lixi-close").addEventListener("click", () => {
+    win.classList.remove("open");
+  });
+  $id("lixi-tab-list").addEventListener("click", () => switchLixiTab("list"));
+  $id("lixi-tab-send").addEventListener("click", () => switchLixiTab("send"));
+  switchLixiTab("list");
+}
+function switchLixiTab(tab) {
+  currentLixiTab = tab;
+  const listTab = $id("lixi-tab-list");
+  const sendTab = $id("lixi-tab-send");
+  if (tab === "list") {
+    listTab.classList.add("active");
+    sendTab.classList.remove("active");
+    renderLixiList();
+  } else {
+    sendTab.classList.add("active");
+    listTab.classList.remove("active");
+    renderLixiSend();
+  }
+}
+async function renderLixiList() {
+  const body = $id("lixi-body");
+  body.innerHTML = '<div style="text-align:center; padding:20px;">\u0110ang t\u1EA3i danh s\xE1ch L\xEC x\xEC...</div>';
+  try {
+    const q = query(collection(db, "red_envelopes"), orderBy("createdAt", "desc"), limit(50));
+    const snapshot = await getDocs(q);
+    let html = "";
+    let now2 = Date.now();
+    for (const docSnap of snapshot.docs) {
+      const data = docSnap.data();
+      const id = docSnap.id;
+      if (data.remainingAmount <= 0) {
+        if (data.emptyAt && now2 - data.emptyAt > 36e5) {
+          deleteDoc(doc(db, "red_envelopes", id)).catch((e2) => console.error(e2));
+          continue;
+        }
+      }
+      const isMine = data.senderId === ctx.S.playerId;
+      const hasClaimed = data.claimedBy && data.claimedBy.includes(ctx.S.playerId);
+      const isEmpty2 = data.remainingAmount <= 0;
+      let statusHTML = "";
+      if (isEmpty2) {
+        statusHTML = '<span style="color:#6b7280; font-weight:bold;">\u0110\xE3 c\u1EA1n</span>';
+      } else if (hasClaimed) {
+        statusHTML = '<span style="color:#10b981; font-weight:bold;">\u0110\xE3 nh\u1EADn</span>';
+      } else if (isMine) {
+        statusHTML = `<div class="buy plain">C\u1EE7a b\u1EA1n</div>`;
+      } else {
+        statusHTML = `<div class="buy" style="border-color:#dd5548; box-shadow:0 3px 0 #a33528;" onclick="window['grabLixi']('${id}')">Gi\u1EADt</div>`;
+      }
+      html += `
+                <div class="field" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-radius:8px; color:#3a2c22;">
+                    <div>
+                        <div style="font-weight:bold; font-size:15px; color:#a33528;">${data.senderName}</div>
+                        <div style="font-size:12px; font-weight:bold; opacity:0.8;">C\xF2n l\u1EA1i: ${data.remainingAmount.toLocaleString()}G</div>
+                    </div>
+                    <div>
+                        ${statusHTML}
+                    </div>
+                </div>
+            `;
+    }
+    if (!html) html = '<div style="text-align:center; padding:20px; color:#6b7280;">Hi\u1EC7n ch\u01B0a c\xF3 bao L\xEC x\xEC n\xE0o!</div>';
+    body.innerHTML = html;
+  } catch (e2) {
+    console.error(e2);
+    body.innerHTML = '<div style="text-align:center; padding:20px; color:#dc2626;">L\u1ED7i t\u1EA3i d\u1EEF li\u1EC7u.</div>';
+  }
+}
+function renderLixiSend() {
+  const body = $id("lixi-body");
+  const myCoins = ctx.S.coins || 0;
+  body.innerHTML = `
+        <div class="field" style="padding:10px; display:flex; flex-direction:column; gap:8px; color:#3a2c22;">
+            <div style="font-size:12px; opacity:0.8;">V\xED c\u1EE7a b\u1EA1n: <b>${myCoins.toLocaleString()}G</b></div>
+            
+            <label style="font-weight:bold; font-size:14px;">T\u1ED5ng V\xE0ng L\xEC x\xEC:</label>
+            <input type="number" id="lixi-inp-total" class="inp" style="width:100%; margin-bottom:12px;" placeholder="V\xED d\u1EE5: 100000" min="1000">
+            
+            <div class="buy" id="lixi-btn-send" style="text-align:center; background:linear-gradient(#e56d61, #d54f42); border-color:#c84b3e; box-shadow:0 3px 0 #a33528; color:#fffdf4; font-weight:bold;">Ph\xE1t L\xEC X\xEC To\xE0n Server</div>
+        </div>
+    `;
+  $id("lixi-btn-send").addEventListener("click", async () => {
+    const total = parseInt($id("lixi-inp-total").value);
+    if (isNaN(total) || total <= 0) return toast("S\u1ED1 ti\u1EC1n kh\xF4ng h\u1EE3p l\u1EC7!");
+    if (total < 100) return toast("T\u1ED1i thi\u1EC3u ph\u1EA3i ph\xE1t 100G!");
+    if (total > ctx.S.coins) return toast("B\u1EA1n kh\xF4ng \u0111\u1EE7 ti\u1EC1n!");
+    ctx.S.coins -= total;
+    save();
+    renderStatus();
+    toast("\u0110ang t\u1EA1o L\xEC x\xEC...");
+    try {
+      await addDoc(collection(db, "red_envelopes"), {
+        senderId: ctx.S.playerId,
+        senderName: ctx.S.username || "Ng\u01B0\u1EDDi \u1EA9n danh",
+        totalAmount: total,
+        remainingAmount: total,
+        claimedBy: [],
+        createdAt: Date.now(),
+        emptyAt: null
+      });
+      toast("\u0110\xE3 ph\xE1t L\xEC x\xEC th\xE0nh c\xF4ng!");
+      switchLixiTab("list");
+    } catch (e2) {
+      console.error(e2);
+      toast("L\u1ED7i t\u1EA1o l\xEC x\xEC!");
+      ctx.S.coins += total;
+      save();
+      renderStatus();
+    }
+  });
+}
+var currentLixiTab;
+var init_lixi = __esm({
+  "src/lixi.js"() {
+    init_store();
+    init_all();
+    init_firebase();
+    init_index_esm7();
+    currentLixiTab = "list";
+    window["grabLixi"] = async function(lixiId) {
+      if (!db || !ctx.S.playerId) return;
+      const docRef = doc(db, "red_envelopes", lixiId);
+      toast("\u0110ang gi\u1EADt...");
+      try {
+        const result = await runTransaction(db, async (transaction) => {
+          const lixiDoc = await transaction.get(docRef);
+          if (!lixiDoc.exists()) {
+            throw "L\xEC x\xEC kh\xF4ng t\u1ED3n t\u1EA1i!";
+          }
+          const data = lixiDoc.data();
+          if (data.remainingAmount <= 0) {
+            throw "L\xEC x\xEC \u0111\xE3 c\u1EA1n ti\u1EC1n!";
+          }
+          if (data.claimedBy && data.claimedBy.includes(ctx.S.playerId)) {
+            throw "B\u1EA1n \u0111\xE3 nh\u1EADn l\xEC x\xEC n\xE0y r\u1ED3i!";
+          }
+          if (data.senderId === ctx.S.playerId) {
+            throw "Kh\xF4ng th\u1EC3 t\u1EF1 gi\u1EADt l\xEC x\xEC c\u1EE7a m\xECnh!";
+          }
+          let grabAmount = 0;
+          const min = Math.max(1, Math.floor(data.totalAmount * 0.03));
+          const max = Math.max(min, Math.floor(data.totalAmount * 0.14));
+          grabAmount = Math.floor(Math.random() * (max - min + 1)) + min;
+          if (grabAmount > data.remainingAmount) {
+            grabAmount = data.remainingAmount;
+          }
+          grabAmount = Math.min(grabAmount, data.remainingAmount);
+          const newRemaining = data.remainingAmount - grabAmount;
+          const newClaimedBy = data.claimedBy || [];
+          newClaimedBy.push(ctx.S.playerId);
+          let updateData = {
+            remainingAmount: newRemaining,
+            claimedBy: newClaimedBy
+          };
+          if (newRemaining <= 0 && !data.emptyAt) {
+            updateData.emptyAt = Date.now();
+          }
+          transaction.update(docRef, updateData);
+          return grabAmount;
+        });
+        ctx.S.coins = (ctx.S.coins || 0) + result;
+        save();
+        renderStatus();
+        toast(`Gi\u1EADt th\xE0nh c\xF4ng ${result.toLocaleString()}G!`);
+        renderLixiList();
+      } catch (e2) {
+        console.error("Lixi Error:", e2);
+        toast(typeof e2 === "string" ? e2 : "Gi\u1EADt L\xEC x\xEC th\u1EA5t b\u1EA1i!");
+        renderLixiList();
+      }
+    };
+  }
+});
+
 // src/all.js
 var all_exports = {};
 __export(all_exports, {
@@ -54357,6 +54825,7 @@ __export(all_exports, {
   cacheCoins: () => cacheCoins,
   cacheDayTxt: () => cacheDayTxt,
   cacheWicon: () => cacheWicon,
+  calculateInterest: () => calculateInterest,
   canCookRecipe: () => canCookRecipe,
   cashOut: () => cashOut,
   cashOutHero: () => cashOutHero,
@@ -54466,6 +54935,7 @@ __export(all_exports, {
   openHeroMode: () => openHeroMode,
   openHeroPanel: () => openHeroPanel,
   openKitchenModal: () => openKitchenModal,
+  openLixiModal: () => openLixiModal,
   openModal: () => openModal,
   openPanel: () => openPanel,
   openPassDlg: () => openPassDlg,
@@ -54512,6 +54982,7 @@ __export(all_exports, {
   registerDynamicSprite: () => registerDynamicSprite,
   regrowMs: () => regrowMs,
   renderAll: () => renderAll,
+  renderBankUI: () => renderBankUI,
   renderBanner: () => renderBanner,
   renderChips: () => renderChips,
   renderDynamic: () => renderDynamic,
@@ -54555,6 +55026,7 @@ __export(all_exports, {
   shopTab: () => shopTab,
   shovel: () => shovel,
   showFleaItemDetail: () => showFleaItemDetail,
+  showResetAnnouncement: () => showResetAnnouncement,
   sleepPet: () => sleepPet,
   spriteSVG: () => spriteSVG,
   startLockedModal: () => startLockedModal,
@@ -54574,6 +55046,7 @@ __export(all_exports, {
   toolbarOpen: () => toolbarOpen,
   touchBase: () => touchBase,
   tryScene: () => tryScene,
+  uiBankAction: () => uiBankAction,
   uiCloseAddItem: () => uiCloseAddItem,
   uiConfirmAdd: () => uiConfirmAdd,
   uiConfirmTrade: () => uiConfirmTrade,
@@ -54620,6 +55093,8 @@ var init_all = __esm({
     init_blackjack();
     init_race();
     init_cooking();
+    init_bank();
+    init_lixi();
   }
 });
 

@@ -134,9 +134,17 @@ export function renderPlots() {
             ${spriteSVG('achivStar', 48)}
             <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Thành Tựu</div>
           </div>
+          <div class="explore-slot" id="eslot-lixi" style="border-color: #dc2626; box-shadow: 0 4px 0 #991b1b, inset 0 0 0 3px rgba(220,38,38,0.4);">
+            <div style="width:48px;height:48px;position:relative;margin:8px auto 0;">${spriteSVG('lixiIcon', 48)}</div>
+            <div class="feature-name" style="color: #fef08a; text-shadow: 0 1px 2px #000;">Lì Xì</div>
+          </div>
           <div class="explore-slot" id="eslot-casino" style="border-color: #ffd94d; box-shadow: 0 4px 0 #b08a5c, inset 0 0 0 3px rgba(255,217,77,0.4);">
             <div style="width:64px;height:64px;position:relative;">${spriteSVG('casinoNeonGoldMap', 64)}</div>
             <div class="feature-name" style="color: #ffd94d; text-shadow: 0 1px 2px #000;">Casino</div>
+          </div>
+          <div class="explore-slot" id="eslot-bank" style="border-color: #71b87a; box-shadow: 0 4px 0 #4a8251, inset 0 0 0 3px rgba(113,184,122,0.4);">
+            <div style="width:48px;height:48px;position:relative;margin:8px auto 0;">${spriteSVG('coin', 48)}</div>
+            <div class="feature-name" style="color: #c8f5cc; text-shadow: 0 1px 2px #000;">Ngân Hàng</div>
           </div>
         `;
         const cBtn = All.$id('eslot-casino');
@@ -159,6 +167,12 @@ export function renderPlots() {
             if (ui) ui.classList.add('open');
             All.openFleaMarket();
         });
+        const lixiBtn = All.$id('eslot-lixi');
+        if (lixiBtn) lixiBtn.addEventListener('click', () => {
+            All.openLixiModal();
+        });
+        const bBtn = All.$id('eslot-bank');
+        if (bBtn) bBtn.addEventListener('click', () => All.openPanel('bank'));
         const aBtn = All.$id('eslot-achiv');
         if (aBtn) aBtn.addEventListener('click', () => All.openAchivModal());
       }

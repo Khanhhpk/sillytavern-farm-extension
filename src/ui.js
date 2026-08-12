@@ -344,3 +344,53 @@ fieldEl.addEventListener('touchend', e => {
     });
   }
 }
+
+export function showResetAnnouncement() {
+  if (localStorage.getItem('farm_reset_announce_seen')) return;
+  console.log('[Farm Ext] Bảng thông báo Reset xuất hiện!');
+  if (ctx.win.querySelector('#farm-reset-modal')) return;
+
+  const m = document.createElement('div');
+  m.id = 'farm-reset-modal';
+  m.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:20px; box-sizing:border-box; color:#fff; text-align:center; font-family:sans-serif; transition: opacity 0.5s;';
+  
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#222; border: 2px solid #555; border-radius:12px; padding:30px; max-width:400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); line-height:1.6;';
+  box.innerHTML = `
+    <h2 style="color:#ff4444; margin-top:0; font-size:24px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #ff4444; padding-bottom:10px;">Đại Kiếp Giáng Lâm</h2>
+    <p style="font-size:16px; margin: 20px 0; font-style:italic;">Thiên cơ nhiễu loạn, Thiên đạo suy tàn, Vạn chúng suy vong. Một hơi tàn, một tia sáng, hết thảy chuyển sinh, tái lập từ đầu.</p>
+    <p style="font-size:18px; font-weight:bold; color:#ffdd55; margin-bottom: 25px;">(Còn 2 ngày nữa là reset toàn bộ)</p>
+    <button id="reset-announce-btn" disabled style="background:#555; color:#999; border:none; padding:12px 24px; font-size:16px; border-radius:6px; cursor:not-allowed; transition:all 0.3s;">Đóng (5s)</button>
+  `;
+  
+  m.appendChild(box);
+  ctx.win.appendChild(m);
+  
+  const btn = box.querySelector('#reset-announce-btn');
+  let timeLeft = 5;
+  const iv = setInterval(() => {
+    timeLeft--;
+    if (timeLeft > 0) {
+      btn.textContent = `Đóng (${timeLeft}s)`;
+    } else {
+      clearInterval(iv);
+      btn.textContent = 'Đã rõ, chuẩn bị chuyển sinh';
+      btn.style.background = '#4CAF50';
+      btn.style.color = '#fff';
+      btn.style.cursor = 'pointer';
+      btn.removeAttribute('disabled');
+    }
+  }, 1000);
+  
+  btn.addEventListener('click', () => {
+    localStorage.setItem('farm_reset_announce_seen', '1');
+    m.style.opacity = '0';
+    setTimeout(() => m.remove(), 500);
+  });
+}
+
+// @ts-ignore
+window.testFarmReset = () => {
+  localStorage.removeItem('farm_reset_announce_seen');
+  console.log('[Farm Ext] Đã xóa cờ reset, hãy đóng mở lại cửa sổ nông trại để xem bảng thông báo.');
+};

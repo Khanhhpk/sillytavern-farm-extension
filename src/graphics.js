@@ -1022,6 +1022,24 @@ export const SPR = {
     "................",
     "................",
     "................"
+  ],
+  lixiIcon: [
+    "................",
+    "................",
+    "...xxxxxxxxxx...",
+    "..xRRRRRRRRRRx..",
+    ".xRxRRRRRRRRxRx.",
+    ".xRRxRRRRRRxRRx.",
+    ".xRRRxRRRRxRRRx.",
+    ".xRRRRxRRxRRRRx.",
+    ".xRRRRRxxRRRRRx.",
+    ".xRRRRCCCCRRRRx.",
+    ".xRRRRCCCCRRRRx.",
+    ".xRRRRRxxRRRRRx.",
+    ".xRRRRRRRRRRRRx.",
+    "..xxxxxxxxxxxx..",
+    "................",
+    "................"
   ]
 };
 /* Nếu bảng màu thiếu màu xanh k/i trong toolWater thì bù vào */

@@ -1026,12 +1026,19 @@ export async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   if (updateLoadingText) updateLoadingText("Nồi đang sôi sùng sục...");
 
   const legendaryCount = itemsData.filter(it => it.rarity && it.rarity.toLowerCase().includes('huyền thoại')).length;
+  const godTierCount = itemsData.filter(it => it.rarity && it.rarity.toLowerCase().includes('thần cấp')).length;
   const isSuccess = Math.random() < 0.6; // 60% success
   
   let isGodTier = false;
-  if (legendaryCount >= 2 && isSuccess) {
-    if (Math.random() < 0.1) {
-      isGodTier = true; // 10% chance when success and >= 2 legendaries
+  if (isSuccess) {
+    if (godTierCount >= 2) {
+      isGodTier = true; // 2 Thần Cấp -> 100% Thần Cấp
+    } else if (godTierCount >= 1 && legendaryCount >= 1) {
+      if (Math.random() < 0.3) isGodTier = true; // 1 Thần Cấp + 1 Huyền thoại -> 30%
+    } else if (godTierCount >= 1) {
+      if (Math.random() < 0.15) isGodTier = true; // 1 Thần Cấp + món khác -> 15%
+    } else if (legendaryCount >= 2) {
+      if (Math.random() < 0.1) isGodTier = true; // >= 2 Huyền thoại -> 10%
     }
   }
 
