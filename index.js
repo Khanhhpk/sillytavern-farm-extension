@@ -5729,11 +5729,18 @@ async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   renderStatus();
   if (updateLoadingText) updateLoadingText("N\u1ED3i \u0111ang s\xF4i s\xF9ng s\u1EE5c...");
   const legendaryCount = itemsData.filter((it2) => it2.rarity && it2.rarity.toLowerCase().includes("huy\u1EC1n tho\u1EA1i")).length;
+  const godTierCount = itemsData.filter((it2) => it2.rarity && it2.rarity.toLowerCase().includes("th\u1EA7n c\u1EA5p")).length;
   const isSuccess = Math.random() < 0.6;
   let isGodTier = false;
-  if (legendaryCount >= 2 && isSuccess) {
-    if (Math.random() < 0.1) {
+  if (isSuccess) {
+    if (godTierCount >= 2) {
       isGodTier = true;
+    } else if (godTierCount >= 1 && legendaryCount >= 1) {
+      if (Math.random() < 0.3) isGodTier = true;
+    } else if (godTierCount >= 1) {
+      if (Math.random() < 0.15) isGodTier = true;
+    } else if (legendaryCount >= 2) {
+      if (Math.random() < 0.1) isGodTier = true;
     }
   }
   let resultData = null;
