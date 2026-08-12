@@ -54633,7 +54633,7 @@ function renderLixiSend() {
             <label style="font-weight:bold; font-size:14px;">T\u1ED5ng V\xE0ng L\xEC x\xEC:</label>
             <input type="number" id="lixi-inp-total" class="inp" style="width:100%; margin-bottom:12px;" placeholder="V\xED d\u1EE5: 100000" min="1000">
             
-            <div class="buy" id="lixi-btn-send" style="text-align:center; background-color:#dd5548; border-color:#c84b3e; box-shadow:0 3px 0 #a33528; color:#fffdf4; font-weight:bold;">Ph\xE1t L\xEC X\xEC To\xE0n Server</div>
+            <div class="buy" id="lixi-btn-send" style="text-align:center; background:linear-gradient(#e56d61, #d54f42); border-color:#c84b3e; box-shadow:0 3px 0 #a33528; color:#fffdf4; font-weight:bold;">Ph\xE1t L\xEC X\xEC To\xE0n Server</div>
         </div>
     `;
   $id("lixi-btn-send").addEventListener("click", async () => {

@@ -137,7 +137,7 @@ function renderLixiSend() {
             <label style="font-weight:bold; font-size:14px;">Tổng Vàng Lì xì:</label>
             <input type="number" id="lixi-inp-total" class="inp" style="width:100%; margin-bottom:12px;" placeholder="Ví dụ: 100000" min="1000">
             
-            <div class="buy" id="lixi-btn-send" style="text-align:center; background-color:#dd5548; border-color:#c84b3e; box-shadow:0 3px 0 #a33528; color:#fffdf4; font-weight:bold;">Phát Lì Xì Toàn Server</div>
+            <div class="buy" id="lixi-btn-send" style="text-align:center; background:linear-gradient(#e56d61, #d54f42); border-color:#c84b3e; box-shadow:0 3px 0 #a33528; color:#fffdf4; font-weight:bold;">Phát Lì Xì Toàn Server</div>
         </div>
     `;
     
