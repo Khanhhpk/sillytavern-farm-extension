@@ -204,10 +204,10 @@ window['grabLixi'] = async function(lixiId) {
                 throw "Không thể tự giật lì xì của mình!";
             }
             
-            // Lấy ngẫu nhiên từ 3% đến 20% tổng số TIỀN GỐC
+            // Lấy ngẫu nhiên từ 3% đến 14% tổng số TIỀN GỐC
             let grabAmount = 0;
             const min = Math.max(1, Math.floor(data.totalAmount * 0.03));
-            const max = Math.max(min, Math.floor(data.totalAmount * 0.20));
+            const max = Math.max(min, Math.floor(data.totalAmount * 0.14));
             grabAmount = Math.floor(Math.random() * (max - min + 1)) + min;
             
             // Không thể lấy nhiều hơn số tiền còn lại trong bao

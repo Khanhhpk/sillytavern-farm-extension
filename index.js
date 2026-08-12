@@ -54696,7 +54696,7 @@ var init_lixi = __esm({
           }
           let grabAmount = 0;
           const min = Math.max(1, Math.floor(data.totalAmount * 0.03));
-          const max = Math.max(min, Math.floor(data.totalAmount * 0.2));
+          const max = Math.max(min, Math.floor(data.totalAmount * 0.14));
           grabAmount = Math.floor(Math.random() * (max - min + 1)) + min;
           if (grabAmount > data.remainingAmount) {
             grabAmount = data.remainingAmount;
