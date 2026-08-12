@@ -6418,17 +6418,17 @@ function openPanel(kind) {
     }
     if (bagTab === "gacha") {
       const gachaKeys = Object.keys(ctx.S.bag || {}).filter((k2) => k2.startsWith("unique@"));
-      const rarityVal = { "R\xE1c": 0, "Th\u01B0\u1EDDng": 1, "Hi\u1EBFm": 2, "S\u1EED thi": 3, "Huy\u1EC1n tho\u1EA1i": 4, "Th\u1EA7n c\u1EA5p": 5 };
+      const rarityVal = { "r\xE1c": 0, "th\u01B0\u1EDDng": 1, "hi\u1EBFm": 2, "s\u1EED thi": 3, "huy\u1EC1n tho\u1EA1i": 4, "th\u1EA7n c\u1EA5p": 5 };
       if (gachaSortMode === "desc") {
         gachaKeys.sort((a, b2) => {
-          const rA = ctx.S.uniques?.[a]?.rarity || "Th\u01B0\u1EDDng";
-          const rB = ctx.S.uniques?.[b2]?.rarity || "Th\u01B0\u1EDDng";
+          const rA = (ctx.S.uniques?.[a]?.rarity || "th\u01B0\u1EDDng").toLowerCase();
+          const rB = (ctx.S.uniques?.[b2]?.rarity || "th\u01B0\u1EDDng").toLowerCase();
           return (rarityVal[rB] || 0) - (rarityVal[rA] || 0);
         });
       } else if (gachaSortMode === "asc") {
         gachaKeys.sort((a, b2) => {
-          const rA = ctx.S.uniques?.[a]?.rarity || "Th\u01B0\u1EDDng";
-          const rB = ctx.S.uniques?.[b2]?.rarity || "Th\u01B0\u1EDDng";
+          const rA = (ctx.S.uniques?.[a]?.rarity || "th\u01B0\u1EDDng").toLowerCase();
+          const rB = (ctx.S.uniques?.[b2]?.rarity || "th\u01B0\u1EDDng").toLowerCase();
           return (rarityVal[rA] || 0) - (rarityVal[rB] || 0);
         });
       }
@@ -50109,7 +50109,7 @@ function renderFleaItems() {
   const searchStr = $id("inp-flea-search") ? $id("inp-flea-search").value.toLowerCase().trim() : "";
   const typeFilter = $id("sel-flea-type") ? $id("sel-flea-type").value : "all";
   const sortVal = $id("sel-flea-sort") ? $id("sel-flea-sort").value : "default";
-  const rarityMap = { "Th\u1EA7n c\u1EA5p": 6, "Huy\u1EC1n tho\u1EA1i": 5, "S\u1EED thi": 4, "Hi\u1EBFm": 3, "Th\u01B0\u1EDDng": 2, "R\xE1c": 1 };
+  const rarityMap = { "th\u1EA7n c\u1EA5p": 6, "huy\u1EC1n tho\u1EA1i": 5, "s\u1EED thi": 4, "hi\u1EBFm": 3, "th\u01B0\u1EDDng": 2, "r\xE1c": 1 };
   const escapeHtml = (str) => (str || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   let itemsArr = Object.entries(currentFleaItems).map(([id, data]) => {
     const itemName = getFleaItemName(data.itemId, data.itemData);
@@ -50124,7 +50124,7 @@ function renderFleaItems() {
     else if (data.itemType === "ferts") effType = "ferts";
     else if (data.itemType === "tickets" || data.itemType === "shards") effType = "tickets";
     let rVal = 0;
-    if (data.itemData && data.itemData.rarity) rVal = rarityMap[data.itemData.rarity] || 0;
+    if (data.itemData && data.itemData.rarity) rVal = rarityMap[data.itemData.rarity.toLowerCase()] || 0;
     return { id, data, itemName, sellerName, effType, rVal };
   });
   itemsArr = itemsArr.filter((item) => {

@@ -241,17 +241,17 @@ export function openPanel(kind) {
     }
     if (bagTab === 'gacha') {
       const gachaKeys = Object.keys(ctx.S.bag || {}).filter(k => k.startsWith('unique@'));
-      const rarityVal = { 'Rác': 0, 'Thường': 1, 'Hiếm': 2, 'Sử thi': 3, 'Huyền thoại': 4, 'Thần cấp': 5 };
+      const rarityVal = { 'rác': 0, 'thường': 1, 'hiếm': 2, 'sử thi': 3, 'huyền thoại': 4, 'thần cấp': 5 };
       if (gachaSortMode === 'desc') {
         gachaKeys.sort((a, b) => {
-          const rA = ctx.S.uniques?.[a]?.rarity || 'Thường';
-          const rB = ctx.S.uniques?.[b]?.rarity || 'Thường';
+          const rA = (ctx.S.uniques?.[a]?.rarity || 'thường').toLowerCase();
+          const rB = (ctx.S.uniques?.[b]?.rarity || 'thường').toLowerCase();
           return (rarityVal[rB] || 0) - (rarityVal[rA] || 0);
         });
       } else if (gachaSortMode === 'asc') {
         gachaKeys.sort((a, b) => {
-          const rA = ctx.S.uniques?.[a]?.rarity || 'Thường';
-          const rB = ctx.S.uniques?.[b]?.rarity || 'Thường';
+          const rA = (ctx.S.uniques?.[a]?.rarity || 'thường').toLowerCase();
+          const rB = (ctx.S.uniques?.[b]?.rarity || 'thường').toLowerCase();
           return (rarityVal[rA] || 0) - (rarityVal[rB] || 0);
         });
       }
