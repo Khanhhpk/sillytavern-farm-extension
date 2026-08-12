@@ -157,7 +157,7 @@ function renderLixiSend() {
         try {
             await addDoc(collection(db, "red_envelopes"), {
                 senderId: ctx.S.playerId,
-                senderName: ctx.S.name || 'Người ẩn danh',
+                senderName: ctx.S.username || 'Người ẩn danh',
                 totalAmount: total,
                 remainingAmount: total,
                 claimedBy: [],
