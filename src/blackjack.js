@@ -824,7 +824,8 @@ function bjHandleMsg(fromPid, data) {
             }
             break;
         }
-        case 'GIVE_MONEY':
+        case 'GIVE_MONEY': {
+            if (typeof data.amount !== 'number' || data.amount <= 0) break;
             const log = bjChatLog.find(e => e.reqData && e.reqData.reqId === data.reqId);
             if (log) {
                 log.reqData.fulfilled += data.amount;
@@ -842,7 +843,9 @@ function bjHandleMsg(fromPid, data) {
             }
             if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
             break;
+        }
         case 'GOLD_SEND': {
+            if (typeof data.amount !== 'number' || data.amount <= 0) break;
             const senderName = data.senderName || bjPlayers[fromPid]?.name || '?';
             if (data.targetPid === bjMyId) {
                 ctx.S.coins = (ctx.S.coins || 0) + data.amount;
