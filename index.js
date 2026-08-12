@@ -3808,9 +3808,10 @@ function initUI() {
   showResetAnnouncement();
 }
 function showResetAnnouncement() {
+  console.log("[Farm Ext] B\u1EA3ng th\xF4ng b\xE1o Reset xu\u1EA5t hi\u1EC7n!");
   if (localStorage.getItem("farm_reset_announce_seen")) return;
   const m2 = document.createElement("div");
-  m2.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:20px; box-sizing:border-box; color:#fff; text-align:center; font-family:sans-serif; transition: opacity 0.5s;";
+  m2.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:20px; box-sizing:border-box; color:#fff; text-align:center; font-family:sans-serif; transition: opacity 0.5s;";
   const box = document.createElement("div");
   box.style.cssText = "background:#222; border: 2px solid #555; border-radius:12px; padding:30px; max-width:400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); line-height:1.6;";
   box.innerHTML = `
@@ -3820,7 +3821,7 @@ function showResetAnnouncement() {
     <button id="reset-announce-btn" disabled style="background:#555; color:#999; border:none; padding:12px 24px; font-size:16px; border-radius:6px; cursor:not-allowed; transition:all 0.3s;">\u0110\xF3ng (5s)</button>
   `;
   m2.appendChild(box);
-  sh.appendChild(m2);
+  ctx.win.appendChild(m2);
   const btn = box.querySelector("#reset-announce-btn");
   let timeLeft = 5;
   const iv = setInterval(() => {
@@ -3856,6 +3857,10 @@ var init_ui = __esm({
     init_utils();
     swX = null;
     swY = null;
+    window.testFarmReset = () => {
+      localStorage.removeItem("farm_reset_announce_seen");
+      showResetAnnouncement();
+    };
   }
 });
 
