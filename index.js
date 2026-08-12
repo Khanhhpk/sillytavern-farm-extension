@@ -3833,7 +3833,7 @@ function showResetAnnouncement() {
       btn.style.background = "#4CAF50";
       btn.style.color = "#fff";
       btn.style.cursor = "pointer";
-      btn.disabled = false;
+      btn.removeAttribute("disabled");
     }
   }, 1e3);
   btn.addEventListener("click", () => {
