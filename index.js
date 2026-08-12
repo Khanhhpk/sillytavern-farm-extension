@@ -50096,7 +50096,7 @@ function renderFleaItems() {
   const searchStr = $id("inp-flea-search") ? $id("inp-flea-search").value.toLowerCase().trim() : "";
   const typeFilter = $id("sel-flea-type") ? $id("sel-flea-type").value : "all";
   const sortVal = $id("sel-flea-sort") ? $id("sel-flea-sort").value : "default";
-  const rarityMap = { "Th\u1EA7n c\u1EA5p": 6, "Th\u1EA7n tho\u1EA1i": 6, "Huy\u1EC1n tho\u1EA1i": 5, "S\u1EED thi": 4, "Hi\u1EBFm": 3, "Th\u01B0\u1EDDng": 2, "R\xE1c": 1 };
+  const rarityMap = { "Th\u1EA7n c\u1EA5p": 6, "Huy\u1EC1n tho\u1EA1i": 5, "S\u1EED thi": 4, "Hi\u1EBFm": 3, "Th\u01B0\u1EDDng": 2, "R\xE1c": 1 };
   const escapeHtml = (str) => (str || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   let itemsArr = Object.entries(currentFleaItems).map(([id, data]) => {
     const itemName = getFleaItemName(data.itemId, data.itemData);

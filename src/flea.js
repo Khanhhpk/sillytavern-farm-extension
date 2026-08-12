@@ -158,7 +158,7 @@ export function renderFleaItems() {
     const typeFilter = All.$id('sel-flea-type') ? All.$id('sel-flea-type').value : 'all';
     const sortVal = All.$id('sel-flea-sort') ? All.$id('sel-flea-sort').value : 'default';
     
-    const rarityMap = { 'Thần cấp': 6, 'Thần thoại': 6, 'Huyền thoại': 5, 'Sử thi': 4, 'Hiếm': 3, 'Thường': 2, 'Rác': 1 };
+    const rarityMap = { 'Thần cấp': 6, 'Huyền thoại': 5, 'Sử thi': 4, 'Hiếm': 3, 'Thường': 2, 'Rác': 1 };
     
     const escapeHtml = (str) => (str || '').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     
