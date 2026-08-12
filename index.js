@@ -3805,6 +3805,42 @@ function initUI() {
       renderPager();
     });
   }
+  showResetAnnouncement();
+}
+function showResetAnnouncement() {
+  if (localStorage.getItem("farm_reset_announce_seen")) return;
+  const m2 = document.createElement("div");
+  m2.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:20px; box-sizing:border-box; color:#fff; text-align:center; font-family:sans-serif; transition: opacity 0.5s;";
+  const box = document.createElement("div");
+  box.style.cssText = "background:#222; border: 2px solid #555; border-radius:12px; padding:30px; max-width:400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); line-height:1.6;";
+  box.innerHTML = `
+    <h2 style="color:#ff4444; margin-top:0; font-size:24px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #ff4444; padding-bottom:10px;">\u0110\u1EA1i Ki\u1EBFp Gi\xE1ng L\xE2m</h2>
+    <p style="font-size:16px; margin: 20px 0; font-style:italic;">Thi\xEAn c\u01A1 nhi\u1EC5u lo\u1EA1n, Thi\xEAn \u0111\u1EA1o suy t\xE0n, V\u1EA1n ch\xFAng suy vong. M\u1ED9t h\u01A1i t\xE0n, m\u1ED9t tia s\xE1ng, h\u1EBFt th\u1EA3y chuy\u1EC3n sinh, t\xE1i l\u1EADp t\u1EEB \u0111\u1EA7u.</p>
+    <p style="font-size:18px; font-weight:bold; color:#ffdd55; margin-bottom: 25px;">(C\xF2n 2 ng\xE0y n\u1EEFa l\xE0 reset to\xE0n b\u1ED9)</p>
+    <button id="reset-announce-btn" disabled style="background:#555; color:#999; border:none; padding:12px 24px; font-size:16px; border-radius:6px; cursor:not-allowed; transition:all 0.3s;">\u0110\xF3ng (5s)</button>
+  `;
+  m2.appendChild(box);
+  sh.appendChild(m2);
+  const btn = box.querySelector("#reset-announce-btn");
+  let timeLeft = 5;
+  const iv = setInterval(() => {
+    timeLeft--;
+    if (timeLeft > 0) {
+      btn.textContent = `\u0110\xF3ng (${timeLeft}s)`;
+    } else {
+      clearInterval(iv);
+      btn.textContent = "\u0110\xE3 r\xF5, chu\u1EA9n b\u1ECB chuy\u1EC3n sinh";
+      btn.style.background = "#4CAF50";
+      btn.style.color = "#fff";
+      btn.style.cursor = "pointer";
+      btn.disabled = false;
+    }
+  }, 1e3);
+  btn.addEventListener("click", () => {
+    localStorage.setItem("farm_reset_announce_seen", "1");
+    m2.style.opacity = "0";
+    setTimeout(() => m2.remove(), 500);
+  });
 }
 var root, sh, $id, fieldEl, decoLayer, fxLayer, dungeonView, raceView, swX, swY;
 var init_ui = __esm({
