@@ -22,21 +22,18 @@ function renderLixiUI() {
     }
     
     win.innerHTML = `
-        <div class="modal-content" style="max-width:400px; padding:0; background:#fffdf4; border: 2px solid #dc2626; border-radius:12px; overflow:hidden;">
-            <div style="background:#dc2626; color:#fff; padding:12px 16px; font-size:18px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
-                <span>🧧 Chợ Lì Xì</span>
-                <span id="lixi-close" style="cursor:pointer; font-size:20px;">&times;</span>
+      <div class="mpanel" style="width: min(400px, 96%);">
+        <div class="mtitle"><span id="lixi-win-title" style="display:flex; align-items:center; gap:8px;">${All.spriteSVG('lixiIcon', 18)} Chợ Lì Xì</span><span class="grow"></span><div class="close-x" id="lixi-close">×</div></div>
+        <div class="mbody" style="min-height: 200px; padding: 12px; display: flex; flex-direction: column; gap: 10px;">
+            <div class="pager open" style="margin:0 auto; display:flex; position:static;">
+                <div class="ptab active" id="lixi-tab-list" style="cursor:pointer; flex:1; text-align:center;">Nhận Lì Xì</div>
+                <div class="ptab" id="lixi-tab-send" style="cursor:pointer; flex:1; text-align:center;">Phát Lì Xì</div>
             </div>
-            <div style="padding:16px;">
-                <div class="tabs" style="display:flex; gap:8px; margin-bottom:16px;">
-                    <div class="tab active" id="lixi-tab-list" style="flex:1; text-align:center; padding:8px; background:#dc2626; color:#fff; cursor:pointer; border-radius:4px;">Nhận Lì Xì</div>
-                    <div class="tab" id="lixi-tab-send" style="flex:1; text-align:center; padding:8px; background:#e5e7eb; color:#374151; cursor:pointer; border-radius:4px;">Phát Lì Xì</div>
-                </div>
-                <div id="lixi-body" style="min-height:200px; max-height:400px; overflow-y:auto;">
-                    <!-- Nội dung tab -->
-                </div>
+            <div id="lixi-body" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+                <!-- Nội dung tab -->
             </div>
         </div>
+      </div>
     `;
     
     win.classList.add('open');
@@ -58,12 +55,12 @@ function switchLixiTab(tab) {
     const listTab = All.$id('lixi-tab-list');
     const sendTab = All.$id('lixi-tab-send');
     if (tab === 'list') {
-        listTab.style.background = '#dc2626'; listTab.style.color = '#fff';
-        sendTab.style.background = '#e5e7eb'; sendTab.style.color = '#374151';
+        listTab.classList.add('active');
+        sendTab.classList.remove('active');
         renderLixiList();
     } else {
-        sendTab.style.background = '#dc2626'; sendTab.style.color = '#fff';
-        listTab.style.background = '#e5e7eb'; listTab.style.color = '#374151';
+        sendTab.classList.add('active');
+        listTab.classList.remove('active');
         renderLixiSend();
     }
 }
@@ -102,16 +99,16 @@ async function renderLixiList() {
             } else if (hasClaimed) {
                 statusHTML = '<span style="color:#10b981; font-weight:bold;">Đã nhận</span>';
             } else if (isMine) {
-                statusHTML = `<button class="buy plain" disabled>Của bạn</button>`;
+                statusHTML = `<div class="buy plain">Của bạn</div>`;
             } else {
-                statusHTML = `<button class="buy" style="background:#dc2626; color:#fff;" onclick="window.grabLixi('${id}')">Giật</button>`;
+                statusHTML = `<div class="buy" style="border-color:#dd5548; box-shadow:0 3px 0 #a33528;" onclick="window['grabLixi']('${id}')">Giật</div>`;
             }
             
             html += `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#fee2e2; padding:12px; margin-bottom:8px; border-radius:8px; border:1px solid #fca5a5;">
+                <div class="field" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-radius:8px;">
                     <div>
-                        <div style="font-weight:bold; color:#991b1b; font-size:16px;">${data.senderName}</div>
-                        <div style="font-size:12px; color:#b91c1c;">Còn lại: ${data.remainingAmount.toLocaleString()}G</div>
+                        <div style="font-weight:bold; font-size:14px; color:#ffb0bc; text-shadow: 0 1px 1px #000;">${data.senderName}</div>
+                        <div style="font-size:12px; opacity:0.8;">Còn lại: ${data.remainingAmount.toLocaleString()}G</div>
                     </div>
                     <div>
                         ${statusHTML}
@@ -134,13 +131,13 @@ function renderLixiSend() {
     const myCoins = ctx.S.coins || 0;
     
     body.innerHTML = `
-        <div style="padding:10px;">
-            <div style="margin-bottom:12px;">Ví của bạn: <b>${myCoins.toLocaleString()}G</b></div>
+        <div class="field" style="padding:10px; display:flex; flex-direction:column; gap:8px;">
+            <div style="font-size:12px; opacity:0.8;">Ví của bạn: <b>${myCoins.toLocaleString()}G</b></div>
             
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Tổng Vàng Lì xì:</label>
-            <input type="number" id="lixi-inp-total" class="num-input" style="width:100%; margin-bottom:12px;" placeholder="Ví dụ: 100000" min="1000">
+            <label style="font-weight:bold; font-size:14px;">Tổng Vàng Lì xì:</label>
+            <input type="number" id="lixi-inp-total" class="inp" style="width:100%; margin-bottom:12px;" placeholder="Ví dụ: 100000" min="1000">
             
-            <button class="buy" id="lixi-btn-send" style="width:100%; background:#dc2626; color:#fff; font-size:16px; padding:10px;">Phát Lì Xì Toàn Server</button>
+            <div class="buy" id="lixi-btn-send" style="text-align:center; border-color:#dd5548; box-shadow:0 3px 0 #a33528;">Phát Lì Xì Toàn Server</div>
         </div>
     `;
     

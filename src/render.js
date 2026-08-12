@@ -135,7 +135,7 @@ export function renderPlots() {
             <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Thành Tựu</div>
           </div>
           <div class="explore-slot" id="eslot-lixi" style="border-color: #dc2626; box-shadow: 0 4px 0 #991b1b, inset 0 0 0 3px rgba(220,38,38,0.4);">
-            <div style="font-size:48px; line-height:48px; margin-top:8px;">🧧</div>
+            <div style="width:48px;height:48px;position:relative;margin:8px auto 0;">${spriteSVG('lixiIcon', 48)}</div>
             <div class="feature-name" style="color: #fef08a; text-shadow: 0 1px 2px #000;">Lì Xì</div>
           </div>
           <div class="explore-slot" id="eslot-casino" style="border-color: #ffd94d; box-shadow: 0 4px 0 #b08a5c, inset 0 0 0 3px rgba(255,217,77,0.4);">

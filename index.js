@@ -1456,6 +1456,24 @@ var init_graphics = __esm({
         "................",
         "................",
         "................"
+      ],
+      lixiIcon: [
+        "................",
+        "................",
+        "...xxxxxxxxxx...",
+        "..xRRRRRRRRRRx..",
+        ".xRxRRRRRRRRxRx.",
+        ".xRRxRRRRRRxRRx.",
+        ".xRRRxRRRRxRRRx.",
+        ".xRRRRxRRxRRRRx.",
+        ".xRRRRRxxRRRRRx.",
+        ".xRRRRCCCCRRRRx.",
+        ".xRRRRCCCCRRRRx.",
+        ".xRRRRRxxRRRRRx.",
+        ".xRRRRRRRRRRRRx.",
+        "..xxxxxxxxxxxx..",
+        "................",
+        "................"
       ]
     };
     P.k = P.k || "#c4e3f0";
@@ -7386,7 +7404,7 @@ function renderPlots() {
             <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Th\xE0nh T\u1EF1u</div>
           </div>
           <div class="explore-slot" id="eslot-lixi" style="border-color: #dc2626; box-shadow: 0 4px 0 #991b1b, inset 0 0 0 3px rgba(220,38,38,0.4);">
-            <div style="font-size:48px; line-height:48px; margin-top:8px;">\u{1F9E7}</div>
+            <div style="width:48px;height:48px;position:relative;margin:8px auto 0;">${spriteSVG("lixiIcon", 48)}</div>
             <div class="feature-name" style="color: #fef08a; text-shadow: 0 1px 2px #000;">L\xEC X\xEC</div>
           </div>
           <div class="explore-slot" id="eslot-casino" style="border-color: #ffd94d; box-shadow: 0 4px 0 #b08a5c, inset 0 0 0 3px rgba(255,217,77,0.4);">
@@ -54521,21 +54539,18 @@ function renderLixiUI() {
     $id("win").appendChild(win);
   }
   win.innerHTML = `
-        <div class="modal-content" style="max-width:400px; padding:0; background:#fffdf4; border: 2px solid #dc2626; border-radius:12px; overflow:hidden;">
-            <div style="background:#dc2626; color:#fff; padding:12px 16px; font-size:18px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
-                <span>\u{1F9E7} Ch\u1EE3 L\xEC X\xEC</span>
-                <span id="lixi-close" style="cursor:pointer; font-size:20px;">&times;</span>
+      <div class="mpanel" style="width: min(400px, 96%);">
+        <div class="mtitle"><span id="lixi-win-title" style="display:flex; align-items:center; gap:8px;">${spriteSVG("lixiIcon", 18)} Ch\u1EE3 L\xEC X\xEC</span><span class="grow"></span><div class="close-x" id="lixi-close">\xD7</div></div>
+        <div class="mbody" style="min-height: 200px; padding: 12px; display: flex; flex-direction: column; gap: 10px;">
+            <div class="pager open" style="margin:0 auto; display:flex; position:static;">
+                <div class="ptab active" id="lixi-tab-list" style="cursor:pointer; flex:1; text-align:center;">Nh\u1EADn L\xEC X\xEC</div>
+                <div class="ptab" id="lixi-tab-send" style="cursor:pointer; flex:1; text-align:center;">Ph\xE1t L\xEC X\xEC</div>
             </div>
-            <div style="padding:16px;">
-                <div class="tabs" style="display:flex; gap:8px; margin-bottom:16px;">
-                    <div class="tab active" id="lixi-tab-list" style="flex:1; text-align:center; padding:8px; background:#dc2626; color:#fff; cursor:pointer; border-radius:4px;">Nh\u1EADn L\xEC X\xEC</div>
-                    <div class="tab" id="lixi-tab-send" style="flex:1; text-align:center; padding:8px; background:#e5e7eb; color:#374151; cursor:pointer; border-radius:4px;">Ph\xE1t L\xEC X\xEC</div>
-                </div>
-                <div id="lixi-body" style="min-height:200px; max-height:400px; overflow-y:auto;">
-                    <!-- N\u1ED9i dung tab -->
-                </div>
+            <div id="lixi-body" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+                <!-- N\u1ED9i dung tab -->
             </div>
         </div>
+      </div>
     `;
   win.classList.add("open");
   $id("lixi-close").addEventListener("click", () => {
@@ -54550,16 +54565,12 @@ function switchLixiTab(tab) {
   const listTab = $id("lixi-tab-list");
   const sendTab = $id("lixi-tab-send");
   if (tab === "list") {
-    listTab.style.background = "#dc2626";
-    listTab.style.color = "#fff";
-    sendTab.style.background = "#e5e7eb";
-    sendTab.style.color = "#374151";
+    listTab.classList.add("active");
+    sendTab.classList.remove("active");
     renderLixiList();
   } else {
-    sendTab.style.background = "#dc2626";
-    sendTab.style.color = "#fff";
-    listTab.style.background = "#e5e7eb";
-    listTab.style.color = "#374151";
+    sendTab.classList.add("active");
+    listTab.classList.remove("active");
     renderLixiSend();
   }
 }
@@ -54589,15 +54600,15 @@ async function renderLixiList() {
       } else if (hasClaimed) {
         statusHTML = '<span style="color:#10b981; font-weight:bold;">\u0110\xE3 nh\u1EADn</span>';
       } else if (isMine) {
-        statusHTML = `<button class="buy plain" disabled>C\u1EE7a b\u1EA1n</button>`;
+        statusHTML = `<div class="buy plain">C\u1EE7a b\u1EA1n</div>`;
       } else {
-        statusHTML = `<button class="buy" style="background:#dc2626; color:#fff;" onclick="window.grabLixi('${id}')">Gi\u1EADt</button>`;
+        statusHTML = `<div class="buy" style="border-color:#dd5548; box-shadow:0 3px 0 #a33528;" onclick="window['grabLixi']('${id}')">Gi\u1EADt</div>`;
       }
       html += `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#fee2e2; padding:12px; margin-bottom:8px; border-radius:8px; border:1px solid #fca5a5;">
+                <div class="field" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-radius:8px;">
                     <div>
-                        <div style="font-weight:bold; color:#991b1b; font-size:16px;">${data.senderName}</div>
-                        <div style="font-size:12px; color:#b91c1c;">C\xF2n l\u1EA1i: ${data.remainingAmount.toLocaleString()}G</div>
+                        <div style="font-weight:bold; font-size:14px; color:#ffb0bc; text-shadow: 0 1px 1px #000;">${data.senderName}</div>
+                        <div style="font-size:12px; opacity:0.8;">C\xF2n l\u1EA1i: ${data.remainingAmount.toLocaleString()}G</div>
                     </div>
                     <div>
                         ${statusHTML}
@@ -54616,13 +54627,13 @@ function renderLixiSend() {
   const body = $id("lixi-body");
   const myCoins = ctx.S.coins || 0;
   body.innerHTML = `
-        <div style="padding:10px;">
-            <div style="margin-bottom:12px;">V\xED c\u1EE7a b\u1EA1n: <b>${myCoins.toLocaleString()}G</b></div>
+        <div class="field" style="padding:10px; display:flex; flex-direction:column; gap:8px;">
+            <div style="font-size:12px; opacity:0.8;">V\xED c\u1EE7a b\u1EA1n: <b>${myCoins.toLocaleString()}G</b></div>
             
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">T\u1ED5ng V\xE0ng L\xEC x\xEC:</label>
-            <input type="number" id="lixi-inp-total" class="num-input" style="width:100%; margin-bottom:12px;" placeholder="V\xED d\u1EE5: 100000" min="1000">
+            <label style="font-weight:bold; font-size:14px;">T\u1ED5ng V\xE0ng L\xEC x\xEC:</label>
+            <input type="number" id="lixi-inp-total" class="inp" style="width:100%; margin-bottom:12px;" placeholder="V\xED d\u1EE5: 100000" min="1000">
             
-            <button class="buy" id="lixi-btn-send" style="width:100%; background:#dc2626; color:#fff; font-size:16px; padding:10px;">Ph\xE1t L\xEC X\xEC To\xE0n Server</button>
+            <div class="buy" id="lixi-btn-send" style="text-align:center; border-color:#dd5548; box-shadow:0 3px 0 #a33528;">Ph\xE1t L\xEC X\xEC To\xE0n Server</div>
         </div>
     `;
   $id("lixi-btn-send").addEventListener("click", async () => {
