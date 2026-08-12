@@ -5574,7 +5574,7 @@ function openGachaRatesModal() {
     openGachaModal();
   });
 }
-async function generateAICauldronMerge(itemsData, isSuccess) {
+async function generateAICauldronMerge(itemsData, isSuccess, isGodTier = false) {
   if (!SEC.url || !SEC.model) return null;
   try {
     const simpleColors = Object.entries(GACHA_P).filter((e2) => typeof e2[1] === "string");
@@ -5596,7 +5596,13 @@ ${it2.spriteMap.join("\n")}`;
     }).join("\n\n");
     const totalValue = itemsData.reduce((sum2, it2) => sum2 + (it2.sell || 0), 0);
     const maxVal = totalValue * 2;
-    const resultInstruction = isSuccess ? `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\xC0NH C\xD4NG. Luy\u1EC7n ho\xE1 \u0111\xE3 sinh ra m\u1ED9t v\u1EADt ph\u1EA9m v\u01B0\u1EE3t tr\u1ED9i ho\u1EB7c v\xF4 c\xF9ng th\xFA v\u1ECB. H\xE3y t\u0103ng gi\xE1 tr\u1ECB c\u1EE7a n\xF3 l\xEAn cao h\u01A1n (nh\u01B0ng KH\xD4NG QU\xC1 ${maxVal}G). \u0110\u1ED3 m\u1EDBi ph\u1EA3i c\xF3 \u0111\u1ED9 hi\u1EBFm t\u1EEB [Th\u01B0\u1EDDng] \u0111\u1EBFn [Huy\u1EC1n tho\u1EA1i].` : `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\u1EA4T B\u1EA0I. Qu\xE1 tr\xECnh luy\u1EC7n ho\xE1 \u0111\xE3 x\u1EA3y ra tai n\u1EA1n, sinh ra ph\u1EBF ph\u1EA9m ho\u1EB7c th\u1EE9 c\u1EF1c k\u1EF3 v\xF4 d\u1EE5ng t\u1EA5u h\xE0i. H\xE3y \xE9p gi\xE1 r\u1EDBt th\xEA th\u1EA3m (c\xF3 th\u1EC3 ch\u1EC9 v\xE0i ch\u1EE5c G). \u0110\u1ED3 m\u1EDBi B\u1EAET BU\u1ED8C ph\u1EA3i mang \u0111\u1ED9 hi\u1EBFm [R\xE1c] ho\u1EB7c [Th\u01B0\u1EDDng].`;
+    const maxValStr = isGodTier ? "Kh\xF4ng gi\u1EDBi h\u1EA1n, h\xE3y \u0111\u1ECBnh gi\xE1 m\u1ED9t con s\u1ED1 kh\u1ED5ng l\u1ED3 (VD: 99999, 50000, v.v...)" : `(T\u1ED1i \u0111a tuy\u1EC7t \u0111\u1ED1i: ${maxVal}G)`;
+    let resultInstruction = "";
+    if (isGodTier) {
+      resultInstruction = `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\u1EA6N C\u1EA4P (GOD TIER). Luy\u1EC7n ho\xE1 \u0111\xE3 t\u1EA1o ra m\u1ED9t K\u1EF2 T\xCDCH! M\xF3n \u0111\u1ED3 sinh ra mang quy\u1EC1n n\u0103ng tuy\u1EC7t \u0111\u1ED1i v\u01B0\u1EE3t ngo\xE0i m\u1ECDi gi\u1EDBi h\u1EA1n th\xF4ng th\u01B0\u1EDDng, v\xF4 c\xF9ng b\xE1 \u0111\u1EA1o, r\u1EF1c r\u1EE1 v\xE0 \u0111\u1ED9c nh\u1EA5t v\xF4 nh\u1ECB. Gi\xE1 tr\u1ECB kh\xF4ng gi\u1EDBi h\u1EA1n. \u0110\u1ED3 m\u1EDBi B\u1EAET BU\u1ED8C ph\u1EA3i mang \u0111\u1ED9 hi\u1EBFm [Th\u1EA7n C\u1EA5p].`;
+    } else {
+      resultInstruction = isSuccess ? `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\xC0NH C\xD4NG. Luy\u1EC7n ho\xE1 \u0111\xE3 sinh ra m\u1ED9t v\u1EADt ph\u1EA9m v\u01B0\u1EE3t tr\u1ED9i ho\u1EB7c v\xF4 c\xF9ng th\xFA v\u1ECB. H\xE3y t\u0103ng gi\xE1 tr\u1ECB c\u1EE7a n\xF3 l\xEAn cao h\u01A1n (nh\u01B0ng KH\xD4NG QU\xC1 ${maxVal}G). \u0110\u1ED3 m\u1EDBi ph\u1EA3i c\xF3 \u0111\u1ED9 hi\u1EBFm t\u1EEB [Th\u01B0\u1EDDng] \u0111\u1EBFn [Huy\u1EC1n tho\u1EA1i].` : `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\u1EA4T B\u1EA0I. Qu\xE1 tr\xECnh luy\u1EC7n ho\xE1 \u0111\xE3 x\u1EA3y ra tai n\u1EA1n, sinh ra ph\u1EBF ph\u1EA9m ho\u1EB7c th\u1EE9 c\u1EF1c k\u1EF3 v\xF4 d\u1EE5ng t\u1EA5u h\xE0i. H\xE3y \xE9p gi\xE1 r\u1EDBt th\xEA th\u1EA3m (c\xF3 th\u1EC3 ch\u1EC9 v\xE0i ch\u1EE5c G). \u0110\u1ED3 m\u1EDBi B\u1EAET BU\u1ED8C ph\u1EA3i mang \u0111\u1ED9 hi\u1EBFm [R\xE1c] ho\u1EB7c [Th\u01B0\u1EDDng].`;
+    }
     const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI qu\u1EA3n l\xFD "N\u1ED3i Luy\u1EC7n" (Witch's Cauldron) v\xE0 chuy\xEAn gia Pixel Art (n x n, t\u1ED1i thi\u1EC3u 32x32).
 Ng\u01B0\u1EDDi ch\u01A1i v\u1EEBa b\u1ECF c\xE1c V\u1EADt ph\u1EA9m \u0110\u1ED9c nh\u1EA5t sau v\xE0o n\u1ED3i \u0111\u1EC3 luy\u1EC7n ho\xE1 (dung h\u1EE3p):
 ${itemsDesc}
@@ -5627,8 +5633,8 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
 {
   "name": "T\xEAn v\u1EADt ph\u1EA9m m\u1EDBi (2~7 ch\u1EEF, \u1EA5n t\u01B0\u1EE3ng)",
   "desc": "M\xF4 t\u1EA3 ng\u1EAFn g\u1ECDn C\u01A0 CH\u1EBE v\xE0 C\xC1CH S\u1EEC D\u1EE4NG c\u1EE7a v\u1EADt ph\u1EA9m m\u1EDBi (d\u01B0\u1EDBi 100 ch\u1EEF). Ph\u1EA3i r\xF5 r\xE0ng, th\xFA v\u1ECB, \u0111\u1ED9c l\u1EA1.",
-  "rarity": "\u0110\u1ED9 hi\u1EBFm c\u1EE7a v\u1EADt ph\u1EA9m (R\xE1c, Th\u01B0\u1EDDng, Hi\u1EBFm, S\u1EED thi, Huy\u1EC1n tho\u1EA1i)",
-  "price": S\u1ED1 nguy\xEAn \u0111\u1ECBnh gi\xE1. (T\u1ED1i \u0111a tuy\u1EC7t \u0111\u1ED1i: ${maxVal}G),
+  "rarity": "\u0110\u1ED9 hi\u1EBFm c\u1EE7a v\u1EADt ph\u1EA9m (${isGodTier ? "B\u1EAET BU\u1ED8C \u0110I\u1EC0N: Th\u1EA7n C\u1EA5p" : "R\xE1c, Th\u01B0\u1EDDng, Hi\u1EBFm, S\u1EED thi, Huy\u1EC1n tho\u1EA1i"})",
+  "price": S\u1ED1 nguy\xEAn \u0111\u1ECBnh gi\xE1. ${maxValStr},
   "spriteMap": [ m\u1EA3ng c\xE1c chu\u1ED7i. N\u1EBFu ch\u1ECDn k\xEDch th\u01B0\u1EDBc n x n, m\u1EA3ng PH\u1EA2I C\xD3 \u0110\xDANG n chu\u1ED7i, v\xE0 m\u1ED7i chu\u1ED7i D\xC0I CH\xCDNH X\xC1C n k\xFD t\u1EF1. Ph\u1EA3i l\xE0 h\xECnh vu\xF4ng (min 32x32). Ch\u1EC9 d\xF9ng k\xFD t\u1EF1 B\u1EA3ng m\xE0u v\xE0 d\u1EA5u '.' cho \u0111i\u1EC3m trong su\u1ED1t ]
 }`;
     const userPrompt = `H\xE3y ti\u1EBFn h\xE0nh luy\u1EC7n ho\xE1 n\u1ED3i ph\xF9 thu\u1EF7 v\u1EDBi c\xE1c nguy\xEAn li\u1EC7u tr\xEAn. Quy\u1EBFt \u0111\u1ECBnh k\u1EBFt qu\u1EA3!`;
@@ -5703,10 +5709,17 @@ async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   save();
   renderStatus();
   if (updateLoadingText) updateLoadingText("N\u1ED3i \u0111ang s\xF4i s\xF9ng s\u1EE5c...");
+  const legendaryCount = itemsData.filter((it2) => it2.rarity && it2.rarity.toLowerCase().includes("huy\u1EC1n tho\u1EA1i")).length;
   const isSuccess = Math.random() < 0.6;
+  let isGodTier = false;
+  if (legendaryCount >= 2 && isSuccess) {
+    if (Math.random() < 0.1) {
+      isGodTier = true;
+    }
+  }
   let resultData = null;
   for (let attempt = 1; attempt <= 3; attempt++) {
-    resultData = await generateAICauldronMerge(itemsData, isSuccess);
+    resultData = await generateAICauldronMerge(itemsData, isSuccess, isGodTier);
     if (resultData) break;
     if (updateLoadingText) updateLoadingText(`\u0110ang th\u1EED l\u1EA1i... (${attempt}/3)`);
   }
@@ -5722,7 +5735,8 @@ async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   const key = `unique@${timestamp}_${randId}`;
   const spKey = `cauldron_${timestamp}_${randId}`;
   let color = "#9e9e9e";
-  if (resultData.rarity === "Huy\u1EC1n tho\u1EA1i") color = "#ff8000";
+  if (resultData.rarity === "Th\u1EA7n C\u1EA5p" || resultData.rarity === "Th\u1EA7n c\u1EA5p") color = "#ff1493";
+  else if (resultData.rarity === "Huy\u1EC1n tho\u1EA1i" || resultData.rarity === "Huy\u1EC1n Tho\u1EA1i") color = "#ff8000";
   else if (resultData.rarity === "S\u1EED thi") color = "#a335ee";
   else if (resultData.rarity === "Hi\u1EBFm") color = "#4a90e2";
   else if (resultData.rarity === "Th\u01B0\u1EDDng") color = "#b0bec5";

@@ -876,7 +876,7 @@ export function openGachaRatesModal() {
 
 // ---------------- LÒ NỒI PHÙ THUỶ (CAULDRON MERGE) ---------------- //
 
-export async function generateAICauldronMerge(itemsData, isSuccess) {
+export async function generateAICauldronMerge(itemsData, isSuccess, isGodTier = false) {
   if (!SEC.url || !SEC.model) return null;
   try {
     const simpleColors = Object.entries(GACHA_P).filter(e => typeof e[1] === 'string');
@@ -898,10 +898,16 @@ ${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể)'}`;
     }).join('\n\n');
     const totalValue = itemsData.reduce((sum, it) => sum + (it.sell || 0), 0);
     const maxVal = totalValue * 2;
+    const maxValStr = isGodTier ? "Không giới hạn, hãy định giá một con số khổng lồ (VD: 99999, 50000, v.v...)" : `(Tối đa tuyệt đối: ${maxVal}G)`;
 
-    const resultInstruction = isSuccess 
-      ? `[KẾT QUẢ BẮT BUỘC]: THÀNH CÔNG. Luyện hoá đã sinh ra một vật phẩm vượt trội hoặc vô cùng thú vị. Hãy tăng giá trị của nó lên cao hơn (nhưng KHÔNG QUÁ ${maxVal}G). Đồ mới phải có độ hiếm từ [Thường] đến [Huyền thoại].`
-      : `[KẾT QUẢ BẮT BUỘC]: THẤT BẠI. Quá trình luyện hoá đã xảy ra tai nạn, sinh ra phế phẩm hoặc thứ cực kỳ vô dụng tấu hài. Hãy ép giá rớt thê thảm (có thể chỉ vài chục G). Đồ mới BẮT BUỘC phải mang độ hiếm [Rác] hoặc [Thường].`;
+    let resultInstruction = '';
+    if (isGodTier) {
+      resultInstruction = `[KẾT QUẢ BẮT BUỘC]: THẦN CẤP (GOD TIER). Luyện hoá đã tạo ra một KỲ TÍCH! Món đồ sinh ra mang quyền năng tuyệt đối vượt ngoài mọi giới hạn thông thường, vô cùng bá đạo, rực rỡ và độc nhất vô nhị. Giá trị không giới hạn. Đồ mới BẮT BUỘC phải mang độ hiếm [Thần Cấp].`;
+    } else {
+      resultInstruction = isSuccess 
+        ? `[KẾT QUẢ BẮT BUỘC]: THÀNH CÔNG. Luyện hoá đã sinh ra một vật phẩm vượt trội hoặc vô cùng thú vị. Hãy tăng giá trị của nó lên cao hơn (nhưng KHÔNG QUÁ ${maxVal}G). Đồ mới phải có độ hiếm từ [Thường] đến [Huyền thoại].`
+        : `[KẾT QUẢ BẮT BUỘC]: THẤT BẠI. Quá trình luyện hoá đã xảy ra tai nạn, sinh ra phế phẩm hoặc thứ cực kỳ vô dụng tấu hài. Hãy ép giá rớt thê thảm (có thể chỉ vài chục G). Đồ mới BẮT BUỘC phải mang độ hiếm [Rác] hoặc [Thường].`;
+    }
 
     const sysPrompt = `Bạn là một AI quản lý "Nồi Luyện" (Witch's Cauldron) và chuyên gia Pixel Art (n x n, tối thiểu 32x32).
 Người chơi vừa bỏ các Vật phẩm Độc nhất sau vào nồi để luyện hoá (dung hợp):
@@ -933,8 +939,8 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
 {
   "name": "Tên vật phẩm mới (2~7 chữ, ấn tượng)",
   "desc": "Mô tả ngắn gọn CƠ CHẾ và CÁCH SỬ DỤNG của vật phẩm mới (dưới 100 chữ). Phải rõ ràng, thú vị, độc lạ.",
-  "rarity": "Độ hiếm của vật phẩm (Rác, Thường, Hiếm, Sử thi, Huyền thoại)",
-  "price": Số nguyên định giá. (Tối đa tuyệt đối: ${maxVal}G),
+  "rarity": "Độ hiếm của vật phẩm (${isGodTier ? 'BẮT BUỘC ĐIỀN: Thần Cấp' : 'Rác, Thường, Hiếm, Sử thi, Huyền thoại'})",
+  "price": Số nguyên định giá. ${maxValStr},
   "spriteMap": [ mảng các chuỗi. Nếu chọn kích thước n x n, mảng PHẢI CÓ ĐÚNG n chuỗi, và mỗi chuỗi DÀI CHÍNH XÁC n ký tự. Phải là hình vuông (min 32x32). Chỉ dùng ký tự Bảng màu và dấu '.' cho điểm trong suốt ]
 }`;
 
@@ -1019,11 +1025,19 @@ export async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   
   if (updateLoadingText) updateLoadingText("Nồi đang sôi sùng sục...");
 
+  const legendaryCount = itemsData.filter(it => it.rarity && it.rarity.toLowerCase().includes('huyền thoại')).length;
   const isSuccess = Math.random() < 0.6; // 60% success
+  
+  let isGodTier = false;
+  if (legendaryCount >= 2 && isSuccess) {
+    if (Math.random() < 0.1) {
+      isGodTier = true; // 10% chance when success and >= 2 legendaries
+    }
+  }
 
   let resultData = null;
   for (let attempt = 1; attempt <= 3; attempt++) {
-    resultData = await generateAICauldronMerge(itemsData, isSuccess);
+    resultData = await generateAICauldronMerge(itemsData, isSuccess, isGodTier);
     if (resultData) break;
     if (updateLoadingText) updateLoadingText(`Đang thử lại... (${attempt}/3)`);
   }
@@ -1043,7 +1057,8 @@ export async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   const spKey = `cauldron_${timestamp}_${randId}`;
   
   let color = '#9e9e9e';
-  if (resultData.rarity === 'Huyền thoại') color = '#ff8000';
+  if (resultData.rarity === 'Thần Cấp' || resultData.rarity === 'Thần cấp') color = '#ff1493'; // Deep Pink / Magenta
+  else if (resultData.rarity === 'Huyền thoại' || resultData.rarity === 'Huyền Thoại') color = '#ff8000';
   else if (resultData.rarity === 'Sử thi') color = '#a335ee';
   else if (resultData.rarity === 'Hiếm') color = '#4a90e2';
   else if (resultData.rarity === 'Thường') color = '#b0bec5';
