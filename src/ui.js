@@ -343,12 +343,9 @@ fieldEl.addEventListener('touchend', e => {
       renderPager();
     });
   }
-
-  showResetAnnouncement();
 }
 
-function showResetAnnouncement() {
-  console.log('[Farm Ext] Bảng thông báo Reset xuất hiện!');
+export function showResetAnnouncement() {
   if (localStorage.getItem('farm_reset_announce_seen')) return;
 
   const m = document.createElement('div');

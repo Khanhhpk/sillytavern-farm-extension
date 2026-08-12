@@ -3805,10 +3805,8 @@ function initUI() {
       renderPager();
     });
   }
-  showResetAnnouncement();
 }
 function showResetAnnouncement() {
-  console.log("[Farm Ext] B\u1EA3ng th\xF4ng b\xE1o Reset xu\u1EA5t hi\u1EC7n!");
   if (localStorage.getItem("farm_reset_announce_seen")) return;
   const m2 = document.createElement("div");
   m2.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:20px; box-sizing:border-box; color:#fff; text-align:center; font-family:sans-serif; transition: opacity 0.5s;";
@@ -7081,6 +7079,7 @@ function toggleWin() {
       return;
     }
     ctx.win.classList.add("open");
+    showResetAnnouncement();
     layout();
     placeWin();
     settle();
@@ -55024,6 +55023,7 @@ __export(all_exports, {
   shopTab: () => shopTab,
   shovel: () => shovel,
   showFleaItemDetail: () => showFleaItemDetail,
+  showResetAnnouncement: () => showResetAnnouncement,
   sleepPet: () => sleepPet,
   spriteSVG: () => spriteSVG,
   startLockedModal: () => startLockedModal,

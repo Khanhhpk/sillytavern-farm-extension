@@ -55,6 +55,7 @@ export function toggleWin() {
           return;
       }
       ctx.win.classList.add('open');
+      All.showResetAnnouncement();
       layout(); placeWin(); settle(); renderAll();
       tick = window.setInterval(() => { renderDynamic(); }, 1000);
 
