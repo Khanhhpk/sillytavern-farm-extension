@@ -346,8 +346,8 @@ fieldEl.addEventListener('touchend', e => {
 }
 
 export function showResetAnnouncement() {
-  console.log('[Farm Ext] Bảng thông báo Reset xuất hiện!');
   if (localStorage.getItem('farm_reset_announce_seen')) return;
+  console.log('[Farm Ext] Bảng thông báo Reset xuất hiện!');
   if (ctx.win.querySelector('#farm-reset-modal')) return;
 
   const m = document.createElement('div');
@@ -392,5 +392,5 @@ export function showResetAnnouncement() {
 // @ts-ignore
 window.testFarmReset = () => {
   localStorage.removeItem('farm_reset_announce_seen');
-  showResetAnnouncement();
+  console.log('[Farm Ext] Đã xóa cờ reset, hãy đóng mở lại cửa sổ nông trại để xem bảng thông báo.');
 };

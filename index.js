@@ -3807,8 +3807,8 @@ function initUI() {
   }
 }
 function showResetAnnouncement() {
-  console.log("[Farm Ext] B\u1EA3ng th\xF4ng b\xE1o Reset xu\u1EA5t hi\u1EC7n!");
   if (localStorage.getItem("farm_reset_announce_seen")) return;
+  console.log("[Farm Ext] B\u1EA3ng th\xF4ng b\xE1o Reset xu\u1EA5t hi\u1EC7n!");
   if (ctx.win.querySelector("#farm-reset-modal")) return;
   const m2 = document.createElement("div");
   m2.id = "farm-reset-modal";
@@ -3860,7 +3860,7 @@ var init_ui = __esm({
     swY = null;
     window.testFarmReset = () => {
       localStorage.removeItem("farm_reset_announce_seen");
-      showResetAnnouncement();
+      console.log("[Farm Ext] \u0110\xE3 x\xF3a c\u1EDD reset, h\xE3y \u0111\xF3ng m\u1EDF l\u1EA1i c\u1EEDa s\u1ED5 n\xF4ng tr\u1EA1i \u0111\u1EC3 xem b\u1EA3ng th\xF4ng b\xE1o.");
     };
   }
 });
