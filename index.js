@@ -54605,10 +54605,10 @@ async function renderLixiList() {
         statusHTML = `<div class="buy" style="border-color:#dd5548; box-shadow:0 3px 0 #a33528;" onclick="window['grabLixi']('${id}')">Gi\u1EADt</div>`;
       }
       html += `
-                <div class="field" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-radius:8px;">
+                <div class="field" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-radius:8px; color:#3a2c22;">
                     <div>
-                        <div style="font-weight:bold; font-size:14px; color:#ffb0bc; text-shadow: 0 1px 1px #000;">${data.senderName}</div>
-                        <div style="font-size:12px; opacity:0.8;">C\xF2n l\u1EA1i: ${data.remainingAmount.toLocaleString()}G</div>
+                        <div style="font-weight:bold; font-size:15px; color:#a33528;">${data.senderName}</div>
+                        <div style="font-size:12px; font-weight:bold; opacity:0.8;">C\xF2n l\u1EA1i: ${data.remainingAmount.toLocaleString()}G</div>
                     </div>
                     <div>
                         ${statusHTML}
@@ -54633,7 +54633,7 @@ function renderLixiSend() {
             <label style="font-weight:bold; font-size:14px;">T\u1ED5ng V\xE0ng L\xEC x\xEC:</label>
             <input type="number" id="lixi-inp-total" class="inp" style="width:100%; margin-bottom:12px;" placeholder="V\xED d\u1EE5: 100000" min="1000">
             
-            <div class="buy" id="lixi-btn-send" style="text-align:center; border-color:#dd5548; box-shadow:0 3px 0 #a33528; color:#fffdf4;">Ph\xE1t L\xEC X\xEC To\xE0n Server</div>
+            <div class="buy" id="lixi-btn-send" style="text-align:center; background-color:#dd5548; border-color:#c84b3e; box-shadow:0 3px 0 #a33528; color:#fffdf4; font-weight:bold;">Ph\xE1t L\xEC X\xEC To\xE0n Server</div>
         </div>
     `;
   $id("lixi-btn-send").addEventListener("click", async () => {
