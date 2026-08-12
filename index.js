@@ -54664,7 +54664,7 @@ var init_lixi = __esm({
     init_firebase();
     init_index_esm7();
     currentLixiTab = "list";
-    window.grabLixi = async function(lixiId) {
+    window["grabLixi"] = async function(lixiId) {
       if (!db || !ctx.S.playerId) return;
       const docRef = doc(db, "red_envelopes", lixiId);
       toast("\u0110ang gi\u1EADt...");
