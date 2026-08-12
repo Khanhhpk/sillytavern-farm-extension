@@ -3599,7 +3599,6 @@ function initUI() {
         <div class="btn" data-open="bag">${spriteSVG("bagIcon", 22)}Balo</div>
         <div class="btn" data-open="gacha">${spriteSVG("gachapon", 22)}Gachapon</div>
         <div class="btn" data-open="trade">${spriteSVG("tradeIcon", 22)}Trade</div>
-        <div class="btn" data-open="bank" id="btn-bank-ui">${spriteSVG("coin", 22)}Ng\xE2n h\xE0ng</div>
         <div class="btn" data-open="cfg">${spriteSVG("gearIcon", 22)}C\xE0i \u0111\u1EB7t</div>
     </div>
     <div class="modal" id="modal">
@@ -6216,7 +6215,7 @@ __export(shop_exports, {
 });
 function openModal(title, bodyHTML, keepBetTable) {
   if (!keepBetTable && cashOut) cashOut();
-  $id("mtitle-text").textContent = title;
+  $id("mtitle-text").innerHTML = title;
   $id("mbody").innerHTML = bodyHTML;
   $id("modal").classList.add("open");
 }
@@ -7390,6 +7389,10 @@ function renderPlots() {
             <div style="width:64px;height:64px;position:relative;">${spriteSVG("casinoNeonGoldMap", 64)}</div>
             <div class="feature-name" style="color: #ffd94d; text-shadow: 0 1px 2px #000;">Casino</div>
           </div>
+          <div class="explore-slot" id="eslot-bank" style="border-color: #71b87a; box-shadow: 0 4px 0 #4a8251, inset 0 0 0 3px rgba(113,184,122,0.4);">
+            <div style="width:48px;height:48px;position:relative;margin:8px auto 0;">${spriteSVG("coin", 48)}</div>
+            <div class="feature-name" style="color: #c8f5cc; text-shadow: 0 1px 2px #000;">Ng\xE2n H\xE0ng</div>
+          </div>
         `;
         const cBtn = $id("eslot-casino");
         if (cBtn) cBtn.addEventListener("click", () => {
@@ -7411,6 +7414,8 @@ function renderPlots() {
           if (ui) ui.classList.add("open");
           openFleaMarket();
         });
+        const bBtn = $id("eslot-bank");
+        if (bBtn) bBtn.addEventListener("click", () => openPanel("bank"));
         const aBtn = $id("eslot-achiv");
         if (aBtn) aBtn.addEventListener("click", () => openAchivModal());
       }
@@ -54319,18 +54324,30 @@ var init_cooking = __esm({
 
 // src/bank.js
 function calculateInterest() {
-  if (!ctx.S.bankDeposit) return;
   const now2 = Date.now();
-  const elapsed = now2 - ctx.S.bankDepositTime;
-  if (elapsed >= FOUR_HOURS) {
-    const cycles = Math.floor(elapsed / FOUR_HOURS);
-    let currentDeposit = ctx.S.bankDeposit;
-    for (let i2 = 0; i2 < cycles; i2++) {
-      currentDeposit += Math.floor(currentDeposit * INTEREST_RATE);
+  if (ctx.S.bankDeposit) {
+    if (!ctx.S.bankDepositTime) ctx.S.bankDepositTime = now2;
+    const depositElapsed = now2 - ctx.S.bankDepositTime;
+    if (depositElapsed >= FOUR_HOURS) {
+      const cycles = Math.floor(depositElapsed / FOUR_HOURS);
+      ctx.S.bankDepositInterest = (ctx.S.bankDepositInterest || 0) + Math.floor(ctx.S.bankDeposit * DEPOSIT_RATE * cycles);
+      ctx.S.bankDepositTime = now2 - depositElapsed % FOUR_HOURS;
+      save();
     }
-    ctx.S.bankDeposit = currentDeposit;
-    ctx.S.bankDepositTime = now2 - elapsed % FOUR_HOURS;
-    save();
+  }
+  if (ctx.S.bankInvestBalance) {
+    if (!ctx.S.bankInvestTime) ctx.S.bankInvestTime = now2;
+    const investElapsed = now2 - ctx.S.bankInvestTime;
+    if (investElapsed >= FOUR_HOURS) {
+      const cycles = Math.floor(investElapsed / FOUR_HOURS);
+      let balance = ctx.S.bankInvestBalance;
+      for (let i2 = 0; i2 < cycles; i2++) {
+        balance += Math.floor(balance * INVEST_RATE);
+      }
+      ctx.S.bankInvestBalance = balance;
+      ctx.S.bankInvestTime = now2 - investElapsed % FOUR_HOURS;
+      save();
+    }
   }
 }
 function checkLoanStatus() {
@@ -54349,17 +54366,27 @@ function checkLoanStatus() {
   }
   if (ctx.S.bankLoan > 0) {
     const loanElapsed = now2 - ctx.S.bankLoanTime;
-    if (loanElapsed >= LOAN_DURATION) {
-      const penalty = Math.floor(ctx.S.bankLoan * 0.05);
+    const duration = ctx.S.bankLoanDuration || FOUR_HOURS;
+    if (loanElapsed >= duration) {
+      const penalty = Math.floor(ctx.S.bankLoan * 0.1);
       let debt = ctx.S.bankLoan + penalty;
       ctx.S.bankLoan = 0;
       ctx.S.bankLoanTime = 0;
-      if (ctx.S.bankDeposit >= debt) {
-        ctx.S.bankDeposit -= debt;
+      ctx.S.bankLoanDuration = 0;
+      const totalDeposit = (ctx.S.bankDeposit || 0) + (ctx.S.bankDepositInterest || 0);
+      if (totalDeposit >= debt) {
+        if (ctx.S.bankDepositInterest >= debt) {
+          ctx.S.bankDepositInterest -= debt;
+        } else {
+          debt -= ctx.S.bankDepositInterest;
+          ctx.S.bankDepositInterest = 0;
+          ctx.S.bankDeposit -= debt;
+        }
         debt = 0;
-      } else if (ctx.S.bankDeposit > 0) {
-        debt -= ctx.S.bankDeposit;
+      } else if (totalDeposit > 0) {
+        debt -= totalDeposit;
         ctx.S.bankDeposit = 0;
+        ctx.S.bankDepositInterest = 0;
       }
       if (debt > 0) {
         if (ctx.S.coins >= debt) {
@@ -54371,13 +54398,13 @@ function checkLoanStatus() {
         }
       }
       if (debt > 0) {
-        ctx.S.bankLockedDebt += debt;
+        ctx.S.bankLockedDebt = (ctx.S.bankLockedDebt || 0) + debt;
       }
       save();
     }
   }
   if (ctx.S.bankLockedDebt > 0) {
-    if (now2 - ctx.S.bankLastCollectionTime >= ONE_HOUR) {
+    if (now2 - (ctx.S.bankLastCollectionTime || 0) >= ONE_HOUR) {
       ctx.S.bankLastCollectionTime = now2;
       if (ctx.S.coins > 0) {
         if (ctx.S.coins >= ctx.S.bankLockedDebt) {
@@ -54392,52 +54419,63 @@ function checkLoanStatus() {
     }
   }
 }
-function deposit(amount) {
-  if (amount <= 0 || ctx.S.coins < amount) return false;
-  calculateInterest();
-  ctx.S.coins -= amount;
-  ctx.S.bankDeposit += amount;
-  ctx.S.bankDepositTime = Date.now();
-  save();
-  return true;
-}
 function renderBankUI() {
   checkLoanStatus();
   calculateInterest();
-  $id("mtitle-text").innerHTML = `${spriteSVG("coin", 16)} Ng\xE2n H\xE0ng Trung \u01AF\u01A1ng`;
-  let html = `
-    <div class="tabs" style="margin-bottom:12px; display:flex; gap:8px;">
+  const title = `${spriteSVG("coin", 16)} Ng\xE2n H\xE0ng Trung \u01AF\u01A1ng`;
+  let html = `<div class="tabs" style="margin-bottom:12px; display:flex; gap:8px;">
         <div class="tab ${currentBankTab === "deposit" ? "active" : ""}" data-banktab="deposit">Ti\u1EBFt Ki\u1EC7m</div>
+        <div class="tab ${currentBankTab === "invest" ? "active" : ""}" data-banktab="invest">\u0110\u1EA7u T\u01B0</div>
         <div class="tab ${currentBankTab === "loan" ? "active" : ""}" data-banktab="loan">Vay N\u1EE3</div>
     </div>`;
   if (currentBankTab === "deposit") {
+    const principal = ctx.S.bankDeposit || 0;
+    const interest = ctx.S.bankDepositInterest || 0;
     html += `
-        <div class="note" style="margin-bottom:12px;">L\xE3i su\u1EA5t 1% m\u1ED7i ng\xE0y (4h \u0111\u1EDDi th\u1EF1c). Ti\u1EC1n l\xE3i t\u1EF1 \u0111\u1ED9ng c\u1ED9ng v\xE0o g\u1ED1c.</div>
-        <div style="font-size:14px; margin-bottom:12px;">S\u1ED1 d\u01B0 \u0111ang g\u1EEDi: <b>${ctx.S.bankDeposit.toLocaleString()}</b> G</div>
+        <div class="note" style="margin-bottom:12px;">Ti\u1EBFt ki\u1EC7m an to\xE0n: L\xE3i \u0111\u01A1n 0.5% m\u1ED7i 4h \u0111\u1EDDi th\u1EF1c. L\xE3i t\xE1ch ri\xEAng, kh\xF4ng c\u1ED9ng d\u1ED3n v\xE0o g\u1ED1c.</div>
+        <div style="font-size:14px; margin-bottom:4px; color:#5c4033;">S\u1ED1 d\u01B0 g\u1ED1c: <b>${principal.toLocaleString()}</b> G</div>
+        <div style="font-size:14px; margin-bottom:12px; color:#10b981;">Ti\u1EC1n l\xE3i nh\u1EADn \u0111\u01B0\u1EE3c: <b>${interest.toLocaleString()}</b> G</div>
         <div style="font-size:14px; margin-bottom:12px; color:#7a5c38;">V\xED v\xE0ng hi\u1EC7n t\u1EA1i: <b>${ctx.S.coins.toLocaleString()}</b> G</div>
         <div style="display:flex; gap:8px;">
             <input type="number" id="bank-deposit-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" max="${ctx.S.coins}" style="flex:1;">
             <div class="buy" onclick="FarmAll.uiBankAction('deposit')">G\u1EEDi Ti\u1EC1n</div>
         </div>
         <div style="display:flex; gap:8px; margin-top:8px;">
-            <input type="number" id="bank-withdraw-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" max="${ctx.S.bankDeposit}" style="flex:1;">
-            <div class="buy" onclick="FarmAll.uiBankAction('withdraw')">R\xFAt Ti\u1EC1n</div>
+            <input type="number" id="bank-withdraw-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" max="${principal + interest}" style="flex:1;">
+            <div class="buy" onclick="FarmAll.uiBankAction('withdrawDeposit')">R\xFAt Ti\u1EC1n</div>
+        </div>`;
+  } else if (currentBankTab === "invest") {
+    const principal = ctx.S.bankInvestPrincipal || 0;
+    const balance = ctx.S.bankInvestBalance || 0;
+    const interest = balance - principal;
+    const isUnlocked = interest >= principal * 0.3;
+    html += `
+        <div class="note" style="margin-bottom:12px;">\u0110\u1EA7u t\u01B0 si\xEAu t\u1ED1c: L\xE3i k\xE9p 1.5% m\u1ED7i 4h. R\u1EE7i ro giam v\u1ED1n: <b>Ch\u1EC9 r\xFAt \u0111\u01B0\u1EE3c ti\u1EC1n g\u1ED1c khi Ti\u1EC1n L\xE3i &gt;= 30% Ti\u1EC1n G\u1ED1c.</b></div>
+        <div style="font-size:14px; margin-bottom:4px; color:#5c4033;">V\u1ED1n \u0111\u1EA7u t\u01B0: <b>${principal.toLocaleString()}</b> G</div>
+        <div style="font-size:14px; margin-bottom:12px; color:#10b981;">Ti\u1EC1n l\xE3i (l\xE3i k\xE9p): <b>${interest.toLocaleString()}</b> G</div>
+        <div style="font-size:14px; margin-bottom:12px; color:#7a5c38;">V\xED v\xE0ng hi\u1EC7n t\u1EA1i: <b>${ctx.S.coins.toLocaleString()}</b> G</div>
+        <div style="display:flex; gap:8px;">
+            <input type="number" id="bank-invest-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" max="${ctx.S.coins}" style="flex:1;">
+            <div class="buy" onclick="FarmAll.uiBankAction('invest')">\u0110\u1EA7u T\u01B0</div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+            <input type="number" id="bank-withdraw-invest-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" max="${isUnlocked ? balance : interest}" style="flex:1;">
+            <div class="buy" onclick="FarmAll.uiBankAction('withdrawInvest')">R\xFAt Ti\u1EC1n ${isUnlocked ? "(G\u1ED1c + L\xE3i)" : "(Ch\u1EC9 L\xE3i)"}</div>
         </div>`;
   } else if (currentBankTab === "loan") {
     const hasLoan = ctx.S.bankLoan > 0;
     const isLocked = ctx.S.bankLockedDebt > 0;
-    const timeElapsed = Date.now() - ctx.S.bankLoanTime;
-    const timeRemainingMs = LOAN_DURATION - timeElapsed;
+    const timeElapsed = Date.now() - (ctx.S.bankLoanTime || 0);
+    const timeRemainingMs = (ctx.S.bankLoanDuration || FOUR_HOURS) - timeElapsed;
     const timeStr = timeRemainingMs > 0 ? fmtDur(timeRemainingMs) : "Qu\xE1 H\u1EA1n!";
-    html += `
-        <div class="note" style="margin-bottom:12px; ${isLocked ? "color:red;" : ""}">K\u1EF3 h\u1EA1n tr\u1EA3 n\u1EE3: 1 ng\xE0y (4h \u0111\u1EDDi th\u1EF1c). N\u1EE3 x\u1EA5u t\u1EF1 \u0111\u1ED9ng tr\u1EEB v\xE0o ti\u1EBFt ki\u1EC7m & t\xFAi v\xE0ng.</div>`;
+    html += `<div class="note" style="margin-bottom:12px; ${isLocked ? "color:red;" : ""}">Kho\u1EA3n vay \u0111\u01B0\u1EE3c t\xEDnh l\xE3i m\u1ED9t l\u1EA7n ngay l\xFAc duy\u1EC7t. N\u1EE3 qu\xE1 h\u1EA1n ph\u1EA1t 10% v\xE0 b\u1ECB kh\xF3a si\u1EBFt n\u1EE3.</div>`;
     if (isLocked) {
-      html += `<div style="color:red; font-weight:bold; margin-bottom:12px;">B\u1EA0N \u0110ANG C\xD3 N\u1EE2 X\u1EA4U: ${ctx.S.bankLockedDebt.toLocaleString()} G</div>`;
-      html += `<div style="font-size:12px; margin-bottom:12px;">Ng\xE2n h\xE0ng s\u1EBD t\u1EF1 \u0111\u1ED9ng si\u1EBFt n\u1EE3 m\u1ED7i khi b\u1EA1n c\xF3 v\xE0ng.</div>`;
-      html += `<hr style="margin: 12px 0; border: 1px dashed #ccc;">
+      html += `<div style="color:red; font-weight:bold; margin-bottom:12px;">B\u1EA0N \u0110ANG C\xD3 N\u1EE2 X\u1EA4U: ${ctx.S.bankLockedDebt.toLocaleString()} G</div>
+            <div style="font-size:12px; margin-bottom:12px; color:#5c4033;">Ng\xE2n h\xE0ng s\u1EBD t\u1EF1 \u0111\u1ED9ng si\u1EBFt n\u1EE3 m\u1ED7i khi b\u1EA1n c\xF3 v\xE0ng.</div>
+            <hr style="margin: 12px 0; border: 1px dashed #ccc;">
             <div style="color:#d35400; font-weight:bold;">T\xEDn d\u1EE5ng \u0111en (Tr\u1EE3 c\u1EA5p kh\u1EA9n c\u1EA5p)</div>
             <div class="note">L\xE3i su\u1EA5t 10% m\u1ED7i 4 gi\u1EDD. C\u1EF1c k\u1EF3 r\u1EE7i ro!</div>
-            <div style="font-size:14px; margin-bottom:12px;">\u0110ang n\u1EE3 t\xEDn d\u1EE5ng \u0111en: <b>${ctx.S.bankEmergencyLoan.toLocaleString()}</b> G</div>
+            <div style="font-size:14px; margin-bottom:12px; color:#5c4033;">\u0110ang n\u1EE3 t\xEDn d\u1EE5ng \u0111en: <b>${(ctx.S.bankEmergencyLoan || 0).toLocaleString()}</b> G</div>
             <div style="display:flex; gap:8px; margin-top:8px;">
                 <input type="number" id="bank-emergency-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" style="flex:1;">
                 <div class="buy" style="background:#d35400;" onclick="FarmAll.uiBankAction('borrowEmergency')">Vay Kh\u1EA9n C\u1EA5p</div>
@@ -54445,130 +54483,190 @@ function renderBankUI() {
             <div style="display:flex; gap:8px; margin-top:8px;">
                 <input type="number" id="bank-repay-emergency-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" style="flex:1;">
                 <div class="buy" onclick="FarmAll.uiBankAction('repayEmergency')">Tr\u1EA3 N\u1EE3 Kh\u1EA9n</div>
-            </div>
-            `;
+            </div>`;
     } else {
       if (hasLoan) {
-        html += `<div style="font-size:14px; margin-bottom:8px;">N\u1EE3 g\u1ED1c: <b>${ctx.S.bankLoan.toLocaleString()}</b> G</div>`;
-        html += `<div style="font-size:14px; margin-bottom:12px; color:${timeRemainingMs > 0 ? "#10b981" : "red"};">Th\u1EDDi gian tr\u1EA3 c\xF2n l\u1EA1i: <b>${timeStr}</b></div>`;
-        html += `<div style="font-size:14px; margin-bottom:12px; color:#7a5c38;">V\xED v\xE0ng hi\u1EC7n t\u1EA1i: <b>${ctx.S.coins.toLocaleString()}</b> G</div>`;
-        html += `<div style="display:flex; gap:8px; margin-top:8px;">
+        html += `<div style="font-size:14px; margin-bottom:8px; color:#5c4033;">N\u1EE3 c\u1EA7n tr\u1EA3: <b>${ctx.S.bankLoan.toLocaleString()}</b> G</div>
+                <div style="font-size:14px; margin-bottom:12px; color:${timeRemainingMs > 0 ? "#10b981" : "red"}">Th\u1EDDi gian tr\u1EA3 c\xF2n l\u1EA1i: <b>${timeStr}</b></div>
+                <div style="font-size:14px; margin-bottom:12px; color:#7a5c38;">V\xED v\xE0ng hi\u1EC7n t\u1EA1i: <b>${ctx.S.coins.toLocaleString()}</b> G</div>
+                <div style="display:flex; gap:8px; margin-top:8px;">
                     <input type="number" id="bank-repay-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" max="${ctx.S.bankLoan}" style="flex:1;">
                     <div class="buy" onclick="FarmAll.uiBankAction('repay')">Tr\u1EA3 N\u1EE3</div>
                 </div>`;
       } else {
-        html += `<div style="font-size:14px; margin-bottom:12px; color:#7a5c38;">V\xED v\xE0ng hi\u1EC7n t\u1EA1i: <b>${ctx.S.coins.toLocaleString()}</b> G</div>`;
-        html += `<div style="display:flex; gap:8px; margin-top:8px;">
-                    <input type="number" id="bank-borrow-amt" class="inp" placeholder="S\u1ED1 l\u01B0\u1EE3ng" min="1" style="flex:1;">
+        html += `<div style="font-size:14px; margin-bottom:12px; color:#7a5c38;">V\xED v\xE0ng hi\u1EC7n t\u1EA1i: <b>${ctx.S.coins.toLocaleString()}</b> G</div>
+                <div style="margin-bottom:8px;">
+                    <select id="bank-loan-tier" class="inp" style="width:100%; padding:6px; background:#faf0dc; border:2px solid #bd923b; color:#5c4033; font-weight:bold; border-radius:6px; outline:none;">
+                        <option value="1">Vay 1 Ng\xE0y (L\xE3i 5%)</option>
+                        <option value="2">Vay 3 Ng\xE0y (L\xE3i 20%)</option>
+                        <option value="3">Vay 7 Ng\xE0y (L\xE3i 50%)</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:8px;">
+                    <input type="number" id="bank-borrow-amt" class="inp" placeholder="V\xE0ng mu\u1ED1n nh\u1EADn" min="1" style="flex:1;">
                     <div class="buy" onclick="FarmAll.uiBankAction('borrow')">Vay N\u1EE3</div>
                 </div>`;
       }
     }
   }
-  $id("mbody").innerHTML = html;
-  $id("mbody").querySelectorAll("[data-banktab]").forEach((el) => {
-    el.addEventListener("click", () => {
-      currentBankTab = el.dataset.banktab;
-      renderBankUI();
+  openModal(title, html);
+  setTimeout(() => {
+    const modalBody = $id("mbody");
+    if (!modalBody) return;
+    modalBody.querySelectorAll("[data-banktab]").forEach((el) => {
+      el.addEventListener("click", () => {
+        currentBankTab = el.dataset.banktab;
+        renderBankUI();
+      });
     });
-  });
-  $id("modal").style.display = "flex";
+  }, 0);
 }
 function uiBankAction(action) {
   let inputId = "";
-  let func = null;
-  if (action === "deposit") {
-    inputId = "bank-deposit-amt";
-    func = deposit;
-  } else if (action === "withdraw") {
-    inputId = "bank-withdraw-amt";
-    func = withdraw;
-  } else if (action === "borrow") {
-    inputId = "bank-borrow-amt";
-    func = borrow;
-  } else if (action === "repay") {
-    inputId = "bank-repay-amt";
-    func = repay;
-  } else if (action === "borrowEmergency") {
-    inputId = "bank-emergency-amt";
-    func = borrowEmergency;
-  } else if (action === "repayEmergency") {
-    inputId = "bank-repay-emergency-amt";
-    func = repayEmergency;
-  }
+  if (action === "deposit") inputId = "bank-deposit-amt";
+  else if (action === "withdrawDeposit") inputId = "bank-withdraw-amt";
+  else if (action === "invest") inputId = "bank-invest-amt";
+  else if (action === "withdrawInvest") inputId = "bank-withdraw-invest-amt";
+  else if (action === "borrow") inputId = "bank-borrow-amt";
+  else if (action === "repay") inputId = "bank-repay-amt";
+  else if (action === "borrowEmergency") inputId = "bank-emergency-amt";
+  else if (action === "repayEmergency") inputId = "bank-repay-emergency-amt";
   const amt = parseInt($id(inputId)?.value || "0", 10);
   if (!amt || isNaN(amt) || amt <= 0) {
     return toast("S\u1ED1 l\u01B0\u1EE3ng kh\xF4ng h\u1EE3p l\u1EC7");
   }
-  const success = func(amt);
+  let success = false;
+  if (action === "deposit") success = deposit(amt);
+  else if (action === "withdrawDeposit") success = withdrawDeposit(amt);
+  else if (action === "invest") success = invest(amt);
+  else if (action === "withdrawInvest") success = withdrawInvest(amt);
+  else if (action === "borrow") {
+    const tier = parseInt($id("bank-loan-tier")?.value || "1", 10);
+    success = borrow(amt, tier);
+  } else if (action === "repay") success = repay(amt);
+  else if (action === "borrowEmergency") success = borrowEmergency(amt);
+  else if (action === "repayEmergency") success = repayEmergency(amt);
   if (success) {
     toast("Th\xE0nh c\xF4ng!");
     renderStatus();
     renderBankUI();
   } else {
-    toast("Giao d\u1ECBch th\u1EA5t b\u1EA1i (Kh\xF4ng \u0111\u1EE7 v\xE0ng ho\u1EB7c l\u1ED7i)");
+    toast("Giao d\u1ECBch th\u1EA5t b\u1EA1i (S\u1ED1 d\u01B0 kh\xF4ng \u0111\u1EE7 ho\u1EB7c b\u1ECB kh\xF3a)");
   }
 }
-function withdraw(amount) {
-  if (amount <= 0 || ctx.S.bankDeposit < amount) return false;
+function deposit(amount) {
+  if (ctx.S.coins < amount) return false;
   calculateInterest();
-  ctx.S.bankDeposit -= amount;
-  ctx.S.coins += amount;
+  ctx.S.coins -= amount;
+  ctx.S.bankDeposit = (ctx.S.bankDeposit || 0) + amount;
   ctx.S.bankDepositTime = Date.now();
   save();
   return true;
 }
-function borrow(amount) {
-  if (amount <= 0 || ctx.S.bankLockedDebt > 0 || ctx.S.bankLoan > 0) return false;
-  ctx.S.bankLoan += amount;
+function withdrawDeposit(amount) {
+  const total = (ctx.S.bankDeposit || 0) + (ctx.S.bankDepositInterest || 0);
+  if (amount > total) return false;
+  calculateInterest();
+  ctx.S.coins += amount;
+  if (amount <= (ctx.S.bankDepositInterest || 0)) {
+    ctx.S.bankDepositInterest -= amount;
+  } else {
+    const remainder = amount - (ctx.S.bankDepositInterest || 0);
+    ctx.S.bankDepositInterest = 0;
+    ctx.S.bankDeposit -= remainder;
+  }
+  ctx.S.bankDepositTime = Date.now();
+  save();
+  return true;
+}
+function invest(amount) {
+  if (ctx.S.coins < amount) return false;
+  calculateInterest();
+  ctx.S.coins -= amount;
+  ctx.S.bankInvestPrincipal = (ctx.S.bankInvestPrincipal || 0) + amount;
+  ctx.S.bankInvestBalance = (ctx.S.bankInvestBalance || 0) + amount;
+  ctx.S.bankInvestTime = Date.now();
+  save();
+  return true;
+}
+function withdrawInvest(amount) {
+  const principal = ctx.S.bankInvestPrincipal || 0;
+  const balance = ctx.S.bankInvestBalance || 0;
+  const interest = balance - principal;
+  const isUnlocked = interest >= principal * 0.3;
+  const maxWithdraw = isUnlocked ? balance : interest;
+  if (amount > maxWithdraw) return false;
+  calculateInterest();
+  ctx.S.coins += amount;
+  ctx.S.bankInvestBalance -= amount;
+  if (isUnlocked && amount > interest) {
+    ctx.S.bankInvestPrincipal -= amount - interest;
+    if (ctx.S.bankInvestPrincipal < 0) ctx.S.bankInvestPrincipal = 0;
+  }
+  ctx.S.bankInvestTime = Date.now();
+  save();
+  return true;
+}
+function borrow(amount, tier) {
+  if (ctx.S.bankLockedDebt > 0 || ctx.S.bankLoan > 0) return false;
+  let durationMultiplier = 1;
+  let interestRate = 0.05;
+  if (tier === 2) {
+    durationMultiplier = 3;
+    interestRate = 0.2;
+  } else if (tier === 3) {
+    durationMultiplier = 7;
+    interestRate = 0.5;
+  }
+  const debt = Math.floor(amount * (1 + interestRate));
+  ctx.S.bankLoan = debt;
+  ctx.S.bankLoanDuration = durationMultiplier * 6 * FOUR_HOURS;
   ctx.S.bankLoanTime = Date.now();
   ctx.S.coins += amount;
   save();
   return true;
 }
 function repay(amount) {
-  if (amount <= 0 || ctx.S.coins < amount) return false;
+  if (ctx.S.coins < amount) return false;
   if (ctx.S.bankLoan > 0) {
-    if (amount >= ctx.S.bankLoan) {
-      amount = ctx.S.bankLoan;
-    }
+    if (amount >= ctx.S.bankLoan) amount = ctx.S.bankLoan;
     ctx.S.coins -= amount;
     ctx.S.bankLoan -= amount;
-    if (ctx.S.bankLoan === 0) ctx.S.bankLoanTime = 0;
+    if (ctx.S.bankLoan === 0) {
+      ctx.S.bankLoanTime = 0;
+      ctx.S.bankLoanDuration = 0;
+    }
     save();
     return true;
   }
   return false;
 }
 function borrowEmergency(amount) {
-  if (amount <= 0) return false;
-  ctx.S.bankEmergencyLoan += amount;
+  ctx.S.bankEmergencyLoan = (ctx.S.bankEmergencyLoan || 0) + amount;
   ctx.S.bankEmergencyLoanTime = Date.now();
   ctx.S.coins += amount;
   save();
   return true;
 }
 function repayEmergency(amount) {
-  if (amount <= 0 || ctx.S.coins < amount || ctx.S.bankEmergencyLoan <= 0) return false;
-  if (amount >= ctx.S.bankEmergencyLoan) {
-    amount = ctx.S.bankEmergencyLoan;
-  }
+  if (ctx.S.coins < amount || (ctx.S.bankEmergencyLoan || 0) <= 0) return false;
+  if (amount >= ctx.S.bankEmergencyLoan) amount = ctx.S.bankEmergencyLoan;
   ctx.S.coins -= amount;
   ctx.S.bankEmergencyLoan -= amount;
   if (ctx.S.bankEmergencyLoan === 0) ctx.S.bankEmergencyLoanTime = 0;
   save();
   return true;
 }
-var FOUR_HOURS, ONE_HOUR, INTEREST_RATE, EMERGENCY_LOAN_INTEREST, LOAN_DURATION, currentBankTab;
+var FOUR_HOURS, ONE_HOUR, DEPOSIT_RATE, INVEST_RATE, EMERGENCY_LOAN_INTEREST, currentBankTab;
 var init_bank = __esm({
   "src/bank.js"() {
     init_store();
     init_all();
     FOUR_HOURS = 4 * 60 * 60 * 1e3;
     ONE_HOUR = 60 * 60 * 1e3;
-    INTEREST_RATE = 0.01;
+    DEPOSIT_RATE = 5e-3;
+    INVEST_RATE = 0.015;
     EMERGENCY_LOAN_INTEREST = 0.1;
-    LOAN_DURATION = FOUR_HOURS;
     currentBankTab = "deposit";
   }
 });
@@ -54618,8 +54716,6 @@ __export(all_exports, {
   bagTab: () => bagTab,
   bjToast: () => bjToast,
   blockPrice: () => blockPrice,
-  borrow: () => borrow,
-  borrowEmergency: () => borrowEmergency,
   buildEventPrompt: () => buildEventPrompt,
   buildTicket: () => buildTicket,
   buyBlock: () => buyBlock,
@@ -54647,7 +54743,6 @@ __export(all_exports, {
   curBlocks: () => curBlocks,
   curPlots: () => curPlots,
   decoLayer: () => decoLayer,
-  deposit: () => deposit,
   destroy: () => destroy,
   disposers: () => disposers,
   dragBar: () => dragBar,
@@ -54799,8 +54894,6 @@ __export(all_exports, {
   renderTimeout: () => renderTimeout,
   renderToolbar: () => renderToolbar,
   renderWitch: () => renderWitch,
-  repay: () => repay,
-  repayEmergency: () => repayEmergency,
   requestDayEvent: () => requestDayEvent,
   resetDestroyed: () => resetDestroyed,
   resizeTimer: () => resizeTimer,
@@ -54871,8 +54964,7 @@ __export(all_exports, {
   weatherOf: () => weatherOf,
   wg: () => wg,
   witchArrive: () => witchArrive,
-  witchDeliver: () => witchDeliver,
-  withdraw: () => withdraw
+  witchDeliver: () => witchDeliver
 });
 var init_all = __esm({
   "src/all.js"() {

@@ -17,7 +17,7 @@ import { openBetModal } from './bet.js';
 /* ---------- Bảng ---------- */
 export function openModal(title, bodyHTML, keepBetTable) {
   if (!keepBetTable && All.cashOut) All.cashOut();                     // Mở bảng khác = rời bàn cược, rút tiền về trước đã
-  All.$id('mtitle-text').textContent = title;
+  All.$id('mtitle-text').innerHTML = title;
   All.$id('mbody').innerHTML = bodyHTML;
   All.$id('modal').classList.add('open');
 }

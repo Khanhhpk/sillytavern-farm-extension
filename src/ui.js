@@ -163,7 +163,6 @@ export function initUI() {
         <div class="btn" data-open="bag">${spriteSVG('bagIcon', 22)}Balo</div>
         <div class="btn" data-open="gacha">${spriteSVG('gachapon', 22)}Gachapon</div>
         <div class="btn" data-open="trade">${spriteSVG('tradeIcon', 22)}Trade</div>
-        <div class="btn" data-open="bank" id="btn-bank-ui">${spriteSVG('coin', 22)}Ngân hàng</div>
         <div class="btn" data-open="cfg">${spriteSVG('gearIcon', 22)}Cài đặt</div>
     </div>
     <div class="modal" id="modal">
