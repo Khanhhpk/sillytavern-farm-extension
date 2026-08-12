@@ -80,13 +80,14 @@ async function renderLixiList() {
             const data = docSnap.data();
             const id = docSnap.id;
             
-            // Xoá lì xì đã cạn sau 1 tiếng
-            if (data.remainingAmount <= 0) {
-                if (data.emptyAt && (now - data.emptyAt > 3600000)) {
-                    // Dọn rác
-                    deleteDoc(doc(db, "red_envelopes", id)).catch(e => console.error(e));
-                    continue; // Không hiển thị nữa
-                }
+            // Xoá lì xì đã cạn sau 1 tiếng HOẶC tồn tại quá 24 giờ
+            const isExpired24h = (now - data.createdAt) > 86400000;
+            const isEmptyExpired = data.remainingAmount <= 0 && data.emptyAt && (now - data.emptyAt > 3600000);
+            
+            if (isExpired24h || isEmptyExpired) {
+                // Dọn rác
+                deleteDoc(doc(db, "red_envelopes", id)).catch(e => console.error(e));
+                continue; // Không hiển thị nữa
             }
             
             const isMine = data.senderId === ctx.S.playerId;
@@ -204,13 +205,13 @@ window['grabLixi'] = async function(lixiId) {
                 throw "Không thể tự giật lì xì của mình!";
             }
             
-            // Lấy ngẫu nhiên từ 3% đến 10% số tiền còn lại, hoặc lấy hết nếu còn ít
+            // Lấy ngẫu nhiên từ 3% đến 15% số tiền còn lại, hoặc lấy hết nếu còn ít
             let grabAmount = 0;
             if (data.remainingAmount <= 50) {
                 grabAmount = data.remainingAmount;
             } else {
                 const min = Math.max(1, Math.floor(data.remainingAmount * 0.03));
-                const max = Math.max(min, Math.floor(data.remainingAmount * 0.1));
+                const max = Math.max(min, Math.floor(data.remainingAmount * 0.15));
                 grabAmount = Math.floor(Math.random() * (max - min + 1)) + min;
             }
             

@@ -54585,11 +54585,11 @@ async function renderLixiList() {
     for (const docSnap of snapshot.docs) {
       const data = docSnap.data();
       const id = docSnap.id;
-      if (data.remainingAmount <= 0) {
-        if (data.emptyAt && now2 - data.emptyAt > 36e5) {
-          deleteDoc(doc(db, "red_envelopes", id)).catch((e2) => console.error(e2));
-          continue;
-        }
+      const isExpired24h = now2 - data.createdAt > 864e5;
+      const isEmptyExpired = data.remainingAmount <= 0 && data.emptyAt && now2 - data.emptyAt > 36e5;
+      if (isExpired24h || isEmptyExpired) {
+        deleteDoc(doc(db, "red_envelopes", id)).catch((e2) => console.error(e2));
+        continue;
       }
       const isMine = data.senderId === ctx.S.playerId;
       const hasClaimed = data.claimedBy && data.claimedBy.includes(ctx.S.playerId);
@@ -54699,7 +54699,7 @@ var init_lixi = __esm({
             grabAmount = data.remainingAmount;
           } else {
             const min = Math.max(1, Math.floor(data.remainingAmount * 0.03));
-            const max = Math.max(min, Math.floor(data.remainingAmount * 0.1));
+            const max = Math.max(min, Math.floor(data.remainingAmount * 0.15));
             grabAmount = Math.floor(Math.random() * (max - min + 1)) + min;
           }
           grabAmount = Math.min(grabAmount, data.remainingAmount);
