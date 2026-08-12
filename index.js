@@ -4673,7 +4673,24 @@ var init_prompt = __esm({
       "V\u1EF1c v\u0169 tr\u1EE5/chi\xEAm tinh",
       "V\u1EF1c h\xF3a h\u1ECDc/gi\u1EA3 kim",
       "V\u1EF1c k\u1EF9 thu\u1EADt s\u1ED1",
-      "V\u1EF1c ngh\u1EC7 thu\u1EADt"
+      "V\u1EF1c ngh\u1EC7 thu\u1EADt",
+      "V\u1EF1c th\u1EDDi gian",
+      "V\u1EF1c kh\xF4ng gian",
+      "V\u1EF1c c\u1EA3m x\xFAc/t\xE2m l\xFD",
+      "V\u1EF1c tri\u1EBFt h\u1ECDc/t\u01B0 t\u01B0\u1EDFng",
+      "V\u1EF1c qu\xE2n s\u1EF1/chi\u1EBFn tranh",
+      "V\u1EF1c to\xE1n h\u1ECDc/h\xECnh h\u1ECDc",
+      "V\u1EF1c \xE2m thanh/\xE2m nh\u1EA1c",
+      "V\u1EF1c \u1EA9m th\u1EF1c/ti\xEAu h\xF3a",
+      "V\u1EF1c th\u1EDDi trang/d\u1EC7t may",
+      "V\u1EF1c l\u1ECBch s\u1EED/k\xFD \u1EE9c",
+      "V\u1EF1c ph\xE1p lu\u1EADt/t\u1ED9i ph\u1EA1m",
+      "V\u1EF1c n\u0103ng l\u01B0\u1EE3ng/v\u1EADt l\xFD",
+      "V\u1EF1c sinh t\u1EED/lu\xE2n h\u1ED3i",
+      "V\u1EF1c \u1EA3o \u1EA3nh/gi\u1EA5c m\u01A1",
+      "V\u1EF1c logic/ngh\u1ECBch l\xFD",
+      "V\u1EF1c v\u0103n h\u1ECDc/th\u01A1 ca",
+      "V\u1EF1c quang h\u1ECDc/\xE1nh s\xE1ng"
     ];
     GAMEPLAY_DOMAINS = [
       "Thao t\xE1c ch\u1EE7 \u0111\u1ED9ng",
@@ -4704,7 +4721,25 @@ var init_prompt = __esm({
       "Bi\u1EBFn \u0111\u1ED5i v\u1EADt l\xFD si\xEAu th\u1EF1c",
       "Ph\xE1 v\u1EE1 B\u1EE9c t\u01B0\u1EDDng th\u1EE9 4 (Meta-game)",
       "Nguy\u1EC1n r\u1EE7a/K\xFD sinh",
-      "Gacha l\u1ED3ng Gacha (May r\u1EE7i \u0111a t\u1EA7ng)"
+      "Gacha l\u1ED3ng Gacha (May r\u1EE7i \u0111a t\u1EA7ng)",
+      "\u0110\xE1nh c\u1EAFp/Chi\u1EBFm \u0111o\u1EA1t",
+      "K\u1EBF th\u1EEBa/Chuy\u1EC3n giao",
+      "\u0110i\u1EC1u khi\u1EC3n/Thao t\xFAng r\u1ED1i",
+      "Nh\xE2n b\u1EA3n/Ph\xE2n li\u1EC7t",
+      "\u0110\u1ED3ng h\xF3a/\u0102n m\xF2n",
+      "Hi\u1EBFn t\u1EBF/Giao d\u1ECBch ma qu\u1EF7",
+      "H\u1EB9n gi\u1EDD/Tr\xEC ho\xE3n",
+      "Ghi h\xECnh/Theo d\xF5i",
+      "Thao t\xFAng x\xE1c su\u1EA5t/T\u1EC9 l\u1EC7",
+      "\u0110\xF3ng b\u0103ng/T\u1EA1m d\u1EEBng tr\u1EA1ng th\xE1i",
+      "Bi\u1EBFn h\xECnh/D\u1ECBch dung",
+      "H\u1EA5p th\u1EE5/Nu\u1ED1t ch\u1EEDng",
+      "\u0110\u1EA3o ng\u01B0\u1EE3c nh\xE2n qu\u1EA3",
+      "\u0110\u1EB7t b\u1EABy/Ph\u1EE5c k\xEDch",
+      "Khi\xEAu kh\xEDch/Chuy\u1EC3n d\u1EDDi c\u1EEBu h\u1EADn",
+      "Phong \u1EA5n/Giam c\u1EA7m",
+      "C\u1ED9ng h\u01B0\u1EDFng/Li\xEAn k\u1EBFt m\u1EA1ng l\u01B0\u1EDBi",
+      "Vi\u1EBFt l\u1EA1i/Ch\u1EC9nh s\u1EEDa quy t\u1EAFc"
     ];
   }
 });

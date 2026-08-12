@@ -25,7 +25,24 @@ const THEME_DOMAINS = [
   "Vực vũ trụ/chiêm tinh",
   "Vực hóa học/giả kim",
   "Vực kỹ thuật số",
-  "Vực nghệ thuật"
+  "Vực nghệ thuật",
+  "Vực thời gian",
+  "Vực không gian",
+  "Vực cảm xúc/tâm lý",
+  "Vực triết học/tư tưởng",
+  "Vực quân sự/chiến tranh",
+  "Vực toán học/hình học",
+  "Vực âm thanh/âm nhạc",
+  "Vực ẩm thực/tiêu hóa",
+  "Vực thời trang/dệt may",
+  "Vực lịch sử/ký ức",
+  "Vực pháp luật/tội phạm",
+  "Vực năng lượng/vật lý",
+  "Vực sinh tử/luân hồi",
+  "Vực ảo ảnh/giấc mơ",
+  "Vực logic/nghịch lý",
+  "Vực văn học/thơ ca",
+  "Vực quang học/ánh sáng"
 ];
 
 const GAMEPLAY_DOMAINS = [
@@ -57,7 +74,25 @@ const GAMEPLAY_DOMAINS = [
   "Biến đổi vật lý siêu thực",
   "Phá vỡ Bức tường thứ 4 (Meta-game)",
   "Nguyền rủa/Ký sinh",
-  "Gacha lồng Gacha (May rủi đa tầng)"
+  "Gacha lồng Gacha (May rủi đa tầng)",
+  "Đánh cắp/Chiếm đoạt",
+  "Kế thừa/Chuyển giao",
+  "Điều khiển/Thao túng rối",
+  "Nhân bản/Phân liệt",
+  "Đồng hóa/Ăn mòn",
+  "Hiến tế/Giao dịch ma quỷ",
+  "Hẹn giờ/Trì hoãn",
+  "Ghi hình/Theo dõi",
+  "Thao túng xác suất/Tỉ lệ",
+  "Đóng băng/Tạm dừng trạng thái",
+  "Biến hình/Dịch dung",
+  "Hấp thụ/Nuốt chửng",
+  "Đảo ngược nhân quả",
+  "Đặt bẫy/Phục kích",
+  "Khiêu khích/Chuyển dời cừu hận",
+  "Phong ấn/Giam cầm",
+  "Cộng hưởng/Liên kết mạng lưới",
+  "Viết lại/Chỉnh sửa quy tắc"
 ];
 
 export function getGachaPrompt() {
