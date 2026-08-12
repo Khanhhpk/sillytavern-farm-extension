@@ -181,7 +181,7 @@ function renderLixiSend() {
     });
 }
 
-window.grabLixi = async function(lixiId) {
+window['grabLixi'] = async function(lixiId) {
     if (!db || !ctx.S.playerId) return;
     
     const docRef = doc(db, "red_envelopes", lixiId);
