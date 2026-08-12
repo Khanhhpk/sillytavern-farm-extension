@@ -4,3 +4,5 @@ dungeon_skill_ideas.md
 .env
 idea/
 sans.pixil
+.env.example
+docs/

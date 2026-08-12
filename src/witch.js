@@ -91,7 +91,19 @@ export function renderWitch() {
   const el = All.$id('witch');
   const active = ctx.S.witch && ctx.S.witch.leaveAt > now() && ctx.S.passes.water;
   el.classList.toggle('show', !!active);
-  if (active && !el.innerHTML) el.innerHTML = `<span class="wtag">✦ Đơn hàng</span><span class="wbody">${petSVG('witchBlob', 48)}</span>`;
+  if (active && !el.innerHTML) {
+    el.innerHTML = `
+      <div style="display: flex; align-items: flex-end; gap: 8px; justify-content: center;">
+        <div class="witch-cauldron-sprite" title="Nồi Phù Thuỷ - Ghép Đồ Gacha">
+          ${spriteSVG('witchCauldron', 44)}
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <span class="wtag">✦ Đơn hàng</span>
+          <span class="wbody">${petSVG('witchBlob', 48)}</span>
+        </div>
+      </div>
+    `;
+  }
   if (!active) el.innerHTML = '';
 }
 
@@ -214,6 +226,9 @@ export function toast(msg) {
 
 export function initWitch() {
   All.$id('witch').addEventListener('click', e => {
+    // @ts-ignore
+    // @ts-ignore
+    if (e.target.closest('.witch-cauldron-sprite')) return import('./gacha.js').then(m => m.openCauldronModal());
     // @ts-ignore
     if (e.target.closest('.wtag')) return openWitchDlg();
     const el = All.$id('witch');

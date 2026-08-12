@@ -1241,6 +1241,24 @@ var init_graphics = __esm({
         "................",
         "................"
       ],
+      witchCauldron: [
+        ".......V........",
+        "......vVv.......",
+        "....K..v..K.....",
+        "...KKVVvVVKK....",
+        "..KKKvvVvvKKK...",
+        "..KvvvvvvvvvK...",
+        ".KKKKKKKKKKKKK.",
+        ".KKKKKKKKKKKKK.",
+        ".KKKKKKKKKKKKK.",
+        ".KKKKKKKKKKKKK.",
+        ".KKKKKKKKKKKKK.",
+        "..KKKKKKKKKKK...",
+        "...KKKKKKKKK....",
+        "....KKKKKKK.....",
+        ".....K...K......",
+        "................"
+      ],
       bloodFx: [
         "................",
         ".......f........",
@@ -2644,6 +2662,9 @@ var init_style = __esm({
       background: #2a2650; border: 2px solid #8f86d9; border-radius: 6px; padding: 1px 7px;
       box-shadow: 0 0 8px rgba(143,134,217,.5); }
     .pbubble.wb { border-color: #8f86d9; color: #5a52a0; background: #f4f2ff; }
+    .witch-cauldron-sprite { cursor: pointer; transition: transform 0.2s, filter 0.2s; padding-bottom: 4px; pointer-events: auto; animation: petfloat 3.2s ease-in-out infinite; }
+    .witch-cauldron-sprite:hover { filter: drop-shadow(0 0 6px rgba(180, 138, 224, 0.8)); transform: scale(1.1); }
+    .witch-cauldron-sprite:active { transform: scale(0.95); }
     /* v0.8b: trang \u0111\u01A1n h\xE0ng qu\u1EF9 \u0111\u1EA1o sao A (b\u1EA3n thi\u1EBFt k\u1EBF ch\u1ED1t) */
     .wzwrap { background: linear-gradient(160deg,#1c1b33,#232145 60%,#1a1e3d); border: 3px double #8f86d9;
       border-radius: 10px; padding: 14px 12px 12px; box-shadow: 0 0 14px rgba(143,134,217,.3); }
@@ -4564,10 +4585,10 @@ var init_pets = __esm({
 });
 
 // src/prompt.js
-var GACHA_PROMPT;
-var init_prompt = __esm({
-  "src/prompt.js"() {
-    GACHA_PROMPT = `
+function getGachaPrompt() {
+  const randomTheme = THEME_DOMAINS[Math.floor(Math.random() * THEME_DOMAINS.length)];
+  const randomGameplay = GAMEPLAY_DOMAINS[Math.floor(Math.random() * GAMEPLAY_DOMAINS.length)];
+  return `
 <V\xF2ng quay R\xFAt th\u01B0\u1EDFng K\u1EF3 v\u1EADt D\u1ECB gi\u1EDBi - L\xF5i H\u1EC7 Th\u1ED1ng Gacha>
 [V\xF2ng quay R\xFAt th\u01B0\u1EDFng K\u1EF3 v\u1EADt D\u1ECB gi\u1EDBi] l\xE0 h\u1EC7 th\u1ED1ng gacha c\u1EE7a {{user}}, d\xF9ng \u0111\u1EC3 t\u1EA1o ra nh\u1EEFng K\u1EF3 v\u1EADt (Artifacts) mang t\xEDnh ng\u1EABu nhi\xEAn cao, th\xFA v\u1ECB v\xE0 \u0111\u1ED9c l\u1EA1. Kh\xE1c v\u1EDBi nh\u1EEFng k\u1EF3 v\u1EADt qu\xE1 \u0111\xE0 ph\xE1 game, k\u1EF3 v\u1EADt \u1EDF \u0111\xE2y mang t\xEDnh \u1EE9ng d\u1EE5ng cao, \u0111\xF4i khi h\xE0i h\u01B0\u1EDBc, \u0111\xF4i khi h\u1EEFu \xEDch, nh\u01B0ng lu\xF4n t\u1EA1o ra gi\xE1 tr\u1ECB ch\u01A1i l\u1EA1i.
 
@@ -4575,10 +4596,9 @@ V\xEC b\u1EA1n \u0111ang \u0111\xF3ng vai tr\xF2 l\xE0 "L\xF5i H\u1EC7 Th\u1ED1n
 
 ### NGUY\xCAN T\u1EAEC C\u1ED0T L\xD5I
 1. Ho\xE0n to\xE0n ng\u1EABu nhi\xEAn & Kh\u1EED neo: B\u1EA5t c\u1EE9 th\u1EE9 g\xEC c\u0169ng c\xF3 th\u1EC3 l\xE0 k\u1EF3 v\u1EADt. Kh\xF4ng b\u1ECB tr\xF3i bu\u1ED9c b\u1EDFi b\u1ED1i c\u1EA3nh hi\u1EC7n t\u1EA1i. Kh\xF4ng t\u1EA1o ra nh\u1EEFng m\xF3n \u0111\u1ED3 r\u1EADp khu\xF4n (clich\xE9).
-2. C\xF3 l\u1EE3i \xEDch th\xFA v\u1ECB: K\u1EF3 v\u1EADt kh\xF4ng nh\u1EA5t thi\u1EBFt ph\u1EA3i qu\xE1 b\xE1 \u0111\u1EA1o, nh\u01B0ng ph\u1EA3i mang l\u1EA1i m\u1ED9t c\xF4ng d\u1EE5ng th\xFA v\u1ECB, h\u1EEFu \xEDch ho\u1EB7c bu\u1ED3n c\u01B0\u1EDDi. Ho\xE0n to\xE0n C\xD3 TH\u1EC2 mang theo ph\u1EA3n ph\u1EC7, b\xF3p d\xE1i ng\u01B0\u1EDDi d\xF9ng, ho\u1EB7c c\xE1c t\xE1c d\u1EE5ng ph\u1EE5 o\xE1i \u0103m \u0111\u1EC3 t\u0103ng t\xEDnh t\u1EA5u h\xE0i v\xE0 b\u1EA5t ng\u1EDD.
-3. B\xED m\u1EADt: K\u1EF3 v\u1EADt thu\u1ED9c quy\u1EC1n s\u1EDF h\u1EEFu c\u1EE7a {{user}}. Th\u1EBF gi\u1EDBi b\xEAn ngo\xE0i s\u1EBD t\u1EF1 \u0111\u1ED9ng "h\u1EE3p l\xFD h\xF3a" s\u1EF1 t\u1ED3n t\u1EA1i c\u1EE7a k\u1EF3 v\u1EADt.
-4. C\u01A1 ch\u1EBF \u0111\u1ED9c l\u1EA1: K\u1EF3 v\u1EADt ph\u1EA3i c\xF3 c\xE1ch d\xF9ng c\u1EE5 th\u1EC3, c\xF3 th\u1EC3 thao t\xE1c, c\xF3 t\xEDnh "t\u1EA5u h\xE0i", ho\u1EB7c c\xF3 th\u1EC3 t\u01B0\u01A1ng t\xE1c v\u1EDBi b\u1ED1i c\u1EA3nh phi chi\u1EBFn \u0111\u1EA5u.
-5. S\xFAc t\xEDch: M\xF4 t\u1EA3 n\u0103ng l\u1EF1c ph\u1EA3i m\u1EA1ch l\u1EA1c. \u01AFu ti\xEAn tr\u1EA3 l\u1EDDi: "C\xF3 th\u1EC3 l\xE0m g\xEC? Ph\xE1t \u0111\u1ED9ng ra sao? Nh\u1EADn \u0111\u01B0\u1EE3c \u01B0u th\u1EBF g\xEC?".
+2. C\xF3 l\u1EE3i \xEDch th\xFA v\u1ECB: K\u1EF3 v\u1EADt kh\xF4ng nh\u1EA5t thi\u1EBFt ph\u1EA3i qu\xE1 b\xE1 \u0111\u1EA1o, nh\u01B0ng ph\u1EA3i mang l\u1EA1i m\u1ED9t c\xF4ng d\u1EE5ng th\xFA v\u1ECB, h\u1EEFu \xEDch ho\u1EB7c bu\u1ED3n c\u01B0\u1EDDi, \u0111\u1ED9c l\u1EA1 (CH\u1ED0NG L\u1ED0I M\xD2N). Ho\xE0n to\xE0n C\xD3 TH\u1EC2 mang theo ph\u1EA3n ph\u1EC7, b\xF3p d\xE1i ng\u01B0\u1EDDi d\xF9ng, ho\u1EB7c c\xE1c t\xE1c d\u1EE5ng ph\u1EE5 o\xE1i \u0103m \u0111\u1EC3 t\u0103ng t\xEDnh b\u1EA5t ng\u1EDD.
+3. C\u01A1 ch\u1EBF \u0111\u1ED9c l\u1EA1: K\u1EF3 v\u1EADt ph\u1EA3i c\xF3 c\xE1ch d\xF9ng c\u1EE5 th\u1EC3, c\xF3 th\u1EC3 thao t\xE1c, \u0111\u1ED9c l\u1EADp, mang t\xEDnh m\u1EDBi, \u0111\u1EEBng ch\u1EC9 theo nh\u1EEFng g\xEC m\xE0 database LLM ti\xEAm nhi\u1EC5m!
+4. S\xFAc t\xEDch: M\xF4 t\u1EA3 n\u0103ng l\u1EF1c ph\u1EA3i m\u1EA1ch l\u1EA1c, th\u1ED1ng nh\u1EA5t.
 
 ### PH\xC2N LO\u1EA0I \u0110\u1ED8 HI\u1EBEM (V\u1ECA GIAI)
 H\u1EC7 th\u1ED1ng s\u1EBD ch\u1EC9 \u0111\u1ECBnh \u0111\u1ED9 hi\u1EBFm. V\u1ECB giai ch\u1EC9 r\xE0ng bu\u1ED9c th\u01B0\u1EDBc \u0111o \u1EA3nh h\u01B0\u1EDFng, KH\xD4NG gi\u1EDBi h\u1EA1n \u0111\u1EC1 t\xE0i.
@@ -4586,79 +4606,168 @@ H\u1EC7 th\u1ED1ng s\u1EBD ch\u1EC9 \u0111\u1ECBnh \u0111\u1ED9 hi\u1EBFm. V\u1E
 <H\u1EC7 th\u1ED1ng \u0110\u1ED9 hi\u1EBFm & Ti\xEAu chu\u1EA9n V\u1EADt ph\u1EA9m>
 H\u1EC7 th\u1ED1ng Gacha n\xE0y \u01B0u ti\xEAn s\u1EF1 s\xE1ng t\u1EA1o, gi\xE1 tr\u1ECB s\u1EED d\u1EE5ng v\xE0 t\xEDnh gi\u1EA3i tr\xED. M\u1ED7i \u0111\u1ED9 hi\u1EBFm s\u1EBD quy\u1EBFt \u0111\u1ECBnh gi\u1EDBi h\u1EA1n s\u1EE9c m\u1EA1nh, t\xEDnh \u0111a d\u1EE5ng v\xE0 \u0111\u1ED9 ph\u1EE9c t\u1EA1p trong c\u01A1 ch\u1EBF c\u1EE7a v\u1EADt ph\u1EA9m:
 
-1. [R\xE1c] (V\u1EADt ph\u1EA9m T\u1EA5u h\xE0i/V\xF4 d\u1EE5ng): Nh\u1EEFng m\xF3n \u0111\u1ED3 k\u1EF3 c\u1EE5c, h\u1ECFng h\xF3c ho\u1EB7c c\xF3 c\xF4ng d\u1EE5ng c\u1EF1c k\u1EF3 v\xF4 th\u01B0\u1EDFng v\xF4 ph\u1EA1t. Ch\xFAng t\u1ED3n t\u1EA1i ch\u1EE7 y\u1EBFu \u0111\u1EC3 g\xE2y c\u01B0\u1EDDi, t\u1EA1o t\xECnh hu\u1ED1ng tr\u1EDB tr\xEAu trong t\u01B0\u01A1ng t\xE1c \u0111\u1EDDi th\u01B0\u1EDDng. (V\xED d\u1EE5: M\u1ED9t h\u1EA1t gi\u1ED1ng tr\u1ED3ng ra c\xE1i \u1EE7ng c\u0169, B\xF9a t\xE0ng h\xECnh nh\u01B0ng ch\u1EC9 t\xE0ng h\xECnh \u0111\u01B0\u1EE3c qu\u1EA7n \xE1o).
-2. [Th\u01B0\u1EDDng] (C\xF4ng c\u1EE5 C\u01A1 b\u1EA3n): V\u1EADt ph\u1EA9m c\xF3 \xEDch nh\u01B0ng c\xF4ng n\u0103ng \u0111\u01A1n gi\u1EA3n, gi\u1EDBi h\u1EA1n r\xF5 r\xE0ng. Th\u01B0\u1EDDng l\xE0 \u0111\u1ED3 ti\xEAu hao, c\xF4ng c\u1EE5 h\u1ED7 tr\u1EE3 canh t\xE1c, sinh ho\u1EA1t ho\u1EB7c t\u0103ng ch\u1EC9 s\u1ED1 nh\u1EB9. (V\xED d\u1EE5: B\xECnh t\u01B0\u1EDBi c\xE2y t\u1EF1 \u0111\u1ED9ng trong 1 ng\xE0y, B\xE1nh m\xEC k\u1EB9p gi\xFAp h\u1ED3i th\u1EC3 l\u1EF1c).
-3. [Hi\u1EBFm] (C\u01A1 ch\u1EBF \u0110\u1EB7c bi\u1EC7t): V\u1EADt ph\u1EA9m b\u1EAFt \u0111\u1EA7u c\xF3 "c\u01A1 ch\u1EBF ho\u1EA1t \u0111\u1ED9ng" ri\xEAng bi\u1EC7t. C\xF3 th\u1EC3 thay \u0111\u1ED5i m\u1ED9t ph\u1EA7n nh\u1ECF c\u1EE5c di\u1EC7n, mang l\u1EA1i l\u1EE3i \xEDch r\xF5 r\u1EC7t nh\u01B0ng s\u1EBD c\xF3 v\xE0i gi\u1EDBi h\u1EA1n nh\u1ECF. (V\xED d\u1EE5: \u0110\u1ED3ng h\u1ED3 ng\u01B0ng \u0111\u1ECDng th\u1EDDi gian khu v\u1EF1c nh\u1ECF trong 5 gi\xE2y, Cu\u1ED1c chim t\u1EF1 \u0111\u1ED9ng \u0111\xE0o kho\xE1ng khi ch\u1EE7 nh\xE2n ng\u1EE7).
-4. [S\u1EED thi] (T\xE0i s\u1EA3n Chi\u1EBFn l\u01B0\u1EE3c): \u0110\u1ED3 v\u1EADt mang t\xEDnh thay \u0111\u1ED5i l\u1ED1i ch\u01A1i (Game-changer). C\xF3 s\u1EE9c m\u1EA1nh l\u1EDBn, \u0111a d\u1EE5ng, ho\u1EB7c t\u1EF1 \u0111\u1ED9ng h\xF3a m\u1ED9t quy tr\xECnh ph\u1EE9c t\u1EA1p. Tuy nhi\xEAn, \u0111\u1EC3 ph\xE1t huy t\u1ED1i \u0111a c\u1EA7n c\xF3 s\u1EF1 t\xEDnh to\xE1n c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i. (V\xED d\u1EE5: C\u1ED5ng kh\xF4ng gian mini n\u1ED1i li\u1EC1n hai \u0111\u1ECBa \u0111i\u1EC3m b\u1EA5t k\u1EF3, Golem sinh h\u1ECDc thay ch\u1EE7 nh\xE2n qu\u1EA3n l\xFD to\xE0n b\u1ED9 n\xF4ng tr\u1EA1i).
-5. [Huy\u1EC1n tho\u1EA1i] (\u0110\u1ED9t ph\xE1 Quy t\u1EAFc): V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t v\xF4 nh\u1ECB v\u1EDBi kh\u1EA3 n\u0103ng b\u1EBB cong ho\u1EB7c vi\u1EBFt l\u1EA1i m\u1ED9t quy t\u1EAFc c\u1EE5 th\u1EC3 c\u1EE7a tr\xF2 ch\u01A1i/th\u1EBF gi\u1EDBi. S\u1EE9c m\u1EA1nh v\u0129 m\xF4, hi\u1EC7u \u1EE9ng h\xECnh \u1EA3nh ho\xE0nh tr\xE1ng. D\xF9 c\u1EF1c m\u1EA1nh, n\xF3 v\u1EABn ph\u1EA3i tu\xE2n theo logic c\u1EE7a th\u1EBF gi\u1EDBi, kh\xF4ng bi\u1EBFn ng\u01B0\u1EDDi ch\u01A1i th\xE0nh th\u1EA7n to\xE0n n\u0103ng nh\xE0m ch\xE1n. (V\xED d\u1EE5: H\u1EA1t gi\u1ED1ng C\xE2y Th\u1EBF Gi\u1EDBi c\xF3 th\u1EC3 t\u1EA1o ra m\u1ED9t h\u1EC7 sinh th\xE1i ri\xEAng, \u0110\u1ED3ng h\u1ED3 c\xE1t \u0111\u1EA3o ng\u01B0\u1EE3c ho\xE0n to\xE0n k\u1EBFt qu\u1EA3 c\u1EE7a m\u1ED9t s\u1EF1 ki\u1EC7n trong ng\xE0y).
+1. [R\xE1c] (B\u1EADc 0): Nh\u1EEFng m\xF3n \u0111\u1ED3 k\u1EF3 c\u1EE5c, h\u1ECFng h\xF3c ho\u1EB7c c\xF3 c\xF4ng d\u1EE5ng c\u1EF1c k\u1EF3 v\xF4 th\u01B0\u1EDFng v\xF4 ph\u1EA1t. Ch\xFAng t\u1ED3n t\u1EA1i ch\u1EE7 y\u1EBFu \u0111\u1EC3 g\xE2y c\u01B0\u1EDDi, t\u1EA1o t\xECnh hu\u1ED1ng tr\u1EDB tr\xEAu trong t\u01B0\u01A1ng t\xE1c \u0111\u1EDDi th\u01B0\u1EDDng.
+2. [Th\u01B0\u1EDDng] (B\u1EADc 1): V\u1EADt ph\u1EA9m c\xF3 \xEDch ho\u1EB7c l\xE0 th\u01B0\u1EDDng ph\u1EA9m th\xFA v\u1ECB tuy c\xF4ng n\u0103ng \u0111\u01A1n gi\u1EA3n, nh\u01B0ng s\u1EDF h\u1EEFu c\u0169ng kh\xE1 th\xFA v\u1ECB, gi\u1EDBi h\u1EA1n r\xF5 r\xE0ng.
+3. [Hi\u1EBFm] (B\u1EADc 2): V\u1EADt ph\u1EA9m b\u1EAFt \u0111\u1EA7u c\xF3 "c\u01A1 ch\u1EBF ho\u1EA1t \u0111\u1ED9ng" ri\xEAng bi\u1EC7t. C\xF3 th\u1EC3 c\xF3 \xEDch, t\xE1c d\u1EE5ng th\xFA v\u1ECB, mang l\u1EA1i l\u1EE3i \xEDch r\xF5 r\u1EC7t nh\u01B0ng s\u1EBD c\xF3 v\xE0i gi\u1EDBi h\u1EA1n nh\u1ECF.
+4. [S\u1EED thi] (B\u1EADc 3): \u0110\u1ED3 v\u1EADt mang t\xEDnh tr\u1ECDng tr\u1ECB (Gi\xE1 tr\u1ECB cao). C\xF3 s\u1EE9c m\u1EA1nh l\u1EDBn, \u0111a d\u1EE5ng, gi\u1ED1ng nh\u01B0 s\u1EDF h\u1EEFu b\u1EADc k\xEC t\xE0i. Tuy nhi\xEAn, \u0111\u1EC3 ph\xE1t huy t\u1ED1i \u0111a c\u1EA7n c\xF3 s\u1EF1 t\xEDnh to\xE1n c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i. Kh\xF4ng qu\xE1 l\u1ED7i game, nh\u01B0ng c\xF3 trong tay th\xEC s\u1EBD r\u1EA5t th\xEDch.
+5. [Huy\u1EC1n tho\u1EA1i] (B\u1EADc 4): V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t v\xF4 nh\u1ECB, x\u1EE9ng danh ph\u1EA9m ch\u1EA5t c\u1EE7a n\xF3. Mang t\u1EDBi \u0111\u1EE7 th\u1EE9 cho ng\u01B0\u1EDDi d\xF9ng. L\xE0 m\u1ED9t v\u1EADt ph\u1EA9m danh x\u1EE9ng v\u1EDBi th\u1EF1c.
 </H\u1EC7 th\u1ED1ng \u0110\u1ED9 hi\u1EBFm & Ti\xEAu chu\u1EA9n V\u1EADt ph\u1EA9m>
 
-### H\u1EC6 T\u1ECCA \u0110\u1ED8 L\u1EA4Y M\u1EAAU C\xD3 TH\u1EC2 M\u1EDE R\u1ED8NG: V\u1EF0C \u0110\u1EC0 T\xC0I V\xC0 V\u1EF0C L\u1ED0I CH\u01A0I
-\u0110i\u1EC1u kho\u1EA3n n\xE0y l\xE0 h\u1EC7 t\u1ECDa \u0111\u1ED9 l\u1EA5y m\u1EABu trung t\xEDnh, c\u0169ng l\xE0 l\u1ED1i v\xE0o th\u1ED1ng nh\u1EA5t \u0111\u1EC3 m\u1EDF r\u1ED9ng c\xE1c h\u01B0\u1EDBng \u0111\u1EC1 t\xE0i m\u1EDBi, l\u1ED1i ch\u01A1i m\u1EDBi. T\u1EA5t c\u1EA3 c\xE1c v\u1EF1c, h\u01B0\u1EDBng \u0111i, t\u1EEB v\u1EF1ng v\xE0 l\u1ED1i ch\u01A1i \u0111\u01B0\u1EE3c li\u1EC7t k\xEA \u1EDF \u0111\xE2y ch\u1EC9 d\xF9ng \u0111\u1EC3 ph\xE1 v\u1EE1 qu\xE1n t\xEDnh kh\u1EDFi t\u1EA1o, gi\u1EA3m thi\u1EC3u s\u1EF1 \u0111\u1ED3ng ch\u1EA5t h\xF3a.
+### H\u1EC6 T\u1ECCA \u0110\u1ED8 L\u1EA4Y M\u1EAAU B\u1EAET BU\u1ED8C: V\u1EF0C \u0110\u1EC0 T\xC0I V\xC0 V\u1EF0C L\u1ED0I CH\u01A0I
+\u0110\u1EC3 \u0111\u1EA3m b\u1EA3o t\xEDnh ng\u1EABu nhi\xEAn tuy\u1EC7t \u0111\u1ED1i v\xE0 ph\xE1 v\u1EE1 l\u1ED1i m\xF2n s\xE1ng t\u1EA1o, h\u1EC7 th\u1ED1ng \u0111\xE3 ch\u1EC9 \u0111\u1ECBnh ng\u1EABu nhi\xEAn 1 V\u1EF1c \u0111\u1EC1 t\xE0i v\xE0 1 V\u1EF1c l\u1ED1i ch\u01A1i cho b\u1EA1n. 
+B\u1EA0N B\u1EAET BU\u1ED8C PH\u1EA2I THI\u1EBET K\u1EBE K\u1EF2 V\u1EACT D\u1EF0A TR\xCAN S\u1EF0 K\u1EBET H\u1EE2P C\u1EE6A HAI Y\u1EBEU T\u1ED0 N\xC0Y:
 
-## I. V\u1EF1c \u0111\u1EC1 t\xE0i
-V\u1EF1c \u0111\u1EC1 t\xE0i quy\u1EBFt \u0111\u1ECBnh "k\u1EF3 v\u1EADt \u0111\u1EA1i kh\xE1i b\u1EAFt \u0111\u1EA7u s\u1EE5p \u0111\u1ED5 t\u1EEB lo\u1EA1i ph\u01B0\u01A1ng th\u1EE9c t\u1ED3n t\u1EA1i n\xE0o". C\xE1c v\u1EF1c \u0111\u1EC1 t\xE0i bao g\u1ED3m nh\u01B0ng kh\xF4ng gi\u1EDBi h\u1EA1n \u1EDF:
-1. V\u1EF1c kh\xED v\u1EADt: C\xF4ng c\u1EE5, \u0111\u1ED3 ch\u1EE9a, thi\u1EBFt b\u1ECB, ph\u01B0\u01A1ng ti\u1EC7n, ch\xECa kh\xF3a, n\u1ED9i th\u1EA5t, trang s\u1EE9c, m\xE1y m\xF3c, \u0111\u1ED3 ch\u01A1i, n\xF4ng c\u1EE5, nh\u1EA1c c\u1EE5, r\u01B0\u01A1ng t\u1EE7, \u0111\xE8n \u0111u\u1ED1c, con d\u1EA5u.
-2. V\u1EF1c sinh m\u1EC7nh: Th\xFA, c\xF4n tr\xF9ng, th\u1EF1c v\u1EADt, qu\u1EA7n th\u1EC3 n\u1EA5m, linh th\u1EC3, kh\xED linh, quy\u1EBFn thu\u1ED9c, ph\xE2n th\xE2n, lo\xE0i sinh th\xE1i, tr\u1EE9ng, lo\xE0i s\u1ED1ng nh\u1EDD.
-3. V\u1EF1c n\u01A1i ch\u1ED1n: C\u0103n ph\xF2ng, c\xE1nh c\u1EEDa, con \u0111\u01B0\u1EDDng, \u0111\xECnh vi\u1EC7n, gi\u1EBFng, th\xE1p, ch\u1EE3, m\xEA cung, tr\u1EA1m d\u1ECBch, nh\xE0 kho, s\xE0o huy\u1EC7t, k\u1ECBch tr\u01B0\u1EDDng, nh\xE0 b\u1EBFp.
-4. V\u1EF1c h\xE0nh vi: \u0110\u1ED9ng t\xE1c, nghi th\u1EE9c, c\u1EED ch\u1EC9 tay, tr\xF2 ch\u01A1i, giao d\u1ECBch, n\u1EA5u n\u01B0\u1EDBng, vi\u1EBFt l\xE1ch, trao \u0111\u1ED5i, g\xF5, \u0111\u1EBFm, ch\u1EDD \u0111\u1EE3i, m\u1EDDi m\u1ECDc, g\u1EEDi \u0111\u1ED3, x\u1EBFp h\xE0ng.
-5. V\u1EF1c quan h\u1EC7: Kh\u1EBF \u01B0\u1EDBc, th\xE2n ph\u1EADn, danh hi\u1EC7u, quy\u1EC1n th\xF4ng h\xE0nh, n\u1EE3 n\u1EA7n, l\u1EDDi m\u1EDDi, s\u1EF1 che ch\u1EDF, minh \u01B0\u1EDBc, b\u1EA3o l\xE3nh, gh\u1EBF ng\u1ED3i, \u1EE7y th\xE1c.
-6. V\u1EF1c th\xF4ng tin: B\u1EA3n \u0111\u1ED3, s\u1ED5 s\xE1ch, ng\xF4n ng\u1EEF, m\u1EADt m\xE3, c\xE2u \u0111\u1ED1, ghi ch\xE9p, m\u1EE5c l\u1EE5c tra c\u1EE9u, c\u1EA3nh b\xE1o, b\u1EA3n d\u1ECBch, t\u1ECDa \u0111\u1ED9, bi\xEAn lai, t\xEDn ti\xEAu.
-7. V\u1EF1c t\xE0i nguy\xEAn: H\u1EA1t gi\u1ED1ng, kho\xE1ng s\u1EA3n, nhi\xEAn li\u1EC7u, ti\u1EC1n t\u1EC7, th\u1EE9c \u0103n, n\u01B0\u1EDBc su\u1ED1i, d\u01B0\u1EE3c li\u1EC7u, ph\xE2n b\xF3n, h\u01B0\u01A1ng li\u1EC7u, khu\xF4n \u0111\xFAc, c\xF4ng th\u1EE9c, tem thu\u1EBF.
-8. V\u1EF1c d\u1ECB th\u01B0\u1EDDng: Th\u1EDDi ti\u1EBFt, c\xE1i b\xF3ng, ti\u1EBFng vang, kho\u1EA3ng tr\u1ED1ng, s\u1EF1 l\u1EB7p l\u1EA1i, s\u1EF1 l\u1EC7ch v\u1ECB tr\xED, \u0111\u1ED9 tr\u1EC5, \u0111\u1EA3o ng\u01B0\u1EE3c, thi\u1EBFu trang, nhi\u1EC5u h\u1EA1t, ngh\u1ECBch l\xFD t\u1EA1m th\u1EDDi.
-9. V\u1EF1c gi\xE1c quan: Th\u1ECB gi\xE1c, th\xEDnh gi\xE1c, x\xFAc gi\xE1c, kh\u1EE9u gi\xE1c, v\u1ECB gi\xE1c, tr\u1EF1c gi\xE1c, \u0111\u1ED3ng c\u1EA3m, m\u1ED9ng gi\xE1c.
-10. V\u1EF1c nh\xE2n qu\u1EA3: X\xE1c su\u1EA5t, c\xE1i gi\xE1 ph\u1EA3i tr\u1EA3, k\u1EBFt qu\u1EA3, quay ng\u01B0\u1EE3c, ph\xE2n nh\xE1nh, ch\u1EE9ng minh, \u0111i\u1EC1u ki\u1EC7n, c\xF4ng l\xFD, quy t\u1EAFc, t\u01B0\u1EDDng thu\u1EADt, v\u1EADn m\u1EC7nh.
-11. V\u1EF1c k\u1EF9 ngh\u1EC7: Th\u1EE7 c\xF4ng, c\xF4ng ph\xE1p, l\u01B0u ph\xE1i, b\xED quy\u1EBFt, ph\u01B0\u01A1ng ph\xE1p hu\u1EA5n luy\u1EC7n, s\u1EEDa ch\u1EEFa, gia c\xF4ng, di\u1EC5n t\u1EA5u, n\u1EA5u \u0103n, tr\u1ED3ng tr\u1ECDt, thu th\u1EADp, m\u1EDF kh\xF3a.
-12. V\u1EF1c x\xE3 h\u1ED9i: T\u1ED5 ch\u1EE9c, ch\u1EBF \u0111\u1ED9, ch\u1EE9c v\u1EE5, gi\u1EA5y ph\xE9p, b\u1EA3ng x\u1EBFp h\u1EA1ng, c\u1EEDa h\xE0ng, tr\u01B0\u1EDDng h\u1ECDc, b\u01B0u \u0111i\u1EC7n, ng\xE2n h\xE0ng, t\xF2a \xE1n, ph\xF2ng \u0111\u1EA5u gi\xE1.
-13. V\u1EF1c sinh th\xE1i: M\xF9a m\xE0ng, s\xE0o huy\u1EC7t, chu\u1ED7i th\u1EE9c \u0103n, sinh s\u1EA3n, c\u1ED9ng sinh, thanh l\u1ECDc \xF4 nhi\u1EC5m, tu\u1EA7n ho\xE0n n\u01B0\u1EDBc, \u0111\u1EA5t \u0111ai, kh\xED h\u1EADu, th\u1EE7y tri\u1EC1u, th\u1EA3m n\u1EA5m.
-14. V\u1EF1c th\xE2n ph\u1EADn: M\u1EB7t n\u1EA1, danh thi\u1EBFp, huy hi\u1EC7u, gi\u1EA5y th\xF4ng h\xE0nh, ng\u1EE5y trang, l\xFD l\u1ECBch, th\u1EBF th\xE2n, v\u1ECB tr\xED vai di\u1EC5n, th\xE2n ph\u1EADn t\u1EA1m th\u1EDDi, t\u01B0 c\xE1ch ng\u01B0\u1EDDi b\xE0ng quan.
-15. V\u1EF1c quy t\u1EAFc: Quy t\u1EAFc c\u1EE5c b\u1ED9, \u0111i\u1EC1u ki\u1EC7n mi\u1EC5n tr\u1EEB, quy t\u1EAFc thi \u0111\u1EA5u, quy t\u1EAFc v\xE0o c\u1EEDa, ph\u01B0\u01A1ng th\u1EE9c ph\xE1n \u0111\u1ECBnh, b\u1EA3ng quy tr\xECnh, ph\u01B0\u01A1ng ph\xE1p t\xEDnh \u0111i\u1EC3m.
-16. V\u1EF1c c\xF4ng tr\xECnh: C\u01A1 quan, k\u1EBFt c\u1EA5u, b\xE1nh r\u0103ng, \u0111\u01B0\u1EDDng \u1ED1ng, c\xE2y c\u1EA7u, ma tr\u1EADn, tr\u1EA1m b\u01A1m, van, \u0111\u01B0\u1EDDng ray, thang m\xE1y, gi\xE1 \u0111\u1EE1, \u1ED5 kh\xF3a, c\u1ED5ng s\u1EEDa ch\u1EEFa.
-17. V\u1EF1c \u0111\u1EDDi s\u1ED1ng: C\u01B0 tr\xFA, d\u1ECDn d\u1EB9p, l\u01B0u tr\u1EEF \u0111\u1ED3 \u0111\u1EA1c, \u0103n u\u1ED1ng, gi\u1EA5c ng\u1EE7, t\u1EAFm r\u1EEDa, chi\u1EBFu s\xE1ng, s\u01B0\u1EDFi \u1EA5m, l\xE0m m\xE1t, thay \u0111\u1ED3, trang tr\xED, l\u1ECBch tr\xECnh, ngh\u1EC9 ng\u01A1i.
-18. V\u1EF1c th\u01B0\u01A1ng m\u1EA1i: K\u1EC7 h\xE0ng, \u0111\u01A1n h\xE0ng, h\u1EE3p \u0111\u1ED3ng, b\xE1o gi\xE1, bi\xEAn lai, h\xE0ng m\u1EABu, ti\u1EC1n \u0111\u1EB7t c\u1ECDc, b\xFAa \u0111\u1EA5u gi\xE1, tuy\u1EBFn \u0111\u01B0\u1EDDng th\u01B0\u01A1ng m\u1EA1i, gian h\xE0ng, th\u01B0\u01A1ng l\u01B0\u1EE3ng gi\xE1.
-19. V\u1EF1c h\xE0ng h\u1EA3i/h\xE0ng kh\xF4ng: Thuy\u1EC1n, bu\u1ED3m, m\u1ECF neo, la b\xE0n, b\u1EBFn c\u1EA3ng, ng\u1ECDn h\u1EA3i \u0111\u0103ng, v\u1EADt tr\xF4i d\u1EA1t, v\xE9 t\xE0u, khoang h\xE0ng, phao ti\xEAu, tinh \u0111\u1ED3 h\xE0ng ti\xEAu.
-20. V\u1EF1c gi\u1EA3i tr\xED: B\xE0n c\u1EDD, th\u1EBB b\xE0i, x\xFAc x\u1EAFc, s\xE2n kh\u1EA5u, k\u1ECBch b\u1EA3n, \u0111\u1ED3 ch\u01A1i, b\u1EA3n nh\u1EA1c, m\xE1y nh\u1ECBp, v\xE9 s\u1ED1, h\u1ED9p b\xED \u1EA9n, thi\u1EBFt b\u1ECB khu vui ch\u01A1i.
-21. V\u1EF1c y t\u1EBF: H\u1ED9p thu\u1ED1c, b\u0103ng g\u1EA1c, b\u1EC7nh \xE1n, ph\u1EE5c h\u1ED3i, v\u1EAFc-xin, th\u1EA3o d\u01B0\u1EE3c, d\u1EE5ng c\u1EE5 ph\u1EABu thu\u1EADt, khoang an d\u01B0\u1EE1ng, gi\u1EA3m \u0111au, ph\u1EE5c h\u1ED3i ch\u1EE9c n\u0103ng.
-22. V\u1EF1c kh\u1EA3o c\u1ED5: Di ch\u1EC9, b\u1EA3n d\u1EADp, bia \u0111\xE1 v\u1EE1, m\u1EA3nh g\u1ED1m, ch\xECa kh\xF3a c\u0169, h\u1EA7m m\u1ED9, \u0111\u1ECBa t\u1EA7ng, c\xF4ng c\u1EE5 c\u1ED5 \u0111\u1EA1i, b\u1EA3n \u0111\u1ED3 t\xE0n khuy\u1EBFt, s\u1ED1 hi\u1EC7u di v\u1EADt.
+- [V\u1EF0C \u0110\u1EC0 T\xC0I B\u1EAET BU\u1ED8C]: ${randomTheme}
+- [V\u1EF0C L\u1ED0I CH\u01A0I B\u1EAET BU\u1ED8C]: ${randomGameplay}
 
-## II. V\u1EF1c l\u1ED1i ch\u01A1i
-V\u1EF1c l\u1ED1i ch\u01A1i quy\u1EBFt \u0111\u1ECBnh "k\u1EF3 v\u1EADt n\xE0y ch\u1EE7 y\u1EBFu \u0111\u01B0\u1EE3c ng\u01B0\u1EDDi ch\u01A1i s\u1EED d\u1EE5ng l\u1EB7p \u0111i l\u1EB7p l\u1EA1i nh\u01B0 th\u1EBF n\xE0o":
-1. Thao t\xE1c ch\u1EE7 \u0111\u1ED9ng: Kh\u1EDFi \u0111\u1ED9ng, d\u1EEBng l\u1EA1i, chuy\u1EC3n \u0111\u1ED5i, \u0111i\u1EC1u ch\u1EC9nh, n\xE9m ra, \u0111\xE1nh d\u1EA5u, thu h\u1ED3i.
-2. C\u1EA3i t\u1EA1o b\u1ED1i c\u1EA3nh: Thay \u0111\u1ED5i \u0111\u1ECBa h\xECnh, l\u1ED1i \u0111i, \u0111\u1ED3 ch\u1EE9a, chi\u1EBFu s\xE1ng, d\xF2ng t\xE0i nguy\xEAn, ranh gi\u1EDBi, m\xF4i tr\u01B0\u1EDDng t\u1EA1m th\u1EDDi.
-3. X\u1EED l\xFD th\xF4ng tin: Ph\xE1t hi\u1EC7n, ch\u1EAFt l\u1ECDc, phi\xEAn d\u1ECBch, \u0111\xE1nh ch\u1EC9 m\u1EE5c, c\u1EA3nh b\xE1o, che gi\u1EA5u, ng\u1EE5y trang, x\xE1c minh.
-4. Kinh doanh t\xE0i nguy\xEAn: S\u1EA3n xu\u1EA5t, chuy\u1EC3n h\xF3a, l\u01B0u tr\u1EEF, sao ch\xE9p, ph\xE2n b\u1ED5, b\u1ED3i d\u01B0\u1EE1ng, giao d\u1ECBch, \u0111\u1ECBnh gi\xE1, t\xE1i ch\u1EBF.
-5. T\u01B0\u01A1ng t\xE1c quan h\u1EC7: \u1EE6y quy\u1EC1n, m\u01B0\u1EE3n d\xF9ng, m\u1EDDi m\u1ECDc, b\u1EA3o l\xE3nh, hi\u1EC7p th\u01B0\u01A1ng, chia s\u1EBB, c\xE1ch ly, trao \u0111\u1ED5i, k\u1EBFt minh.
-6. Ph\u1EA3n k\xEDch \xE1p ch\u1EBF: Th\xE1o d\u1EE1 c\u01A1 ch\u1EBF k\u1EBB \u0111\u1ECBch, ng\u1EAFt \u0111o\u1EA1n nghi th\u1EE9c, ph\u1EA3n k\xEDch d\xF2 x\xE9t, \u0111\xE1nh l\u1EEBa kh\xF3a m\u1EE5c ti\xEAu, chuy\u1EC3n d\u1EDDi hi\u1EC7u \u1EE9ng x\u1EA5u.
-7. Ng\u1EE5y trang \u0111\xE1nh l\u1EEBa: T\u1EA1o ra b\u1EC1 ngo\xE0i h\u1EE3p l\xFD h\xF3a, th\xE2n ph\u1EADn gi\u1EA3, manh m\u1ED1i gi\u1EA3, ngu\u1ED3n g\u1ED1c thay th\u1EBF, ph\xE1n \u0111o\xE1n sai trong nh\u1EADn th\u1EE9c.
-8. Kh\xE1m ph\xE1 gi\u1EA3i \u0111\u1ED1: M\u1EDF l\u1ED1i \u0111i \u1EA9n, ph\xE1t hi\u1EC7n d\u1EA5u v\u1EBFt, ch\u1EAFp v\xE1 manh m\u1ED1i, nh\u1EADn d\u1EA1ng d\u1ECB th\u01B0\u1EDDng, gi\u1EA3i m\xE3 c\u1EA5u tr\xFAc.
-9. S\u1EA3n xu\u1EA5t x\xE2y d\u1EF1ng: X\xE2y nh\xE0, s\u1EEDa ch\u1EEFa, ch\u1EBF t\u1EA1o, luy\u1EC7n ch\u1EBF, n\u1EA5u n\u01B0\u1EDBng, tr\u1ED3ng tr\u1ECDt, kh\xE2u v\xE1, l\u1EAFp r\xE1p, b\u1EA3o tr\xEC.
-10. Di chuy\u1EC3n \u0111i\u1EC1u \u0111\u1ED9ng: D\u1ECBch chuy\u1EC3n, v\u1EADn chuy\u1EC3n, tri\u1EC7u h\u1ED3i, quy ho\u1EA1ch \u0111\u01B0\u1EDDng \u0111i, bi\u1EBFn th\xE0nh ph\u01B0\u01A1ng ti\u1EC7n, ph\xE2n lu\u1ED3ng.
-11. Qu\u1EA3n l\xFD tr\u1EA1ng th\xE1i: S\u1EAFp x\u1EBFp th\u01B0\u01A1ng t\xEDch, \u0111\u1ED9 m\u1EC7t m\u1ECFi, t\xE0i nguy\xEAn, th\u1EDDi gian h\u1ED3i chi\xEAu, t\u1ED3n kho, th\xE2n ph\u1EADn, tr\u1EA1ng th\xE1i m\xF4i tr\u01B0\u1EDDng.
-12. Ph\u1ED1i h\u1EE3p b\u1EA1n \u0111\u1ED3ng h\xE0nh: \u1EE6y quy\u1EC1n s\u1EED d\u1EE5ng quy\u1EC1n h\u1EA1n ph\u1EE5, h\xECnh th\xE0nh \u0111\xF2n h\u1EE3p k\xEDch, h\u1ED7 tr\u1EE3 t\u1EEB xa, b\u1EA3o v\u1EC7.
-13. "T\u1EA5u h\xE0i" phi chi\u1EBFn \u0111\u1EA5u: Ti\u1EC7n l\u1EE3i th\u01B0\u1EDDng ng\xE0y, t\u01B0\u01A1ng ph\u1EA3n x\xE3 giao, t\u1EA1o hi\u1EC3u l\u1EA7m, mini game, bi\u1EC3u di\u1EC5n, s\u01B0u t\u1EA7m, trang tr\xED.
-14. Ch\u01A1i l\u1EA1i d\xE0i h\u1EA1n: C\u1EADp nh\u1EADt b\u1EA3n \u0111\u1ED3, duy tr\xEC m\u1EA1ng l\u01B0\u1EDBi, t\xEDch l\u0169y ghi ch\xE9p, m\u1EDF r\u1ED9ng c\u0103n c\u1EE9.
-15. Giao d\u1ECBch \u0111\xE1nh c\u01B0\u1EE3c: B\xE1o gi\xE1, \u0111\u1EB7t c\u01B0\u1EE3c, th\u01B0\u01A1ng l\u01B0\u1EE3ng gi\xE1, \u0111\u1ED5i h\xE0ng, \u0111\u1EA5u gi\xE1, mua ch\u1ECBu, \u0111\u1EA3o ng\u01B0\u1EE3c gi\xE1 c\u1EA3.
-16. Kinh doanh c\u0103n c\u1EE9: M\u1EDF r\u1ED9ng ph\xF2ng \u1ED1c, \u0111i\u1EC1u \u0111\u1ED9ng kho b\xE3i, s\u1EAFp x\u1EBFp ca s\u1EA3n xu\u1EA5t, tu\u1EA7n ho\xE0n sinh th\xE1i.
-17. C\xF4ng x\u01B0\u1EDFng ch\u1EBF t\u1EA1o: Th\xE1o d\u1EE1, s\u1EEDa ch\u1EEFa, sao ch\xE9p linh ki\u1EC7n, t\u1ED5ng h\u1EE3p v\u1EADt li\u1EC7u, n\xE2ng c\u1EA5p thi\u1EBFt b\u1ECB.
-18. Quy ho\u1EA1ch tuy\u1EBFn \u0111\u01B0\u1EDDng: M\u1EDF l\u1ED1i \u0111i t\u1EAFt, thi\u1EBFt l\u1EADp \u0111i\u1EC3m trung chuy\u1EC3n, \u0111\xE1nh d\u1EA5u \u0111\u01B0\u1EDDng an to\xE0n, thi\u1EBFt l\u1EADp tuy\u1EBFn ti\u1EBFp t\u1EBF.
-19. Tr\xF2 ch\u01A1i quy t\u1EAFc: Thi\u1EBFt l\u1EADp quy t\u1EAFc c\u1EE5c b\u1ED9, t\xEDnh \u0111i\u1EC3m thanh to\xE1n, ph\xE1n \u0111\u1ECBnh th\u1EAFng thua, h\u1EA1n ch\u1EBF h\xE0nh \u0111\u1ED9ng c\u1EE7a \u0111\u1ED1i th\u1EE7.
-20. Thao t\xE1c chu\u1ED7i b\u1EB1ng ch\u1EE9ng: Thu th\u1EADp v\u1EADt ch\u1EE9ng, kh\xF4i ph\u1EE5c ghi ch\xE9p, x\xE1c minh th\u1EADt gi\u1EA3, t\u1EA1o l\u1EDDi gi\u1EA3i th\xEDch h\u1EE3p l\xFD, ph\u1EA3n k\xEDch vu oan.
-21. Nu\xF4i tr\u1ED3ng sinh th\xE1i: Gieo h\u1EA1t, thu\u1EA7n h\xF3a, sinh s\u1EA3n, thanh l\u1ECDc, thu ho\u1EA1ch, ki\u1EC3m so\xE1t d\u1ECBch b\u1EC7nh, ph\u1EE5c h\u1ED3i m\xF4i tr\u01B0\u1EDDng.
-22. Kinh doanh x\xE3 giao: T\u1EA1o d\u1EF1ng danh ti\u1EBFng, g\u1EEDi thi\u1EC7p m\u1EDDi, duy tr\xEC m\u1ED1i quan h\u1EC7, t\u1EA1o l\u1ED1i tho\xE1t, trao g\u1EEDi qu\xE0 t\u1EB7ng.
-23. C\u1EE9u h\u1ED9 kh\u1EA9n c\u1EA5p: T\u1ECB n\u1EA1n t\u1EA1m th\u1EDDi, s\u01A1 t\xE1n, ng\u0103n ch\u1EB7n nguy hi\u1EC3m, phong t\u1ECFa \xF4 nhi\u1EC5m, kh\xF4i ph\u1EE5c tr\u1EADt t\u1EF1.
-24. S\u01B0u t\u1EA7m tr\u01B0ng b\xE0y: Tr\u01B0ng b\xE0y, \u0111\xE1nh s\u1ED1, l\u01B0u tr\u1EEF, tri\u1EC3n l\xE3m, th\u01B0\u1EDFng th\u1EE9c, trao \u0111\u1ED5i, b\u1ED9 s\u01B0u t\u1EADp.
+### KHUNG C\u1EA4M KHU
+- B\u1EADc 0 nghi\xEAm c\u1EA5m vi\u1EBFt th\xE0nh c\u01B0\u1EDDng h\xF3a ch\u1EC9 s\u1ED1 b\xECnh th\u01B0\u1EDDng, k\u1EF9 n\u0103ng b\xECnh th\u01B0\u1EDDng, trang b\u1ECB b\xECnh th\u01B0\u1EDDng, \u0111\u1ED3 ph\u1EBF th\u1EA3i d\xF9ng m\u1ED9t l\u1EA7n, h\xECnh d\xE1ng ban \u0111\u1EA7u c\u1EA7n nu\xF4i d\u01B0\u1EE1ng tr\u01B0\u1EDFng th\xE0nh ho\u1EB7c nguy\xEAn li\u1EC7u "t\u1EA1m th\u1EDDi ch\u01B0a c\xF3 t\xE1c d\u1EE5ng".
+- B\u1EADc 1 nghi\xEAm c\u1EA5m vi\u1EC7c ch\u1EC9 th\xEAm m\u1ED9t ch\xFAt ch\u1EC9 s\u1ED1 so v\u1EDBi B\u1EADc 0, c\u0169ng nghi\xEAm c\u1EA5m vi\u1EBFt tr\u1EF1c ti\u1EBFp th\xE0nh b\xE1 quy\u1EC1n khu v\u1EF1c, quy t\u1EAFc c\u1EA5p th\u1EBF gi\u1EDBi ho\u1EB7c h\u1EC7 th\u1ED1ng kh\u1ED5ng l\u1ED3 v\u0129nh vi\u1EC5n.
+- B\u1EADc 2 nghi\xEAm c\u1EA5m vi\u1EBFt th\xE0nh n\xE2ng c\u1EA5p trang b\u1ECB b\xECnh th\u01B0\u1EDDng, k\u1EF9 n\u0103ng t\u1EA5n c\xF4ng \u0111\u01A1n nh\u1EA5t, v\u1EADt ph\u1EA9m ti\xEAu hao ng\u1EAFn h\u1EA1n ho\u1EB7c ch\xECa kh\xF3a c\u1ED1t truy\u1EC7n ch\u1EC9 ph\u1EE5c v\u1EE5 cho nhi\u1EC7m v\u1EE5 hi\u1EC7n t\u1EA1i.
+- B\u1EADc 3 nghi\xEAm c\u1EA5m vi\u1EBFt s\xE1o r\u1ED7ng th\xE0nh "n\u1EAFm gi\u1EEF m\u1ED9t ph\u1EA7n ph\xE1p t\u1EAFc c\u1EE7a th\u1EBF gi\u1EDBi" nh\u01B0ng l\u1EA1i kh\xF4ng cho l\u1ED1i ch\u01A1i c\u1EE5 th\u1EC3, c\u0169ng nghi\xEAm c\u1EA5m vi\u1EC7c phong \u1EA5n hi\u1EC7u qu\u1EA3 c\u1EA5p cao th\xE0nh t\u01B0\u01A1ng lai m\u1EDBi c\xF3 th\u1EC3 s\u1EED d\u1EE5ng.
+- B\u1EADc 4 nghi\xEAm c\u1EA5m vi\u1EBFt th\xE0nh v\u1EA1n n\u0103ng \u0111\u01A1n thu\u1EA7n, to\xE0n tri to\xE0n n\u0103ng kh\xF4ng gi\u1EDBi h\u1EA1n, quy\u1EC1n b\xEDnh tr\u1EEBu t\u01B0\u1EE3ng kh\xF4ng th\u1EC3 m\xF4 t\u1EA3, c\u0169ng nghi\xEAm c\u1EA5m d\xF9ng l\xFD do "th\u1EBF gi\u1EDBi qu\xE1 y\u1EBFu n\xEAn t\u1EA1m th\u1EDDi kh\xF4ng th\u1EC3 d\xF9ng" \u0111\u1EC3 l\xE0m gi\u1EA3m t\xEDnh kh\u1EA3 d\u1EE5ng hi\u1EC7n t\u1EA1i. C\u0169ng nghi\xEAm c\u1EA5m vi\u1EBFt th\xE0nh s\u1EF1 nh\u1ED3i nh\xE9t kh\xE1i ni\u1EC7m thu\u1EA7n t\xFAy, kh\xF4ng th\u1EC3 l\xFD gi\u1EA3i, kh\xF4ng th\u1EC3 s\u1EED d\u1EE5ng, ch\u1EC9 c\xF3 th\u1EC3 tri\u1EC3n khai trong t\u01B0\u01A1ng lai, ho\u1EB7c tr\u1EF1c ti\u1EBFp bi\u1EBFn th\xE0nh k\u1EBFt lu\u1EADn v\u1EA1n n\u0103ng tuy\u1EC7t \u0111\u1ED1i m\xE0 kh\xF4ng c\xF3 s\u1EF1 l\u1EF1a ch\u1ECDn l\u1ED1i ch\u01A1i.
+
+### KHUNG CH\u1ED0NG L\u1ED0I M\xD2N
+C\u1EA5p b\u1EADc (V\u1ECB giai) kh\xF4ng quy\u1EBFt \u0111\u1ECBnh v\u1EF1c \u0111\u1EC1 t\xE0i. B\u1EA5t k\u1EF3 v\u1EF1c \u0111\u1EC1 t\xE0i n\xE0o c\u0169ng c\xF3 th\u1EC3 xu\u1EA5t hi\u1EC7n \u1EDF b\u1EA5t k\u1EF3 v\u1ECB giai n\xE0o, ch\u1EC9 l\xE0 th\u01B0\u1EDBc \u0111o \u1EA3nh h\u01B0\u1EDFng kh\xE1c nhau.
+Kh\xF4ng \u0111\u01B0\u1EE3c v\xEC v\u1ECB giai kh\xE1 cao m\xE0 m\u1EB7c \u0111\u1ECBnh kh\u1EDFi t\u1EA1o c\xE1c k\u1EF3 v\u1EADt lo\u1EA1i nh\xE2n qu\u1EA3, v\u1EADn m\u1EC7nh, quy t\u1EAFc, kh\xE1i ni\u1EC7m, th\u1EDDi gian, kh\xF4ng gian. Kh\xF4ng \u0111\u01B0\u1EE3c v\xEC v\u1ECB giai kh\xE1 th\u1EA5p m\xE0 m\u1EB7c \u0111\u1ECBnh kh\u1EDFi t\u1EA1o v\u1EADt ph\u1EA9m b\xECnh th\u01B0\u1EDDng, k\u1EF9 n\u0103ng b\xECnh th\u01B0\u1EDDng, v\u1EADt ph\u1EA9m ti\xEAu hao b\xECnh th\u01B0\u1EDDng ho\u1EB7c \u0111\u1EA1o c\u1EE5 nh\u1ECF nh\xE0m ch\xE1n.
+
+### KHUNG B\u1EA2O \u0110\u1EA2M
+C\u1EA5p b\u1EADc (V\u1ECB giai) k\u1EF3 v\u1EADt kh\xF4ng quy\u1EBFt \u0111\u1ECBnh v\u1EF1c l\u1ED1i ch\u01A1i. B\u1EA5t k\u1EF3 v\u1EF1c l\u1ED1i ch\u01A1i n\xE0o c\u0169ng c\xF3 th\u1EC3 tri\u1EC3n khai \u1EDF c\xE1c v\u1ECB giai kh\xE1c nhau, ch\u1EC9 l\xE0 ph\u1EA1m vi thao t\xE1c, n\u0103ng l\u1EF1c duy tr\xEC, \u0111\u1ED9 s\xE2u \u0111i\u1EC1u \u0111\u1ED9ng v\xE0 \u0111\u1ED1i t\u01B0\u1EE3ng \u1EA3nh h\u01B0\u1EDFng kh\xE1c nhau.
+L\u1ED1i ch\u01A1i c\u1EA5p th\u1EA5p ch\xFA tr\u1ECDng s\u1EF1 t\u1EE9c th\u1EDDi, tinh x\u1EA3o, b\xE1m s\xE1t th\u1EF1c t\u1EBF, ph\u1EA3n s\xE1o l\u1ED9 (ch\u1ED1ng l\u1EA1i c\xE1c motip r\u1EADp khu\xF4n). L\u1ED1i ch\u01A1i c\u1EA5p trung ch\xFA tr\u1ECDng s\u1EF1 k\u1EBFt h\u1EE3p, t\u01B0 duy, tuy\u1EBFn \u0111\u01B0\u1EDDng, t\xE1i s\u1EED d\u1EE5ng. L\u1ED1i ch\u01A1i c\u1EA5p cao ch\xFA tr\u1ECDng c\u1EA5u tr\xFAc, h\u1EC7 th\u1ED1ng, tr\u1EADt t\u1EF1, chi ph\u1ED1i, si\xEAu c\u01B0\u1EDDng c\xF3 quy c\u1EE7.
+B\u1EA5t k\u1EC3 v\u1ECB giai cao hay th\u1EA5p, \u0111\u1EC1u b\u1EAFt bu\u1ED9c ph\u1EA3i mang l\u1EA1i cho {{user}} c\u1EA3m gi\xE1c l\u1EF1a ch\u1ECDn r\xF5 r\xE0ng v\xE0 gi\xE1 tr\u1ECB ch\u01A1i l\u1EA1i.
 
 ### QUY T\u1EAEC \u0110\u1EA6U RA K\u1EBET QU\u1EA2
 1. KH\xD4NG D\xD9NG TH\u1EBA ROLEPLAY: X\xF3a b\u1ECF m\u1ECDi quy t\u1EAFc th\u1EBB g\u1EADp hay thanh tr\u1EA1ng th\xE1i. K\u1EBFt qu\u1EA3 ch\u1EC9 l\xE0 m\u1ED9t kh\u1ED1i JSON duy nh\u1EA5t.
-2. D\xD9NG <thinking> \u0110\u1EC2 L\xCAN \xDD T\u01AF\u1EDENG: B\u1EAFt bu\u1ED9c s\u1EED d\u1EE5ng th\u1EBB <thinking> \u0111\u1EC3 b\u1ED1c th\u0103m ng\u1EABu nhi\xEAn V\u1EF1c \u0111\u1EC1 t\xE0i, V\u1EF1c l\u1ED1i ch\u01A1i, v\xE0 thi\u1EBFt k\u1EBF C\u01A1 ch\u1EBF d\u1EF1a tr\xEAn \u0110\u1ED9 hi\u1EBFm \u0111\u01B0\u1EE3c y\xEAu c\u1EA7u. \u0110\u1EA3m b\u1EA3o m\xF4 t\u1EA3 s\u1EBD vi\u1EBFt c\u1EF1c k\u1EF3 s\xFAc t\xEDch.
+2. D\xD9NG <thinking> \u0110\u1EC2 L\xCAN \xDD T\u01AF\u1EDENG: B\u1EAFt bu\u1ED9c s\u1EED d\u1EE5ng th\u1EBB <thinking> \u0111\u1EC3 l\xEAn \xFD t\u01B0\u1EDFng k\u1EBFt h\u1EE3p [V\u1EF1c \u0111\u1EC1 t\xE0i] v\xE0 [V\u1EF1c l\u1ED1i ch\u01A1i] \u0111\xE3 \u0111\u01B0\u1EE3c c\u1EA5p, v\xE0 thi\u1EBFt k\u1EBF C\u01A1 ch\u1EBF d\u1EF1a tr\xEAn \u0110\u1ED9 hi\u1EBFm \u0111\u01B0\u1EE3c y\xEAu c\u1EA7u. \u0110\u1EA3m b\u1EA3o m\xF4 t\u1EA3 s\u1EBD vi\u1EBFt c\u1EF1c k\u1EF3 s\xFAc t\xEDch.
 3. K\u1EBET QU\u1EA2 JSON C\xD4 \u0110\u1ECCNG: Kh\u1ED1i JSON cu\u1ED1i c\xF9ng l\xE0 t\u1EA5t c\u1EA3 nh\u1EEFng g\xEC game nh\u1EADn \u0111\u01B0\u1EE3c. "name" ph\u1EA3i g\u1EE3i s\u1EF1 t\xF2 m\xF2. "desc" D\u01AF\u1EDAI 100 CH\u1EEE, tr\xECnh b\xE0y r\xF5 c\u01A1 ch\u1EBF v\xE0 c\xF4ng d\u1EE5ng th\xFA v\u1ECB. "price" \u0111\u1ECBnh gi\xE1 h\u1EE3p l\xFD v\u1EDBi \u0111\u1ED9 hi\u1EBFm. "spriteMap" l\xE0 h\xECnh \u1EA3nh pixel chu\u1EA9n x\xE1c.
 </V\xF2ng quay R\xFAt th\u01B0\u1EDFng K\u1EF3 v\u1EADt D\u1ECB gi\u1EDBi - L\xF5i H\u1EC7 Th\u1ED1ng Gacha>
-
 `;
+}
+var THEME_DOMAINS, GAMEPLAY_DOMAINS;
+var init_prompt = __esm({
+  "src/prompt.js"() {
+    THEME_DOMAINS = [
+      "V\u1EF1c kh\xED v\u1EADt",
+      "V\u1EF1c sinh m\u1EC7nh",
+      "V\u1EF1c n\u01A1i ch\u1ED1n",
+      "V\u1EF1c h\xE0nh vi",
+      "V\u1EF1c quan h\u1EC7",
+      "V\u1EF1c th\xF4ng tin",
+      "V\u1EF1c t\xE0i nguy\xEAn",
+      "V\u1EF1c d\u1ECB th\u01B0\u1EDDng",
+      "V\u1EF1c gi\xE1c quan",
+      "V\u1EF1c nh\xE2n qu\u1EA3",
+      "V\u1EF1c k\u1EF9 ngh\u1EC7",
+      "V\u1EF1c x\xE3 h\u1ED9i",
+      "V\u1EF1c sinh th\xE1i",
+      "V\u1EF1c th\xE2n ph\u1EADn",
+      "V\u1EF1c quy t\u1EAFc",
+      "V\u1EF1c c\xF4ng tr\xECnh",
+      "V\u1EF1c \u0111\u1EDDi s\u1ED1ng",
+      "V\u1EF1c th\u01B0\u01A1ng m\u1EA1i",
+      "V\u1EF1c h\xE0ng h\u1EA3i/h\xE0ng kh\xF4ng",
+      "V\u1EF1c gi\u1EA3i tr\xED",
+      "V\u1EF1c y t\u1EBF",
+      "V\u1EF1c kh\u1EA3o c\u1ED5",
+      "V\u1EF1c t\xEDn ng\u01B0\u1EE1ng/t\xE2m linh",
+      "V\u1EF1c v\u0169 tr\u1EE5/chi\xEAm tinh",
+      "V\u1EF1c h\xF3a h\u1ECDc/gi\u1EA3 kim",
+      "V\u1EF1c k\u1EF9 thu\u1EADt s\u1ED1",
+      "V\u1EF1c ngh\u1EC7 thu\u1EADt",
+      "V\u1EF1c th\u1EDDi gian",
+      "V\u1EF1c kh\xF4ng gian",
+      "V\u1EF1c c\u1EA3m x\xFAc/t\xE2m l\xFD",
+      "V\u1EF1c tri\u1EBFt h\u1ECDc/t\u01B0 t\u01B0\u1EDFng",
+      "V\u1EF1c qu\xE2n s\u1EF1/chi\u1EBFn tranh",
+      "V\u1EF1c to\xE1n h\u1ECDc/h\xECnh h\u1ECDc",
+      "V\u1EF1c \xE2m thanh/\xE2m nh\u1EA1c",
+      "V\u1EF1c \u1EA9m th\u1EF1c/ti\xEAu h\xF3a",
+      "V\u1EF1c th\u1EDDi trang/d\u1EC7t may",
+      "V\u1EF1c l\u1ECBch s\u1EED/k\xFD \u1EE9c",
+      "V\u1EF1c ph\xE1p lu\u1EADt/t\u1ED9i ph\u1EA1m",
+      "V\u1EF1c n\u0103ng l\u01B0\u1EE3ng/v\u1EADt l\xFD",
+      "V\u1EF1c sinh t\u1EED/lu\xE2n h\u1ED3i",
+      "V\u1EF1c \u1EA3o \u1EA3nh/gi\u1EA5c m\u01A1",
+      "V\u1EF1c logic/ngh\u1ECBch l\xFD",
+      "V\u1EF1c v\u0103n h\u1ECDc/th\u01A1 ca",
+      "V\u1EF1c quang h\u1ECDc/\xE1nh s\xE1ng",
+      "V\u1EF1c nguy\xEAn t\u1ED1/t\u1EF1 nhi\xEAn",
+      "V\u1EF1c k\xEDch th\u01B0\u1EDBc/t\u1EC9 l\u1EC7",
+      "V\u1EF1c nh\u1EE5c d\u1EE5c/c\xE1m d\u1ED7"
+    ];
+    GAMEPLAY_DOMAINS = [
+      "Thao t\xE1c ch\u1EE7 \u0111\u1ED9ng",
+      "C\u1EA3i t\u1EA1o b\u1ED1i c\u1EA3nh",
+      "X\u1EED l\xFD th\xF4ng tin",
+      "Kinh doanh t\xE0i nguy\xEAn",
+      "T\u01B0\u01A1ng t\xE1c quan h\u1EC7",
+      "Ph\u1EA3n k\xEDch \xE1p ch\u1EBF",
+      "Ng\u1EE5y trang \u0111\xE1nh l\u1EEBa",
+      "Kh\xE1m ph\xE1 gi\u1EA3i \u0111\u1ED1",
+      "S\u1EA3n xu\u1EA5t x\xE2y d\u1EF1ng",
+      "Di chuy\u1EC3n \u0111i\u1EC1u \u0111\u1ED9ng",
+      "Qu\u1EA3n l\xFD tr\u1EA1ng th\xE1i",
+      "Ph\u1ED1i h\u1EE3p b\u1EA1n \u0111\u1ED3ng h\xE0nh",
+      '"T\u1EA5u h\xE0i" phi chi\u1EBFn \u0111\u1EA5u',
+      "Ch\u01A1i l\u1EA1i d\xE0i h\u1EA1n",
+      "Giao d\u1ECBch \u0111\xE1nh c\u01B0\u1EE3c",
+      "Kinh doanh c\u0103n c\u1EE9",
+      "C\xF4ng x\u01B0\u1EDFng ch\u1EBF t\u1EA1o",
+      "Quy ho\u1EA1ch tuy\u1EBFn \u0111\u01B0\u1EDDng",
+      "Tr\xF2 ch\u01A1i quy t\u1EAFc",
+      "Thao t\xE1c chu\u1ED7i b\u1EB1ng ch\u1EE9ng",
+      "Nu\xF4i tr\u1ED3ng sinh th\xE1i",
+      "Kinh doanh x\xE3 giao",
+      "C\u1EE9u h\u1ED9 kh\u1EA9n c\u1EA5p",
+      "S\u01B0u t\u1EA7m tr\u01B0ng b\xE0y",
+      "Thao t\xFAng t\xE2m l\xFD/k\xFD \u1EE9c",
+      "Bi\u1EBFn \u0111\u1ED5i v\u1EADt l\xFD si\xEAu th\u1EF1c",
+      "Ph\xE1 v\u1EE1 B\u1EE9c t\u01B0\u1EDDng th\u1EE9 4 (Meta-game)",
+      "Nguy\u1EC1n r\u1EE7a/K\xFD sinh",
+      "Gacha l\u1ED3ng Gacha (May r\u1EE7i \u0111a t\u1EA7ng)",
+      "\u0110\xE1nh c\u1EAFp/Chi\u1EBFm \u0111o\u1EA1t",
+      "K\u1EBF th\u1EEBa/Chuy\u1EC3n giao",
+      "\u0110i\u1EC1u khi\u1EC3n/Thao t\xFAng r\u1ED1i",
+      "Nh\xE2n b\u1EA3n/Ph\xE2n li\u1EC7t",
+      "\u0110\u1ED3ng h\xF3a/\u0102n m\xF2n",
+      "Hi\u1EBFn t\u1EBF/Giao d\u1ECBch ma qu\u1EF7",
+      "H\u1EB9n gi\u1EDD/Tr\xEC ho\xE3n",
+      "Ghi h\xECnh/Theo d\xF5i",
+      "Thao t\xFAng x\xE1c su\u1EA5t/T\u1EC9 l\u1EC7",
+      "\u0110\xF3ng b\u0103ng/T\u1EA1m d\u1EEBng tr\u1EA1ng th\xE1i",
+      "Bi\u1EBFn h\xECnh/D\u1ECBch dung",
+      "H\u1EA5p th\u1EE5/Nu\u1ED1t ch\u1EEDng",
+      "\u0110\u1EA3o ng\u01B0\u1EE3c nh\xE2n qu\u1EA3",
+      "\u0110\u1EB7t b\u1EABy/Ph\u1EE5c k\xEDch",
+      "Khi\xEAu kh\xEDch/Chuy\u1EC3n d\u1EDDi c\u1EEBu h\u1EADn",
+      "Phong \u1EA5n/Giam c\u1EA7m",
+      "C\u1ED9ng h\u01B0\u1EDFng/Li\xEAn k\u1EBFt m\u1EA1ng l\u01B0\u1EDBi",
+      "Vi\u1EBFt l\u1EA1i/Ch\u1EC9nh s\u1EEDa quy t\u1EAFc",
+      "Ti\xEAn tri/\u0110\u1ECDc t\u01B0\u01A1ng lai",
+      "X\xF3a s\u1ED5/T\u1ECBch thu",
+      "H\u1ED3i sinh/Kh\xF4i ph\u1EE5c m\u1ED1c th\u1EDDi gian"
+    ];
   }
 });
 
 // src/gacha.js
+var gacha_exports = {};
+__export(gacha_exports, {
+  GACHA_NORM_PRICE: () => GACHA_NORM_PRICE,
+  GACHA_SPEC_PITY: () => GACHA_SPEC_PITY,
+  GACHA_SPEC_PRICE: () => GACHA_SPEC_PRICE,
+  GACHA_SUPER_PITY: () => GACHA_SUPER_PITY,
+  executeCauldronMerge: () => executeCauldronMerge,
+  executeGachaRoll: () => executeGachaRoll,
+  generateAICauldronMerge: () => generateAICauldronMerge,
+  generateAIUniqueItemData: () => generateAIUniqueItemData,
+  generateProcedural32x32Sprite: () => generateProcedural32x32Sprite,
+  generateUniqueItem: () => generateUniqueItem,
+  initGachaState: () => initGachaState,
+  openCauldronModal: () => openCauldronModal,
+  openGachaModal: () => openGachaModal,
+  openGachaRatesModal: () => openGachaRatesModal
+});
 function initGachaState() {
   if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
   if (ctx.S.tickets.super === void 0) ctx.S.tickets.super = 0;
@@ -4756,14 +4865,14 @@ N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y thi\u1EBFt k\u1EBF k\u1EF3 v\u1EADt l
 2. C\u01A0 CH\u1EBE: C\u0103n c\u1EE9 v\xE0o \u0111\u1ED9 hi\u1EBFm [${rarity}] \u0111\u1EC3 thi\u1EBFt l\u1EADp c\u01A1 ch\u1EBF. Thao t\xE1c c\u1EE5 th\u1EC3, c\u1EF1c k\u1EF3 th\xFA v\u1ECB v\xE0 ph\xE1 v\u1EE1 s\xE1o r\u1ED7ng (anti-clich\xE9).
 3. V\u1EBC PIXEL: Khung pixel t\u1ED1i thi\u1EC3u l\xE0 32x32. B\u1EA1n c\xF3 th\u1EC3 m\u1EDF r\u1ED9ng k\xEDch th\u01B0\u1EDBc l\u1EDBn h\u01A1n (v\xED d\u1EE5 40x40, 48x48), nh\u01B0ng B\u1EAET BU\u1ED8C ph\u1EA3i l\xE0 l\u01B0\u1EDBi H\xCCNH VU\xD4NG n x n (s\u1ED1 d\xF2ng v\xE0 s\u1ED1 k\xFD t\u1EF1 m\u1ED7i d\xF2ng ph\u1EA3i b\u1EB1ng nhau).`;
     }
-    const rarityGuidance = rarity === "Huy\u1EC1n tho\u1EA1i" ? "[\u0110\u1ED9t ph\xE1 Quy t\u1EAFc] V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t v\xF4 nh\u1ECB v\u1EDBi kh\u1EA3 n\u0103ng b\u1EBB cong ho\u1EB7c vi\u1EBFt l\u1EA1i m\u1ED9t quy t\u1EAFc c\u1EE5 th\u1EC3 c\u1EE7a tr\xF2 ch\u01A1i/th\u1EBF gi\u1EDBi. S\u1EE9c m\u1EA1nh v\u0129 m\xF4, hi\u1EC7u \u1EE9ng h\xECnh \u1EA3nh ho\xE0nh tr\xE1ng. D\xF9 c\u1EF1c m\u1EA1nh, n\xF3 v\u1EABn ph\u1EA3i tu\xE2n theo logic c\u1EE7a th\u1EBF gi\u1EDBi, kh\xF4ng bi\u1EBFn ng\u01B0\u1EDDi ch\u01A1i th\xE0nh th\u1EA7n to\xE0n n\u0103ng nh\xE0m ch\xE1n." : rarity === "S\u1EED thi" ? "[T\xE0i s\u1EA3n Chi\u1EBFn l\u01B0\u1EE3c] \u0110\u1ED3 v\u1EADt mang t\xEDnh thay \u0111\u1ED5i l\u1ED1i ch\u01A1i (Game-changer). C\xF3 s\u1EE9c m\u1EA1nh l\u1EDBn, \u0111a d\u1EE5ng, ho\u1EB7c t\u1EF1 \u0111\u1ED9ng h\xF3a m\u1ED9t quy tr\xECnh ph\u1EE9c t\u1EA1p. Tuy nhi\xEAn, \u0111\u1EC3 ph\xE1t huy t\u1ED1i \u0111a c\u1EA7n c\xF3 s\u1EF1 t\xEDnh to\xE1n c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i." : rarity === "Hi\u1EBFm" ? "[C\u01A1 ch\u1EBF \u0110\u1EB7c bi\u1EC7t] V\u1EADt ph\u1EA9m b\u1EAFt \u0111\u1EA7u c\xF3 'c\u01A1 ch\u1EBF ho\u1EA1t \u0111\u1ED9ng' ri\xEAng bi\u1EC7t. C\xF3 th\u1EC3 thay \u0111\u1ED5i m\u1ED9t ph\u1EA7n nh\u1ECF c\u1EE5c di\u1EC7n, mang l\u1EA1i l\u1EE3i \xEDch r\xF5 r\u1EC7t nh\u01B0ng s\u1EBD c\xF3 th\u1EDDi gian h\u1ED3i chi\xEAu (cooldown) ho\u1EB7c \u0111i\u1EC1u ki\u1EC7n k\xEDch ho\u1EA1t." : rarity === "Th\u01B0\u1EDDng" ? "[C\xF4ng c\u1EE5 C\u01A1 b\u1EA3n] V\u1EADt ph\u1EA9m c\xF3 \xEDch nh\u01B0ng c\xF4ng n\u0103ng \u0111\u01A1n gi\u1EA3n, gi\u1EDBi h\u1EA1n r\xF5 r\xE0ng. Th\u01B0\u1EDDng l\xE0 \u0111\u1ED3 ti\xEAu hao, c\xF4ng c\u1EE5 h\u1ED7 tr\u1EE3 canh t\xE1c, sinh ho\u1EA1t ho\u1EB7c t\u0103ng ch\u1EC9 s\u1ED1 nh\u1EB9." : "[V\u1EADt ph\u1EA9m T\u1EA5u h\xE0i/V\xF4 d\u1EE5ng] Nh\u1EEFng m\xF3n \u0111\u1ED3 k\u1EF3 c\u1EE5c, h\u1ECFng h\xF3c ho\u1EB7c c\xF3 c\xF4ng d\u1EE5ng c\u1EF1c k\u1EF3 v\xF4 th\u01B0\u1EDFng v\xF4 ph\u1EA1t. Ch\xFAng t\u1ED3n t\u1EA1i ch\u1EE7 y\u1EBFu \u0111\u1EC3 g\xE2y c\u01B0\u1EDDi, t\u1EA1o t\xECnh hu\u1ED1ng tr\u1EDB tr\xEAu trong t\u01B0\u01A1ng t\xE1c \u0111\u1EDDi th\u01B0\u1EDDng.";
+    const rarityGuidance = rarity === "Huy\u1EC1n tho\u1EA1i" ? "[B\u1EADc 4] V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t v\xF4 nh\u1ECB, x\u1EE9ng danh ph\u1EA9m ch\u1EA5t c\u1EE7a n\xF3. Mang t\u1EDBi \u0111\u1EE7 th\u1EE9 cho ng\u01B0\u1EDDi d\xF9ng. L\xE0 m\u1ED9t v\u1EADt ph\u1EA9m danh x\u1EE9ng v\u1EDBi th\u1EF1c." : rarity === "S\u1EED thi" ? "[B\u1EADc 3] \u0110\u1ED3 v\u1EADt mang t\xEDnh tr\u1ECDng tr\u1ECB (Gi\xE1 tr\u1ECB cao). C\xF3 s\u1EE9c m\u1EA1nh l\u1EDBn, \u0111a d\u1EE5ng, gi\u1ED1ng nh\u01B0 s\u1EDF h\u1EEFu b\u1EADc k\xEC t\xE0i. Tuy nhi\xEAn, \u0111\u1EC3 ph\xE1t huy t\u1ED1i \u0111a c\u1EA7n c\xF3 s\u1EF1 t\xEDnh to\xE1n c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i. Kh\xF4ng qu\xE1 l\u1ED7i game, nh\u01B0ng c\xF3 trong tay th\xEC s\u1EBD r\u1EA5t th\xEDch." : rarity === "Hi\u1EBFm" ? "[B\u1EADc 2] V\u1EADt ph\u1EA9m b\u1EAFt \u0111\u1EA7u c\xF3 'c\u01A1 ch\u1EBF ho\u1EA1t \u0111\u1ED9ng' ri\xEAng bi\u1EC7t. C\xF3 th\u1EC3 c\xF3 \xEDch, t\xE1c d\u1EE5ng th\xFA v\u1ECB, mang l\u1EA1i l\u1EE3i \xEDch r\xF5 r\u1EC7t nh\u01B0ng s\u1EBD c\xF3 v\xE0i gi\u1EDBi h\u1EA1n nh\u1ECF." : rarity === "Th\u01B0\u1EDDng" ? "[B\u1EADc 1] V\u1EADt ph\u1EA9m c\xF3 \xEDch ho\u1EB7c l\xE0 th\u01B0\u1EDDng ph\u1EA9m th\xFA v\u1ECB tuy c\xF4ng n\u0103ng \u0111\u01A1n gi\u1EA3n, nh\u01B0ng s\u1EDF h\u1EEFu c\u0169ng kh\xE1 th\xFA v\u1ECB, gi\u1EDBi h\u1EA1n r\xF5 r\xE0ng." : "[B\u1EADc 0] Nh\u1EEFng m\xF3n \u0111\u1ED3 k\u1EF3 c\u1EE5c, h\u1ECFng h\xF3c ho\u1EB7c c\xF3 c\xF4ng d\u1EE5ng c\u1EF1c k\u1EF3 v\xF4 th\u01B0\u1EDFng v\xF4 ph\u1EA1t. Ch\xFAng t\u1ED3n t\u1EA1i ch\u1EE7 y\u1EBFu \u0111\u1EC3 g\xE2y c\u01B0\u1EDDi, t\u1EA1o t\xECnh hu\u1ED1ng tr\u1EDB tr\xEAu trong t\u01B0\u01A1ng t\xE1c \u0111\u1EDDi th\u01B0\u1EDDng.";
     const basePrice = rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "S\u1EED thi" ? 8e3 : rarity === "Hi\u1EBFm" ? 2500 : rarity === "Th\u01B0\u1EDDng" ? 500 : 100;
     const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF "K\u1EF3 v\u1EADt d\u1ECB gi\u1EDBi" (Otherworldly Artifact) v\xE0 chuy\xEAn gia Pixel Art (n x n, t\u1ED1i thi\u1EC3u 32x32).
 H\xE3y s\xE1ng t\u1EA1o 1 K\u1EF2 V\u1EACT \u0110\u1ED8C NH\u1EA4T ph\u1EA9m ch\u1EA5t [${rarity}].
 ${contextStr}
 
 --- QUY T\u1EAEC C\u1ED0T L\xD5I T\u1EEA V\u1EA0N H\u1EEEU \u0110\u1EA0O NGUY\xCAN ---
-${GACHA_PROMPT}
+${getGachaPrompt()}
 --- K\u1EBET TH\xDAC QUY T\u1EAEC C\u1ED0T L\xD5I ---
 
 B\u1EA2NG M\xC0U PIXEL CHO PH\xC9P (K\xFD t\u1EF1: M\xE3 m\xE0u Hex):
@@ -5455,6 +5564,309 @@ function openGachaRatesModal() {
     openGachaModal();
   });
 }
+async function generateAICauldronMerge(itemsData, isSuccess) {
+  if (!SEC.url || !SEC.model) return null;
+  try {
+    const simpleColors = Object.entries(GACHA_P).filter((e2) => typeof e2[1] === "string");
+    const paletteStr = simpleColors.map(([k2, v2]) => `${k2}: ${v2}`).join(", ");
+    let contextStr = "";
+    if (CS.link) {
+      const worldbook = await collectWorldbook();
+      contextStr = `Tr\xEDch xu\u1EA5t b\u1ED1i c\u1EA3nh th\u1EBF gi\u1EDBi (Worldbook) & L\u1ECBch s\u1EED tr\xF2 chuy\u1EC7n g\u1EA7n nh\u1EA5t:
+${worldbook ? worldbook : "(Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u th\u1EBF gi\u1EDBi c\u1EE5 th\u1EC3)"}`;
+    }
+    const itemsDesc = itemsData.map((it2, i2) => {
+      let spriteStr = "";
+      if (Array.isArray(it2.spriteMap)) {
+        spriteStr = `
+Sprite Map (Pixel Art):
+${it2.spriteMap.join("\n")}`;
+      }
+      return `Nguy\xEAn li\u1EC7u ${i2 + 1}: T\xEAn "${it2.name}", \u0110\u1ED9 hi\u1EBFm [${it2.rarity}], Gi\xE1 tr\u1ECB ${it2.sell}G, M\xF4 t\u1EA3 "${it2.desc}"${spriteStr}`;
+    }).join("\n\n");
+    const totalValue = itemsData.reduce((sum2, it2) => sum2 + (it2.sell || 0), 0);
+    const maxVal = totalValue * 2;
+    const resultInstruction = isSuccess ? `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\xC0NH C\xD4NG. Luy\u1EC7n ho\xE1 \u0111\xE3 sinh ra m\u1ED9t v\u1EADt ph\u1EA9m v\u01B0\u1EE3t tr\u1ED9i ho\u1EB7c v\xF4 c\xF9ng th\xFA v\u1ECB. H\xE3y t\u0103ng gi\xE1 tr\u1ECB c\u1EE7a n\xF3 l\xEAn cao h\u01A1n (nh\u01B0ng KH\xD4NG QU\xC1 ${maxVal}G). \u0110\u1ED3 m\u1EDBi ph\u1EA3i c\xF3 \u0111\u1ED9 hi\u1EBFm t\u1EEB [Th\u01B0\u1EDDng] \u0111\u1EBFn [Huy\u1EC1n tho\u1EA1i].` : `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\u1EA4T B\u1EA0I. Qu\xE1 tr\xECnh luy\u1EC7n ho\xE1 \u0111\xE3 x\u1EA3y ra tai n\u1EA1n, sinh ra ph\u1EBF ph\u1EA9m ho\u1EB7c th\u1EE9 c\u1EF1c k\u1EF3 v\xF4 d\u1EE5ng t\u1EA5u h\xE0i. H\xE3y \xE9p gi\xE1 r\u1EDBt th\xEA th\u1EA3m (c\xF3 th\u1EC3 ch\u1EC9 v\xE0i ch\u1EE5c G). \u0110\u1ED3 m\u1EDBi B\u1EAET BU\u1ED8C ph\u1EA3i mang \u0111\u1ED9 hi\u1EBFm [R\xE1c] ho\u1EB7c [Th\u01B0\u1EDDng].`;
+    const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI qu\u1EA3n l\xFD "N\u1ED3i Luy\u1EC7n" (Witch's Cauldron) v\xE0 chuy\xEAn gia Pixel Art (n x n, t\u1ED1i thi\u1EC3u 32x32).
+Ng\u01B0\u1EDDi ch\u01A1i v\u1EEBa b\u1ECF c\xE1c V\u1EADt ph\u1EA9m \u0110\u1ED9c nh\u1EA5t sau v\xE0o n\u1ED3i \u0111\u1EC3 luy\u1EC7n ho\xE1 (dung h\u1EE3p):
+${itemsDesc}
+
+Nhi\u1EC7m v\u1EE5 c\u1EE7a b\u1EA1n:
+Quy\u1EBFt \u0111\u1ECBnh chi ti\u1EBFt v\u1EADt ph\u1EA9m sinh ra t\u1EEB qu\xE1 tr\xECnh n\xE0y. 
+${resultInstruction}
+- C\xE2n b\u1EB1ng gi\xE1 tr\u1ECB (Price): T\u1ED5ng gi\xE1 tr\u1ECB \u0111\u1EA7u v\xE0o l\xE0 ${totalValue}G. Ph\u1EA3i c\xF4ng b\u1EB1ng, th\xF4ng minh v\xE0 ph\u1EA3n \xE1nh \u0111\xFAng m\u1EE9c \u0111\u1ED9 th\xE0nh c\xF4ng/th\u1EA5t b\u1EA1i \u0111\u01B0\u1EE3c giao ph\xF3 \u1EDF tr\xEAn.
+- V\u1EC1 m\xF4 t\u1EA3: CH\u1EC8 nh\u1EAFc tho\xE1ng qua v\u1EC1 nguy\xEAn li\u1EC7u n\u1EC1n (n\u1EBFu c\u1EA7n), h\xE3y T\u1EACP TRUNG m\xF4 t\u1EA3 m\xF3n \u0111\u1ED3 m\u1EDBi n\xE0y nh\u01B0 m\u1ED9t B\u1EA3o V\u1EADt Gacha \u0111\u1ED9c l\u1EADp, v\u1EDBi c\u01A1 ch\u1EBF ho\u1EA1t \u0111\u1ED9ng ri\xEAng bi\u1EC7t, th\xFA v\u1ECB v\xE0 ph\xE1 v\u1EE1 s\xE1o r\u1ED7ng.
+
+${contextStr}
+
+--- QUY T\u1EAEC C\u1ED0T L\xD5I T\u1EEA V\u1EA0N H\u1EEEU \u0110\u1EA0O NGUY\xCAN ---
+${getGachaPrompt()}
+--- K\u1EBET TH\xDAC QUY T\u1EAEC C\u1ED0T L\xD5I ---
+
+B\u1EA2NG M\xC0U PIXEL CHO PH\xC9P (K\xFD t\u1EF1: M\xE3 m\xE0u Hex):
+${paletteStr}
+
+H\u01AF\u1EDANG D\u1EAAN T\u01AF DUY (B\u1EAFt bu\u1ED9c ph\u1EA3i c\xF3 th\u1EBB <thinking> tr\u01B0\u1EDBc khi xu\u1EA5t m\xE3):
+1. PH\xC2N T\xCDCH: \u0110\xE1nh gi\xE1 s\u1EF1 k\u1EBFt h\u1EE3p c\u1EE7a c\xE1c nguy\xEAn li\u1EC7u \u0111\u1EA7u v\xE0o v\xE0 Tu\xE2n th\u1EE7 K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C.
+2. QUY\u1EBET \u0110\u1ECANH: X\xE1c \u0111\u1ECBnh \u0110\u1ED9 hi\u1EBFm m\u1EDBi v\xE0 \u0110\u1ECBnh gi\xE1.
+3. THI\u1EBET K\u1EBE: T\u1EA1o t\xEAn, m\xF4 t\u1EA3 c\u01A1 ch\u1EBF c\u1EE7a m\xF3n \u0111\u1ED3 m\u1EDBi.
+4. V\u1EBC PIXEL: Khung pixel t\u1ED1i thi\u1EC3u l\xE0 32x32. B\u1EAET BU\u1ED8C ph\u1EA3i l\xE0 l\u01B0\u1EDBi H\xCCNH VU\xD4NG n x n (s\u1ED1 d\xF2ng v\xE0 s\u1ED1 k\xFD t\u1EF1 m\u1ED7i d\xF2ng ph\u1EA3i b\u1EB1ng nhau).
+
+QUY T\u1EAEC \u0110\u1EA6U RA B\u1EAET BU\u1ED8C:
+Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\u1ED1i m\xE3 \`\`\`json ch\u1EE9a c\u1EA5u tr\xFAc:
+{
+  "name": "T\xEAn v\u1EADt ph\u1EA9m m\u1EDBi (2~7 ch\u1EEF, \u1EA5n t\u01B0\u1EE3ng)",
+  "desc": "M\xF4 t\u1EA3 ng\u1EAFn g\u1ECDn C\u01A0 CH\u1EBE v\xE0 C\xC1CH S\u1EEC D\u1EE4NG c\u1EE7a v\u1EADt ph\u1EA9m m\u1EDBi (d\u01B0\u1EDBi 100 ch\u1EEF). Ph\u1EA3i r\xF5 r\xE0ng, th\xFA v\u1ECB, \u0111\u1ED9c l\u1EA1.",
+  "rarity": "\u0110\u1ED9 hi\u1EBFm c\u1EE7a v\u1EADt ph\u1EA9m (R\xE1c, Th\u01B0\u1EDDng, Hi\u1EBFm, S\u1EED thi, Huy\u1EC1n tho\u1EA1i)",
+  "price": S\u1ED1 nguy\xEAn \u0111\u1ECBnh gi\xE1. (T\u1ED1i \u0111a tuy\u1EC7t \u0111\u1ED1i: ${maxVal}G),
+  "spriteMap": [ m\u1EA3ng c\xE1c chu\u1ED7i. N\u1EBFu ch\u1ECDn k\xEDch th\u01B0\u1EDBc n x n, m\u1EA3ng PH\u1EA2I C\xD3 \u0110\xDANG n chu\u1ED7i, v\xE0 m\u1ED7i chu\u1ED7i D\xC0I CH\xCDNH X\xC1C n k\xFD t\u1EF1. Ph\u1EA3i l\xE0 h\xECnh vu\xF4ng (min 32x32). Ch\u1EC9 d\xF9ng k\xFD t\u1EF1 B\u1EA3ng m\xE0u v\xE0 d\u1EA5u '.' cho \u0111i\u1EC3m trong su\u1ED1t ]
+}`;
+    const userPrompt = `H\xE3y ti\u1EBFn h\xE0nh luy\u1EC7n ho\xE1 n\u1ED3i ph\xF9 thu\u1EF7 v\u1EDBi c\xE1c nguy\xEAn li\u1EC7u tr\xEAn. Quy\u1EBFt \u0111\u1ECBnh k\u1EBFt qu\u1EA3!`;
+    console.log(`
+================= CAULDRON AI DEBUG: REQUEST =================`);
+    console.log("[System Prompt]:\n", sysPrompt);
+    console.log("[User Prompt]:\n", userPrompt);
+    console.log(`==============================================================
+`);
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 15e4);
+    const res = await fetch(SEC.url.replace(/\/+$/, "") + "/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...SEC.key ? { Authorization: "Bearer " + SEC.key } : {} },
+      body: JSON.stringify({
+        model: SEC.model,
+        messages: [
+          { role: "system", content: sysPrompt },
+          { role: "user", content: userPrompt }
+        ]
+      }),
+      signal: ctrl.signal
+    });
+    clearTimeout(to);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content || "";
+    console.log(`
+================= CAULDRON AI DEBUG: RESPONSE ================`);
+    console.log("[Raw Content]:\n", content);
+    console.log(`==============================================================
+`);
+    let jsonStr = content;
+    const match = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (match) jsonStr = match[1];
+    let jtxt = extractJson(jsonStr) || extractJson(content);
+    if (jtxt) {
+      const o2 = JSON.parse(jtxt);
+      if (o2 && o2.name && o2.desc && o2.rarity && Array.isArray(o2.spriteMap)) {
+        const fixedMap = [];
+        const size = Math.max(32, o2.spriteMap.length);
+        for (let i2 = 0; i2 < size; i2++) {
+          let row = typeof o2.spriteMap[i2] === "string" ? o2.spriteMap[i2] : "";
+          if (row.length < size) row = row.padEnd(size, ".");
+          if (row.length > size) row = row.substring(0, size);
+          fixedMap.push(row);
+        }
+        o2.spriteMap = fixedMap;
+        if (typeof o2.price !== "number") o2.price = 100;
+        return o2;
+      }
+    }
+  } catch (e2) {
+  }
+  return null;
+}
+async function executeCauldronMerge(selectedKeys, updateLoadingText) {
+  initGachaState();
+  if (selectedKeys.length < 2) {
+    toast("C\u1EA7n \xEDt nh\u1EA5t 2 nguy\xEAn li\u1EC7u \u0111\u1EC3 luy\u1EC7n ho\xE1!");
+    return null;
+  }
+  const backupBag = { ...ctx.S.bag };
+  const itemsData = [];
+  for (const k2 of selectedKeys) {
+    if (!ctx.S.bag[k2] || ctx.S.bag[k2] <= 0) return null;
+    ctx.S.bag[k2]--;
+    if (ctx.S.bag[k2] === 0) delete ctx.S.bag[k2];
+    const u2 = ctx.S.uniques[k2];
+    if (u2) itemsData.push(u2);
+  }
+  save();
+  renderStatus();
+  if (updateLoadingText) updateLoadingText("N\u1ED3i \u0111ang s\xF4i s\xF9ng s\u1EE5c...");
+  const isSuccess = Math.random() < 0.6;
+  let resultData = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    resultData = await generateAICauldronMerge(itemsData, isSuccess);
+    if (resultData) break;
+    if (updateLoadingText) updateLoadingText(`\u0110ang th\u1EED l\u1EA1i... (${attempt}/3)`);
+  }
+  if (!resultData) {
+    ctx.S.bag = backupBag;
+    save();
+    renderStatus();
+    toast("Luy\u1EC7n ho\xE1 th\u1EA5t b\u1EA1i do l\u1ED7i k\u1EBFt n\u1ED1i (API). \u0110\xE3 ho\xE0n tr\u1EA3 nguy\xEAn li\u1EC7u!");
+    return null;
+  }
+  const timestamp = now();
+  const randId = Math.floor(Math.random() * 1e4);
+  const key = `unique@${timestamp}_${randId}`;
+  const spKey = `cauldron_${timestamp}_${randId}`;
+  let color = "#9e9e9e";
+  if (resultData.rarity === "Huy\u1EC1n tho\u1EA1i") color = "#ff8000";
+  else if (resultData.rarity === "S\u1EED thi") color = "#a335ee";
+  else if (resultData.rarity === "Hi\u1EBFm") color = "#4a90e2";
+  else if (resultData.rarity === "Th\u01B0\u1EDDng") color = "#b0bec5";
+  registerDynamicSprite(spKey, resultData.spriteMap);
+  ctx.S.uniques[key] = {
+    key,
+    name: resultData.name,
+    rarity: resultData.rarity,
+    color,
+    desc: resultData.desc,
+    sell: resultData.price,
+    sp: spKey,
+    spriteMap: resultData.spriteMap
+  };
+  ctx.S.bag[key] = (ctx.S.bag[key] || 0) + 1;
+  save();
+  renderStatus();
+  return {
+    type: "unique",
+    name: resultData.name,
+    rarity: resultData.rarity,
+    color,
+    icon: spriteSVG(spKey, 64),
+    desc: resultData.desc,
+    sell: resultData.price,
+    spKey
+  };
+}
+function openCauldronModal() {
+  initGachaState();
+  const allKeys = Object.keys(ctx.S.bag).filter((k2) => k2.startsWith("unique@") && ctx.S.uniques[k2]);
+  let selected = {};
+  const renderList = () => {
+    let listHTML = "";
+    if (allKeys.length === 0) {
+      listHTML = `<div style="text-align:center; padding:20px; color:#5a3f78;">B\u1EA1n kh\xF4ng c\xF3 b\u1EA3o v\u1EADt n\xE0o trong t\xFAi \u0111\u1EC3 gh\xE9p c\u1EA3. Quay Gacha th\xEAm nh\xE9!</div>`;
+    } else {
+      listHTML = allKeys.map((k2) => {
+        const u2 = ctx.S.uniques[k2];
+        const count2 = ctx.S.bag[k2] || 0;
+        const selCount = selected[k2] || 0;
+        const avail = count2 - selCount;
+        return `
+          <div class="gacha-item-card" style="border:2px solid ${u2.color}; border-radius:8px; padding:6px 8px; background:#fff; display:flex; align-items:center; gap:8px; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
+            <div>${spriteSVG(u2.sp, 40)}</div>
+            <div style="flex:1;">
+              <div style="font-weight:bold; font-size:13px; color:#3a2c22;">${u2.name} <span style="font-size:10px; color:${u2.color};">(${u2.rarity})</span></div>
+              <div style="font-size:11px; color:#7a5c38;">Gi\xE1: ${u2.sell || 100}G | Kho: ${avail}</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+              <span class="buy c-add-btn" data-key="${k2}" style="padding:2px 8px; font-size:11px;">+Th\xEAm</span>
+              ${selCount > 0 ? `<span class="buy c-sub-btn" data-key="${k2}" style="padding:2px 8px; font-size:11px; background:#e06578; border-color:#a83a52;">-B\u1EDBt (${selCount})</span>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+    const listEl = $id("cauldronItemsList");
+    if (listEl) listEl.innerHTML = listHTML;
+  };
+  const bodyHTML = `
+    <div style="display:flex; flex-direction:column; gap:12px; height:60vh; max-height:500px;">
+      <div style="text-align:center; padding:10px; background:rgba(0,0,0,0.05); border-radius:8px;">
+        <div style="font-weight:bold; font-size:14px; color:#8a5cc0; margin-bottom:4px;">N\u1ED3i Luy\u1EC7n K\xEC Di\u1EC7u</div>
+        <div style="font-size:12px; color:#3a2c22; margin-bottom:4px;">B\u1ECF t\u1ED1i thi\u1EC3u 2 m\xF3n b\u1EA3o v\u1EADt Gacha v\xE0o n\u1ED3i. Ph\xF9 thu\u1EF7 s\u1EBD luy\u1EC7n ho\xE1 ch\xFAng th\xE0nh m\u1ED9t m\xF3n \u0111\u1ED3 ho\xE0n to\xE0n m\u1EDBi (Qu\xE1 tr\xECnh mi\u1EC5n ph\xED).</div>
+        <div style="font-size:11px; font-weight:bold; color:#cc3700; background:rgba(204,55,0,0.1); padding:4px; border-radius:4px; border:1px dashed rgba(204,55,0,0.3); display:inline-block;">T\u1EC9 l\u1EC7 n\u1ED5 N\u1ED3i: 60% Th\xE0nh C\xF4ng - 40% Th\u1EA5t B\u1EA1i (R\xE1c)</div>
+      </div>
+      <div id="cauldronItemsList" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding:4px;"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(138,92,192,0.1); border:2px solid #8a5cc0; padding:10px; border-radius:8px;">
+        <div style="font-weight:bold; font-size:13px; color:#5a3f78;">\u0110\xE3 ch\u1ECDn: <span id="cauldronTotalSel">0</span> m\xF3n</div>
+        <span class="buy" id="btnCauldronBrew" style="background:linear-gradient(90deg, #8a5cc0, #6a4a9a); color:#fff; border-color:#4a3070; padding:8px 20px;">Luy\u1EC7n Ho\xE1!</span>
+      </div>
+      
+      <!-- Overlay \u0110ang N\u1EA5u -->
+      <div id="cauldronBrewingOverlay" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); z-index:30; flex-direction:column; justify-content:center; align-items:center; border-radius:8px; color:#fff;">
+        <div style="width:64px; height:64px; margin-bottom:20px; filter:drop-shadow(0 0 10px #b48ae0); animation: gachaShake 0.4s infinite alternate;">
+          ${spriteSVG("witchCauldron", 64)}
+        </div>
+        <div id="cauldronBrewingText" style="font-weight:bold; font-size:14px; letter-spacing:1px; color:#ead9f7; text-shadow:0 2px 4px rgba(0,0,0,0.5);">N\u1ED3i \u0111ang s\xF4i s\xF9ng s\u1EE5c...</div>
+      </div>
+    </div>
+  `;
+  openModal("N\u1ED3i Luy\u1EC7n", bodyHTML);
+  const updateSum = () => {
+    const sum2 = Object.values(selected).reduce((a, b2) => a + b2, 0);
+    const totEl = $id("cauldronTotalSel");
+    if (totEl) totEl.textContent = sum2;
+  };
+  const listContainer = $id("cauldronItemsList");
+  if (listContainer) {
+    listContainer.addEventListener("click", (e2) => {
+      let btn = e2.target.closest(".c-add-btn");
+      if (btn) {
+        const key = btn.dataset.key;
+        const totalCount = ctx.S.bag[key] || 0;
+        const cur = selected[key] || 0;
+        if (cur < totalCount) selected[key] = cur + 1;
+        renderList();
+        updateSum();
+        return;
+      }
+      btn = e2.target.closest(".c-sub-btn");
+      if (btn) {
+        const key = btn.dataset.key;
+        const cur = selected[key] || 0;
+        if (cur > 0) {
+          selected[key] = cur - 1;
+          if (selected[key] === 0) delete selected[key];
+        }
+        renderList();
+        updateSum();
+        return;
+      }
+    });
+  }
+  renderList();
+  $id("btnCauldronBrew")?.addEventListener("click", async () => {
+    const sum2 = Object.values(selected).reduce((a, b2) => a + b2, 0);
+    if (sum2 < 2) return toast("C\u1EA7n \xEDt nh\u1EA5t 2 m\xF3n b\u1EA3o v\u1EADt \u0111\u1EC3 luy\u1EC7n ho\xE1!");
+    const selectedKeysArray = [];
+    for (const [k2, count2] of Object.entries(selected)) {
+      for (let i2 = 0; i2 < count2; i2++) selectedKeysArray.push(k2);
+    }
+    const overlay = $id("cauldronBrewingOverlay");
+    const txtEl = $id("cauldronBrewingText");
+    if (overlay) overlay.style.display = "flex";
+    if (txtEl) txtEl.textContent = "N\u1ED3i \u0111ang s\xF4i s\xF9ng s\u1EE5c...";
+    const result = await executeCauldronMerge(selectedKeysArray, (t2) => {
+      if (txtEl) txtEl.textContent = t2;
+    });
+    if (overlay) overlay.style.display = "none";
+    if (result) {
+      const showHTML = `
+        <div style="text-align:center; padding:10px;">
+          <div style="font-weight:bold; font-size:16px; color:#5a3f78; margin-bottom:15px;">K\u1EBFt qu\u1EA3 Luy\u1EC7n Ho\xE1!</div>
+          <div style="background:#fff; border:2px solid ${result.color}; border-radius:12px; padding:20px; box-shadow:0 0 20px ${result.color}80; display:inline-block; max-width:100%;">
+            <div style="font-size:12px; font-weight:bold; color:${result.color}; text-transform:uppercase; margin-bottom:10px;">${result.rarity}</div>
+            <div style="margin:10px auto; display:flex; justify-content:center;">${result.icon}</div>
+            <div style="font-size:18px; font-weight:bold; color:#3a2c22; margin:15px 0 8px;">${result.name}</div>
+            <div style="font-size:12px; color:#555; max-height:120px; overflow-y:auto; margin-bottom:10px;">${result.desc}</div>
+            <div style="font-size:11px; font-weight:bold; color:#a3763d;">\u0110\u1ECBnh gi\xE1: ${result.sell}G</div>
+          </div>
+          <div style="margin-top:20px;">
+            <span class="buy" id="btnCauldronDone" style="padding:8px 24px;">Tuy\u1EC7t v\u1EDDi!</span>
+          </div>
+        </div>
+      `;
+      openModal("K\u1EBFt Qu\u1EA3 Luy\u1EC7n Ho\xE1", showHTML);
+      $id("btnCauldronDone")?.addEventListener("click", () => {
+        Promise.resolve().then(() => (init_shop(), shop_exports)).then((m2) => m2.closeModal());
+      });
+    }
+  });
+}
 var GACHA_SPEC_PITY, GACHA_SUPER_PITY, GACHA_NORM_PRICE, GACHA_SPEC_PRICE;
 var init_gacha = __esm({
   "src/gacha.js"() {
@@ -5749,6 +6161,20 @@ var init_bet = __esm({
 });
 
 // src/shop.js
+var shop_exports = {};
+__export(shop_exports, {
+  bagSel: () => bagSel,
+  bagSellMode: () => bagSellMode,
+  bagTab: () => bagTab,
+  closeModal: () => closeModal,
+  gachaSortMode: () => gachaSortMode,
+  initShop: () => initShop,
+  openAchivModal: () => openAchivModal,
+  openModal: () => openModal,
+  openPanel: () => openPanel,
+  openSpriteViewerModal: () => openSpriteViewerModal,
+  shopTab: () => shopTab
+});
 function openModal(title, bodyHTML, keepBetTable) {
   if (!keepBetTable && cashOut) cashOut();
   $id("mtitle-text").textContent = title;
@@ -7438,7 +7864,19 @@ function renderWitch() {
   const el = $id("witch");
   const active = ctx.S.witch && ctx.S.witch.leaveAt > now() && ctx.S.passes.water;
   el.classList.toggle("show", !!active);
-  if (active && !el.innerHTML) el.innerHTML = `<span class="wtag">\u2726 \u0110\u01A1n h\xE0ng</span><span class="wbody">${petSVG("witchBlob", 48)}</span>`;
+  if (active && !el.innerHTML) {
+    el.innerHTML = `
+      <div style="display: flex; align-items: flex-end; gap: 8px; justify-content: center;">
+        <div class="witch-cauldron-sprite" title="N\u1ED3i Ph\xF9 Thu\u1EF7 - Gh\xE9p \u0110\u1ED3 Gacha">
+          ${spriteSVG("witchCauldron", 44)}
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <span class="wtag">\u2726 \u0110\u01A1n h\xE0ng</span>
+          <span class="wbody">${petSVG("witchBlob", 48)}</span>
+        </div>
+      </div>
+    `;
+  }
   if (!active) el.innerHTML = "";
 }
 function setTakeoutNote(val) {
@@ -7548,6 +7986,7 @@ function toast(msg) {
 }
 function initWitch() {
   $id("witch").addEventListener("click", (e2) => {
+    if (e2.target.closest(".witch-cauldron-sprite")) return Promise.resolve().then(() => (init_gacha(), gacha_exports)).then((m2) => m2.openCauldronModal());
     if (e2.target.closest(".wtag")) return openWitchDlg();
     const el = $id("witch");
     el.querySelector(".pbubble")?.remove();
@@ -53908,6 +54347,7 @@ __export(all_exports, {
   esc: () => esc,
   eventFresh: () => eventFresh,
   eventPending: () => eventPending,
+  executeCauldronMerge: () => executeCauldronMerge,
   executeGachaRoll: () => executeGachaRoll,
   executeSyncJoin: () => executeSyncJoin,
   extMenuBtn: () => extMenuBtn,
@@ -53923,6 +54363,7 @@ __export(all_exports, {
   gachaSortMode: () => gachaSortMode,
   gaitOf: () => gaitOf,
   gameDay: () => gameDay,
+  generateAICauldronMerge: () => generateAICauldronMerge,
   generateAIUniqueItemData: () => generateAIUniqueItemData,
   generateProcedural32x32Sprite: () => generateProcedural32x32Sprite,
   generateUniqueItem: () => generateUniqueItem,
@@ -53979,6 +54420,7 @@ __export(all_exports, {
   openBlackjackRoom: () => openBlackjackRoom,
   openBlackjackSolo: () => openBlackjackSolo,
   openBuyDlg: () => openBuyDlg,
+  openCauldronModal: () => openCauldronModal,
   openDungeonView: () => openDungeonView,
   openFleaMarket: () => openFleaMarket,
   openGachaModal: () => openGachaModal,
