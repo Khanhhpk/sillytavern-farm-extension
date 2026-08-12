@@ -26,8 +26,8 @@ function renderLixiUI() {
         <div class="mtitle"><span id="lixi-win-title" style="display:flex; align-items:center; gap:8px;">${All.spriteSVG('lixiIcon', 18)} Chợ Lì Xì</span><span class="grow"></span><div class="close-x" id="lixi-close">×</div></div>
         <div class="mbody" style="min-height: 200px; padding: 12px; display: flex; flex-direction: column; gap: 10px;">
             <div class="pager open" style="margin:0 auto; display:flex; position:static;">
-                <div class="ptab active" id="lixi-tab-list" style="cursor:pointer; flex:1; text-align:center;">Nhận Lì Xì</div>
-                <div class="ptab" id="lixi-tab-send" style="cursor:pointer; flex:1; text-align:center;">Phát Lì Xì</div>
+                <div class="ptab active" id="lixi-tab-list" style="cursor:pointer; flex:1; text-align:center; display:flex; align-items:center; justify-content:center; white-space:nowrap;">Nhận Lì Xì</div>
+                <div class="ptab" id="lixi-tab-send" style="cursor:pointer; flex:1; text-align:center; display:flex; align-items:center; justify-content:center; white-space:nowrap;">Phát Lì Xì</div>
             </div>
             <div id="lixi-body" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
                 <!-- Nội dung tab -->
@@ -131,13 +131,13 @@ function renderLixiSend() {
     const myCoins = ctx.S.coins || 0;
     
     body.innerHTML = `
-        <div class="field" style="padding:10px; display:flex; flex-direction:column; gap:8px;">
+        <div class="field" style="padding:10px; display:flex; flex-direction:column; gap:8px; color:#3a2c22;">
             <div style="font-size:12px; opacity:0.8;">Ví của bạn: <b>${myCoins.toLocaleString()}G</b></div>
             
             <label style="font-weight:bold; font-size:14px;">Tổng Vàng Lì xì:</label>
             <input type="number" id="lixi-inp-total" class="inp" style="width:100%; margin-bottom:12px;" placeholder="Ví dụ: 100000" min="1000">
             
-            <div class="buy" id="lixi-btn-send" style="text-align:center; border-color:#dd5548; box-shadow:0 3px 0 #a33528;">Phát Lì Xì Toàn Server</div>
+            <div class="buy" id="lixi-btn-send" style="text-align:center; border-color:#dd5548; box-shadow:0 3px 0 #a33528; color:#fffdf4;">Phát Lì Xì Toàn Server</div>
         </div>
     `;
     
