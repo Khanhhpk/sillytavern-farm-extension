@@ -138,6 +138,7 @@ Hệ thống Gacha này ưu tiên sự sáng tạo, giá trị sử dụng và t
 3. [Hiếm] (Bậc 2): Vật phẩm bắt đầu có "cơ chế hoạt động" riêng biệt. Có thể có ích, tác dụng thú vị, mang lại lợi ích rõ rệt nhưng sẽ có vài giới hạn nhỏ.
 4. [Sử thi] (Bậc 3): Đồ vật mang tính trọng trị (Giá trị cao). Có sức mạnh lớn, đa dụng, giống như sở hữu bậc kì tài. Tuy nhiên, để phát huy tối đa cần có sự tính toán của người chơi. Không quá lỗi game, nhưng có trong tay thì sẽ rất thích.
 5. [Huyền thoại] (Bậc 4): Vật phẩm độc nhất vô nhị, xứng danh phẩm chất của nó. Mang tới đủ thứ cho người dùng. Là một vật phẩm danh xứng với thực.
+6. [Thần cấp] (Bậc 5): Vật phẩm chí cao vô thượng, mang theo quyền năng thay đổi cốt truyện hoặc tạo ra những biến số khổng lồ. Vượt qua mọi rào cản thông thường, sở hữu vẻ đẹp, khí chất và sức mạnh tiệm cận thần linh.
 </Hệ thống Độ hiếm & Tiêu chuẩn Vật phẩm>
 
 ### HỆ TỌA ĐỘ LẤY MẪU BẮT BUỘC: VỰC ĐỀ TÀI VÀ VỰC LỐI CHƠI
@@ -153,6 +154,7 @@ BẠN BẮT BUỘC PHẢI THIẾT KẾ KỲ VẬT DỰA TRÊN SỰ KẾT HỢP C
 - Bậc 2 nghiêm cấm viết thành nâng cấp trang bị bình thường, kỹ năng tấn công đơn nhất, vật phẩm tiêu hao ngắn hạn hoặc chìa khóa cốt truyện chỉ phục vụ cho nhiệm vụ hiện tại.
 - Bậc 3 nghiêm cấm viết sáo rỗng thành "nắm giữ một phần pháp tắc của thế giới" nhưng lại không cho lối chơi cụ thể, cũng nghiêm cấm việc phong ấn hiệu quả cấp cao thành tương lai mới có thể sử dụng.
 - Bậc 4 nghiêm cấm viết thành vạn năng đơn thuần, toàn tri toàn năng không giới hạn, quyền bính trừu tượng không thể mô tả, cũng nghiêm cấm dùng lý do "thế giới quá yếu nên tạm thời không thể dùng" để làm giảm tính khả dụng hiện tại. Cũng nghiêm cấm viết thành sự nhồi nhét khái niệm thuần túy, không thể lý giải, không thể sử dụng, chỉ có thể triển khai trong tương lai, hoặc trực tiếp biến thành kết luận vạn năng tuyệt đối mà không có sự lựa chọn lối chơi.
+- Bậc 5 nghiêm cấm việc biến người chơi thành đấng sáng tạo tối cao không thể tương tác, nghiêm cấm việc xóa bỏ hoàn toàn gameplay chỉ bằng một nút bấm. Bậc 5 phải mang lại sức mạnh to lớn nhưng vẫn duy trì sự tương tác thú vị, một thứ "đồ chơi của các vị thần" hơn là một nút "Win Button" vô vị.
 
 ### KHUNG CHỐNG LỐI MÒN
 Cấp bậc (Vị giai) không quyết định vực đề tài. Bất kỳ vực đề tài nào cũng có thể xuất hiện ở bất kỳ vị giai nào, chỉ là thước đo ảnh hưởng khác nhau.
