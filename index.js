@@ -4693,7 +4693,13 @@ var init_prompt = __esm({
       "V\u1EF1c quang h\u1ECDc/\xE1nh s\xE1ng",
       "V\u1EF1c nguy\xEAn t\u1ED1/t\u1EF1 nhi\xEAn",
       "V\u1EF1c k\xEDch th\u01B0\u1EDBc/t\u1EC9 l\u1EC7",
-      "V\u1EF1c nh\u1EE5c d\u1EE5c/c\xE1m d\u1ED7"
+      "V\u1EF1c nh\u1EE5c d\u1EE5c/c\xE1m d\u1ED7",
+      "V\u1EF1c h\u01B0 v\xF4/s\u1EF1 v\u1EAFng m\u1EB7t",
+      "V\u1EF1c ng\xF4n ng\u1EEF/k\xFD hi\u1EC7u",
+      "V\u1EF1c \u0111a v\u0169 tr\u1EE5/kh\xF4ng gian song song",
+      "V\u1EF1c v\u0103n h\xF3a \u0111\u1EA1i ch\xFAng/meme",
+      "V\u1EF1c phim \u1EA3nh/anime",
+      "V\u1EF1c m\u1EA1ng x\xE3 h\u1ED9i/cyberculture"
     ];
     GAMEPLAY_DOMAINS = [
       "Thao t\xE1c ch\u1EE7 \u0111\u1ED9ng",
@@ -4745,7 +4751,11 @@ var init_prompt = __esm({
       "Vi\u1EBFt l\u1EA1i/Ch\u1EC9nh s\u1EEDa quy t\u1EAFc",
       "Ti\xEAn tri/\u0110\u1ECDc t\u01B0\u01A1ng lai",
       "X\xF3a s\u1ED5/T\u1ECBch thu",
-      "H\u1ED3i sinh/Kh\xF4i ph\u1EE5c m\u1ED1c th\u1EDDi gian"
+      "H\u1ED3i sinh/Kh\xF4i ph\u1EE5c m\u1ED1c th\u1EDDi gian",
+      "Thao t\xFAng th\u1EF1c t\u1EA1i",
+      "\u0110\u1ED3ng b\u1ED9 h\xF3a/Tr\xED tu\u1EC7 t\u1EADp th\u1EC3",
+      "Lan truy\u1EC1n/G\xE2y b\xE3o",
+      "Tham chi\u1EBFu ch\xE2m bi\u1EBFm/B\u1EAFt ch\u01B0\u1EDBc"
     ];
   }
 });
