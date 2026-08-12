@@ -54578,18 +54578,18 @@ async function renderLixiList() {
   const body = $id("lixi-body");
   body.innerHTML = '<div style="text-align:center; padding:20px;">\u0110ang t\u1EA3i danh s\xE1ch L\xEC x\xEC...</div>';
   try {
-    const q = query(collection(db, "red_envelopes"), orderBy("createdAt", "desc"));
+    const q = query(collection(db, "red_envelopes"), orderBy("createdAt", "desc"), limit(50));
     const snapshot = await getDocs(q);
     let html = "";
     let now2 = Date.now();
     for (const docSnap of snapshot.docs) {
       const data = docSnap.data();
       const id = docSnap.id;
-      const isExpired24h = now2 - data.createdAt > 864e5;
-      const isEmptyExpired = data.remainingAmount <= 0 && data.emptyAt && now2 - data.emptyAt > 36e5;
-      if (isExpired24h || isEmptyExpired) {
-        deleteDoc(doc(db, "red_envelopes", id)).catch((e2) => console.error(e2));
-        continue;
+      if (data.remainingAmount <= 0) {
+        if (data.emptyAt && now2 - data.emptyAt > 36e5) {
+          deleteDoc(doc(db, "red_envelopes", id)).catch((e2) => console.error(e2));
+          continue;
+        }
       }
       const isMine = data.senderId === ctx.S.playerId;
       const hasClaimed = data.claimedBy && data.claimedBy.includes(ctx.S.playerId);
