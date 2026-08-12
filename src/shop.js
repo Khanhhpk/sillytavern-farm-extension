@@ -111,6 +111,9 @@ export let bagTab = 'crop';
 export let bagSellMode = false, bagSel = {};              // Bán một chạm: chế độ tick chọn (mặc định chọn hết)
 export let gachaSortMode = 'default';
 export function openPanel(kind) {
+  if (kind === 'bank') {
+    return All.renderBankUI();
+  }
   if (kind === 'gacha') {
     return openGachaModal();
   }

@@ -93,6 +93,13 @@ export function loadState() {
   if (!ctx.S.raceForm) ctx.S.raceForm = {};
   if (!ctx.S.raceStats) ctx.S.raceStats = { plays: 0, staked: 0, won: 0, net: 0, best: 0 };
   if (ctx.S.race === undefined) ctx.S.race = null;
+  if (ctx.S.bankDeposit === undefined) ctx.S.bankDeposit = 0;
+  if (ctx.S.bankDepositTime === undefined) ctx.S.bankDepositTime = Date.now();
+  if (ctx.S.bankLoan === undefined) ctx.S.bankLoan = 0;
+  if (ctx.S.bankLoanTime === undefined) ctx.S.bankLoanTime = 0;
+  if (ctx.S.bankLockedDebt === undefined) ctx.S.bankLockedDebt = 0;
+  if (ctx.S.bankLastCollectionTime === undefined) ctx.S.bankLastCollectionTime = 0;
+  if (ctx.S.bankEmergencyLoan === undefined) ctx.S.bankEmergencyLoan = 0;
 
   Object.keys(ctx.S.uniques || {}).forEach(k => {
     const item = ctx.S.uniques[k];

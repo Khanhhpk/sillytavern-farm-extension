@@ -15,6 +15,8 @@ export const gameDay = () => Math.floor((now() - ctx.S.day0) / DAY_MS) + 1;
 export const weatherOf = d => WEATHERS[Math.floor(mulberry32(d * 7919)() * WEATHERS.length)];
 export const isRain = () => weatherOf(gameDay()) === 'Mưa nhỏ';
 export function settle() {
+  All.checkLoanStatus();
+  All.calculateInterest();
   if (CS.link && !eventFresh() && !eventPending) requestDayEvent();   // #17: sự kiện hết hạn là gieo lại ngay (tính giờ theo mốc neo)
   /* v0.8b: lịch ghé thăm của phù thuỷ tròn (cần vé vùng nước; đến giờ thì rời đi; lỡ 2 lượt thì bảo hiểm) */
   if (ctx.S.passes.water && ctx.S.witch) {
