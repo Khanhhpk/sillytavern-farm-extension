@@ -16,8 +16,7 @@ function renderLixiUI() {
     if (!win) {
         win = document.createElement('div');
         win.id = 'lixi-win';
-        win.className = 'modal-window';
-        win.style.display = 'none';
+        win.className = 'modal';
         win.style.zIndex = '9999';
         All.sh.appendChild(win);
     }
@@ -40,10 +39,10 @@ function renderLixiUI() {
         </div>
     `;
     
-    win.style.display = 'flex';
+    win.classList.add('open');
     
     All.$id('lixi-close').addEventListener('click', () => {
-        win.style.display = 'none';
+        win.classList.remove('open');
     });
     
     All.$id('lixi-tab-list').addEventListener('click', () => switchLixiTab('list'));
