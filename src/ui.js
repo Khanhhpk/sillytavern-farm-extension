@@ -346,9 +346,12 @@ fieldEl.addEventListener('touchend', e => {
 }
 
 export function showResetAnnouncement() {
+  console.log('[Farm Ext] Bảng thông báo Reset xuất hiện!');
   if (localStorage.getItem('farm_reset_announce_seen')) return;
+  if (ctx.win.querySelector('#farm-reset-modal')) return;
 
   const m = document.createElement('div');
+  m.id = 'farm-reset-modal';
   m.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:20px; box-sizing:border-box; color:#fff; text-align:center; font-family:sans-serif; transition: opacity 0.5s;';
   
   const box = document.createElement('div');

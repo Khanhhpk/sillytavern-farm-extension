@@ -3807,8 +3807,11 @@ function initUI() {
   }
 }
 function showResetAnnouncement() {
+  console.log("[Farm Ext] B\u1EA3ng th\xF4ng b\xE1o Reset xu\u1EA5t hi\u1EC7n!");
   if (localStorage.getItem("farm_reset_announce_seen")) return;
+  if (ctx.win.querySelector("#farm-reset-modal")) return;
   const m2 = document.createElement("div");
+  m2.id = "farm-reset-modal";
   m2.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:20px; box-sizing:border-box; color:#fff; text-align:center; font-family:sans-serif; transition: opacity 0.5s;";
   const box = document.createElement("div");
   box.style.cssText = "background:#222; border: 2px solid #555; border-radius:12px; padding:30px; max-width:400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); line-height:1.6;";
