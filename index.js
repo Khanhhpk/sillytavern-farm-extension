@@ -4690,7 +4690,10 @@ var init_prompt = __esm({
       "V\u1EF1c \u1EA3o \u1EA3nh/gi\u1EA5c m\u01A1",
       "V\u1EF1c logic/ngh\u1ECBch l\xFD",
       "V\u1EF1c v\u0103n h\u1ECDc/th\u01A1 ca",
-      "V\u1EF1c quang h\u1ECDc/\xE1nh s\xE1ng"
+      "V\u1EF1c quang h\u1ECDc/\xE1nh s\xE1ng",
+      "V\u1EF1c nguy\xEAn t\u1ED1/t\u1EF1 nhi\xEAn",
+      "V\u1EF1c k\xEDch th\u01B0\u1EDBc/t\u1EC9 l\u1EC7",
+      "V\u1EF1c nh\u1EE5c d\u1EE5c/c\xE1m d\u1ED7"
     ];
     GAMEPLAY_DOMAINS = [
       "Thao t\xE1c ch\u1EE7 \u0111\u1ED9ng",
@@ -4739,7 +4742,10 @@ var init_prompt = __esm({
       "Khi\xEAu kh\xEDch/Chuy\u1EC3n d\u1EDDi c\u1EEBu h\u1EADn",
       "Phong \u1EA5n/Giam c\u1EA7m",
       "C\u1ED9ng h\u01B0\u1EDFng/Li\xEAn k\u1EBFt m\u1EA1ng l\u01B0\u1EDBi",
-      "Vi\u1EBFt l\u1EA1i/Ch\u1EC9nh s\u1EEDa quy t\u1EAFc"
+      "Vi\u1EBFt l\u1EA1i/Ch\u1EC9nh s\u1EEDa quy t\u1EAFc",
+      "Ti\xEAn tri/\u0110\u1ECDc t\u01B0\u01A1ng lai",
+      "X\xF3a s\u1ED5/T\u1ECBch thu",
+      "H\u1ED3i sinh/Kh\xF4i ph\u1EE5c m\u1ED1c th\u1EDDi gian"
     ];
   }
 });
