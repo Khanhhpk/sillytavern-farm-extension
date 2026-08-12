@@ -564,6 +564,12 @@ let selectedTradeId = null;
 let selectedTradeMax = 0;
 
 export function uiSelectAdd(id, max) {
+    const totalDebt = (ctx.S.bankLoan || 0) + (ctx.S.bankLockedDebt || 0) + (ctx.S.bankEmergencyLoan || 0);
+    if (totalDebt > 0) {
+        All.toast(`Giao dịch bị chặn! Bạn đang nợ Ngân Hàng ${totalDebt.toLocaleString()}G. Vui lòng trả nợ trước!`);
+        return;
+    }
+    
     selectedTradeId = id;
     selectedTradeMax = max;
     All.$id('trade-popup-act').style.display = 'flex';
