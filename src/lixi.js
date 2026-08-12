@@ -18,7 +18,7 @@ function renderLixiUI() {
         win.id = 'lixi-win';
         win.className = 'modal';
         win.style.zIndex = '9999';
-        All.sh.appendChild(win);
+        All.$id('win').appendChild(win);
     }
     
     win.innerHTML = `
