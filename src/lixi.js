@@ -204,14 +204,15 @@ window['grabLixi'] = async function(lixiId) {
                 throw "Không thể tự giật lì xì của mình!";
             }
             
-            // Lấy ngẫu nhiên từ 3% đến 15% số tiền còn lại, hoặc lấy hết nếu còn ít
+            // Lấy ngẫu nhiên từ 3% đến 20% tổng số TIỀN GỐC
             let grabAmount = 0;
-            if (data.remainingAmount <= 50) {
+            const min = Math.max(1, Math.floor(data.totalAmount * 0.03));
+            const max = Math.max(min, Math.floor(data.totalAmount * 0.20));
+            grabAmount = Math.floor(Math.random() * (max - min + 1)) + min;
+            
+            // Không thể lấy nhiều hơn số tiền còn lại trong bao
+            if (grabAmount > data.remainingAmount) {
                 grabAmount = data.remainingAmount;
-            } else {
-                const min = Math.max(1, Math.floor(data.remainingAmount * 0.03));
-                const max = Math.max(min, Math.floor(data.remainingAmount * 0.15));
-                grabAmount = Math.floor(Math.random() * (max - min + 1)) + min;
             }
             
             grabAmount = Math.min(grabAmount, data.remainingAmount);

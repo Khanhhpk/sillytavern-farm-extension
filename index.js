@@ -54695,12 +54695,11 @@ var init_lixi = __esm({
             throw "Kh\xF4ng th\u1EC3 t\u1EF1 gi\u1EADt l\xEC x\xEC c\u1EE7a m\xECnh!";
           }
           let grabAmount = 0;
-          if (data.remainingAmount <= 50) {
+          const min = Math.max(1, Math.floor(data.totalAmount * 0.03));
+          const max = Math.max(min, Math.floor(data.totalAmount * 0.2));
+          grabAmount = Math.floor(Math.random() * (max - min + 1)) + min;
+          if (grabAmount > data.remainingAmount) {
             grabAmount = data.remainingAmount;
-          } else {
-            const min = Math.max(1, Math.floor(data.remainingAmount * 0.03));
-            const max = Math.max(min, Math.floor(data.remainingAmount * 0.15));
-            grabAmount = Math.floor(Math.random() * (max - min + 1)) + min;
           }
           grabAmount = Math.min(grabAmount, data.remainingAmount);
           const newRemaining = data.remainingAmount - grabAmount;
