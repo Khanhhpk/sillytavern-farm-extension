@@ -1057,11 +1057,12 @@ export async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   const spKey = `cauldron_${timestamp}_${randId}`;
   
   let color = '#9e9e9e';
-  if (resultData.rarity === 'Thần Cấp' || resultData.rarity === 'Thần cấp') color = '#ff1493'; // Deep Pink / Magenta
-  else if (resultData.rarity === 'Huyền thoại' || resultData.rarity === 'Huyền Thoại') color = '#ff8000';
-  else if (resultData.rarity === 'Sử thi') color = '#a335ee';
-  else if (resultData.rarity === 'Hiếm') color = '#4a90e2';
-  else if (resultData.rarity === 'Thường') color = '#b0bec5';
+  if (/Thần cấp/i.test(resultData.rarity)) { color = '#ff1493'; resultData.rarity = 'Thần cấp'; }
+  else if (/Huyền thoại/i.test(resultData.rarity)) { color = '#ff8000'; resultData.rarity = 'Huyền thoại'; }
+  else if (/Sử thi/i.test(resultData.rarity)) { color = '#a335ee'; resultData.rarity = 'Sử thi'; }
+  else if (/Hiếm/i.test(resultData.rarity)) { color = '#4a90e2'; resultData.rarity = 'Hiếm'; }
+  else if (/Thường/i.test(resultData.rarity)) { color = '#b0bec5'; resultData.rarity = 'Thường'; }
+  else { resultData.rarity = 'Rác'; }
 
   registerDynamicSprite(spKey, resultData.spriteMap);
   

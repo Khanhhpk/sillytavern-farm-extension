@@ -5736,11 +5736,24 @@ async function executeCauldronMerge(selectedKeys, updateLoadingText) {
   const key = `unique@${timestamp}_${randId}`;
   const spKey = `cauldron_${timestamp}_${randId}`;
   let color = "#9e9e9e";
-  if (resultData.rarity === "Th\u1EA7n C\u1EA5p" || resultData.rarity === "Th\u1EA7n c\u1EA5p") color = "#ff1493";
-  else if (resultData.rarity === "Huy\u1EC1n tho\u1EA1i" || resultData.rarity === "Huy\u1EC1n Tho\u1EA1i") color = "#ff8000";
-  else if (resultData.rarity === "S\u1EED thi") color = "#a335ee";
-  else if (resultData.rarity === "Hi\u1EBFm") color = "#4a90e2";
-  else if (resultData.rarity === "Th\u01B0\u1EDDng") color = "#b0bec5";
+  if (/Thần cấp/i.test(resultData.rarity)) {
+    color = "#ff1493";
+    resultData.rarity = "Th\u1EA7n c\u1EA5p";
+  } else if (/Huyền thoại/i.test(resultData.rarity)) {
+    color = "#ff8000";
+    resultData.rarity = "Huy\u1EC1n tho\u1EA1i";
+  } else if (/Sử thi/i.test(resultData.rarity)) {
+    color = "#a335ee";
+    resultData.rarity = "S\u1EED thi";
+  } else if (/Hiếm/i.test(resultData.rarity)) {
+    color = "#4a90e2";
+    resultData.rarity = "Hi\u1EBFm";
+  } else if (/Thường/i.test(resultData.rarity)) {
+    color = "#b0bec5";
+    resultData.rarity = "Th\u01B0\u1EDDng";
+  } else {
+    resultData.rarity = "R\xE1c";
+  }
   registerDynamicSprite(spKey, resultData.spriteMap);
   ctx.S.uniques[key] = {
     key,
