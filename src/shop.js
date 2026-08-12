@@ -241,7 +241,7 @@ export function openPanel(kind) {
     }
     if (bagTab === 'gacha') {
       const gachaKeys = Object.keys(ctx.S.bag || {}).filter(k => k.startsWith('unique@'));
-      const rarityVal = { 'Rác': 0, 'Thường': 1, 'Hiếm': 2, 'Sử thi': 3, 'Huyền thoại': 4 };
+      const rarityVal = { 'Rác': 0, 'Thường': 1, 'Hiếm': 2, 'Sử thi': 3, 'Huyền thoại': 4, 'Thần cấp': 5 };
       if (gachaSortMode === 'desc') {
         gachaKeys.sort((a, b) => {
           const rA = ctx.S.uniques?.[a]?.rarity || 'Thường';

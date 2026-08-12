@@ -2882,6 +2882,7 @@ var init_style = __esm({
     .gacha-item-card.rarity-Hi\u1EBFm { border-color: #4a90e2 !important; background: #f0f7ff !important; }
     .gacha-item-card.rarity-S\u1EED-thi { border-color: #a335ee !important; background: #faf0ff !important; }
     .gacha-item-card.rarity-Huy\u1EC1n-tho\u1EA1i { border-color: #ff8000 !important; background: #fff8f0 !important; box-shadow: 0 0 10px rgba(255,128,0,0.6) !important; }
+    .gacha-item-card.rarity-Th\u1EA7n-c\u1EA5p { border-color: #ff1493 !important; background: #fff0f5 !important; box-shadow: 0 0 15px rgba(255,20,147,0.8) !important; animation: popIn 1s infinite alternate; }
     /* Dungeon View */
     .dungeon-view { display: flex; flex: 1; width: 100%; background: #5f5870; z-index: 10; border-radius: 4px; padding: 10px; flex-direction: column; box-sizing: border-box; }
     .dg-arena { flex: 1; position: relative; border: 4px solid #3f3a50; border-radius: 8px; background: rgba(0,0,0,0.1); overflow: hidden; }
@@ -4804,10 +4805,10 @@ async function pMap(array, asyncFn, concurrency) {
 function generateProcedural32x32Sprite(rarity) {
   const map = [];
   const borderChar = "K";
-  const mainChar = rarity === "Huy\u1EC1n tho\u1EA1i" ? "C" : rarity === "S\u1EED thi" ? "V" : rarity === "Hi\u1EBFm" ? "B" : rarity === "Th\u01B0\u1EDDng" ? "G" : "D";
-  const subChar = rarity === "Huy\u1EC1n tho\u1EA1i" ? "Y" : rarity === "S\u1EED thi" ? "v" : rarity === "Hi\u1EBFm" ? "b" : rarity === "Th\u01B0\u1EDDng" ? "g" : "d";
+  const mainChar = rarity === "Th\u1EA7n c\u1EA5p" ? "S" : rarity === "Huy\u1EC1n tho\u1EA1i" ? "C" : rarity === "S\u1EED thi" ? "V" : rarity === "Hi\u1EBFm" ? "B" : rarity === "Th\u01B0\u1EDDng" ? "G" : "D";
+  const subChar = rarity === "Th\u1EA7n c\u1EA5p" ? "s" : rarity === "Huy\u1EC1n tho\u1EA1i" ? "Y" : rarity === "S\u1EED thi" ? "v" : rarity === "Hi\u1EBFm" ? "b" : rarity === "Th\u01B0\u1EDDng" ? "g" : "d";
   const highlightChar = "W";
-  const accentChar = rarity === "Huy\u1EC1n tho\u1EA1i" ? "R" : rarity === "S\u1EED thi" ? "F" : rarity === "Hi\u1EBFm" ? "E" : rarity === "Th\u01B0\u1EDDng" ? "L" : "D";
+  const accentChar = rarity === "Th\u1EA7n c\u1EA5p" ? "M" : rarity === "Huy\u1EC1n tho\u1EA1i" ? "R" : rarity === "S\u1EED thi" ? "F" : rarity === "Hi\u1EBFm" ? "E" : rarity === "Th\u01B0\u1EDDng" ? "L" : "D";
   const type = Math.floor(Math.random() * 4);
   for (let y2 = 0; y2 < 32; y2++) {
     let row = "";
@@ -4876,7 +4877,7 @@ N\u1EBFu th\u1EA5y ph\xF9 h\u1EE3p, h\xE3y thi\u1EBFt k\u1EBF k\u1EF3 v\u1EADt l
 3. V\u1EBC PIXEL: Khung pixel t\u1ED1i thi\u1EC3u l\xE0 32x32. B\u1EA1n c\xF3 th\u1EC3 m\u1EDF r\u1ED9ng k\xEDch th\u01B0\u1EDBc l\u1EDBn h\u01A1n (v\xED d\u1EE5 40x40, 48x48), nh\u01B0ng B\u1EAET BU\u1ED8C ph\u1EA3i l\xE0 l\u01B0\u1EDBi H\xCCNH VU\xD4NG n x n (s\u1ED1 d\xF2ng v\xE0 s\u1ED1 k\xFD t\u1EF1 m\u1ED7i d\xF2ng ph\u1EA3i b\u1EB1ng nhau).`;
     }
     const rarityGuidance = rarity === "Huy\u1EC1n tho\u1EA1i" ? "[B\u1EADc 4] V\u1EADt ph\u1EA9m \u0111\u1ED9c nh\u1EA5t v\xF4 nh\u1ECB, x\u1EE9ng danh ph\u1EA9m ch\u1EA5t c\u1EE7a n\xF3. Mang t\u1EDBi \u0111\u1EE7 th\u1EE9 cho ng\u01B0\u1EDDi d\xF9ng. L\xE0 m\u1ED9t v\u1EADt ph\u1EA9m danh x\u1EE9ng v\u1EDBi th\u1EF1c." : rarity === "S\u1EED thi" ? "[B\u1EADc 3] \u0110\u1ED3 v\u1EADt mang t\xEDnh tr\u1ECDng tr\u1ECB (Gi\xE1 tr\u1ECB cao). C\xF3 s\u1EE9c m\u1EA1nh l\u1EDBn, \u0111a d\u1EE5ng, gi\u1ED1ng nh\u01B0 s\u1EDF h\u1EEFu b\u1EADc k\xEC t\xE0i. Tuy nhi\xEAn, \u0111\u1EC3 ph\xE1t huy t\u1ED1i \u0111a c\u1EA7n c\xF3 s\u1EF1 t\xEDnh to\xE1n c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i. Kh\xF4ng qu\xE1 l\u1ED7i game, nh\u01B0ng c\xF3 trong tay th\xEC s\u1EBD r\u1EA5t th\xEDch." : rarity === "Hi\u1EBFm" ? "[B\u1EADc 2] V\u1EADt ph\u1EA9m b\u1EAFt \u0111\u1EA7u c\xF3 'c\u01A1 ch\u1EBF ho\u1EA1t \u0111\u1ED9ng' ri\xEAng bi\u1EC7t. C\xF3 th\u1EC3 c\xF3 \xEDch, t\xE1c d\u1EE5ng th\xFA v\u1ECB, mang l\u1EA1i l\u1EE3i \xEDch r\xF5 r\u1EC7t nh\u01B0ng s\u1EBD c\xF3 v\xE0i gi\u1EDBi h\u1EA1n nh\u1ECF." : rarity === "Th\u01B0\u1EDDng" ? "[B\u1EADc 1] V\u1EADt ph\u1EA9m c\xF3 \xEDch ho\u1EB7c l\xE0 th\u01B0\u1EDDng ph\u1EA9m th\xFA v\u1ECB tuy c\xF4ng n\u0103ng \u0111\u01A1n gi\u1EA3n, nh\u01B0ng s\u1EDF h\u1EEFu c\u0169ng kh\xE1 th\xFA v\u1ECB, gi\u1EDBi h\u1EA1n r\xF5 r\xE0ng." : "[B\u1EADc 0] Nh\u1EEFng m\xF3n \u0111\u1ED3 k\u1EF3 c\u1EE5c, h\u1ECFng h\xF3c ho\u1EB7c c\xF3 c\xF4ng d\u1EE5ng c\u1EF1c k\u1EF3 v\xF4 th\u01B0\u1EDFng v\xF4 ph\u1EA1t. Ch\xFAng t\u1ED3n t\u1EA1i ch\u1EE7 y\u1EBFu \u0111\u1EC3 g\xE2y c\u01B0\u1EDDi, t\u1EA1o t\xECnh hu\u1ED1ng tr\u1EDB tr\xEAu trong t\u01B0\u01A1ng t\xE1c \u0111\u1EDDi th\u01B0\u1EDDng.";
-    const basePrice = rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "S\u1EED thi" ? 8e3 : rarity === "Hi\u1EBFm" ? 2500 : rarity === "Th\u01B0\u1EDDng" ? 500 : 100;
+    const basePrice = rarity === "Th\u1EA7n c\u1EA5p" ? 1e5 : rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "S\u1EED thi" ? 8e3 : rarity === "Hi\u1EBFm" ? 2500 : rarity === "Th\u01B0\u1EDDng" ? 500 : 100;
     const sysPrompt = `B\u1EA1n l\xE0 m\u1ED9t AI thi\u1EBFt k\u1EBF "K\u1EF3 v\u1EADt d\u1ECB gi\u1EDBi" (Otherworldly Artifact) v\xE0 chuy\xEAn gia Pixel Art (n x n, t\u1ED1i thi\u1EC3u 32x32).
 H\xE3y s\xE1ng t\u1EA1o 1 K\u1EF2 V\u1EACT \u0110\u1ED8C NH\u1EA4T ph\u1EA9m ch\u1EA5t [${rarity}].
 ${contextStr}
@@ -4946,7 +4947,7 @@ Sau khi \u0111\xF3ng th\u1EBB </thinking>, ch\u1EC9 xu\u1EA5t \u0111\xFAng 1 kh\
         }
         o2.spriteMap = fixedMap;
         if (typeof o2.price !== "number") {
-          o2.price = rarity === "S\u1EED thi" ? 8e3 : rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "Hi\u1EBFm" ? 2500 : rarity === "Th\u01B0\u1EDDng" ? 500 : 100;
+          o2.price = rarity === "Th\u1EA7n c\u1EA5p" ? o2.price || 1e5 : rarity === "S\u1EED thi" ? 8e3 : rarity === "Huy\u1EC1n tho\u1EA1i" ? 2e4 : rarity === "Hi\u1EBFm" ? 2500 : rarity === "Th\u01B0\u1EDDng" ? 500 : 100;
         }
         return o2;
       }
@@ -5596,7 +5597,7 @@ ${it2.spriteMap.join("\n")}`;
     }).join("\n\n");
     const totalValue = itemsData.reduce((sum2, it2) => sum2 + (it2.sell || 0), 0);
     const maxVal = totalValue * 2;
-    const maxValStr = isGodTier ? "Kh\xF4ng gi\u1EDBi h\u1EA1n, h\xE3y \u0111\u1ECBnh gi\xE1 m\u1ED9t con s\u1ED1 kh\u1ED5ng l\u1ED3 (VD: 99999, 50000, v.v...)" : `(T\u1ED1i \u0111a tuy\u1EC7t \u0111\u1ED1i: ${maxVal}G)`;
+    const maxValStr = isGodTier ? `Ch\xEDnh x\xE1c B\u1EB0NG ${totalValue * 5}G (Kh\xF4ng th\xEAm b\u1EDBt)` : `(T\u1ED1i \u0111a tuy\u1EC7t \u0111\u1ED1i: ${maxVal}G)`;
     let resultInstruction = "";
     if (isGodTier) {
       resultInstruction = `[K\u1EBET QU\u1EA2 B\u1EAET BU\u1ED8C]: TH\u1EA6N C\u1EA4P (GOD TIER). Luy\u1EC7n ho\xE1 \u0111\xE3 t\u1EA1o ra m\u1ED9t K\u1EF2 T\xCDCH! M\xF3n \u0111\u1ED3 sinh ra mang quy\u1EC1n n\u0103ng tuy\u1EC7t \u0111\u1ED1i v\u01B0\u1EE3t ngo\xE0i m\u1ECDi gi\u1EDBi h\u1EA1n th\xF4ng th\u01B0\u1EDDng, v\xF4 c\xF9ng b\xE1 \u0111\u1EA1o, r\u1EF1c r\u1EE1 v\xE0 \u0111\u1ED9c nh\u1EA5t v\xF4 nh\u1ECB. Gi\xE1 tr\u1ECB kh\xF4ng gi\u1EDBi h\u1EA1n. \u0110\u1ED3 m\u1EDBi B\u1EAET BU\u1ED8C ph\u1EA3i mang \u0111\u1ED9 hi\u1EBFm [Th\u1EA7n C\u1EA5p].`;
@@ -6404,7 +6405,7 @@ function openPanel(kind) {
     }
     if (bagTab === "gacha") {
       const gachaKeys = Object.keys(ctx.S.bag || {}).filter((k2) => k2.startsWith("unique@"));
-      const rarityVal = { "R\xE1c": 0, "Th\u01B0\u1EDDng": 1, "Hi\u1EBFm": 2, "S\u1EED thi": 3, "Huy\u1EC1n tho\u1EA1i": 4 };
+      const rarityVal = { "R\xE1c": 0, "Th\u01B0\u1EDDng": 1, "Hi\u1EBFm": 2, "S\u1EED thi": 3, "Huy\u1EC1n tho\u1EA1i": 4, "Th\u1EA7n c\u1EA5p": 5 };
       if (gachaSortMode === "desc") {
         gachaKeys.sort((a, b2) => {
           const rA = ctx.S.uniques?.[a]?.rarity || "Th\u01B0\u1EDDng";
@@ -50095,7 +50096,7 @@ function renderFleaItems() {
   const searchStr = $id("inp-flea-search") ? $id("inp-flea-search").value.toLowerCase().trim() : "";
   const typeFilter = $id("sel-flea-type") ? $id("sel-flea-type").value : "all";
   const sortVal = $id("sel-flea-sort") ? $id("sel-flea-sort").value : "default";
-  const rarityMap = { "Th\u1EA7n tho\u1EA1i": 6, "Huy\u1EC1n tho\u1EA1i": 5, "S\u1EED thi": 4, "Hi\u1EBFm": 3, "Th\u01B0\u1EDDng": 2, "R\xE1c": 1 };
+  const rarityMap = { "Th\u1EA7n c\u1EA5p": 6, "Th\u1EA7n tho\u1EA1i": 6, "Huy\u1EC1n tho\u1EA1i": 5, "S\u1EED thi": 4, "Hi\u1EBFm": 3, "Th\u01B0\u1EDDng": 2, "R\xE1c": 1 };
   const escapeHtml = (str) => (str || "").toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   let itemsArr = Object.entries(currentFleaItems).map(([id, data]) => {
     const itemName = getFleaItemName(data.itemId, data.itemData);

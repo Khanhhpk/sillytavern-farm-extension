@@ -46,10 +46,10 @@ async function pMap(array, asyncFn, concurrency) {
 export function generateProcedural32x32Sprite(rarity) {
   const map = [];
   const borderChar = 'K';
-  const mainChar = rarity === 'Huyền thoại' ? 'C' : rarity === 'Sử thi' ? 'V' : rarity === 'Hiếm' ? 'B' : rarity === 'Thường' ? 'G' : 'D';
-  const subChar = rarity === 'Huyền thoại' ? 'Y' : rarity === 'Sử thi' ? 'v' : rarity === 'Hiếm' ? 'b' : rarity === 'Thường' ? 'g' : 'd';
+  const mainChar = rarity === 'Thần cấp' ? 'S' : rarity === 'Huyền thoại' ? 'C' : rarity === 'Sử thi' ? 'V' : rarity === 'Hiếm' ? 'B' : rarity === 'Thường' ? 'G' : 'D';
+  const subChar = rarity === 'Thần cấp' ? 's' : rarity === 'Huyền thoại' ? 'Y' : rarity === 'Sử thi' ? 'v' : rarity === 'Hiếm' ? 'b' : rarity === 'Thường' ? 'g' : 'd';
   const highlightChar = 'W';
-  const accentChar = rarity === 'Huyền thoại' ? 'R' : rarity === 'Sử thi' ? 'F' : rarity === 'Hiếm' ? 'E' : rarity === 'Thường' ? 'L' : 'D';
+  const accentChar = rarity === 'Thần cấp' ? 'M' : rarity === 'Huyền thoại' ? 'R' : rarity === 'Sử thi' ? 'F' : rarity === 'Hiếm' ? 'E' : rarity === 'Thường' ? 'L' : 'D';
 
   const type = Math.floor(Math.random() * 4); 
 
@@ -138,7 +138,7 @@ Nếu thấy phù hợp, hãy thiết kế kỳ vật liên kết với bối c�
       ? "[Bậc 1] Vật phẩm có ích hoặc là thường phẩm thú vị tuy công năng đơn giản, nhưng sở hữu cũng khá thú vị, giới hạn rõ ràng."
       : "[Bậc 0] Những món đồ kỳ cục, hỏng hóc hoặc có công dụng cực kỳ vô thưởng vô phạt. Chúng tồn tại chủ yếu để gây cười, tạo tình huống trớ trêu trong tương tác đời thường.";
 
-    const basePrice = rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : rarity === 'Hiếm' ? 2500 : rarity === 'Thường' ? 500 : 100;
+    const basePrice = rarity === 'Thần cấp' ? 100000 : rarity === 'Huyền thoại' ? 20000 : rarity === 'Sử thi' ? 8000 : rarity === 'Hiếm' ? 2500 : rarity === 'Thường' ? 500 : 100;
 
     const sysPrompt = `Bạn là một AI thiết kế "Kỳ vật dị giới" (Otherworldly Artifact) và chuyên gia Pixel Art (n x n, tối thiểu 32x32).
 Hãy sáng tạo 1 KỲ VẬT ĐỘC NHẤT phẩm chất [${rarity}].
@@ -218,7 +218,7 @@ Sau khi đóng thẻ </thinking>, chỉ xuất đúng 1 khối mã \`\`\`json ch
         
         // Đảm bảo có giá để hiển thị, nếu AI thiếu thì fallback
         if (typeof o.price !== 'number') {
-           o.price = rarity === 'Sử thi' ? 8000 : (rarity === 'Huyền thoại' ? 20000 : (rarity === 'Hiếm' ? 2500 : (rarity === 'Thường' ? 500 : 100)));
+           o.price = rarity === 'Thần cấp' ? (o.price || 100000) : (rarity === 'Sử thi' ? 8000 : (rarity === 'Huyền thoại' ? 20000 : (rarity === 'Hiếm' ? 2500 : (rarity === 'Thường' ? 500 : 100))));
         }
         return o;
       }
@@ -898,7 +898,7 @@ ${worldbook ? worldbook : '(Không có dữ liệu thế giới cụ thể)'}`;
     }).join('\n\n');
     const totalValue = itemsData.reduce((sum, it) => sum + (it.sell || 0), 0);
     const maxVal = totalValue * 2;
-    const maxValStr = isGodTier ? "Không giới hạn, hãy định giá một con số khổng lồ (VD: 99999, 50000, v.v...)" : `(Tối đa tuyệt đối: ${maxVal}G)`;
+    const maxValStr = isGodTier ? `Chính xác BẰNG ${totalValue * 5}G (Không thêm bớt)` : `(Tối đa tuyệt đối: ${maxVal}G)`;
 
     let resultInstruction = '';
     if (isGodTier) {
