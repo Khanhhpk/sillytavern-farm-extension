@@ -54519,7 +54519,7 @@ function renderLixiUI() {
     win.className = "modal-window";
     win.style.display = "none";
     win.style.zIndex = "9999";
-    document.body.appendChild(win);
+    sh.appendChild(win);
   }
   win.innerHTML = `
         <div class="modal-content" style="max-width:400px; padding:0; background:#fffdf4; border: 2px solid #dc2626; border-radius:12px; overflow:hidden;">
