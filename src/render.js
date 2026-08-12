@@ -134,6 +134,10 @@ export function renderPlots() {
             ${spriteSVG('achivStar', 48)}
             <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Thành Tựu</div>
           </div>
+          <div class="explore-slot" id="eslot-lixi" style="border-color: #dc2626; box-shadow: 0 4px 0 #991b1b, inset 0 0 0 3px rgba(220,38,38,0.4);">
+            <div style="font-size:48px; line-height:48px; margin-top:8px;">🧧</div>
+            <div class="feature-name" style="color: #fef08a; text-shadow: 0 1px 2px #000;">Lì Xì</div>
+          </div>
           <div class="explore-slot" id="eslot-casino" style="border-color: #ffd94d; box-shadow: 0 4px 0 #b08a5c, inset 0 0 0 3px rgba(255,217,77,0.4);">
             <div style="width:64px;height:64px;position:relative;">${spriteSVG('casinoNeonGoldMap', 64)}</div>
             <div class="feature-name" style="color: #ffd94d; text-shadow: 0 1px 2px #000;">Casino</div>
@@ -162,6 +166,10 @@ export function renderPlots() {
             const ui = All.$id('trade-win');
             if (ui) ui.classList.add('open');
             All.openFleaMarket();
+        });
+        const lixiBtn = All.$id('eslot-lixi');
+        if (lixiBtn) lixiBtn.addEventListener('click', () => {
+            All.openLixiModal();
         });
         const bBtn = All.$id('eslot-bank');
         if (bBtn) bBtn.addEventListener('click', () => All.openPanel('bank'));

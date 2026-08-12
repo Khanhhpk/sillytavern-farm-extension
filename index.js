@@ -7385,6 +7385,10 @@ function renderPlots() {
             ${spriteSVG("achivStar", 48)}
             <div class="feature-name" style="color: #fcd34d; text-shadow: 0 1px 2px #000;">Th\xE0nh T\u1EF1u</div>
           </div>
+          <div class="explore-slot" id="eslot-lixi" style="border-color: #dc2626; box-shadow: 0 4px 0 #991b1b, inset 0 0 0 3px rgba(220,38,38,0.4);">
+            <div style="font-size:48px; line-height:48px; margin-top:8px;">\u{1F9E7}</div>
+            <div class="feature-name" style="color: #fef08a; text-shadow: 0 1px 2px #000;">L\xEC X\xEC</div>
+          </div>
           <div class="explore-slot" id="eslot-casino" style="border-color: #ffd94d; box-shadow: 0 4px 0 #b08a5c, inset 0 0 0 3px rgba(255,217,77,0.4);">
             <div style="width:64px;height:64px;position:relative;">${spriteSVG("casinoNeonGoldMap", 64)}</div>
             <div class="feature-name" style="color: #ffd94d; text-shadow: 0 1px 2px #000;">Casino</div>
@@ -7413,6 +7417,10 @@ function renderPlots() {
           const ui = $id("trade-win");
           if (ui) ui.classList.add("open");
           openFleaMarket();
+        });
+        const lixiBtn = $id("eslot-lixi");
+        if (lixiBtn) lixiBtn.addEventListener("click", () => {
+          openLixiModal();
         });
         const bBtn = $id("eslot-bank");
         if (bBtn) bBtn.addEventListener("click", () => openPanel("bank"));
@@ -54495,6 +54503,223 @@ var init_bank = __esm({
   }
 });
 
+// src/lixi.js
+async function openLixiModal() {
+  if (!db) {
+    toast("H\u1EC7 th\u1ED1ng L\xEC X\xEC y\xEAu c\u1EA7u c\u1EA5u h\xECnh Firebase. Vui l\xF2ng th\xEAm config v\xE0o .env");
+    return;
+  }
+  renderLixiUI();
+}
+function renderLixiUI() {
+  let win = $id("lixi-win");
+  if (!win) {
+    win = document.createElement("div");
+    win.id = "lixi-win";
+    win.className = "modal-window";
+    win.style.display = "none";
+    win.style.zIndex = "9999";
+    document.body.appendChild(win);
+  }
+  win.innerHTML = `
+        <div class="modal-content" style="max-width:400px; padding:0; background:#fffdf4; border: 2px solid #dc2626; border-radius:12px; overflow:hidden;">
+            <div style="background:#dc2626; color:#fff; padding:12px 16px; font-size:18px; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
+                <span>\u{1F9E7} Ch\u1EE3 L\xEC X\xEC</span>
+                <span id="lixi-close" style="cursor:pointer; font-size:20px;">&times;</span>
+            </div>
+            <div style="padding:16px;">
+                <div class="tabs" style="display:flex; gap:8px; margin-bottom:16px;">
+                    <div class="tab active" id="lixi-tab-list" style="flex:1; text-align:center; padding:8px; background:#dc2626; color:#fff; cursor:pointer; border-radius:4px;">Nh\u1EADn L\xEC X\xEC</div>
+                    <div class="tab" id="lixi-tab-send" style="flex:1; text-align:center; padding:8px; background:#e5e7eb; color:#374151; cursor:pointer; border-radius:4px;">Ph\xE1t L\xEC X\xEC</div>
+                </div>
+                <div id="lixi-body" style="min-height:200px; max-height:400px; overflow-y:auto;">
+                    <!-- N\u1ED9i dung tab -->
+                </div>
+            </div>
+        </div>
+    `;
+  win.style.display = "flex";
+  $id("lixi-close").addEventListener("click", () => {
+    win.style.display = "none";
+  });
+  $id("lixi-tab-list").addEventListener("click", () => switchLixiTab("list"));
+  $id("lixi-tab-send").addEventListener("click", () => switchLixiTab("send"));
+  switchLixiTab("list");
+}
+function switchLixiTab(tab) {
+  currentLixiTab = tab;
+  const listTab = $id("lixi-tab-list");
+  const sendTab = $id("lixi-tab-send");
+  if (tab === "list") {
+    listTab.style.background = "#dc2626";
+    listTab.style.color = "#fff";
+    sendTab.style.background = "#e5e7eb";
+    sendTab.style.color = "#374151";
+    renderLixiList();
+  } else {
+    sendTab.style.background = "#dc2626";
+    sendTab.style.color = "#fff";
+    listTab.style.background = "#e5e7eb";
+    listTab.style.color = "#374151";
+    renderLixiSend();
+  }
+}
+async function renderLixiList() {
+  const body = $id("lixi-body");
+  body.innerHTML = '<div style="text-align:center; padding:20px;">\u0110ang t\u1EA3i danh s\xE1ch L\xEC x\xEC...</div>';
+  try {
+    const q = query(collection(db, "red_envelopes"), orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
+    let html = "";
+    let now2 = Date.now();
+    for (const docSnap of snapshot.docs) {
+      const data = docSnap.data();
+      const id = docSnap.id;
+      if (data.remainingAmount <= 0) {
+        if (data.emptyAt && now2 - data.emptyAt > 36e5) {
+          deleteDoc(doc(db, "red_envelopes", id)).catch((e2) => console.error(e2));
+          continue;
+        }
+      }
+      const isMine = data.senderId === ctx.S.playerId;
+      const hasClaimed = data.claimedBy && data.claimedBy.includes(ctx.S.playerId);
+      const isEmpty2 = data.remainingAmount <= 0;
+      let statusHTML = "";
+      if (isEmpty2) {
+        statusHTML = '<span style="color:#6b7280; font-weight:bold;">\u0110\xE3 c\u1EA1n</span>';
+      } else if (hasClaimed) {
+        statusHTML = '<span style="color:#10b981; font-weight:bold;">\u0110\xE3 nh\u1EADn</span>';
+      } else if (isMine) {
+        statusHTML = `<button class="buy plain" disabled>C\u1EE7a b\u1EA1n</button>`;
+      } else {
+        statusHTML = `<button class="buy" style="background:#dc2626; color:#fff;" onclick="window.grabLixi('${id}')">Gi\u1EADt</button>`;
+      }
+      html += `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#fee2e2; padding:12px; margin-bottom:8px; border-radius:8px; border:1px solid #fca5a5;">
+                    <div>
+                        <div style="font-weight:bold; color:#991b1b; font-size:16px;">${data.senderName}</div>
+                        <div style="font-size:12px; color:#b91c1c;">C\xF2n l\u1EA1i: ${data.remainingAmount.toLocaleString()}G</div>
+                    </div>
+                    <div>
+                        ${statusHTML}
+                    </div>
+                </div>
+            `;
+    }
+    if (!html) html = '<div style="text-align:center; padding:20px; color:#6b7280;">Hi\u1EC7n ch\u01B0a c\xF3 bao L\xEC x\xEC n\xE0o!</div>';
+    body.innerHTML = html;
+  } catch (e2) {
+    console.error(e2);
+    body.innerHTML = '<div style="text-align:center; padding:20px; color:#dc2626;">L\u1ED7i t\u1EA3i d\u1EEF li\u1EC7u.</div>';
+  }
+}
+function renderLixiSend() {
+  const body = $id("lixi-body");
+  const myCoins = ctx.S.coins || 0;
+  body.innerHTML = `
+        <div style="padding:10px;">
+            <div style="margin-bottom:12px;">V\xED c\u1EE7a b\u1EA1n: <b>${myCoins.toLocaleString()}G</b></div>
+            
+            <label style="display:block; margin-bottom:4px; font-weight:bold;">T\u1ED5ng V\xE0ng L\xEC x\xEC:</label>
+            <input type="number" id="lixi-inp-total" class="num-input" style="width:100%; margin-bottom:12px;" placeholder="V\xED d\u1EE5: 100000" min="1000">
+            
+            <button class="buy" id="lixi-btn-send" style="width:100%; background:#dc2626; color:#fff; font-size:16px; padding:10px;">Ph\xE1t L\xEC X\xEC To\xE0n Server</button>
+        </div>
+    `;
+  $id("lixi-btn-send").addEventListener("click", async () => {
+    const total = parseInt($id("lixi-inp-total").value);
+    if (isNaN(total) || total <= 0) return toast("S\u1ED1 ti\u1EC1n kh\xF4ng h\u1EE3p l\u1EC7!");
+    if (total < 100) return toast("T\u1ED1i thi\u1EC3u ph\u1EA3i ph\xE1t 100G!");
+    if (total > ctx.S.coins) return toast("B\u1EA1n kh\xF4ng \u0111\u1EE7 ti\u1EC1n!");
+    ctx.S.coins -= total;
+    save();
+    renderStatus();
+    toast("\u0110ang t\u1EA1o L\xEC x\xEC...");
+    try {
+      await addDoc(collection(db, "red_envelopes"), {
+        senderId: ctx.S.playerId,
+        senderName: ctx.S.name || "Ng\u01B0\u1EDDi \u1EA9n danh",
+        totalAmount: total,
+        remainingAmount: total,
+        claimedBy: [],
+        createdAt: Date.now(),
+        emptyAt: null
+      });
+      toast("\u0110\xE3 ph\xE1t L\xEC x\xEC th\xE0nh c\xF4ng!");
+      switchLixiTab("list");
+    } catch (e2) {
+      console.error(e2);
+      toast("L\u1ED7i t\u1EA1o l\xEC x\xEC!");
+      ctx.S.coins += total;
+      save();
+      renderStatus();
+    }
+  });
+}
+var currentLixiTab;
+var init_lixi = __esm({
+  "src/lixi.js"() {
+    init_store();
+    init_all();
+    init_firebase();
+    init_index_esm7();
+    currentLixiTab = "list";
+    window.grabLixi = async function(lixiId) {
+      if (!db || !ctx.S.playerId) return;
+      const docRef = doc(db, "red_envelopes", lixiId);
+      toast("\u0110ang gi\u1EADt...");
+      try {
+        const result = await runTransaction(db, async (transaction) => {
+          const lixiDoc = await transaction.get(docRef);
+          if (!lixiDoc.exists()) {
+            throw "L\xEC x\xEC kh\xF4ng t\u1ED3n t\u1EA1i!";
+          }
+          const data = lixiDoc.data();
+          if (data.remainingAmount <= 0) {
+            throw "L\xEC x\xEC \u0111\xE3 c\u1EA1n ti\u1EC1n!";
+          }
+          if (data.claimedBy && data.claimedBy.includes(ctx.S.playerId)) {
+            throw "B\u1EA1n \u0111\xE3 nh\u1EADn l\xEC x\xEC n\xE0y r\u1ED3i!";
+          }
+          if (data.senderId === ctx.S.playerId) {
+            throw "Kh\xF4ng th\u1EC3 t\u1EF1 gi\u1EADt l\xEC x\xEC c\u1EE7a m\xECnh!";
+          }
+          let grabAmount = 0;
+          if (data.remainingAmount <= 50) {
+            grabAmount = data.remainingAmount;
+          } else {
+            const min = Math.max(1, Math.floor(data.remainingAmount * 0.1));
+            const max = Math.floor(data.remainingAmount * 0.5);
+            grabAmount = Math.floor(Math.random() * (max - min + 1)) + min;
+          }
+          grabAmount = Math.min(grabAmount, data.remainingAmount);
+          const newRemaining = data.remainingAmount - grabAmount;
+          const newClaimedBy = data.claimedBy || [];
+          newClaimedBy.push(ctx.S.playerId);
+          let updateData = {
+            remainingAmount: newRemaining,
+            claimedBy: newClaimedBy
+          };
+          if (newRemaining <= 0 && !data.emptyAt) {
+            updateData.emptyAt = Date.now();
+          }
+          transaction.update(docRef, updateData);
+          return grabAmount;
+        });
+        ctx.S.coins = (ctx.S.coins || 0) + result;
+        save();
+        renderStatus();
+        toast(`Gi\u1EADt th\xE0nh c\xF4ng ${result.toLocaleString()}G!`);
+        renderLixiList();
+      } catch (e2) {
+        console.error("Lixi Error:", e2);
+        toast(typeof e2 === "string" ? e2 : "Gi\u1EADt L\xEC x\xEC th\u1EA5t b\u1EA1i!");
+        renderLixiList();
+      }
+    };
+  }
+});
+
 // src/all.js
 var all_exports = {};
 __export(all_exports, {
@@ -54658,6 +54883,7 @@ __export(all_exports, {
   openHeroMode: () => openHeroMode,
   openHeroPanel: () => openHeroPanel,
   openKitchenModal: () => openKitchenModal,
+  openLixiModal: () => openLixiModal,
   openModal: () => openModal,
   openPanel: () => openPanel,
   openPassDlg: () => openPassDlg,
@@ -54815,6 +55041,7 @@ var init_all = __esm({
     init_race();
     init_cooking();
     init_bank();
+    init_lixi();
   }
 });
 
