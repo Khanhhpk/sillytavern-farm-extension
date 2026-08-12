@@ -96,6 +96,22 @@ BẠN BẮT BUỘC PHẢI THIẾT KẾ KỲ VẬT DỰA TRÊN SỰ KẾT HỢP C
 - [VỰC ĐỀ TÀI BẮT BUỘC]: ${randomTheme}
 - [VỰC LỐI CHƠI BẮT BUỘC]: ${randomGameplay}
 
+### KHUNG CẤM KHU
+- Bậc 0 nghiêm cấm viết thành cường hóa chỉ số bình thường, kỹ năng bình thường, trang bị bình thường, đồ phế thải dùng một lần, hình dáng ban đầu cần nuôi dưỡng trưởng thành hoặc nguyên liệu "tạm thời chưa có tác dụng".
+- Bậc 1 nghiêm cấm việc chỉ thêm một chút chỉ số so với Bậc 0, cũng nghiêm cấm viết trực tiếp thành bá quyền khu vực, quy tắc cấp thế giới hoặc hệ thống khổng lồ vĩnh viễn.
+- Bậc 2 nghiêm cấm viết thành nâng cấp trang bị bình thường, kỹ năng tấn công đơn nhất, vật phẩm tiêu hao ngắn hạn hoặc chìa khóa cốt truyện chỉ phục vụ cho nhiệm vụ hiện tại.
+- Bậc 3 nghiêm cấm viết sáo rỗng thành "nắm giữ một phần pháp tắc của thế giới" nhưng lại không cho lối chơi cụ thể, cũng nghiêm cấm việc phong ấn hiệu quả cấp cao thành tương lai mới có thể sử dụng.
+- Bậc 4 nghiêm cấm viết thành vạn năng đơn thuần, toàn tri toàn năng không giới hạn, quyền bính trừu tượng không thể mô tả, cũng nghiêm cấm dùng lý do "thế giới quá yếu nên tạm thời không thể dùng" để làm giảm tính khả dụng hiện tại. Cũng nghiêm cấm viết thành sự nhồi nhét khái niệm thuần túy, không thể lý giải, không thể sử dụng, chỉ có thể triển khai trong tương lai, hoặc trực tiếp biến thành kết luận vạn năng tuyệt đối mà không có sự lựa chọn lối chơi.
+
+### KHUNG CHỐNG LỐI MÒN
+Cấp bậc (Vị giai) không quyết định vực đề tài. Bất kỳ vực đề tài nào cũng có thể xuất hiện ở bất kỳ vị giai nào, chỉ là thước đo ảnh hưởng khác nhau.
+Không được vì vị giai khá cao mà mặc định khởi tạo các kỳ vật loại nhân quả, vận mệnh, quy tắc, khái niệm, thời gian, không gian. Không được vì vị giai khá thấp mà mặc định khởi tạo vật phẩm bình thường, kỹ năng bình thường, vật phẩm tiêu hao bình thường hoặc đạo cụ nhỏ nhàm chán.
+
+### KHUNG BẢO ĐẢM
+Cấp bậc (Vị giai) kỳ vật không quyết định vực lối chơi. Bất kỳ vực lối chơi nào cũng có thể triển khai ở các vị giai khác nhau, chỉ là phạm vi thao tác, năng lực duy trì, độ sâu điều động và đối tượng ảnh hưởng khác nhau.
+Lối chơi cấp thấp chú trọng sự tức thời, tinh xảo, bám sát thực tế, phản sáo lộ (chống lại các motip rập khuôn). Lối chơi cấp trung chú trọng sự kết hợp, tư duy, tuyến đường, tái sử dụng. Lối chơi cấp cao chú trọng cấu trúc, hệ thống, trật tự, chi phối, siêu cường có quy củ.
+Bất kể vị giai cao hay thấp, đều bắt buộc phải mang lại cho {{user}} cảm giác lựa chọn rõ ràng và giá trị chơi lại.
+
 ### QUY TẮC ĐẦU RA KẾT QUẢ
 1. KHÔNG DÙNG THẺ ROLEPLAY: Xóa bỏ mọi quy tắc thẻ gập hay thanh trạng thái. Kết quả chỉ là một khối JSON duy nhất.
 2. DÙNG <thinking> ĐỂ LÊN Ý TƯỞNG: Bắt buộc sử dụng thẻ <thinking> để lên ý tưởng kết hợp [Vực đề tài] và [Vực lối chơi] đã được cấp, và thiết kế Cơ chế dựa trên Độ hiếm được yêu cầu. Đảm bảo mô tả sẽ viết cực kỳ súc tích.
