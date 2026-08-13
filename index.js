@@ -185,6 +185,30 @@ function sansSpriteForAction(action, step) {
     const phase2 = Math.floor(s2 % 10 / 2);
     return { src: _sp(`magic/magic_0${phase2 + 1}.png`), flip: false };
   }
+  if (action === "attack_updown") {
+    const phase2 = s2 % 10;
+    if (phase2 < 5) return { src: _sp(`attack_updown/attack_up_0${phase2 + 1}.png`), flip: false };
+    return { src: _sp(`attack_updown/attack_down_0${phase2 - 4}.png`), flip: false };
+  }
+  if (action === "attack_leftright") {
+    const phase2 = s2 % 6;
+    return { src: _sp(`attack_leftright/attack_left_0${phase2 + 1}.png`), flip: false };
+  }
+  if (action === "flashing_eye") {
+    const phase2 = s2 % 4;
+    return { src: _sp(`flashing_eye/flashing_eye_0${phase2 + 1}.png`), flip: false };
+  }
+  if (action === "shrug") {
+    const phase2 = s2 % 4;
+    return { src: _sp(`shrug/shrug_0${phase2 + 1}.png`), flip: false };
+  }
+  if (action === "gaster_charge") {
+    return { src: _sp(`gaster_blaster/blaster_left_close.png`), flip: false };
+  }
+  if (action === "gaster_fire") {
+    const phase2 = s2 % 3 + 1;
+    return { src: _sp(`gaster_blaster/blaster_left_fire_0${phase2}.png`), flip: false };
+  }
   return { src: SANS_SPRITES.idle, flip: false };
 }
 function sansSpriteFor(dx, dy, step) {
@@ -1933,11 +1957,11 @@ var init_graphics = __esm({
     })();
     _sp = (p2) => _sansBase + "sans_sprites/" + p2;
     SANS_SPRITES = {
-      idle: _sp("overworld_walk/walk_front_idle.png"),
-      left: _sp("overworld_walk/walk_left_idle.png"),
-      right: _sp("overworld_walk/walk_right_idle.png"),
-      up: _sp("overworld_walk/walk_back_idle.png"),
-      down: _sp("overworld_walk/walk_front_idle.png"),
+      idle: _sp("basic_down/basic_down_1.png"),
+      left: _sp("basic_left/basic_left_1.png"),
+      right: _sp("basic_right/basic_right_1.png"),
+      up: _sp("basic_up/basic_up_1.png"),
+      down: _sp("basic_down/basic_down_1.png"),
       walkF1: _sp("overworld_walk/walk_front_1.png"),
       walkF2: _sp("overworld_walk/walk_front_2.png"),
       walkL1: _sp("overworld_walk/walk_left_1.png"),
@@ -1945,7 +1969,8 @@ var init_graphics = __esm({
       walkR1: _sp("overworld_walk/walk_right_1.png"),
       walkR2: _sp("overworld_walk/walk_right_2.png"),
       walkU1: _sp("overworld_walk/walk_back_1.png"),
-      walkU2: _sp("overworld_walk/walk_back_2.png")
+      walkU2: _sp("overworld_walk/walk_back_2.png"),
+      bone: _sp("bones/bone_white_short.png")
     };
     PETS = {
       /* —— Trang 1 —— */
@@ -3011,9 +3036,18 @@ var init_style = __esm({
     .dg-cd-fill { height: 100%; background: #ffeb3b; }
     .dg-skill-cd-bar { position: absolute; top: -3px; left: 0px; width: 32px; height: 2px; background: #333; border: 1px solid #111; border-radius: 1px; overflow: hidden; z-index: 2; }
     .dg-skill-cd-fill { height: 100%; background: #00bcd4; }
+    .dg-stamina-bar { position: absolute; top: -17px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
+    .dg-stamina-fill { height: 100%; background: #ffd94d; transition: width 0.1s; }
+    .dg-skill-cd-bar.blue-magic { top: 0px; }
+    .dg-skill-cd-bar.blue-magic .dg-skill-cd-fill { background: #1a237e; }
+    .dg-skill-cd-bar.gravity-push { top: 3px; }
+    .dg-skill-cd-bar.gravity-push .dg-skill-cd-fill { background: #9c27b0; }
+    .dg-skill-cd-bar.gaster-blaster { top: 6px; }
+    .dg-skill-cd-bar.gaster-blaster .dg-skill-cd-fill { background: #e0f7fa; box-shadow: 0 0 2px #fff; }
     .dg-entity.enemy .dg-hp-fill { background: #e06578; }
     .dg-dmg { position: absolute; left: 0; top: 0; font-size: 14px; font-weight: bold; color: #ff4444; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; pointer-events: none; z-index: 10; animation: dmgFloat 0.8s ease-out forwards; }
     .dg-dmg.heal { color: #a4dc8c; }
+    .dg-dmg.karma { color: #d500f9; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
     .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
     
@@ -11353,12 +11387,23 @@ function loadDungeonState(saveData) {
   fullTeam = saveData.fullTeam.map((savedP) => {
     const el = document.createElement("div");
     el.className = "dg-entity pet";
-    el.innerHTML = `
+    let barsHtml = `
             <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
             <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
             <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
-            ${petSVG(savedP.id, 32)}
         `;
+    if (savedP.id === "sans") {
+      barsHtml = `
+                <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+                <div class="dg-stamina-bar"><div class="dg-stamina-fill" style="width: 100%"></div></div>
+                <div class="dg-skill-cd-bar blue-magic" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                <div class="dg-skill-cd-bar gravity-push" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                <div class="dg-skill-cd-bar gaster-blaster" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+            `;
+    }
+    el.innerHTML = `${barsHtml}
+            ${petSVG(savedP.id, 32)}`;
     el.style.transform = `translate3d(${savedP.x - 16}px, ${savedP.y - 16}px, 0)`;
     arena.appendChild(el);
     const stat = PET_STATS2[savedP.id] || PET_STATS2.default;
@@ -11372,7 +11417,7 @@ function loadDungeonState(saveData) {
     savedP.range = Math.round(stat.range * Math.pow(1.05, u2.range || 0));
     savedP.maxCd = Math.max(0.15, stat.cd * Math.pow(0.92, u2.aspd || 0));
     if (savedP.dodge === void 0) savedP.dodge = savedP.id === "ghostBlob" ? 0.25 : 0.05;
-    return {
+    const memberObj = {
       ...savedP,
       el,
       type: "pet",
@@ -11384,6 +11429,18 @@ function loadDungeonState(saveData) {
       skillCd: savedP.skillCd || 0,
       maxSkillCd: savedP.maxSkillCd || stat.maxSkillCd || 0
     };
+    if (savedP.id === "sans") {
+      memberObj.stamina = savedP.stamina !== void 0 ? savedP.stamina : 100;
+      memberObj.maxStamina = 100;
+      memberObj.gravityCd = savedP.gravityCd || 0;
+      memberObj.gasterCd = savedP.gasterCd || 0;
+      memberObj.blueMagicCd = savedP.blueMagicCd || 0;
+      memberObj.tpCd = savedP.tpCd || 0;
+      memberObj.isResting = false;
+      memberObj.restTimer = 0;
+      memberObj.actionState = "idle";
+    }
+    return memberObj;
   });
   team = [...fullTeam];
   const isBoss = currentWave % 10 === 0;
@@ -11520,12 +11577,23 @@ function initPlacementPhase() {
         const stat = PET_STATS2[pId] || PET_STATS2.default;
         const el = document.createElement("div");
         el.className = "dg-entity pet";
-        el.innerHTML = `
+        let barsHtml = `
                     <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
                     <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
                     <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
-                    ${petSVG(pId, 32)}
                 `;
+        if (pId === "sans") {
+          barsHtml = `
+                        <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                        <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+                        <div class="dg-stamina-bar"><div class="dg-stamina-fill" style="width: 100%"></div></div>
+                        <div class="dg-skill-cd-bar blue-magic" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                        <div class="dg-skill-cd-bar gravity-push" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                        <div class="dg-skill-cd-bar gaster-blaster" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                    `;
+        }
+        el.innerHTML = `${barsHtml}
+                    ${petSVG(pId, 32)}`;
         let x2 = e2.clientX - rect.left - 16;
         let y2 = e2.clientY - rect.top - 16;
         if (x2 > rect.width - 16) x2 = rect.width - 16;
@@ -11556,6 +11624,17 @@ function initPlacementPhase() {
           armor: stat.armor,
           dockSlot: currentSlot
         };
+        if (pId === "sans") {
+          memberObj.stamina = 100;
+          memberObj.maxStamina = 100;
+          memberObj.gravityCd = 0;
+          memberObj.gasterCd = 0;
+          memberObj.blueMagicCd = 0;
+          memberObj.tpCd = 0;
+          memberObj.isResting = false;
+          memberObj.restTimer = 0;
+          memberObj.actionState = "idle";
+        }
         team.push(memberObj);
         let isPlacedDragging = false;
         el.addEventListener("pointerdown", (ev) => {
@@ -11862,6 +11941,29 @@ function combatLoop() {
     updateEntities(enemies, team, stepDt, arenaRect);
     let newProjs = [];
     projectiles = projectiles.filter((p2) => {
+      if (p2.isBone) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          return false;
+        }
+        p2.x += p2.vx * stepDt;
+        p2.y += p2.vy * stepDt;
+        p2.el.style.left = p2.x + "px";
+        p2.el.style.top = p2.y + "px";
+        let hit = false;
+        p2.groupB.forEach((e2) => {
+          if (e2.hp > 0 && Math.hypot(e2.x - p2.x, e2.y - p2.y) < 40) {
+            if (p2.onHit) p2.onHit(e2);
+            hit = true;
+          }
+        });
+        if (hit) {
+          p2.el.remove();
+          return false;
+        }
+        return true;
+      }
       if (p2.isPuddle) {
         p2.lifetime -= stepDt;
         if (p2.lifetime <= 0) {
@@ -12202,7 +12304,18 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     });
     return;
   }
-  if (target.type === "pet") {
+  if (target.id === "sans") {
+    if (target.stamina >= 10) {
+      target.stamina -= 10;
+      spawnDmg(target, 0, "miss");
+      target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - atk);
+      target.el.style.filter = "drop-shadow(0 0 5px cyan)";
+      setTimeout(() => {
+        if (target.el) target.el.style.filter = "";
+      }, 150);
+      return;
+    }
+  } else if (target.type === "pet") {
     const dodgeChance = target.dodge !== void 0 ? target.dodge : target.id === "ghostBlob" ? 0.25 : 0.05;
     if (Math.random() < dodgeChance) {
       spawnDmg(target, 0, "miss");
@@ -12269,6 +12382,10 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
   if (skill === "poison") target.status.poison = 3;
   if (skill === "freeze") target.status.freeze = 3;
   if (skill === "root" && Math.random() < 0.3) target.status.root = 2;
+  if (attacker && attacker.id === "sans" && target.type === "enemy") {
+    target.status.karmaDuration = 3;
+    target.karmaStacks = (target.karmaStacks || 0) + 1;
+  }
   if (skill === "cleave" && attacker) {
     enemyGroup.forEach((e2) => {
       if (e2 !== target && e2.hp > 0 && Math.hypot(e2.x - target.x, e2.y - target.y) <= 40) {
@@ -12297,6 +12414,267 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     });
   }
 }
+function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
+  const staminaPct = Math.max(0, Math.min(100, a.stamina / a.maxStamina * 100));
+  const staminaFill = a.el.querySelector(".dg-stamina-fill");
+  if (staminaFill) staminaFill.style.width = staminaPct + "%";
+  ["blueMagicCd", "gravityCd", "gasterCd"].forEach((cdName) => {
+    if (a[cdName] > 0) a[cdName] -= dt2;
+  });
+  const maxCds = { blueMagicCd: 7, gravityCd: 9, gasterCd: 10 };
+  const classes = { blueMagicCd: ".blue-magic", gravityCd: ".gravity-push", gasterCd: ".gaster-blaster" };
+  for (let cdName in maxCds) {
+    const bar = a.el.querySelector(classes[cdName]);
+    if (bar) {
+      bar.style.display = "block";
+      const fill = bar.querySelector(".dg-skill-cd-fill");
+      if (fill) fill.style.width = Math.max(0, Math.min(100, (1 - Math.max(0, a[cdName]) / maxCds[cdName]) * 100)) + "%";
+    }
+  }
+  if (a.isResting) {
+    a.restTimer -= dt2;
+    a.stamina = Math.min(a.maxStamina, a.stamina + 100 / 4 * dt2);
+    if (!a._sleepStep) a._sleepStep = 0;
+    a._sleepStep += dt2 * 10;
+    const sansImg = a.el.querySelector(".sans-sprite");
+    if (sansImg) sansImg.src = sansSpriteForAction("sleep_stand", Math.floor(a._sleepStep)).src;
+    if (a.restTimer <= 0) a.isResting = false;
+    return;
+  } else {
+    a.stamina = Math.min(a.maxStamina, a.stamina + 1 * dt2);
+  }
+  if (a.cd > 0) a.cd -= dt2;
+  if (a.tpCd > 0) a.tpCd -= dt2;
+  let closest = null;
+  let minDist = Infinity;
+  enemyGroup.filter((b2) => b2.hp > 0).forEach((b2) => {
+    const dx = b2.x - a.x;
+    const dy = b2.y - a.y;
+    const dist = Math.max(0.1, Math.hypot(dx, dy));
+    if (dist < minDist) {
+      minDist = dist;
+      closest = { b: b2, dx, dy, dist };
+    }
+  });
+  if (a.stamina < 20 && a.gravityCd <= 0 && a.tpCd <= 0 && enemyGroup.filter((b2) => b2.hp > 0).length > 0) {
+    a.stamina -= 12;
+    a.gravityCd = 9;
+    if (arena) {
+      arena.style.animation = "dg-shake 0.4s";
+      setTimeout(() => {
+        if (arena) arena.style.animation = "";
+      }, 400);
+    }
+    enemyGroup.forEach((e2) => {
+      if (e2.hp > 0) {
+        e2.x = 40 + Math.random() * 20;
+        e2.y = 40 + Math.random() * 20;
+        e2.el.style.transform = `translate3d(${e2.x - 16}px, ${e2.y - 16}px, 0)`;
+        if (!e2.status) e2.status = {};
+        e2.status.stun = 1.5;
+        e2.hp -= a.atk;
+        spawnDmg(e2, -a.atk);
+      }
+    });
+    a.x = arenaRect.width - 40;
+    a.y = arenaRect.height - 40;
+    a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+    a.isResting = true;
+    a.restTimer = 4;
+    a._sleepStep = 0;
+    return;
+  }
+  if (closest && closest.dist < 60 && a.tpCd <= 0 && a.stamina >= 10) {
+    a.stamina -= 10;
+    a.tpCd = 2;
+    a.x += closest.dx > 0 ? -150 : 150;
+    a.y += closest.dy > 0 ? -150 : 150;
+    a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
+    a.y = Math.max(30, Math.min(a.y, arenaRect.height - 30));
+    a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+    const sansImg = a.el.querySelector(".sans-sprite");
+    if (sansImg) sansImg.src = sansSpriteForAction("shrug", 0).src;
+    a.actionState = "shrug";
+    a.actionTimer = 0.3;
+    return;
+  }
+  if (closest && a.actionState === "idle") {
+    if (a.gasterCd <= 0 && a.stamina >= 15) {
+      a.gasterCd = 10;
+      a.stamina -= 15;
+      const sansImg = a.el.querySelector(".sans-sprite");
+      if (sansImg) sansImg.src = sansSpriteForAction("flashing_eye", 1).src;
+      a.actionState = "gaster";
+      a.actionTimer = 3.6;
+      const isRight = closest.dx > 0;
+      const bx = a.x + (isRight ? 30 : -30);
+      const by = a.y - 40;
+      const blaster = document.createElement("img");
+      blaster.className = "dg-gaster-blaster";
+      blaster.src = sansSpriteForAction("gaster_charge", 0).src;
+      blaster.style.position = "absolute";
+      blaster.style.width = "64px";
+      blaster.style.height = "64px";
+      blaster.style.left = bx + "px";
+      blaster.style.top = by + "px";
+      blaster.style.zIndex = "50";
+      if (!isRight) blaster.style.transform = "scaleX(-1)";
+      if (arena) arena.appendChild(blaster);
+      setTimeout(() => {
+        if (!arena || !arena.contains(blaster)) return;
+        let frame = 1;
+        const fireInterval = setInterval(() => {
+          if (!arena.contains(blaster)) {
+            clearInterval(fireInterval);
+            return;
+          }
+          blaster.src = sansSpriteForAction("gaster_fire", frame).src;
+          frame++;
+        }, 100);
+        const laser = document.createElement("div");
+        laser.style.position = "absolute";
+        laser.style.height = "64px";
+        laser.style.width = "1500px";
+        laser.style.background = "linear-gradient(90deg, rgba(255,255,255,0.9) 0%, rgba(0,255,255,0.9) 20%, rgba(255,255,255,0.7) 100%)";
+        laser.style.left = (isRight ? bx + 32 : bx - 1500 + 32) + "px";
+        laser.style.top = by + 16 + "px";
+        laser.style.zIndex = "40";
+        if (arena) arena.appendChild(laser);
+        let dotTimer = 3;
+        let tickTimer = 0;
+        const hitInterval = setInterval(() => {
+          dotTimer -= 0.1;
+          tickTimer -= 0.1;
+          if (dotTimer <= 0 || !arena.contains(laser)) {
+            clearInterval(hitInterval);
+            clearInterval(fireInterval);
+            if (laser.parentNode) laser.remove();
+            if (blaster.parentNode) blaster.remove();
+            return;
+          }
+          if (tickTimer <= 0) {
+            tickTimer = 0.2;
+            enemyGroup.forEach((e2) => {
+              if (e2.hp > 0 && Math.abs(e2.y - by) < 40) {
+                if (isRight && e2.x > bx || !isRight && e2.x < bx) {
+                  e2.hp -= 1;
+                  spawnDmg(e2, -1);
+                  if (!e2.status) e2.status = {};
+                  e2.status.karmaDuration = 3;
+                  e2.karmaStacks = (e2.karmaStacks || 0) + 1;
+                }
+              }
+            });
+          }
+        }, 100);
+      }, 600);
+      return;
+    }
+    if (a.blueMagicCd <= 0 && a.stamina >= 10 && closest.dist < 100) {
+      a.blueMagicCd = 7;
+      a.stamina -= 10;
+      a.actionState = "attack_updown";
+      a.actionTimer = 0.5;
+      const target = closest.b;
+      if (!target.status) target.status = {};
+      target.status.stun = 2;
+      target.el.style.transition = "transform 0.2s cubic-bezier(0.25, 1, 0.5, 1)";
+      target.el.style.transform = `translate3d(${target.x - 16}px, ${target.y - 60}px, 0)`;
+      setTimeout(() => {
+        if (target.el) {
+          target.el.style.transition = "transform 0.1s cubic-bezier(0.5, 0, 0.75, 0)";
+          target.el.style.transform = `translate3d(${target.x - 16}px, ${target.y - 16}px, 0)`;
+        }
+        target.hp -= a.atk;
+        spawnDmg(target, -a.atk);
+        if (!target.status) target.status = {};
+        target.status.karmaDuration = 3;
+        target.karmaStacks = (target.karmaStacks || 0) + 1;
+      }, 300);
+      return;
+    }
+    if (a.cd <= 0 && closest.dist <= a.range) {
+      a.cd = a.maxCd;
+      const bone = document.createElement("div");
+      bone.innerHTML = `<img src="${SANS_SPRITES.bone}" width="24" height="24">`;
+      bone.style.position = "absolute";
+      bone.style.left = a.x + "px";
+      bone.style.top = a.y + "px";
+      bone.style.zIndex = "50";
+      bone.style.animation = "dg-spin 0.5s linear infinite";
+      if (arena) arena.appendChild(bone);
+      const speed = 250;
+      projectiles2.push({
+        isBone: true,
+        lifetime: 2,
+        maxLifetime: 2,
+        vx: closest.dx / closest.dist * speed,
+        vy: closest.dy / closest.dist * speed,
+        x: a.x,
+        y: a.y,
+        el: bone,
+        a,
+        groupB: enemyGroup,
+        onHit: (tgt) => {
+          tgt.hp -= a.atk;
+          spawnDmg(tgt, -a.atk);
+          if (!tgt.status) tgt.status = {};
+          tgt.status.karmaDuration = 3;
+          tgt.karmaStacks = (tgt.karmaStacks || 0) + 1;
+        }
+      });
+      a.actionState = "attack_leftright";
+      a.actionTimer = 0.2;
+      return;
+    }
+  }
+  if (a.actionState !== "idle") {
+    a.actionTimer -= dt2;
+    if (a.actionTimer <= 0) {
+      a.actionState = "idle";
+    } else {
+      const sansImg = a.el.querySelector(".sans-sprite");
+      if (sansImg && a.actionState !== "gaster") {
+        if (!a._actionStep) a._actionStep = 0;
+        a._actionStep += dt2 * 10;
+        sansImg.src = sansSpriteForAction(a.actionState, Math.floor(a._actionStep)).src;
+        if (closest && closest.dx < 0) sansImg.style.transform = "scaleX(-1)";
+        else sansImg.style.transform = "scaleX(1)";
+      }
+      return;
+    }
+  }
+  if (closest) {
+    let moveX = 0, moveY = 0;
+    const speed = a.speed * dt2;
+    if (closest.dist < a.range * 0.5) {
+      moveX = -(closest.dx / closest.dist) * speed;
+      moveY = -(closest.dy / closest.dist) * speed;
+    } else if (closest.dist > a.range * 0.9) {
+      moveX = closest.dx / closest.dist * speed;
+      moveY = closest.dy / closest.dist * speed;
+    }
+    if (moveX !== 0 || moveY !== 0) {
+      a.x += moveX;
+      a.y += moveY;
+      a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
+      a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
+      a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+      const sansImg = a.el.querySelector(".sans-sprite");
+      if (sansImg) {
+        if (!a._walkStep) a._walkStep = 0;
+        a._walkStep += dt2 * 10;
+        const spr = sansSpriteFor(moveX, moveY, Math.floor(a._walkStep));
+        sansImg.src = spr.src;
+        if (moveX < 0) sansImg.style.transform = "scaleX(-1)";
+        else if (moveX > 0) sansImg.style.transform = "scaleX(1)";
+      }
+    } else {
+      const sansImg = a.el.querySelector(".sans-sprite");
+      if (sansImg) sansImg.src = sansSpriteForAction("idle", 0).src;
+    }
+  }
+}
 function updateEntities(groupA, groupB, dt2, arenaRect) {
   if (!arenaRect) {
     const a = arenaEl || $id("dg-arena");
@@ -12305,6 +12683,10 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
   const arena = arenaEl || $id("dg-arena");
   groupA.forEach((a) => {
     if (a.hp <= 0) return;
+    if (a.ai === "sans_ai") {
+      updateSansAI(a, groupB, dt2, arenaRect, arena, projectiles);
+      return;
+    }
     if (a.kb && a.kb.time > 0) {
       a.kb.time -= dt2;
       a.x += a.kb.dx * a.kb.speed * dt2;
@@ -12403,6 +12785,20 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
           a.hp -= dmg;
           spawnDmg(a, -dmg);
         }
+        if (eff === "karmaDuration") {
+          if (a.karmaStacks > 0) {
+            const dmg = Math.max(1, Math.floor(a.maxHp * 5e-3 * a.karmaStacks * dt2 * 2));
+            a._karmaDmgAcc = (a._karmaDmgAcc || 0) + a.maxHp * 5e-3 * a.karmaStacks * dt2;
+            if (a._karmaDmgAcc >= 1) {
+              const tickDmg = Math.floor(a._karmaDmgAcc);
+              a.hp -= tickDmg;
+              a._karmaDmgAcc -= tickDmg;
+              if (Math.random() < 0.1) spawnDmg(a, -tickDmg, "karma");
+            }
+          }
+        }
+      } else if (eff === "karmaDuration" && a.status[eff] <= 0) {
+        a.karmaStacks = 0;
       }
     }
     let statusHtml = "";
@@ -13418,6 +13814,7 @@ var init_dungeon = __esm({
       penguin: { name: "C\xE1nh C\u1EE5t", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m 30% t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh c\u1EE7a qu\xE1i.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> S\xFAt m\u1ED9t qu\u1EA3 c\u1EA7u tuy\u1EBFt l\u0103n d\u1ED9i t\u01B0\u1EDDng 5 l\u1EA7n, g\xE2y 200% s\xE1t th\u01B0\u01A1ng v\xE0 \u0111\xF3ng b\u0103ng 3 gi\xE2y.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze", activeSkill: "blizzard", maxSkillCd: 15 },
       // Naoya: maxSkillCd 10s→12s
       naoyaSlime: { name: "Naoya", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> \u0110\u1EA7u X\u1EA1 Ch\xFA Ph\xE1p - L\u01B0\u1EDBt 24 khung h\xECnh c\xF4ng k\xEDch to\xE0n map v\xE0 \u0111\xF3ng b\u0103ng qu\xE1i 1s.", hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: "projection_sorcery", maxSkillCd: 12 },
+      sans: { name: "Sans", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> M\xE1u c\u1EF1c y\u1EBFu (1 HP) nh\u01B0ng c\xF3 thanh Th\u1EC3 l\u1EF1c \u0111\u1EC3 n\xE9 100% s\xE1t th\u01B0\u01A1ng. \u0110\xF2n \u0111\xE1nh th\u01B0\u1EDDng g\xE2y hi\u1EC7u \u1EE9ng R\xFAt m\xE1u Karma.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> \u0110\u1EA7y \u0111\u1EE7 tuy\u1EC7t k\u0129 Blue Magic, Gravity Push v\xE0 Gaster Blaster.", hp: 1, atk: 1, range: 150, speed: 55, cd: 0.2, ai: "sans_ai" },
       default: { name: "Pet V\xF4 Danh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
     };
     ENEMY_TYPES = [

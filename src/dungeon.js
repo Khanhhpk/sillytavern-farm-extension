@@ -1,6 +1,6 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
-import { petSVG, spriteSVG } from './graphics.js';
+import { petSVG, spriteSVG, sansSpriteFor, sansSpriteForAction, SANS_SPRITES } from './graphics.js';
 import { playNaoyaCutscene } from './hero.js';
 
 export let isDungeonOpen = false;
@@ -44,6 +44,7 @@ const PET_STATS = {
     penguin: { name: 'Cánh Cụt', desc: '<b>Bị động:</b> Đòn đánh làm giảm 30% tốc độ di chuyển và tốc đánh của quái.<br><b>Chủ động (15s):</b> Sút một quả cầu tuyết lăn dội tường 5 lần, gây 200% sát thương và đóng băng 3 giây.', hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: 'freeze', activeSkill: 'blizzard', maxSkillCd: 15 },
     // Naoya: maxSkillCd 10s→12s
     naoyaSlime: { name: 'Naoya', desc: '<b>Bị động:</b> Không có.<br><b>Chủ động (12s):</b> Đầu Xạ Chú Pháp - Lướt 24 khung hình công kích toàn map và đóng băng quái 1s.', hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: 'projection_sorcery', maxSkillCd: 12 },
+    sans: { name: 'Sans', desc: '<b>Bị động:</b> Máu cực yếu (1 HP) nhưng có thanh Thể lực để né 100% sát thương. Đòn đánh thường gây hiệu ứng Rút máu Karma.<br><b>Chủ động:</b> Đầy đủ tuyệt kĩ Blue Magic, Gravity Push và Gaster Blaster.', hp: 1, atk: 1, range: 150, speed: 55, cd: 0.2, ai: 'sans_ai' },
     default: { name: 'Pet Vô Danh', desc: '<b>Bị động:</b> Không có.<br><b>Chủ động:</b> Không có.', hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
 };
 
@@ -188,12 +189,22 @@ function loadDungeonState(saveData) {
     fullTeam = saveData.fullTeam.map(savedP => {
         const el = document.createElement('div');
         el.className = 'dg-entity pet';
-        el.innerHTML = `
+        let barsHtml = `
             <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
             <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
             <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
-            ${petSVG(savedP.id, 32)}
         `;
+        if (savedP.id === 'sans') {
+            barsHtml = `
+                <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+                <div class="dg-stamina-bar"><div class="dg-stamina-fill" style="width: 100%"></div></div>
+                <div class="dg-skill-cd-bar blue-magic" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                <div class="dg-skill-cd-bar gravity-push" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                <div class="dg-skill-cd-bar gaster-blaster" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+            `;
+        }
+        el.innerHTML = `${barsHtml}\n            ${petSVG(savedP.id, 32)}`;
         el.style.transform = `translate3d(${savedP.x - 16}px, ${savedP.y - 16}px, 0)`;
         arena.appendChild(el);
         const stat = PET_STATS[savedP.id] || PET_STATS.default;
@@ -213,7 +224,7 @@ function loadDungeonState(saveData) {
         savedP.maxCd = Math.max(0.15, stat.cd * Math.pow(0.92, u.aspd || 0));
         if (savedP.dodge === undefined) savedP.dodge = savedP.id === 'ghostBlob' ? 0.25 : 0.05;
 
-        return { 
+        const memberObj = { 
             ...savedP, 
             el: el,
             type: 'pet',
@@ -225,6 +236,18 @@ function loadDungeonState(saveData) {
             skillCd: savedP.skillCd || 0,
             maxSkillCd: savedP.maxSkillCd || stat.maxSkillCd || 0
         };
+        if (savedP.id === 'sans') {
+            memberObj.stamina = savedP.stamina !== undefined ? savedP.stamina : 100;
+            memberObj.maxStamina = 100;
+            memberObj.gravityCd = savedP.gravityCd || 0;
+            memberObj.gasterCd = savedP.gasterCd || 0;
+            memberObj.blueMagicCd = savedP.blueMagicCd || 0;
+            memberObj.tpCd = savedP.tpCd || 0;
+            memberObj.isResting = false;
+            memberObj.restTimer = 0;
+            memberObj.actionState = 'idle';
+        }
+        return memberObj;
     });
     team = [...fullTeam];
     
@@ -378,12 +401,22 @@ function initPlacementPhase() {
                 const stat = PET_STATS[pId] || PET_STATS.default;
                 const el = document.createElement('div');
                 el.className = 'dg-entity pet';
-                el.innerHTML = `
+                let barsHtml = `
                     <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
                     <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
                     <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
-                    ${petSVG(pId, 32)}
                 `;
+                if (pId === 'sans') {
+                    barsHtml = `
+                        <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                        <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+                        <div class="dg-stamina-bar"><div class="dg-stamina-fill" style="width: 100%"></div></div>
+                        <div class="dg-skill-cd-bar blue-magic" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                        <div class="dg-skill-cd-bar gravity-push" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                        <div class="dg-skill-cd-bar gaster-blaster" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                    `;
+                }
+                el.innerHTML = `${barsHtml}\n                    ${petSVG(pId, 32)}`;
                 
                 let x = e.clientX - rect.left - 16;
                 let y = e.clientY - rect.top - 16;
@@ -403,6 +436,17 @@ function initPlacementPhase() {
                     skillCd: stat.maxSkillCd || 0, maxSkillCd: stat.maxSkillCd || 0, el, type: 'pet',
                     skill: stat.skill, activeSkill: stat.activeSkill, ai: stat.ai, armor: stat.armor, dockSlot: currentSlot
                 };
+                if (pId === 'sans') {
+                    memberObj.stamina = 100;
+                    memberObj.maxStamina = 100;
+                    memberObj.gravityCd = 0;
+                    memberObj.gasterCd = 0;
+                    memberObj.blueMagicCd = 0;
+                    memberObj.tpCd = 0;
+                    memberObj.isResting = false;
+                    memberObj.restTimer = 0;
+                    memberObj.actionState = 'idle';
+                }
                 team.push(memberObj);
                 
                 // Allow moving/removing placed pets
@@ -747,6 +791,31 @@ function combatLoop() {
     // Update projectiles
     let newProjs = [];
     projectiles = projectiles.filter(p => {
+        if (p.isBone) {
+            p.lifetime -= stepDt;
+            if (p.lifetime <= 0) {
+                p.el.remove();
+                return false;
+            }
+            p.x += p.vx * stepDt;
+            p.y += p.vy * stepDt;
+            p.el.style.left = p.x + 'px';
+            p.el.style.top = p.y + 'px';
+            
+            let hit = false;
+            p.groupB.forEach(e => {
+                if (e.hp > 0 && Math.hypot(e.x - p.x, e.y - p.y) < 40) {
+                    if (p.onHit) p.onHit(e);
+                    hit = true;
+                }
+            });
+            if (hit) {
+                p.el.remove();
+                return false;
+            }
+            return true;
+        }
+
         if (p.isPuddle) {
             p.lifetime -= stepDt;
             if (p.lifetime <= 0) {
@@ -1111,7 +1180,16 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     }
     
     // Dodge check (pets only)
-    if (target.type === 'pet') {
+    if (target.id === 'sans') {
+        if (target.stamina >= 10) {
+            target.stamina -= 10;
+            spawnDmg(target, 0, 'miss');
+            target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - atk);
+            target.el.style.filter = 'drop-shadow(0 0 5px cyan)';
+            setTimeout(() => { if (target.el) target.el.style.filter = ''; }, 150);
+            return;
+        }
+    } else if (target.type === 'pet') {
         // Ma Trắng: dodge gốc 15%→25%
         const dodgeChance = target.dodge !== undefined ? target.dodge : (target.id === 'ghostBlob' ? 0.25 : 0.05);
         if (Math.random() < dodgeChance) {
@@ -1196,6 +1274,10 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     if (skill === 'freeze') target.status.freeze = 3;
     // Mầm Sương root: 25%→30%
     if (skill === 'root' && Math.random() < 0.30) target.status.root = 2;
+    if (attacker && attacker.id === 'sans' && target.type === 'enemy') {
+        target.status.karmaDuration = 3; // 3 seconds of DOT
+        target.karmaStacks = (target.karmaStacks || 0) + 1;
+    }
     
     if (skill === 'cleave' && attacker) {
         enemyGroup.forEach(e => {
@@ -1227,12 +1309,290 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     }
 }
 
+function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
+    const staminaPct = Math.max(0, Math.min(100, (a.stamina / a.maxStamina) * 100));
+    const staminaFill = a.el.querySelector('.dg-stamina-fill');
+    if (staminaFill) staminaFill.style.width = staminaPct + '%';
+    
+    ['blueMagicCd', 'gravityCd', 'gasterCd'].forEach(cdName => {
+        if (a[cdName] > 0) a[cdName] -= dt;
+    });
+    const maxCds = { blueMagicCd: 7, gravityCd: 9, gasterCd: 10 };
+    const classes = { blueMagicCd: '.blue-magic', gravityCd: '.gravity-push', gasterCd: '.gaster-blaster' };
+    for (let cdName in maxCds) {
+        const bar = a.el.querySelector(classes[cdName]);
+        if (bar) {
+            bar.style.display = 'block';
+            const fill = bar.querySelector('.dg-skill-cd-fill');
+            if (fill) fill.style.width = Math.max(0, Math.min(100, (1 - Math.max(0, a[cdName]) / maxCds[cdName]) * 100)) + '%';
+        }
+    }
+
+    if (a.isResting) {
+        a.restTimer -= dt;
+        a.stamina = Math.min(a.maxStamina, a.stamina + (100 / 4) * dt); // Full regen in 4s
+        if (!a._sleepStep) a._sleepStep = 0;
+        a._sleepStep += dt * 10;
+        const sansImg = a.el.querySelector('.sans-sprite');
+        if (sansImg) sansImg.src = sansSpriteForAction('sleep_stand', Math.floor(a._sleepStep)).src;
+        if (a.restTimer <= 0) a.isResting = false;
+        return;
+    } else {
+        a.stamina = Math.min(a.maxStamina, a.stamina + 1 * dt);
+    }
+
+    if (a.cd > 0) a.cd -= dt;
+    if (a.tpCd > 0) a.tpCd -= dt;
+    
+    /** @type {any} */
+    let closest = null;
+    let minDist = Infinity;
+    enemyGroup.filter(b => b.hp > 0).forEach(b => {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const dist = Math.max(0.1, Math.hypot(dx, dy));
+        if (dist < minDist) { minDist = dist; closest = { b, dx, dy, dist }; }
+    });
+
+    if (a.stamina < 20 && a.gravityCd <= 0 && a.tpCd <= 0 && enemyGroup.filter(b=>b.hp>0).length > 0) {
+        a.stamina -= 12;
+        a.gravityCd = 9;
+        
+        if (arena) {
+            arena.style.animation = 'dg-shake 0.4s';
+            setTimeout(() => { if (arena) arena.style.animation = ''; }, 400);
+        }
+
+        enemyGroup.forEach(e => {
+            if (e.hp > 0) {
+                e.x = 40 + Math.random()*20;
+                e.y = 40 + Math.random()*20;
+                e.el.style.transform = `translate3d(${e.x - 16}px, ${e.y - 16}px, 0)`;
+                if (!e.status) e.status = {};
+                e.status.stun = 1.5;
+                e.hp -= a.atk;
+                spawnDmg(e, -a.atk);
+            }
+        });
+        
+        a.x = arenaRect.width - 40;
+        a.y = arenaRect.height - 40;
+        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+        
+        a.isResting = true;
+        a.restTimer = 4;
+        a._sleepStep = 0;
+        return;
+    }
+
+    if (closest && closest.dist < 60 && a.tpCd <= 0 && a.stamina >= 10) {
+        a.stamina -= 10;
+        a.tpCd = 2;
+        a.x += (closest.dx > 0 ? -150 : 150);
+        a.y += (closest.dy > 0 ? -150 : 150);
+        a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
+        a.y = Math.max(30, Math.min(a.y, arenaRect.height - 30));
+        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+        const sansImg = a.el.querySelector('.sans-sprite');
+        if (sansImg) sansImg.src = sansSpriteForAction('shrug', 0).src;
+        a.actionState = 'shrug';
+        a.actionTimer = 0.3;
+        return;
+    }
+
+    if (closest && a.actionState === 'idle') {
+        if (a.gasterCd <= 0 && a.stamina >= 15) {
+            a.gasterCd = 10;
+            a.stamina -= 15;
+            const sansImg = a.el.querySelector('.sans-sprite');
+            if (sansImg) sansImg.src = sansSpriteForAction('flashing_eye', 1).src;
+            a.actionState = 'gaster';
+            a.actionTimer = 3.6;
+
+            const isRight = closest.dx > 0;
+            const bx = a.x + (isRight ? 30 : -30);
+            const by = a.y - 40;
+            const blaster = document.createElement('img');
+            blaster.className = 'dg-gaster-blaster';
+            blaster.src = sansSpriteForAction('gaster_charge', 0).src;
+            blaster.style.position = 'absolute';
+            blaster.style.width = '64px';
+            blaster.style.height = '64px';
+            blaster.style.left = bx + 'px';
+            blaster.style.top = by + 'px';
+            blaster.style.zIndex = '50';
+            if (!isRight) blaster.style.transform = 'scaleX(-1)';
+            if (arena) arena.appendChild(blaster);
+            
+            setTimeout(() => {
+                if (!arena || !arena.contains(blaster)) return;
+                let frame = 1;
+                const fireInterval = setInterval(() => {
+                    if (!arena.contains(blaster)) { clearInterval(fireInterval); return; }
+                    blaster.src = sansSpriteForAction('gaster_fire', frame).src;
+                    frame++;
+                }, 100);
+
+                const laser = document.createElement('div');
+                laser.style.position = 'absolute';
+                laser.style.height = '64px';
+                laser.style.width = '1500px';
+                laser.style.background = 'linear-gradient(90deg, rgba(255,255,255,0.9) 0%, rgba(0,255,255,0.9) 20%, rgba(255,255,255,0.7) 100%)';
+                laser.style.left = (isRight ? bx + 32 : bx - 1500 + 32) + 'px';
+                laser.style.top = (by + 16) + 'px';
+                laser.style.zIndex = '40';
+                if (arena) arena.appendChild(laser);
+
+                let dotTimer = 3.0;
+                let tickTimer = 0;
+                const hitInterval = setInterval(() => {
+                    dotTimer -= 0.1;
+                    tickTimer -= 0.1;
+                    if (dotTimer <= 0 || !arena.contains(laser)) {
+                        clearInterval(hitInterval);
+                        clearInterval(fireInterval);
+                        if (laser.parentNode) laser.remove();
+                        if (blaster.parentNode) blaster.remove();
+                        return;
+                    }
+                    if (tickTimer <= 0) {
+                        tickTimer = 0.2;
+                        enemyGroup.forEach(e => {
+                            if (e.hp > 0 && Math.abs(e.y - by) < 40) {
+                                if ((isRight && e.x > bx) || (!isRight && e.x < bx)) {
+                                    e.hp -= 1;
+                                    spawnDmg(e, -1);
+                                    if (!e.status) e.status = {};
+                                    e.status.karmaDuration = 3;
+                                    e.karmaStacks = (e.karmaStacks || 0) + 1;
+                                }
+                            }
+                        });
+                    }
+                }, 100);
+            }, 600);
+            return;
+        }
+
+        if (a.blueMagicCd <= 0 && a.stamina >= 10 && closest.dist < 100) {
+            a.blueMagicCd = 7;
+            a.stamina -= 10;
+            a.actionState = 'attack_updown';
+            a.actionTimer = 0.5;
+
+            const target = closest.b;
+            if (!target.status) target.status = {};
+            target.status.stun = 2;
+            
+            target.el.style.transition = 'transform 0.2s cubic-bezier(0.25, 1, 0.5, 1)';
+            target.el.style.transform = `translate3d(${target.x - 16}px, ${target.y - 60}px, 0)`;
+            setTimeout(() => {
+                if (target.el) {
+                    target.el.style.transition = 'transform 0.1s cubic-bezier(0.5, 0, 0.75, 0)';
+                    target.el.style.transform = `translate3d(${target.x - 16}px, ${target.y - 16}px, 0)`;
+                }
+                target.hp -= a.atk;
+                spawnDmg(target, -a.atk);
+                if (!target.status) target.status = {};
+                target.status.karmaDuration = 3;
+                target.karmaStacks = (target.karmaStacks || 0) + 1;
+            }, 300);
+            return;
+        }
+        
+        if (a.cd <= 0 && closest.dist <= a.range) {
+            a.cd = a.maxCd;
+            const bone = document.createElement('div');
+            bone.innerHTML = `<img src="${SANS_SPRITES.bone}" width="24" height="24">`;
+            bone.style.position = 'absolute';
+            bone.style.left = a.x + 'px';
+            bone.style.top = a.y + 'px';
+            bone.style.zIndex = '50';
+            bone.style.animation = 'dg-spin 0.5s linear infinite';
+            if (arena) arena.appendChild(bone);
+            
+            const speed = 250;
+            projectiles.push({
+                isBone: true, lifetime: 2, maxLifetime: 2,
+                vx: (closest.dx / closest.dist) * speed, vy: (closest.dy / closest.dist) * speed,
+                x: a.x, y: a.y, el: bone, a, groupB: enemyGroup,
+                onHit: (tgt) => {
+                    tgt.hp -= a.atk;
+                    spawnDmg(tgt, -a.atk);
+                    if (!tgt.status) tgt.status = {};
+                    tgt.status.karmaDuration = 3;
+                    tgt.karmaStacks = (tgt.karmaStacks || 0) + 1;
+                }
+            });
+            a.actionState = 'attack_leftright';
+            a.actionTimer = 0.2;
+            return;
+        }
+    }
+
+    if (a.actionState !== 'idle') {
+        a.actionTimer -= dt;
+        if (a.actionTimer <= 0) {
+            a.actionState = 'idle';
+        } else {
+            const sansImg = a.el.querySelector('.sans-sprite');
+            if (sansImg && a.actionState !== 'gaster') {
+                if (!a._actionStep) a._actionStep = 0;
+                a._actionStep += dt * 10;
+                sansImg.src = sansSpriteForAction(a.actionState, Math.floor(a._actionStep)).src;
+                if (closest && closest.dx < 0) sansImg.style.transform = 'scaleX(-1)';
+                else sansImg.style.transform = 'scaleX(1)';
+            }
+            return;
+        }
+    }
+
+    if (closest) {
+        let moveX = 0, moveY = 0;
+        const speed = a.speed * dt;
+        
+        if (closest.dist < a.range * 0.5) {
+            moveX = -(closest.dx / closest.dist) * speed;
+            moveY = -(closest.dy / closest.dist) * speed;
+        } else if (closest.dist > a.range * 0.9) {
+            moveX = (closest.dx / closest.dist) * speed;
+            moveY = (closest.dy / closest.dist) * speed;
+        }
+        
+        if (moveX !== 0 || moveY !== 0) {
+            a.x += moveX;
+            a.y += moveY;
+            a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
+            a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
+            a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+            
+            const sansImg = a.el.querySelector('.sans-sprite');
+            if (sansImg) {
+                if (!a._walkStep) a._walkStep = 0;
+                a._walkStep += dt * 10;
+                const spr = sansSpriteFor(moveX, moveY, Math.floor(a._walkStep));
+                sansImg.src = spr.src;
+                if (moveX < 0) sansImg.style.transform = 'scaleX(-1)';
+                else if (moveX > 0) sansImg.style.transform = 'scaleX(1)';
+            }
+        } else {
+            const sansImg = a.el.querySelector('.sans-sprite');
+            if (sansImg) sansImg.src = sansSpriteForAction('idle', 0).src;
+        }
+    }
+}
+
 function updateEntities(groupA, groupB, dt, arenaRect) {
     if (!arenaRect) { const a = arenaEl || All.$id('dg-arena'); arenaRect = a ? a.getBoundingClientRect() : { width: 960, height: 450 }; }
     const arena = arenaEl || All.$id('dg-arena');
     
     groupA.forEach(a => {
         if (a.hp <= 0) return;
+        
+        if (a.ai === 'sans_ai') {
+            updateSansAI(a, groupB, dt, arenaRect, arena, projectiles);
+            return;
+        }
         
         if (a.kb && a.kb.time > 0) {
             a.kb.time -= dt;
@@ -1351,6 +1711,21 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
                     a.hp -= dmg;
                     spawnDmg(a, -dmg);
                 }
+                if (eff === 'karmaDuration') {
+                    // Deal DOT based on stacks: 0.5% maxHp per stack, scaled by dt (apply continuously)
+                    if (a.karmaStacks > 0) {
+                        const dmg = Math.max(1, Math.floor(a.maxHp * 0.005 * a.karmaStacks * dt * 2)); // *2 to adjust tick rate slightly to ensure it deals some dmg
+                        a._karmaDmgAcc = (a._karmaDmgAcc || 0) + (a.maxHp * 0.005 * a.karmaStacks * dt);
+                        if (a._karmaDmgAcc >= 1) {
+                            const tickDmg = Math.floor(a._karmaDmgAcc);
+                            a.hp -= tickDmg;
+                            a._karmaDmgAcc -= tickDmg;
+                            if (Math.random() < 0.1) spawnDmg(a, -tickDmg, 'karma'); // Don't spam text too much
+                        }
+                    }
+                }
+            } else if (eff === 'karmaDuration' && a.status[eff] <= 0) {
+                a.karmaStacks = 0; // Reset stacks when duration ends
             }
         }
         

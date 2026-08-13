@@ -433,9 +433,18 @@ export const styleCSS = `
     .dg-cd-fill { height: 100%; background: #ffeb3b; }
     .dg-skill-cd-bar { position: absolute; top: -3px; left: 0px; width: 32px; height: 2px; background: #333; border: 1px solid #111; border-radius: 1px; overflow: hidden; z-index: 2; }
     .dg-skill-cd-fill { height: 100%; background: #00bcd4; }
+    .dg-stamina-bar { position: absolute; top: -17px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
+    .dg-stamina-fill { height: 100%; background: #ffd94d; transition: width 0.1s; }
+    .dg-skill-cd-bar.blue-magic { top: 0px; }
+    .dg-skill-cd-bar.blue-magic .dg-skill-cd-fill { background: #1a237e; }
+    .dg-skill-cd-bar.gravity-push { top: 3px; }
+    .dg-skill-cd-bar.gravity-push .dg-skill-cd-fill { background: #9c27b0; }
+    .dg-skill-cd-bar.gaster-blaster { top: 6px; }
+    .dg-skill-cd-bar.gaster-blaster .dg-skill-cd-fill { background: #e0f7fa; box-shadow: 0 0 2px #fff; }
     .dg-entity.enemy .dg-hp-fill { background: #e06578; }
     .dg-dmg { position: absolute; left: 0; top: 0; font-size: 14px; font-weight: bold; color: #ff4444; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; pointer-events: none; z-index: 10; animation: dmgFloat 0.8s ease-out forwards; }
     .dg-dmg.heal { color: #a4dc8c; }
+    .dg-dmg.karma { color: #d500f9; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
     .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
     
