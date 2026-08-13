@@ -1185,7 +1185,7 @@ const _sansBase = (() => {
     return '/extensions/sillytavern-farm-extension/';
   }
 })();
-const _sp = (p) => _sansBase + 'sans%20sprites/' + p;
+const _sp = (p) => _sansBase + 'sans_sprites/' + p;
 export const SANS_SPRITES = {
   idle:  _sp('overworld_walk/walk_front_idle.png'),
   left:  _sp('overworld_walk/walk_left_idle.png'),
