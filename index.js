@@ -182,12 +182,8 @@ function sansSpriteForAction(action, step) {
     return { src: _sp(`sleep_stand/sprite-12-${phase2 + 1}.png`), flip: false };
   }
   if (action === "magic") {
-    const phase2 = s2 % 10;
-    if (phase2 < 5) {
-      return { src: _sp(`attack_updown/attack_up_0${phase2 + 1}.png`), flip: false };
-    } else {
-      return { src: _sp(`attack_updown/attack_down_0${phase2 - 4}.png`), flip: false };
-    }
+    const phase2 = Math.floor(s2 % 10 / 2);
+    return { src: _sp(`magic/magic_0${phase2 + 1}.png`), flip: false };
   }
   return { src: SANS_SPRITES.idle, flip: false };
 }
