@@ -366,13 +366,18 @@ export function initPets() {
       const id = el.dataset.pet;
       if (sceneBusy(id) || petTgt[id] || el.classList.contains('sleep') || el.dataset.sansAction) return;   // Đang diễn / đang đi / đang ngủ thì đừng làm phiền
       
-      if (!PETS[id].job && Math.random() < 0.12) {
-        if (id === 'sans' && Math.random() < 0.65) return sansIdleAction(el);
+      const isSans = id === 'sans';
+      const lazyChance = isSans ? 0.35 : 0.12;
+      
+      if (!PETS[id].job && Math.random() < lazyChance) {
+        if (isSans && Math.random() < 0.70) return sansIdleAction(el);
         return sleepPet(el);
       }
       
       if (PETS[id].job && now() - (petTouch[id] || touchBase) > 5 * MIN && Math.random() < 0.08) return sleepPet(el);   // Bé làm việc 5 phút không ai đoái hoài thì đứng ngủ (tưới tự động không bị ảnh hưởng, mây ngủ vẫn mưa nhé)
-      if (Math.random() < 0.35) moveTo(el, petSpot(id));
+      
+      const walkChance = isSans ? 0.10 : 0.35;
+      if (Math.random() < walkChance) moveTo(el, petSpot(id));
     });
   }, 7000);
   let activeDrag = null;
