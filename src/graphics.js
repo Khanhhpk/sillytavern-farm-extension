@@ -1187,20 +1187,20 @@ const _sansBase = (() => {
 })();
 const _sp = (p) => _sansBase + 'sans%20sprites/' + p;
 export const SANS_SPRITES = {
-  idle:  _sp('00_overworld_walk/walk_front_idle.png'),
-  left:  _sp('00_overworld_walk/walk_left_idle.png'),
-  right: _sp('00_overworld_walk/walk_right_idle.png'),
-  up:    _sp('00_overworld_walk/walk_back_idle.png'),
-  down:  _sp('00_overworld_walk/walk_front_idle.png'),
+  idle:  _sp('overworld_walk/walk_front_idle.png'),
+  left:  _sp('overworld_walk/walk_left_idle.png'),
+  right: _sp('overworld_walk/walk_right_idle.png'),
+  up:    _sp('overworld_walk/walk_back_idle.png'),
+  down:  _sp('overworld_walk/walk_front_idle.png'),
 
-  walkF1:  _sp('00_overworld_walk/walk_front_1.png'),
-  walkF2:  _sp('00_overworld_walk/walk_front_2.png'),
-  walkL1:  _sp('00_overworld_walk/walk_left_1.png'),
-  walkL2:  _sp('00_overworld_walk/walk_left_2.png'),
-  walkR1:  _sp('00_overworld_walk/walk_right_1.png'),
-  walkR2:  _sp('00_overworld_walk/walk_right_2.png'),
-  walkU1:  _sp('00_overworld_walk/walk_back_1.png'),
-  walkU2:  _sp('00_overworld_walk/walk_back_2.png'),
+  walkF1:  _sp('overworld_walk/walk_front_1.png'),
+  walkF2:  _sp('overworld_walk/walk_front_2.png'),
+  walkL1:  _sp('overworld_walk/walk_left_1.png'),
+  walkL2:  _sp('overworld_walk/walk_left_2.png'),
+  walkR1:  _sp('overworld_walk/walk_right_1.png'),
+  walkR2:  _sp('overworld_walk/walk_right_2.png'),
+  walkU1:  _sp('overworld_walk/walk_back_1.png'),
+  walkU2:  _sp('overworld_walk/walk_back_2.png'),
 };
 export function sansSpriteFor(dx, dy, step) {
   const s = step || 0;

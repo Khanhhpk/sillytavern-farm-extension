@@ -1897,19 +1897,19 @@ var init_graphics = __esm({
     })();
     _sp = (p2) => _sansBase + "sans%20sprites/" + p2;
     SANS_SPRITES = {
-      idle: _sp("00_overworld_walk/walk_front_idle.png"),
-      left: _sp("00_overworld_walk/walk_left_idle.png"),
-      right: _sp("00_overworld_walk/walk_right_idle.png"),
-      up: _sp("00_overworld_walk/walk_back_idle.png"),
-      down: _sp("00_overworld_walk/walk_front_idle.png"),
-      walkF1: _sp("00_overworld_walk/walk_front_1.png"),
-      walkF2: _sp("00_overworld_walk/walk_front_2.png"),
-      walkL1: _sp("00_overworld_walk/walk_left_1.png"),
-      walkL2: _sp("00_overworld_walk/walk_left_2.png"),
-      walkR1: _sp("00_overworld_walk/walk_right_1.png"),
-      walkR2: _sp("00_overworld_walk/walk_right_2.png"),
-      walkU1: _sp("00_overworld_walk/walk_back_1.png"),
-      walkU2: _sp("00_overworld_walk/walk_back_2.png")
+      idle: _sp("overworld_walk/walk_front_idle.png"),
+      left: _sp("overworld_walk/walk_left_idle.png"),
+      right: _sp("overworld_walk/walk_right_idle.png"),
+      up: _sp("overworld_walk/walk_back_idle.png"),
+      down: _sp("overworld_walk/walk_front_idle.png"),
+      walkF1: _sp("overworld_walk/walk_front_1.png"),
+      walkF2: _sp("overworld_walk/walk_front_2.png"),
+      walkL1: _sp("overworld_walk/walk_left_1.png"),
+      walkL2: _sp("overworld_walk/walk_left_2.png"),
+      walkR1: _sp("overworld_walk/walk_right_1.png"),
+      walkR2: _sp("overworld_walk/walk_right_2.png"),
+      walkU1: _sp("overworld_walk/walk_back_1.png"),
+      walkU2: _sp("overworld_walk/walk_back_2.png")
     };
     PETS = {
       /* —— Trang 1 —— */
@@ -2707,8 +2707,8 @@ var init_style = __esm({
     .pet[data-pet="sans"].flip .pbody img { transform: none; }   /* Sans x\u1EED l\xFD flip ri\xEAng qua sprite src */
     
     @keyframes sans_sleep_anim {
-      0%, 49.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/15_sleep_stand/sprite-12-1.png"); }
-      50%, 100% { content: url("plugins/sillytavern-farm-extension/sans sprites/15_sleep_stand/sprite-12-2.png"); }
+      0%, 49.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/sleep_stand/sprite-12-1.png"); }
+      50%, 100% { content: url("plugins/sillytavern-farm-extension/sans sprites/sleep_stand/sprite-12-2.png"); }
     }
     .pet[data-pet="sans"].sleep .pbody img[data-sans-sprite] {
       animation: sans_sleep_anim 2s infinite;

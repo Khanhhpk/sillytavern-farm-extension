@@ -165,8 +165,8 @@ export const styleCSS = `
     .pet[data-pet="sans"].flip .pbody img { transform: none; }   /* Sans xử lý flip riêng qua sprite src */
     
     @keyframes sans_sleep_anim {
-      0%, 49.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/15_sleep_stand/sprite-12-1.png"); }
-      50%, 100% { content: url("plugins/sillytavern-farm-extension/sans sprites/15_sleep_stand/sprite-12-2.png"); }
+      0%, 49.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/sleep_stand/sprite-12-1.png"); }
+      50%, 100% { content: url("plugins/sillytavern-farm-extension/sans sprites/sleep_stand/sprite-12-2.png"); }
     }
     .pet[data-pet="sans"].sleep .pbody img[data-sans-sprite] {
       animation: sans_sleep_anim 2s infinite;
