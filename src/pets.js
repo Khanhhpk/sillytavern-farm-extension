@@ -114,20 +114,20 @@ export function sansIdleAction(el) {
   const actions = ['icecream', 'stool', 'stool_chup', 'stool_comb'];
   const act = actions[Math.floor(Math.random() * actions.length)];
   const id = el.dataset.pet;
-  el.dataset.sansAction = act;
-  startSansIdleLoop();
+  playSansAction(el, act);
   petIdleT[id] = window.setTimeout(() => wakeSans(el), 15000 + Math.random() * 15000);
 }
 export function wakeSans(el) {
   const id = el.dataset.pet;
   if (petIdleT[id]) { window.clearTimeout(petIdleT[id]); delete petIdleT[id]; }
   delete el.dataset.sansAction;
+  stopSansAction(el);
 }
 
 export function sleepPet(el) {
   const id = el.dataset.pet;
   el.classList.add('sleep');
-  if (id === 'sans') startSansIdleLoop();
+  if (id === 'sans') playSansAction(el, 'sleep_stand');
   el.insertAdjacentHTML('beforeend', '<span class="zzz">Z</span><span class="zzz z2">z</span>');
   petSleepT[id] = window.setTimeout(() => wakePet(el, false), 40000 + Math.random() * 40000);
 }
@@ -143,36 +143,49 @@ export function wakePet(el, startled) {
     const me = petEl(mate);
     if (startled && me && me.classList.contains('sleep')) window.setTimeout(() => wakePet(me, true), 260);
   }
+  if (id === 'sans') stopSansAction(el);
   if (startled) petBubble(el, '?!');
 }
 
-let sansIdleTimer = null;
-export function startSansIdleLoop() {
-  if (sansIdleTimer) return;
-  sansIdleTimer = window.setInterval(() => {
-    const el = petEl('sans');
-    if (!el || !el.isConnected) return;
-    const isSleep = el.classList.contains('sleep');
-    const action = el.dataset.sansAction || (isSleep ? 'sleep_stand' : null);
+export const petAnimT = {}; // Bảng lưu timer hoạt ảnh đặc biệt
+
+export function playSansAction(el, action) {
+  const id = el.dataset.pet;
+  if (petAnimT[id]) window.clearInterval(petAnimT[id]);
+  
+  if (action !== 'sleep_stand') el.dataset.sansAction = action;
+  sansStep[id] = 0;
+  
+  petAnimT[id] = window.setInterval(() => {
+    if (!el.isConnected || el.classList.contains('walk')) return;
     
-    // Only animate if there's a special action or sleep (and not walking, since walk has its own hopStep)
-    if (action && !el.classList.contains('walk')) {
-      sansStep['sans'] = (sansStep['sans'] || 0) + 1;
-      const sp = sansSpriteForAction(action, sansStep['sans']);
-      const img = el.querySelector('[data-sans-sprite]');
-      if (img) {
-        img.src = sp.src;
-        img.style.transform = sp.flip ? 'scaleX(-1)' : '';
-      }
-    } else if (!action && !el.classList.contains('walk')) {
-      // Ensure reset if no action and not walking
-      const img = el.querySelector('[data-sans-sprite]');
-      if (img) {
-        img.src = sansSpriteForAction(null, 0).src;
-      }
+    // Tự động dừng nếu state bị xoá (ví dụ gọi script test ngoài luồng)
+    if (action !== 'sleep_stand' && el.dataset.sansAction !== action) return stopSansAction(el);
+    if (action === 'sleep_stand' && !el.classList.contains('sleep')) return stopSansAction(el);
+    
+    sansStep[id] = (sansStep[id] || 0) + 1;
+    const sp = sansSpriteForAction(action, sansStep[id]);
+    const img = el.querySelector('[data-sans-sprite]');
+    if (img) {
+      img.src = sp.src;
+      img.style.transform = sp.flip ? 'scaleX(-1)' : '';
     }
-  }, 200); // 200ms per frame
+  }, 200); // 200ms mỗi frame
 }
+
+export function stopSansAction(el) {
+  const id = el.dataset.pet;
+  if (petAnimT[id]) {
+    window.clearInterval(petAnimT[id]);
+    delete petAnimT[id];
+  }
+  const img = el.querySelector('[data-sans-sprite]');
+  if (img && !el.classList.contains('walk')) {
+    img.src = sansSpriteForAction(null, 0).src; // Về idle
+    img.style.transform = '';
+  }
+}
+
 
 /* v0.7③: kho tương tác trứng phục sinh —— tiểu phẩm ngẫu nhiên tần suất thấp (đụng đầu nảy ra / lây ngáp / ngủ chồng đống / rượt đuổi):
    chọn diễn viên rồi khoá lại (tuần tra không giành người), diễn xong ai về nhà nấy; render lại bảng = tắt đèn giải tán; cùng một vở không diễn liên tiếp */
