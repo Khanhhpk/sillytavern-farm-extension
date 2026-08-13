@@ -160,7 +160,7 @@ export function sansUltimateFarm(el) {
     
     if (!plots) continue;
     
-    for (let pi = 0; pi < blocks; pi++) {
+    for (let pi = 0; pi < blocks * 4; pi++) {
       const plot = plots[pi];
       if (!plot) continue;
       

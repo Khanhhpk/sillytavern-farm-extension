@@ -4365,7 +4365,7 @@ function sansUltimateFarm(el) {
     const blocks = page === 1 ? ctx.S.unlockedBlocks : page === 2 ? ctx.S.unlockedBlocks2 : ctx.S.unlockedBlocks3;
     const plots = page === 1 ? ctx.S.plots : page === 2 ? ctx.S.plots2 : ctx.S.plots3;
     if (!plots) continue;
-    for (let pi = 0; pi < blocks; pi++) {
+    for (let pi = 0; pi < blocks * 4; pi++) {
       const plot = plots[pi];
       if (!plot) continue;
       if (plot.crop) {
