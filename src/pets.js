@@ -189,9 +189,11 @@ export function sansUltimateFarm(el) {
   ctx.S.page = originalPage;
   
   if (acted) {
-    playSansAction(el, 'magic');
-    petBubble(el, 'heh, shortcuts.');
-    petIdleT['sans'] = window.setTimeout(() => wakeSans(el), 2000); // 2s duration for magic animation
+    if (el) {
+      playSansAction(el, 'magic');
+      petBubble(el, 'heh, shortcuts.');
+      petIdleT['sans'] = window.setTimeout(() => wakeSans(el), 2000); // 2s duration for magic animation
+    }
   }
   return acted;
 }
@@ -421,6 +423,11 @@ export function petFert(el, cry) {                             // Bé bí ẩn: 
 
 export function initPets() {
   wander = window.setInterval(() => {                  // Nhịp tuần tra: cứ 7s lại giao điểm đến / ru ngủ / mở tiểu phẩm cho các bé đang rảnh
+    // Chạy ngầm tính năng siêu thú cưng của Sans kể cả khi đóng bảng
+    if ((!ctx.win || !ctx.win.classList.contains('open')) && ctx.S && ctx.S.petsOut && ctx.S.petsOut.includes('sans')) {
+      sansUltimateFarm(null);
+    }
+    
     if (!ctx.win || !ctx.win.classList.contains('open')) return;           // Tối ưu: Dừng tuần tra và tính toán vị trí khi bảng bị ẩn
     const ov = All.$id('mascots');
     if (!ov || ov.clientWidth === 0) return;

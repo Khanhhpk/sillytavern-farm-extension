@@ -4392,9 +4392,11 @@ function sansUltimateFarm(el) {
   }
   ctx.S.page = originalPage;
   if (acted) {
-    playSansAction(el, "magic");
-    petBubble(el, "heh, shortcuts.");
-    petIdleT["sans"] = window.setTimeout(() => wakeSans(el), 2e3);
+    if (el) {
+      playSansAction(el, "magic");
+      petBubble(el, "heh, shortcuts.");
+      petIdleT["sans"] = window.setTimeout(() => wakeSans(el), 2e3);
+    }
   }
   return acted;
 }
@@ -4626,6 +4628,9 @@ function petFert(el, cry) {
 }
 function initPets() {
   wander = window.setInterval(() => {
+    if ((!ctx.win || !ctx.win.classList.contains("open")) && ctx.S && ctx.S.petsOut && ctx.S.petsOut.includes("sans")) {
+      sansUltimateFarm(null);
+    }
     if (!ctx.win || !ctx.win.classList.contains("open")) return;
     const ov = $id("mascots");
     if (!ov || ov.clientWidth === 0) return;
