@@ -195,12 +195,11 @@ function sansSpriteForAction(action, step) {
     return { src: _sp(`attack_leftright/attack_left_0${phase2 + 1}.png`), flip: false };
   }
   if (action === "flashing_eye") {
-    const phase2 = s2 % 4;
-    return { src: _sp(`flashing_eye/flashing_eye_0${phase2 + 1}.png`), flip: false };
+    const phase2 = s2 % 2;
+    return { src: _sp(`flashing_eye/flash_front_${phase2 === 0 ? "cyan" : "yellow"}.png`), flip: false };
   }
   if (action === "shrug") {
-    const phase2 = s2 % 4;
-    return { src: _sp(`shrug/shrug_0${phase2 + 1}.png`), flip: false };
+    return { src: _sp(`shrug/sprite-6-2.png`), flip: false };
   }
   if (action === "gaster_charge") {
     return { src: _sp(`gaster_blaster/blaster_left_close.png`), flip: false };
