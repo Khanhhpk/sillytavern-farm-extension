@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "firebase": "^12.17.1",
+    "jimp": "^0.22.10",
     "peerjs": "^1.5.5"
   }
 }

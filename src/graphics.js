@@ -1188,14 +1188,14 @@ const _sansBase = (() => {
 const _sp = (p) => _sansBase + 'sans%20sprites/' + p;
 export const SANS_SPRITES = {
   idle:    _sp('05_full_body/full_body_front.png'),
-  right:   _sp('02_torso_side/torso_side_01.png'),
-  left:    _sp('02_torso_side/torso_side_01.png'),
+  right:   _sp('05_full_body_walk/walk_side_01.png'),
+  left:    _sp('05_full_body_walk/walk_side_01.png'),
   up:      _sp('05_full_body/full_body_side.png'),
   down:    _sp('05_full_body/full_body_front.png'),
-  walkF1:  _sp('01_torso_front/torso_front_01.png'),
-  walkF2:  _sp('01_torso_front/torso_front_03.png'),
-  walkS1:  _sp('02_torso_side/torso_side_01.png'),
-  walkS2:  _sp('02_torso_side/torso_side_03.png'),
+  walkF1:  _sp('05_full_body_walk/walk_front_01.png'),
+  walkF2:  _sp('05_full_body_walk/walk_front_02.png'),
+  walkS1:  _sp('05_full_body_walk/walk_side_01.png'),
+  walkS2:  _sp('05_full_body_walk/walk_side_02.png'),
 };
 export function sansSpriteFor(dx, dy, step) {
   const s = step || 0;

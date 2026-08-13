@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { background: #333; color: white; padding: 50px; font-family: sans-serif; }
+  .sans-container {
+    position: relative;
+    width: 23px;
+    height: 30px;
+    transform: scale(4);
+    transform-origin: top left;
+    image-rendering: pixelated;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .sans-container img {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  #head { top: 0; z-index: 3; }
+  #torso { top: 14px; z-index: 2; }
+  #legs { top: 22px; z-index: 1; }
+  
+  .controls { margin-top: 150px; }
+</style>
+</head>
+<body>
+  <div style="display:flex; gap: 100px;">
+    <div>
+      <h3>Composite</h3>
+      <div class="sans-container">
+        <img id="legs" src="sans sprites/03_legs_front/legs_front_02.png" />
+        <img id="torso" src="sans sprites/01_torso_front/torso_front_02.png" />
+        <img id="head" src="sans sprites/08_face_normal/face_front_smile_01.png" />
+      </div>
+    </div>
+    <div>
+      <h3>Reference</h3>
+      <div class="sans-container" style="width:23px; height:30px;">
+        <img src="sans sprites/05_full_body/full_body_front.png" style="top:0; left:0; transform:none;" />
+      </div>
+    </div>
+  </div>
+  
+  <div class="controls">
+    <label>Head Top: <input type="number" id="h-top" value="0"></label><br>
+    <label>Torso Top: <input type="number" id="t-top" value="14"></label><br>
+    <label>Legs Top: <input type="number" id="l-top" value="22"></label><br>
+  </div>
+  
+  <script>
+    document.querySelectorAll('input').forEach(inp => {
+      inp.addEventListener('input', () => {
+        document.getElementById('head').style.top = document.getElementById('h-top').value + 'px';
+        document.getElementById('torso').style.top = document.getElementById('t-top').value + 'px';
+        document.getElementById('legs').style.top = document.getElementById('l-top').value + 'px';
+      });
+    });
+  </script>
+</body>
+</html>
