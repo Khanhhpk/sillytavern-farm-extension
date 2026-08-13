@@ -161,18 +161,26 @@ function mulberry32(a) {
 }
 function sansSpriteFor(dx, dy, step) {
   const s2 = step || 0;
-  const alt = (s2 & 1) === 0;
+  const phase2 = s2 % 4;
   if (Math.abs(dx) < 1 && Math.abs(dy) < 1)
     return { src: SANS_SPRITES.idle, flip: false };
   const angle = Math.atan2(dy, dx) * (180 / Math.PI);
   if (angle > -35 && angle <= 35) {
-    return { src: alt ? SANS_SPRITES.walkR1 : SANS_SPRITES.walkR2, flip: false };
+    if (phase2 === 0) return { src: SANS_SPRITES.walkR1, flip: false };
+    if (phase2 === 2) return { src: SANS_SPRITES.walkR2, flip: false };
+    return { src: SANS_SPRITES.right, flip: false };
   } else if (angle > 145 || angle <= -145) {
-    return { src: alt ? SANS_SPRITES.walkL1 : SANS_SPRITES.walkL2, flip: false };
+    if (phase2 === 0) return { src: SANS_SPRITES.walkL1, flip: false };
+    if (phase2 === 2) return { src: SANS_SPRITES.walkL2, flip: false };
+    return { src: SANS_SPRITES.left, flip: false };
   } else if (angle > 35 && angle <= 145) {
-    return { src: alt ? SANS_SPRITES.walkU1 : SANS_SPRITES.walkU2, flip: false };
+    if (phase2 === 0) return { src: SANS_SPRITES.walkU1, flip: false };
+    if (phase2 === 2) return { src: SANS_SPRITES.walkU2, flip: false };
+    return { src: SANS_SPRITES.up, flip: false };
   } else {
-    return { src: alt ? SANS_SPRITES.walkF1 : SANS_SPRITES.walkF2, flip: false };
+    if (phase2 === 0) return { src: SANS_SPRITES.walkF1, flip: false };
+    if (phase2 === 2) return { src: SANS_SPRITES.walkF2, flip: false };
+    return { src: SANS_SPRITES.down, flip: false };
   }
 }
 function petSVG(name3, px) {
