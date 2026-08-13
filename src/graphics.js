@@ -1187,15 +1187,20 @@ const _sansBase = (() => {
 })();
 const _sp = (p) => _sansBase + 'sans%20sprites/' + p;
 export const SANS_SPRITES = {
-  idle:    _sp('05_full_body/full_body_front.png'),
-  right:   _sp('05_full_body_walk/walk_side_01.png'),
-  left:    _sp('05_full_body_walk/walk_side_01.png'),
-  up:      _sp('05_full_body/full_body_side.png'),
-  down:    _sp('05_full_body/full_body_front.png'),
-  walkF1:  _sp('05_full_body_walk/walk_front_01.png'),
-  walkF2:  _sp('05_full_body_walk/walk_front_02.png'),
-  walkS1:  _sp('05_full_body_walk/walk_side_01.png'),
-  walkS2:  _sp('05_full_body_walk/walk_side_02.png'),
+  idle:  _sp('00_overworld_walk/walk_front_idle.png'),
+  left:  _sp('00_overworld_walk/walk_left_idle.png'),
+  right: _sp('00_overworld_walk/walk_right_idle.png'),
+  up:    _sp('00_overworld_walk/walk_back_idle.png'),
+  down:  _sp('00_overworld_walk/walk_front_idle.png'),
+
+  walkF1:  _sp('00_overworld_walk/walk_front_1.png'),
+  walkF2:  _sp('00_overworld_walk/walk_front_2.png'),
+  walkL1:  _sp('00_overworld_walk/walk_left_1.png'),
+  walkL2:  _sp('00_overworld_walk/walk_left_2.png'),
+  walkR1:  _sp('00_overworld_walk/walk_right_1.png'),
+  walkR2:  _sp('00_overworld_walk/walk_right_2.png'),
+  walkU1:  _sp('00_overworld_walk/walk_back_1.png'),
+  walkU2:  _sp('00_overworld_walk/walk_back_2.png'),
 };
 export function sansSpriteFor(dx, dy, step) {
   const s = step || 0;
@@ -1215,13 +1220,13 @@ export function sansSpriteFor(dx, dy, step) {
   
   if (angle > -35 && angle <= 35) {
     // Đi sang phải
-    return { src: alt ? SANS_SPRITES.walkS1 : SANS_SPRITES.walkS2, flip: true }; 
+    return { src: alt ? SANS_SPRITES.walkR1 : SANS_SPRITES.walkR2, flip: false }; 
   } else if (angle > 145 || angle <= -145) {
     // Đi sang trái
-    return { src: alt ? SANS_SPRITES.walkS1 : SANS_SPRITES.walkS2, flip: false };
+    return { src: alt ? SANS_SPRITES.walkL1 : SANS_SPRITES.walkL2, flip: false };
   } else if (angle > 35 && angle <= 145) {
-    // Đi lên (do không có sprite quay lưng, ta dùng tạm sprite "up" đã gán)
-    return { src: SANS_SPRITES.up, flip: false }; 
+    // Đi lên (away from camera) -> quay lưng
+    return { src: alt ? SANS_SPRITES.walkU1 : SANS_SPRITES.walkU2, flip: false }; 
   } else {
     // Đi xuống (hướng về camera) -> Dùng hoạt ảnh đi bộ trực diện
     return { src: alt ? SANS_SPRITES.walkF1 : SANS_SPRITES.walkF2, flip: false };
