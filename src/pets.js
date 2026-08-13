@@ -186,6 +186,10 @@ export function stopSansAction(el) {
   }
 }
 
+// Cho phép người dùng test trên console
+window.playSansAction = playSansAction;
+window.stopSansAction = stopSansAction;
+
 
 /* v0.7③: kho tương tác trứng phục sinh —— tiểu phẩm ngẫu nhiên tần suất thấp (đụng đầu nảy ra / lây ngáp / ngủ chồng đống / rượt đuổi):
    chọn diễn viên rồi khoá lại (tuần tra không giành người), diễn xong ai về nhà nấy; render lại bảng = tắt đèn giải tán; cùng một vở không diễn liên tiếp */
