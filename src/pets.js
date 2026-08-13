@@ -187,8 +187,8 @@ export function stopSansAction(el) {
 }
 
 // Cho phép người dùng test trên console
-window.playSansAction = playSansAction;
-window.stopSansAction = stopSansAction;
+window['playSansAction'] = playSansAction;
+window['stopSansAction'] = stopSansAction;
 
 
 /* v0.7③: kho tương tác trứng phục sinh —— tiểu phẩm ngẫu nhiên tần suất thấp (đụng đầu nảy ra / lây ngáp / ngủ chồng đống / rượt đuổi):
