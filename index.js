@@ -181,6 +181,14 @@ function sansSpriteForAction(action, step) {
     const phase2 = Math.floor(s2 % 10 / 5);
     return { src: _sp(`sleep_stand/sprite-12-${phase2 + 1}.png`), flip: false };
   }
+  if (action === "magic") {
+    const phase2 = s2 % 10;
+    if (phase2 < 5) {
+      return { src: _sp(`attack_updown/attack_up_0${phase2 + 1}.png`), flip: false };
+    } else {
+      return { src: _sp(`attack_updown/attack_down_0${phase2 - 4}.png`), flip: false };
+    }
+  }
   return { src: SANS_SPRITES.idle, flip: false };
 }
 function sansSpriteFor(dx, dy, step) {
@@ -3958,8 +3966,8 @@ function regrowMs(cropId) {
   const c2 = CROPS[cropId] || {};
   return TEST_MODE ? REGROW : (c2.regrowM || Math.round((c2.grow || 30) * 0.6)) * MIN;
 }
-function plant(pi, cropId) {
-  if ((ctx.S.seeds[cropId] || 0) <= 0) return toast("H\u1EBFt h\u1EA1t gi\u1ED1ng n\xE0y r\u1ED3i");
+function plant(pi, cropId, quiet) {
+  if ((ctx.S.seeds[cropId] || 0) <= 0) return quiet ? false : toast("H\u1EBFt h\u1EA1t gi\u1ED1ng n\xE0y r\u1ED3i");
   let realId = cropId;
   if (cropId === "mystery") {
     const fam = ["dream", "key", "fang"][Math.floor(Math.random() * 3)];
@@ -3967,12 +3975,12 @@ function plant(pi, cropId) {
   } else {
     const c3 = CROPS[cropId];
     if (!c3) {
-      toast("H\u1EA1t gi\u1ED1ng n\xE0y \u0111\xE3 h\u1ECFng (kh\xF4ng t\u1ED3n t\u1EA1i trong phi\xEAn b\u1EA3n n\xE0y)!");
+      if (!quiet) toast("H\u1EA1t gi\u1ED1ng n\xE0y \u0111\xE3 h\u1ECFng (kh\xF4ng t\u1ED3n t\u1EA1i trong phi\xEAn b\u1EA3n n\xE0y)!");
       ctx.S.seeds[cropId] = 0;
-      return;
+      return false;
     }
     const z = c3.zone || 1;
-    if (z !== ctx.S.page) return toast(c3.name + " ph\u1EA3i tr\u1ED3ng \u1EDF " + ZONE_NAME[z] + " (trang " + z + ")");
+    if (z !== ctx.S.page) return quiet ? false : toast(c3.name + " ph\u1EA3i tr\u1ED3ng \u1EDF " + ZONE_NAME[z] + " (trang " + z + ")");
   }
   ctx.S.seeds[cropId]--;
   const g = growMs(realId);
@@ -3992,25 +4000,26 @@ function plant(pi, cropId) {
   renderPlots();
   return true;
 }
-function water(pi) {
+function water(pi, quiet) {
   const c2 = curPlots()[pi].crop;
-  if (!c2) return toast("\xD4 n\xE0y ch\u01B0a tr\u1ED3ng g\xEC");
-  if (now() >= c2.matureAt) return toast("Ch\xEDn r\u1ED3i, thu nhanh \u0111i!");
-  if (now() < c2.wateredUntil) return toast("V\u1EEBa t\u01B0\u1EDBi xong m\xE0");
+  if (!c2) return quiet ? false : toast("\xD4 n\xE0y ch\u01B0a tr\u1ED3ng g\xEC");
+  if (now() >= c2.matureAt) return quiet ? false : toast("Ch\xEDn r\u1ED3i, thu nhanh \u0111i!");
+  if (now() < c2.wateredUntil) return quiet ? false : toast("V\u1EEBa t\u01B0\u1EDBi xong m\xE0");
   c2.matureAt = now() + (c2.matureAt - now()) * 0.75;
   c2.wateredUntil = now() + WATER_CD;
   save();
   renderPlots();
-  toast("T\u01B0\u1EDBi n\u01B0\u1EDBc xong, c\xE2y m\u1ECDc nhanh h\u01A1n!");
+  if (!quiet) toast("T\u01B0\u1EDBi n\u01B0\u1EDBc xong, c\xE2y m\u1ECDc nhanh h\u01A1n!");
+  return true;
 }
 function fertilize(pi, fid, quiet) {
   const c2 = curPlots()[pi].crop;
-  if (!c2) return toast("\xD4 n\xE0y ch\u01B0a tr\u1ED3ng g\xEC");
-  if ((ctx.S.ferts[fid] || 0) <= 0) return toast("H\u1EBFt lo\u1EA1i ph\xE2n n\xE0y r\u1ED3i");
+  if (!c2) return quiet ? false : toast("\xD4 n\xE0y ch\u01B0a tr\u1ED3ng g\xEC");
+  if ((ctx.S.ferts[fid] || 0) <= 0) return quiet ? false : toast("H\u1EBFt lo\u1EA1i ph\xE2n n\xE0y r\u1ED3i");
   if (!c2.fertUsed) c2.fertUsed = {};
-  if (c2.fertUsed[fid]) return toast("V\u1EE5 n\xE0y \u0111\xE3 b\xF3n " + FERTS[fid].name + " r\u1ED3i");
+  if (c2.fertUsed[fid]) return quiet ? false : toast("V\u1EE5 n\xE0y \u0111\xE3 b\xF3n " + FERTS[fid].name + " r\u1ED3i");
   if (fid === "compost") {
-    if (now() >= c2.matureAt) return toast("Ch\xEDn r\u1ED3i, kh\u1ECFi b\xF3n ph\xE2n");
+    if (now() >= c2.matureAt) return quiet ? false : toast("Ch\xEDn r\u1ED3i, kh\u1ECFi b\xF3n ph\xE2n");
     c2.matureAt = now() + (c2.matureAt - now()) * 0.75;
   } else c2.shiny = true;
   c2.fertUsed[fid] = true;
@@ -4209,6 +4218,7 @@ __export(pets_exports, {
   renderPets: () => renderPets,
   sansIdleAction: () => sansIdleAction,
   sansStep: () => sansStep,
+  sansUltimateFarm: () => sansUltimateFarm,
   scene: () => scene,
   sceneBusy: () => sceneBusy,
   sceneTimer: () => sceneTimer,
@@ -4335,6 +4345,62 @@ function sleepPet(el) {
   if (id === "sans") playSansAction(el, "sleep_stand");
   el.insertAdjacentHTML("beforeend", '<span class="zzz">Z</span><span class="zzz z2">z</span>');
   petSleepT[id] = window.setTimeout(() => wakePet(el, false), 4e4 + Math.random() * 4e4);
+}
+function getBestSeedForZone(zone) {
+  let best = null;
+  let bestValue = -1;
+  for (const [id, count2] of Object.entries(ctx.S.seeds)) {
+    if (count2 <= 0) continue;
+    const def = CROPS[id];
+    if (!def) continue;
+    const z = def.zone || 1;
+    if (z === zone && def.sell > bestValue) {
+      bestValue = def.sell;
+      best = id;
+    }
+  }
+  return best;
+}
+function sansUltimateFarm(el) {
+  let acted = false;
+  const originalPage = ctx.S.page;
+  for (let page = 1; page <= 3; page++) {
+    ctx.S.page = page;
+    const blocks = page === 1 ? ctx.S.unlockedBlocks : page === 2 ? ctx.S.unlockedBlocks2 : ctx.S.unlockedBlocks3;
+    const plots = page === 1 ? ctx.S.plots : page === 2 ? ctx.S.plots2 : ctx.S.plots3;
+    if (!plots) continue;
+    for (let pi = 0; pi < blocks; pi++) {
+      const plot = plots[pi];
+      if (!plot) continue;
+      if (plot.crop) {
+        if (now() >= plot.crop.matureAt) {
+          if (harvest(pi, true)) acted = true;
+        } else {
+          if (now() >= plot.crop.wateredUntil) {
+            if (water(pi, true)) acted = true;
+          }
+          if (ctx.S.ferts["compost"] > 0 && (!plot.crop.fertUsed || !plot.crop.fertUsed["compost"])) {
+            if (fertilize(pi, "compost", true)) acted = true;
+          }
+          if (ctx.S.ferts["shiny"] > 0 && (!plot.crop.fertUsed || !plot.crop.fertUsed["shiny"])) {
+            if (fertilize(pi, "shiny", true)) acted = true;
+          }
+        }
+      } else {
+        const bestSeed = getBestSeedForZone(page);
+        if (bestSeed) {
+          if (plant(pi, bestSeed, true)) acted = true;
+        }
+      }
+    }
+  }
+  ctx.S.page = originalPage;
+  if (acted) {
+    playSansAction(el, "magic");
+    petBubble(el, "heh, shortcuts.");
+    petIdleT["sans"] = window.setTimeout(() => wakeSans(el), 2e3);
+  }
+  return acted;
 }
 function wakePet(el, startled) {
   const id = el.dataset.pet;
@@ -4572,6 +4638,7 @@ function initPets() {
       const id = el.dataset.pet;
       if (sceneBusy(id) || petTgt[id] || el.classList.contains("sleep") || el.dataset.sansAction) return;
       const isSans = id === "sans";
+      if (isSans && sansUltimateFarm(el)) return;
       const lazyChance = isSans ? 0.35 : 0.12;
       if (!PETS[id].job && Math.random() < lazyChance) {
         if (isSans && Math.random() < 0.7) return sansIdleAction(el);
@@ -55187,6 +55254,7 @@ __export(all_exports, {
   sansSpriteFor: () => sansSpriteFor,
   sansSpriteForAction: () => sansSpriteForAction,
   sansStep: () => sansStep,
+  sansUltimateFarm: () => sansUltimateFarm,
   save: () => save,
   saveCharState: () => saveCharState,
   saveSec: () => saveSec,

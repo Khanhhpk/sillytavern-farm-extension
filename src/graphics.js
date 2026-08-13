@@ -1228,6 +1228,15 @@ export function sansSpriteForAction(action, step) {
     const phase = Math.floor((s % 10) / 5);
     return { src: _sp(`sleep_stand/sprite-12-${phase + 1}.png`), flip: false };
   }
+  if (action === 'magic') {
+    // 5 nhịp vung tay lên, 5 nhịp vung tay xuống (mỗi frame 200ms -> tổng 2.0s)
+    const phase = s % 10;
+    if (phase < 5) {
+      return { src: _sp(`attack_updown/attack_up_0${phase + 1}.png`), flip: false };
+    } else {
+      return { src: _sp(`attack_updown/attack_down_0${phase - 4}.png`), flip: false };
+    }
+  }
   return { src: SANS_SPRITES.idle, flip: false };
 }
 

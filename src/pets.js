@@ -6,7 +6,7 @@ import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, L
 import { sh } from './ui.js';
 import { save, curBlocks, curPlots } from './state.js';
 import { renderStatus, pickFrom } from './render.js';
-import { plant, harvest, fertilize } from './logic.js';
+import { plant, harvest, fertilize, water } from './logic.js';
 
 /* ---------- Thú cưng: render động + chọc chọc (uỷ quyền listener, bong bóng trên đầu, đủ 10 phút mới thật sự rơi tiền) ---------- */
 /* extraClass tuỳ chọn: trường đua truyền 'rb' để đổi chỗ neo bong bóng.
@@ -130,6 +130,70 @@ export function sleepPet(el) {
   if (id === 'sans') playSansAction(el, 'sleep_stand');
   el.insertAdjacentHTML('beforeend', '<span class="zzz">Z</span><span class="zzz z2">z</span>');
   petSleepT[id] = window.setTimeout(() => wakePet(el, false), 40000 + Math.random() * 40000);
+}
+
+// Logic Tự động hoá của Sans
+function getBestSeedForZone(zone) {
+  let best = null;
+  let bestValue = -1;
+  for (const [id, count] of Object.entries(ctx.S.seeds)) {
+    if (count <= 0) continue;
+    const def = CROPS[id];
+    if (!def) continue;
+    const z = def.zone || 1;
+    if (z === zone && def.sell > bestValue) {
+      bestValue = def.sell;
+      best = id;
+    }
+  }
+  return best;
+}
+
+export function sansUltimateFarm(el) {
+  let acted = false;
+  const originalPage = ctx.S.page;
+  
+  for (let page = 1; page <= 3; page++) {
+    ctx.S.page = page;
+    const blocks = page === 1 ? ctx.S.unlockedBlocks : (page === 2 ? ctx.S.unlockedBlocks2 : ctx.S.unlockedBlocks3);
+    const plots = page === 1 ? ctx.S.plots : (page === 2 ? ctx.S.plots2 : ctx.S.plots3);
+    
+    if (!plots) continue;
+    
+    for (let pi = 0; pi < blocks; pi++) {
+      const plot = plots[pi];
+      if (!plot) continue;
+      
+      if (plot.crop) {
+        if (now() >= plot.crop.matureAt) {
+          if (harvest(pi, true)) acted = true;
+        } else {
+          if (now() >= plot.crop.wateredUntil) {
+            if (water(pi, true)) acted = true;
+          }
+          if (ctx.S.ferts['compost'] > 0 && (!plot.crop.fertUsed || !plot.crop.fertUsed['compost'])) {
+            if (fertilize(pi, 'compost', true)) acted = true;
+          }
+          if (ctx.S.ferts['shiny'] > 0 && (!plot.crop.fertUsed || !plot.crop.fertUsed['shiny'])) {
+            if (fertilize(pi, 'shiny', true)) acted = true;
+          }
+        }
+      } else {
+        const bestSeed = getBestSeedForZone(page);
+        if (bestSeed) {
+          if (plant(pi, bestSeed, true)) acted = true;
+        }
+      }
+    }
+  }
+  ctx.S.page = originalPage;
+  
+  if (acted) {
+    playSansAction(el, 'magic');
+    petBubble(el, 'heh, shortcuts.');
+    petIdleT['sans'] = window.setTimeout(() => wakeSans(el), 2000); // 2s duration for magic animation
+  }
+  return acted;
 }
 export function wakePet(el, startled) {
   const id = el.dataset.pet;
@@ -367,6 +431,10 @@ export function initPets() {
       if (sceneBusy(id) || petTgt[id] || el.classList.contains('sleep') || el.dataset.sansAction) return;   // Đang diễn / đang đi / đang ngủ thì đừng làm phiền
       
       const isSans = id === 'sans';
+      
+      // Khả năng siêu cấp tự động hoá của Sans
+      if (isSans && sansUltimateFarm(el)) return;
+      
       const lazyChance = isSans ? 0.35 : 0.12;
       
       if (!PETS[id].job && Math.random() < lazyChance) {
