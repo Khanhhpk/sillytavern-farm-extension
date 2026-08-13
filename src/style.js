@@ -170,8 +170,8 @@ export const styleCSS = `
       70%       { transform: translateY(1px) scale(1.01,.99); }
     }
     @keyframes sanswalk {
-      0%   { transform: translateY(0px); }
-      50%  { transform: translateY(-1px); }
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(0); }
     }
     .zzz { position: absolute; bottom: calc(100% - 8px); left: 68%; font-size: 12px; font-weight: bold;
       color: #7a90c8; text-shadow: 1px 1px 0 #fff; pointer-events: none; animation: zrise 2.6s linear infinite; }

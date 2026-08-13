@@ -1205,8 +1205,8 @@ export function sansSpriteFor(dx, dy, step) {
   if (Math.abs(dx) >= Math.abs(dy)) {                      // Hướng ngang ưu tiên
     const src = alt ? SANS_SPRITES.walkS1 : SANS_SPRITES.walkS2;
     return dx > 0
-      ? { src, flip: false }                               // sang phải
-      : { src, flip: true  };                              // sang trái
+      ? { src, flip: true }                               // sang phải (flip left-facing sprite)
+      : { src, flip: false  };                            // sang trái
   }
   // Hướng dọc — dy trong hệ toạ độ pet: dương = lên màn hình
   const src = alt ? SANS_SPRITES.walkF1 : SANS_SPRITES.walkF2;
