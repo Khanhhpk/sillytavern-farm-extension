@@ -1333,7 +1333,7 @@ export const PETS = {
   /* —— Át chủ bài (page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
   peach_soda: { name: 'Bé soda đào', page: 1, price: 9999, cry: ['Bốp——!', '(nổi một bong bóng nhỏ)', 'Xì~', '(vị ngòn ngọt)'], desc: 'Loại tìm kho báu · tinh linh soda vị đào · dễ thương quá mức nên đắt nhất' },
   penguin: { name: 'Chim cánh cụt', page: 1, price: 100000, cry: ['Pingu!', 'Núp núp~', 'Trượt tuyết nào!', 'Cánh cụt!'], desc: 'Loại đặc biệt · AFK mỗi 1 tiếng mang về 1 vé gacha ngẫu nhiên (70% vé thường, 30% vé đặc biệt)' },
-  sans: { name: 'Sans', page: 1, price: 0, special: true, cry: ['heh.', '...', 'wanna have a bad time?', '(ngủ gật)', 'cool dude.', 'not gonna budge.'], desc: 'Loại đặc biệt · The coolest skeleton around · có hoạt ảnh di chuyển đầy đủ 4 hướng' },
+  sans: { name: 'Sans', page: 1, price: 0, special: true, cry: ['heh.', '...', 'wanna have a bad time?', '(ngủ gật)', 'cool dude.', 'not gonna budge.'], desc: 'Loại đặc biệt · The coolest skeleton around · Siêu thú cưng: Tự động chăm sóc cả 3 trang trại' },
   naoyaSlime: { name: 'Naoya', page: 1, hidden: true, price: 0, cry: ['Rác rưởi!', 'Lũ yếu kém...', 'Bẩn hết cả người!', '(lườm khinh bỉ)'], desc: 'Loại đặc biệt (Thành tựu) · Kẻ tự xưng là thiên tài nhưng lại bị kẹt trong hình hài Slime tròn vo núng nính.' }
 };
 export const PASSES = {
