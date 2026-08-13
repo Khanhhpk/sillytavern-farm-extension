@@ -1202,6 +1202,31 @@ export const SANS_SPRITES = {
   walkU1:  _sp('overworld_walk/walk_back_1.png'),
   walkU2:  _sp('overworld_walk/walk_back_2.png'),
 };
+
+export function sansSpriteForAction(action, step) {
+  const s = step || 0;
+  if (action === 'icecream') {
+    const phase = s % 10;
+    return { src: _sp(`icecream/sprite-18-${phase + 1}.png`), flip: false };
+  }
+  if (action === 'stool_chup') {
+    const phase = s % 10;
+    return { src: _sp(`stool_chup/sprite-10-${phase + 1}.png`), flip: false };
+  }
+  if (action === 'stool_comb') {
+    const phase = s % 3;
+    return { src: _sp(`stool_comb/sprite-9-${phase + 1}.png`), flip: false };
+  }
+  if (action === 'stool') {
+    const phase = Math.floor((s % 4) / 2); // 2 steps per frame to slow it down, or just %2
+    return { src: _sp(`stool/sprite-8-${(s % 2) + 1}.png`), flip: false };
+  }
+  if (action === 'sleep_stand') {
+    return { src: _sp(`sleep_stand/sprite-12-${(s % 2) + 1}.png`), flip: false };
+  }
+  return { src: SANS_SPRITES.idle, flip: false };
+}
+
 export function sansSpriteFor(dx, dy, step) {
   const s = step || 0;
   const phase = s % 4;

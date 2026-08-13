@@ -2,7 +2,7 @@ import { now } from './state.js';
 import { ctx } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
-import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P, sansSpriteFor } from './graphics.js';
+import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P, sansSpriteFor, sansSpriteForAction } from './graphics.js';
 import { sh } from './ui.js';
 import { save, curBlocks, curPlots } from './state.js';
 import { renderStatus, pickFrom } from './render.js';
@@ -115,6 +115,7 @@ export function sansIdleAction(el) {
   const act = actions[Math.floor(Math.random() * actions.length)];
   const id = el.dataset.pet;
   el.dataset.sansAction = act;
+  startSansIdleLoop();
   petIdleT[id] = window.setTimeout(() => wakeSans(el), 15000 + Math.random() * 15000);
 }
 export function wakeSans(el) {
@@ -126,6 +127,7 @@ export function wakeSans(el) {
 export function sleepPet(el) {
   const id = el.dataset.pet;
   el.classList.add('sleep');
+  if (id === 'sans') startSansIdleLoop();
   el.insertAdjacentHTML('beforeend', '<span class="zzz">Z</span><span class="zzz z2">z</span>');
   petSleepT[id] = window.setTimeout(() => wakePet(el, false), 40000 + Math.random() * 40000);
 }
@@ -143,6 +145,35 @@ export function wakePet(el, startled) {
   }
   if (startled) petBubble(el, '?!');
 }
+
+let sansIdleTimer = null;
+export function startSansIdleLoop() {
+  if (sansIdleTimer) return;
+  sansIdleTimer = window.setInterval(() => {
+    const el = petEl('sans');
+    if (!el || !el.isConnected) return;
+    const isSleep = el.classList.contains('sleep');
+    const action = el.dataset.sansAction || (isSleep ? 'sleep_stand' : null);
+    
+    // Only animate if there's a special action or sleep (and not walking, since walk has its own hopStep)
+    if (action && !el.classList.contains('walk')) {
+      sansStep['sans'] = (sansStep['sans'] || 0) + 1;
+      const sp = sansSpriteForAction(action, sansStep['sans']);
+      const img = el.querySelector('[data-sans-sprite]');
+      if (img) {
+        img.src = sp.src;
+        img.style.transform = sp.flip ? 'scaleX(-1)' : '';
+      }
+    } else if (!action && !el.classList.contains('walk')) {
+      // Ensure reset if no action and not walking
+      const img = el.querySelector('[data-sans-sprite]');
+      if (img) {
+        img.src = sansSpriteForAction(null, 0).src;
+      }
+    }
+  }, 200); // 200ms per frame
+}
+
 /* v0.7③: kho tương tác trứng phục sinh —— tiểu phẩm ngẫu nhiên tần suất thấp (đụng đầu nảy ra / lây ngáp / ngủ chồng đống / rượt đuổi):
    chọn diễn viên rồi khoá lại (tuần tra không giành người), diễn xong ai về nhà nấy; render lại bảng = tắt đèn giải tán; cùng một vở không diễn liên tiếp */
 export const petArrive = {};                                    // Callback khi nhảy tới nơi
