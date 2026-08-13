@@ -164,12 +164,16 @@ function sansSpriteFor(dx, dy, step) {
   const alt = (s2 & 1) === 0;
   if (Math.abs(dx) < 1 && Math.abs(dy) < 1)
     return { src: SANS_SPRITES.idle, flip: false };
-  if (Math.abs(dx) >= Math.abs(dy)) {
-    const src2 = alt ? SANS_SPRITES.walkS1 : SANS_SPRITES.walkS2;
-    return dx > 0 ? { src: src2, flip: true } : { src: src2, flip: false };
+  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+  if (angle > -35 && angle <= 35) {
+    return { src: alt ? SANS_SPRITES.walkS1 : SANS_SPRITES.walkS2, flip: true };
+  } else if (angle > 145 || angle <= -145) {
+    return { src: alt ? SANS_SPRITES.walkS1 : SANS_SPRITES.walkS2, flip: false };
+  } else if (angle > 35 && angle <= 145) {
+    return { src: SANS_SPRITES.up, flip: false };
+  } else {
+    return { src: alt ? SANS_SPRITES.walkF1 : SANS_SPRITES.walkF2, flip: false };
   }
-  const src = alt ? SANS_SPRITES.walkF1 : SANS_SPRITES.walkF2;
-  return dy > 0 ? { src: SANS_SPRITES.up, flip: false } : { src: SANS_SPRITES.down, flip: false };
 }
 function petSVG(name3, px) {
   if (name3 === "sans") {

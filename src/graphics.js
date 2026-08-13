@@ -1199,20 +1199,33 @@ export const SANS_SPRITES = {
 };
 export function sansSpriteFor(dx, dy, step) {
   const s = step || 0;
-  const alt = (s & 1) === 0;                               // Alternates every call
+  const alt = (s & 1) === 0;
+
   if (Math.abs(dx) < 1 && Math.abs(dy) < 1)
     return { src: SANS_SPRITES.idle, flip: false };
-  if (Math.abs(dx) >= Math.abs(dy)) {                      // Hướng ngang ưu tiên
-    const src = alt ? SANS_SPRITES.walkS1 : SANS_SPRITES.walkS2;
-    return dx > 0
-      ? { src, flip: true }                               // sang phải (flip left-facing sprite)
-      : { src, flip: false  };                            // sang trái
+
+  // dy > 0 nghĩa là y đích lớn hơn y hiện tại -> dịch chuyển Y CSS âm hơn -> đi LÊN (away from camera)
+  // Tính góc di chuyển từ -180 đến 180 độ. (dx phải, dy lên)
+  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+  // Phân vùng 360 độ:
+  // Vùng Sideway (Ngang): -35° đến 35° (Phải) và 145° đến -145° (Trái)
+  // Vùng Up (Lên): 35° đến 145°
+  // Vùng Down (Xuống): -145° đến -35°
+  
+  if (angle > -35 && angle <= 35) {
+    // Đi sang phải
+    return { src: alt ? SANS_SPRITES.walkS1 : SANS_SPRITES.walkS2, flip: true }; 
+  } else if (angle > 145 || angle <= -145) {
+    // Đi sang trái
+    return { src: alt ? SANS_SPRITES.walkS1 : SANS_SPRITES.walkS2, flip: false };
+  } else if (angle > 35 && angle <= 145) {
+    // Đi lên (do không có sprite quay lưng, ta dùng tạm sprite "up" đã gán)
+    return { src: SANS_SPRITES.up, flip: false }; 
+  } else {
+    // Đi xuống (hướng về camera) -> Dùng hoạt ảnh đi bộ trực diện
+    return { src: alt ? SANS_SPRITES.walkF1 : SANS_SPRITES.walkF2, flip: false };
   }
-  // Hướng dọc — dy trong hệ toạ độ pet: dương = lên màn hình
-  const src = alt ? SANS_SPRITES.walkF1 : SANS_SPRITES.walkF2;
-  return dy > 0
-    ? { src: SANS_SPRITES.up,  flip: false }               // di chuyển lên
-    : { src: SANS_SPRITES.down, flip: false };             // di chuyển xuống
 }
 
 export function petSVG(name, px) {
