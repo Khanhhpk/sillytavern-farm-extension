@@ -171,6 +171,8 @@ export const styleCSS = `
     .pet[data-pet="sans"].sleep .pbody img[data-sans-sprite] {
       animation: sans_sleep_anim 2s infinite;
     }
+    .pet[data-pet="sans"][data-sans-action="stool"] .pbody img[data-sans-sprite] { animation: sans_stool 2s infinite; }
+    .pet[data-pet="sans"][data-sans-action="stool_comb"] .pbody img[data-sans-sprite] { animation: sans_stool_comb 2s infinite; }
     .zzz { position: absolute; bottom: calc(100% - 8px); left: 68%; font-size: 12px; font-weight: bold;
       color: #7a90c8; text-shadow: 1px 1px 0 #fff; pointer-events: none; animation: zrise 2.6s linear infinite; }
     .zzz.z2 { left: 52%; font-size: 10px; animation-delay: 1.3s; }
@@ -998,9 +1000,6 @@ export const blackjackStyles = `
         border-top: none;
         border-left: none;
     }
-}
-`;
-
 
     @keyframes sans_icecream {
       0%, 9.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/icecream/sprite-18-1.png"); }
@@ -1039,3 +1038,5 @@ export const blackjackStyles = `
     .pet[data-pet="sans"][data-sans-action="stool_chup"] .pbody img[data-sans-sprite] { animation: sans_stool_chup 2s infinite; }
     .pet[data-pet="sans"][data-sans-action="stool"] .pbody img[data-sans-sprite] { animation: sans_stool 2s infinite; }
     .pet[data-pet="sans"][data-sans-action="stool_comb"] .pbody img[data-sans-sprite] { animation: sans_stool_comb 2s infinite; }
+}
+`;

@@ -2713,6 +2713,8 @@ var init_style = __esm({
     .pet[data-pet="sans"].sleep .pbody img[data-sans-sprite] {
       animation: sans_sleep_anim 2s infinite;
     }
+    .pet[data-pet="sans"][data-sans-action="stool"] .pbody img[data-sans-sprite] { animation: sans_stool 2s infinite; }
+    .pet[data-pet="sans"][data-sans-action="stool_comb"] .pbody img[data-sans-sprite] { animation: sans_stool_comb 2s infinite; }
     .zzz { position: absolute; bottom: calc(100% - 8px); left: 68%; font-size: 12px; font-weight: bold;
       color: #7a90c8; text-shadow: 1px 1px 0 #fff; pointer-events: none; animation: zrise 2.6s linear infinite; }
     .zzz.z2 { left: 52%; font-size: 10px; animation-delay: 1.3s; }
@@ -3539,6 +3541,44 @@ var init_style = __esm({
         border-top: none;
         border-left: none;
     }
+
+    @keyframes sans_icecream {
+      0%, 9.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/icecream/sprite-18-1.png"); }
+      10%, 19.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/icecream/sprite-18-2.png"); }
+      20%, 29.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/icecream/sprite-18-3.png"); }
+      30%, 39.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/icecream/sprite-18-4.png"); }
+      40%, 49.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/icecream/sprite-18-5.png"); }
+      50%, 59.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/icecream/sprite-18-6.png"); }
+      60%, 69.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/icecream/sprite-18-7.png"); }
+      70%, 79.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/icecream/sprite-18-8.png"); }
+      80%, 89.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/icecream/sprite-18-9.png"); }
+      90%, 99.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/icecream/sprite-18-10.png"); }
+    }
+    @keyframes sans_stool_chup {
+      0%, 9.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool_chup/sprite-10-1.png"); }
+      10%, 19.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool_chup/sprite-10-2.png"); }
+      20%, 29.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool_chup/sprite-10-3.png"); }
+      30%, 39.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool_chup/sprite-10-4.png"); }
+      40%, 49.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool_chup/sprite-10-5.png"); }
+      50%, 59.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool_chup/sprite-10-6.png"); }
+      60%, 69.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool_chup/sprite-10-7.png"); }
+      70%, 79.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool_chup/sprite-10-8.png"); }
+      80%, 89.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool_chup/sprite-10-9.png"); }
+      90%, 99.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool_chup/sprite-10-10.png"); }
+    }
+    @keyframes sans_stool {
+      0%, 49.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool/sprite-8-1.png"); }
+      50%, 99.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool/sprite-8-2.png"); }
+    }
+    @keyframes sans_stool_comb {
+      0.00%, 33.23% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool_comb/sprite-9-1.png"); }
+      33.33%, 66.56% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool_comb/sprite-9-2.png"); }
+      66.66%, 99.89% { content: url("plugins/sillytavern-farm-extension/sans sprites/stool_comb/sprite-9-3.png"); }
+    }
+    .pet[data-pet="sans"][data-sans-action="icecream"] .pbody img[data-sans-sprite] { animation: sans_icecream 2s infinite; }
+    .pet[data-pet="sans"][data-sans-action="stool_chup"] .pbody img[data-sans-sprite] { animation: sans_stool_chup 2s infinite; }
+    .pet[data-pet="sans"][data-sans-action="stool"] .pbody img[data-sans-sprite] { animation: sans_stool 2s infinite; }
+    .pet[data-pet="sans"][data-sans-action="stool_comb"] .pbody img[data-sans-sprite] { animation: sans_stool_comb 2s infinite; }
 }
 `;
   }
@@ -4166,6 +4206,7 @@ __export(pets_exports, {
   petFert: () => petFert,
   petHarvest: () => petHarvest,
   petHopT: () => petHopT,
+  petIdleT: () => petIdleT,
   petPlant: () => petPlant,
   petPos: () => petPos,
   petSleepT: () => petSleepT,
@@ -4175,6 +4216,7 @@ __export(pets_exports, {
   pileWith: () => pileWith,
   placePet: () => placePet,
   renderPets: () => renderPets,
+  sansIdleAction: () => sansIdleAction,
   sansStep: () => sansStep,
   scene: () => scene,
   sceneBusy: () => sceneBusy,
@@ -4185,6 +4227,7 @@ __export(pets_exports, {
   tryScene: () => tryScene,
   updateNextScene: () => updateNextScene,
   wakePet: () => wakePet,
+  wakeSans: () => wakeSans,
   walkTo: () => walkTo,
   wander: () => wander
 });
@@ -4277,6 +4320,21 @@ function moveTo(el, p2) {
   if (FLOATY[id]) return placePet(el, p2, false);
   petTgt[id] = p2;
   if (!petHopT[id]) hopStep(el);
+}
+function sansIdleAction(el) {
+  const actions = ["icecream", "stool", "stool_chup", "stool_comb"];
+  const act = actions[Math.floor(Math.random() * actions.length)];
+  const id = el.dataset.pet;
+  el.dataset.sansAction = act;
+  petIdleT[id] = window.setTimeout(() => wakeSans(el), 15e3 + Math.random() * 15e3);
+}
+function wakeSans(el) {
+  const id = el.dataset.pet;
+  if (petIdleT[id]) {
+    window.clearTimeout(petIdleT[id]);
+    delete petIdleT[id];
+  }
+  delete el.dataset.sansAction;
 }
 function sleepPet(el) {
   const id = el.dataset.pet;
@@ -4423,6 +4481,10 @@ function renderPets() {
     window.clearTimeout(petSleepT[k2]);
     delete petSleepT[k2];
   });
+  Object.keys(petIdleT).forEach((k2) => {
+    window.clearTimeout(petIdleT[k2]);
+    delete petIdleT[k2];
+  });
   $id("mascots").dataset.drag = ctx.S.dragPet ? "1" : "0";
   $id("mascots").innerHTML = ctx.S.petsOut.map((id) => PETS[id] ? `<span class="pet" data-pet="${id}" title="Ch\u1ECDc ch\u1ECDc ${PETS[id].name}"><span class="pbody" style="animation-delay:-${(Math.random() * 1.8).toFixed(2)}s">${petSVG(id, 48)}</span></span>` : "").join("");
   sh.querySelectorAll("#mascots .pet").forEach((el) => {
@@ -4483,8 +4545,11 @@ function initPets() {
     if (!scene && now() >= nextSceneAt) tryScene();
     sh.querySelectorAll("#mascots .pet").forEach((el) => {
       const id = el.dataset.pet;
-      if (sceneBusy(id) || petTgt[id] || el.classList.contains("sleep")) return;
-      if (!PETS[id].job && Math.random() < 0.08) return sleepPet(el);
+      if (sceneBusy(id) || petTgt[id] || el.classList.contains("sleep") || el.dataset.sansAction) return;
+      if (!PETS[id].job && Math.random() < 0.12) {
+        if (id === "sans" && Math.random() < 0.65) return sansIdleAction(el);
+        return sleepPet(el);
+      }
       if (PETS[id].job && now() - (petTouch[id] || touchBase) > 5 * MIN && Math.random() < 0.08) return sleepPet(el);
       if (Math.random() < 0.35) moveTo(el, petSpot(id));
     });
@@ -4518,6 +4583,7 @@ function initPets() {
     }
     delete petTgt[id];
     delete petArrive[id];
+    if (el.dataset.sansAction) wakeSans(el);
     el.dataset.dragging = "true";
     const comp = window.getComputedStyle(el);
     let exactLeft = 0, exactBottom = 0;
@@ -4618,6 +4684,7 @@ function initPets() {
     const def = PETS[petId];
     if (!def) return;
     petTouch[petId] = now();
+    if (el.dataset.sansAction) wakeSans(el);
     if (el.classList.contains("sleep")) return wakePet(el, true);
     const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
     if (def.job === "plant") return petPlant(el, cry);
@@ -4669,7 +4736,7 @@ function initPets() {
     handlePetClick(el, el.dataset.pet);
   });
 }
-var petPos, petTgt, petHopT, sansStep, WORK_BAND, FLOATY, GAITS, gaitOf, stopHop, petSleepT, petArrive, pileWith, petTouch, touchBase, scene, lastScene, nextSceneAt, updateNextScene, sceneBusy, sceneTimer, wander;
+var petPos, petTgt, petHopT, sansStep, WORK_BAND, FLOATY, GAITS, gaitOf, stopHop, petSleepT, petIdleT, petArrive, pileWith, petTouch, touchBase, scene, lastScene, nextSceneAt, updateNextScene, sceneBusy, sceneTimer, wander;
 var init_pets = __esm({
   "src/pets.js"() {
     init_state();
@@ -4706,6 +4773,7 @@ var init_pets = __esm({
       }
     };
     petSleepT = {};
+    petIdleT = {};
     petArrive = {};
     pileWith = {};
     petTouch = {};
@@ -55037,6 +55105,7 @@ __export(all_exports, {
   petFert: () => petFert,
   petHarvest: () => petHarvest,
   petHopT: () => petHopT,
+  petIdleT: () => petIdleT,
   petPlant: () => petPlant,
   petPos: () => petPos,
   petSVG: () => petSVG,
@@ -55081,6 +55150,7 @@ __export(all_exports, {
   root: () => root,
   runState: () => runState,
   sanitizeEvent: () => sanitizeEvent,
+  sansIdleAction: () => sansIdleAction,
   sansSpriteFor: () => sansSpriteFor,
   sansStep: () => sansStep,
   save: () => save,
@@ -55140,6 +55210,7 @@ __export(all_exports, {
   updateNextScene: () => updateNextScene,
   useStarShard: () => useStarShard,
   wakePet: () => wakePet,
+  wakeSans: () => wakeSans,
   walkTo: () => walkTo,
   wander: () => wander,
   warmUpCache: () => warmUpCache,
