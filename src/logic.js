@@ -43,7 +43,7 @@ export function plant(pi, cropId, quiet) {
     c.evDay = gameDay();
   }
   curPlots()[pi].crop = c;
-  save(); renderPlots();
+  save(); if (!quiet) renderPlots();
   return true;
 }
 export function water(pi, quiet) {
@@ -53,7 +53,7 @@ export function water(pi, quiet) {
   if (now() < c.wateredUntil) return quiet ? false : toast('Vừa tưới xong mà');
   c.matureAt = now() + (c.matureAt - now()) * 0.75;
   c.wateredUntil = now() + WATER_CD;
-  save(); renderPlots();
+  save(); if (!quiet) renderPlots();
   if (!quiet) toast('Tưới nước xong, cây mọc nhanh hơn!');
   return true;
 }
@@ -69,7 +69,7 @@ export function fertilize(pi, fid, quiet) {
   } else c.shiny = true;                             // v1.0 B′: khi thu hoạch kết toán 25% giá bán thành vàng (thay cho cơ chế +1 sản lượng cũ)
   c.fertUsed[fid] = true;
   ctx.S.ferts[fid]--;
-  save(); renderPlots();
+  save(); if (!quiet) renderPlots();
   if (!quiet) plotEmote(pi, fid === 'compost' ? (Math.random() < 0.5 ? 'emLeaf' : 'emNote') : (Math.random() < 0.5 ? 'emHeart' : 'emStar'));   // Sửa #15
   return true;
 }
@@ -147,10 +147,10 @@ export function harvest(pi, quiet) {
     c.matureAt = now() + regrowMs(c.id);
     c.fertUsed = {};                                   // Vụ mới: phân bón và đột biến đều đặt lại
     delete c.rainDay; delete c.mut; delete c.mutRolled;
-    save(); renderPlots(); if (!quiet) toast('Thu hoạch ' + shownName + ' ×' + n + ' (còn thu được ' + c.left + ' vụ nữa)' + (shinyGain ? ' ✨+' + shinyGain + 'G' : ''));
+    save(); if (!quiet) renderPlots(); if (!quiet) toast('Thu hoạch ' + shownName + ' ×' + n + ' (còn thu được ' + c.left + ' vụ nữa)' + (shinyGain ? ' ✨+' + shinyGain + 'G' : ''));
   } else {
     curPlots()[pi].crop = null;
-    save(); renderPlots(); if (!quiet) toast('Thu hoạch ' + shownName + ' ×' + n + (def.regrow ? ' (cây này công thành thân thoái rồi)' : '') + (shinyGain ? ' ✨+' + shinyGain + 'G' : ''));
+    save(); if (!quiet) renderPlots(); if (!quiet) toast('Thu hoạch ' + shownName + ' ×' + n + (def.regrow ? ' (cây này công thành thân thoái rồi)' : '') + (shinyGain ? ' ✨+' + shinyGain + 'G' : ''));
   }
   return { name: shownName, n };
 }

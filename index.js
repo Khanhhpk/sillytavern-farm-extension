@@ -3993,7 +3993,7 @@ function plant(pi, cropId, quiet) {
   }
   curPlots()[pi].crop = c2;
   save();
-  renderPlots();
+  if (!quiet) renderPlots();
   return true;
 }
 function water(pi, quiet) {
@@ -4004,7 +4004,7 @@ function water(pi, quiet) {
   c2.matureAt = now() + (c2.matureAt - now()) * 0.75;
   c2.wateredUntil = now() + WATER_CD;
   save();
-  renderPlots();
+  if (!quiet) renderPlots();
   if (!quiet) toast("T\u01B0\u1EDBi n\u01B0\u1EDBc xong, c\xE2y m\u1ECDc nhanh h\u01A1n!");
   return true;
 }
@@ -4021,7 +4021,7 @@ function fertilize(pi, fid, quiet) {
   c2.fertUsed[fid] = true;
   ctx.S.ferts[fid]--;
   save();
-  renderPlots();
+  if (!quiet) renderPlots();
   if (!quiet) plotEmote(pi, fid === "compost" ? Math.random() < 0.5 ? "emLeaf" : "emNote" : Math.random() < 0.5 ? "emHeart" : "emStar");
   return true;
 }
@@ -4106,12 +4106,12 @@ function harvest(pi, quiet) {
     delete c2.mut;
     delete c2.mutRolled;
     save();
-    renderPlots();
+    if (!quiet) renderPlots();
     if (!quiet) toast("Thu ho\u1EA1ch " + shownName + " \xD7" + n2 + " (c\xF2n thu \u0111\u01B0\u1EE3c " + c2.left + " v\u1EE5 n\u1EEFa)" + (shinyGain ? " \u2728+" + shinyGain + "G" : ""));
   } else {
     curPlots()[pi].crop = null;
     save();
-    renderPlots();
+    if (!quiet) renderPlots();
     if (!quiet) toast("Thu ho\u1EA1ch " + shownName + " \xD7" + n2 + (def.regrow ? " (c\xE2y n\xE0y c\xF4ng th\xE0nh th\xE2n tho\xE1i r\u1ED3i)" : "") + (shinyGain ? " \u2728+" + shinyGain + "G" : ""));
   }
   return { name: shownName, n: n2 };
@@ -4393,6 +4393,7 @@ function sansUltimateFarm(el) {
   ctx.S.page = originalPage;
   if (acted) {
     if (el) {
+      Promise.resolve().then(() => (init_render(), render_exports)).then((r2) => r2.renderPlots());
       playSansAction(el, "magic");
       petBubble(el, "heh, shortcuts.");
       petIdleT["sans"] = window.setTimeout(() => wakeSans(el), 2e3);
@@ -7596,6 +7597,30 @@ var init_orb = __esm({
 });
 
 // src/render.js
+var render_exports = {};
+__export(render_exports, {
+  TOOLS: () => TOOLS,
+  buyConfirm: () => buyConfirm,
+  cacheBlockTxt: () => cacheBlockTxt,
+  cacheCoins: () => cacheCoins,
+  cacheDayTxt: () => cacheDayTxt,
+  cacheWicon: () => cacheWicon,
+  initRender: () => initRender,
+  mode: () => mode,
+  pendingPick: () => pendingPick,
+  pickFrom: () => pickFrom,
+  plotHTML: () => plotHTML,
+  renderAll: () => renderAll,
+  renderBanner: () => renderBanner,
+  renderChips: () => renderChips,
+  renderDynamic: () => renderDynamic,
+  renderPlots: () => renderPlots,
+  renderStatus: () => renderStatus,
+  renderToolbar: () => renderToolbar,
+  setMode: () => setMode,
+  setPendingPick: () => setPendingPick,
+  toolbarOpen: () => toolbarOpen
+});
 function setMode(val) {
   mode = val;
 }

@@ -190,6 +190,7 @@ export function sansUltimateFarm(el) {
   
   if (acted) {
     if (el) {
+      import('./render.js').then(r => r.renderPlots()); // Trigger a single render update for the current page
       playSansAction(el, 'magic');
       petBubble(el, 'heh, shortcuts.');
       petIdleT['sans'] = window.setTimeout(() => wakeSans(el), 2000); // 2s duration for magic animation
