@@ -1901,7 +1901,7 @@ var init_graphics = __esm({
       walkF1: _sp("05_full_body_walk/walk_front_01.png"),
       walkF2: _sp("05_full_body_walk/walk_front_02.png"),
       walkS1: _sp("05_full_body_walk/walk_side_01.png"),
-      walkS2: _sp("05_full_body_walk/walk_side_01.png")
+      walkS2: _sp("05_full_body_walk/walk_side_02.png")
     };
     PETS = {
       /* —— Trang 1 —— */
