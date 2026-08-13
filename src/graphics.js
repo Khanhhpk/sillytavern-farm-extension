@@ -1173,7 +1173,54 @@ const PET_FX = {
   },
 };
 const petCache = new Map();
+
+/* ── Sans: đường dẫn sprite theo hướng di chuyển ── */
+/* Base path: resolve relative to this module file (index.js trong root extension) */
+const _sansBase = (() => {
+  try {
+    // import.meta.url = e.g. http://localhost:8000/extensions/sillytavern-farm-extension/index.js
+    const u = new URL('.', import.meta.url);
+    return u.href.endsWith('/') ? u.href : u.href + '/';
+  } catch {
+    return '/extensions/sillytavern-farm-extension/';
+  }
+})();
+const _sp = (p) => _sansBase + 'sans%20sprites/' + p;
+export const SANS_SPRITES = {
+  idle:    _sp('05_full_body/full_body_front.png'),
+  right:   _sp('02_torso_side/torso_side_01.png'),
+  left:    _sp('02_torso_side/torso_side_01.png'),
+  up:      _sp('05_full_body/full_body_side.png'),
+  down:    _sp('05_full_body/full_body_front.png'),
+  walkF1:  _sp('01_torso_front/torso_front_01.png'),
+  walkF2:  _sp('01_torso_front/torso_front_03.png'),
+  walkS1:  _sp('02_torso_side/torso_side_01.png'),
+  walkS2:  _sp('02_torso_side/torso_side_03.png'),
+};
+export function sansSpriteFor(dx, dy, step) {
+  const s = step || 0;
+  const alt = (s & 1) === 0;                               // Alternates every call
+  if (Math.abs(dx) < 1 && Math.abs(dy) < 1)
+    return { src: SANS_SPRITES.idle, flip: false };
+  if (Math.abs(dx) >= Math.abs(dy)) {                      // Hướng ngang ưu tiên
+    const src = alt ? SANS_SPRITES.walkS1 : SANS_SPRITES.walkS2;
+    return dx > 0
+      ? { src, flip: false }                               // sang phải
+      : { src, flip: true  };                              // sang trái
+  }
+  // Hướng dọc — dy trong hệ toạ độ pet: dương = lên màn hình
+  const src = alt ? SANS_SPRITES.walkF1 : SANS_SPRITES.walkF2;
+  return dy > 0
+    ? { src: SANS_SPRITES.up,  flip: false }               // di chuyển lên
+    : { src: SANS_SPRITES.down, flip: false };             // di chuyển xuống
+}
+
 export function petSVG(name, px) {
+  /* ── Sans: trả về img đặc biệt có data-sans để JS cập nhật hướng ── */
+  if (name === 'sans') {
+    return `<img draggable="false" data-sans-sprite class="sans-sprite" width="${px}" height="${px}" src="${SANS_SPRITES.idle}" style="display:block; image-rendering:pixelated; object-fit:contain;" />`;
+  }
+
   const key = name + '@' + px;
   if (petCache.has(key)) return petCache.get(key);
   const map = PET_SPR[name]; if (!map) return '';
@@ -1226,6 +1273,7 @@ export const PETS = {
   /* —— Át chủ bài (page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
   peach_soda: { name: 'Bé soda đào', page: 1, price: 9999, cry: ['Bốp——!', '(nổi một bong bóng nhỏ)', 'Xì~', '(vị ngòn ngọt)'], desc: 'Loại tìm kho báu · tinh linh soda vị đào · dễ thương quá mức nên đắt nhất' },
   penguin: { name: 'Chim cánh cụt', page: 1, price: 100000, cry: ['Pingu!', 'Núp núp~', 'Trượt tuyết nào!', 'Cánh cụt!'], desc: 'Loại đặc biệt · AFK mỗi 1 tiếng mang về 1 vé gacha ngẫu nhiên (70% vé thường, 30% vé đặc biệt)' },
+  sans: { name: 'Sans', page: 1, price: 0, special: true, cry: ['heh.', '...', 'wanna have a bad time?', '(ngủ gật)', 'cool dude.', 'not gonna budge.'], desc: 'Loại đặc biệt · The coolest skeleton around · có hoạt ảnh di chuyển đầy đủ 4 hướng' },
   naoyaSlime: { name: 'Naoya', page: 1, hidden: true, price: 0, cry: ['Rác rưởi!', 'Lũ yếu kém...', 'Bẩn hết cả người!', '(lườm khinh bỉ)'], desc: 'Loại đặc biệt (Thành tựu) · Kẻ tự xưng là thiên tài nhưng lại bị kẹt trong hình hài Slime tròn vo núng nính.' }
 };
 export const PASSES = {

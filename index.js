@@ -159,7 +159,22 @@ function mulberry32(a) {
     return ((t2 ^ t2 >>> 14) >>> 0) / 4294967296;
   };
 }
+function sansSpriteFor(dx, dy, step) {
+  const s2 = step || 0;
+  const alt = (s2 & 1) === 0;
+  if (Math.abs(dx) < 1 && Math.abs(dy) < 1)
+    return { src: SANS_SPRITES.idle, flip: false };
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    const src2 = alt ? SANS_SPRITES.walkS1 : SANS_SPRITES.walkS2;
+    return dx > 0 ? { src: src2, flip: false } : { src: src2, flip: true };
+  }
+  const src = alt ? SANS_SPRITES.walkF1 : SANS_SPRITES.walkF2;
+  return dy > 0 ? { src: SANS_SPRITES.up, flip: false } : { src: SANS_SPRITES.down, flip: false };
+}
 function petSVG(name3, px) {
+  if (name3 === "sans") {
+    return `<img draggable="false" data-sans-sprite class="sans-sprite" width="${px}" height="${px}" src="${SANS_SPRITES.idle}" style="display:block; image-rendering:pixelated; object-fit:contain;" />`;
+  }
   const key = name3 + "@" + px;
   if (petCache.has(key)) return petCache.get(key);
   const map = PET_SPR[name3];
@@ -354,7 +369,7 @@ function warmUpCache(CROPS2) {
   }
   setTimeout(next, 1e3);
 }
-var P, GACHA_P, SPR, PET_P, PET_SPR, petLinear, PET_FX, petCache, PETS, PASSES, C2, DYNAMIC_SPR, spriteCache, tileCache, LP;
+var P, GACHA_P, SPR, PET_P, PET_SPR, petLinear, PET_FX, petCache, _sansBase, _sp, SANS_SPRITES, PETS, PASSES, C2, DYNAMIC_SPR, spriteCache, tileCache, LP;
 var init_graphics = __esm({
   "src/graphics.js"() {
     init_state();
@@ -1868,6 +1883,26 @@ var init_graphics = __esm({
       }
     };
     petCache = /* @__PURE__ */ new Map();
+    _sansBase = (() => {
+      try {
+        const u2 = new URL(".", import.meta.url);
+        return u2.href.endsWith("/") ? u2.href : u2.href + "/";
+      } catch {
+        return "/extensions/sillytavern-farm-extension/";
+      }
+    })();
+    _sp = (p2) => _sansBase + "sans%20sprites/" + p2;
+    SANS_SPRITES = {
+      idle: _sp("05_full_body/full_body_front.png"),
+      right: _sp("02_torso_side/torso_side_01.png"),
+      left: _sp("02_torso_side/torso_side_01.png"),
+      up: _sp("05_full_body/full_body_side.png"),
+      down: _sp("05_full_body/full_body_front.png"),
+      walkF1: _sp("01_torso_front/torso_front_01.png"),
+      walkF2: _sp("01_torso_front/torso_front_03.png"),
+      walkS1: _sp("02_torso_side/torso_side_01.png"),
+      walkS2: _sp("02_torso_side/torso_side_03.png")
+    };
     PETS = {
       /* —— Trang 1 —— */
       slime: { name: "Slime xanh", page: 1, price: 0, starter: true, cry: ["B\u1EE5p b\u1EE5p~", "B\u1EF1ppp!", "Gr\xF9 gr\xF9\u2026", "B\u1EE5p?", "Nh\u1EA3y nh\u1EA3y!"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 b\xE9 tr\xF2n t\u1ED5 ti\xEAn, b\u1EA1n \u0111\u1ED3ng h\xE0nh t\u1EEB \u0111\u1EA7u" },
@@ -1888,6 +1923,7 @@ var init_graphics = __esm({
       /* —— Át chủ bài (page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
       peach_soda: { name: "B\xE9 soda \u0111\xE0o", page: 1, price: 9999, cry: ["B\u1ED1p\u2014\u2014!", "(n\u1ED5i m\u1ED9t bong b\xF3ng nh\u1ECF)", "X\xEC~", "(v\u1ECB ng\xF2n ng\u1ECDt)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 tinh linh soda v\u1ECB \u0111\xE0o \xB7 d\u1EC5 th\u01B0\u01A1ng qu\xE1 m\u1EE9c n\xEAn \u0111\u1EAFt nh\u1EA5t" },
       penguin: { name: "Chim c\xE1nh c\u1EE5t", page: 1, price: 1e5, cry: ["Pingu!", "N\xFAp n\xFAp~", "Tr\u01B0\u1EE3t tuy\u1EBFt n\xE0o!", "C\xE1nh c\u1EE5t!"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 AFK m\u1ED7i 1 ti\u1EBFng mang v\u1EC1 1 v\xE9 gacha ng\u1EABu nhi\xEAn (70% v\xE9 th\u01B0\u1EDDng, 30% v\xE9 \u0111\u1EB7c bi\u1EC7t)" },
+      sans: { name: "Sans", page: 1, price: 0, special: true, cry: ["heh.", "...", "wanna have a bad time?", "(ng\u1EE7 g\u1EADt)", "cool dude.", "not gonna budge."], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 The coolest skeleton around \xB7 c\xF3 ho\u1EA1t \u1EA3nh di chuy\u1EC3n \u0111\u1EA7y \u0111\u1EE7 4 h\u01B0\u1EDBng" },
       naoyaSlime: { name: "Naoya", page: 1, hidden: true, price: 0, cry: ["R\xE1c r\u01B0\u1EDFi!", "L\u0169 y\u1EBFu k\xE9m...", "B\u1EA9n h\u1EBFt c\u1EA3 ng\u01B0\u1EDDi!", "(l\u01B0\u1EDDm khinh b\u1EC9)"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t (Th\xE0nh t\u1EF1u) \xB7 K\u1EBB t\u1EF1 x\u01B0ng l\xE0 thi\xEAn t\xE0i nh\u01B0ng l\u1EA1i b\u1ECB k\u1EB9t trong h\xECnh h\xE0i Slime tr\xF2n vo n\xFAng n\xEDnh." }
     };
     PASSES = {
@@ -2657,6 +2693,20 @@ var init_style = __esm({
     .pet[data-pet="jellyfish"] .pbody { animation: petfloat 3.2s ease-in-out infinite; }  /* M\xE2y / ma / s\u1EE9a: ki\u1EC3u bay l\u01A1 l\u1EEDng (\u0111\xE8 l\xEAn walk) */
     .pet.sleep .pbody { animation: petsleep 3.6s ease-in-out infinite; }   /* v0.7\u2461: ng\u1EE7 = th\u1EDF ch\u1EADm (\u0111\xE8 l\xEAn bay, ma c\u0169ng ph\u1EA3i h\u1EA1 c\xE1nh m\xE0 ng\u1EE7) */
     .pet.flip .pbody img { transform: scaleX(-1); }
+    /* \u2500\u2500 Sans: pet \u0111\u1EB7c bi\u1EC7t c\xF3 ho\u1EA1t \u1EA3nh h\u01B0\u1EDBng \u2500\u2500 */
+    .pet[data-pet="sans"] .pbody { animation: sansidle 2.4s ease-in-out infinite; }
+    .pet[data-pet="sans"].walk .pbody { animation: sanswalk 0.5s steps(1) infinite; }
+    .pet[data-pet="sans"] .pbody .sans-sprite { width: 56px; height: 56px; }
+    .pet[data-pet="sans"].flip .pbody img { transform: none; }   /* Sans x\u1EED l\xFD flip ri\xEAng qua sprite src */
+    @keyframes sansidle {
+      0%, 100% { transform: translateY(0px) scale(1,1); }
+      40%       { transform: translateY(-2px) scale(.99,1.01); }
+      70%       { transform: translateY(1px) scale(1.01,.99); }
+    }
+    @keyframes sanswalk {
+      0%   { transform: translateY(0px); }
+      50%  { transform: translateY(-1px); }
+    }
     .zzz { position: absolute; bottom: calc(100% - 8px); left: 68%; font-size: 12px; font-weight: bold;
       color: #7a90c8; text-shadow: 1px 1px 0 #fff; pointer-events: none; animation: zrise 2.6s linear infinite; }
     .zzz.z2 { left: 52%; font-size: 10px; animation-delay: 1.3s; }
@@ -4119,6 +4169,7 @@ __export(pets_exports, {
   pileWith: () => pileWith,
   placePet: () => placePet,
   renderPets: () => renderPets,
+  sansStep: () => sansStep,
   scene: () => scene,
   sceneBusy: () => sceneBusy,
   sceneTimer: () => sceneTimer,
@@ -4152,18 +4203,19 @@ function petSpot(id) {
   return { x: x2, y: WORK_BAND + 6 + Math.random() * Math.max(20, H2 - WORK_BAND - 70) };
 }
 function placePet(el, p2, instant) {
+  const id = el.dataset.pet;
   if (instant) el.style.transitionProperty = "transform, translate";
   else {
-    const old = petPos[el.dataset.pet] || p2;
+    const old = petPos[id] || p2;
     const dist = Math.hypot(p2.x - old.x, p2.y - old.y);
     const dur = dist < 40 ? 0.5 : Math.min(11, Math.max(3, dist / 18));
     el.style.transitionProperty = "transform, translate";
     el.style.transitionDuration = ".12s, " + dur + "s";
     el.style.transitionTimingFunction = "ease, linear";
-    el.classList.toggle("flip", p2.x < old.x);
+    if (id !== "sans") el.classList.toggle("flip", p2.x < old.x);
   }
   el.style.translate = p2.x + "px " + -p2.y + "px";
-  petPos[el.dataset.pet] = p2;
+  petPos[id] = p2;
 }
 function hopStep(el) {
   const id = el.dataset.pet;
@@ -4177,6 +4229,14 @@ function hopStep(el) {
     delete petTgt[id];
     el.classList.remove("walk");
     stopHop(id);
+    if (id === "sans") {
+      sansStep[id] = 0;
+      const img = el.querySelector("[data-sans-sprite]");
+      if (img) {
+        img.src = sansSpriteFor(0, 0).src;
+        img.style.transform = "";
+      }
+    }
     const cb = petArrive[id];
     delete petArrive[id];
     if (cb) cb();
@@ -4185,7 +4245,16 @@ function hopStep(el) {
   const dx = tgt.x - cur.x, dy = tgt.y - cur.y, dist = Math.hypot(dx, dy);
   const len = Math.min(g.len, dist);
   const p2 = { x: cur.x + dx / dist * len, y: cur.y + dy / dist * len };
-  el.classList.toggle("flip", dx < 0);
+  el.classList.toggle("flip", id !== "sans" && dx < 0);
+  if (id === "sans") {
+    sansStep[id] = (sansStep[id] || 0) + 1;
+    const sp = sansSpriteFor(dx, dy, sansStep[id]);
+    const img = el.querySelector("[data-sans-sprite]");
+    if (img) {
+      img.src = sp.src;
+      img.style.transform = sp.flip ? "scaleX(-1)" : "";
+    }
+  }
   el.classList.add("walk");
   el.style.setProperty("--hopd", g.dur + "ms");
   el.style.setProperty("--hy", g.hy + "px");
@@ -4594,7 +4663,7 @@ function initPets() {
     handlePetClick(el, el.dataset.pet);
   });
 }
-var petPos, petTgt, petHopT, WORK_BAND, FLOATY, GAITS, gaitOf, stopHop, petSleepT, petArrive, pileWith, petTouch, touchBase, scene, lastScene, nextSceneAt, updateNextScene, sceneBusy, sceneTimer, wander;
+var petPos, petTgt, petHopT, sansStep, WORK_BAND, FLOATY, GAITS, gaitOf, stopHop, petSleepT, petArrive, pileWith, petTouch, touchBase, scene, lastScene, nextSceneAt, updateNextScene, sceneBusy, sceneTimer, wander;
 var init_pets = __esm({
   "src/pets.js"() {
     init_state();
@@ -4609,6 +4678,7 @@ var init_pets = __esm({
     petPos = {};
     petTgt = {};
     petHopT = {};
+    sansStep = {};
     WORK_BAND = 74;
     FLOATY = { cloudMallow: 1, ghostBlob: 1, jellyfish: 1 };
     GAITS = {
@@ -4617,6 +4687,8 @@ var init_pets = __esm({
       // Bạch tuộc: bước lắt nhắt bò sát đất
       octoCream: { len: 8, dur: 290, hy: -4 },
       // Bạch tuộc kem: bò còn chậm rì hơn nữa
+      sans: { len: 18, dur: 400, hy: 0 },
+      // Sans: bước đi lậờ đờ, không nhảy (≈ FLOATY nhưng vẫn hop-based để trigger direction)
       _: { len: 14, dur: 330, hy: -9 }
       // Mặc định: kiểu nảy chuẩn của dòng slime
     };
@@ -54798,6 +54870,7 @@ __export(all_exports, {
   PET_SKILLS: () => PET_SKILLS,
   PET_SPR: () => PET_SPR,
   PET_STATS: () => PET_STATS,
+  SANS_SPRITES: () => SANS_SPRITES,
   SEC: () => SEC,
   SEC_LS_KEY: () => SEC_LS_KEY,
   SPR: () => SPR,
@@ -55002,6 +55075,8 @@ __export(all_exports, {
   root: () => root,
   runState: () => runState,
   sanitizeEvent: () => sanitizeEvent,
+  sansSpriteFor: () => sansSpriteFor,
+  sansStep: () => sansStep,
   save: () => save,
   saveCharState: () => saveCharState,
   saveSec: () => saveSec,

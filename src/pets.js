@@ -2,7 +2,7 @@ import { now } from './state.js';
 import { ctx } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
-import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
+import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P, sansSpriteFor } from './graphics.js';
 import { sh } from './ui.js';
 import { save, curBlocks, curPlots } from './state.js';
 import { renderStatus, pickFrom } from './render.js';
@@ -23,12 +23,13 @@ export function petBubble(el, txt, extraClass) {
 }
 /* #26 (sửa lần 2): hàng dưới cùng (cao bằng một ô ruộng) = tầng đi lại riêng cho loại làm việc, không chạy lên trên; các bé khác đi lang thang tự do trong toàn khu ruộng phía trên hàng dưới, có thể băng ngang qua ruộng
    v0.7①: di chuyển kiểu nhảy —— bé không thuộc nhóm bay sẽ nhích tới điểm đích bằng từng cú nhảy nhỏ (mỗi cú = xê dịch ngang tuyến tính một bước + thân bay lên hạ xuống theo parabol), mây/ma thì trượt */
-export const petPos = {}, petTgt = {}, petHopT = {};            // Toạ độ / điểm đến / bộ đếm nhảy liên tiếp lúc chạy, không ghi vào save
+export const petPos = {}, petTgt = {}, petHopT = {}, sansStep = {};  // Toạ độ / điểm đến / bộ đếm nhảy / bước Sans
 export const WORK_BAND = 74;                                    // Chiều cao hàng dưới ≈ một ô ruộng (dành cho loại làm việc, loại đi dạo tính từ phía trên nó)
 export const FLOATY = { cloudMallow: 1, ghostBlob: 1, jellyfish: 1 };   // Danh sách bay: không nhảy, trượt đều (#43: bé sứa xoăn nhập hội, thành bộ ba bay lơ lửng)
 export const GAITS = {                                          // Dáng đi: len = độ dài một bước nhảy, dur = chu kỳ một cú nhảy (ms), hy = độ cao nhảy
   octo:      { len: 8,  dur: 260, hy: -4 },              // Bạch tuộc: bước lắt nhắt bò sát đất
   octoCream: { len: 8,  dur: 290, hy: -4 },              // Bạch tuộc kem: bò còn chậm rì hơn nữa
+  sans:      { len: 18, dur: 400, hy:  0 },              // Sans: bước đi lậờ đờ, không nhảy (≈ FLOATY nhưng vẫn hop-based để trigger direction)
   _:         { len: 14, dur: 330, hy: -9 },              // Mặc định: kiểu nảy chuẩn của dòng slime
 };
 export const gaitOf = id => GAITS[id] || GAITS._;
@@ -46,18 +47,19 @@ export function petSpot(id) {
   return { x, y: WORK_BAND + 6 + Math.random() * Math.max(20, H - WORK_BAND - 70) };
 }
 export function placePet(el, p, instant) {                      // Đặt vị trí: instant = dịch chuyển tức thì; nếu không thì trượt đều (dành riêng cho bé bay)
+  const id = el.dataset.pet;
   if (instant) el.style.transitionProperty = 'transform, translate';
   else {
-    const old = petPos[el.dataset.pet] || p;
+    const old = petPos[id] || p;
     const dist = Math.hypot(p.x - old.x, p.y - old.y);
     const dur = dist < 40 ? .5 : Math.min(11, Math.max(3, dist / 18));
     el.style.transitionProperty = 'transform, translate';
     el.style.transitionDuration = '.12s, ' + dur + 's';
     el.style.transitionTimingFunction = 'ease, linear';
-    el.classList.toggle('flip', p.x < old.x);
+    if (id !== 'sans') el.classList.toggle('flip', p.x < old.x);   // Sans manages its own flip
   }
   el.style.translate = p.x + 'px ' + (-p.y) + 'px';
-  petPos[el.dataset.pet] = p;
+  petPos[id] = p;
 }
 export function hopStep(el) {                                   // Một cú nhảy: nhích một bước về phía đích, tới nơi thì nghỉ
   const id = el.dataset.pet;
@@ -66,13 +68,28 @@ export function hopStep(el) {                                   // Một cú nh�
   const cur = petPos[id], tgt = petTgt[id], g = gaitOf(id);
   if (!cur || !tgt || Math.hypot(tgt.x - cur.x, tgt.y - cur.y) < 3) {
     delete petTgt[id]; el.classList.remove('walk'); stopHop(id);
+    if (id === 'sans') {
+      sansStep[id] = 0;
+      const img = el.querySelector('[data-sans-sprite]');
+      if (img) { img.src = sansSpriteFor(0, 0).src; img.style.transform = ''; }
+    }
     const cb = petArrive[id]; delete petArrive[id]; if (cb) cb();   // v0.7③: callback khi tới nơi (dùng cho việc dàn cảnh tiểu phẩm)
     return;
   }
   const dx = tgt.x - cur.x, dy = tgt.y - cur.y, dist = Math.hypot(dx, dy);
   const len = Math.min(g.len, dist);
   const p = { x: cur.x + dx / dist * len, y: cur.y + dy / dist * len };
-  el.classList.toggle('flip', dx < 0);
+  el.classList.toggle('flip', id !== 'sans' && dx < 0);   // Sans tự xử lý flip qua sprite direction
+  /* ── Sans: đổi sprite theo hướng đi, xen kẽ walk frames ── */
+  if (id === 'sans') {
+    sansStep[id] = (sansStep[id] || 0) + 1;
+    const sp = sansSpriteFor(dx, dy, sansStep[id]);
+    const img = el.querySelector('[data-sans-sprite]');
+    if (img) {
+      img.src = sp.src;
+      img.style.transform = sp.flip ? 'scaleX(-1)' : '';
+    }
+  }
   el.classList.add('walk');
   el.style.setProperty('--hopd', g.dur + 'ms');
   el.style.setProperty('--hy', g.hy + 'px');
