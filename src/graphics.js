@@ -1214,15 +1214,19 @@ export function sansSpriteForAction(action, step) {
     return { src: _sp(`stool_chup/sprite-10-${phase + 1}.png`), flip: false };
   }
   if (action === 'stool_comb') {
-    const phase = s % 3;
+    // Giữ 3 nhịp mỗi frame (600ms) -> tổng 1.8s
+    const phase = Math.floor((s % 9) / 3);
     return { src: _sp(`stool_comb/sprite-9-${phase + 1}.png`), flip: false };
   }
   if (action === 'stool') {
-    const phase = Math.floor((s % 4) / 2); // 2 steps per frame to slow it down, or just %2
-    return { src: _sp(`stool/sprite-8-${(s % 2) + 1}.png`), flip: false };
+    // Giữ 5 nhịp mỗi frame (1000ms = 1s) -> tổng 2.0s
+    const phase = Math.floor((s % 10) / 5); 
+    return { src: _sp(`stool/sprite-8-${phase + 1}.png`), flip: false };
   }
   if (action === 'sleep_stand') {
-    return { src: _sp(`sleep_stand/sprite-12-${(s % 2) + 1}.png`), flip: false };
+    // Giữ 5 nhịp mỗi frame (1000ms = 1s) -> tổng 2.0s
+    const phase = Math.floor((s % 10) / 5);
+    return { src: _sp(`sleep_stand/sprite-12-${phase + 1}.png`), flip: false };
   }
   return { src: SANS_SPRITES.idle, flip: false };
 }

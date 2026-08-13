@@ -170,15 +170,16 @@ function sansSpriteForAction(action, step) {
     return { src: _sp(`stool_chup/sprite-10-${phase2 + 1}.png`), flip: false };
   }
   if (action === "stool_comb") {
-    const phase2 = s2 % 3;
+    const phase2 = Math.floor(s2 % 9 / 3);
     return { src: _sp(`stool_comb/sprite-9-${phase2 + 1}.png`), flip: false };
   }
   if (action === "stool") {
-    const phase2 = Math.floor(s2 % 4 / 2);
-    return { src: _sp(`stool/sprite-8-${s2 % 2 + 1}.png`), flip: false };
+    const phase2 = Math.floor(s2 % 10 / 5);
+    return { src: _sp(`stool/sprite-8-${phase2 + 1}.png`), flip: false };
   }
   if (action === "sleep_stand") {
-    return { src: _sp(`sleep_stand/sprite-12-${s2 % 2 + 1}.png`), flip: false };
+    const phase2 = Math.floor(s2 % 10 / 5);
+    return { src: _sp(`sleep_stand/sprite-12-${phase2 + 1}.png`), flip: false };
   }
   return { src: SANS_SPRITES.idle, flip: false };
 }
