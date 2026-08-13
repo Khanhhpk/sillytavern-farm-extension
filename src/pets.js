@@ -109,6 +109,20 @@ export function moveTo(el, p) {                                 // Lên đườn
 }
 /* v0.7②: ngủ —— bé đi dạo rảnh mãi rồi nằm bẹp xuống thả chữ Z (bé làm việc đang trong ca thì không ngủ); chọc = giật mình tỉnh dậy kêu "?!", không ai chọc thì cũng tự tỉnh */
 export const petSleepT = {};
+export const petIdleT = {};
+export function sansIdleAction(el) {
+  const actions = ['icecream', 'stool', 'stool_chup', 'stool_comb'];
+  const act = actions[Math.floor(Math.random() * actions.length)];
+  const id = el.dataset.pet;
+  el.dataset.sansAction = act;
+  petIdleT[id] = window.setTimeout(() => wakeSans(el), 15000 + Math.random() * 15000);
+}
+export function wakeSans(el) {
+  const id = el.dataset.pet;
+  if (petIdleT[id]) { window.clearTimeout(petIdleT[id]); delete petIdleT[id]; }
+  delete el.dataset.sansAction;
+}
+
 export function sleepPet(el) {
   const id = el.dataset.pet;
   el.classList.add('sleep');
@@ -237,6 +251,7 @@ export function renderPets() {
   for (const k in petArrive) delete petArrive[k];
   for (const k in pileWith) delete pileWith[k];
   Object.keys(petSleepT).forEach(k => { window.clearTimeout(petSleepT[k]); delete petSleepT[k]; });
+  Object.keys(petIdleT).forEach(k => { window.clearTimeout(petIdleT[k]); delete petIdleT[k]; });
   All.$id('mascots').dataset.drag = ctx.S.dragPet ? '1' : '0';   // Bật touch-action:none cho .pet khi cho phép kéo (xem style.js)
   All.$id('mascots').innerHTML = ctx.S.petsOut.map(id => PETS[id]
     ? `<span class="pet" data-pet="${id}" title="Chọc chọc ${PETS[id].name}"><span class="pbody" style="animation-delay:-${(Math.random() * 1.8).toFixed(2)}s">${petSVG(id, 48)}</span></span>` : '').join('');
@@ -301,8 +316,13 @@ export function initPets() {
     sh.querySelectorAll('#mascots .pet').forEach(el => {
       // @ts-ignore
       const id = el.dataset.pet;
-      if (sceneBusy(id) || petTgt[id] || el.classList.contains('sleep')) return;   // Đang diễn / đang đi / đang ngủ thì đừng làm phiền
-      if (!PETS[id].job && Math.random() < 0.08) return sleepPet(el);   // Rảnh lâu quá thì chợp mắt một giấc
+      if (sceneBusy(id) || petTgt[id] || el.classList.contains('sleep') || el.dataset.sansAction) return;   // Đang diễn / đang đi / đang ngủ thì đừng làm phiền
+      
+      if (!PETS[id].job && Math.random() < 0.12) {
+        if (id === 'sans' && Math.random() < 0.65) return sansIdleAction(el);
+        return sleepPet(el);
+      }
+      
       if (PETS[id].job && now() - (petTouch[id] || touchBase) > 5 * MIN && Math.random() < 0.08) return sleepPet(el);   // Bé làm việc 5 phút không ai đoái hoài thì đứng ngủ (tưới tự động không bị ảnh hưởng, mây ngủ vẫn mưa nhé)
       if (Math.random() < 0.35) moveTo(el, petSpot(id));
     });
@@ -341,6 +361,7 @@ export function initPets() {
     if (petHopT[id]) { clearTimeout(petHopT[id]); petHopT[id] = null; }
     delete petTgt[id];
     delete petArrive[id];
+    if (el.dataset.sansAction) wakeSans(el);
     el.dataset.dragging = 'true'; // Đánh dấu đang bị người dùng điều khiển
 
     // Lấy toạ độ thực tế (mid-air) nếu bé đang nhảy dở
@@ -458,6 +479,7 @@ export function initPets() {
     const def = PETS[petId];
     if (!def) return;
     petTouch[petId] = now();
+    if (el.dataset.sansAction) wakeSans(el);
     if (el.classList.contains('sleep')) return wakePet(el, true);
     const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
     if (def.job === 'plant') return petPlant(el, cry);
