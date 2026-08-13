@@ -2701,19 +2701,17 @@ var init_style = __esm({
     .pet[data-pet="jellyfish"] .pbody { animation: petfloat 3.2s ease-in-out infinite; }  /* M\xE2y / ma / s\u1EE9a: ki\u1EC3u bay l\u01A1 l\u1EEDng (\u0111\xE8 l\xEAn walk) */
     .pet.sleep .pbody { animation: petsleep 3.6s ease-in-out infinite; }   /* v0.7\u2461: ng\u1EE7 = th\u1EDF ch\u1EADm (\u0111\xE8 l\xEAn bay, ma c\u0169ng ph\u1EA3i h\u1EA1 c\xE1nh m\xE0 ng\u1EE7) */
     .pet.flip .pbody img { transform: scaleX(-1); }
-    /* \u2500\u2500 Sans: pet \u0111\u1EB7c bi\u1EC7t c\xF3 ho\u1EA1t \u1EA3nh h\u01B0\u1EDBng \u2500\u2500 */
-    .pet[data-pet="sans"] .pbody { animation: sansidle 2.4s ease-in-out infinite; }
-    .pet[data-pet="sans"].walk .pbody { animation: sanswalk 0.5s steps(1) infinite; }
+    /* \u2500\u2500 Sans: pet \u0111\u1EB7c bi\u1EC7t \u2500\u2500 */
+    .pet[data-pet="sans"] .pbody { animation: none !important; }
     .pet[data-pet="sans"] .pbody .sans-sprite { width: 56px; height: 56px; }
     .pet[data-pet="sans"].flip .pbody img { transform: none; }   /* Sans x\u1EED l\xFD flip ri\xEAng qua sprite src */
-    @keyframes sansidle {
-      0%, 100% { transform: translateY(0px) scale(1,1); }
-      40%       { transform: translateY(-2px) scale(.99,1.01); }
-      70%       { transform: translateY(1px) scale(1.01,.99); }
+    
+    @keyframes sans_sleep_anim {
+      0%, 49.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/15_sleep_stand/sprite-12-1.png"); }
+      50%, 100% { content: url("plugins/sillytavern-farm-extension/sans sprites/15_sleep_stand/sprite-12-2.png"); }
     }
-    @keyframes sanswalk {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(0); }
+    .pet[data-pet="sans"].sleep .pbody img[data-sans-sprite] {
+      animation: sans_sleep_anim 2s infinite;
     }
     .zzz { position: absolute; bottom: calc(100% - 8px); left: 68%; font-size: 12px; font-weight: bold;
       color: #7a90c8; text-shadow: 1px 1px 0 #fff; pointer-events: none; animation: zrise 2.6s linear infinite; }

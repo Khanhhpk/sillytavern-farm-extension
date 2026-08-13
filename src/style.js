@@ -159,19 +159,17 @@ export const styleCSS = `
     .pet[data-pet="jellyfish"] .pbody { animation: petfloat 3.2s ease-in-out infinite; }  /* Mây / ma / sứa: kiểu bay lơ lửng (đè lên walk) */
     .pet.sleep .pbody { animation: petsleep 3.6s ease-in-out infinite; }   /* v0.7②: ngủ = thở chậm (đè lên bay, ma cũng phải hạ cánh mà ngủ) */
     .pet.flip .pbody img { transform: scaleX(-1); }
-    /* ── Sans: pet đặc biệt có hoạt ảnh hướng ── */
-    .pet[data-pet="sans"] .pbody { animation: sansidle 2.4s ease-in-out infinite; }
-    .pet[data-pet="sans"].walk .pbody { animation: sanswalk 0.5s steps(1) infinite; }
+    /* ── Sans: pet đặc biệt ── */
+    .pet[data-pet="sans"] .pbody { animation: none !important; }
     .pet[data-pet="sans"] .pbody .sans-sprite { width: 56px; height: 56px; }
     .pet[data-pet="sans"].flip .pbody img { transform: none; }   /* Sans xử lý flip riêng qua sprite src */
-    @keyframes sansidle {
-      0%, 100% { transform: translateY(0px) scale(1,1); }
-      40%       { transform: translateY(-2px) scale(.99,1.01); }
-      70%       { transform: translateY(1px) scale(1.01,.99); }
+    
+    @keyframes sans_sleep_anim {
+      0%, 49.9% { content: url("plugins/sillytavern-farm-extension/sans sprites/15_sleep_stand/sprite-12-1.png"); }
+      50%, 100% { content: url("plugins/sillytavern-farm-extension/sans sprites/15_sleep_stand/sprite-12-2.png"); }
     }
-    @keyframes sanswalk {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(0); }
+    .pet[data-pet="sans"].sleep .pbody img[data-sans-sprite] {
+      animation: sans_sleep_anim 2s infinite;
     }
     .zzz { position: absolute; bottom: calc(100% - 8px); left: 68%; font-size: 12px; font-weight: bold;
       color: #7a90c8; text-shadow: 1px 1px 0 #fff; pointer-events: none; animation: zrise 2.6s linear infinite; }
