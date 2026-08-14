@@ -1150,7 +1150,6 @@ function spawnDmg(target, amount, type) {
     setTimeout(() => dmg.remove(), 800);
     
     // HP UI update moved to updateEntities to handle continuous Karma DOT
-    }
 }
 
 function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOverride) {
