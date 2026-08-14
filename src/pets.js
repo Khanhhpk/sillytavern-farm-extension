@@ -669,9 +669,9 @@ export function initPets() {
 }
 
 // Lệnh Console ẩn để điều khiển thủ công (Debug)
-window.toggleSansControl = function() {
+window['toggleSansControl'] = function() {
   window['sansManualControl'] = !window['sansManualControl'];
-  const el = document.querySelector('.pet[data-pet="sans"]');
+  const el = /** @type {HTMLElement} */ (document.querySelector('.pet[data-pet="sans"]'));
   if (!el) {
     console.log("Sans chưa xuất hiện trên đồng!");
     window['sansManualControl'] = false;
@@ -684,6 +684,9 @@ window.toggleSansControl = function() {
       console.log("Phím 1: Ngủ gật (sleep_stand)");
       console.log("Phím 2: Ăn kem (icecream)");
       console.log("Phím 3: Xài phép (magic)");
+      console.log("Phím 5: Ngồi ghế (stool)");
+      console.log("Phím 6: Chụp ảnh (stool_chup)");
+      console.log("Phím 7: Chải đầu (stool_comb)");
       console.log("Phím 4: Huỷ hành động (stop)");
       
       delete petTgt['sans']; 
@@ -691,7 +694,7 @@ window.toggleSansControl = function() {
       stopHop('sans');
       if (el.dataset.sansAction) wakeSans(el);
       
-      window._sansManualListener = function(e) {
+      window['_sansManualListener'] = function(e) {
           if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
           const p = petPos['sans'] || {x: 100, y: 100};
           petPos['sans'] = p;
@@ -726,14 +729,17 @@ window.toggleSansControl = function() {
           if (e.key === '1') { playSansAction(el, 'sleep_stand'); }
           if (e.key === '2') { playSansAction(el, 'icecream'); }
           if (e.key === '3') { playSansAction(el, 'magic'); }
+          if (e.key === '5') { playSansAction(el, 'stool'); }
+          if (e.key === '6') { playSansAction(el, 'stool_chup'); }
+          if (e.key === '7') { playSansAction(el, 'stool_comb'); }
           if (e.key === '4') { stopSansAction(el); }
       };
-      window.addEventListener('keydown', window._sansManualListener);
+      window.addEventListener('keydown', window['_sansManualListener']);
   } else {
       console.log("=== SANS MANUAL CONTROL: TẮT ===");
-      if (window._sansManualListener) {
-          window.removeEventListener('keydown', window._sansManualListener);
-          delete window._sansManualListener;
+      if (window['_sansManualListener']) {
+          window.removeEventListener('keydown', window['_sansManualListener']);
+          delete window['_sansManualListener'];
       }
       stopSansAction(el);
   }

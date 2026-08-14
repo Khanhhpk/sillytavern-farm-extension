@@ -5001,9 +5001,12 @@ var init_pets = __esm({
     sceneTimer = (fn2, ms) => {
       if (scene) scene.timers.push(window.setTimeout(fn2, ms));
     };
-    window.toggleSansControl = function() {
+    window["toggleSansControl"] = function() {
       window["sansManualControl"] = !window["sansManualControl"];
-      const el = document.querySelector('.pet[data-pet="sans"]');
+      const el = (
+        /** @type {HTMLElement} */
+        document.querySelector('.pet[data-pet="sans"]')
+      );
       if (!el) {
         console.log("Sans ch\u01B0a xu\u1EA5t hi\u1EC7n tr\xEAn \u0111\u1ED3ng!");
         window["sansManualControl"] = false;
@@ -5015,12 +5018,15 @@ var init_pets = __esm({
         console.log("Ph\xEDm 1: Ng\u1EE7 g\u1EADt (sleep_stand)");
         console.log("Ph\xEDm 2: \u0102n kem (icecream)");
         console.log("Ph\xEDm 3: X\xE0i ph\xE9p (magic)");
+        console.log("Ph\xEDm 5: Ng\u1ED3i gh\u1EBF (stool)");
+        console.log("Ph\xEDm 6: Ch\u1EE5p \u1EA3nh (stool_chup)");
+        console.log("Ph\xEDm 7: Ch\u1EA3i \u0111\u1EA7u (stool_comb)");
         console.log("Ph\xEDm 4: Hu\u1EF7 h\xE0nh \u0111\u1ED9ng (stop)");
         delete petTgt["sans"];
         el.classList.remove("walk");
         stopHop("sans");
         if (el.dataset.sansAction) wakeSans(el);
-        window._sansManualListener = function(e2) {
+        window["_sansManualListener"] = function(e2) {
           if (e2.target.tagName === "INPUT" || e2.target.tagName === "TEXTAREA") return;
           const p2 = petPos["sans"] || { x: 100, y: 100 };
           petPos["sans"] = p2;
@@ -5056,16 +5062,25 @@ var init_pets = __esm({
           if (e2.key === "3") {
             playSansAction(el, "magic");
           }
+          if (e2.key === "5") {
+            playSansAction(el, "stool");
+          }
+          if (e2.key === "6") {
+            playSansAction(el, "stool_chup");
+          }
+          if (e2.key === "7") {
+            playSansAction(el, "stool_comb");
+          }
           if (e2.key === "4") {
             stopSansAction(el);
           }
         };
-        window.addEventListener("keydown", window._sansManualListener);
+        window.addEventListener("keydown", window["_sansManualListener"]);
       } else {
         console.log("=== SANS MANUAL CONTROL: T\u1EAET ===");
-        if (window._sansManualListener) {
-          window.removeEventListener("keydown", window._sansManualListener);
-          delete window._sansManualListener;
+        if (window["_sansManualListener"]) {
+          window.removeEventListener("keydown", window["_sansManualListener"]);
+          delete window["_sansManualListener"];
         }
         stopSansAction(el);
       }
