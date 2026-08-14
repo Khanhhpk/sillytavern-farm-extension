@@ -244,6 +244,9 @@ function sansDungeonSpriteForAction(action, step) {
     const phase2 = Math.floor(s2 % 10 / 2);
     return { src: _spDungeon(`magic/magic_0${phase2 + 1}.png`), flip: false };
   }
+  if (action === "shrug") {
+    return { src: _spDungeon(`shrug/sprite-2-0.png`), flip: false };
+  }
   if (action === "gaster_charge") {
     return { src: _spDungeon(`gaster_blaster/blaster_left_close.png`), flip: false };
   }
@@ -12594,10 +12597,35 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
   if (closest && closest.dist < 60 && a.tpCd <= 0 && a.stamina >= 10) {
     a.stamina -= 10;
     a.tpCd = maxTpCd;
-    a.x += closest.dx > 0 ? -150 : 150;
-    a.y += closest.dy > 0 ? -150 : 150;
-    a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
-    a.y = Math.max(30, Math.min(a.y, arenaRect.height - 30));
+    const candidates = [
+      { x: a.x - 150, y: a.y },
+      { x: a.x + 150, y: a.y },
+      { x: a.x, y: a.y - 150 },
+      { x: a.x, y: a.y + 150 },
+      { x: a.x - 100, y: a.y - 100 },
+      { x: a.x + 100, y: a.y + 100 },
+      { x: a.x - 100, y: a.y + 100 },
+      { x: a.x + 100, y: a.y - 100 }
+    ];
+    let bestPos = { x: a.x, y: a.y };
+    let maxMinDist = -1;
+    candidates.forEach((pos) => {
+      pos.x = Math.max(30, Math.min(pos.x, arenaRect.width - 30));
+      pos.y = Math.max(30, Math.min(pos.y, arenaRect.height - 30));
+      let minDistToEnemies = Infinity;
+      enemyGroup.forEach((e2) => {
+        if (e2.hp > 0) {
+          let d = Math.hypot(e2.x - pos.x, e2.y - pos.y);
+          if (d < minDistToEnemies) minDistToEnemies = d;
+        }
+      });
+      if (minDistToEnemies > maxMinDist) {
+        maxMinDist = minDistToEnemies;
+        bestPos = pos;
+      }
+    });
+    a.x = bestPos.x;
+    a.y = bestPos.y;
     a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
     a._shrugTimer = 0.5;
     return;
@@ -13982,7 +14010,7 @@ var init_dungeon = __esm({
       penguin: { name: "C\xE1nh C\u1EE5t", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m 30% t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh c\u1EE7a qu\xE1i.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> S\xFAt m\u1ED9t qu\u1EA3 c\u1EA7u tuy\u1EBFt l\u0103n d\u1ED9i t\u01B0\u1EDDng 5 l\u1EA7n, g\xE2y 200% s\xE1t th\u01B0\u01A1ng v\xE0 \u0111\xF3ng b\u0103ng 3 gi\xE2y.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze", activeSkill: "blizzard", maxSkillCd: 15 },
       // Naoya: maxSkillCd 10s→12s
       naoyaSlime: { name: "Naoya", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> \u0110\u1EA7u X\u1EA1 Ch\xFA Ph\xE1p - L\u01B0\u1EDBt 24 khung h\xECnh c\xF4ng k\xEDch to\xE0n map v\xE0 \u0111\xF3ng b\u0103ng qu\xE1i 1s.", hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: "projection_sorcery", maxSkillCd: 12 },
-      sans: { name: "Sans", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> M\xE1u c\u1EF1c y\u1EBFu (1 HP) nh\u01B0ng c\xF3 thanh Th\u1EC3 l\u1EF1c \u0111\u1EC3 n\xE9 100% s\xE1t th\u01B0\u01A1ng. \u0110\xF2n \u0111\xE1nh th\u01B0\u1EDDng g\xE2y hi\u1EC7u \u1EE9ng R\xFAt m\xE1u Karma.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> \u0110\u1EA7y \u0111\u1EE7 tuy\u1EC7t k\u0129 Blue Magic, Gravity Push v\xE0 Gaster Blaster.", hp: 1, atk: 1, range: 200, speed: 55, cd: 0.2, ai: "sans_ai" },
+      sans: { name: "Sans", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> M\xE1u c\u1EF1c y\u1EBFu (1 HP) nh\u01B0ng c\xF3 thanh Th\u1EC3 l\u1EF1c \u0111\u1EC3 n\xE9 100% s\xE1t th\u01B0\u01A1ng. \u0110\xF2n \u0111\xE1nh th\u01B0\u1EDDng g\xE2y hi\u1EC7u \u1EE9ng R\xFAt m\xE1u Karma.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> \u0110\u1EA7y \u0111\u1EE7 tuy\u1EC7t k\u0129 Blue Magic, Gravity Push v\xE0 Gaster Blaster.", hp: 1, atk: 1, range: 200, speed: 35, cd: 0.2, ai: "sans_ai" },
       default: { name: "Pet V\xF4 Danh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
     };
     ENEMY_TYPES = [

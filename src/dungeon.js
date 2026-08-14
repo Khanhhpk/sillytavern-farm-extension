@@ -44,7 +44,7 @@ const PET_STATS = {
     penguin: { name: 'Cánh Cụt', desc: '<b>Bị động:</b> Đòn đánh làm giảm 30% tốc độ di chuyển và tốc đánh của quái.<br><b>Chủ động (15s):</b> Sút một quả cầu tuyết lăn dội tường 5 lần, gây 200% sát thương và đóng băng 3 giây.', hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: 'freeze', activeSkill: 'blizzard', maxSkillCd: 15 },
     // Naoya: maxSkillCd 10s→12s
     naoyaSlime: { name: 'Naoya', desc: '<b>Bị động:</b> Không có.<br><b>Chủ động (12s):</b> Đầu Xạ Chú Pháp - Lướt 24 khung hình công kích toàn map và đóng băng quái 1s.', hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: 'projection_sorcery', maxSkillCd: 12 },
-    sans: { name: 'Sans', desc: '<b>Bị động:</b> Máu cực yếu (1 HP) nhưng có thanh Thể lực để né 100% sát thương. Đòn đánh thường gây hiệu ứng Rút máu Karma.<br><b>Chủ động:</b> Đầy đủ tuyệt kĩ Blue Magic, Gravity Push và Gaster Blaster.', hp: 1, atk: 1, range: 200, speed: 55, cd: 0.2, ai: 'sans_ai' },
+    sans: { name: 'Sans', desc: '<b>Bị động:</b> Máu cực yếu (1 HP) nhưng có thanh Thể lực để né 100% sát thương. Đòn đánh thường gây hiệu ứng Rút máu Karma.<br><b>Chủ động:</b> Đầy đủ tuyệt kĩ Blue Magic, Gravity Push và Gaster Blaster.', hp: 1, atk: 1, range: 200, speed: 35, cd: 0.2, ai: 'sans_ai' },
     default: { name: 'Pet Vô Danh', desc: '<b>Bị động:</b> Không có.<br><b>Chủ động:</b> Không có.', hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
 };
 
@@ -1431,10 +1431,38 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
     if (closest && closest.dist < 60 && a.tpCd <= 0 && a.stamina >= 10) {
         a.stamina -= 10;
         a.tpCd = maxTpCd;
-        a.x += (closest.dx > 0 ? -150 : 150);
-        a.y += (closest.dy > 0 ? -150 : 150);
-        a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
-        a.y = Math.max(30, Math.min(a.y, arenaRect.height - 30));
+        
+        const candidates = [
+            { x: a.x - 150, y: a.y }, { x: a.x + 150, y: a.y },
+            { x: a.x, y: a.y - 150 }, { x: a.x, y: a.y + 150 },
+            { x: a.x - 100, y: a.y - 100 }, { x: a.x + 100, y: a.y + 100 },
+            { x: a.x - 100, y: a.y + 100 }, { x: a.x + 100, y: a.y - 100 }
+        ];
+
+        let bestPos = { x: a.x, y: a.y };
+        let maxMinDist = -1;
+
+        candidates.forEach(pos => {
+            pos.x = Math.max(30, Math.min(pos.x, arenaRect.width - 30));
+            pos.y = Math.max(30, Math.min(pos.y, arenaRect.height - 30));
+            
+            let minDistToEnemies = Infinity;
+            enemyGroup.forEach(e => {
+                if (e.hp > 0) {
+                    let d = Math.hypot(e.x - pos.x, e.y - pos.y);
+                    if (d < minDistToEnemies) minDistToEnemies = d;
+                }
+            });
+
+            if (minDistToEnemies > maxMinDist) {
+                maxMinDist = minDistToEnemies;
+                bestPos = pos;
+            }
+        });
+
+        a.x = bestPos.x;
+        a.y = bestPos.y;
+        
         a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
         a._shrugTimer = 0.5;
         // Don't set actionTimer to 0.3 so we can keep walking visually, just overridden by shrug

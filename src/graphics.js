@@ -1285,6 +1285,9 @@ export function sansDungeonSpriteForAction(action, step) {
     const phase = Math.floor((s % 10) / 2);
     return { src: _spDungeon(`magic/magic_0${phase + 1}.png`), flip: false };
   }
+  if (action === 'shrug') {
+    return { src: _spDungeon(`shrug/sprite-2-0.png`), flip: false };
+  }
 
   if (action === 'gaster_charge') {
     return { src: _spDungeon(`gaster_blaster/blaster_left_close.png`), flip: false };
