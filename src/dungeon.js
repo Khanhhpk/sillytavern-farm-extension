@@ -190,13 +190,13 @@ function loadDungeonState(saveData) {
         const el = document.createElement('div');
         el.className = 'dg-entity pet';
         let barsHtml = `
-            <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+            <div class="dg-hp-bar"><div class="dg-hp-fill"></div><div class="dg-karma-fill" style="width: 0%"></div></div>
             <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
             <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
         `;
         if (savedP.id === 'sans') {
             barsHtml = `
-                <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                <div class="dg-hp-bar"><div class="dg-hp-fill"></div><div class="dg-karma-fill" style="width: 0%"></div></div>
                 <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
                 <div class="dg-stamina-bar"><div class="dg-stamina-fill" style="width: 100%"></div></div>
                 <div class="dg-skill-cd-bar blue-magic" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
@@ -402,13 +402,13 @@ function initPlacementPhase() {
                 const el = document.createElement('div');
                 el.className = 'dg-entity pet';
                 let barsHtml = `
-                    <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                    <div class="dg-hp-bar"><div class="dg-hp-fill"></div><div class="dg-karma-fill" style="width: 0%"></div></div>
                     <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
                     <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
                 `;
                 if (pId === 'sans') {
                     barsHtml = `
-                        <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+                        <div class="dg-hp-bar"><div class="dg-hp-fill"></div><div class="dg-karma-fill" style="width: 0%"></div></div>
                         <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
                         <div class="dg-stamina-bar"><div class="dg-stamina-fill" style="width: 100%"></div></div>
                         <div class="dg-skill-cd-bar blue-magic" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
@@ -705,7 +705,7 @@ function _doStartWave() {
         const el = document.createElement('div');
         el.className = 'dg-entity enemy flip';
         el.innerHTML = `
-            <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+            <div class="dg-hp-bar"><div class="dg-hp-fill"></div><div class="dg-karma-fill" style="width: 0%"></div></div>
             <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
             <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
             ${spriteSVG(type.sp || type.id, 32)}
@@ -1149,10 +1149,7 @@ function spawnDmg(target, amount, type) {
     arena.appendChild(dmg);
     setTimeout(() => dmg.remove(), 800);
     
-    if (target.el && target.maxHp) {
-        const pct = Math.max(0, target.hp / target.maxHp) * 100;
-        const fill = target.el.querySelector('.dg-hp-fill');
-        if (fill) fill.style.width = pct + '%';
+    // HP UI update moved to updateEntities to handle continuous Karma DOT
     }
 }
 
@@ -1361,34 +1358,58 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         if (dist < minDist) { minDist = dist; closest = { b, dx, dy, dist }; }
     });
 
-    if (a.stamina < 20 && a.gravityCd <= 0 && a.tpCd <= 0 && enemyGroup.filter(b=>b.hp>0).length > 0) {
-        a.stamina -= 12;
-        a.gravityCd = 9;
+    let canGravityPush = a.gravityCd <= 0 && a.tpCd <= 0 && enemyGroup.filter(b=>b.hp>0).length > 0;
+    // Gravity Push trigger: either normal (stamina >= 20) or tired (stamina < 20)
+    if (canGravityPush) {
+        let isTired = a.stamina < 20;
+        if (isTired) a.stamina -= 12;
+        else a.stamina -= 20;
         
+        a.gravityCd = 9;
         a.actionState = 'magic';
         a.actionTimer = 1.0;
-        a.restPending = 1.0; // Start resting after magic finishes
+        if (isTired) a.restPending = 1.0;
 
         if (arena) {
             arena.style.animation = 'dg-shake 0.4s';
             setTimeout(() => { if (arena) arena.style.animation = ''; }, 400);
         }
+        
+        // Find furthest wall
+        const distTop = a.y - 30;
+        const distBottom = arenaRect.height - 30 - a.y;
+        const distLeft = a.x - 30;
+        const distRight = arenaRect.width - 30 - a.x;
+        const maxDist = Math.max(distTop, distBottom, distLeft, distRight);
+        
+        let wallDirX = 0; let wallDirY = 0;
+        if (maxDist === distTop) wallDirY = -1;
+        else if (maxDist === distBottom) wallDirY = 1;
+        else if (maxDist === distLeft) wallDirX = -1;
+        else if (maxDist === distRight) wallDirX = 1;
 
-        a.x = arenaRect.width - 40;
-        a.y = arenaRect.height - 40;
-        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+        // Tired teleport to opposite wall
+        if (isTired) {
+            if (wallDirX !== 0) {
+                a.x = wallDirX > 0 ? 40 : arenaRect.width - 40;
+                a.y = 40 + Math.random() * (arenaRect.height - 80);
+            } else {
+                a.y = wallDirY > 0 ? 40 : arenaRect.height - 40;
+                a.x = 40 + Math.random() * (arenaRect.width - 80);
+            }
+            a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+        }
 
+        // Apply high speed knockback to enemies towards that wall
         enemyGroup.forEach(e => {
             if (e.hp > 0) {
-                e.el.style.transition = 'transform 0.3s ease-out';
-                e.x = 40 + Math.random()*20;
-                e.y = 40 + Math.random()*20;
-                e.el.style.transform = `translate3d(${e.x - 16}px, ${e.y - 16}px, 0)`;
-                setTimeout(() => { if (e.el) e.el.style.transition = ''; }, 300);
-                if (!e.status) e.status = {};
-                e.status.stun = 1.5;
-                e.hp -= a.atk;
-                spawnDmg(e, -a.atk);
+                e.kb = {
+                    time: 0.5,
+                    dx: wallDirX,
+                    dy: wallDirY,
+                    speed: 1200 + Math.random() * 400,
+                    wallDamage: true
+                };
             }
         });
         
@@ -1617,6 +1638,27 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
             a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
             a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
             
+            if (a.kb.wallDamage) {
+                if (a.x <= 20 || a.x >= arenaRect.width - 20 || a.y <= 20 || a.y >= arenaRect.height - 20) {
+                    a.kb.time = 0;
+                    a.hp -= 1;
+                    spawnDmg(a, -1);
+                    if (!a.status) a.status = {};
+                    a.status.stun = 1.0;
+                    a.karmaStacks = (a.karmaStacks || 0) + 5;
+                    a.status.karmaDuration = 3;
+                    const boom = document.createElement('div');
+                    boom.className = 'dg-boom-effect';
+                    boom.style.width = '60px';
+                    boom.style.height = '60px';
+                    boom.style.left = (a.x - 30) + 'px';
+                    boom.style.top = (a.y - 30) + 'px';
+                    boom.style.background = 'radial-gradient(circle, rgba(200,200,200,1) 0%, rgba(200,200,200,0) 70%)';
+                    arena.appendChild(boom);
+                    setTimeout(() => boom.remove(), 300);
+                }
+            }
+            
             let hitOther = false;
             groupA.forEach(other => {
                if (!hitOther && other !== a && other.hp > 0 && Math.hypot(other.x - a.x, other.y - a.y) < 40) {
@@ -1766,6 +1808,22 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
         if (a._lastStatusHtml !== statusHtml) {
             statusDiv.innerHTML = statusHtml;
             a._lastStatusHtml = statusHtml;
+        }
+        
+        // Update HP and Karma Visuals
+        if (a.el && a.maxHp) {
+            let expectedKarmaDmg = (a.status && a.status.karmaDuration > 0 && a.karmaStacks > 0) ? 
+                (a.maxHp * 0.005 * a.karmaStacks * a.status.karmaDuration) : 0;
+            if (expectedKarmaDmg >= a.hp) expectedKarmaDmg = a.hp - 1; // Karma can't kill
+            let safeHp = Math.max(1, a.hp - expectedKarmaDmg);
+            let safeHpPct = (safeHp / a.maxHp) * 100;
+            let karmaPct = ((a.hp - safeHp) / a.maxHp) * 100;
+            
+            const hpFill = a.el.querySelector('.dg-hp-fill');
+            if (hpFill) hpFill.style.width = Math.max(0, safeHpPct) + '%';
+            
+            const karmaFill = a.el.querySelector('.dg-karma-fill');
+            if (karmaFill) karmaFill.style.width = Math.max(0, karmaPct) + '%';
         }
         
         if (isStunned) return; // Can't move or attack
