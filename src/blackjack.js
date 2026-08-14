@@ -736,6 +736,7 @@ function bjHandleMsg(fromPid, data) {
                 if (typeof data.bet !== 'number' || data.bet <= 0 || !Number.isFinite(data.bet)) break;
                 if (data.bet < bjSettings.minBet) break;
                 if (bjSettings.maxBet > 0 && data.bet > bjSettings.maxBet) break;
+                if (!bjGameState || bjGameState.phase !== 'betting' || (bjGameState.betsIn && bjGameState.betsIn[fromPid])) break;
                 if (fromPid === bjMyId) {
                     ctx.S.coins -= data.bet; save(); renderStatus();
                 } else if (bjConns[fromPid]) {
@@ -1106,7 +1107,7 @@ function bjHandleRoomAction(fromPid, data) {
     }
     
     if (data.actionType === 'INSURANCE_ANSWER') {
-        if (bjIsHost) {
+        if (bjIsHost && gs.phase === 'insurance') {
             if (data.answer === 'even') {
                 const myH = gs.hands[fromPid];
                 if (!myH || !isBlackjack(myH.cards[0])) return;
