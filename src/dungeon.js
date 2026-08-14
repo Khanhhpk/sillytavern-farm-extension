@@ -317,13 +317,15 @@ function initPlacementPhase() {
     function updateDockNav() {
         if (!dockWrapper) return;
         const w = dockWrapper.clientWidth || 250;
-        const itemsPerPage = Math.max(1, Math.floor(w / 54));
+        const slotEl = slotsContainer.querySelector('.dg-slot');
+        const slotWidth = slotEl ? slotEl.offsetWidth + 10 : (window.innerWidth <= 600 ? 60 : 74);
+        const itemsPerPage = Math.max(1, Math.floor((w + 10) / slotWidth));
         const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
         if (dockPage > maxPage) dockPage = maxPage;
         
         navLeft.style.opacity = dockPage > 0 ? '1' : '0.3';
         navRight.style.opacity = dockPage < maxPage ? '1' : '0.3';
-        const offset = dockPage * itemsPerPage * 54; 
+        const offset = dockPage * itemsPerPage * slotWidth; 
         slotsContainer.style.transform = `translateX(-${offset}px)`;
     }
 
@@ -331,7 +333,9 @@ function initPlacementPhase() {
     navRight.addEventListener('pointerdown', (e) => { 
         e.preventDefault(); 
         const w = dockWrapper.clientWidth || 250;
-        const itemsPerPage = Math.max(1, Math.floor(w / 54));
+        const slotEl = slotsContainer.querySelector('.dg-slot');
+        const slotWidth = slotEl ? slotEl.offsetWidth + 10 : (window.innerWidth <= 600 ? 60 : 74);
+        const itemsPerPage = Math.max(1, Math.floor((w + 10) / slotWidth));
         const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
         if (dockPage < maxPage) { dockPage++; updateDockNav(); } 
     });
@@ -2672,7 +2676,7 @@ function showWaveRewards(isLoaded = false) {
         let petsHtml = '<div class="dg-shop-left">';
         fullTeam.forEach((p, idx) => {
             const isSel = idx === selectedIdx;
-            const totalLv = Object.values(p.upgrades).reduce((a,b)=>a+b,0);
+            const totalLv = Object.values(p.upgrades).reduce((a,b)=>a+(Number(b)||0),0);
             const formatNum = n => n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(1)+'K' : Math.round(n);
             petsHtml += `<div class="dg-shop-pet ${isSel?'selected':''}" data-idx="${idx}">
                 ${petSVG(p.id, 40)}
@@ -2773,7 +2777,19 @@ function showWaveRewards(isLoaded = false) {
 
         shopHtml += `</div>`;
 
+        let oldLeftScroll = 0;
+        let oldGridScroll = 0;
+        const oldLeftEl = overlay.querySelector('.dg-shop-left');
+        if (oldLeftEl) oldLeftScroll = oldLeftEl.scrollTop;
+        const oldGridEl = overlay.querySelector('.dg-shop-grid');
+        if (oldGridEl) oldGridScroll = oldGridEl.scrollTop;
+
         overlay.innerHTML = `<div class="dg-shop-box">${headerHtml}<div class="dg-shop-content">${petsHtml}${shopHtml}</div></div>`;
+
+        const newLeftEl = overlay.querySelector('.dg-shop-left');
+        if (newLeftEl) newLeftEl.scrollTop = oldLeftScroll;
+        const newGridEl = overlay.querySelector('.dg-shop-grid');
+        if (newGridEl) newGridEl.scrollTop = oldGridScroll;
 
         overlay.querySelectorAll('.dg-shop-pet').forEach(el => {
             el.onclick = () => renderShop(parseInt(el.dataset.idx));

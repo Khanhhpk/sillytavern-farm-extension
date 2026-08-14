@@ -11005,9 +11005,13 @@ function initHero() {
     let el;
     el = e2.target.closest(".hero-slot.filled");
     if (el) {
+      heroPanelScrollTop = $id("mbody").scrollTop;
       ctx.S.hero.party.splice(parseInt(el.dataset.rem), 1);
       save();
       openHeroPanel();
+      setTimeout(() => {
+        if ($id("mbody")) $id("mbody").scrollTop = heroPanelScrollTop;
+      }, 0);
       return;
     }
     el = e2.target.closest(".h-r-pet");
@@ -11015,21 +11019,30 @@ function initHero() {
       const pId = el.dataset.add;
       if (ctx.S.hero.party.includes(pId)) return;
       if (ctx.S.hero.party.length >= 3) return toast("\u0110\u1ED9i h\xECnh \u0111\xE3 \u0111\u1EA7y! (Max 3)");
+      heroPanelScrollTop = $id("mbody").scrollTop;
       ctx.S.hero.party.push(pId);
       save();
       openHeroPanel();
+      setTimeout(() => {
+        if ($id("mbody")) $id("mbody").scrollTop = heroPanelScrollTop;
+      }, 0);
       return;
     }
     el = e2.target.closest(".h-r-info");
     if (el) {
+      heroPanelScrollTop = $id("mbody").scrollTop;
       openPetSkills(el.dataset.info);
       return;
     }
     el = e2.target.closest(".hero-style-btn");
     if (el) {
+      heroPanelScrollTop = $id("mbody").scrollTop;
       ctx.S.hero.style = el.dataset.style;
       save();
       openHeroPanel();
+      setTimeout(() => {
+        if ($id("mbody")) $id("mbody").scrollTop = heroPanelScrollTop;
+      }, 0);
       return;
     }
     el = e2.target.closest("#hero-deploy");
@@ -11115,6 +11128,9 @@ function initHero() {
     el = e2.target.closest("#pet-back-btn");
     if (el) {
       openHeroPanel();
+      setTimeout(() => {
+        if ($id("mbody")) $id("mbody").scrollTop = heroPanelScrollTop;
+      }, 0);
       return;
     }
   });
@@ -11215,7 +11231,7 @@ function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
     }
   }, 40);
 }
-var heroLoop, lastTick, PET_SKILLS, PET_STATS, runState, hToastTimer, hGesture;
+var heroPanelScrollTop, heroLoop, lastTick, PET_SKILLS, PET_STATS, runState, hToastTimer, hGesture;
 var init_hero = __esm({
   "src/hero.js"() {
     init_store();
@@ -11224,6 +11240,7 @@ var init_hero = __esm({
     init_data();
     init_state();
     init_shop();
+    heroPanelScrollTop = 0;
     heroLoop = null;
     lastTick = 0;
     PET_SKILLS = {
@@ -11576,12 +11593,14 @@ function initPlacementPhase() {
   function updateDockNav() {
     if (!dockWrapper) return;
     const w2 = dockWrapper.clientWidth || 250;
-    const itemsPerPage = Math.max(1, Math.floor(w2 / 54));
+    const slotEl = slotsContainer.querySelector(".dg-slot");
+    const slotWidth = slotEl ? slotEl.offsetWidth + 10 : window.innerWidth <= 600 ? 60 : 74;
+    const itemsPerPage = Math.max(1, Math.floor((w2 + 10) / slotWidth));
     const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
     if (dockPage > maxPage) dockPage = maxPage;
     navLeft.style.opacity = dockPage > 0 ? "1" : "0.3";
     navRight.style.opacity = dockPage < maxPage ? "1" : "0.3";
-    const offset = dockPage * itemsPerPage * 54;
+    const offset = dockPage * itemsPerPage * slotWidth;
     slotsContainer.style.transform = `translateX(-${offset}px)`;
   }
   navLeft.addEventListener("pointerdown", (e2) => {
@@ -11594,7 +11613,9 @@ function initPlacementPhase() {
   navRight.addEventListener("pointerdown", (e2) => {
     e2.preventDefault();
     const w2 = dockWrapper.clientWidth || 250;
-    const itemsPerPage = Math.max(1, Math.floor(w2 / 54));
+    const slotEl = slotsContainer.querySelector(".dg-slot");
+    const slotWidth = slotEl ? slotEl.offsetWidth + 10 : window.innerWidth <= 600 ? 60 : 74;
+    const itemsPerPage = Math.max(1, Math.floor((w2 + 10) / slotWidth));
     const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
     if (dockPage < maxPage) {
       dockPage++;
@@ -13753,7 +13774,7 @@ function showWaveRewards(isLoaded = false) {
     let petsHtml = '<div class="dg-shop-left">';
     fullTeam.forEach((p2, idx) => {
       const isSel = idx === selectedIdx;
-      const totalLv = Object.values(p2.upgrades).reduce((a, b2) => a + b2, 0);
+      const totalLv = Object.values(p2.upgrades).reduce((a, b2) => a + (Number(b2) || 0), 0);
       const formatNum = (n2) => n2 >= 1e6 ? (n2 / 1e6).toFixed(1) + "M" : n2 >= 1e3 ? (n2 / 1e3).toFixed(1) + "K" : Math.round(n2);
       petsHtml += `<div class="dg-shop-pet ${isSel ? "selected" : ""}" data-idx="${idx}">
                 ${petSVG(p2.id, 40)}
@@ -13842,7 +13863,17 @@ function showWaveRewards(isLoaded = false) {
       shopHtml += `<div style="color:#aaa; text-align:center; flex:1; display:flex; align-items:center; justify-content:center;">Ch\u1ECDn m\u1ED9t Pet b\xEAn tr\xE1i \u0111\u1EC3 n\xE2ng c\u1EA5p.</div>`;
     }
     shopHtml += `</div>`;
+    let oldLeftScroll = 0;
+    let oldGridScroll = 0;
+    const oldLeftEl = overlay.querySelector(".dg-shop-left");
+    if (oldLeftEl) oldLeftScroll = oldLeftEl.scrollTop;
+    const oldGridEl = overlay.querySelector(".dg-shop-grid");
+    if (oldGridEl) oldGridScroll = oldGridEl.scrollTop;
     overlay.innerHTML = `<div class="dg-shop-box">${headerHtml}<div class="dg-shop-content">${petsHtml}${shopHtml}</div></div>`;
+    const newLeftEl = overlay.querySelector(".dg-shop-left");
+    if (newLeftEl) newLeftEl.scrollTop = oldLeftScroll;
+    const newGridEl = overlay.querySelector(".dg-shop-grid");
+    if (newGridEl) newGridEl.scrollTop = oldGridScroll;
     overlay.querySelectorAll(".dg-shop-pet").forEach((el) => {
       el.onclick = () => renderShop(parseInt(el.dataset.idx));
     });

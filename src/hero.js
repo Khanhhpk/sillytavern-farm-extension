@@ -5,6 +5,8 @@ import { CROPS } from './data.js';
 import { save } from './state.js';
 import { openModal, closeModal } from './shop.js';
 
+
+let heroPanelScrollTop = 0;
 let heroLoop = null;
 let lastTick = 0;
 let currentMonster = null;
@@ -1565,8 +1567,10 @@ export function initHero() {
     // @ts-ignore
     el = e.target.closest('.hero-slot.filled');
     if (el) {
+      heroPanelScrollTop = All.$id('mbody').scrollTop;
       ctx.S.hero.party.splice(parseInt(el.dataset.rem), 1);
       save(); openHeroPanel();
+      setTimeout(() => { if(All.$id('mbody')) All.$id('mbody').scrollTop = heroPanelScrollTop; }, 0);
       return;
     }
     // @ts-ignore
@@ -1575,16 +1579,28 @@ export function initHero() {
       const pId = el.dataset.add;
       if (ctx.S.hero.party.includes(pId)) return;
       if (ctx.S.hero.party.length >= 3) return All.toast('Đội hình đã đầy! (Max 3)');
+      heroPanelScrollTop = All.$id('mbody').scrollTop;
       ctx.S.hero.party.push(pId);
       save(); openHeroPanel();
+      setTimeout(() => { if(All.$id('mbody')) All.$id('mbody').scrollTop = heroPanelScrollTop; }, 0);
       return;
     }
     // @ts-ignore
     el = e.target.closest('.h-r-info');
-    if (el) { openPetSkills(el.dataset.info); return; }
+    if (el) { 
+        heroPanelScrollTop = All.$id('mbody').scrollTop;
+        openPetSkills(el.dataset.info); 
+        return; 
+    }
     // @ts-ignore
     el = e.target.closest('.hero-style-btn');
-    if (el) { ctx.S.hero.style = el.dataset.style; save(); openHeroPanel(); return; }
+    if (el) { 
+        heroPanelScrollTop = All.$id('mbody').scrollTop;
+        ctx.S.hero.style = el.dataset.style; 
+        save(); openHeroPanel(); 
+        setTimeout(() => { if(All.$id('mbody')) All.$id('mbody').scrollTop = heroPanelScrollTop; }, 0);
+        return; 
+    }
     // @ts-ignore
     el = e.target.closest('#hero-deploy');
     if (el) {
@@ -1667,7 +1683,11 @@ export function initHero() {
     }
     // @ts-ignore
     el = e.target.closest('#pet-back-btn');
-    if (el) { openHeroPanel(); return; }
+    if (el) { 
+        openHeroPanel(); 
+        setTimeout(() => { if(All.$id('mbody')) All.$id('mbody').scrollTop = heroPanelScrollTop; }, 0);
+        return; 
+    }
   });
 }
 
