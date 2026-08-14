@@ -160,14 +160,17 @@ __export(graphics_exports, {
   PETS: () => PETS,
   PET_P: () => PET_P,
   PET_SPR: () => PET_SPR,
-  SANS_SPRITES: () => SANS_SPRITES,
+  SANS_DUNGEON_SPRITES: () => SANS_DUNGEON_SPRITES,
+  SANS_FARM_SPRITES: () => SANS_FARM_SPRITES,
   SPR: () => SPR,
   applySansSprite: () => applySansSprite,
   mulberry32: () => mulberry32,
   petSVG: () => petSVG,
   registerDynamicSprite: () => registerDynamicSprite,
-  sansSpriteFor: () => sansSpriteFor,
-  sansSpriteForAction: () => sansSpriteForAction,
+  sansDungeonSpriteFor: () => sansDungeonSpriteFor,
+  sansDungeonSpriteForAction: () => sansDungeonSpriteForAction,
+  sansFarmSpriteFor: () => sansFarmSpriteFor,
+  sansFarmSpriteForAction: () => sansFarmSpriteForAction,
   spriteSVG: () => spriteSVG,
   tileURI: () => tileURI,
   warmUpCache: () => warmUpCache
@@ -208,86 +211,122 @@ function applySansSprite(el, sp) {
     }
   }
 }
-function sansSpriteForAction(action, step) {
+function sansFarmSpriteForAction(action, step) {
   const s2 = step || 0;
   if (action === "icecream") {
     const phase2 = s2 % 10;
-    return { src: _sp(`icecream/sprite-18-${phase2 + 1}.png`), flip: false };
+    return { src: _spFarm(`icecream/sprite-18-${phase2 + 1}.png`), flip: false };
   }
   if (action === "stool_chup") {
     const phase2 = s2 % 10;
-    return { src: _sp(`stool_chup/sprite-10-${phase2 + 1}.png`), flip: false };
+    return { src: _spFarm(`stool_chup/sprite-10-${phase2 + 1}.png`), flip: false };
   }
   if (action === "stool_comb") {
     const phase2 = Math.floor(s2 % 9 / 3);
-    return { src: _sp(`stool_comb/sprite-9-${phase2 + 1}.png`), flip: false };
+    return { src: _spFarm(`stool_comb/sprite-9-${phase2 + 1}.png`), flip: false };
   }
   if (action === "stool") {
     const phase2 = Math.floor(s2 % 10 / 5);
-    return { src: _sp(`stool/sprite-8-${phase2 + 1}.png`), flip: false };
+    return { src: _spFarm(`stool/sprite-8-${phase2 + 1}.png`), flip: false };
   }
   if (action === "sleep_stand") {
     const phase2 = Math.floor(s2 % 10 / 5);
-    return { src: _sp(`sleep_stand/sprite-12-${phase2 + 1}.png`), flip: false };
+    return { src: _spFarm(`sleep_stand/sprite-12-${phase2 + 1}.png`), flip: false };
   }
   if (action === "magic") {
     const phase2 = Math.floor(s2 % 10 / 2);
-    return { src: _sp(`magic/magic_0${phase2 + 1}.png`), flip: false, legs: SANS_SPRITES.legsF };
+    return { src: _spFarm(`magic/magic_0${phase2 + 1}.png`), flip: false };
+  }
+  return { src: SANS_FARM_SPRITES.idle, flip: false };
+}
+function sansDungeonSpriteForAction(action, step) {
+  const s2 = step || 0;
+  if (action === "sleep_stand") {
+    const phase2 = Math.floor(s2 % 10 / 5);
+    return { src: _spDungeon(`sleep_stand/sprite-12-${phase2 + 1}.png`), flip: false };
+  }
+  if (action === "magic") {
+    const phase2 = Math.floor(s2 % 10 / 2);
+    return { src: _spDungeon(`magic/magic_0${phase2 + 1}.png`), flip: false, legs: SANS_DUNGEON_SPRITES.legsF };
   }
   if (action === "attack_updown") {
     const phase2 = s2 % 10;
-    if (phase2 < 5) return { src: _sp(`attack_updown/attack_up_0${phase2 + 1}.png`), flip: false, legs: SANS_SPRITES.legsF };
-    return { src: _sp(`attack_updown/attack_down_0${phase2 - 4}.png`), flip: false, legs: SANS_SPRITES.legsF };
+    if (phase2 < 5) return { src: _spDungeon(`attack_updown/attack_up_0${phase2 + 1}.png`), flip: false, legs: SANS_DUNGEON_SPRITES.legsF };
+    return { src: _spDungeon(`attack_updown/attack_down_0${phase2 - 4}.png`), flip: false, legs: SANS_DUNGEON_SPRITES.legsF };
   }
   if (action === "attack_leftright") {
     const phase2 = s2 % 6;
-    return { src: _sp(`attack_leftright/attack_left_0${phase2 + 1}.png`), flip: false, legs: SANS_SPRITES.legsS };
+    return { src: _spDungeon(`attack_leftright/attack_left_0${phase2 + 1}.png`), flip: false, legs: SANS_DUNGEON_SPRITES.legsS };
   }
   if (action === "flashing_eye") {
     const phase2 = s2 % 2;
-    return { src: SANS_SPRITES.idle, flip: false, overlay: _sp(`flashing_eye/flash_front_${phase2 === 0 ? "cyan" : "yellow"}.png`) };
+    return { src: SANS_DUNGEON_SPRITES.idle, flip: false, overlay: _spDungeon(`flashing_eye/flash_front_${phase2 === 0 ? "cyan" : "yellow"}.png`) };
   }
   if (action === "shrug") {
-    return { src: _sp(`shrug/sprite-6-2.png`), flip: false };
+    return { src: _spDungeon(`shrug/sprite-6-2.png`), flip: false };
   }
   if (action === "gaster_charge") {
-    return { src: _sp(`gaster_blaster/blaster_left_close.png`), flip: false };
+    return { src: _spDungeon(`gaster_blaster/blaster_left_close.png`), flip: false };
   }
   if (action === "gaster_fire") {
-    return { src: _sp(`gaster_blaster/blaster_left_fire_01.png`), flip: false };
+    return { src: _spDungeon(`gaster_blaster/blaster_left_fire_01.png`), flip: false };
   }
-  return { src: SANS_SPRITES.idle, flip: false };
+  return { src: SANS_DUNGEON_SPRITES.idle, flip: false };
 }
-function sansSpriteFor(dx, dy, step) {
+function sansFarmSpriteFor(dx, dy, step) {
   const s2 = step || 0;
   const phase2 = s2 % 4;
   if (Math.abs(dx) < 1 && Math.abs(dy) < 1)
-    return { src: SANS_SPRITES.idle, flip: false };
-  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
-  if (angle > -35 && angle <= 35) {
-    if (phase2 === 0) return { src: SANS_SPRITES.walkR1, flip: false };
-    if (phase2 === 2) return { src: SANS_SPRITES.walkR2, flip: false };
-    return { src: SANS_SPRITES.right, flip: false };
-  } else if (angle > 145 || angle <= -145) {
-    if (phase2 === 0) return { src: SANS_SPRITES.walkL1, flip: false };
-    if (phase2 === 2) return { src: SANS_SPRITES.walkL2, flip: false };
-    return { src: SANS_SPRITES.left, flip: false };
-  } else if (angle > 35 && angle <= 145) {
-    if (phase2 === 0) return { src: SANS_SPRITES.walkU1, flip: false };
-    if (phase2 === 2) return { src: SANS_SPRITES.walkU2, flip: false };
-    return { src: SANS_SPRITES.up, flip: false };
+    return { src: SANS_FARM_SPRITES.idle, flip: false };
+  const angle = Math.atan2(dx, dy) * 180 / Math.PI;
+  if (angle > -45 && angle <= 45) {
+    if (phase2 === 1) return { src: SANS_FARM_SPRITES.walkR1, flip: false };
+    if (phase2 === 3) return { src: SANS_FARM_SPRITES.walkR2, flip: false };
+    return { src: SANS_FARM_SPRITES.right, flip: false };
+  } else if (angle > 45 && angle <= 135) {
+    if (phase2 === 1) return { src: SANS_FARM_SPRITES.walkF1, flip: false };
+    if (phase2 === 3) return { src: SANS_FARM_SPRITES.walkF2, flip: false };
+    return { src: SANS_FARM_SPRITES.down, flip: false };
+  } else if (angle > -135 && angle <= -45) {
+    if (phase2 === 1) return { src: SANS_FARM_SPRITES.walkU1, flip: false };
+    if (phase2 === 3) return { src: SANS_FARM_SPRITES.walkU2, flip: false };
+    return { src: SANS_FARM_SPRITES.up, flip: false };
   } else {
-    if (phase2 === 0) return { src: SANS_SPRITES.walkF1, flip: false };
-    if (phase2 === 2) return { src: SANS_SPRITES.walkF2, flip: false };
-    return { src: SANS_SPRITES.down, flip: false };
+    if (phase2 === 1) return { src: SANS_FARM_SPRITES.walkL1, flip: false };
+    if (phase2 === 3) return { src: SANS_FARM_SPRITES.walkL2, flip: false };
+    return { src: SANS_FARM_SPRITES.left, flip: false };
+  }
+}
+function sansDungeonSpriteFor(dx, dy, step) {
+  const s2 = step || 0;
+  const phase2 = s2 % 4;
+  if (Math.abs(dx) < 1 && Math.abs(dy) < 1)
+    return { src: SANS_DUNGEON_SPRITES.idle, flip: false };
+  const angle = Math.atan2(dx, dy) * 180 / Math.PI;
+  if (angle > -45 && angle <= 45) {
+    if (phase2 === 1) return { src: SANS_DUNGEON_SPRITES.walkR1, flip: false };
+    if (phase2 === 3) return { src: SANS_DUNGEON_SPRITES.walkR2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.right, flip: false };
+  } else if (angle > 45 && angle <= 135) {
+    if (phase2 === 1) return { src: SANS_DUNGEON_SPRITES.walkF1, flip: false };
+    if (phase2 === 3) return { src: SANS_DUNGEON_SPRITES.walkF2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.down, flip: false };
+  } else if (angle > -135 && angle <= -45) {
+    if (phase2 === 1) return { src: SANS_DUNGEON_SPRITES.walkU1, flip: false };
+    if (phase2 === 3) return { src: SANS_DUNGEON_SPRITES.walkU2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.up, flip: false };
+  } else {
+    if (phase2 === 1) return { src: SANS_DUNGEON_SPRITES.walkL1, flip: false };
+    if (phase2 === 3) return { src: SANS_DUNGEON_SPRITES.walkL2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.left, flip: false };
   }
 }
 function petSVG(name3, px) {
   if (name3 === "sans") {
     return `<div style="position:relative; width:${px}px; height:${px}px; display:inline-block;">
-      <img draggable="false" data-sans-legs class="sans-legs" width="${px}" height="${px}" src="${SANS_SPRITES.legsF}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:1;" />
-      <img draggable="false" data-sans-sprite class="sans-sprite" width="${px}" height="${px}" src="${SANS_SPRITES.idle}" style="position:relative; display:block; image-rendering:pixelated; object-fit:contain; z-index:2;" />
-      <img draggable="false" data-sans-overlay class="sans-overlay" width="${px}" height="${px}" src="${SANS_SPRITES.idle}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:3;" />
+      <img draggable="false" data-sans-legs class="sans-legs" width="${px}" height="${px}" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:1;" />
+      <img draggable="false" data-sans-sprite class="sans-sprite" width="${px}" height="${px}" src="${SANS_FARM_SPRITES.idle}" style="position:relative; display:block; image-rendering:pixelated; object-fit:contain; z-index:2;" />
+      <img draggable="false" data-sans-overlay class="sans-overlay" width="${px}" height="${px}" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:3;" />
     </div>`;
   }
   const key = name3 + "@" + px;
@@ -484,7 +523,7 @@ function warmUpCache(CROPS2) {
   }
   setTimeout(next, 1e3);
 }
-var P, GACHA_P, SPR, PET_P, PET_SPR, petLinear, PET_FX, petCache, _sansBase, _sp, SANS_SPRITES, PETS, PASSES, C2, DYNAMIC_SPR, spriteCache, tileCache, LP;
+var P, GACHA_P, SPR, PET_P, PET_SPR, petLinear, PET_FX, petCache, _sansBase, _spFarm, _spDungeon, SANS_FARM_SPRITES, SANS_DUNGEON_SPRITES, PETS, PASSES, C2, DYNAMIC_SPR, spriteCache, tileCache, LP;
 var init_graphics = __esm({
   "src/graphics.js"() {
     init_state();
@@ -2006,24 +2045,40 @@ var init_graphics = __esm({
         return "/extensions/sillytavern-farm-extension/";
       }
     })();
-    _sp = (p2) => _sansBase + "sans_sprites/" + p2;
-    SANS_SPRITES = {
-      idle: _sp("overworld_walk/walk_front_idle.png"),
-      left: _sp("overworld_walk/walk_left_idle.png"),
-      right: _sp("overworld_walk/walk_right_idle.png"),
-      up: _sp("overworld_walk/walk_back_idle.png"),
-      down: _sp("overworld_walk/walk_front_idle.png"),
-      walkF1: _sp("overworld_walk/walk_front_1.png"),
-      walkF2: _sp("overworld_walk/walk_front_2.png"),
-      walkL1: _sp("overworld_walk/walk_left_1.png"),
-      walkL2: _sp("overworld_walk/walk_left_2.png"),
-      walkR1: _sp("overworld_walk/walk_right_1.png"),
-      walkR2: _sp("overworld_walk/walk_right_2.png"),
-      walkU1: _sp("overworld_walk/walk_back_1.png"),
-      walkU2: _sp("overworld_walk/walk_back_2.png"),
-      bone: _sp("bones/bone_white_short.png"),
-      legsF: _sp("legs_front/legs_front_01.png"),
-      legsS: _sp("legs_side/legs_side_01.png")
+    _spFarm = (p2) => _sansBase + "sans_sprites_farm/" + p2;
+    _spDungeon = (p2) => _sansBase + "sans_sprites_dungeon/" + p2;
+    SANS_FARM_SPRITES = {
+      idle: _spFarm("overworld_walk/walk_front_idle.png"),
+      left: _spFarm("overworld_walk/walk_left_idle.png"),
+      right: _spFarm("overworld_walk/walk_right_idle.png"),
+      up: _spFarm("overworld_walk/walk_back_idle.png"),
+      down: _spFarm("overworld_walk/walk_front_idle.png"),
+      walkF1: _spFarm("overworld_walk/walk_front_1.png"),
+      walkF2: _spFarm("overworld_walk/walk_front_2.png"),
+      walkL1: _spFarm("overworld_walk/walk_left_1.png"),
+      walkL2: _spFarm("overworld_walk/walk_left_2.png"),
+      walkR1: _spFarm("overworld_walk/walk_right_1.png"),
+      walkR2: _spFarm("overworld_walk/walk_right_2.png"),
+      walkU1: _spFarm("overworld_walk/walk_back_1.png"),
+      walkU2: _spFarm("overworld_walk/walk_back_2.png")
+    };
+    SANS_DUNGEON_SPRITES = {
+      idle: _spDungeon("overworld_walk/walk_front_idle.png"),
+      left: _spDungeon("overworld_walk/walk_left_idle.png"),
+      right: _spDungeon("overworld_walk/walk_right_idle.png"),
+      up: _spDungeon("overworld_walk/walk_back_idle.png"),
+      down: _spDungeon("overworld_walk/walk_front_idle.png"),
+      walkF1: _spDungeon("overworld_walk/walk_front_1.png"),
+      walkF2: _spDungeon("overworld_walk/walk_front_2.png"),
+      walkL1: _spDungeon("overworld_walk/walk_left_1.png"),
+      walkL2: _spDungeon("overworld_walk/walk_left_2.png"),
+      walkR1: _spDungeon("overworld_walk/walk_right_1.png"),
+      walkR2: _spDungeon("overworld_walk/walk_right_2.png"),
+      walkU1: _spDungeon("overworld_walk/walk_back_1.png"),
+      walkU2: _spDungeon("overworld_walk/walk_back_2.png"),
+      bone: _spDungeon("bones/bone_white_short.png"),
+      legsF: _spDungeon("legs_front/legs_front_01.png"),
+      legsS: _spDungeon("legs_side/legs_side_01.png")
     };
     PETS = {
       /* —— Trang 1 —— */
@@ -4365,7 +4420,7 @@ function hopStep(el) {
     stopHop(id);
     if (id === "sans") {
       sansStep[id] = 0;
-      Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g2) => g2.applySansSprite(el, g2.sansSpriteFor(0, 0)));
+      Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g2) => g2.applySansSprite(el, g2.sansFarmSpriteFor(0, 0)));
     }
     const cb = petArrive[id];
     delete petArrive[id];
@@ -4378,8 +4433,10 @@ function hopStep(el) {
   el.classList.toggle("flip", id !== "sans" && dx < 0);
   if (id === "sans") {
     sansStep[id] = (sansStep[id] || 0) + 1;
-    const sp = sansSpriteFor(dx, dy, sansStep[id]);
-    Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g2) => g2.applySansSprite(el, sp));
+    Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g2) => {
+      const sp = g2.sansFarmSpriteFor(dx, dy, sansStep[id]);
+      g2.applySansSprite(el, sp);
+    });
   }
   el.classList.add("walk");
   el.style.setProperty("--hopd", g.dur + "ms");
@@ -4508,8 +4565,10 @@ function playSansAction(el, action) {
     if (action !== "sleep_stand" && el.dataset.sansAction !== action) return stopSansAction(el);
     if (action === "sleep_stand" && !el.classList.contains("sleep")) return stopSansAction(el);
     sansStep[id] = (sansStep[id] || 0) + 1;
-    const sp = sansSpriteForAction(action, sansStep[id]);
-    Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g) => g.applySansSprite(el, sp));
+    Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g) => {
+      const sp = g.sansFarmSpriteForAction(action, sansStep[id]);
+      g.applySansSprite(el, sp);
+    });
   }, 200);
 }
 function stopSansAction(el) {
@@ -4520,7 +4579,7 @@ function stopSansAction(el) {
   }
   const img = el.querySelector("[data-sans-sprite]");
   if (img && !el.classList.contains("walk")) {
-    Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g) => g.applySansSprite(el, g.sansSpriteFor(0, 0)));
+    Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g) => g.applySansSprite(el, g.sansFarmSpriteFor(0, 0)));
   }
 }
 function endScene() {
@@ -12483,7 +12542,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     a.stamina = Math.min(a.maxStamina, a.stamina + 100 / 4 * dt2);
     if (!a._sleepStep) a._sleepStep = 0;
     a._sleepStep += dt2 * 10;
-    const sp = sansSpriteForAction("sleep_stand", Math.floor(a._sleepStep));
+    const sp = sansDungeonSpriteForAction("sleep_stand", Math.floor(a._sleepStep));
     applySansSprite(a.el, sp);
     if (a.restTimer <= 0) a.isResting = false;
     return;
@@ -12543,7 +12602,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
     a.y = Math.max(30, Math.min(a.y, arenaRect.height - 30));
     a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-    const sp = sansSpriteForAction("shrug", 0);
+    const sp = sansDungeonSpriteForAction("shrug", 0);
     applySansSprite(a.el, sp);
     a.actionState = "shrug";
     a.actionTimer = 0.3;
@@ -12553,7 +12612,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     if (a.gasterCd <= 0 && a.stamina >= 15) {
       a.gasterCd = 10;
       a.stamina -= 15;
-      const sp = sansSpriteForAction("flashing_eye", 1);
+      const sp = sansDungeonSpriteForAction("flashing_eye", 1);
       applySansSprite(a.el, sp);
       a.actionState = "gaster";
       a.actionTimer = 3.6;
@@ -12567,7 +12626,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
       const by = a.y - dirY * 30 - 20;
       const blaster = document.createElement("img");
       blaster.className = "dg-gaster-blaster";
-      blaster.src = sansSpriteForAction("gaster_charge", 0).src;
+      blaster.src = sansDungeonSpriteForAction("gaster_charge", 0).src;
       blaster.style.position = "absolute";
       blaster.style.width = "64px";
       blaster.style.height = "64px";
@@ -12579,7 +12638,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
       if (arena) arena.appendChild(blaster);
       setTimeout(() => {
         if (!arena || !arena.contains(blaster)) return;
-        blaster.src = sansSpriteForAction("gaster_fire", 0).src;
+        blaster.src = sansDungeonSpriteForAction("gaster_fire", 0).src;
         const laser = document.createElement("div");
         laser.style.position = "absolute";
         laser.style.height = "64px";
@@ -12651,7 +12710,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     if (a.cd <= 0 && closest.dist <= a.range) {
       a.cd = a.maxCd;
       const bone = document.createElement("div");
-      bone.innerHTML = `<img src="${SANS_SPRITES.bone}" width="24" height="24">`;
+      bone.innerHTML = `<img src="${SANS_DUNGEON_SPRITES.bone}" width="24" height="24">`;
       bone.style.position = "absolute";
       bone.style.left = a.x + "px";
       bone.style.top = a.y + "px";
@@ -12691,7 +12750,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
       if (a.actionState !== "gaster") {
         if (!a._actionStep) a._actionStep = 0;
         a._actionStep += dt2 * 10;
-        const sp = sansSpriteForAction(a.actionState, Math.floor(a._actionStep));
+        const sp = sansDungeonSpriteForAction(a.actionState, Math.floor(a._actionStep));
         if (closest && closest.dx < 0) sp.flip = true;
         else sp.flip = false;
         applySansSprite(a.el, sp);
@@ -12717,10 +12776,10 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
       a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
       if (!a._walkStep) a._walkStep = 0;
       a._walkStep += dt2 * 10;
-      const sp = sansSpriteFor(moveX, moveY, Math.floor(a._walkStep));
+      const sp = sansDungeonSpriteFor(moveX, moveY, Math.floor(a._walkStep));
       applySansSprite(a.el, sp);
     } else {
-      const sp = sansSpriteForAction("idle", 0);
+      const sp = sansDungeonSpriteForAction("idle", 0);
       applySansSprite(a.el, sp);
     }
   }
@@ -55515,7 +55574,8 @@ __export(all_exports, {
   PET_SKILLS: () => PET_SKILLS,
   PET_SPR: () => PET_SPR,
   PET_STATS: () => PET_STATS,
-  SANS_SPRITES: () => SANS_SPRITES,
+  SANS_DUNGEON_SPRITES: () => SANS_DUNGEON_SPRITES,
+  SANS_FARM_SPRITES: () => SANS_FARM_SPRITES,
   SEC: () => SEC,
   SEC_LS_KEY: () => SEC_LS_KEY,
   SPR: () => SPR,
@@ -55724,9 +55784,11 @@ __export(all_exports, {
   root: () => root,
   runState: () => runState,
   sanitizeEvent: () => sanitizeEvent,
+  sansDungeonSpriteFor: () => sansDungeonSpriteFor,
+  sansDungeonSpriteForAction: () => sansDungeonSpriteForAction,
+  sansFarmSpriteFor: () => sansFarmSpriteFor,
+  sansFarmSpriteForAction: () => sansFarmSpriteForAction,
   sansIdleAction: () => sansIdleAction,
-  sansSpriteFor: () => sansSpriteFor,
-  sansSpriteForAction: () => sansSpriteForAction,
   sansStep: () => sansStep,
   sansUltimateFarm: () => sansUltimateFarm,
   save: () => save,

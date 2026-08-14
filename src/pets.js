@@ -2,7 +2,7 @@ import { now } from './state.js';
 import { ctx } from './store.js';
 import * as All from './all.js';
 import { BLOCK_PRICE_PG, WEATHERS, TEST_MODE, DAY_MS, CROPS, GROW, MIN, REGROW, FERTS, WATER_CD, REGROW_MAX, POKE_CD, TREASURE_CD, PETS_OUT_MAX, WITCH_STAY, witchGap, SNAP_EDGE, ZONE_NAME } from './data.js';
-import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P, sansSpriteFor, sansSpriteForAction } from './graphics.js';
+import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, LP, PET_P } from './graphics.js';
 import { sh } from './ui.js';
 import { save, curBlocks, curPlots } from './state.js';
 import { renderStatus, pickFrom } from './render.js';
@@ -69,8 +69,8 @@ export function hopStep(el) {                                   // Một cú nh�
   if (!cur || !tgt || Math.hypot(tgt.x - cur.x, tgt.y - cur.y) < 3) {
     delete petTgt[id]; el.classList.remove('walk'); stopHop(id);
     if (id === 'sans') {
-      sansStep[id] = 0;
-      import('./graphics.js').then(g => g.applySansSprite(el, g.sansSpriteFor(0, 0)));
+        sansStep[id] = 0;
+        import('./graphics.js').then(g => g.applySansSprite(el, g.sansFarmSpriteFor(0, 0)));
     }
     const cb = petArrive[id]; delete petArrive[id]; if (cb) cb();   // v0.7③: callback khi tới nơi (dùng cho việc dàn cảnh tiểu phẩm)
     return;
@@ -82,8 +82,10 @@ export function hopStep(el) {                                   // Một cú nh�
   /* ── Sans: đổi sprite theo hướng đi, xen kẽ walk frames ── */
   if (id === 'sans') {
     sansStep[id] = (sansStep[id] || 0) + 1;
-    const sp = sansSpriteFor(dx, dy, sansStep[id]);
-    import('./graphics.js').then(g => g.applySansSprite(el, sp));
+    import('./graphics.js').then(g => {
+      const sp = g.sansFarmSpriteFor(dx, dy, sansStep[id]);
+      g.applySansSprite(el, sp);
+    });
   }
   el.classList.add('walk');
   el.style.setProperty('--hopd', g.dur + 'ms');
@@ -226,8 +228,10 @@ export function playSansAction(el, action) {
     if (action === 'sleep_stand' && !el.classList.contains('sleep')) return stopSansAction(el);
     
     sansStep[id] = (sansStep[id] || 0) + 1;
-    const sp = sansSpriteForAction(action, sansStep[id]);
-    import('./graphics.js').then(g => g.applySansSprite(el, sp));
+    import('./graphics.js').then(g => {
+      const sp = g.sansFarmSpriteForAction(action, sansStep[id]);
+      g.applySansSprite(el, sp);
+    });
   }, 200); // 200ms mỗi frame
 }
 
@@ -239,7 +243,7 @@ export function stopSansAction(el) {
   }
   const img = el.querySelector('[data-sans-sprite]');
   if (img && !el.classList.contains('walk')) {
-    import('./graphics.js').then(g => g.applySansSprite(el, g.sansSpriteFor(0, 0)));
+    import('./graphics.js').then(g => g.applySansSprite(el, g.sansFarmSpriteFor(0, 0)));
   }
 }
 

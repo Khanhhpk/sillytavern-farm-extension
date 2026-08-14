@@ -1,6 +1,6 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
-import { petSVG, spriteSVG, sansSpriteFor, sansSpriteForAction, SANS_SPRITES, applySansSprite } from './graphics.js';
+import { petSVG, spriteSVG, sansDungeonSpriteFor, sansDungeonSpriteForAction, SANS_DUNGEON_SPRITES, applySansSprite } from './graphics.js';
 import { playNaoyaCutscene } from './hero.js';
 
 export let isDungeonOpen = false;
@@ -1340,7 +1340,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         a.stamina = Math.min(a.maxStamina, a.stamina + (100 / 4) * dt); // Full regen in 4s
         if (!a._sleepStep) a._sleepStep = 0;
         a._sleepStep += dt * 10;
-        const sp = sansSpriteForAction('sleep_stand', Math.floor(a._sleepStep));
+        const sp = sansDungeonSpriteForAction('sleep_stand', Math.floor(a._sleepStep));
         applySansSprite(a.el, sp);
         if (a.restTimer <= 0) a.isResting = false;
         return;
@@ -1403,7 +1403,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
         a.y = Math.max(30, Math.min(a.y, arenaRect.height - 30));
         a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-        const sp = sansSpriteForAction('shrug', 0);
+        const sp = sansDungeonSpriteForAction('shrug', 0);
         applySansSprite(a.el, sp);
         a.actionState = 'shrug';
         a.actionTimer = 0.3;
@@ -1414,7 +1414,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         if (a.gasterCd <= 0 && a.stamina >= 15) {
             a.gasterCd = 10;
             a.stamina -= 15;
-            const sp = sansSpriteForAction('flashing_eye', 1);
+            const sp = sansDungeonSpriteForAction('flashing_eye', 1);
             applySansSprite(a.el, sp);
             a.actionState = 'gaster';
             a.actionTimer = 3.6;
@@ -1431,7 +1431,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
 
             const blaster = document.createElement('img');
             blaster.className = 'dg-gaster-blaster';
-            blaster.src = sansSpriteForAction('gaster_charge', 0).src;
+            blaster.src = sansDungeonSpriteForAction('gaster_charge', 0).src;
             blaster.style.position = 'absolute';
             blaster.style.width = '64px';
             blaster.style.height = '64px';
@@ -1446,7 +1446,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
             setTimeout(() => {
                 if (!arena || !arena.contains(blaster)) return;
                 
-                blaster.src = sansSpriteForAction('gaster_fire', 0).src;
+                blaster.src = sansDungeonSpriteForAction('gaster_fire', 0).src;
 
                 const laser = document.createElement('div');
                 laser.style.position = 'absolute';
@@ -1526,7 +1526,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         if (a.cd <= 0 && closest.dist <= a.range) {
             a.cd = a.maxCd;
             const bone = document.createElement('div');
-            bone.innerHTML = `<img src="${SANS_SPRITES.bone}" width="24" height="24">`;
+            bone.innerHTML = `<img src="${SANS_DUNGEON_SPRITES.bone}" width="24" height="24">`;
             bone.style.position = 'absolute';
             bone.style.left = a.x + 'px';
             bone.style.top = a.y + 'px';
@@ -1561,7 +1561,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
             if (a.actionState !== 'gaster') {
                 if (!a._actionStep) a._actionStep = 0;
                 a._actionStep += dt * 10;
-                const sp = sansSpriteForAction(a.actionState, Math.floor(a._actionStep));
+                const sp = sansDungeonSpriteForAction(a.actionState, Math.floor(a._actionStep));
                 if (closest && closest.dx < 0) sp.flip = true;
                 else sp.flip = false;
                 applySansSprite(a.el, sp);
@@ -1591,10 +1591,10 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
             
             if (!a._walkStep) a._walkStep = 0;
             a._walkStep += dt * 10;
-            const sp = sansSpriteFor(moveX, moveY, Math.floor(a._walkStep));
+            const sp = sansDungeonSpriteFor(moveX, moveY, Math.floor(a._walkStep));
             applySansSprite(a.el, sp);
         } else {
-            const sp = sansSpriteForAction('idle', 0);
+            const sp = sansDungeonSpriteForAction('idle', 0);
             applySansSprite(a.el, sp);
         }
     }

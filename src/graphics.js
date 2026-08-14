@@ -1185,24 +1185,42 @@ const _sansBase = (() => {
     return '/extensions/sillytavern-farm-extension/';
   }
 })();
-const _sp = (p) => _sansBase + 'sans_sprites/' + p;
-export const SANS_SPRITES = {
-  idle:    _sp('overworld_walk/walk_front_idle.png'),
-  left:    _sp('overworld_walk/walk_left_idle.png'),
-  right:   _sp('overworld_walk/walk_right_idle.png'),
-  up:      _sp('overworld_walk/walk_back_idle.png'),
-  down:    _sp('overworld_walk/walk_front_idle.png'),
-  walkF1:  _sp('overworld_walk/walk_front_1.png'),
-  walkF2:  _sp('overworld_walk/walk_front_2.png'),
-  walkL1:  _sp('overworld_walk/walk_left_1.png'),
-  walkL2:  _sp('overworld_walk/walk_left_2.png'),
-  walkR1:  _sp('overworld_walk/walk_right_1.png'),
-  walkR2:  _sp('overworld_walk/walk_right_2.png'),
-  walkU1:  _sp('overworld_walk/walk_back_1.png'),
-  walkU2:  _sp('overworld_walk/walk_back_2.png'),
-  bone:    _sp('bones/bone_white_short.png'),
-  legsF:   _sp('legs_front/legs_front_01.png'),
-  legsS:   _sp('legs_side/legs_side_01.png')
+const _spFarm = (p) => _sansBase + 'sans_sprites_farm/' + p;
+const _spDungeon = (p) => _sansBase + 'sans_sprites_dungeon/' + p;
+
+export const SANS_FARM_SPRITES = {
+  idle:    _spFarm('overworld_walk/walk_front_idle.png'),
+  left:    _spFarm('overworld_walk/walk_left_idle.png'),
+  right:   _spFarm('overworld_walk/walk_right_idle.png'),
+  up:      _spFarm('overworld_walk/walk_back_idle.png'),
+  down:    _spFarm('overworld_walk/walk_front_idle.png'),
+  walkF1:  _spFarm('overworld_walk/walk_front_1.png'),
+  walkF2:  _spFarm('overworld_walk/walk_front_2.png'),
+  walkL1:  _spFarm('overworld_walk/walk_left_1.png'),
+  walkL2:  _spFarm('overworld_walk/walk_left_2.png'),
+  walkR1:  _spFarm('overworld_walk/walk_right_1.png'),
+  walkR2:  _spFarm('overworld_walk/walk_right_2.png'),
+  walkU1:  _spFarm('overworld_walk/walk_back_1.png'),
+  walkU2:  _spFarm('overworld_walk/walk_back_2.png')
+};
+
+export const SANS_DUNGEON_SPRITES = {
+  idle:    _spDungeon('overworld_walk/walk_front_idle.png'),
+  left:    _spDungeon('overworld_walk/walk_left_idle.png'),
+  right:   _spDungeon('overworld_walk/walk_right_idle.png'),
+  up:      _spDungeon('overworld_walk/walk_back_idle.png'),
+  down:    _spDungeon('overworld_walk/walk_front_idle.png'),
+  walkF1:  _spDungeon('overworld_walk/walk_front_1.png'),
+  walkF2:  _spDungeon('overworld_walk/walk_front_2.png'),
+  walkL1:  _spDungeon('overworld_walk/walk_left_1.png'),
+  walkL2:  _spDungeon('overworld_walk/walk_left_2.png'),
+  walkR1:  _spDungeon('overworld_walk/walk_right_1.png'),
+  walkR2:  _spDungeon('overworld_walk/walk_right_2.png'),
+  walkU1:  _spDungeon('overworld_walk/walk_back_1.png'),
+  walkU2:  _spDungeon('overworld_walk/walk_back_2.png'),
+  bone:    _spDungeon('bones/bone_white_short.png'),
+  legsF:   _spDungeon('legs_front/legs_front_01.png'),
+  legsS:   _spDungeon('legs_side/legs_side_01.png')
 };
 
 export function applySansSprite(el, sp) {
@@ -1234,97 +1252,123 @@ export function applySansSprite(el, sp) {
   }
 }
 
-export function sansSpriteForAction(action, step) {
+export function sansFarmSpriteForAction(action, step) {
   const s = step || 0;
   if (action === 'icecream') {
     const phase = s % 10;
-    return { src: _sp(`icecream/sprite-18-${phase + 1}.png`), flip: false };
+    return { src: _spFarm(`icecream/sprite-18-${phase + 1}.png`), flip: false };
   }
   if (action === 'stool_chup') {
     const phase = s % 10;
-    return { src: _sp(`stool_chup/sprite-10-${phase + 1}.png`), flip: false };
+    return { src: _spFarm(`stool_chup/sprite-10-${phase + 1}.png`), flip: false };
   }
   if (action === 'stool_comb') {
-    // Giữ 3 nhịp mỗi frame (600ms) -> tổng 1.8s
     const phase = Math.floor((s % 9) / 3);
-    return { src: _sp(`stool_comb/sprite-9-${phase + 1}.png`), flip: false };
+    return { src: _spFarm(`stool_comb/sprite-9-${phase + 1}.png`), flip: false };
   }
   if (action === 'stool') {
-    // Giữ 5 nhịp mỗi frame (1000ms = 1s) -> tổng 2.0s
     const phase = Math.floor((s % 10) / 5); 
-    return { src: _sp(`stool/sprite-8-${phase + 1}.png`), flip: false };
+    return { src: _spFarm(`stool/sprite-8-${phase + 1}.png`), flip: false };
   }
   if (action === 'sleep_stand') {
-    // Giữ 5 nhịp mỗi frame (1000ms = 1s) -> tổng 2.0s
     const phase = Math.floor((s % 10) / 5);
-    return { src: _sp(`sleep_stand/sprite-12-${phase + 1}.png`), flip: false };
+    return { src: _spFarm(`sleep_stand/sprite-12-${phase + 1}.png`), flip: false };
   }
   if (action === 'magic') {
-    // 5 khung hình ném tay xuống, mỗi frame giữ 2 nhịp (400ms) -> tổng 2.0s
     const phase = Math.floor((s % 10) / 2);
-    return { src: _sp(`magic/magic_0${phase + 1}.png`), flip: false, legs: SANS_SPRITES.legsF };
+    return { src: _spFarm(`magic/magic_0${phase + 1}.png`), flip: false };
+  }
+  return { src: SANS_FARM_SPRITES.idle, flip: false };
+}
+
+export function sansDungeonSpriteForAction(action, step) {
+  const s = step || 0;
+  if (action === 'sleep_stand') {
+    const phase = Math.floor((s % 10) / 5);
+    return { src: _spDungeon(`sleep_stand/sprite-12-${phase + 1}.png`), flip: false };
+  }
+  if (action === 'magic') {
+    const phase = Math.floor((s % 10) / 2);
+    return { src: _spDungeon(`magic/magic_0${phase + 1}.png`), flip: false, legs: SANS_DUNGEON_SPRITES.legsF };
   }
   if (action === 'attack_updown') {
     const phase = s % 10;
-    if (phase < 5) return { src: _sp(`attack_updown/attack_up_0${phase + 1}.png`), flip: false, legs: SANS_SPRITES.legsF };
-    return { src: _sp(`attack_updown/attack_down_0${phase - 4}.png`), flip: false, legs: SANS_SPRITES.legsF };
+    if (phase < 5) return { src: _spDungeon(`attack_updown/attack_up_0${phase + 1}.png`), flip: false, legs: SANS_DUNGEON_SPRITES.legsF };
+    return { src: _spDungeon(`attack_updown/attack_down_0${phase - 4}.png`), flip: false, legs: SANS_DUNGEON_SPRITES.legsF };
   }
   if (action === 'attack_leftright') {
     const phase = s % 6;
-    return { src: _sp(`attack_leftright/attack_left_0${phase + 1}.png`), flip: false, legs: SANS_SPRITES.legsS };
+    return { src: _spDungeon(`attack_leftright/attack_left_0${phase + 1}.png`), flip: false, legs: SANS_DUNGEON_SPRITES.legsS };
   }
   if (action === 'flashing_eye') {
     const phase = s % 2;
-    return { src: SANS_SPRITES.idle, flip: false, overlay: _sp(`flashing_eye/flash_front_${phase === 0 ? 'cyan' : 'yellow'}.png`) };
+    return { src: SANS_DUNGEON_SPRITES.idle, flip: false, overlay: _spDungeon(`flashing_eye/flash_front_${phase === 0 ? 'cyan' : 'yellow'}.png`) };
   }
   if (action === 'shrug') {
-    return { src: _sp(`shrug/sprite-6-2.png`), flip: false };
+    return { src: _spDungeon(`shrug/sprite-6-2.png`), flip: false };
   }
   if (action === 'gaster_charge') {
-    return { src: _sp(`gaster_blaster/blaster_left_close.png`), flip: false };
+    return { src: _spDungeon(`gaster_blaster/blaster_left_close.png`), flip: false };
   }
   if (action === 'gaster_fire') {
-    return { src: _sp(`gaster_blaster/blaster_left_fire_01.png`), flip: false };
+    return { src: _spDungeon(`gaster_blaster/blaster_left_fire_01.png`), flip: false };
   }
-  return { src: SANS_SPRITES.idle, flip: false };
+  return { src: SANS_DUNGEON_SPRITES.idle, flip: false };
 }
 
-export function sansSpriteFor(dx, dy, step) {
+export function sansFarmSpriteFor(dx, dy, step) {
   const s = step || 0;
   const phase = s % 4;
 
   if (Math.abs(dx) < 1 && Math.abs(dy) < 1)
-    return { src: SANS_SPRITES.idle, flip: false };
+    return { src: SANS_FARM_SPRITES.idle, flip: false };
 
-  // dy > 0 nghĩa là y đích lớn hơn y hiện tại -> dịch chuyển Y CSS âm hơn -> đi LÊN (away from camera)
-  // Tính góc di chuyển từ -180 đến 180 độ. (dx phải, dy lên)
-  const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+  const angle = Math.atan2(dx, dy) * 180 / Math.PI;
 
-  // Phân vùng 360 độ:
-  // Vùng Sideway (Ngang): -35° đến 35° (Phải) và 145° đến -145° (Trái)
-  // Vùng Up (Lên): 35° đến 145°
-  // Vùng Down (Xuống): -145° đến -35°
-  
-  if (angle > -35 && angle <= 35) {
-    // Đi sang phải
-    if (phase === 0) return { src: SANS_SPRITES.walkR1, flip: false };
-    if (phase === 2) return { src: SANS_SPRITES.walkR2, flip: false };
-    return { src: SANS_SPRITES.right, flip: false };
-  } else if (angle > 145 || angle <= -145) {
-    // Đi sang trái
-    if (phase === 0) return { src: SANS_SPRITES.walkL1, flip: false };
-    if (phase === 2) return { src: SANS_SPRITES.walkL2, flip: false };
-    return { src: SANS_SPRITES.left, flip: false };
-  } else if (angle > 35 && angle <= 145) {
-    // Đi lên (away from camera) -> quay lưng
-    if (phase === 0) return { src: SANS_SPRITES.walkU1, flip: false };
-    if (phase === 2) return { src: SANS_SPRITES.walkU2, flip: false };
-    return { src: SANS_SPRITES.up, flip: false };
+  if (angle > -45 && angle <= 45) {
+    if (phase === 1) return { src: SANS_FARM_SPRITES.walkR1, flip: false };
+    if (phase === 3) return { src: SANS_FARM_SPRITES.walkR2, flip: false };
+    return { src: SANS_FARM_SPRITES.right, flip: false };
+  } else if (angle > 45 && angle <= 135) {
+    if (phase === 1) return { src: SANS_FARM_SPRITES.walkF1, flip: false };
+    if (phase === 3) return { src: SANS_FARM_SPRITES.walkF2, flip: false };
+    return { src: SANS_FARM_SPRITES.down, flip: false };
+  } else if (angle > -135 && angle <= -45) {
+    if (phase === 1) return { src: SANS_FARM_SPRITES.walkU1, flip: false };
+    if (phase === 3) return { src: SANS_FARM_SPRITES.walkU2, flip: false };
+    return { src: SANS_FARM_SPRITES.up, flip: false };
   } else {
-    // Đi xuống (towards camera) -> quay mặt
-    if (phase === 0) return { src: SANS_SPRITES.walkF1, flip: false };
-    if (phase === 2) return { src: SANS_SPRITES.walkF2, flip: false };
-    return { src: SANS_SPRITES.down, flip: false };
+    if (phase === 1) return { src: SANS_FARM_SPRITES.walkL1, flip: false };
+    if (phase === 3) return { src: SANS_FARM_SPRITES.walkL2, flip: false };
+    return { src: SANS_FARM_SPRITES.left, flip: false };
+  }
+}
+
+export function sansDungeonSpriteFor(dx, dy, step) {
+  const s = step || 0;
+  const phase = s % 4;
+
+  if (Math.abs(dx) < 1 && Math.abs(dy) < 1)
+    return { src: SANS_DUNGEON_SPRITES.idle, flip: false };
+
+  const angle = Math.atan2(dx, dy) * 180 / Math.PI;
+
+  if (angle > -45 && angle <= 45) {
+    if (phase === 1) return { src: SANS_DUNGEON_SPRITES.walkR1, flip: false };
+    if (phase === 3) return { src: SANS_DUNGEON_SPRITES.walkR2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.right, flip: false };
+  } else if (angle > 45 && angle <= 135) {
+    if (phase === 1) return { src: SANS_DUNGEON_SPRITES.walkF1, flip: false };
+    if (phase === 3) return { src: SANS_DUNGEON_SPRITES.walkF2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.down, flip: false };
+  } else if (angle > -135 && angle <= -45) {
+    if (phase === 1) return { src: SANS_DUNGEON_SPRITES.walkU1, flip: false };
+    if (phase === 3) return { src: SANS_DUNGEON_SPRITES.walkU2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.up, flip: false };
+  } else {
+    if (phase === 1) return { src: SANS_DUNGEON_SPRITES.walkL1, flip: false };
+    if (phase === 3) return { src: SANS_DUNGEON_SPRITES.walkL2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.left, flip: false };
   }
 }
 
@@ -1332,9 +1376,9 @@ export function petSVG(name, px) {
   /* ── Sans: trả về img đặc biệt có data-sans để JS cập nhật hướng ── */
   if (name === 'sans') {
     return `<div style="position:relative; width:${px}px; height:${px}px; display:inline-block;">
-      <img draggable="false" data-sans-legs class="sans-legs" width="${px}" height="${px}" src="${SANS_SPRITES.legsF}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:1;" />
-      <img draggable="false" data-sans-sprite class="sans-sprite" width="${px}" height="${px}" src="${SANS_SPRITES.idle}" style="position:relative; display:block; image-rendering:pixelated; object-fit:contain; z-index:2;" />
-      <img draggable="false" data-sans-overlay class="sans-overlay" width="${px}" height="${px}" src="${SANS_SPRITES.idle}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:3;" />
+      <img draggable="false" data-sans-legs class="sans-legs" width="${px}" height="${px}" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:1;" />
+      <img draggable="false" data-sans-sprite class="sans-sprite" width="${px}" height="${px}" src="${SANS_FARM_SPRITES.idle}" style="position:relative; display:block; image-rendering:pixelated; object-fit:contain; z-index:2;" />
+      <img draggable="false" data-sans-overlay class="sans-overlay" width="${px}" height="${px}" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:3;" />
     </div>`;
   }
 
