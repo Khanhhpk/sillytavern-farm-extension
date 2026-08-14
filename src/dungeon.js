@@ -1403,9 +1403,9 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
         a.y = Math.max(30, Math.min(a.y, arenaRect.height - 30));
         a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-        const sp = sansDungeonSpriteForAction('shrug', 0);
+        const sp = sansDungeonSpriteForAction('magic', 0);
         applySansSprite(a.el, sp);
-        a.actionState = 'shrug';
+        a.actionState = 'magic';
         a.actionTimer = 0.3;
         return;
     }
@@ -1414,7 +1414,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         if (a.gasterCd <= 0 && a.stamina >= 15) {
             a.gasterCd = 10;
             a.stamina -= 15;
-            const sp = sansDungeonSpriteForAction('flashing_eye', 1);
+            const sp = sansDungeonSpriteForAction('magic', 1);
             applySansSprite(a.el, sp);
             a.actionState = 'gaster';
             a.actionTimer = 3.6;
@@ -1500,7 +1500,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         if (a.blueMagicCd <= 0 && a.stamina >= 10 && closest.dist < 100) {
             a.blueMagicCd = 7;
             a.stamina -= 10;
-            a.actionState = 'attack_updown';
+            a.actionState = 'magic';
             a.actionTimer = 0.5;
 
             const target = closest.b;
@@ -1547,8 +1547,6 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
                     tgt.karmaStacks = (tgt.karmaStacks || 0) + 1;
                 }
             });
-            a.actionState = 'attack_leftright';
-            a.actionTimer = 0.2;
             return;
         }
     }

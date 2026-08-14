@@ -1218,9 +1218,7 @@ export const SANS_DUNGEON_SPRITES = {
   walkR2:  _spDungeon('overworld_walk/walk_right_2.png'),
   walkU1:  _spDungeon('overworld_walk/walk_back_1.png'),
   walkU2:  _spDungeon('overworld_walk/walk_back_2.png'),
-  bone:    _spDungeon('bones/bone_white_short.png'),
-  legsF:   _spDungeon('legs_front/legs_front_01.png'),
-  legsS:   _spDungeon('legs_side/legs_side_01.png')
+  bone:    _spDungeon('bones/bone_white_short.png')
 };
 
 export function applySansSprite(el, sp) {
@@ -1291,22 +1289,7 @@ export function sansDungeonSpriteForAction(action, step) {
     const phase = Math.floor((s % 10) / 2);
     return { src: _spDungeon(`magic/magic_0${phase + 1}.png`), flip: false };
   }
-  if (action === 'attack_updown') {
-    const phase = s % 10;
-    if (phase < 5) return { src: _spDungeon(`attack_updown/attack_up_0${phase + 1}.png`), flip: false };
-    return { src: _spDungeon(`attack_updown/attack_down_0${phase - 4}.png`), flip: false };
-  }
-  if (action === 'attack_leftright') {
-    const phase = s % 6;
-    return { src: _spDungeon(`attack_leftright/attack_left_0${phase + 1}.png`), flip: false };
-  }
-  if (action === 'flashing_eye') {
-    const phase = s % 2;
-    return { src: SANS_DUNGEON_SPRITES.idle, flip: false, overlay: _spDungeon(`flashing_eye/flash_front_${phase === 0 ? 'cyan' : 'yellow'}.png`) };
-  }
-  if (action === 'shrug') {
-    return { src: _spDungeon(`shrug/sprite-6-2.png`), flip: false };
-  }
+
   if (action === 'gaster_charge') {
     return { src: _spDungeon(`gaster_blaster/blaster_left_close.png`), flip: false };
   }

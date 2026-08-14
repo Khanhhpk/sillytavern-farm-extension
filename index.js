@@ -249,22 +249,6 @@ function sansDungeonSpriteForAction(action, step) {
     const phase2 = Math.floor(s2 % 10 / 2);
     return { src: _spDungeon(`magic/magic_0${phase2 + 1}.png`), flip: false };
   }
-  if (action === "attack_updown") {
-    const phase2 = s2 % 10;
-    if (phase2 < 5) return { src: _spDungeon(`attack_updown/attack_up_0${phase2 + 1}.png`), flip: false };
-    return { src: _spDungeon(`attack_updown/attack_down_0${phase2 - 4}.png`), flip: false };
-  }
-  if (action === "attack_leftright") {
-    const phase2 = s2 % 6;
-    return { src: _spDungeon(`attack_leftright/attack_left_0${phase2 + 1}.png`), flip: false };
-  }
-  if (action === "flashing_eye") {
-    const phase2 = s2 % 2;
-    return { src: SANS_DUNGEON_SPRITES.idle, flip: false, overlay: _spDungeon(`flashing_eye/flash_front_${phase2 === 0 ? "cyan" : "yellow"}.png`) };
-  }
-  if (action === "shrug") {
-    return { src: _spDungeon(`shrug/sprite-6-2.png`), flip: false };
-  }
   if (action === "gaster_charge") {
     return { src: _spDungeon(`gaster_blaster/blaster_left_close.png`), flip: false };
   }
@@ -2079,9 +2063,7 @@ var init_graphics = __esm({
       walkR2: _spDungeon("overworld_walk/walk_right_2.png"),
       walkU1: _spDungeon("overworld_walk/walk_back_1.png"),
       walkU2: _spDungeon("overworld_walk/walk_back_2.png"),
-      bone: _spDungeon("bones/bone_white_short.png"),
-      legsF: _spDungeon("legs_front/legs_front_01.png"),
-      legsS: _spDungeon("legs_side/legs_side_01.png")
+      bone: _spDungeon("bones/bone_white_short.png")
     };
     PETS = {
       /* —— Trang 1 —— */
@@ -12605,9 +12587,9 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
     a.y = Math.max(30, Math.min(a.y, arenaRect.height - 30));
     a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-    const sp = sansDungeonSpriteForAction("shrug", 0);
+    const sp = sansDungeonSpriteForAction("magic", 0);
     applySansSprite(a.el, sp);
-    a.actionState = "shrug";
+    a.actionState = "magic";
     a.actionTimer = 0.3;
     return;
   }
@@ -12615,7 +12597,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     if (a.gasterCd <= 0 && a.stamina >= 15) {
       a.gasterCd = 10;
       a.stamina -= 15;
-      const sp = sansDungeonSpriteForAction("flashing_eye", 1);
+      const sp = sansDungeonSpriteForAction("magic", 1);
       applySansSprite(a.el, sp);
       a.actionState = "gaster";
       a.actionTimer = 3.6;
@@ -12690,7 +12672,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     if (a.blueMagicCd <= 0 && a.stamina >= 10 && closest.dist < 100) {
       a.blueMagicCd = 7;
       a.stamina -= 10;
-      a.actionState = "attack_updown";
+      a.actionState = "magic";
       a.actionTimer = 0.5;
       const target = closest.b;
       if (!target.status) target.status = {};
@@ -12740,8 +12722,6 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
           tgt.karmaStacks = (tgt.karmaStacks || 0) + 1;
         }
       });
-      a.actionState = "attack_leftright";
-      a.actionTimer = 0.2;
       return;
     }
   }
