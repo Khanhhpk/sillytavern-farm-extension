@@ -12881,28 +12881,26 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
         groupA.forEach((other) => {
           if (!hitOther && other !== a && other.hp > 0 && Math.hypot(other.x - a.x, other.y - a.y) < 40) {
             if (!other.status) other.status = {};
-            if (!other.status.stun) {
-              hitOther = true;
-              other.status.stun = 1.5;
-              const impactX = other.x;
-              const impactY = other.y;
-              const boom = document.createElement("div");
-              boom.className = "dg-boom-effect";
-              boom.style.width = "80px";
-              boom.style.height = "80px";
-              boom.style.left = impactX - 8 + "px";
-              boom.style.top = impactY - 8 + "px";
-              boom.style.background = "radial-gradient(circle, rgba(255,220,80,1) 0%, rgba(255,120,0,0) 70%)";
-              arena.appendChild(boom);
-              setTimeout(() => boom.remove(), 400);
-              const CHAIN_RADIUS = 55;
-              groupA.forEach((nearby) => {
-                if (nearby !== a && nearby !== other && nearby.hp > 0 && Math.hypot(nearby.x - impactX, nearby.y - impactY) < CHAIN_RADIUS) {
-                  if (!nearby.status) nearby.status = {};
-                  nearby.status.stun = 1;
-                }
-              });
-            }
+            hitOther = true;
+            other.status.stun = 1.5;
+            const impactX = other.x;
+            const impactY = other.y;
+            const boom = document.createElement("div");
+            boom.className = "dg-boom-effect";
+            boom.style.width = "80px";
+            boom.style.height = "80px";
+            boom.style.left = impactX - 8 + "px";
+            boom.style.top = impactY - 8 + "px";
+            boom.style.background = "radial-gradient(circle, rgba(255,220,80,1) 0%, rgba(255,120,0,0) 70%)";
+            arena.appendChild(boom);
+            setTimeout(() => boom.remove(), 400);
+            const CHAIN_RADIUS = 55;
+            groupA.forEach((nearby) => {
+              if (nearby !== a && nearby !== other && nearby.hp > 0 && Math.hypot(nearby.x - impactX, nearby.y - impactY) < CHAIN_RADIUS) {
+                if (!nearby.status) nearby.status = {};
+                nearby.status.stun = 1;
+              }
+            });
           }
         });
         if (hitOther) {
