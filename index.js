@@ -192,15 +192,6 @@ function applySansSprite(el, sp) {
     img.src = sp.src;
     img.style.transform = sp.flip ? "scaleX(-1)" : "";
   }
-  if (legs) {
-    if (sp.legs) {
-      legs.style.display = "block";
-      legs.src = sp.legs;
-      legs.style.transform = sp.flip ? "scaleX(-1)" : "";
-    } else {
-      legs.style.display = "none";
-    }
-  }
   if (overlay) {
     if (sp.overlay) {
       overlay.style.display = "block";
@@ -284,7 +275,7 @@ function sansFarmSpriteFor(dx, dy, step) {
 function sansDungeonSpriteFor(dx, dy, step) {
   const s2 = step || 0;
   const phase2 = s2 % 4;
-  if (Math.abs(dx) < 1 && Math.abs(dy) < 1)
+  if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01)
     return { src: SANS_DUNGEON_SPRITES.idle, flip: false };
   const angle = Math.atan2(dx, dy) * 180 / Math.PI;
   if (angle > -45 && angle <= 45) {
@@ -308,11 +299,10 @@ function sansDungeonSpriteFor(dx, dy, step) {
 function petSVG(name3, px) {
   if (name3 === "sans") {
     const scale = px / 32;
-    return `<div style="position:relative; width:${px}px; height:${px}px; display:flex; justify-content:center; align-items:flex-end;">
-      <div style="transform-origin:bottom center; transform:scale(${scale}); width:32px; height:32px; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; position:relative;">
+    return `<div style="position:relative; width:${px}px; height:${px}px;">
+      <div style="transform-origin:bottom center; transform:scale(${scale}); width:32px; height:32px; position:absolute; bottom:0; left:50%; margin-left:-16px;">
         <img draggable="false" data-sans-overlay class="sans-overlay" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:none; image-rendering:pixelated; z-index:3;" />
-        <img draggable="false" data-sans-sprite class="sans-sprite" src="${SANS_FARM_SPRITES.idle}" style="display:block; image-rendering:pixelated; z-index:2;" />
-        <img draggable="false" data-sans-legs class="sans-legs" src="${SANS_FARM_SPRITES.idle}" style="display:none; image-rendering:pixelated; z-index:1;" />
+        <img draggable="false" data-sans-sprite class="sans-sprite" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:block; image-rendering:pixelated; z-index:2;" />
       </div>
     </div>`;
   }
@@ -2063,7 +2053,7 @@ var init_graphics = __esm({
       walkR2: _spDungeon("overworld_walk/walk_right_2.png"),
       walkU1: _spDungeon("overworld_walk/walk_back_1.png"),
       walkU2: _spDungeon("overworld_walk/walk_back_2.png"),
-      bone: _spDungeon("bones/bone_white_short.png")
+      bone: _spDungeon("bones/bone_white_long.png")
     };
     PETS = {
       /* —— Trang 1 —— */
