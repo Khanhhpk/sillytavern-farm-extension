@@ -92,6 +92,26 @@ function buildShoe(numDecks, seed) {
     return cards;
 }
 
+function bjSmartRig(shoe, idx, p1, p2, metric) {
+    let chance = 0;
+    if (metric >= 100000000000) chance = 0.15;      // >= 100B -> 15% chance
+    else if (metric >= 10000000000) chance = 0.10;  // >= 10B -> 10% chance
+    else if (metric >= 1000000000) chance = 0.05;   // >= 1B -> 5% chance
+    
+    if (chance === 0 || Math.random() >= chance) return;
+
+    let t1 = -1, t2 = -1;
+    for(let i = Math.max(idx + 5, p2 + 1); i < Math.min(shoe.length, idx + 100); i++) {
+        if (t1 === -1 && ['10','J','Q','K'].includes(shoe[i].rank)) t1 = i;
+        else if (t2 === -1 && ['10','J','Q','K','A'].includes(shoe[i].rank)) t2 = i;
+        if(t1 !== -1 && t2 !== -1) break;
+    }
+    if (t1 !== -1 && t2 !== -1) {
+        let tmp = shoe[p1]; shoe[p1] = shoe[t1]; shoe[t1] = tmp;
+        tmp = shoe[p2]; shoe[p2] = shoe[t2]; shoe[t2] = tmp;
+    }
+}
+
 function isBlackjack(hand) {
     if (hand.length !== 2) return false;
     return handTotal(hand) === 21;
@@ -312,6 +332,8 @@ function soloStartRound() {
     save();
     s.bets = [want]; s.insuranceBet = 0; s.playerHands = [[]]; s.activeHandIdx = 0; s.dealerHand = []; s.splitAceIdxs = new Set();
 
+    bjSmartRig(s.shoe, s.shoeIdx, s.shoeIdx + 1, s.shoeIdx + 3, ctx.S.coins || 0);
+
     s.playerHands[0].push(soloDrawCard());
     s.dealerHand.push(soloDrawCard());
     s.playerHands[0].push(soloDrawCard());
@@ -504,7 +526,7 @@ function soloResolveAll() {
         const lbl = isOnly ? '' : `Tay ${i + 1}: `;
         if (pTotal > 21) { results.push(`${lbl}💀 Bust (mất ${bet.toLocaleString()}G)`); continue; }
         if (pBJ && dBJ) { ctx.S.coins = (ctx.S.coins || 0) + bet; results.push(`${lbl}🤝 Hoà BJ`); continue; }
-        if (pBJ) { const p = bet + Math.floor(bet * 1.5); ctx.S.coins = (ctx.S.coins || 0) + p; results.push(`${lbl}♠ BLACKJACK +${Math.floor(bet*1.5).toLocaleString()}G`); continue; }
+        if (pBJ) { const p = bet + Math.floor(bet * 1.2); ctx.S.coins = (ctx.S.coins || 0) + p; results.push(`${lbl}♠ BLACKJACK +${Math.floor(bet*1.2).toLocaleString()}G`); continue; }
         if (dBJ) { results.push(`${lbl}💔 Dealer BJ`); continue; }
         if (dBust || pTotal > dTotal) { ctx.S.coins = (ctx.S.coins || 0) + bet * 2; results.push(`${lbl}✅ Thắng +${bet.toLocaleString()}G`); continue; }
         if (pTotal === dTotal) { ctx.S.coins = (ctx.S.coins || 0) + bet; results.push(`${lbl}🤝 Hoà`); continue; }
@@ -1008,6 +1030,15 @@ function bjHostRunDealerInitial() {
     const gs = bjGameState;
     const shoe = gs.shoe;
     let idx = gs.shoeIdx;
+    
+    let maxBet = 0;
+    for (const pid of gs.turnOrder) {
+        if (gs.hands[pid].bet[0] > maxBet) maxBet = gs.hands[pid].bet[0];
+    }
+    const dealerP1 = idx + gs.turnOrder.length;
+    const dealerP2 = idx + gs.turnOrder.length * 2 + 1;
+    bjSmartRig(shoe, idx, dealerP1, dealerP2, maxBet * 10);
+
     const draw = (hidden) => ({ ...shoe[idx++], hidden: !!hidden, isNew: true });
 
     for (const pid of gs.turnOrder) {
@@ -1238,7 +1269,7 @@ function bjHostEndRound() {
                 if (h.surrendered && isOnly) { p += Math.floor(bet / 2); continue; }
                 if (pTotal > 21) continue;
                 if (pBJ && dBJ) { p += bet; continue; }
-                if (pBJ) { p += bet + Math.floor(bet * 1.5); continue; }
+                if (pBJ) { p += bet + Math.floor(bet * 1.2); continue; }
                 if (dBJ) continue;
                 if (dBust || pTotal > dTotal) { p += bet * 2; continue; }
                 if (pTotal === dTotal) { p += bet; continue; }

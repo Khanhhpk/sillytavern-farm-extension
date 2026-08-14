@@ -95,13 +95,14 @@ export const styleCSS = `
     .field.pg3 .block.locked .plot { border-color: #6d657c; box-shadow: none; }
     .blocks { display: grid; grid-template-columns: repeat(3, max-content); gap: 14px; justify-content: center; }
     @media (max-width: 640px) {
+      #win, .dungeon-win { width: 100vw !important; height: 100vh !important; height: 100dvh !important; max-height: none !important; left: 0 !important; top: 0 !important; transform: none !important; border-radius: 0; border: none; outline: none; box-shadow: none; }
       .blocks { grid-template-columns: repeat(2, max-content); }
       .field { padding: 12px 12px 70px; }
       .titlebar { padding-top: max(32px, calc(9px + env(safe-area-inset-top, 0px))); }
       .titlebar h1 { font-size: 13px; letter-spacing: 0; }
       .titlebar h1 .sub { display: none; }
       .statusbar { gap: 6px 10px; font-size: 12px; padding: 6px 10px; }
-      .bottombar { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; }
+      .bottombar { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; display: grid; grid-template-columns: repeat(3, 1fr); }
       .btn { font-size: 11px; padding: 6px 2px; }
       span.dside { display: none; }
       span.dbot { display: inline; }
