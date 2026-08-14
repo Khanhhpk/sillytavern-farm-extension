@@ -63,6 +63,7 @@ export function placePet(el, p, instant) {                      // Đặt vị t
 }
 export function hopStep(el) {                                   // Một cú nhảy: nhích một bước về phía đích, tới nơi thì nghỉ
   const id = el.dataset.pet;
+  if (id === 'sans' && window['sansManualControl']) return;
   if (el.dataset.dragging) return; // Không can thiệp khi người dùng đang kéo
   if (!el.isConnected) { stopHop(id); return; }
   const cur = petPos[id], tgt = petTgt[id], g = gaitOf(id);
@@ -99,6 +100,7 @@ export function hopStep(el) {                                   // Một cú nh�
 }
 export function moveTo(el, p) {                                 // Lên đường tới p: bé bay thì trượt, còn lại thì nhảy liên tiếp
   const id = el.dataset.pet;
+  if (id === 'sans' && window['sansManualControl']) return;
   if (el.dataset.dragging) return; // Không giành quyền điều khiển
   if (FLOATY[id]) return placePet(el, p, false);
   petTgt[id] = p;
@@ -665,3 +667,74 @@ export function initPets() {
     handlePetClick(el, el.dataset.pet);
   });
 }
+
+// Lệnh Console ẩn để điều khiển thủ công (Debug)
+window.toggleSansControl = function() {
+  window['sansManualControl'] = !window['sansManualControl'];
+  const el = document.querySelector('.pet[data-pet="sans"]');
+  if (!el) {
+    console.log("Sans chưa xuất hiện trên đồng!");
+    window['sansManualControl'] = false;
+    return;
+  }
+
+  if (window['sansManualControl']) {
+      console.log("=== SANS MANUAL CONTROL: BẬT ===");
+      console.log("Phím Mũi Tên: Di chuyển");
+      console.log("Phím 1: Ngủ gật (sleep_stand)");
+      console.log("Phím 2: Ăn kem (icecream)");
+      console.log("Phím 3: Xài phép (magic)");
+      console.log("Phím 4: Huỷ hành động (stop)");
+      
+      delete petTgt['sans']; 
+      el.classList.remove('walk');
+      stopHop('sans');
+      if (el.dataset.sansAction) wakeSans(el);
+      
+      window._sansManualListener = function(e) {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+          const p = petPos['sans'] || {x: 100, y: 100};
+          petPos['sans'] = p;
+          let dx = 0, dy = 0;
+          const speed = 10;
+          if (e.key === 'ArrowUp') dy = speed;
+          if (e.key === 'ArrowDown') dy = -speed;
+          if (e.key === 'ArrowLeft') dx = -speed;
+          if (e.key === 'ArrowRight') dx = speed;
+          
+          if (dx !== 0 || dy !== 0) {
+              e.preventDefault();
+              p.x += dx; p.y += dy;
+              
+              const ov = document.getElementById('mascots');
+              const W = ov ? ov.clientWidth : 380;
+              const H = ov ? ov.clientHeight : 320;
+              p.x = Math.max(0, Math.min(p.x, W - 64));
+              p.y = Math.max(WORK_BAND, Math.min(p.y, H - 70));
+              
+              el.style.transitionProperty = 'none';
+              el.style.translate = p.x + 'px ' + (-p.y) + 'px';
+              
+              // Cập nhật sprite thủ công
+              sansStep['sans'] = (sansStep['sans'] || 0) + 1;
+              import('./graphics.js').then(g => {
+                  const sp = g.sansFarmSpriteFor(dx, dy, sansStep['sans']);
+                  g.applySansSprite(el, sp);
+              });
+          }
+          
+          if (e.key === '1') { playSansAction(el, 'sleep_stand'); }
+          if (e.key === '2') { playSansAction(el, 'icecream'); }
+          if (e.key === '3') { playSansAction(el, 'magic'); }
+          if (e.key === '4') { stopSansAction(el); }
+      };
+      window.addEventListener('keydown', window._sansManualListener);
+  } else {
+      console.log("=== SANS MANUAL CONTROL: TẮT ===");
+      if (window._sansManualListener) {
+          window.removeEventListener('keydown', window._sansManualListener);
+          delete window._sansManualListener;
+      }
+      stopSansAction(el);
+  }
+};

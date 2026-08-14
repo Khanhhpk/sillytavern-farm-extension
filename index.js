@@ -4386,6 +4386,7 @@ function placePet(el, p2, instant) {
 }
 function hopStep(el) {
   const id = el.dataset.pet;
+  if (id === "sans" && window["sansManualControl"]) return;
   if (el.dataset.dragging) return;
   if (!el.isConnected) {
     stopHop(id);
@@ -4428,6 +4429,7 @@ function hopStep(el) {
 }
 function moveTo(el, p2) {
   const id = el.dataset.pet;
+  if (id === "sans" && window["sansManualControl"]) return;
   if (el.dataset.dragging) return;
   if (FLOATY[id]) return placePet(el, p2, false);
   petTgt[id] = p2;
@@ -4998,6 +5000,75 @@ var init_pets = __esm({
     sceneBusy = (id) => !!(scene && scene.ids.indexOf(id) >= 0);
     sceneTimer = (fn2, ms) => {
       if (scene) scene.timers.push(window.setTimeout(fn2, ms));
+    };
+    window.toggleSansControl = function() {
+      window["sansManualControl"] = !window["sansManualControl"];
+      const el = document.querySelector('.pet[data-pet="sans"]');
+      if (!el) {
+        console.log("Sans ch\u01B0a xu\u1EA5t hi\u1EC7n tr\xEAn \u0111\u1ED3ng!");
+        window["sansManualControl"] = false;
+        return;
+      }
+      if (window["sansManualControl"]) {
+        console.log("=== SANS MANUAL CONTROL: B\u1EACT ===");
+        console.log("Ph\xEDm M\u0169i T\xEAn: Di chuy\u1EC3n");
+        console.log("Ph\xEDm 1: Ng\u1EE7 g\u1EADt (sleep_stand)");
+        console.log("Ph\xEDm 2: \u0102n kem (icecream)");
+        console.log("Ph\xEDm 3: X\xE0i ph\xE9p (magic)");
+        console.log("Ph\xEDm 4: Hu\u1EF7 h\xE0nh \u0111\u1ED9ng (stop)");
+        delete petTgt["sans"];
+        el.classList.remove("walk");
+        stopHop("sans");
+        if (el.dataset.sansAction) wakeSans(el);
+        window._sansManualListener = function(e2) {
+          if (e2.target.tagName === "INPUT" || e2.target.tagName === "TEXTAREA") return;
+          const p2 = petPos["sans"] || { x: 100, y: 100 };
+          petPos["sans"] = p2;
+          let dx = 0, dy = 0;
+          const speed = 10;
+          if (e2.key === "ArrowUp") dy = speed;
+          if (e2.key === "ArrowDown") dy = -speed;
+          if (e2.key === "ArrowLeft") dx = -speed;
+          if (e2.key === "ArrowRight") dx = speed;
+          if (dx !== 0 || dy !== 0) {
+            e2.preventDefault();
+            p2.x += dx;
+            p2.y += dy;
+            const ov = document.getElementById("mascots");
+            const W = ov ? ov.clientWidth : 380;
+            const H2 = ov ? ov.clientHeight : 320;
+            p2.x = Math.max(0, Math.min(p2.x, W - 64));
+            p2.y = Math.max(WORK_BAND, Math.min(p2.y, H2 - 70));
+            el.style.transitionProperty = "none";
+            el.style.translate = p2.x + "px " + -p2.y + "px";
+            sansStep["sans"] = (sansStep["sans"] || 0) + 1;
+            Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g) => {
+              const sp = g.sansFarmSpriteFor(dx, dy, sansStep["sans"]);
+              g.applySansSprite(el, sp);
+            });
+          }
+          if (e2.key === "1") {
+            playSansAction(el, "sleep_stand");
+          }
+          if (e2.key === "2") {
+            playSansAction(el, "icecream");
+          }
+          if (e2.key === "3") {
+            playSansAction(el, "magic");
+          }
+          if (e2.key === "4") {
+            stopSansAction(el);
+          }
+        };
+        window.addEventListener("keydown", window._sansManualListener);
+      } else {
+        console.log("=== SANS MANUAL CONTROL: T\u1EAET ===");
+        if (window._sansManualListener) {
+          window.removeEventListener("keydown", window._sansManualListener);
+          delete window._sansManualListener;
+        }
+        stopSansAction(el);
+      }
     };
   }
 });
