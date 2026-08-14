@@ -1276,6 +1276,10 @@ export function sansDungeonSpriteForAction(action, step) {
     const phase = Math.floor((s % 10) / 5);
     return { src: _spDungeon(`sleep_stand/sprite-12-${phase + 1}.png`), flip: false };
   }
+  if (action === 'stool_chup') {
+    const phase = Math.floor((s % 10) / 5);
+    return { src: _spDungeon(`stool_chup/sprite-10-${phase + 1}.png`), flip: false };
+  }
   if (action === 'magic') {
     const phase = Math.floor((s % 10) / 2);
     return { src: _spDungeon(`magic/magic_0${phase + 1}.png`), flip: false };

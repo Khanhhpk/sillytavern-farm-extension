@@ -1331,13 +1331,14 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
             a.isResting = true;
             a.restTimer = 4;
             a._sleepStep = 0;
+            a._sleepAnim = Math.random() < 0.5 ? 'sleep_stand' : 'stool_chup';
         }
     } else if (a.isResting) {
         a.restTimer -= dt;
         a.stamina = Math.min(a.maxStamina, a.stamina + (100 / 4) * dt); // Full regen in 4s
         if (!a._sleepStep) a._sleepStep = 0;
         a._sleepStep += dt * 10;
-        const sp = sansDungeonSpriteForAction('sleep_stand', Math.floor(a._sleepStep));
+        const sp = sansDungeonSpriteForAction(a._sleepAnim || 'sleep_stand', Math.floor(a._sleepStep));
         applySansSprite(a.el, sp);
         if (a.restTimer <= 0) a.isResting = false;
         return;
@@ -1573,7 +1574,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         if (a.actionTimer <= 0) {
             a.actionState = 'idle';
         } else {
-            if (a.actionState !== 'magic' && a.actionState !== 'shrug' && a.actionState !== 'sleep_stand') {
+            if (a.actionState !== 'magic' && a.actionState !== 'shrug' && a.actionState !== 'sleep_stand' && a.actionState !== 'stool_chup') {
                 if (!a._actionStep) a._actionStep = 0;
                 a._actionStep += dt * 10;
                 const sp = sansDungeonSpriteForAction(a.actionState, Math.floor(a._actionStep));
