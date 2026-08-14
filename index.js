@@ -247,16 +247,16 @@ function sansDungeonSpriteForAction(action, step) {
   }
   if (action === "magic") {
     const phase2 = Math.floor(s2 % 10 / 2);
-    return { src: _spDungeon(`magic/magic_0${phase2 + 1}.png`), flip: false, legs: SANS_DUNGEON_SPRITES.legsF };
+    return { src: _spDungeon(`magic/magic_0${phase2 + 1}.png`), flip: false };
   }
   if (action === "attack_updown") {
     const phase2 = s2 % 10;
-    if (phase2 < 5) return { src: _spDungeon(`attack_updown/attack_up_0${phase2 + 1}.png`), flip: false, legs: SANS_DUNGEON_SPRITES.legsF };
-    return { src: _spDungeon(`attack_updown/attack_down_0${phase2 - 4}.png`), flip: false, legs: SANS_DUNGEON_SPRITES.legsF };
+    if (phase2 < 5) return { src: _spDungeon(`attack_updown/attack_up_0${phase2 + 1}.png`), flip: false };
+    return { src: _spDungeon(`attack_updown/attack_down_0${phase2 - 4}.png`), flip: false };
   }
   if (action === "attack_leftright") {
     const phase2 = s2 % 6;
-    return { src: _spDungeon(`attack_leftright/attack_left_0${phase2 + 1}.png`), flip: false, legs: SANS_DUNGEON_SPRITES.legsS };
+    return { src: _spDungeon(`attack_leftright/attack_left_0${phase2 + 1}.png`), flip: false };
   }
   if (action === "flashing_eye") {
     const phase2 = s2 % 2;
