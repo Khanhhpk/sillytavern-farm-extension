@@ -1273,7 +1273,7 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     // Mầm Sương root: 25%→30%
     if (skill === 'root' && Math.random() < 0.30) target.status.root = 2;
     if (attacker && attacker.id === 'sans' && target.type === 'enemy') {
-        target.status.karmaDuration = 3 * Math.pow(1.10, attacker.upgrades.karmaDur || 0); // 3 seconds of DOT (scaled)
+        target.status.karmaDuration = 3; // 3 seconds of DOT
         target.karmaStacks = (target.karmaStacks || 0) + 1;
     }
     
@@ -1509,7 +1509,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
                                     e.hp -= 1;
                                     spawnDmg(e, -1);
                                     if (!e.status) e.status = {};
-                                    e.status.karmaDuration = 3 * Math.pow(1.10, a.upgrades.karmaDur || 0);
+                                    e.status.karmaDuration = 3;
                                     e.karmaStacks = (e.karmaStacks || 0) + 1;
                                 }
                             }
@@ -1539,7 +1539,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
                 target.hp -= a.atk;
                 spawnDmg(target, -a.atk);
                 if (!target.status) target.status = {};
-                target.status.karmaDuration = 3 * Math.pow(1.10, a.upgrades.karmaDur || 0);
+                target.status.karmaDuration = 3;
                 target.karmaStacks = (target.karmaStacks || 0) + 1;
             }, 300);
             return;
@@ -1565,7 +1565,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
                     tgt.hp -= a.atk;
                     spawnDmg(tgt, -a.atk);
                     if (!tgt.status) tgt.status = {};
-                    tgt.status.karmaDuration = 3 * Math.pow(1.10, a.upgrades.karmaDur || 0);
+                    tgt.status.karmaDuration = 3;
                     tgt.karmaStacks = (tgt.karmaStacks || 0) + 1;
                 }
             });
@@ -1651,7 +1651,7 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
                     a.status.stun = 1.0;
                     a.karmaStacks = (a.karmaStacks || 0) + 5;
                     const sans = groupB.find(p => p.id === 'sans');
-                    a.status.karmaDuration = 3 * Math.pow(1.10, sans ? (sans.upgrades.karmaDur || 0) : 0);
+                    a.status.karmaDuration = 3;
                     const boom = document.createElement('div');
                     boom.className = 'dg-boom-effect';
                     boom.style.width = '60px';
@@ -1777,14 +1777,13 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
                 if (eff === 'karmaDuration') {
                     if (a.karmaStacks > 0) {
                         const sans = groupB.find(p => p.id === 'sans');
-                        const tickLvl = sans ? (sans.upgrades.karmaTick || 0) : 0;
-                        const tickRate = 2 * Math.pow(1.15, tickLvl) * a.karmaStacks;
+                        const tickRate = 2 * a.karmaStacks;
                         
                         a._karmaTickAcc = (a._karmaTickAcc || 0) + (tickRate * dt);
                         if (a._karmaTickAcc >= 1) {
                             const ticks = Math.floor(a._karmaTickAcc);
-                            // Deal 1% max hp damage total, but visually display as -1
-                            const totalDmg = Math.max(1, Math.floor(a.maxHp * 0.01 * ticks));
+                            // Deal 0.7% max hp damage total, but visually display as -1
+                            const totalDmg = Math.max(1, Math.floor(a.maxHp * 0.007 * ticks));
                             a.hp -= totalDmg;
                             a._karmaTickAcc -= ticks;
                             if (Math.random() < 0.35) spawnDmg(a, -1, 'karma');
@@ -2686,9 +2685,7 @@ function showWaveRewards(isLoaded = false) {
                     { id: 'gasterCd', name: 'Gaster CD (-5%)', val: '10s', lv: u.gasterCd || 0, cost: calc(200, u.gasterCd || 0), forceCanBuy: (u.gasterCd || 0) < 10 },
                     { id: 'blueMagicCd', name: 'Stun CD (-5%)', val: '7s', lv: u.blueMagicCd || 0, cost: calc(150, u.blueMagicCd || 0), forceCanBuy: (u.blueMagicCd || 0) < 10 },
                     { id: 'gravityCd', name: 'Gravity CD (-5%)', val: '9s', lv: u.gravityCd || 0, cost: calc(150, u.gravityCd || 0), forceCanBuy: (u.gravityCd || 0) < 10 },
-                    { id: 'tpCd', name: 'Teleport CD (-10%)', val: '2s', lv: u.tpCd || 0, cost: calc(300, u.tpCd || 0), forceCanBuy: (u.tpCd || 0) < 8 },
-                    { id: 'karmaDur', name: 'Karma Duration (+10%)', val: '3s', lv: u.karmaDur || 0, cost: calc(100, u.karmaDur || 0) },
-                    { id: 'karmaTick', name: 'Karma Tick Rate (+15%)', val: '2 ticks/s', lv: u.karmaTick || 0, cost: calc(200, u.karmaTick || 0) }
+                    { id: 'tpCd', name: 'Teleport CD (-10%)', val: '2s', lv: u.tpCd || 0, cost: calc(300, u.tpCd || 0), forceCanBuy: (u.tpCd || 0) < 8 }
                 ];
             } else {
                 stats = [
@@ -2768,8 +2765,6 @@ function showWaveRewards(isLoaded = false) {
                     if (statId === 'blueMagicCd') { p.upgrades.blueMagicCd = (p.upgrades.blueMagicCd || 0) + 1; }
                     if (statId === 'gravityCd') { p.upgrades.gravityCd = (p.upgrades.gravityCd || 0) + 1; }
                     if (statId === 'tpCd') { p.upgrades.tpCd = (p.upgrades.tpCd || 0) + 1; }
-                    if (statId === 'karmaDur') { p.upgrades.karmaDur = (p.upgrades.karmaDur || 0) + 1; }
-                    if (statId === 'karmaTick') { p.upgrades.karmaTick = (p.upgrades.karmaTick || 0) + 1; }
                     
                     // Recalibrate base stats based on upgrades
                     const stat = PET_STATS[p.id] || PET_STATS.default;
