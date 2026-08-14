@@ -70,8 +70,7 @@ export function hopStep(el) {                                   // Một cú nh�
     delete petTgt[id]; el.classList.remove('walk'); stopHop(id);
     if (id === 'sans') {
       sansStep[id] = 0;
-      const img = el.querySelector('[data-sans-sprite]');
-      if (img) { img.src = sansSpriteFor(0, 0).src; img.style.transform = ''; }
+      import('./graphics.js').then(g => g.applySansSprite(el, g.sansSpriteFor(0, 0)));
     }
     const cb = petArrive[id]; delete petArrive[id]; if (cb) cb();   // v0.7③: callback khi tới nơi (dùng cho việc dàn cảnh tiểu phẩm)
     return;
@@ -84,11 +83,7 @@ export function hopStep(el) {                                   // Một cú nh�
   if (id === 'sans') {
     sansStep[id] = (sansStep[id] || 0) + 1;
     const sp = sansSpriteFor(dx, dy, sansStep[id]);
-    const img = el.querySelector('[data-sans-sprite]');
-    if (img) {
-      img.src = sp.src;
-      img.style.transform = sp.flip ? 'scaleX(-1)' : '';
-    }
+    import('./graphics.js').then(g => g.applySansSprite(el, sp));
   }
   el.classList.add('walk');
   el.style.setProperty('--hopd', g.dur + 'ms');
@@ -232,11 +227,7 @@ export function playSansAction(el, action) {
     
     sansStep[id] = (sansStep[id] || 0) + 1;
     const sp = sansSpriteForAction(action, sansStep[id]);
-    const img = el.querySelector('[data-sans-sprite]');
-    if (img) {
-      img.src = sp.src;
-      img.style.transform = sp.flip ? 'scaleX(-1)' : '';
-    }
+    import('./graphics.js').then(g => g.applySansSprite(el, sp));
   }, 200); // 200ms mỗi frame
 }
 
@@ -248,8 +239,7 @@ export function stopSansAction(el) {
   }
   const img = el.querySelector('[data-sans-sprite]');
   if (img && !el.classList.contains('walk')) {
-    img.src = sansSpriteForAction(null, 0).src; // Về idle
-    img.style.transform = '';
+    import('./graphics.js').then(g => g.applySansSprite(el, g.sansSpriteFor(0, 0)));
   }
 }
 

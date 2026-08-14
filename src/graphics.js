@@ -1187,11 +1187,11 @@ const _sansBase = (() => {
 })();
 const _sp = (p) => _sansBase + 'sans_sprites/' + p;
 export const SANS_SPRITES = {
-  idle:    _sp('basic_down/basic_down_1.png'),
-  left:    _sp('basic_left/basic_left_1.png'),
-  right:   _sp('basic_right/basic_right_1.png'),
-  up:      _sp('basic_up/basic_up_1.png'),
-  down:    _sp('basic_down/basic_down_1.png'),
+  idle:    _sp('overworld_walk/walk_front_idle.png'),
+  left:    _sp('overworld_walk/walk_left_idle.png'),
+  right:   _sp('overworld_walk/walk_right_idle.png'),
+  up:      _sp('overworld_walk/walk_back_idle.png'),
+  down:    _sp('overworld_walk/walk_front_idle.png'),
   walkF1:  _sp('overworld_walk/walk_front_1.png'),
   walkF2:  _sp('overworld_walk/walk_front_2.png'),
   walkL1:  _sp('overworld_walk/walk_left_1.png'),
@@ -1200,8 +1200,39 @@ export const SANS_SPRITES = {
   walkR2:  _sp('overworld_walk/walk_right_2.png'),
   walkU1:  _sp('overworld_walk/walk_back_1.png'),
   walkU2:  _sp('overworld_walk/walk_back_2.png'),
-  bone:    _sp('bones/bone_white_short.png')
+  bone:    _sp('bones/bone_white_short.png'),
+  legsF:   _sp('legs_front/legs_front_01.png'),
+  legsS:   _sp('legs_side/legs_side_01.png')
 };
+
+export function applySansSprite(el, sp) {
+  const img = el.querySelector('.sans-sprite') || el.querySelector('[data-sans-sprite]');
+  const legs = el.querySelector('.sans-legs');
+  const overlay = el.querySelector('.sans-overlay');
+  
+  if (img) {
+    img.src = sp.src;
+    img.style.transform = sp.flip ? 'scaleX(-1)' : '';
+  }
+  if (legs) {
+    if (sp.legs) {
+      legs.style.display = 'block';
+      legs.src = sp.legs;
+      legs.style.transform = sp.flip ? 'scaleX(-1)' : '';
+    } else {
+      legs.style.display = 'none';
+    }
+  }
+  if (overlay) {
+    if (sp.overlay) {
+      overlay.style.display = 'block';
+      overlay.src = sp.overlay;
+      overlay.style.transform = sp.flip ? 'scaleX(-1)' : '';
+    } else {
+      overlay.style.display = 'none';
+    }
+  }
+}
 
 export function sansSpriteForAction(action, step) {
   const s = step || 0;
@@ -1231,20 +1262,20 @@ export function sansSpriteForAction(action, step) {
   if (action === 'magic') {
     // 5 khung hình ném tay xuống, mỗi frame giữ 2 nhịp (400ms) -> tổng 2.0s
     const phase = Math.floor((s % 10) / 2);
-    return { src: _sp(`magic/magic_0${phase + 1}.png`), flip: false };
+    return { src: _sp(`magic/magic_0${phase + 1}.png`), flip: false, legs: SANS_SPRITES.legsF };
   }
   if (action === 'attack_updown') {
     const phase = s % 10;
-    if (phase < 5) return { src: _sp(`attack_updown/attack_up_0${phase + 1}.png`), flip: false };
-    return { src: _sp(`attack_updown/attack_down_0${phase - 4}.png`), flip: false };
+    if (phase < 5) return { src: _sp(`attack_updown/attack_up_0${phase + 1}.png`), flip: false, legs: SANS_SPRITES.legsF };
+    return { src: _sp(`attack_updown/attack_down_0${phase - 4}.png`), flip: false, legs: SANS_SPRITES.legsF };
   }
   if (action === 'attack_leftright') {
     const phase = s % 6;
-    return { src: _sp(`attack_leftright/attack_left_0${phase + 1}.png`), flip: false };
+    return { src: _sp(`attack_leftright/attack_left_0${phase + 1}.png`), flip: false, legs: SANS_SPRITES.legsS };
   }
   if (action === 'flashing_eye') {
     const phase = s % 2;
-    return { src: _sp(`flashing_eye/flash_front_${phase === 0 ? 'cyan' : 'yellow'}.png`), flip: false };
+    return { src: SANS_SPRITES.idle, flip: false, overlay: _sp(`flashing_eye/flash_front_${phase === 0 ? 'cyan' : 'yellow'}.png`) };
   }
   if (action === 'shrug') {
     return { src: _sp(`shrug/sprite-6-2.png`), flip: false };
@@ -1253,8 +1284,7 @@ export function sansSpriteForAction(action, step) {
     return { src: _sp(`gaster_blaster/blaster_left_close.png`), flip: false };
   }
   if (action === 'gaster_fire') {
-    const phase = (s % 3) + 1; // 01, 02, 03
-    return { src: _sp(`gaster_blaster/blaster_left_fire_0${phase}.png`), flip: false };
+    return { src: _sp(`gaster_blaster/blaster_left_fire_01.png`), flip: false };
   }
   return { src: SANS_SPRITES.idle, flip: false };
 }
@@ -1301,7 +1331,11 @@ export function sansSpriteFor(dx, dy, step) {
 export function petSVG(name, px) {
   /* ── Sans: trả về img đặc biệt có data-sans để JS cập nhật hướng ── */
   if (name === 'sans') {
-    return `<img draggable="false" data-sans-sprite class="sans-sprite" width="${px}" height="${px}" src="${SANS_SPRITES.idle}" style="display:block; image-rendering:pixelated; object-fit:contain;" />`;
+    return `<div style="position:relative; width:${px}px; height:${px}px; display:inline-block;">
+      <img draggable="false" data-sans-legs class="sans-legs" width="${px}" height="${px}" src="${SANS_SPRITES.legsF}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:1;" />
+      <img draggable="false" data-sans-sprite class="sans-sprite" width="${px}" height="${px}" src="${SANS_SPRITES.idle}" style="position:relative; display:block; image-rendering:pixelated; object-fit:contain; z-index:2;" />
+      <img draggable="false" data-sans-overlay class="sans-overlay" width="${px}" height="${px}" src="${SANS_SPRITES.idle}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:3;" />
+    </div>`;
   }
 
   const key = name + '@' + px;

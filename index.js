@@ -150,6 +150,28 @@ var init_data = __esm({
 });
 
 // src/graphics.js
+var graphics_exports = {};
+__export(graphics_exports, {
+  DYNAMIC_SPR: () => DYNAMIC_SPR,
+  GACHA_P: () => GACHA_P,
+  LP: () => LP,
+  P: () => P,
+  PASSES: () => PASSES,
+  PETS: () => PETS,
+  PET_P: () => PET_P,
+  PET_SPR: () => PET_SPR,
+  SANS_SPRITES: () => SANS_SPRITES,
+  SPR: () => SPR,
+  applySansSprite: () => applySansSprite,
+  mulberry32: () => mulberry32,
+  petSVG: () => petSVG,
+  registerDynamicSprite: () => registerDynamicSprite,
+  sansSpriteFor: () => sansSpriteFor,
+  sansSpriteForAction: () => sansSpriteForAction,
+  spriteSVG: () => spriteSVG,
+  tileURI: () => tileURI,
+  warmUpCache: () => warmUpCache
+});
 function mulberry32(a) {
   return function() {
     a |= 0;
@@ -158,6 +180,33 @@ function mulberry32(a) {
     t2 = t2 + Math.imul(t2 ^ t2 >>> 7, 61 | t2) ^ t2;
     return ((t2 ^ t2 >>> 14) >>> 0) / 4294967296;
   };
+}
+function applySansSprite(el, sp) {
+  const img = el.querySelector(".sans-sprite") || el.querySelector("[data-sans-sprite]");
+  const legs = el.querySelector(".sans-legs");
+  const overlay = el.querySelector(".sans-overlay");
+  if (img) {
+    img.src = sp.src;
+    img.style.transform = sp.flip ? "scaleX(-1)" : "";
+  }
+  if (legs) {
+    if (sp.legs) {
+      legs.style.display = "block";
+      legs.src = sp.legs;
+      legs.style.transform = sp.flip ? "scaleX(-1)" : "";
+    } else {
+      legs.style.display = "none";
+    }
+  }
+  if (overlay) {
+    if (sp.overlay) {
+      overlay.style.display = "block";
+      overlay.src = sp.overlay;
+      overlay.style.transform = sp.flip ? "scaleX(-1)" : "";
+    } else {
+      overlay.style.display = "none";
+    }
+  }
 }
 function sansSpriteForAction(action, step) {
   const s2 = step || 0;
@@ -183,20 +232,20 @@ function sansSpriteForAction(action, step) {
   }
   if (action === "magic") {
     const phase2 = Math.floor(s2 % 10 / 2);
-    return { src: _sp(`magic/magic_0${phase2 + 1}.png`), flip: false };
+    return { src: _sp(`magic/magic_0${phase2 + 1}.png`), flip: false, legs: SANS_SPRITES.legsF };
   }
   if (action === "attack_updown") {
     const phase2 = s2 % 10;
-    if (phase2 < 5) return { src: _sp(`attack_updown/attack_up_0${phase2 + 1}.png`), flip: false };
-    return { src: _sp(`attack_updown/attack_down_0${phase2 - 4}.png`), flip: false };
+    if (phase2 < 5) return { src: _sp(`attack_updown/attack_up_0${phase2 + 1}.png`), flip: false, legs: SANS_SPRITES.legsF };
+    return { src: _sp(`attack_updown/attack_down_0${phase2 - 4}.png`), flip: false, legs: SANS_SPRITES.legsF };
   }
   if (action === "attack_leftright") {
     const phase2 = s2 % 6;
-    return { src: _sp(`attack_leftright/attack_left_0${phase2 + 1}.png`), flip: false };
+    return { src: _sp(`attack_leftright/attack_left_0${phase2 + 1}.png`), flip: false, legs: SANS_SPRITES.legsS };
   }
   if (action === "flashing_eye") {
     const phase2 = s2 % 2;
-    return { src: _sp(`flashing_eye/flash_front_${phase2 === 0 ? "cyan" : "yellow"}.png`), flip: false };
+    return { src: SANS_SPRITES.idle, flip: false, overlay: _sp(`flashing_eye/flash_front_${phase2 === 0 ? "cyan" : "yellow"}.png`) };
   }
   if (action === "shrug") {
     return { src: _sp(`shrug/sprite-6-2.png`), flip: false };
@@ -205,8 +254,7 @@ function sansSpriteForAction(action, step) {
     return { src: _sp(`gaster_blaster/blaster_left_close.png`), flip: false };
   }
   if (action === "gaster_fire") {
-    const phase2 = s2 % 3 + 1;
-    return { src: _sp(`gaster_blaster/blaster_left_fire_0${phase2}.png`), flip: false };
+    return { src: _sp(`gaster_blaster/blaster_left_fire_01.png`), flip: false };
   }
   return { src: SANS_SPRITES.idle, flip: false };
 }
@@ -236,7 +284,11 @@ function sansSpriteFor(dx, dy, step) {
 }
 function petSVG(name3, px) {
   if (name3 === "sans") {
-    return `<img draggable="false" data-sans-sprite class="sans-sprite" width="${px}" height="${px}" src="${SANS_SPRITES.idle}" style="display:block; image-rendering:pixelated; object-fit:contain;" />`;
+    return `<div style="position:relative; width:${px}px; height:${px}px; display:inline-block;">
+      <img draggable="false" data-sans-legs class="sans-legs" width="${px}" height="${px}" src="${SANS_SPRITES.legsF}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:1;" />
+      <img draggable="false" data-sans-sprite class="sans-sprite" width="${px}" height="${px}" src="${SANS_SPRITES.idle}" style="position:relative; display:block; image-rendering:pixelated; object-fit:contain; z-index:2;" />
+      <img draggable="false" data-sans-overlay class="sans-overlay" width="${px}" height="${px}" src="${SANS_SPRITES.idle}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:3;" />
+    </div>`;
   }
   const key = name3 + "@" + px;
   if (petCache.has(key)) return petCache.get(key);
@@ -1956,11 +2008,11 @@ var init_graphics = __esm({
     })();
     _sp = (p2) => _sansBase + "sans_sprites/" + p2;
     SANS_SPRITES = {
-      idle: _sp("basic_down/basic_down_1.png"),
-      left: _sp("basic_left/basic_left_1.png"),
-      right: _sp("basic_right/basic_right_1.png"),
-      up: _sp("basic_up/basic_up_1.png"),
-      down: _sp("basic_down/basic_down_1.png"),
+      idle: _sp("overworld_walk/walk_front_idle.png"),
+      left: _sp("overworld_walk/walk_left_idle.png"),
+      right: _sp("overworld_walk/walk_right_idle.png"),
+      up: _sp("overworld_walk/walk_back_idle.png"),
+      down: _sp("overworld_walk/walk_front_idle.png"),
       walkF1: _sp("overworld_walk/walk_front_1.png"),
       walkF2: _sp("overworld_walk/walk_front_2.png"),
       walkL1: _sp("overworld_walk/walk_left_1.png"),
@@ -1969,7 +2021,9 @@ var init_graphics = __esm({
       walkR2: _sp("overworld_walk/walk_right_2.png"),
       walkU1: _sp("overworld_walk/walk_back_1.png"),
       walkU2: _sp("overworld_walk/walk_back_2.png"),
-      bone: _sp("bones/bone_white_short.png")
+      bone: _sp("bones/bone_white_short.png"),
+      legsF: _sp("legs_front/legs_front_01.png"),
+      legsS: _sp("legs_side/legs_side_01.png")
     };
     PETS = {
       /* —— Trang 1 —— */
@@ -4311,11 +4365,7 @@ function hopStep(el) {
     stopHop(id);
     if (id === "sans") {
       sansStep[id] = 0;
-      const img = el.querySelector("[data-sans-sprite]");
-      if (img) {
-        img.src = sansSpriteFor(0, 0).src;
-        img.style.transform = "";
-      }
+      Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g2) => g2.applySansSprite(el, g2.sansSpriteFor(0, 0)));
     }
     const cb = petArrive[id];
     delete petArrive[id];
@@ -4329,11 +4379,7 @@ function hopStep(el) {
   if (id === "sans") {
     sansStep[id] = (sansStep[id] || 0) + 1;
     const sp = sansSpriteFor(dx, dy, sansStep[id]);
-    const img = el.querySelector("[data-sans-sprite]");
-    if (img) {
-      img.src = sp.src;
-      img.style.transform = sp.flip ? "scaleX(-1)" : "";
-    }
+    Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g2) => g2.applySansSprite(el, sp));
   }
   el.classList.add("walk");
   el.style.setProperty("--hopd", g.dur + "ms");
@@ -4463,11 +4509,7 @@ function playSansAction(el, action) {
     if (action === "sleep_stand" && !el.classList.contains("sleep")) return stopSansAction(el);
     sansStep[id] = (sansStep[id] || 0) + 1;
     const sp = sansSpriteForAction(action, sansStep[id]);
-    const img = el.querySelector("[data-sans-sprite]");
-    if (img) {
-      img.src = sp.src;
-      img.style.transform = sp.flip ? "scaleX(-1)" : "";
-    }
+    Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g) => g.applySansSprite(el, sp));
   }, 200);
 }
 function stopSansAction(el) {
@@ -4478,8 +4520,7 @@ function stopSansAction(el) {
   }
   const img = el.querySelector("[data-sans-sprite]");
   if (img && !el.classList.contains("walk")) {
-    img.src = sansSpriteForAction(null, 0).src;
-    img.style.transform = "";
+    Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g) => g.applySansSprite(el, g.sansSpriteFor(0, 0)));
   }
 }
 function endScene() {
@@ -12430,13 +12471,20 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
       if (fill) fill.style.width = Math.max(0, Math.min(100, (1 - Math.max(0, a[cdName]) / maxCds[cdName]) * 100)) + "%";
     }
   }
-  if (a.isResting) {
+  if (a.restPending > 0) {
+    a.restPending -= dt2;
+    if (a.restPending <= 0) {
+      a.isResting = true;
+      a.restTimer = 4;
+      a._sleepStep = 0;
+    }
+  } else if (a.isResting) {
     a.restTimer -= dt2;
     a.stamina = Math.min(a.maxStamina, a.stamina + 100 / 4 * dt2);
     if (!a._sleepStep) a._sleepStep = 0;
     a._sleepStep += dt2 * 10;
-    const sansImg = a.el.querySelector(".sans-sprite");
-    if (sansImg) sansImg.src = sansSpriteForAction("sleep_stand", Math.floor(a._sleepStep)).src;
+    const sp = sansSpriteForAction("sleep_stand", Math.floor(a._sleepStep));
+    applySansSprite(a.el, sp);
     if (a.restTimer <= 0) a.isResting = false;
     return;
   } else {
@@ -12458,29 +12506,33 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
   if (a.stamina < 20 && a.gravityCd <= 0 && a.tpCd <= 0 && enemyGroup.filter((b2) => b2.hp > 0).length > 0) {
     a.stamina -= 12;
     a.gravityCd = 9;
+    a.actionState = "magic";
+    a.actionTimer = 1;
+    a.restPending = 1;
     if (arena) {
       arena.style.animation = "dg-shake 0.4s";
       setTimeout(() => {
         if (arena) arena.style.animation = "";
       }, 400);
     }
+    a.x = arenaRect.width - 40;
+    a.y = arenaRect.height - 40;
+    a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
     enemyGroup.forEach((e2) => {
       if (e2.hp > 0) {
+        e2.el.style.transition = "transform 0.3s ease-out";
         e2.x = 40 + Math.random() * 20;
         e2.y = 40 + Math.random() * 20;
         e2.el.style.transform = `translate3d(${e2.x - 16}px, ${e2.y - 16}px, 0)`;
+        setTimeout(() => {
+          if (e2.el) e2.el.style.transition = "";
+        }, 300);
         if (!e2.status) e2.status = {};
         e2.status.stun = 1.5;
         e2.hp -= a.atk;
         spawnDmg(e2, -a.atk);
       }
     });
-    a.x = arenaRect.width - 40;
-    a.y = arenaRect.height - 40;
-    a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-    a.isResting = true;
-    a.restTimer = 4;
-    a._sleepStep = 0;
     return;
   }
   if (closest && closest.dist < 60 && a.tpCd <= 0 && a.stamina >= 10) {
@@ -12491,8 +12543,8 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
     a.y = Math.max(30, Math.min(a.y, arenaRect.height - 30));
     a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-    const sansImg = a.el.querySelector(".sans-sprite");
-    if (sansImg) sansImg.src = sansSpriteForAction("shrug", 0).src;
+    const sp = sansSpriteForAction("shrug", 0);
+    applySansSprite(a.el, sp);
     a.actionState = "shrug";
     a.actionTimer = 0.3;
     return;
@@ -12501,42 +12553,43 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     if (a.gasterCd <= 0 && a.stamina >= 15) {
       a.gasterCd = 10;
       a.stamina -= 15;
-      const sansImg = a.el.querySelector(".sans-sprite");
-      if (sansImg) sansImg.src = sansSpriteForAction("flashing_eye", 1).src;
+      const sp = sansSpriteForAction("flashing_eye", 1);
+      applySansSprite(a.el, sp);
       a.actionState = "gaster";
       a.actionTimer = 3.6;
-      const isRight = closest.dx > 0;
-      const bx = a.x + (isRight ? 30 : -30);
-      const by = a.y - 40;
+      const dx = closest.dx;
+      const dy = closest.dy;
+      const dist = closest.dist || 1;
+      const dirX = dx / dist;
+      const dirY = dy / dist;
+      const angle = Math.atan2(dy, dx);
+      const bx = a.x - dirX * 30;
+      const by = a.y - dirY * 30 - 20;
       const blaster = document.createElement("img");
       blaster.className = "dg-gaster-blaster";
       blaster.src = sansSpriteForAction("gaster_charge", 0).src;
       blaster.style.position = "absolute";
       blaster.style.width = "64px";
       blaster.style.height = "64px";
-      blaster.style.left = bx + "px";
-      blaster.style.top = by + "px";
+      blaster.style.left = bx - 32 + "px";
+      blaster.style.top = by - 32 + "px";
       blaster.style.zIndex = "50";
-      if (!isRight) blaster.style.transform = "scaleX(-1)";
+      let rotDeg = (angle - Math.PI) * 180 / Math.PI;
+      blaster.style.transform = `rotate(${rotDeg}deg)`;
       if (arena) arena.appendChild(blaster);
       setTimeout(() => {
         if (!arena || !arena.contains(blaster)) return;
-        let frame = 1;
-        const fireInterval = setInterval(() => {
-          if (!arena.contains(blaster)) {
-            clearInterval(fireInterval);
-            return;
-          }
-          blaster.src = sansSpriteForAction("gaster_fire", frame).src;
-          frame++;
-        }, 100);
+        blaster.src = sansSpriteForAction("gaster_fire", 0).src;
         const laser = document.createElement("div");
         laser.style.position = "absolute";
         laser.style.height = "64px";
         laser.style.width = "1500px";
         laser.style.background = "linear-gradient(90deg, rgba(255,255,255,0.9) 0%, rgba(0,255,255,0.9) 20%, rgba(255,255,255,0.7) 100%)";
-        laser.style.left = (isRight ? bx + 32 : bx - 1500 + 32) + "px";
-        laser.style.top = by + 16 + "px";
+        laser.style.left = bx + "px";
+        laser.style.top = by - 32 + "px";
+        laser.style.transformOrigin = "0 50%";
+        let laserRot = angle * 180 / Math.PI;
+        laser.style.transform = `rotate(${laserRot}deg)`;
         laser.style.zIndex = "40";
         if (arena) arena.appendChild(laser);
         let dotTimer = 3;
@@ -12546,7 +12599,6 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
           tickTimer -= 0.1;
           if (dotTimer <= 0 || !arena.contains(laser)) {
             clearInterval(hitInterval);
-            clearInterval(fireInterval);
             if (laser.parentNode) laser.remove();
             if (blaster.parentNode) blaster.remove();
             return;
@@ -12554,8 +12606,12 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
           if (tickTimer <= 0) {
             tickTimer = 0.2;
             enemyGroup.forEach((e2) => {
-              if (e2.hp > 0 && Math.abs(e2.y - by) < 40) {
-                if (isRight && e2.x > bx || !isRight && e2.x < bx) {
+              if (e2.hp > 0) {
+                const evx = e2.x - bx;
+                const evy = e2.y - 16 - by;
+                const dot = evx * dirX + evy * dirY;
+                const perpDist = Math.abs(evx * dirY - evy * dirX);
+                if (dot > 0 && perpDist < 40) {
                   e2.hp -= 1;
                   spawnDmg(e2, -1);
                   if (!e2.status) e2.status = {};
@@ -12632,13 +12688,13 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     if (a.actionTimer <= 0) {
       a.actionState = "idle";
     } else {
-      const sansImg = a.el.querySelector(".sans-sprite");
-      if (sansImg && a.actionState !== "gaster") {
+      if (a.actionState !== "gaster") {
         if (!a._actionStep) a._actionStep = 0;
         a._actionStep += dt2 * 10;
-        sansImg.src = sansSpriteForAction(a.actionState, Math.floor(a._actionStep)).src;
-        if (closest && closest.dx < 0) sansImg.style.transform = "scaleX(-1)";
-        else sansImg.style.transform = "scaleX(1)";
+        const sp = sansSpriteForAction(a.actionState, Math.floor(a._actionStep));
+        if (closest && closest.dx < 0) sp.flip = true;
+        else sp.flip = false;
+        applySansSprite(a.el, sp);
       }
       return;
     }
@@ -12659,18 +12715,13 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
       a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
       a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
       a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-      const sansImg = a.el.querySelector(".sans-sprite");
-      if (sansImg) {
-        if (!a._walkStep) a._walkStep = 0;
-        a._walkStep += dt2 * 10;
-        const spr = sansSpriteFor(moveX, moveY, Math.floor(a._walkStep));
-        sansImg.src = spr.src;
-        if (moveX < 0) sansImg.style.transform = "scaleX(-1)";
-        else if (moveX > 0) sansImg.style.transform = "scaleX(1)";
-      }
+      if (!a._walkStep) a._walkStep = 0;
+      a._walkStep += dt2 * 10;
+      const sp = sansSpriteFor(moveX, moveY, Math.floor(a._walkStep));
+      applySansSprite(a.el, sp);
     } else {
-      const sansImg = a.el.querySelector(".sans-sprite");
-      if (sansImg) sansImg.src = sansSpriteForAction("idle", 0).src;
+      const sp = sansSpriteForAction("idle", 0);
+      applySansSprite(a.el, sp);
     }
   }
 }
@@ -55475,6 +55526,7 @@ __export(all_exports, {
   addBlock: () => addBlock,
   applyDayEvent: () => applyDayEvent,
   applyPageSkin: () => applyPageSkin,
+  applySansSprite: () => applySansSprite,
   applyTheme: () => applyTheme,
   applyViewState: () => applyViewState,
   bagName: () => bagName,

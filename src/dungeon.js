@@ -1,6 +1,6 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
-import { petSVG, spriteSVG, sansSpriteFor, sansSpriteForAction, SANS_SPRITES } from './graphics.js';
+import { petSVG, spriteSVG, sansSpriteFor, sansSpriteForAction, SANS_SPRITES, applySansSprite } from './graphics.js';
 import { playNaoyaCutscene } from './hero.js';
 
 export let isDungeonOpen = false;
@@ -1328,13 +1328,20 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         }
     }
 
-    if (a.isResting) {
+    if (a.restPending > 0) {
+        a.restPending -= dt;
+        if (a.restPending <= 0) {
+            a.isResting = true;
+            a.restTimer = 4;
+            a._sleepStep = 0;
+        }
+    } else if (a.isResting) {
         a.restTimer -= dt;
         a.stamina = Math.min(a.maxStamina, a.stamina + (100 / 4) * dt); // Full regen in 4s
         if (!a._sleepStep) a._sleepStep = 0;
         a._sleepStep += dt * 10;
-        const sansImg = a.el.querySelector('.sans-sprite');
-        if (sansImg) sansImg.src = sansSpriteForAction('sleep_stand', Math.floor(a._sleepStep)).src;
+        const sp = sansSpriteForAction('sleep_stand', Math.floor(a._sleepStep));
+        applySansSprite(a.el, sp);
         if (a.restTimer <= 0) a.isResting = false;
         return;
     } else {
@@ -1358,16 +1365,26 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         a.stamina -= 12;
         a.gravityCd = 9;
         
+        a.actionState = 'magic';
+        a.actionTimer = 1.0;
+        a.restPending = 1.0; // Start resting after magic finishes
+
         if (arena) {
             arena.style.animation = 'dg-shake 0.4s';
             setTimeout(() => { if (arena) arena.style.animation = ''; }, 400);
         }
 
+        a.x = arenaRect.width - 40;
+        a.y = arenaRect.height - 40;
+        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+
         enemyGroup.forEach(e => {
             if (e.hp > 0) {
+                e.el.style.transition = 'transform 0.3s ease-out';
                 e.x = 40 + Math.random()*20;
                 e.y = 40 + Math.random()*20;
                 e.el.style.transform = `translate3d(${e.x - 16}px, ${e.y - 16}px, 0)`;
+                setTimeout(() => { if (e.el) e.el.style.transition = ''; }, 300);
                 if (!e.status) e.status = {};
                 e.status.stun = 1.5;
                 e.hp -= a.atk;
@@ -1375,13 +1392,6 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
             }
         });
         
-        a.x = arenaRect.width - 40;
-        a.y = arenaRect.height - 40;
-        a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-        
-        a.isResting = true;
-        a.restTimer = 4;
-        a._sleepStep = 0;
         return;
     }
 
@@ -1393,8 +1403,8 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
         a.y = Math.max(30, Math.min(a.y, arenaRect.height - 30));
         a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-        const sansImg = a.el.querySelector('.sans-sprite');
-        if (sansImg) sansImg.src = sansSpriteForAction('shrug', 0).src;
+        const sp = sansSpriteForAction('shrug', 0);
+        applySansSprite(a.el, sp);
         a.actionState = 'shrug';
         a.actionTimer = 0.3;
         return;
@@ -1404,42 +1414,51 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         if (a.gasterCd <= 0 && a.stamina >= 15) {
             a.gasterCd = 10;
             a.stamina -= 15;
-            const sansImg = a.el.querySelector('.sans-sprite');
-            if (sansImg) sansImg.src = sansSpriteForAction('flashing_eye', 1).src;
+            const sp = sansSpriteForAction('flashing_eye', 1);
+            applySansSprite(a.el, sp);
             a.actionState = 'gaster';
             a.actionTimer = 3.6;
 
-            const isRight = closest.dx > 0;
-            const bx = a.x + (isRight ? 30 : -30);
-            const by = a.y - 40;
+            const dx = closest.dx;
+            const dy = closest.dy;
+            const dist = closest.dist || 1;
+            const dirX = dx / dist;
+            const dirY = dy / dist;
+            const angle = Math.atan2(dy, dx);
+            
+            const bx = a.x - dirX * 30;
+            const by = a.y - dirY * 30 - 20;
+
             const blaster = document.createElement('img');
             blaster.className = 'dg-gaster-blaster';
             blaster.src = sansSpriteForAction('gaster_charge', 0).src;
             blaster.style.position = 'absolute';
             blaster.style.width = '64px';
             blaster.style.height = '64px';
-            blaster.style.left = bx + 'px';
-            blaster.style.top = by + 'px';
+            blaster.style.left = (bx - 32) + 'px';
+            blaster.style.top = (by - 32) + 'px';
             blaster.style.zIndex = '50';
-            if (!isRight) blaster.style.transform = 'scaleX(-1)';
+            
+            let rotDeg = (angle - Math.PI) * 180 / Math.PI;
+            blaster.style.transform = `rotate(${rotDeg}deg)`;
             if (arena) arena.appendChild(blaster);
             
             setTimeout(() => {
                 if (!arena || !arena.contains(blaster)) return;
-                let frame = 1;
-                const fireInterval = setInterval(() => {
-                    if (!arena.contains(blaster)) { clearInterval(fireInterval); return; }
-                    blaster.src = sansSpriteForAction('gaster_fire', frame).src;
-                    frame++;
-                }, 100);
+                
+                blaster.src = sansSpriteForAction('gaster_fire', 0).src;
 
                 const laser = document.createElement('div');
                 laser.style.position = 'absolute';
                 laser.style.height = '64px';
                 laser.style.width = '1500px';
                 laser.style.background = 'linear-gradient(90deg, rgba(255,255,255,0.9) 0%, rgba(0,255,255,0.9) 20%, rgba(255,255,255,0.7) 100%)';
-                laser.style.left = (isRight ? bx + 32 : bx - 1500 + 32) + 'px';
-                laser.style.top = (by + 16) + 'px';
+                
+                laser.style.left = bx + 'px';
+                laser.style.top = (by - 32) + 'px';
+                laser.style.transformOrigin = '0 50%';
+                let laserRot = angle * 180 / Math.PI;
+                laser.style.transform = `rotate(${laserRot}deg)`;
                 laser.style.zIndex = '40';
                 if (arena) arena.appendChild(laser);
 
@@ -1450,7 +1469,6 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
                     tickTimer -= 0.1;
                     if (dotTimer <= 0 || !arena.contains(laser)) {
                         clearInterval(hitInterval);
-                        clearInterval(fireInterval);
                         if (laser.parentNode) laser.remove();
                         if (blaster.parentNode) blaster.remove();
                         return;
@@ -1458,8 +1476,13 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
                     if (tickTimer <= 0) {
                         tickTimer = 0.2;
                         enemyGroup.forEach(e => {
-                            if (e.hp > 0 && Math.abs(e.y - by) < 40) {
-                                if ((isRight && e.x > bx) || (!isRight && e.x < bx)) {
+                            if (e.hp > 0) {
+                                const evx = e.x - bx;
+                                const evy = (e.y - 16) - by; // Adjust for enemy center
+                                const dot = evx * dirX + evy * dirY;
+                                const perpDist = Math.abs(evx * dirY - evy * dirX);
+                                
+                                if (dot > 0 && perpDist < 40) {
                                     e.hp -= 1;
                                     spawnDmg(e, -1);
                                     if (!e.status) e.status = {};
@@ -1535,13 +1558,13 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         if (a.actionTimer <= 0) {
             a.actionState = 'idle';
         } else {
-            const sansImg = a.el.querySelector('.sans-sprite');
-            if (sansImg && a.actionState !== 'gaster') {
+            if (a.actionState !== 'gaster') {
                 if (!a._actionStep) a._actionStep = 0;
                 a._actionStep += dt * 10;
-                sansImg.src = sansSpriteForAction(a.actionState, Math.floor(a._actionStep)).src;
-                if (closest && closest.dx < 0) sansImg.style.transform = 'scaleX(-1)';
-                else sansImg.style.transform = 'scaleX(1)';
+                const sp = sansSpriteForAction(a.actionState, Math.floor(a._actionStep));
+                if (closest && closest.dx < 0) sp.flip = true;
+                else sp.flip = false;
+                applySansSprite(a.el, sp);
             }
             return;
         }
@@ -1566,18 +1589,13 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
             a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
             a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
             
-            const sansImg = a.el.querySelector('.sans-sprite');
-            if (sansImg) {
-                if (!a._walkStep) a._walkStep = 0;
-                a._walkStep += dt * 10;
-                const spr = sansSpriteFor(moveX, moveY, Math.floor(a._walkStep));
-                sansImg.src = spr.src;
-                if (moveX < 0) sansImg.style.transform = 'scaleX(-1)';
-                else if (moveX > 0) sansImg.style.transform = 'scaleX(1)';
-            }
+            if (!a._walkStep) a._walkStep = 0;
+            a._walkStep += dt * 10;
+            const sp = sansSpriteFor(moveX, moveY, Math.floor(a._walkStep));
+            applySansSprite(a.el, sp);
         } else {
-            const sansImg = a.el.querySelector('.sans-sprite');
-            if (sansImg) sansImg.src = sansSpriteForAction('idle', 0).src;
+            const sp = sansSpriteForAction('idle', 0);
+            applySansSprite(a.el, sp);
         }
     }
 }
