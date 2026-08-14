@@ -190,13 +190,13 @@ function applySansSprite(el, sp) {
   const overlay = el.querySelector(".sans-overlay");
   if (img) {
     img.src = sp.src;
-    img.style.transform = sp.flip ? "scaleX(-1)" : "";
+    img.style.transform = sp.flip ? "translateX(-50%) scaleX(-1)" : "translateX(-50%)";
   }
   if (overlay) {
     if (sp.overlay) {
       overlay.style.display = "block";
       overlay.src = sp.overlay;
-      overlay.style.transform = sp.flip ? "scaleX(-1)" : "";
+      overlay.style.transform = sp.flip ? "translateX(-50%) scaleX(-1)" : "translateX(-50%)";
     } else {
       overlay.style.display = "none";
     }
@@ -12027,7 +12027,7 @@ function combatLoop() {
         p2.el.style.top = p2.y + "px";
         let hit = false;
         p2.groupB.forEach((e2) => {
-          if (e2.hp > 0 && Math.hypot(e2.x - p2.x, e2.y - p2.y) < 40) {
+          if (e2.hp > 0 && Math.hypot(e2.x - p2.x, e2.y - p2.y) < 20) {
             if (p2.onHit) p2.onHit(e2);
             hit = true;
           }

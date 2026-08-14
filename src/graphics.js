@@ -1228,13 +1228,13 @@ export function applySansSprite(el, sp) {
   
   if (img) {
     img.src = sp.src;
-    img.style.transform = sp.flip ? 'scaleX(-1)' : '';
+    img.style.transform = sp.flip ? 'translateX(-50%) scaleX(-1)' : 'translateX(-50%)';
   }
   if (overlay) {
     if (sp.overlay) {
       overlay.style.display = 'block';
       overlay.src = sp.overlay;
-      overlay.style.transform = sp.flip ? 'scaleX(-1)' : '';
+      overlay.style.transform = sp.flip ? 'translateX(-50%) scaleX(-1)' : 'translateX(-50%)';
     } else {
       overlay.style.display = 'none';
     }

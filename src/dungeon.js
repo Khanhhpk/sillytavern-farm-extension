@@ -804,7 +804,7 @@ function combatLoop() {
             
             let hit = false;
             p.groupB.forEach(e => {
-                if (e.hp > 0 && Math.hypot(e.x - p.x, e.y - p.y) < 40) {
+                if (e.hp > 0 && Math.hypot(e.x - p.x, e.y - p.y) < 20) {
                     if (p.onHit) p.onHit(e);
                     hit = true;
                 }
