@@ -2802,12 +2802,12 @@ function showWaveRewards(isLoaded = false) {
                 if (shopGold >= cost) {
                     shopGold -= cost;
                     const p = selectedPet;
-                    if (statId === 'hp') { p.upgrades.hp++; }
-                    if (statId === 'atk') { p.upgrades.atk++; }
-                    if (statId === 'aspd') { p.upgrades.aspd++; }
-                    if (statId === 'spd') { p.upgrades.spd++; }
-                    if (statId === 'critR') { p.critRate = Math.min(0.6, p.critRate + 0.05); p.upgrades.critR++; }
-                    if (statId === 'critD') { p.critDmg = Math.round((p.critDmg + 0.2)*10)/10; p.upgrades.critD++; }
+                    if (statId === 'hp') { p.upgrades.hp = (p.upgrades.hp || 0) + 1; }
+                    if (statId === 'atk') { p.upgrades.atk = (p.upgrades.atk || 0) + 1; }
+                    if (statId === 'aspd') { p.upgrades.aspd = (p.upgrades.aspd || 0) + 1; }
+                    if (statId === 'spd') { p.upgrades.spd = (p.upgrades.spd || 0) + 1; }
+                    if (statId === 'critR') { p.critRate = Math.min(0.6, p.critRate + 0.05); p.upgrades.critR = (p.upgrades.critR || 0) + 1; }
+                    if (statId === 'critD') { p.critDmg = Math.round((p.critDmg + 0.2)*10)/10; p.upgrades.critD = (p.upgrades.critD || 0) + 1; }
                     if (statId === 'dodge') { p.dodge = Math.min(0.4, p.dodge + 0.05); p.upgrades.dodge = (p.upgrades.dodge || 0) + 1; }
                     if (statId === 'range') { p.upgrades.range = (p.upgrades.range || 0) + 1; }
                     if (statId === 'skillCdR') { p.upgrades.skillCdR = (p.upgrades.skillCdR || 0) + 1; }

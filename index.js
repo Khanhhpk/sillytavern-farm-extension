@@ -13885,24 +13885,24 @@ function showWaveRewards(isLoaded = false) {
           shopGold -= cost;
           const p2 = selectedPet;
           if (statId === "hp") {
-            p2.upgrades.hp++;
+            p2.upgrades.hp = (p2.upgrades.hp || 0) + 1;
           }
           if (statId === "atk") {
-            p2.upgrades.atk++;
+            p2.upgrades.atk = (p2.upgrades.atk || 0) + 1;
           }
           if (statId === "aspd") {
-            p2.upgrades.aspd++;
+            p2.upgrades.aspd = (p2.upgrades.aspd || 0) + 1;
           }
           if (statId === "spd") {
-            p2.upgrades.spd++;
+            p2.upgrades.spd = (p2.upgrades.spd || 0) + 1;
           }
           if (statId === "critR") {
             p2.critRate = Math.min(0.6, p2.critRate + 0.05);
-            p2.upgrades.critR++;
+            p2.upgrades.critR = (p2.upgrades.critR || 0) + 1;
           }
           if (statId === "critD") {
             p2.critDmg = Math.round((p2.critDmg + 0.2) * 10) / 10;
-            p2.upgrades.critD++;
+            p2.upgrades.critD = (p2.upgrades.critD || 0) + 1;
           }
           if (statId === "dodge") {
             p2.dodge = Math.min(0.4, p2.dodge + 0.05);
