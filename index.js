@@ -13769,13 +13769,13 @@ function showWaveRewards(isLoaded = false) {
       } else {
         stats = [
           // Hiệu quả HP & ATK upgrade: +10%→+15%
-          { id: "hp", name: "Max HP (+15%)", val: selectedPet.maxHp, lv: u2.hp, cost: calc(80, u2.hp) },
-          { id: "atk", name: "ATK (+15%)", val: selectedPet.atk, lv: u2.atk, cost: calc(80, u2.atk) },
+          { id: "hp", name: "Max HP (+15%)", val: selectedPet.maxHp, lv: u2.hp || 0, cost: calc(80, u2.hp || 0) },
+          { id: "atk", name: "ATK (+15%)", val: selectedPet.atk, lv: u2.atk || 0, cost: calc(80, u2.atk || 0) },
           // ATK SPD: giảm 8%/level, sàn 0.15s
-          { id: "aspd", name: "ATK SPD (+8%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u2.aspd, cost: calc(100, u2.aspd), forceCanBuy: selectedPet.maxCd > 0.16 },
-          { id: "spd", name: "Move Speed (+5%)", val: selectedPet.speed, lv: u2.spd, cost: calc(50, u2.spd), forceCanBuy: selectedPet.speed < 150 },
-          { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u2.critR, cost: calc(90, u2.critR), forceCanBuy: selectedPet.critRate < 0.59 },
-          { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u2.critD, cost: calc(90, u2.critD) },
+          { id: "aspd", name: "ATK SPD (+8%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u2.aspd || 0, cost: calc(100, u2.aspd || 0), forceCanBuy: selectedPet.maxCd > 0.16 },
+          { id: "spd", name: "Move Speed (+5%)", val: selectedPet.speed, lv: u2.spd || 0, cost: calc(50, u2.spd || 0), forceCanBuy: selectedPet.speed < 150 },
+          { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u2.critR || 0, cost: calc(90, u2.critR || 0), forceCanBuy: selectedPet.critRate < 0.59 },
+          { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u2.critD || 0, cost: calc(90, u2.critD || 0) },
           { id: "dodge", name: "N\xE9 Tr\xE1nh (+5%)", val: (selectedPet.dodge * 100).toFixed(0) + "%", lv: u2.dodge || 0, cost: calc(100, u2.dodge || 0), forceCanBuy: selectedPet.dodge < 0.39 }
         ];
       }
