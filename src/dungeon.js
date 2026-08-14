@@ -1433,6 +1433,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
             blaster.style.position = 'absolute';
             blaster.style.width = '40px';
             blaster.style.height = '40px';
+            blaster.style.objectFit = 'contain';
             blaster.style.left = (bx - 20) + 'px';
             blaster.style.top = (by - 20) + 'px';
             blaster.style.zIndex = '50';

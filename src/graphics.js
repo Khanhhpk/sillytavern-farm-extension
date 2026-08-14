@@ -1297,7 +1297,7 @@ export function sansFarmSpriteFor(dx, dy, step) {
   if (Math.abs(dx) < 1 && Math.abs(dy) < 1)
     return { src: SANS_FARM_SPRITES.idle, flip: false };
 
-  const angle = Math.atan2(dx, dy) * 180 / Math.PI;
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
 
   if (angle > -45 && angle <= 45) {
     if (phase === 1) return { src: SANS_FARM_SPRITES.walkR1, flip: false };
@@ -1325,7 +1325,7 @@ export function sansDungeonSpriteFor(dx, dy, step) {
   if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01)
     return { src: SANS_DUNGEON_SPRITES.idle, flip: false };
 
-  const angle = Math.atan2(dx, dy) * 180 / Math.PI;
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
 
   if (angle > -45 && angle <= 45) {
     if (phase === 1) return { src: SANS_DUNGEON_SPRITES.walkR1, flip: false };
@@ -1352,8 +1352,8 @@ export function petSVG(name, px) {
     const scale = px / 32;
     return `<div style="position:relative; width:${px}px; height:${px}px;">
       <div style="transform-origin:bottom center; transform:scale(${scale}); width:32px; height:32px; position:absolute; bottom:0; left:50%; margin-left:-16px;">
-        <img draggable="false" data-sans-overlay class="sans-overlay" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:none; image-rendering:pixelated; z-index:3;" />
-        <img draggable="false" data-sans-sprite class="sans-sprite" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:block; image-rendering:pixelated; z-index:2;" />
+        <img draggable="false" data-sans-overlay class="sans-overlay" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:none; image-rendering:pixelated; z-index:3; width:auto; height:auto; max-width:none; max-height:none;" />
+        <img draggable="false" data-sans-sprite class="sans-sprite" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:block; image-rendering:pixelated; z-index:2; width:auto; height:auto; max-width:none; max-height:none;" />
       </div>
     </div>`;
   }
