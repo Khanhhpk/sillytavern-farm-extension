@@ -1655,9 +1655,9 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
                     setTimeout(() => boom.remove(), 300);
                 }
             }
-            
-            let hitOther = false;
-            groupA.forEach(other => {
+            if (!a.kb.wallDamage) {
+                let hitOther = false;
+                groupA.forEach(other => {
                if (!hitOther && other !== a && other.hp > 0 && Math.hypot(other.x - a.x, other.y - a.y) < 40) {
                    if (!other.status) other.status = {};
                    if (!other.status.stun) {
@@ -1688,10 +1688,11 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
                        });
                    }
                }
-            });
-            
-            if (hitOther) {
-                a.kb.time = 0;
+                });
+                
+                if (hitOther) {
+                    a.kb.time = 0;
+                }
             }
             
             return;
