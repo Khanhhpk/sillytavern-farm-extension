@@ -804,7 +804,7 @@ function combatLoop() {
             
             let hit = false;
             p.groupB.forEach(e => {
-                if (e.hp > 0 && Math.hypot(e.x - p.x, e.y - p.y) < 20) {
+                if (e.hp > 0 && Math.hypot(e.x - p.x, e.y - p.y) < 12) {
                     if (p.onHit) p.onHit(e);
                     hit = true;
                 }
@@ -1545,10 +1545,10 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         if (a.cd <= 0 && closest.dist <= a.range) {
             a.cd = a.maxCd;
             const bone = document.createElement('div');
-            bone.innerHTML = `<img src="${SANS_DUNGEON_SPRITES.bone}" width="24" height="24">`;
+            bone.innerHTML = `<img src="${SANS_DUNGEON_SPRITES.bone}" width="8" height="20">`;
             bone.style.position = 'absolute';
             bone.style.left = a.x + 'px';
-            bone.style.top = a.y + 'px';
+            bone.style.top = (a.y - 16) + 'px';
             bone.style.zIndex = '50';
             bone.style.animation = 'dg-spin 0.5s linear infinite';
             if (arena) arena.appendChild(bone);
