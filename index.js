@@ -12599,8 +12599,6 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
       a.stamina -= 15;
       const sp = sansDungeonSpriteForAction("magic", 1);
       applySansSprite(a.el, sp);
-      a.actionState = "gaster";
-      a.actionTimer = 3.6;
       const dx = closest.dx;
       const dy = closest.dy;
       const dist = closest.dist || 1;
@@ -12613,12 +12611,12 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
       blaster.className = "dg-gaster-blaster";
       blaster.src = sansDungeonSpriteForAction("gaster_charge", 0).src;
       blaster.style.position = "absolute";
-      blaster.style.width = "64px";
-      blaster.style.height = "64px";
-      blaster.style.left = bx - 32 + "px";
-      blaster.style.top = by - 32 + "px";
+      blaster.style.width = "40px";
+      blaster.style.height = "40px";
+      blaster.style.left = bx - 20 + "px";
+      blaster.style.top = by - 20 + "px";
       blaster.style.zIndex = "50";
-      let rotDeg = (angle - Math.PI) * 180 / Math.PI;
+      let rotDeg = angle * 180 / Math.PI - 90;
       blaster.style.transform = `rotate(${rotDeg}deg)`;
       if (arena) arena.appendChild(blaster);
       setTimeout(() => {
@@ -12626,11 +12624,11 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
         blaster.src = sansDungeonSpriteForAction("gaster_fire", 0).src;
         const laser = document.createElement("div");
         laser.style.position = "absolute";
-        laser.style.height = "64px";
+        laser.style.height = "40px";
         laser.style.width = "1500px";
         laser.style.background = "linear-gradient(90deg, rgba(255,255,255,0.9) 0%, rgba(0,255,255,0.9) 20%, rgba(255,255,255,0.7) 100%)";
         laser.style.left = bx + "px";
-        laser.style.top = by - 32 + "px";
+        laser.style.top = by - 20 + "px";
         laser.style.transformOrigin = "0 50%";
         let laserRot = angle * 180 / Math.PI;
         laser.style.transform = `rotate(${laserRot}deg)`;
@@ -12730,7 +12728,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     if (a.actionTimer <= 0) {
       a.actionState = "idle";
     } else {
-      if (a.actionState !== "gaster") {
+      if (a.actionState !== "magic" && a.actionState !== "shrug" && a.actionState !== "sleep_stand") {
         if (!a._actionStep) a._actionStep = 0;
         a._actionStep += dt2 * 10;
         const sp = sansDungeonSpriteForAction(a.actionState, Math.floor(a._actionStep));
