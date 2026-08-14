@@ -12529,7 +12529,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
   });
   let canGravityPush = a.gravityCd <= 0 && a.tpCd <= 0 && enemyGroup.filter((b2) => b2.hp > 0).length > 0;
   if (canGravityPush) {
-    let isTired = a.stamina < 20;
+    let isTired = a.stamina <= a.maxStamina * 0.2;
     if (isTired) a.stamina -= 12;
     else a.stamina -= 20;
     a.gravityCd = 9;

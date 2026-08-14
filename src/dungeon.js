@@ -1359,9 +1359,9 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
     });
 
     let canGravityPush = a.gravityCd <= 0 && a.tpCd <= 0 && enemyGroup.filter(b=>b.hp>0).length > 0;
-    // Gravity Push trigger: either normal (stamina >= 20) or tired (stamina < 20)
+    // Gravity Push trigger: either normal (stamina > 20%) or tired (stamina <= 20%)
     if (canGravityPush) {
-        let isTired = a.stamina < 20;
+        let isTired = a.stamina <= (a.maxStamina * 0.2);
         if (isTired) a.stamina -= 12;
         else a.stamina -= 20;
         
