@@ -9649,6 +9649,24 @@ var init_state = __esm({
 });
 
 // src/hero.js
+function saveHeroScrolls() {
+  const mbody = $id("mbody");
+  if (mbody) {
+    heroPanelScrollTop = mbody.scrollTop;
+    const rosterEl = mbody.querySelector(".hero-pet-roster-list");
+    if (rosterEl) heroRosterScrollTop = rosterEl.scrollTop;
+  }
+}
+function restoreHeroScrolls() {
+  setTimeout(() => {
+    const mbody = $id("mbody");
+    if (mbody) {
+      mbody.scrollTop = heroPanelScrollTop;
+      const rosterEl = mbody.querySelector(".hero-pet-roster-list");
+      if (rosterEl) rosterEl.scrollTop = heroRosterScrollTop;
+    }
+  }, 0);
+}
 function initHeroState() {
   if (!ctx.S.hero) {
     ctx.S.hero = {};
@@ -11005,13 +11023,11 @@ function initHero() {
     let el;
     el = e2.target.closest(".hero-slot.filled");
     if (el) {
-      heroPanelScrollTop = $id("mbody").scrollTop;
+      saveHeroScrolls();
       ctx.S.hero.party.splice(parseInt(el.dataset.rem), 1);
       save();
       openHeroPanel();
-      setTimeout(() => {
-        if ($id("mbody")) $id("mbody").scrollTop = heroPanelScrollTop;
-      }, 0);
+      restoreHeroScrolls();
       return;
     }
     el = e2.target.closest(".h-r-pet");
@@ -11019,30 +11035,26 @@ function initHero() {
       const pId = el.dataset.add;
       if (ctx.S.hero.party.includes(pId)) return;
       if (ctx.S.hero.party.length >= 3) return toast("\u0110\u1ED9i h\xECnh \u0111\xE3 \u0111\u1EA7y! (Max 3)");
-      heroPanelScrollTop = $id("mbody").scrollTop;
+      saveHeroScrolls();
       ctx.S.hero.party.push(pId);
       save();
       openHeroPanel();
-      setTimeout(() => {
-        if ($id("mbody")) $id("mbody").scrollTop = heroPanelScrollTop;
-      }, 0);
+      restoreHeroScrolls();
       return;
     }
     el = e2.target.closest(".h-r-info");
     if (el) {
-      heroPanelScrollTop = $id("mbody").scrollTop;
+      saveHeroScrolls();
       openPetSkills(el.dataset.info);
       return;
     }
     el = e2.target.closest(".hero-style-btn");
     if (el) {
-      heroPanelScrollTop = $id("mbody").scrollTop;
+      saveHeroScrolls();
       ctx.S.hero.style = el.dataset.style;
       save();
       openHeroPanel();
-      setTimeout(() => {
-        if ($id("mbody")) $id("mbody").scrollTop = heroPanelScrollTop;
-      }, 0);
+      restoreHeroScrolls();
       return;
     }
     el = e2.target.closest("#hero-deploy");
@@ -11128,9 +11140,7 @@ function initHero() {
     el = e2.target.closest("#pet-back-btn");
     if (el) {
       openHeroPanel();
-      setTimeout(() => {
-        if ($id("mbody")) $id("mbody").scrollTop = heroPanelScrollTop;
-      }, 0);
+      restoreHeroScrolls();
       return;
     }
   });
@@ -11231,7 +11241,7 @@ function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
     }
   }, 40);
 }
-var heroPanelScrollTop, heroLoop, lastTick, PET_SKILLS, PET_STATS, runState, hToastTimer, hGesture;
+var heroPanelScrollTop, heroRosterScrollTop, heroLoop, lastTick, PET_SKILLS, PET_STATS, runState, hToastTimer, hGesture;
 var init_hero = __esm({
   "src/hero.js"() {
     init_store();
@@ -11241,6 +11251,7 @@ var init_hero = __esm({
     init_state();
     init_shop();
     heroPanelScrollTop = 0;
+    heroRosterScrollTop = 0;
     heroLoop = null;
     lastTick = 0;
     PET_SKILLS = {

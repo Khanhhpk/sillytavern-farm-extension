@@ -7,6 +7,28 @@ import { openModal, closeModal } from './shop.js';
 
 
 let heroPanelScrollTop = 0;
+let heroRosterScrollTop = 0;
+
+function saveHeroScrolls() {
+    const mbody = All.$id('mbody');
+    if (mbody) {
+        heroPanelScrollTop = mbody.scrollTop;
+        const rosterEl = mbody.querySelector('.hero-pet-roster-list');
+        if (rosterEl) heroRosterScrollTop = rosterEl.scrollTop;
+    }
+}
+
+function restoreHeroScrolls() {
+    setTimeout(() => {
+        const mbody = All.$id('mbody');
+        if (mbody) {
+            mbody.scrollTop = heroPanelScrollTop;
+            const rosterEl = mbody.querySelector('.hero-pet-roster-list');
+            if (rosterEl) rosterEl.scrollTop = heroRosterScrollTop;
+        }
+    }, 0);
+}
+
 let heroLoop = null;
 let lastTick = 0;
 let currentMonster = null;
@@ -1567,10 +1589,10 @@ export function initHero() {
     // @ts-ignore
     el = e.target.closest('.hero-slot.filled');
     if (el) {
-      heroPanelScrollTop = All.$id('mbody').scrollTop;
+      saveHeroScrolls();
       ctx.S.hero.party.splice(parseInt(el.dataset.rem), 1);
       save(); openHeroPanel();
-      setTimeout(() => { if(All.$id('mbody')) All.$id('mbody').scrollTop = heroPanelScrollTop; }, 0);
+      restoreHeroScrolls();
       return;
     }
     // @ts-ignore
@@ -1579,26 +1601,26 @@ export function initHero() {
       const pId = el.dataset.add;
       if (ctx.S.hero.party.includes(pId)) return;
       if (ctx.S.hero.party.length >= 3) return All.toast('Đội hình đã đầy! (Max 3)');
-      heroPanelScrollTop = All.$id('mbody').scrollTop;
+      saveHeroScrolls();
       ctx.S.hero.party.push(pId);
       save(); openHeroPanel();
-      setTimeout(() => { if(All.$id('mbody')) All.$id('mbody').scrollTop = heroPanelScrollTop; }, 0);
+      restoreHeroScrolls();
       return;
     }
     // @ts-ignore
     el = e.target.closest('.h-r-info');
     if (el) { 
-        heroPanelScrollTop = All.$id('mbody').scrollTop;
+        saveHeroScrolls();
         openPetSkills(el.dataset.info); 
         return; 
     }
     // @ts-ignore
     el = e.target.closest('.hero-style-btn');
     if (el) { 
-        heroPanelScrollTop = All.$id('mbody').scrollTop;
+        saveHeroScrolls();
         ctx.S.hero.style = el.dataset.style; 
         save(); openHeroPanel(); 
-        setTimeout(() => { if(All.$id('mbody')) All.$id('mbody').scrollTop = heroPanelScrollTop; }, 0);
+        restoreHeroScrolls();
         return; 
     }
     // @ts-ignore
@@ -1685,7 +1707,7 @@ export function initHero() {
     el = e.target.closest('#pet-back-btn');
     if (el) { 
         openHeroPanel(); 
-        setTimeout(() => { if(All.$id('mbody')) All.$id('mbody').scrollTop = heroPanelScrollTop; }, 0);
+        restoreHeroScrolls();
         return; 
     }
   });
