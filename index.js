@@ -5003,9 +5003,10 @@ var init_pets = __esm({
     };
     window["toggleSansControl"] = function() {
       window["sansManualControl"] = !window["sansManualControl"];
+      const ov = $id("mascots");
       const el = (
         /** @type {HTMLElement} */
-        document.querySelector('.pet[data-pet="sans"]')
+        ov ? ov.querySelector('.pet[data-pet="sans"]') : null
       );
       if (!el) {
         console.log("Sans ch\u01B0a xu\u1EA5t hi\u1EC7n tr\xEAn \u0111\u1ED3ng!");
@@ -5040,9 +5041,9 @@ var init_pets = __esm({
             e2.preventDefault();
             p2.x += dx;
             p2.y += dy;
-            const ov = document.getElementById("mascots");
-            const W = ov ? ov.clientWidth : 380;
-            const H2 = ov ? ov.clientHeight : 320;
+            const ov2 = document.getElementById("mascots");
+            const W = ov2 ? ov2.clientWidth : 380;
+            const H2 = ov2 ? ov2.clientHeight : 320;
             p2.x = Math.max(0, Math.min(p2.x, W - 64));
             p2.y = Math.max(WORK_BAND, Math.min(p2.y, H2 - 70));
             el.style.transitionProperty = "none";

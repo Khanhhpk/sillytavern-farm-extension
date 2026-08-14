@@ -671,7 +671,8 @@ export function initPets() {
 // Lệnh Console ẩn để điều khiển thủ công (Debug)
 window['toggleSansControl'] = function() {
   window['sansManualControl'] = !window['sansManualControl'];
-  const el = /** @type {HTMLElement} */ (document.querySelector('.pet[data-pet="sans"]'));
+  const ov = All.$id('mascots');
+  const el = /** @type {HTMLElement} */ (ov ? ov.querySelector('.pet[data-pet="sans"]') : null);
   if (!el) {
     console.log("Sans chưa xuất hiện trên đồng!");
     window['sansManualControl'] = false;
