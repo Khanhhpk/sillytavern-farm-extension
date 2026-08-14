@@ -1177,8 +1177,9 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     
     // Dodge check (pets only)
     if (target.id === 'sans') {
-        if (target.stamina >= 10) {
+        if (target.stamina > 0) {
             target.stamina -= 10;
+            if (target.stamina < 0) target.stamina = 0;
             spawnDmg(target, 0, 'miss');
             target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - atk);
             target.el.style.filter = 'drop-shadow(0 0 5px cyan)';
@@ -1365,7 +1366,6 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         else a.stamina -= 20;
         
         a.gravityCd = 9;
-        a.actionState = 'magic';
         a.actionTimer = 1.0;
         if (isTired) a.restPending = 1.0;
 
@@ -1423,9 +1423,8 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
         a.y = Math.max(30, Math.min(a.y, arenaRect.height - 30));
         a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-        const sp = sansDungeonSpriteForAction('magic', 0);
+        const sp = sansDungeonSpriteForAction('idle', 0);
         applySansSprite(a.el, sp);
-        a.actionState = 'magic';
         a.actionTimer = 0.3;
         return;
     }
@@ -1519,7 +1518,6 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         if (a.blueMagicCd <= 0 && a.stamina >= 10 && closest.dist < 100) {
             a.blueMagicCd = 7;
             a.stamina -= 10;
-            a.actionState = 'magic';
             a.actionTimer = 0.5;
 
             const target = closest.b;
@@ -1768,15 +1766,14 @@ function updateEntities(groupA, groupB, dt, arenaRect) {
                     spawnDmg(a, -dmg);
                 }
                 if (eff === 'karmaDuration') {
-                    // Deal DOT based on stacks: 0.5% maxHp per stack, scaled by dt (apply continuously)
+                    // Deal DOT based on stacks: 1.5% maxHp per stack, scaled by dt (apply continuously)
                     if (a.karmaStacks > 0) {
-                        const dmg = Math.max(1, Math.floor(a.maxHp * 0.005 * a.karmaStacks * dt * 2)); // *2 to adjust tick rate slightly to ensure it deals some dmg
-                        a._karmaDmgAcc = (a._karmaDmgAcc || 0) + (a.maxHp * 0.005 * a.karmaStacks * dt);
+                        a._karmaDmgAcc = (a._karmaDmgAcc || 0) + (a.maxHp * 0.015 * a.karmaStacks * dt);
                         if (a._karmaDmgAcc >= 1) {
                             const tickDmg = Math.floor(a._karmaDmgAcc);
                             a.hp -= tickDmg;
                             a._karmaDmgAcc -= tickDmg;
-                            if (Math.random() < 0.1) spawnDmg(a, -tickDmg, 'karma'); // Don't spam text too much
+                            if (Math.random() < 0.35) spawnDmg(a, -tickDmg, 'karma'); // Increased tick rate text
                         }
                     }
                 }

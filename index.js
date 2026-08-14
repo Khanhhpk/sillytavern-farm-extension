@@ -12368,8 +12368,9 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     return;
   }
   if (target.id === "sans") {
-    if (target.stamina >= 10) {
+    if (target.stamina > 0) {
       target.stamina -= 10;
+      if (target.stamina < 0) target.stamina = 0;
       spawnDmg(target, 0, "miss");
       target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - atk);
       target.el.style.filter = "drop-shadow(0 0 5px cyan)";
@@ -12532,7 +12533,6 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     if (isTired) a.stamina -= 12;
     else a.stamina -= 20;
     a.gravityCd = 9;
-    a.actionState = "magic";
     a.actionTimer = 1;
     if (isTired) a.restPending = 1;
     if (arena) {
@@ -12583,9 +12583,8 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
     a.y = Math.max(30, Math.min(a.y, arenaRect.height - 30));
     a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-    const sp = sansDungeonSpriteForAction("magic", 0);
+    const sp = sansDungeonSpriteForAction("idle", 0);
     applySansSprite(a.el, sp);
-    a.actionState = "magic";
     a.actionTimer = 0.3;
     return;
   }
@@ -12667,7 +12666,6 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     if (a.blueMagicCd <= 0 && a.stamina >= 10 && closest.dist < 100) {
       a.blueMagicCd = 7;
       a.stamina -= 10;
-      a.actionState = "magic";
       a.actionTimer = 0.5;
       const target = closest.b;
       if (!target.status) target.status = {};
@@ -12894,13 +12892,12 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
         }
         if (eff === "karmaDuration") {
           if (a.karmaStacks > 0) {
-            const dmg = Math.max(1, Math.floor(a.maxHp * 5e-3 * a.karmaStacks * dt2 * 2));
-            a._karmaDmgAcc = (a._karmaDmgAcc || 0) + a.maxHp * 5e-3 * a.karmaStacks * dt2;
+            a._karmaDmgAcc = (a._karmaDmgAcc || 0) + a.maxHp * 0.015 * a.karmaStacks * dt2;
             if (a._karmaDmgAcc >= 1) {
               const tickDmg = Math.floor(a._karmaDmgAcc);
               a.hp -= tickDmg;
               a._karmaDmgAcc -= tickDmg;
-              if (Math.random() < 0.1) spawnDmg(a, -tickDmg, "karma");
+              if (Math.random() < 0.35) spawnDmg(a, -tickDmg, "karma");
             }
           }
         }
