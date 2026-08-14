@@ -1316,7 +1316,14 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         if (a[cdName] > 0) a[cdName] -= dt;
     });
     if (a._shrugTimer > 0) a._shrugTimer -= dt;
-    const maxCds = { blueMagicCd: 7, gravityCd: 9, gasterCd: 10 };
+    
+    // Calculate max CDs with upgrades
+    const maxCds = { 
+        blueMagicCd: 7 * Math.max(0.5, 1 - (a.upgrades.blueMagicCd || 0) * 0.05), 
+        gravityCd: 13 * Math.max(0.5, 1 - (a.upgrades.gravityCd || 0) * 0.05), 
+        gasterCd: 10 * Math.max(0.5, 1 - (a.upgrades.gasterCd || 0) * 0.05) 
+    };
+    const maxTpCd = 2 * Math.max(0.5, 1 - (a.upgrades.tpCd || 0) * 0.10);
     const classes = { blueMagicCd: '.blue-magic', gravityCd: '.gravity-push', gasterCd: '.gaster-blaster' };
     for (let cdName in maxCds) {
         const bar = a.el.querySelector(classes[cdName]);
