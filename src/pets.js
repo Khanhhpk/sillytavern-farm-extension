@@ -685,7 +685,7 @@ window['toggleSansControl'] = function() {
       console.log("Phím 2: Ăn kem (icecream)");
       console.log("Phím 3: Xài phép (magic)");
       console.log("Phím 5: Ngồi ghế (stool)");
-      console.log("Phím 6: Chụp ảnh (stool_chup)");
+      console.log("Phím 6: Uống Ketchup (stool_chup)");
       console.log("Phím 7: Chải đầu (stool_comb)");
       console.log("Phím 4: Huỷ hành động (stop)");
       

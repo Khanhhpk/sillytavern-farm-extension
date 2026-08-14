@@ -5019,7 +5019,7 @@ var init_pets = __esm({
         console.log("Ph\xEDm 2: \u0102n kem (icecream)");
         console.log("Ph\xEDm 3: X\xE0i ph\xE9p (magic)");
         console.log("Ph\xEDm 5: Ng\u1ED3i gh\u1EBF (stool)");
-        console.log("Ph\xEDm 6: Ch\u1EE5p \u1EA3nh (stool_chup)");
+        console.log("Ph\xEDm 6: U\u1ED1ng Ketchup (stool_chup)");
         console.log("Ph\xEDm 7: Ch\u1EA3i \u0111\u1EA7u (stool_comb)");
         console.log("Ph\xEDm 4: Hu\u1EF7 h\xE0nh \u0111\u1ED9ng (stop)");
         delete petTgt["sans"];
