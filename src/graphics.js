@@ -1187,6 +1187,14 @@ const _sansBase = (() => {
 })();
 const _spFarm = (p) => _sansBase + 'sans_sprites_farm/' + p;
 const _spDungeon = (p) => _sansBase + 'sans_sprites_dungeon/' + p;
+const _spHero = (p) => _sansBase + 'sans_sprites_hero/' + p;
+
+export const SANS_HERO_SPRITES = {
+  bone_white: _spHero('bone_white_short.png'),
+  bone_blue: _spHero('bone_blue_long.png'),
+  stool_chup: _spHero('stool_chup/'),
+  gaster_blaster: _spHero('gaster_blaster/')
+};
 
 export const SANS_FARM_SPRITES = {
   idle:    _spFarm('overworld_walk/walk_front_idle.png'),

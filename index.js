@@ -162,6 +162,7 @@ __export(graphics_exports, {
   PET_SPR: () => PET_SPR,
   SANS_DUNGEON_SPRITES: () => SANS_DUNGEON_SPRITES,
   SANS_FARM_SPRITES: () => SANS_FARM_SPRITES,
+  SANS_HERO_SPRITES: () => SANS_HERO_SPRITES,
   SPR: () => SPR,
   applySansSprite: () => applySansSprite,
   mulberry32: () => mulberry32,
@@ -507,7 +508,7 @@ function warmUpCache(CROPS2) {
   }
   setTimeout(next, 1e3);
 }
-var P, GACHA_P, SPR, PET_P, PET_SPR, petLinear, PET_FX, petCache, _sansBase, _spFarm, _spDungeon, SANS_FARM_SPRITES, SANS_DUNGEON_SPRITES, PETS, PASSES, C2, DYNAMIC_SPR, spriteCache, tileCache, LP;
+var P, GACHA_P, SPR, PET_P, PET_SPR, petLinear, PET_FX, petCache, _sansBase, _spFarm, _spDungeon, _spHero, SANS_HERO_SPRITES, SANS_FARM_SPRITES, SANS_DUNGEON_SPRITES, PETS, PASSES, C2, DYNAMIC_SPR, spriteCache, tileCache, LP;
 var init_graphics = __esm({
   "src/graphics.js"() {
     init_state();
@@ -2031,6 +2032,13 @@ var init_graphics = __esm({
     })();
     _spFarm = (p2) => _sansBase + "sans_sprites_farm/" + p2;
     _spDungeon = (p2) => _sansBase + "sans_sprites_dungeon/" + p2;
+    _spHero = (p2) => _sansBase + "sans_sprites_hero/" + p2;
+    SANS_HERO_SPRITES = {
+      bone_white: _spHero("bone_white_short.png"),
+      bone_blue: _spHero("bone_blue_long.png"),
+      stool_chup: _spHero("stool_chup/"),
+      gaster_blaster: _spHero("gaster_blaster/")
+    };
     SANS_FARM_SPRITES = {
       idle: _spFarm("overworld_walk/walk_front_idle.png"),
       left: _spFarm("overworld_walk/walk_left_idle.png"),
@@ -9930,7 +9938,7 @@ function openPetSkills(pId) {
         </div>
         <div style="flex:1;">
           <div style="font-size: 18px; font-weight:bold; color: #f2c231; margin-bottom: 4px;">Lv.${st2.level}</div>
-          <div style="font-size: 14px;">HP C\u01A1 b\u1EA3n: <b>${st2.maxHp}</b> (+${st2.enhHpLevel} C\u01B0\u1EDDng h\xF3a)</div>
+          <div style="font-size: 14px;">${pId === "sans" ? "DODGE" : "HP"} C\u01A1 b\u1EA3n: <b>${st2.maxHp}</b> (+${st2.enhHpLevel} C\u01B0\u1EDDng h\xF3a)</div>
           <div style="font-size: 14px;">ATK C\u01A1 b\u1EA3n: <b>${st2.atk}</b> (+${st2.enhAtkLevel} C\u01B0\u1EDDng h\xF3a)</div>
           <div style="font-size: 14px;">T\u1ED1c \u0111\xE1nh: <b>${st2.spd}</b> (+${st2.enhSpdLevel} C\u01B0\u1EDDng h\xF3a)</div>
           <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${st2.level >= 30 ? 100 : Math.min(100, st2.exp / st2.nextExp * 100)}%"></div><span>${st2.level >= 30 ? "MAX LEVEL" : `EXP: ${Math.floor(st2.exp)}/${st2.nextExp}`}</span></div>
@@ -9950,7 +9958,7 @@ function openPetSkills(pId) {
       <div class="hero-panel-section" style="margin-top:16px;">C\u01B0\u1EDDng H\xF3a (Enhance)</div>
       <div class="betsides">
         <div class="betside hero-deploy-btn" id="pet-enh-hp" data-pid="${pId}" data-cost="${st2.enhHpCost}" style="margin-top:0; padding:10px; font-size:14px;">
-          +50 HP<br><span style="font-size:12px; font-weight:normal;">(${st2.enhHpCost} V\xE0ng)</span>
+          +50 ${pId === "sans" ? "DODGE" : "HP"}<br><span style="font-size:12px; font-weight:normal;">(${st2.enhHpCost} V\xE0ng)</span>
         </div>
         <div class="betside hero-deploy-btn" id="pet-enh-atk" data-pid="${pId}" data-cost="${st2.enhAtkCost}" style="margin-top:0; padding:10px; font-size:14px;">
           +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st2.enhAtkCost} V\xE0ng)</span>
@@ -10310,6 +10318,10 @@ function heroTick() {
       if (runState.stage > ctx.S.hero.maxStage) ctx.S.hero.maxStage = runState.stage;
       runState.pets.forEach((p2) => {
         if (p2.hp > 0) p2.hp = Math.min(p2.maxHp, p2.hp + p2.maxHp * 0.2);
+        if (p2.id === "sans") {
+          p2.muchBetterReady = true;
+          p2.badTimeReady = true;
+        }
       });
       save();
       renderHeroUI();
@@ -10358,11 +10370,66 @@ function heroTick() {
               const mobEl = $id("hmob-" + tMob.idx);
               spawnSkillEffect(pEl, mobEl, aSk.type);
             }
+          } else if (aSk.type === "gaster_blaster") {
+            let tMob = null;
+            if (runState.focusTarget !== null && runState.monsters[runState.focusTarget] && runState.monsters[runState.focusTarget].hp > 0 && runState.monsters[runState.focusTarget].x <= 200 + runState.focusTarget * 45 + 2) {
+              tMob = runState.monsters[runState.focusTarget];
+            } else {
+              tMob = activeMonsters[Math.floor(Math.random() * activeMonsters.length)];
+            }
+            if (!p2.gbEl && !p2.gbClosing) {
+              const scene3 = pEl ? pEl.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
+              if (scene3) {
+                p2.gbEl = document.createElement("div");
+                p2.gbEl.style.position = "absolute";
+                p2.gbEl.style.transition = "top 0.2s ease-out";
+                p2.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gaster_blaster}blaster_front_open_01.png" style="height:64px; image-rendering:pixelated; transform: scaleX(-1);">`;
+                p2.gbEl.style.left = 60 + pIdx * 45 + "px";
+                p2.gbEl.style.top = "-100px";
+                scene3.appendChild(p2.gbEl);
+                setTimeout(() => {
+                  if (p2.gbEl) p2.gbEl.style.top = "10px";
+                }, 10);
+                const img = p2.gbEl.querySelector("img");
+                setTimeout(() => {
+                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_open_02.png";
+                }, 100);
+                setTimeout(() => {
+                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_fire_01.png";
+                }, 200);
+                setTimeout(() => {
+                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_fire_02.png";
+                }, 300);
+                setTimeout(() => {
+                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_fire_03.png";
+                }, 400);
+              }
+            }
+            p2.gasterTick = (p2.gasterTick || 0) + dt2 / 1e3;
+            if (p2.gasterTick >= 0.5) {
+              p2.gasterTick -= 0.5;
+              tMob.hp -= aSk.val;
+              tMob.karma = (tMob.karma || 0) + 1;
+              const mobEl = $id("hmob-" + tMob.idx);
+              if (mobEl) setTimeout(() => showFloatDamage("-" + aSk.val, mobEl, "#fff"), 0);
+              spawnSkillEffect(p2.gbEl || pEl, mobEl, "laser");
+            }
+            if (p2.skillActiveTime <= 0 && p2.gbEl && !p2.gbClosing) {
+              p2.gbClosing = true;
+              const img = p2.gbEl.querySelector("img");
+              if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_close.png";
+              setTimeout(() => {
+                if (p2.gbEl) p2.gbEl.remove();
+                p2.gbEl = null;
+                p2.gbClosing = false;
+              }, 200);
+            }
           }
         }
       } else if (p2.skillMaxCd > 0) {
         let stSpdMult = 1;
         if (p2.spdBuff) stSpdMult *= p2.spdBuff;
+        if (p2.badTimeTimer > 0) stSpdMult *= 2;
         p2.skillCd -= dt2 / 1e3 * stSpdMult;
         const skBar = $id("sk-pet-" + pIdx);
         if (skBar) skBar.style.width = Math.min(100, Math.max(0, (p2.skillMaxCd - p2.skillCd) / p2.skillMaxCd * 100)) + "%";
@@ -10539,6 +10606,15 @@ function heroTick() {
                 ap.spdBuffTimer = aSk.duration;
               });
               setTimeout(() => showFloatDamage("SPD BUFF", pEl, "#00e676"), 0);
+            } else if (aSk.type === "gaster_blaster") {
+              p2.gbEl = document.createElement("div");
+              p2.gbEl.className = "gaster-blaster";
+              p2.gbEl.style.position = "absolute";
+              p2.gbEl.style.left = 60 + pIdx * 45 + "px";
+              p2.gbEl.style.top = "10px";
+              p2.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gb}" style="width:64px;">`;
+              sh.querySelector(".hero-scene").appendChild(p2.gbEl);
+              p2.gasterTick = 2;
             } else if (aSk.type === "blind") {
               tMob.blindCd = aSk.duration;
               setTimeout(() => showFloatDamage("BLIND", mobEl, "#607d8b"), 0);
@@ -10547,6 +10623,28 @@ function heroTick() {
               p2.atkDebuff = 0.5;
               p2.sugarTimer = aSk.duration;
               setTimeout(() => showFloatDamage("SUGAR RUSH", pEl, "#ff80ab"), 0);
+            } else if (aSk.type === "bone_time") {
+              if (!runState.projectiles) runState.projectiles = [];
+              const scene3 = pEl ? pEl.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
+              const boneEl = document.createElement("div");
+              boneEl.className = "dg-projectile";
+              boneEl.style.position = "absolute";
+              boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_blue}" style="height:64px; image-rendering:pixelated;">`;
+              if (scene3) scene3.appendChild(boneEl);
+              runState.projectiles.push({
+                x: 60 + pIdx * 45,
+                y: 50,
+                vx: 200,
+                vy: -150,
+                type: "bone_blue",
+                dmg: Math.floor(p2.atk * 1.5),
+                karmaAmt: 2,
+                el: boneEl,
+                hitCd: 0,
+                bounces: 0,
+                maxBounces: aSk.val
+              });
+              setTimeout(() => showFloatDamage("BONE TIME!", pEl, "#00ffff"), 0);
             } else if (aSk.type === "snowball_roll") {
               const dmg = p2.atk * aSk.val;
               tMob.hp -= dmg;
@@ -10581,6 +10679,13 @@ function heroTick() {
           p2.spdBuff = null;
           p2.atkDebuff = null;
         }
+      }
+      if (p2.dmgResistTimer > 0) {
+        p2.dmgResistTimer -= dt2 / 1e3;
+        if (p2.dmgResistTimer <= 0) p2.dmgResist = 0;
+      }
+      if (p2.badTimeTimer > 0) {
+        p2.badTimeTimer -= dt2 / 1e3;
       }
       let rtSpdMult = 1;
       if (p2.spdBuff) rtSpdMult *= p2.spdBuff;
@@ -10641,6 +10746,36 @@ function heroTick() {
             }
             if (passEq && pSkill[passEq] && pSkill[passEq].type === "initial_burst" && runState.waveTime <= 3) {
               dmg = Math.floor(dmg * pSkill[passEq].val);
+            }
+            if (p2.id === "sans") {
+              if (!runState.projectiles) runState.projectiles = [];
+              const pEl2 = $id("hpet-" + pIdx);
+              const scene3 = pEl2 ? pEl2.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
+              const boneEl = document.createElement("div");
+              boneEl.className = "dg-projectile";
+              boneEl.style.position = "absolute";
+              boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_white}" style="height:32px; image-rendering:pixelated;">`;
+              if (scene3) scene3.appendChild(boneEl);
+              runState.projectiles.push({
+                x: 60 + pIdx * 45,
+                y: 50,
+                vx: 180,
+                vy: 0,
+                type: "bone_white",
+                dmg: p2.atk,
+                karmaAmt: 2,
+                el: boneEl,
+                hitCd: 0
+              });
+              if (pEl2) {
+                pEl2.classList.remove("idle");
+                pEl2.classList.add("attack");
+                setTimeout(() => {
+                  pEl2.classList.remove("attack");
+                  pEl2.classList.add("idle");
+                }, 300);
+              }
+              return;
             }
             const doDamage = () => {
               tMob.hp -= dmg;
@@ -10757,6 +10892,51 @@ function heroTick() {
               }
             }
             target.hp -= dmg;
+            if (target.id === "sans") {
+              const sData = ctx.S.hero.roster["sans"];
+              if (sData) {
+                if (sData.passive_eq === "p1" && target.hp <= 0 && target.muchBetterReady !== false) {
+                  target.muchBetterReady = false;
+                  target.hp = 1;
+                  target.dmgResist = 1;
+                  target.dmgResistTimer = 1;
+                  const scene3 = pEl ? pEl.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
+                  if (scene3) {
+                    const imgBase = pEl ? pEl.querySelector("img") : null;
+                    if (imgBase) imgBase.style.opacity = 0;
+                    const ketchupEl = document.createElement("div");
+                    ketchupEl.style.position = "absolute";
+                    ketchupEl.innerHTML = `<img src="${SANS_HERO_SPRITES.stool_chup}sprite-10-1.png" style="height:48px; image-rendering:pixelated; transform: scaleX(-1);">`;
+                    ketchupEl.style.left = 60 + pIdx * 45 + "px";
+                    ketchupEl.style.bottom = "10px";
+                    scene3.appendChild(ketchupEl);
+                    const kImg = ketchupEl.querySelector("img");
+                    for (let i2 = 2; i2 <= 10; i2++) {
+                      setTimeout(() => {
+                        if (kImg) kImg.src = SANS_HERO_SPRITES.stool_chup + `sprite-10-${i2}.png`;
+                      }, (i2 - 1) * 100);
+                    }
+                    setTimeout(() => {
+                      ketchupEl.remove();
+                      if (imgBase) imgBase.style.opacity = 1;
+                    }, 1e3);
+                  }
+                  if (pEl) setTimeout(() => showFloatDamage("MUCH BETTER", pEl, "#ff0000"), 0);
+                  setTimeout(() => {
+                    if (!runState) return;
+                    target.hp = Math.min(target.maxHp, target.hp + target.maxHp * 0.5);
+                    const hpPet2 = $id("hp-pet-" + pIdx);
+                    if (hpPet2) hpPet2.style.width = target.hp / target.maxHp * 100 + "%";
+                    if (pEl) showFloatDamage("HEAL 50%", pEl, "#a4dc8c");
+                  }, 1e3);
+                }
+                if (sData.passive_eq === "p2" && target.hp / target.maxHp < 0.5 && target.badTimeReady !== false) {
+                  target.badTimeReady = false;
+                  target.badTimeTimer = 5;
+                  if (pEl) setTimeout(() => showFloatDamage("GET DUNKED ON!", pEl, "#ff0000"), 0);
+                }
+              }
+            }
             if (target.hp <= 0 && target.cheatDeath > 0) {
               target.cheatDeath--;
               target.hp = 1;
@@ -10779,6 +10959,73 @@ function heroTick() {
           } else {
             if (pEl) setTimeout(() => showFloatDamage("MISS", pEl, "#aaddff"), 150);
           }
+        }
+      }
+    });
+    if (!runState.projectiles) runState.projectiles = [];
+    const scene2 = sh.querySelector(".hero-scene");
+    for (let i2 = runState.projectiles.length - 1; i2 >= 0; i2--) {
+      const proj = runState.projectiles[i2];
+      proj.x += proj.vx * (dt2 / 1e3);
+      proj.y += proj.vy * (dt2 / 1e3);
+      let isDead = false;
+      if (proj.type === "bone_blue") {
+        if (proj.x > 380 || proj.x < 50) {
+          proj.vx *= -1;
+          proj.bounces++;
+        }
+        if (proj.y > 100 || proj.y < -20) {
+          proj.vy *= -1;
+          proj.bounces++;
+        }
+        if (proj.bounces >= proj.maxBounces) isDead = true;
+      } else if (proj.type === "bone_white") {
+        if (proj.x > 450) isDead = true;
+      }
+      if (isDead) {
+        if (proj.el) proj.el.remove();
+        runState.projectiles.splice(i2, 1);
+        continue;
+      }
+      if (proj.el) {
+        proj.el.style.transform = `translate3d(${proj.x}px, ${proj.y}px, 0) ${proj.type === "bone_blue" ? "rotate(" + proj.bounces * 90 + "deg)" : ""}`;
+      }
+      proj.hitCd = proj.hitCd || 0;
+      if (proj.hitCd > 0) proj.hitCd -= dt2 / 1e3;
+      if (proj.hitCd <= 0) {
+        let hitAny = false;
+        activeMonsters.forEach((m2) => {
+          if (m2.hp <= 0) return;
+          const mEl = $id("hmob-" + m2.idx);
+          const dist = Math.hypot(m2.x - proj.x, 50 - proj.y);
+          if (dist < 40) {
+            m2.hp -= proj.dmg;
+            if (proj.karmaAmt) m2.karma = (m2.karma || 0) + proj.karmaAmt;
+            if (mEl) {
+              mEl.classList.remove("idle");
+              mEl.classList.add("hurt");
+              setTimeout(() => {
+                mEl.classList.remove("hurt");
+                mEl.classList.add("idle");
+              }, 200);
+              setTimeout(() => showFloatDamage("-" + proj.dmg, mEl, "#fff"), 0);
+            }
+            hitAny = true;
+          }
+        });
+        if (hitAny) proj.hitCd = proj.type === "bone_blue" ? 0.3 : 0.5;
+      }
+    }
+    activeMonsters.forEach((m2) => {
+      if (m2.hp > 0 && m2.karma && m2.karma > 0) {
+        m2.karmaTimer = (m2.karmaTimer || 0) + dt2 / 1e3;
+        if (m2.karmaTimer >= 1) {
+          m2.karmaTimer -= 1;
+          const dmg = Math.max(1, Math.floor(m2.maxHp * 5e-3 * m2.karma));
+          m2.hp -= dmg;
+          const mEl = $id("hmob-" + m2.idx);
+          if (mEl) setTimeout(() => showFloatDamage("-" + dmg, mEl, "#e040fb"), 0);
+          m2.karma = Math.max(0, m2.karma - 1);
         }
       }
     });
@@ -10994,16 +11241,19 @@ function renderHeroUI() {
   const container = $id("hero-party");
   if (container) {
     const extraStyle = ctx.S.hero.style === "defense" ? "filter: drop-shadow(0 0 4px #4da6ff);" : "";
-    container.innerHTML = runState.pets.map(
-      (p2, i2) => `<div class="hero-pet idle" id="hpet-${i2}" style="z-index:${10 - i2}; ${extraStyle} opacity: ${p2.hp > 0 ? 1 : 0.3}">
-         <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-pet-${i2}" style="width:${p2.hp / p2.maxHp * 100}%"></div></div>
+    container.innerHTML = runState.pets.map((p2, i2) => {
+      const isSans = p2.id === "sans";
+      const hpColor = isSans ? "background:#00ffff;" : "";
+      const hpText = isSans ? '<div style="position:absolute; width:100%; text-align:center; top:0; left:0; font-size:7px; font-weight:bold; color:#000; line-height:6px; font-family:monospace;">DODGE</div>' : "";
+      return `<div class="hero-pet idle" id="hpet-${i2}" style="z-index:${10 - i2}; ${extraStyle} opacity: ${p2.hp > 0 ? 1 : 0.3}">
+         <div class="hp-bar-mini" style="position:relative; overflow:hidden;"><div class="hp-fill-mini" id="hp-pet-${i2}" style="width:${p2.hp / p2.maxHp * 100}%; ${hpColor}"></div>${hpText}</div>
          <div class="hero-bars-container">
            <div class="hero-bar-row"><div class="hero-bar-fill fill-cd" id="cd-pet-${i2}" style="width:0%"></div></div>
            ${p2.skillMaxCd > 0 ? `<div class="hero-bar-row"><div class="hero-bar-fill fill-sk" id="sk-pet-${i2}" style="width:0%"></div></div>` : ""}
          </div>
          ${petSVG(p2.id, 32)}
-       </div>`
-    ).join("");
+       </div>`;
+    }).join("");
   }
   updateHeroStats();
 }
@@ -11439,6 +11689,12 @@ var init_hero = __esm({
         p1: { name: "Khinh Mi\u1EC7t K\u1EBB Y\u1EBFu", type: "execute", val: 0.24, desc: "T\u1EF1 \u0111\u1ED9ng ki\u1EBFt li\u1EC5u qu\xE1i c\xF3 HP < 24%" },
         p2: { name: "Quy T\u1EAFc Khung H\xECnh", type: "combo_master", val: 4, desc: "C\u1EE9 \u0111\xF2n \u0111\xE1nh th\u1EE9 4 l\xE0 Ch\xED M\u1EA1ng x3 S\xE1t Th\u01B0\u01A1ng" }
       },
+      sans: {
+        a1: { name: "Gaster Blaster", type: "gaster_blaster", val: 1, cd: 8, duration: 2, desc: "Laser g\xE2y 1 s\xE1t th\u01B0\u01A1ng chu\u1EA9n v\xE0 1 stack Karma m\u1ED7i 0.5s" },
+        a2: { name: "Bone Time", type: "bone_time", val: 5, cd: 12, duration: 2, desc: "X\u01B0\u01A1ng n\u1EA3y t\u01B0\u1EDDng 5 l\u1EA7n (Bone Blue Long), s\xE1t th\u01B0\u01A1ng li\xEAn t\u1EE5c" },
+        p1: { name: "Much better", type: "dodge_recover", val: 0.5, desc: "H\u1EBFt Dodge: T\u1EA1m th\u1EDDi b\u1EA5t t\u1EED, l\xF4i gh\u1EBF u\u1ED1ng Ketchup h\u1ED3i 50% Dodge (1 l\u1EA7n/\u1EA3i)" },
+        p2: { name: "Get dunked on", type: "bad_time_mode", val: 0.5, desc: "Dodge < 50%: B\u1EADt Bad Time Mode, gi\u1EA3m 50% th\u1EDDi gian h\u1ED3i chi\xEAu A1, A2 trong 5s" }
+      },
       default: {
         a1: { name: "C\u1ED1 G\u1EAFng", type: "atk_up", val: 0.2, cd: 5, duration: 3, desc: "T\u0103ng 20% ATK" },
         p1: { name: "L\u1EA1c Quan", type: "crit_rate", val: 0.2, desc: "T\u1EC9 l\u1EC7 B\u1EA1o k\xEDch +20%" }
@@ -11461,6 +11717,7 @@ var init_hero = __esm({
       peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
       penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5, baseSpd: 1 },
       naoyaSlime: { baseHp: 80, hpPerLv: 10, baseAtk: 24, atkPerLv: 6, baseSpd: 2.4 },
+      sans: { baseHp: 100, hpPerLv: 0, baseAtk: 1, atkPerLv: 0, baseSpd: 1.5 },
       default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1 }
     };
     runState = null;
@@ -55885,6 +56142,7 @@ __export(all_exports, {
   PET_STATS: () => PET_STATS,
   SANS_DUNGEON_SPRITES: () => SANS_DUNGEON_SPRITES,
   SANS_FARM_SPRITES: () => SANS_FARM_SPRITES,
+  SANS_HERO_SPRITES: () => SANS_HERO_SPRITES,
   SEC: () => SEC,
   SEC_LS_KEY: () => SEC_LS_KEY,
   SPR: () => SPR,

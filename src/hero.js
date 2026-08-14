@@ -1,6 +1,6 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
-import { spriteSVG, petSVG, PETS } from './graphics.js';
+import { spriteSVG, petSVG, PETS, SANS_HERO_SPRITES } from './graphics.js';
 import { CROPS } from './data.js';
 import { save } from './state.js';
 import { openModal, closeModal } from './shop.js';
@@ -132,6 +132,12 @@ export const PET_SKILLS = {
       p1: { name: 'Khinh Miệt Kẻ Yếu', type: 'execute', val: 0.24, desc: 'Tự động kiết liễu quái có HP < 24%' },
       p2: { name: 'Quy Tắc Khung Hình', type: 'combo_master', val: 4, desc: 'Cứ đòn đánh thứ 4 là Chí Mạng x3 Sát Thương' }
   },
+  sans: {
+    a1: { name: 'Gaster Blaster', type: 'gaster_blaster', val: 1.0, cd: 8, duration: 2, desc: 'Laser gây 1 sát thương chuẩn và 1 stack Karma mỗi 0.5s' },
+    a2: { name: 'Bone Time', type: 'bone_time', val: 5, cd: 12, duration: 2, desc: 'Xương nảy tường 5 lần (Bone Blue Long), sát thương liên tục' },
+    p1: { name: 'Much better', type: 'dodge_recover', val: 0.5, desc: 'Hết Dodge: Tạm thời bất tử, lôi ghế uống Ketchup hồi 50% Dodge (1 lần/ải)' },
+    p2: { name: 'Get dunked on', type: 'bad_time_mode', val: 0.5, desc: 'Dodge < 50%: Bật Bad Time Mode, giảm 50% thời gian hồi chiêu A1, A2 trong 5s' }
+  },
   default: { 
     a1: { name: 'Cố Gắng', type: 'atk_up', val: 0.2, cd: 5, duration: 3, desc: 'Tăng 20% ATK' }, 
     p1: { name: 'Lạc Quan', type: 'crit_rate', val: 0.2, desc: 'Tỉ lệ Bạo kích +20%' } 
@@ -155,6 +161,7 @@ export const PET_STATS = {
   peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
   penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5, baseSpd: 1.0 },
   naoyaSlime: { baseHp: 80, hpPerLv: 10, baseAtk: 24, atkPerLv: 6, baseSpd: 2.4 },
+  sans: { baseHp: 100, hpPerLv: 0, baseAtk: 1, atkPerLv: 0, baseSpd: 1.5 },
   default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1.0 }
 };
 
@@ -358,7 +365,7 @@ function openPetSkills(pId) {
         </div>
         <div style="flex:1;">
           <div style="font-size: 18px; font-weight:bold; color: #f2c231; margin-bottom: 4px;">Lv.${st.level}</div>
-          <div style="font-size: 14px;">HP Cơ bản: <b>${st.maxHp}</b> (+${st.enhHpLevel} Cường hóa)</div>
+          <div style="font-size: 14px;">${pId === 'sans' ? 'DODGE' : 'HP'} Cơ bản: <b>${st.maxHp}</b> (+${st.enhHpLevel} Cường hóa)</div>
           <div style="font-size: 14px;">ATK Cơ bản: <b>${st.atk}</b> (+${st.enhAtkLevel} Cường hóa)</div>
           <div style="font-size: 14px;">Tốc đánh: <b>${st.spd}</b> (+${st.enhSpdLevel} Cường hóa)</div>
           <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp/st.nextExp*100)}%"></div><span>${st.level >= 30 ? 'MAX LEVEL' : `EXP: ${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
@@ -378,7 +385,7 @@ function openPetSkills(pId) {
       <div class="hero-panel-section" style="margin-top:16px;">Cường Hóa (Enhance)</div>
       <div class="betsides">
         <div class="betside hero-deploy-btn" id="pet-enh-hp" data-pid="${pId}" data-cost="${st.enhHpCost}" style="margin-top:0; padding:10px; font-size:14px;">
-          +50 HP<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} Vàng)</span>
+          +50 ${pId === 'sans' ? 'DODGE' : 'HP'}<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} Vàng)</span>
         </div>
         <div class="betside hero-deploy-btn" id="pet-enh-atk" data-pid="${pId}" data-cost="${st.enhAtkCost}" style="margin-top:0; padding:10px; font-size:14px;">
           +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} Vàng)</span>
@@ -778,7 +785,10 @@ function heroTick() {
       
       runState.stage++;
       if (runState.stage > ctx.S.hero.maxStage) ctx.S.hero.maxStage = runState.stage;
-      runState.pets.forEach(p => { if (p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2); });
+      runState.pets.forEach(p => { 
+        if (p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2); 
+        if (p.id === 'sans') { p.muchBetterReady = true; p.badTimeReady = true; }
+      });
       
       save();
       renderHeroUI();
@@ -834,11 +844,62 @@ function heroTick() {
                   const mobEl = All.$id('hmob-' + tMob.idx);
                   spawnSkillEffect(pEl, mobEl, aSk.type);
                 }
+            } else if (aSk.type === 'gaster_blaster') {
+                let tMob = null;
+                if (runState.focusTarget !== null && runState.monsters[runState.focusTarget] && runState.monsters[runState.focusTarget].hp > 0 && runState.monsters[runState.focusTarget].x <= 200 + (runState.focusTarget * 45) + 2) {
+                  tMob = runState.monsters[runState.focusTarget];
+                } else {
+                  tMob = activeMonsters[Math.floor(Math.random() * activeMonsters.length)];
+                }
+                
+                if (!p.gbEl && !p.gbClosing) {
+                    const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
+                    if (scene) {
+                        p.gbEl = document.createElement('div');
+                        p.gbEl.style.position = 'absolute';
+                        p.gbEl.style.transition = 'top 0.2s ease-out';
+                        p.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gaster_blaster}blaster_front_open_01.png" style="height:64px; image-rendering:pixelated; transform: scaleX(-1);">`;
+                        p.gbEl.style.left = (60 + (pIdx * 45)) + 'px';
+                        p.gbEl.style.top = '-100px';
+                        scene.appendChild(p.gbEl);
+                        
+                        setTimeout(() => { if (p.gbEl) p.gbEl.style.top = '10px'; }, 10);
+                        
+                        const img = p.gbEl.querySelector('img');
+                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_open_02.png'; }, 100);
+                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_fire_01.png'; }, 200);
+                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_fire_02.png'; }, 300);
+                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_fire_03.png'; }, 400);
+                    }
+                }
+
+                p.gasterTick = (p.gasterTick || 0) + dt/1000;
+                if (p.gasterTick >= 0.5) {
+                    p.gasterTick -= 0.5;
+                    tMob.hp -= aSk.val; // 1 chuẩn
+                    tMob.karma = (tMob.karma || 0) + 1;
+                    const mobEl = All.$id('hmob-' + tMob.idx);
+                    if (mobEl) setTimeout(() => showFloatDamage('-' + aSk.val, mobEl, '#fff'), 0);
+                    spawnSkillEffect(p.gbEl || pEl, mobEl, 'laser');
+                }
+                
+                // Cleanup on end
+                if (p.skillActiveTime <= 0 && p.gbEl && !p.gbClosing) {
+                    p.gbClosing = true;
+                    const img = p.gbEl.querySelector('img');
+                    if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_close.png';
+                    setTimeout(() => {
+                        if (p.gbEl) p.gbEl.remove();
+                        p.gbEl = null;
+                        p.gbClosing = false;
+                    }, 200);
+                }
             }
         }
       } else if (p.skillMaxCd > 0) {
         let stSpdMult = 1.0;
         if (p.spdBuff) stSpdMult *= p.spdBuff;
+        if (p.badTimeTimer > 0) stSpdMult *= 2.0; // GET DUNKED ON speedup
         p.skillCd -= (dt / 1000) * stSpdMult;
         const skBar = All.$id('sk-pet-' + pIdx);
         if (skBar) skBar.style.width = Math.min(100, Math.max(0, ((p.skillMaxCd - p.skillCd) / p.skillMaxCd) * 100)) + '%';
@@ -1022,6 +1083,15 @@ function heroTick() {
             } else if (aSk.type === 'party_speed_buff') {
                alivePets.forEach(ap => { ap.spdBuff = aSk.val; ap.spdBuffTimer = aSk.duration; });
                setTimeout(() => showFloatDamage('SPD BUFF', pEl, '#00e676'), 0);
+            } else if (aSk.type === 'gaster_blaster') {
+                p.gbEl = document.createElement('div');
+                p.gbEl.className = 'gaster-blaster';
+                p.gbEl.style.position = 'absolute';
+                p.gbEl.style.left = (60 + (pIdx * 45)) + 'px';
+                p.gbEl.style.top = '10px';
+                p.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gb}" style="width:64px;">`;
+                All.sh.querySelector('.hero-scene').appendChild(p.gbEl);
+                p.gasterTick = 2.0;
             } else if (aSk.type === 'blind') {
                tMob.blindCd = aSk.duration;
                setTimeout(() => showFloatDamage('BLIND', mobEl, '#607d8b'), 0);
@@ -1030,6 +1100,21 @@ function heroTick() {
                p.atkDebuff = 0.5;
                p.sugarTimer = aSk.duration;
                setTimeout(() => showFloatDamage('SUGAR RUSH', pEl, '#ff80ab'), 0);
+            } else if (aSk.type === 'bone_time') {
+                if (!runState.projectiles) runState.projectiles = [];
+                const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
+                const boneEl = document.createElement('div');
+                boneEl.className = 'dg-projectile';
+                boneEl.style.position = 'absolute';
+                boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_blue}" style="height:64px; image-rendering:pixelated;">`;
+                if (scene) scene.appendChild(boneEl);
+                
+                runState.projectiles.push({
+                    x: 60 + (pIdx * 45), y: 50, vx: 200, vy: -150,
+                    type: 'bone_blue', dmg: Math.floor(p.atk * 1.5), karmaAmt: 2,
+                    el: boneEl, hitCd: 0, bounces: 0, maxBounces: aSk.val
+                });
+                setTimeout(() => showFloatDamage('BONE TIME!', pEl, '#00ffff'), 0);
             } else if (aSk.type === 'snowball_roll') {
                const dmg = p.atk * aSk.val;
                tMob.hp -= dmg;
@@ -1055,6 +1140,8 @@ function heroTick() {
       if (p.atkBuffTimer > 0) { p.atkBuffTimer -= dt/1000; if(p.atkBuffTimer<=0) p.atkBuff = null; }
       if (p.spdBuffTimer > 0) { p.spdBuffTimer -= dt/1000; if(p.spdBuffTimer<=0) p.spdBuff = null; }
       if (p.sugarTimer > 0) { p.sugarTimer -= dt/1000; if(p.sugarTimer<=0) { p.spdBuff = null; p.atkDebuff = null; } }
+      if (p.dmgResistTimer > 0) { p.dmgResistTimer -= dt/1000; if(p.dmgResistTimer<=0) p.dmgResist = 0; }
+      if (p.badTimeTimer > 0) { p.badTimeTimer -= dt/1000; }
 
       let rtSpdMult = 1.0;
       if (p.spdBuff) rtSpdMult *= p.spdBuff;
@@ -1131,6 +1218,26 @@ function heroTick() {
                 dmg = Math.floor(dmg * pSkill[passEq].val);
             }
             
+            if (p.id === 'sans') {
+                if (!runState.projectiles) runState.projectiles = [];
+                const pEl = All.$id('hpet-' + pIdx);
+                const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
+                const boneEl = document.createElement('div');
+                boneEl.className = 'dg-projectile';
+                boneEl.style.position = 'absolute';
+                boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_white}" style="height:32px; image-rendering:pixelated;">`;
+                if (scene) scene.appendChild(boneEl);
+                
+                runState.projectiles.push({
+                    x: 60 + (pIdx * 45), y: 50, vx: 180, vy: 0,
+                    type: 'bone_white', dmg: p.atk, karmaAmt: 2,
+                    el: boneEl, hitCd: 0
+                });
+                
+                if (pEl) { pEl.classList.remove('idle'); pEl.classList.add('attack'); setTimeout(() => { pEl.classList.remove('attack'); pEl.classList.add('idle'); }, 300); }
+                return; // SKIP NORMAL DAMAGE
+            }
+
             const doDamage = () => {
               tMob.hp -= dmg;
               
@@ -1234,6 +1341,60 @@ function heroTick() {
             }
 
             target.hp -= dmg;
+            
+            // SANS OVERRIDE: Much better & Get dunked on
+            if (target.id === 'sans') {
+                const sData = ctx.S.hero.roster['sans'];
+                if (sData) {
+                    if (sData.passive_eq === 'p1' && target.hp <= 0 && target.muchBetterReady !== false) {
+                        target.muchBetterReady = false;
+                        target.hp = 1;
+                        target.dmgResist = 1; // 100% damage block
+                        target.dmgResistTimer = 1.0;
+                        
+                        const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
+                        if (scene) {
+                            const imgBase = pEl ? pEl.querySelector('img') : null;
+                            if (imgBase) imgBase.style.opacity = 0;
+                            
+                            const ketchupEl = document.createElement('div');
+                            ketchupEl.style.position = 'absolute';
+                            ketchupEl.innerHTML = `<img src="${SANS_HERO_SPRITES.stool_chup}sprite-10-1.png" style="height:48px; image-rendering:pixelated; transform: scaleX(-1);">`;
+                            ketchupEl.style.left = (60 + (pIdx * 45)) + 'px';
+                            ketchupEl.style.bottom = '10px';
+                            scene.appendChild(ketchupEl);
+                            
+                            const kImg = ketchupEl.querySelector('img');
+                            for (let i = 2; i <= 10; i++) {
+                                setTimeout(() => {
+                                    if (kImg) kImg.src = SANS_HERO_SPRITES.stool_chup + `sprite-10-${i}.png`;
+                                }, (i - 1) * 100);
+                            }
+
+                            setTimeout(() => {
+                                ketchupEl.remove();
+                                if (imgBase) imgBase.style.opacity = 1;
+                            }, 1000);
+                        }
+                        if (pEl) setTimeout(() => showFloatDamage('MUCH BETTER', pEl, '#ff0000'), 0);
+                        
+                        setTimeout(() => {
+                            if (!runState) return;
+                            target.hp = Math.min(target.maxHp, target.hp + target.maxHp * 0.5);
+                            const hpPet = All.$id('hp-pet-' + pIdx);
+                            if (hpPet) hpPet.style.width = ((target.hp / target.maxHp) * 100) + '%';
+                            if (pEl) showFloatDamage('HEAL 50%', pEl, '#a4dc8c');
+                        }, 1000);
+                    }
+                    if (sData.passive_eq === 'p2' && (target.hp / target.maxHp) < 0.5 && target.badTimeReady !== false) {
+                        target.badTimeReady = false;
+                        target.badTimeTimer = 5.0;
+                        if (pEl) setTimeout(() => showFloatDamage('GET DUNKED ON!', pEl, '#ff0000'), 0);
+                    }
+                }
+            }
+            // >>> END SANS OVERRIDE <<<
+
             if (target.hp <= 0 && target.cheatDeath > 0) {
                target.cheatDeath--;
                target.hp = 1;
@@ -1255,6 +1416,72 @@ function heroTick() {
         }
       }
     });
+
+    // 3. Projectiles Update
+    if (!runState.projectiles) runState.projectiles = [];
+    const scene = All.sh.querySelector('.hero-scene');
+    for (let i = runState.projectiles.length - 1; i >= 0; i--) {
+        const proj = runState.projectiles[i];
+        proj.x += proj.vx * (dt/1000);
+        proj.y += proj.vy * (dt/1000);
+        let isDead = false;
+        
+        if (proj.type === 'bone_blue') {
+            if (proj.x > 380 || proj.x < 50) { proj.vx *= -1; proj.bounces++; }
+            if (proj.y > 100 || proj.y < -20) { proj.vy *= -1; proj.bounces++; }
+            if (proj.bounces >= proj.maxBounces) isDead = true;
+        } else if (proj.type === 'bone_white') {
+            if (proj.x > 450) isDead = true;
+        }
+        
+        if (isDead) {
+            if (proj.el) proj.el.remove();
+            runState.projectiles.splice(i, 1);
+            continue;
+        }
+        
+        if (proj.el) {
+            proj.el.style.transform = `translate3d(${proj.x}px, ${proj.y}px, 0) ${proj.type==='bone_blue' ? 'rotate(' + (proj.bounces*90) + 'deg)' : ''}`;
+        }
+        
+        proj.hitCd = proj.hitCd || 0;
+        if (proj.hitCd > 0) proj.hitCd -= dt/1000;
+        
+        if (proj.hitCd <= 0) {
+            let hitAny = false;
+            activeMonsters.forEach(m => {
+                if (m.hp <= 0) return;
+                const mEl = All.$id('hmob-' + m.idx);
+                const dist = Math.hypot(m.x - proj.x, 50 - proj.y);
+                if (dist < 40) {
+                    m.hp -= proj.dmg;
+                    if (proj.karmaAmt) m.karma = (m.karma || 0) + proj.karmaAmt;
+                    if (mEl) {
+                        mEl.classList.remove('idle'); mEl.classList.add('hurt'); setTimeout(() => { mEl.classList.remove('hurt'); mEl.classList.add('idle'); }, 200);
+                        setTimeout(() => showFloatDamage('-' + proj.dmg, mEl, '#fff'), 0);
+                    }
+                    hitAny = true;
+                }
+            });
+            if (hitAny) proj.hitCd = proj.type === 'bone_blue' ? 0.3 : 0.5;
+        }
+    }
+
+    // 4. Karma Update
+    activeMonsters.forEach(m => {
+        if (m.hp > 0 && m.karma && m.karma > 0) {
+            m.karmaTimer = (m.karmaTimer || 0) + dt/1000;
+            if (m.karmaTimer >= 1.0) {
+                m.karmaTimer -= 1.0;
+                const dmg = Math.max(1, Math.floor(m.maxHp * 0.005 * m.karma));
+                m.hp -= dmg;
+                const mEl = All.$id('hmob-' + m.idx);
+                if (mEl) setTimeout(() => showFloatDamage('-' + dmg, mEl, '#e040fb'), 0);
+                m.karma = Math.max(0, m.karma - 1);
+            }
+        }
+    });
+
   }
   
   updateHeroStats();
@@ -1446,16 +1673,19 @@ function renderHeroUI() {
   const container = All.$id('hero-party');
   if (container) {
     const extraStyle = ctx.S.hero.style === 'defense' ? 'filter: drop-shadow(0 0 4px #4da6ff);' : '';
-    container.innerHTML = runState.pets.map((p, i) => 
-      `<div class="hero-pet idle" id="hpet-${i}" style="z-index:${10-i}; ${extraStyle} opacity: ${p.hp > 0 ? 1 : 0.3}">
-         <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-pet-${i}" style="width:${(p.hp/p.maxHp)*100}%"></div></div>
+    container.innerHTML = runState.pets.map((p, i) => {
+      const isSans = p.id === 'sans';
+      const hpColor = isSans ? 'background:#00ffff;' : '';
+      const hpText = isSans ? '<div style="position:absolute; width:100%; text-align:center; top:0; left:0; font-size:7px; font-weight:bold; color:#000; line-height:6px; font-family:monospace;">DODGE</div>' : '';
+      return `<div class="hero-pet idle" id="hpet-${i}" style="z-index:${10-i}; ${extraStyle} opacity: ${p.hp > 0 ? 1 : 0.3}">
+         <div class="hp-bar-mini" style="position:relative; overflow:hidden;"><div class="hp-fill-mini" id="hp-pet-${i}" style="width:${(p.hp/p.maxHp)*100}%; ${hpColor}"></div>${hpText}</div>
          <div class="hero-bars-container">
            <div class="hero-bar-row"><div class="hero-bar-fill fill-cd" id="cd-pet-${i}" style="width:0%"></div></div>
            ${p.skillMaxCd > 0 ? `<div class="hero-bar-row"><div class="hero-bar-fill fill-sk" id="sk-pet-${i}" style="width:0%"></div></div>` : ''}
          </div>
          ${petSVG(p.id, 32)}
-       </div>`
-    ).join('');
+       </div>`;
+    }).join('');
   }
   updateHeroStats();
 }
