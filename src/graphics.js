@@ -1312,13 +1312,13 @@ export function sansFarmSpriteFor(dx, dy, step) {
     if (phase === 3) return { src: SANS_FARM_SPRITES.walkR2, flip: false };
     return { src: SANS_FARM_SPRITES.right, flip: false };
   } else if (angle > 45 && angle <= 135) {
-    if (phase === 1) return { src: SANS_FARM_SPRITES.walkF1, flip: false };
-    if (phase === 3) return { src: SANS_FARM_SPRITES.walkF2, flip: false };
-    return { src: SANS_FARM_SPRITES.down, flip: false };
-  } else if (angle > -135 && angle <= -45) {
     if (phase === 1) return { src: SANS_FARM_SPRITES.walkU1, flip: false };
     if (phase === 3) return { src: SANS_FARM_SPRITES.walkU2, flip: false };
     return { src: SANS_FARM_SPRITES.up, flip: false };
+  } else if (angle > -135 && angle <= -45) {
+    if (phase === 1) return { src: SANS_FARM_SPRITES.walkF1, flip: false };
+    if (phase === 3) return { src: SANS_FARM_SPRITES.walkF2, flip: false };
+    return { src: SANS_FARM_SPRITES.down, flip: false };
   } else {
     if (phase === 1) return { src: SANS_FARM_SPRITES.walkL1, flip: false };
     if (phase === 3) return { src: SANS_FARM_SPRITES.walkL2, flip: false };
