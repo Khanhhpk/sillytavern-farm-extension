@@ -434,7 +434,8 @@ function initPlacementPhase() {
                     id: pId, x, y, hp: stat.hp, maxHp: stat.hp, atk: stat.atk,
                     range: stat.range, speed: stat.speed, cd: 0, maxCd: stat.cd,
                     skillCd: stat.maxSkillCd || 0, maxSkillCd: stat.maxSkillCd || 0, el, type: 'pet',
-                    skill: stat.skill, activeSkill: stat.activeSkill, ai: stat.ai, armor: stat.armor, dockSlot: currentSlot
+                    skill: stat.skill, activeSkill: stat.activeSkill, ai: stat.ai, armor: stat.armor, dockSlot: currentSlot,
+                    upgrades: {}
                 };
                 if (pId === 'sans') {
                     memberObj.stamina = 100;
@@ -1328,12 +1329,15 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
 
     if (a.restPending > 0) {
         a.restPending -= dt;
+        const sp = sansDungeonSpriteForAction('shrug', 0);
+        applySansSprite(a.el, sp);
         if (a.restPending <= 0) {
             a.isResting = true;
             a.restTimer = 4;
             a._sleepStep = 0;
             a._sleepAnim = Math.random() < 0.5 ? 'sleep_stand' : 'stool_chup';
         }
+        return;
     } else if (a.isResting) {
         a.restTimer -= dt;
         a.stamina = Math.min(a.maxStamina, a.stamina + (100 / 4) * dt); // Full regen in 4s

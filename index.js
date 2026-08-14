@@ -11695,7 +11695,8 @@ function initPlacementPhase() {
           activeSkill: stat.activeSkill,
           ai: stat.ai,
           armor: stat.armor,
-          dockSlot: currentSlot
+          dockSlot: currentSlot,
+          upgrades: {}
         };
         if (pId === "sans") {
           memberObj.stamina = 100;
@@ -12503,12 +12504,15 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
   }
   if (a.restPending > 0) {
     a.restPending -= dt2;
+    const sp = sansDungeonSpriteForAction("shrug", 0);
+    applySansSprite(a.el, sp);
     if (a.restPending <= 0) {
       a.isResting = true;
       a.restTimer = 4;
       a._sleepStep = 0;
       a._sleepAnim = Math.random() < 0.5 ? "sleep_stand" : "stool_chup";
     }
+    return;
   } else if (a.isResting) {
     a.restTimer -= dt2;
     a.stamina = Math.min(a.maxStamina, a.stamina + 100 / 4 * dt2);
