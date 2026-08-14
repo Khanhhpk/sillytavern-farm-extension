@@ -11657,7 +11657,7 @@ function initPlacementPhase() {
                 `;
         if (pId === "sans") {
           barsHtml = `
-                        <div class="dg-hp-bar"><div class="dg-hp-fill"></div><div class="dg-karma-fill" style="width: 0%"></div></div>
+                        <div class="dg-hp-bar"><div class="dg-hp-fill" style="width: 100%"></div></div>
                         <div class="dg-cd-bar" style="display:none;"><div class="dg-cd-fill" style="width: 0%"></div></div>
                         <div class="dg-stamina-bar"><div class="dg-stamina-fill" style="width: 100%"></div></div>
                         <div class="dg-skill-cd-bar blue-magic" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
@@ -12515,7 +12515,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     return;
   } else if (a.isResting) {
     a.restTimer -= dt2;
-    a.stamina = Math.min(a.maxStamina, a.stamina + 100 / 4 * dt2);
+    a.stamina = Math.min(a.maxStamina, a.stamina + a.maxStamina / 4 * dt2);
     if (!a._sleepStep) a._sleepStep = 0;
     a._sleepStep += dt2 * 10;
     const sp = sansDungeonSpriteForAction(a._sleepAnim || "sleep_stand", Math.floor(a._sleepStep));
@@ -12541,7 +12541,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     let isTired = a.stamina <= a.maxStamina * 0.2;
     if (isTired) a.stamina -= 12;
     else a.stamina -= 20;
-    a.gravityCd = 9;
+    a.gravityCd = maxCds.gravityCd;
     a.actionTimer = 1;
     if (isTired) a.restPending = 1;
     if (arena) {
@@ -12588,7 +12588,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
   }
   if (closest && closest.dist < 60 && a.tpCd <= 0 && a.stamina >= 10) {
     a.stamina -= 10;
-    a.tpCd = 2;
+    a.tpCd = maxTpCd;
     a.x += closest.dx > 0 ? -150 : 150;
     a.y += closest.dy > 0 ? -150 : 150;
     a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
@@ -12599,7 +12599,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
   }
   if (closest && a.actionState === "idle") {
     if (a.gasterCd <= 0 && a.stamina >= 15) {
-      a.gasterCd = 10;
+      a.gasterCd = maxCds.gasterCd;
       a.stamina -= 15;
       const sp = sansDungeonSpriteForAction("magic", 1);
       applySansSprite(a.el, sp);
@@ -12673,7 +12673,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
       return;
     }
     if (a.blueMagicCd <= 0 && a.stamina >= 10 && closest.dist < 100) {
-      a.blueMagicCd = 7;
+      a.blueMagicCd = maxCds.blueMagicCd;
       a.stamina -= 10;
       a.actionTimer = 0.5;
       const target = closest.b;
@@ -13758,10 +13758,10 @@ function showWaveRewards(isLoaded = false) {
       if (selectedPet.id === "sans") {
         stats = [
           { id: "stamina", name: "Max Stamina (+5%)", val: selectedPet.maxStamina, lv: u2.stamina || 0, cost: calc(150, u2.stamina || 0) },
-          { id: "gasterCd", name: "Gaster CD (-5%)", val: "10s", lv: u2.gasterCd || 0, cost: calc(200, u2.gasterCd || 0), forceCanBuy: (u2.gasterCd || 0) < 10 },
-          { id: "blueMagicCd", name: "Stun CD (-5%)", val: "7s", lv: u2.blueMagicCd || 0, cost: calc(150, u2.blueMagicCd || 0), forceCanBuy: (u2.blueMagicCd || 0) < 10 },
-          { id: "gravityCd", name: "Gravity CD (-5%)", val: "9s", lv: u2.gravityCd || 0, cost: calc(150, u2.gravityCd || 0), forceCanBuy: (u2.gravityCd || 0) < 10 },
-          { id: "tpCd", name: "Teleport CD (-10%)", val: "2s", lv: u2.tpCd || 0, cost: calc(300, u2.tpCd || 0), forceCanBuy: (u2.tpCd || 0) < 8 }
+          { id: "gasterCd", name: "Gaster CD (-5%)", val: (10 * Math.max(0.5, 1 - (u2.gasterCd || 0) * 0.05)).toFixed(1) + "s", lv: u2.gasterCd || 0, cost: calc(200, u2.gasterCd || 0), forceCanBuy: (u2.gasterCd || 0) < 10 },
+          { id: "blueMagicCd", name: "Stun CD (-5%)", val: (7 * Math.max(0.5, 1 - (u2.blueMagicCd || 0) * 0.05)).toFixed(1) + "s", lv: u2.blueMagicCd || 0, cost: calc(150, u2.blueMagicCd || 0), forceCanBuy: (u2.blueMagicCd || 0) < 10 },
+          { id: "gravityCd", name: "Gravity CD (-5%)", val: (13 * Math.max(0.5, 1 - (u2.gravityCd || 0) * 0.05)).toFixed(1) + "s", lv: u2.gravityCd || 0, cost: calc(150, u2.gravityCd || 0), forceCanBuy: (u2.gravityCd || 0) < 10 },
+          { id: "tpCd", name: "Teleport CD (-10%)", val: (2 * Math.max(0.5, 1 - (u2.tpCd || 0) * 0.1)).toFixed(1) + "s", lv: u2.tpCd || 0, cost: calc(300, u2.tpCd || 0), forceCanBuy: (u2.tpCd || 0) < 5 }
         ];
       } else {
         stats = [
@@ -13977,7 +13977,7 @@ var init_dungeon = __esm({
       penguin: { name: "C\xE1nh C\u1EE5t", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m 30% t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh c\u1EE7a qu\xE1i.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> S\xFAt m\u1ED9t qu\u1EA3 c\u1EA7u tuy\u1EBFt l\u0103n d\u1ED9i t\u01B0\u1EDDng 5 l\u1EA7n, g\xE2y 200% s\xE1t th\u01B0\u01A1ng v\xE0 \u0111\xF3ng b\u0103ng 3 gi\xE2y.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze", activeSkill: "blizzard", maxSkillCd: 15 },
       // Naoya: maxSkillCd 10s→12s
       naoyaSlime: { name: "Naoya", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> \u0110\u1EA7u X\u1EA1 Ch\xFA Ph\xE1p - L\u01B0\u1EDBt 24 khung h\xECnh c\xF4ng k\xEDch to\xE0n map v\xE0 \u0111\xF3ng b\u0103ng qu\xE1i 1s.", hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: "projection_sorcery", maxSkillCd: 12 },
-      sans: { name: "Sans", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> M\xE1u c\u1EF1c y\u1EBFu (1 HP) nh\u01B0ng c\xF3 thanh Th\u1EC3 l\u1EF1c \u0111\u1EC3 n\xE9 100% s\xE1t th\u01B0\u01A1ng. \u0110\xF2n \u0111\xE1nh th\u01B0\u1EDDng g\xE2y hi\u1EC7u \u1EE9ng R\xFAt m\xE1u Karma.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> \u0110\u1EA7y \u0111\u1EE7 tuy\u1EC7t k\u0129 Blue Magic, Gravity Push v\xE0 Gaster Blaster.", hp: 1, atk: 1, range: 300, speed: 55, cd: 0.2, ai: "sans_ai" },
+      sans: { name: "Sans", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> M\xE1u c\u1EF1c y\u1EBFu (1 HP) nh\u01B0ng c\xF3 thanh Th\u1EC3 l\u1EF1c \u0111\u1EC3 n\xE9 100% s\xE1t th\u01B0\u01A1ng. \u0110\xF2n \u0111\xE1nh th\u01B0\u1EDDng g\xE2y hi\u1EC7u \u1EE9ng R\xFAt m\xE1u Karma.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> \u0110\u1EA7y \u0111\u1EE7 tuy\u1EC7t k\u0129 Blue Magic, Gravity Push v\xE0 Gaster Blaster.", hp: 1, atk: 1, range: 200, speed: 55, cd: 0.2, ai: "sans_ai" },
       default: { name: "Pet V\xF4 Danh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
     };
     ENEMY_TYPES = [

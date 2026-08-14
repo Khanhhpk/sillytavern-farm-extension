@@ -44,7 +44,7 @@ const PET_STATS = {
     penguin: { name: 'Cánh Cụt', desc: '<b>Bị động:</b> Đòn đánh làm giảm 30% tốc độ di chuyển và tốc đánh của quái.<br><b>Chủ động (15s):</b> Sút một quả cầu tuyết lăn dội tường 5 lần, gây 200% sát thương và đóng băng 3 giây.', hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: 'freeze', activeSkill: 'blizzard', maxSkillCd: 15 },
     // Naoya: maxSkillCd 10s→12s
     naoyaSlime: { name: 'Naoya', desc: '<b>Bị động:</b> Không có.<br><b>Chủ động (12s):</b> Đầu Xạ Chú Pháp - Lướt 24 khung hình công kích toàn map và đóng băng quái 1s.', hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: 'projection_sorcery', maxSkillCd: 12 },
-    sans: { name: 'Sans', desc: '<b>Bị động:</b> Máu cực yếu (1 HP) nhưng có thanh Thể lực để né 100% sát thương. Đòn đánh thường gây hiệu ứng Rút máu Karma.<br><b>Chủ động:</b> Đầy đủ tuyệt kĩ Blue Magic, Gravity Push và Gaster Blaster.', hp: 1, atk: 1, range: 300, speed: 55, cd: 0.2, ai: 'sans_ai' },
+    sans: { name: 'Sans', desc: '<b>Bị động:</b> Máu cực yếu (1 HP) nhưng có thanh Thể lực để né 100% sát thương. Đòn đánh thường gây hiệu ứng Rút máu Karma.<br><b>Chủ động:</b> Đầy đủ tuyệt kĩ Blue Magic, Gravity Push và Gaster Blaster.', hp: 1, atk: 1, range: 200, speed: 55, cd: 0.2, ai: 'sans_ai' },
     default: { name: 'Pet Vô Danh', desc: '<b>Bị động:</b> Không có.<br><b>Chủ động:</b> Không có.', hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
 };
 
@@ -408,7 +408,7 @@ function initPlacementPhase() {
                 `;
                 if (pId === 'sans') {
                     barsHtml = `
-                        <div class="dg-hp-bar"><div class="dg-hp-fill"></div><div class="dg-karma-fill" style="width: 0%"></div></div>
+                        <div class="dg-hp-bar"><div class="dg-hp-fill" style="width: 100%"></div></div>
                         <div class="dg-cd-bar" style="display:none;"><div class="dg-cd-fill" style="width: 0%"></div></div>
                         <div class="dg-stamina-bar"><div class="dg-stamina-fill" style="width: 100%"></div></div>
                         <div class="dg-skill-cd-bar blue-magic" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
@@ -1340,7 +1340,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         return;
     } else if (a.isResting) {
         a.restTimer -= dt;
-        a.stamina = Math.min(a.maxStamina, a.stamina + (100 / 4) * dt); // Full regen in 4s
+        a.stamina = Math.min(a.maxStamina, a.stamina + (a.maxStamina / 4) * dt); // Full regen in 4s
         if (!a._sleepStep) a._sleepStep = 0;
         a._sleepStep += dt * 10;
         const sp = sansDungeonSpriteForAction(a._sleepAnim || 'sleep_stand', Math.floor(a._sleepStep));
@@ -1369,7 +1369,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         if (isTired) a.stamina -= 12;
         else a.stamina -= 20;
         
-        a.gravityCd = 9;
+        a.gravityCd = maxCds.gravityCd;
         a.actionTimer = 1.0;
         if (isTired) a.restPending = 1.0;
 
@@ -1423,7 +1423,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
 
     if (closest && closest.dist < 60 && a.tpCd <= 0 && a.stamina >= 10) {
         a.stamina -= 10;
-        a.tpCd = 2;
+        a.tpCd = maxTpCd;
         a.x += (closest.dx > 0 ? -150 : 150);
         a.y += (closest.dy > 0 ? -150 : 150);
         a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
@@ -1436,7 +1436,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
 
     if (closest && a.actionState === 'idle') {
         if (a.gasterCd <= 0 && a.stamina >= 15) {
-            a.gasterCd = 10;
+            a.gasterCd = maxCds.gasterCd;
             a.stamina -= 15;
             const sp = sansDungeonSpriteForAction('magic', 1);
             applySansSprite(a.el, sp);
@@ -1521,7 +1521,7 @@ function updateSansAI(a, enemyGroup, dt, arenaRect, arena, projectiles) {
         }
 
         if (a.blueMagicCd <= 0 && a.stamina >= 10 && closest.dist < 100) {
-            a.blueMagicCd = 7;
+            a.blueMagicCd = maxCds.blueMagicCd;
             a.stamina -= 10;
             a.actionTimer = 0.5;
 
@@ -2682,10 +2682,10 @@ function showWaveRewards(isLoaded = false) {
             if (selectedPet.id === 'sans') {
                 stats = [
                     { id: 'stamina', name: 'Max Stamina (+5%)', val: selectedPet.maxStamina, lv: u.stamina || 0, cost: calc(150, u.stamina || 0) },
-                    { id: 'gasterCd', name: 'Gaster CD (-5%)', val: '10s', lv: u.gasterCd || 0, cost: calc(200, u.gasterCd || 0), forceCanBuy: (u.gasterCd || 0) < 10 },
-                    { id: 'blueMagicCd', name: 'Stun CD (-5%)', val: '7s', lv: u.blueMagicCd || 0, cost: calc(150, u.blueMagicCd || 0), forceCanBuy: (u.blueMagicCd || 0) < 10 },
-                    { id: 'gravityCd', name: 'Gravity CD (-5%)', val: '9s', lv: u.gravityCd || 0, cost: calc(150, u.gravityCd || 0), forceCanBuy: (u.gravityCd || 0) < 10 },
-                    { id: 'tpCd', name: 'Teleport CD (-10%)', val: '2s', lv: u.tpCd || 0, cost: calc(300, u.tpCd || 0), forceCanBuy: (u.tpCd || 0) < 8 }
+                    { id: 'gasterCd', name: 'Gaster CD (-5%)', val: (10 * Math.max(0.5, 1 - (u.gasterCd || 0) * 0.05)).toFixed(1) + 's', lv: u.gasterCd || 0, cost: calc(200, u.gasterCd || 0), forceCanBuy: (u.gasterCd || 0) < 10 },
+                    { id: 'blueMagicCd', name: 'Stun CD (-5%)', val: (7 * Math.max(0.5, 1 - (u.blueMagicCd || 0) * 0.05)).toFixed(1) + 's', lv: u.blueMagicCd || 0, cost: calc(150, u.blueMagicCd || 0), forceCanBuy: (u.blueMagicCd || 0) < 10 },
+                    { id: 'gravityCd', name: 'Gravity CD (-5%)', val: (13 * Math.max(0.5, 1 - (u.gravityCd || 0) * 0.05)).toFixed(1) + 's', lv: u.gravityCd || 0, cost: calc(150, u.gravityCd || 0), forceCanBuy: (u.gravityCd || 0) < 10 },
+                    { id: 'tpCd', name: 'Teleport CD (-10%)', val: (2 * Math.max(0.5, 1 - (u.tpCd || 0) * 0.10)).toFixed(1) + 's', lv: u.tpCd || 0, cost: calc(300, u.tpCd || 0), forceCanBuy: (u.tpCd || 0) < 5 }
                 ];
             } else {
                 stats = [
