@@ -323,10 +323,13 @@ function sansDungeonSpriteFor(dx, dy, step) {
 }
 function petSVG(name3, px) {
   if (name3 === "sans") {
-    return `<div style="position:relative; width:${px}px; height:${px}px; display:inline-block;">
-      <img draggable="false" data-sans-legs class="sans-legs" width="${px}" height="${px}" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:1;" />
-      <img draggable="false" data-sans-sprite class="sans-sprite" width="${px}" height="${px}" src="${SANS_FARM_SPRITES.idle}" style="position:relative; display:block; image-rendering:pixelated; object-fit:contain; z-index:2;" />
-      <img draggable="false" data-sans-overlay class="sans-overlay" width="${px}" height="${px}" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; top:0; left:0; display:none; image-rendering:pixelated; object-fit:contain; z-index:3;" />
+    const scale = px / 32;
+    return `<div style="position:relative; width:${px}px; height:${px}px; display:flex; justify-content:center; align-items:flex-end;">
+      <div style="transform-origin:bottom center; transform:scale(${scale}); width:32px; height:32px; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; position:relative;">
+        <img draggable="false" data-sans-overlay class="sans-overlay" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:none; image-rendering:pixelated; z-index:3;" />
+        <img draggable="false" data-sans-sprite class="sans-sprite" src="${SANS_FARM_SPRITES.idle}" style="display:block; image-rendering:pixelated; z-index:2;" />
+        <img draggable="false" data-sans-legs class="sans-legs" src="${SANS_FARM_SPRITES.idle}" style="display:none; image-rendering:pixelated; z-index:1;" />
+      </div>
     </div>`;
   }
   const key = name3 + "@" + px;
