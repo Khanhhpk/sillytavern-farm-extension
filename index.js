@@ -2057,6 +2057,7 @@ var init_graphics = __esm({
       walkR2: _spDungeon("overworld_walk/walk_right_2.png"),
       walkU1: _spDungeon("overworld_walk/walk_back_1.png"),
       walkU2: _spDungeon("overworld_walk/walk_back_2.png"),
+      shrug: _spDungeon("shrug/sprite-6-2.png"),
       bone: _spDungeon("bones/bone_white_long.png")
     };
     PETS = {
@@ -11467,7 +11468,7 @@ function loadDungeonState(saveData) {
     if (savedP.id === "sans") {
       barsHtml = `
                 <div class="dg-hp-bar"><div class="dg-hp-fill"></div><div class="dg-karma-fill" style="width: 0%"></div></div>
-                <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+                <div class="dg-cd-bar" style="display:none;"><div class="dg-cd-fill" style="width: 0%"></div></div>
                 <div class="dg-stamina-bar"><div class="dg-stamina-fill" style="width: 100%"></div></div>
                 <div class="dg-skill-cd-bar blue-magic" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
                 <div class="dg-skill-cd-bar gravity-push" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
@@ -11657,7 +11658,7 @@ function initPlacementPhase() {
         if (pId === "sans") {
           barsHtml = `
                         <div class="dg-hp-bar"><div class="dg-hp-fill"></div><div class="dg-karma-fill" style="width: 0%"></div></div>
-                        <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
+                        <div class="dg-cd-bar" style="display:none;"><div class="dg-cd-fill" style="width: 0%"></div></div>
                         <div class="dg-stamina-bar"><div class="dg-stamina-fill" style="width: 100%"></div></div>
                         <div class="dg-skill-cd-bar blue-magic" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
                         <div class="dg-skill-cd-bar gravity-push" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
@@ -12451,7 +12452,7 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
   if (skill === "freeze") target.status.freeze = 3;
   if (skill === "root" && Math.random() < 0.3) target.status.root = 2;
   if (attacker && attacker.id === "sans" && target.type === "enemy") {
-    target.status.karmaDuration = 3;
+    target.status.karmaDuration = 3 * Math.pow(1.1, attacker.upgrades.karmaDur || 0);
     target.karmaStacks = (target.karmaStacks || 0) + 1;
   }
   if (skill === "cleave" && attacker) {
@@ -12486,9 +12487,10 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
   const staminaPct = Math.max(0, Math.min(100, a.stamina / a.maxStamina * 100));
   const staminaFill = a.el.querySelector(".dg-stamina-fill");
   if (staminaFill) staminaFill.style.width = staminaPct + "%";
-  ["blueMagicCd", "gravityCd", "gasterCd"].forEach((cdName) => {
+  ["blueMagicCd", "gravityCd", "gasterCd", "tpCd"].forEach((cdName) => {
     if (a[cdName] > 0) a[cdName] -= dt2;
   });
+  if (a._shrugTimer > 0) a._shrugTimer -= dt2;
   const maxCds = { blueMagicCd: 7, gravityCd: 9, gasterCd: 10 };
   const classes = { blueMagicCd: ".blue-magic", gravityCd: ".gravity-push", gasterCd: ".gaster-blaster" };
   for (let cdName in maxCds) {
@@ -12516,8 +12518,6 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     applySansSprite(a.el, sp);
     if (a.restTimer <= 0) a.isResting = false;
     return;
-  } else {
-    a.stamina = Math.min(a.maxStamina, a.stamina + 1 * dt2);
   }
   if (a.cd > 0) a.cd -= dt2;
   if (a.tpCd > 0) a.tpCd -= dt2;
@@ -12566,6 +12566,8 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
         a.x = 40 + Math.random() * (arenaRect.width - 80);
       }
       a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+      a._shrugTimer = 0.5;
+      a.restPending = 0.5;
     }
     enemyGroup.forEach((e2) => {
       if (e2.hp > 0) {
@@ -12588,9 +12590,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
     a.x = Math.max(30, Math.min(a.x, arenaRect.width - 30));
     a.y = Math.max(30, Math.min(a.y, arenaRect.height - 30));
     a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-    const sp = sansDungeonSpriteForAction("idle", 0);
-    applySansSprite(a.el, sp);
-    a.actionTimer = 0.3;
+    a._shrugTimer = 0.5;
     return;
   }
   if (closest && a.actionState === "idle") {
@@ -12658,7 +12658,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
                   e2.hp -= 1;
                   spawnDmg(e2, -1);
                   if (!e2.status) e2.status = {};
-                  e2.status.karmaDuration = 3;
+                  e2.status.karmaDuration = 3 * Math.pow(1.1, a.upgrades.karmaDur || 0);
                   e2.karmaStacks = (e2.karmaStacks || 0) + 1;
                 }
               }
@@ -12685,7 +12685,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
         target.hp -= a.atk;
         spawnDmg(target, -a.atk);
         if (!target.status) target.status = {};
-        target.status.karmaDuration = 3;
+        target.status.karmaDuration = 3 * Math.pow(1.1, a.upgrades.karmaDur || 0);
         target.karmaStacks = (target.karmaStacks || 0) + 1;
       }, 300);
       return;
@@ -12716,7 +12716,7 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
           tgt.hp -= a.atk;
           spawnDmg(tgt, -a.atk);
           if (!tgt.status) tgt.status = {};
-          tgt.status.karmaDuration = 3;
+          tgt.status.karmaDuration = 3 * Math.pow(1.1, a.upgrades.karmaDur || 0);
           tgt.karmaStacks = (tgt.karmaStacks || 0) + 1;
         }
       });
@@ -12757,10 +12757,12 @@ function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
       a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
       if (!a._walkStep) a._walkStep = 0;
       a._walkStep += dt2 * 10;
-      const sp = sansDungeonSpriteFor(moveX, moveY, Math.floor(a._walkStep));
+      let sp = sansDungeonSpriteFor(moveX, moveY, Math.floor(a._walkStep));
+      if (a._shrugTimer > 0) sp = sansDungeonSpriteForAction("shrug", 0);
       applySansSprite(a.el, sp);
     } else {
-      const sp = sansDungeonSpriteForAction("idle", 0);
+      let sp = sansDungeonSpriteForAction("idle", 0);
+      if (a._shrugTimer > 0) sp = sansDungeonSpriteForAction("shrug", 0);
       applySansSprite(a.el, sp);
     }
   }
@@ -12792,7 +12794,8 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
           if (!a.status) a.status = {};
           a.status.stun = 1;
           a.karmaStacks = (a.karmaStacks || 0) + 5;
-          a.status.karmaDuration = 3;
+          const sans = groupB.find((p2) => p2.id === "sans");
+          a.status.karmaDuration = 3 * Math.pow(1.1, sans ? sans.upgrades.karmaDur || 0 : 0);
           const boom = document.createElement("div");
           boom.className = "dg-boom-effect";
           boom.style.width = "60px";
@@ -12899,12 +12902,16 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
         }
         if (eff === "karmaDuration") {
           if (a.karmaStacks > 0) {
-            a._karmaDmgAcc = (a._karmaDmgAcc || 0) + a.maxHp * 0.015 * a.karmaStacks * dt2;
-            if (a._karmaDmgAcc >= 1) {
-              const tickDmg = Math.floor(a._karmaDmgAcc);
-              a.hp -= tickDmg;
-              a._karmaDmgAcc -= tickDmg;
-              if (Math.random() < 0.35) spawnDmg(a, -tickDmg, "karma");
+            const sans = groupB.find((p2) => p2.id === "sans");
+            const tickLvl = sans ? sans.upgrades.karmaTick || 0 : 0;
+            const tickRate = 2 * Math.pow(1.15, tickLvl) * a.karmaStacks;
+            a._karmaTickAcc = (a._karmaTickAcc || 0) + tickRate * dt2;
+            if (a._karmaTickAcc >= 1) {
+              const ticks = Math.floor(a._karmaTickAcc);
+              const totalDmg = Math.max(1, Math.floor(a.maxHp * 0.01 * ticks));
+              a.hp -= totalDmg;
+              a._karmaTickAcc -= ticks;
+              if (Math.random() < 0.35) spawnDmg(a, -1, "karma");
             }
           }
         }
@@ -13744,22 +13751,37 @@ function showWaveRewards(isLoaded = false) {
       const hpMissingTeam = fullTeam.reduce((acc, member) => acc + (member.maxHp - member.hp), 0);
       const healTeamCost = Math.max(30, totalMaxHp > 0 ? Math.floor(waveBaseGold * 0.5 * (hpMissingTeam / totalMaxHp)) : 30);
       const calc = (base, lv) => Math.floor(base * Math.pow(1.18, lv));
-      const stats = [
-        // Hiệu quả HP & ATK upgrade: +10%→+15%
-        { id: "hp", name: "Max HP (+15%)", val: selectedPet.maxHp, lv: u2.hp, cost: calc(80, u2.hp) },
-        { id: "atk", name: "ATK (+15%)", val: selectedPet.atk, lv: u2.atk, cost: calc(80, u2.atk) },
-        // ATK SPD: giảm 8%/level, sàn 0.15s
-        { id: "aspd", name: "ATK SPD (+8%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u2.aspd, cost: calc(100, u2.aspd), forceCanBuy: selectedPet.maxCd > 0.16 },
-        { id: "spd", name: "Move Speed (+5%)", val: selectedPet.speed, lv: u2.spd, cost: calc(50, u2.spd), forceCanBuy: selectedPet.speed < 150 },
-        { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u2.critR, cost: calc(90, u2.critR), forceCanBuy: selectedPet.critRate < 0.59 },
-        { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u2.critD, cost: calc(90, u2.critD) },
-        { id: "dodge", name: "N\xE9 Tr\xE1nh (+5%)", val: (selectedPet.dodge * 100).toFixed(0) + "%", lv: u2.dodge || 0, cost: calc(100, u2.dodge || 0), forceCanBuy: selectedPet.dodge < 0.39 }
-      ];
-      if (PET_STATS2[selectedPet.id] && PET_STATS2[selectedPet.id].range > 60) {
-        stats.push({ id: "range", name: "T\u1EA7m \u0110\xE1nh (+5%)", val: Math.round(selectedPet.range), lv: u2.range || 0, cost: calc(70, u2.range || 0), forceCanBuy: selectedPet.range < 400 });
+      let stats = [];
+      if (selectedPet.id === "sans") {
+        stats = [
+          { id: "stamina", name: "Max Stamina (+5%)", val: selectedPet.maxStamina, lv: u2.stamina || 0, cost: calc(150, u2.stamina || 0) },
+          { id: "gasterCd", name: "Gaster CD (-5%)", val: "10s", lv: u2.gasterCd || 0, cost: calc(200, u2.gasterCd || 0), forceCanBuy: (u2.gasterCd || 0) < 10 },
+          { id: "blueMagicCd", name: "Stun CD (-5%)", val: "7s", lv: u2.blueMagicCd || 0, cost: calc(150, u2.blueMagicCd || 0), forceCanBuy: (u2.blueMagicCd || 0) < 10 },
+          { id: "gravityCd", name: "Gravity CD (-5%)", val: "9s", lv: u2.gravityCd || 0, cost: calc(150, u2.gravityCd || 0), forceCanBuy: (u2.gravityCd || 0) < 10 },
+          { id: "tpCd", name: "Teleport CD (-10%)", val: "2s", lv: u2.tpCd || 0, cost: calc(300, u2.tpCd || 0), forceCanBuy: (u2.tpCd || 0) < 8 },
+          { id: "karmaDur", name: "Karma Duration (+10%)", val: "3s", lv: u2.karmaDur || 0, cost: calc(100, u2.karmaDur || 0) },
+          { id: "karmaTick", name: "Karma Tick Rate (+15%)", val: "2 ticks/s", lv: u2.karmaTick || 0, cost: calc(200, u2.karmaTick || 0) }
+        ];
+      } else {
+        stats = [
+          // Hiệu quả HP & ATK upgrade: +10%→+15%
+          { id: "hp", name: "Max HP (+15%)", val: selectedPet.maxHp, lv: u2.hp, cost: calc(80, u2.hp) },
+          { id: "atk", name: "ATK (+15%)", val: selectedPet.atk, lv: u2.atk, cost: calc(80, u2.atk) },
+          // ATK SPD: giảm 8%/level, sàn 0.15s
+          { id: "aspd", name: "ATK SPD (+8%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u2.aspd, cost: calc(100, u2.aspd), forceCanBuy: selectedPet.maxCd > 0.16 },
+          { id: "spd", name: "Move Speed (+5%)", val: selectedPet.speed, lv: u2.spd, cost: calc(50, u2.spd), forceCanBuy: selectedPet.speed < 150 },
+          { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u2.critR, cost: calc(90, u2.critR), forceCanBuy: selectedPet.critRate < 0.59 },
+          { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u2.critD, cost: calc(90, u2.critD) },
+          { id: "dodge", name: "N\xE9 Tr\xE1nh (+5%)", val: (selectedPet.dodge * 100).toFixed(0) + "%", lv: u2.dodge || 0, cost: calc(100, u2.dodge || 0), forceCanBuy: selectedPet.dodge < 0.39 }
+        ];
       }
-      if (selectedPet.maxSkillCd > 0) {
-        stats.push({ id: "skillCdR", name: "Gi\u1EA3m H\u1ED3i Chi\xEAu (+5%)", val: selectedPet.maxSkillCd.toFixed(1) + "s", lv: u2.skillCdR || 0, cost: Math.floor(1e3 * Math.pow(1.5, u2.skillCdR || 0)), forceCanBuy: (u2.skillCdR || 0) < 10 });
+      if (selectedPet.id !== "sans") {
+        if (PET_STATS2[selectedPet.id] && PET_STATS2[selectedPet.id].range > 60) {
+          stats.push({ id: "range", name: "T\u1EA7m \u0110\xE1nh (+5%)", val: Math.round(selectedPet.range), lv: u2.range || 0, cost: calc(70, u2.range || 0), forceCanBuy: selectedPet.range < 400 });
+        }
+        if (selectedPet.maxSkillCd > 0) {
+          stats.push({ id: "skillCdR", name: "Gi\u1EA3m H\u1ED3i Chi\xEAu (+5%)", val: selectedPet.maxSkillCd.toFixed(1) + "s", lv: u2.skillCdR || 0, cost: Math.floor(1e3 * Math.pow(1.5, u2.skillCdR || 0)), forceCanBuy: (u2.skillCdR || 0) < 10 });
+        }
       }
       stats.push(
         { id: "heal_pet", name: "H\u1ED3i M\xE1u (Full)", val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: "", cost: healPetCost, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
@@ -13827,6 +13849,27 @@ function showWaveRewards(isLoaded = false) {
           if (statId === "skillCdR") {
             p2.upgrades.skillCdR = (p2.upgrades.skillCdR || 0) + 1;
           }
+          if (statId === "stamina") {
+            p2.upgrades.stamina = (p2.upgrades.stamina || 0) + 1;
+          }
+          if (statId === "gasterCd") {
+            p2.upgrades.gasterCd = (p2.upgrades.gasterCd || 0) + 1;
+          }
+          if (statId === "blueMagicCd") {
+            p2.upgrades.blueMagicCd = (p2.upgrades.blueMagicCd || 0) + 1;
+          }
+          if (statId === "gravityCd") {
+            p2.upgrades.gravityCd = (p2.upgrades.gravityCd || 0) + 1;
+          }
+          if (statId === "tpCd") {
+            p2.upgrades.tpCd = (p2.upgrades.tpCd || 0) + 1;
+          }
+          if (statId === "karmaDur") {
+            p2.upgrades.karmaDur = (p2.upgrades.karmaDur || 0) + 1;
+          }
+          if (statId === "karmaTick") {
+            p2.upgrades.karmaTick = (p2.upgrades.karmaTick || 0) + 1;
+          }
           const stat = PET_STATS2[p2.id] || PET_STATS2.default;
           const oldMax = p2.maxHp > 0 ? p2.maxHp : 1;
           const hpPercent = p2.hp / oldMax;
@@ -13838,6 +13881,9 @@ function showWaveRewards(isLoaded = false) {
           p2.maxCd = Math.max(0.15, stat.cd * Math.pow(0.92, p2.upgrades.aspd || 0));
           if (stat.maxSkillCd) {
             p2.maxSkillCd = stat.maxSkillCd * (1 - (p2.upgrades.skillCdR || 0) * 0.05);
+          }
+          if (p2.id === "sans") {
+            p2.maxStamina = Math.round(100 * Math.pow(1.05, p2.upgrades.stamina || 0));
           }
           if (getActiveCookingBuffs && p2._cookBuffApplied) {
             const buffs = getActiveCookingBuffs();
@@ -13936,7 +13982,7 @@ var init_dungeon = __esm({
       penguin: { name: "C\xE1nh C\u1EE5t", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m 30% t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh c\u1EE7a qu\xE1i.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> S\xFAt m\u1ED9t qu\u1EA3 c\u1EA7u tuy\u1EBFt l\u0103n d\u1ED9i t\u01B0\u1EDDng 5 l\u1EA7n, g\xE2y 200% s\xE1t th\u01B0\u01A1ng v\xE0 \u0111\xF3ng b\u0103ng 3 gi\xE2y.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze", activeSkill: "blizzard", maxSkillCd: 15 },
       // Naoya: maxSkillCd 10s→12s
       naoyaSlime: { name: "Naoya", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> \u0110\u1EA7u X\u1EA1 Ch\xFA Ph\xE1p - L\u01B0\u1EDBt 24 khung h\xECnh c\xF4ng k\xEDch to\xE0n map v\xE0 \u0111\xF3ng b\u0103ng qu\xE1i 1s.", hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: "projection_sorcery", maxSkillCd: 12 },
-      sans: { name: "Sans", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> M\xE1u c\u1EF1c y\u1EBFu (1 HP) nh\u01B0ng c\xF3 thanh Th\u1EC3 l\u1EF1c \u0111\u1EC3 n\xE9 100% s\xE1t th\u01B0\u01A1ng. \u0110\xF2n \u0111\xE1nh th\u01B0\u1EDDng g\xE2y hi\u1EC7u \u1EE9ng R\xFAt m\xE1u Karma.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> \u0110\u1EA7y \u0111\u1EE7 tuy\u1EC7t k\u0129 Blue Magic, Gravity Push v\xE0 Gaster Blaster.", hp: 1, atk: 1, range: 150, speed: 55, cd: 0.2, ai: "sans_ai" },
+      sans: { name: "Sans", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> M\xE1u c\u1EF1c y\u1EBFu (1 HP) nh\u01B0ng c\xF3 thanh Th\u1EC3 l\u1EF1c \u0111\u1EC3 n\xE9 100% s\xE1t th\u01B0\u01A1ng. \u0110\xF2n \u0111\xE1nh th\u01B0\u1EDDng g\xE2y hi\u1EC7u \u1EE9ng R\xFAt m\xE1u Karma.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> \u0110\u1EA7y \u0111\u1EE7 tuy\u1EC7t k\u0129 Blue Magic, Gravity Push v\xE0 Gaster Blaster.", hp: 1, atk: 1, range: 300, speed: 55, cd: 0.2, ai: "sans_ai" },
       default: { name: "Pet V\xF4 Danh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
     };
     ENEMY_TYPES = [

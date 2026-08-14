@@ -1218,6 +1218,7 @@ export const SANS_DUNGEON_SPRITES = {
   walkR2:  _spDungeon('overworld_walk/walk_right_2.png'),
   walkU1:  _spDungeon('overworld_walk/walk_back_1.png'),
   walkU2:  _spDungeon('overworld_walk/walk_back_2.png'),
+  shrug:   _spDungeon('shrug/sprite-6-2.png'),
   bone:    _spDungeon('bones/bone_white_long.png')
 };
 
