@@ -152,7 +152,7 @@ export function renderStockChart(ticker) {
   const maxPrice = Math.max(...history) * 1.1;
   const range = Math.max(0.1, maxPrice - minPrice);
   
-  let html = `<div style="display: flex; align-items: flex-end; height: 180px; width: 100%; border-bottom: 2px solid #475569; padding-left: 5px; gap: 3px; position: relative;">`;
+  let html = `<div style="display: flex; align-items: flex-end; height: 180px; width: 100%; border-bottom: 2px solid #475569; padding-left: 5px; gap: 4px; position: relative;">`;
   
   // Background grid lines
   html += `
@@ -164,10 +164,27 @@ export function renderStockChart(ticker) {
   for (let i = 0; i < history.length; i++) {
     const price = history[i];
     const prevPrice = i > 0 ? history[i-1] : price;
-    const heightPct = ((price - minPrice) / range) * 100;
     const color = price >= prevPrice ? '#22c55e' : '#ef4444';
     
-    html += `<div style="flex: 1; min-width: 5px; background: ${color}; height: ${Math.max(1, heightPct)}%; border-radius: 2px 2px 0 0;" title="${price.toFixed(2)}"></div>`;
+    const lowEnd = Math.min(price, prevPrice);
+    const highEnd = Math.max(price, prevPrice);
+    
+    const bottomPct = ((lowEnd - minPrice) / range) * 100;
+    const heightPct = Math.max(1, ((highEnd - lowEnd) / range) * 100);
+    
+    // Generate deterministic pseudo-wicks
+    const seed = price * 10000;
+    const wickExtend = (seed % 4) + 1; // 1 to 4 percent wick
+    
+    html += `
+      <div style="flex: 1; min-width: 4px; position: relative; height: 100%;" title="Giá: $${price.toFixed(2)}">
+        <!-- Wick -->
+        <div style="position: absolute; width: 1px; background: ${color}; left: 50%; transform: translateX(-50%); 
+                    bottom: ${Math.max(0, bottomPct - wickExtend)}%; height: ${heightPct + wickExtend * 2}%;"></div>
+        <!-- Body -->
+        <div style="width: 100%; background: ${color}; position: absolute; bottom: ${bottomPct}%; height: ${heightPct}%; border-radius: 1px; z-index: 2;"></div>
+      </div>
+    `;
   }
   
   html += `</div>`;
@@ -250,10 +267,13 @@ export function openStockModal() {
 
           <!-- Chart Panel -->
           <div style="background: #0f172a; padding: 20px; border-radius: 12px; border: 1px solid #334155; flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; z-index: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; z-index: 1;">
               <div style="font-weight: 800; font-size: 18px; color: ${STOCKS[selectedStock].color};">${STOCKS[selectedStock].name}</div>
-              <div style="background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; font-size: 13px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2);">
-                Sở hữu: <span style="font-weight: bold; color: #fff;">${sharesOwned}</span> cp ($${(sharesOwned * currentPrice).toFixed(2)})
+              <div style="display: flex; gap: 10px;">
+                <button id="stk-forward" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(168,85,247,0.3)'" onmouseout="this.style.background='rgba(168,85,247,0.2)'" title="Tua nhanh 100 phút (10 phiên)">Tua Nhanh (x10)</button>
+                <div style="background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; font-size: 13px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2);">
+                  Sở hữu: <span style="font-weight: bold; color: #fff;">${sharesOwned}</span> cp ($${(sharesOwned * currentPrice).toFixed(2)})
+                </div>
               </div>
             </div>
             ${renderStockChart(selectedStock)}
@@ -267,6 +287,12 @@ export function openStockModal() {
             <button id="stk-buy" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3); transition: transform 0.1s;">MUA</button>
             <button id="stk-sell" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3); transition: transform 0.1s;">BÁN</button>
           </div>
+
+          <!-- Time Control -->
+          <div style="display: flex; justify-content: flex-end; margin-top: 5px;">
+             <button id="stk-forward" style="background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; transition: background 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">⏩ Tua nhanh 10 phiên (100 phút)</button>
+          </div>
+          
           
         </div>
       </div>
@@ -364,5 +390,15 @@ export function openStockModal() {
     } else {
       All.toast("Không đủ cổ phiếu để bán!");
     }
+  });
+
+  All.$id('stk-forward').addEventListener('click', () => {
+    if (!ctx.S.stock) return;
+    // Tua nhanh 100 phút
+    ctx.S.stock.lastUpdate -= 600000 * 10;
+    updateMarket();
+    All.save();
+    openStockModal();
+    All.toast("Đã tua nhanh 10 phiên giao dịch!");
   });
 }
