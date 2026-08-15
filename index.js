@@ -56616,7 +56616,7 @@ function openStockModal() {
     sessBlock = `<div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; border: 1px dashed #334155; text-align: center; font-size: 11px; color: #475569;">\u26A1 N\u1EA1p ti\u1EC1n l\u1EA7n \u0111\u1EA7u \u0111\u1EC3 theo d\xF5i phi\xEAn</div>`;
   }
   let bodyHTML = `
-    <div style="display: flex; flex-direction: column; height: 100%; gap: 12px; color: #e2e8f0;">
+    <div style="display: flex; flex-direction: column; gap: 12px; color: #e2e8f0;">
       
       <!-- Top Bar: Portfolio Info (responsive grid) -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px; background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
@@ -56647,7 +56647,7 @@ function openStockModal() {
       </div>
 
       <!-- Main Layout: Sidebar & Content -->
-      <div style="display: flex; flex-wrap: wrap; gap: 12px; flex: 1; overflow-y: auto;">
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; flex: 1;">
         
         <!-- Left Panel: Banking & Margin -->
         <div style="flex: 1; min-width: 230px; background: #1e293b; padding: 12px; border-radius: 12px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 12px;">
@@ -56825,7 +56825,7 @@ function openStockModal() {
   Object.keys(STOCKS).forEach((t2) => {
     $id(`stk-tab-${t2}`).addEventListener("click", () => {
       selectedStock = t2;
-      openStockModal();
+      setTimeout(() => openStockModal(), 10);
     });
   });
   const tradeInp = $id("stk-trade-amt");

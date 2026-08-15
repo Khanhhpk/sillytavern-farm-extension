@@ -279,10 +279,10 @@ describe('Stock Market Module', () => {
       // Restore standard random for this specific simulation
       randomFn = Math.random;
       
-      // Let's run 100 runs of 1000 candles for CRASH and check if the median is a huge loss (EV sink)
+      // Let's run 200 runs of 1000 candles for CRASH and check if the median is a huge loss (EV sink)
       // Since CRASH has high outliers, we check the median
       let endings = [];
-      for(let r=0; r<100; r++) {
+      for(let r=0; r<200; r++) {
         S.stock.history['CRASH'] = [10];
         S.stock.trends['CRASH'] = 0;
         for(let i=0; i<1000; i++) {

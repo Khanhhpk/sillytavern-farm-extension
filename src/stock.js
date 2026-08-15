@@ -363,7 +363,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
   }
 
   let bodyHTML = `
-    <div style="display: flex; flex-direction: column; height: 100%; gap: 12px; color: #e2e8f0;">
+    <div style="display: flex; flex-direction: column; gap: 12px; color: #e2e8f0;">
       
       <!-- Top Bar: Portfolio Info (responsive grid) -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px; background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
@@ -394,7 +394,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       </div>
 
       <!-- Main Layout: Sidebar & Content -->
-      <div style="display: flex; flex-wrap: wrap; gap: 12px; flex: 1; overflow-y: auto;">
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; flex: 1;">
         
         <!-- Left Panel: Banking & Margin -->
         <div style="flex: 1; min-width: 230px; background: #1e293b; padding: 12px; border-radius: 12px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 12px;">
@@ -588,7 +588,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
   Object.keys(STOCKS).forEach(t => {
     All.$id(`stk-tab-${t}`).addEventListener('click', () => {
       selectedStock = t;
-      openStockModal();
+      setTimeout(() => openStockModal(), 10);
     });
   });
 
