@@ -270,6 +270,58 @@ export function sellStock(ticker, shares) {
   return true;
 }
 
+export function placeAutoOrder(ticker, type, targetPrice, shares) {
+  if (shares <= 0 || targetPrice <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
+  if (!ctx.S.stock.autoOrders) ctx.S.stock.autoOrders = [];
+  ctx.S.stock.autoOrders.push({
+    id: Date.now().toString() + Math.random().toString(),
+    ticker, type, targetPrice, shares, status: 'PENDING'
+  });
+  return true;
+}
+
+export function cancelAutoOrder(id) {
+  if (!ctx.S.stock.autoOrders) return false;
+  const order = ctx.S.stock.autoOrders.find(o => o.id === id);
+  if (order) {
+    order.status = 'CANCELED_USER';
+    ctx.S.stock.autoOrders = ctx.S.stock.autoOrders.filter(o => o.id !== id);
+    return true;
+  }
+  return false;
+}
+
+export function checkAutoOrders(ticker, currentPrice) {
+  if (!ctx.S.stock.autoOrders) return;
+  const orders = ctx.S.stock.autoOrders.filter(o => o.ticker === ticker && o.status === 'PENDING');
+  orders.forEach(order => {
+    let triggered = false;
+    if (order.type === 'TP' && currentPrice >= order.targetPrice) triggered = true;
+    if (order.type === 'SL' && currentPrice <= order.targetPrice) triggered = true;
+    
+    if (triggered) {
+      let sharesToSell = order.shares;
+      let portfolioShares = ctx.S.stock.portfolio[ticker] || 0;
+      if (portfolioShares <= 0) {
+        order.status = 'CANCELED_NO_SHARES';
+      } else {
+        if (sharesToSell > portfolioShares) sharesToSell = portfolioShares;
+        if (sellStock(ticker, sharesToSell)) {
+           order.status = 'EXECUTED';
+           order.executionPrice = currentPrice;
+           order.timestamp = Date.now();
+        } else {
+           order.status = 'FAILED';
+        }
+      }
+      ctx.S.stock.autoOrders = ctx.S.stock.autoOrders.filter(o => o.id !== order.id);
+      if (!ctx.S.stock.orderLogs) ctx.S.stock.orderLogs = [];
+      ctx.S.stock.orderLogs.unshift({ ...order });
+      if (ctx.S.stock.orderLogs.length > 20) ctx.S.stock.orderLogs.length = 20;
+    }
+  });
+}
+
 export function borrowMargin(amount) {
   if (amount <= 0) return false;
   ctx.S.stock.debt = (ctx.S.stock.debt || 0) + amount;
@@ -592,6 +644,47 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
             </div>
           </div>
           
+          <!-- Auto Orders Interface -->
+          <div style="background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155; margin-top: 8px;">
+            <div style="font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 6px;">LỆNH TỰ ĐỘNG BÁN (AUTO SELL)</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch;">
+              <input type="number" id="stk-auto-amt" min="1" placeholder="Số cp" style="flex: 1; min-width: 60px; padding: 8px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 13px; outline: none;" />
+              <input type="number" id="stk-auto-price" min="0.1" step="0.1" placeholder="Giá mục tiêu $" style="flex: 1; min-width: 80px; padding: 8px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 13px; outline: none;" />
+              <div style="display: flex; gap: 4px; flex: 2; min-width: 140px;">
+                <button id="stk-auto-tp" style="flex: 1; background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 6px; padding: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">CHỐT LỜI</button>
+                <button id="stk-auto-sl" style="flex: 1; background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 6px; padding: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">CẮT LỖ</button>
+              </div>
+            </div>
+
+            <!-- Auto Orders List & Logs -->
+            <div style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 8px; max-height: 120px; overflow-y: auto;">
+              <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">Danh sách lệnh chờ:</div>
+              ${(ctx.S.stock.autoOrders || []).map(o => `
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 4px; margin-bottom: 4px;">
+                  <span style="color: ${o.type === 'TP' ? '#10b981' : '#ef4444'}; font-weight: bold;">${o.type}</span>
+                  <span style="color: ${STOCKS[o.ticker].color}; font-weight: bold;">${o.ticker}</span>
+                  <span>${fmtMoney(o.shares)} cp</span>
+                  <span>@ $${fmtMoney(o.targetPrice)}</span>
+                  <button class="stk-auto-cancel" data-id="${o.id}" style="background: none; border: 1px solid #ef4444; color: #ef4444; border-radius: 3px; cursor: pointer; font-size: 9px; padding: 2px 4px;">HỦY</button>
+                </div>
+              `).join('')}
+              ${(ctx.S.stock.autoOrders?.length || 0) === 0 ? `<div style="font-size: 11px; color: #64748b; font-style: italic;">Chưa có lệnh nào.</div>` : ''}
+
+              <div style="font-size: 11px; color: #94a3b8; margin-top: 8px; margin-bottom: 4px;">Lịch sử khớp lệnh:</div>
+              ${(ctx.S.stock.orderLogs || []).slice(0, 10).map(l => {
+                let statusColor = '#94a3b8';
+                if (l.status === 'EXECUTED') statusColor = '#10b981';
+                else if (l.status.startsWith('CANCELED')) statusColor = '#ef4444';
+                return `
+                <div style="display: flex; justify-content: space-between; font-size: 10px; color: #cbd5e1; padding: 2px 0;">
+                  <span>${new Date(l.timestamp || Date.now()).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}</span>
+                  <span>${l.type} ${l.ticker} x${fmtMoney(l.shares)}</span>
+                  <span style="color: ${statusColor}">${l.status === 'EXECUTED' ? `$${fmtMoney(l.executionPrice)}` : l.status}</span>
+                </div>
+              `}).join('')}
+            </div>
+          </div>
+          
         </div>
       </div>
     </div>
@@ -771,6 +864,46 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     } else {
       All.toast("Không đủ cổ phiếu để bán!");
     }
+  });
+
+  if (All.$id('stk-auto-tp')) {
+    All.$id('stk-auto-tp').addEventListener('click', () => {
+      const shares = parseFloat(All.$id('stk-auto-amt').value);
+      const price = parseFloat(All.$id('stk-auto-price').value);
+      if (shares > 0 && price > 0 && placeAutoOrder(selectedStock, 'TP', price, shares)) {
+        All.save();
+        openStockModal();
+        All.toast(`Đã đặt lệnh Chốt Lời ${selectedStock}`);
+      } else {
+        All.toast("Số lượng hoặc Giá không hợp lệ (hoặc không đủ cổ phiếu)!");
+      }
+    });
+  }
+
+  if (All.$id('stk-auto-sl')) {
+    All.$id('stk-auto-sl').addEventListener('click', () => {
+      const shares = parseFloat(All.$id('stk-auto-amt').value);
+      const price = parseFloat(All.$id('stk-auto-price').value);
+      if (shares > 0 && price > 0 && placeAutoOrder(selectedStock, 'SL', price, shares)) {
+        All.save();
+        openStockModal();
+        All.toast(`Đã đặt lệnh Cắt Lỗ ${selectedStock}`);
+      } else {
+        All.toast("Số lượng hoặc Giá không hợp lệ (hoặc không đủ cổ phiếu)!");
+      }
+    });
+  }
+
+  const cancelBtns = stockView.querySelectorAll('.stk-auto-cancel');
+  cancelBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = e.target.getAttribute('data-id');
+      if (cancelAutoOrder(id)) {
+        All.save();
+        openStockModal();
+        All.toast("Đã hủy lệnh!");
+      }
+    });
   });
 
 

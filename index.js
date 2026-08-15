@@ -56536,6 +56536,58 @@ function sellStock(ticker, shares) {
   }
   return true;
 }
+function placeAutoOrder(ticker, type, targetPrice, shares) {
+  if (shares <= 0 || targetPrice <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
+  if (!ctx.S.stock.autoOrders) ctx.S.stock.autoOrders = [];
+  ctx.S.stock.autoOrders.push({
+    id: Date.now().toString() + Math.random().toString(),
+    ticker,
+    type,
+    targetPrice,
+    shares,
+    status: "PENDING"
+  });
+  return true;
+}
+function cancelAutoOrder(id) {
+  if (!ctx.S.stock.autoOrders) return false;
+  const order = ctx.S.stock.autoOrders.find((o2) => o2.id === id);
+  if (order) {
+    order.status = "CANCELED_USER";
+    ctx.S.stock.autoOrders = ctx.S.stock.autoOrders.filter((o2) => o2.id !== id);
+    return true;
+  }
+  return false;
+}
+function checkAutoOrders(ticker, currentPrice) {
+  if (!ctx.S.stock.autoOrders) return;
+  const orders = ctx.S.stock.autoOrders.filter((o2) => o2.ticker === ticker && o2.status === "PENDING");
+  orders.forEach((order) => {
+    let triggered = false;
+    if (order.type === "TP" && currentPrice >= order.targetPrice) triggered = true;
+    if (order.type === "SL" && currentPrice <= order.targetPrice) triggered = true;
+    if (triggered) {
+      let sharesToSell = order.shares;
+      let portfolioShares = ctx.S.stock.portfolio[ticker] || 0;
+      if (portfolioShares <= 0) {
+        order.status = "CANCELED_NO_SHARES";
+      } else {
+        if (sharesToSell > portfolioShares) sharesToSell = portfolioShares;
+        if (sellStock(ticker, sharesToSell)) {
+          order.status = "EXECUTED";
+          order.executionPrice = currentPrice;
+          order.timestamp = Date.now();
+        } else {
+          order.status = "FAILED";
+        }
+      }
+      ctx.S.stock.autoOrders = ctx.S.stock.autoOrders.filter((o2) => o2.id !== order.id);
+      if (!ctx.S.stock.orderLogs) ctx.S.stock.orderLogs = [];
+      ctx.S.stock.orderLogs.unshift({ ...order });
+      if (ctx.S.stock.orderLogs.length > 20) ctx.S.stock.orderLogs.length = 20;
+    }
+  });
+}
 function borrowMargin(amount) {
   if (amount <= 0) return false;
   ctx.S.stock.debt = (ctx.S.stock.debt || 0) + amount;
@@ -56835,6 +56887,48 @@ function openStockModal() {
             </div>
           </div>
           
+          <!-- Auto Orders Interface -->
+          <div style="background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155; margin-top: 8px;">
+            <div style="font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 6px;">L\u1EC6NH T\u1EF0 \u0110\u1ED8NG B\xC1N (AUTO SELL)</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch;">
+              <input type="number" id="stk-auto-amt" min="1" placeholder="S\u1ED1 cp" style="flex: 1; min-width: 60px; padding: 8px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 13px; outline: none;" />
+              <input type="number" id="stk-auto-price" min="0.1" step="0.1" placeholder="Gi\xE1 m\u1EE5c ti\xEAu $" style="flex: 1; min-width: 80px; padding: 8px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 13px; outline: none;" />
+              <div style="display: flex; gap: 4px; flex: 2; min-width: 140px;">
+                <button id="stk-auto-tp" style="flex: 1; background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 6px; padding: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">CH\u1ED0T L\u1EDCI</button>
+                <button id="stk-auto-sl" style="flex: 1; background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 6px; padding: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">C\u1EAET L\u1ED6</button>
+              </div>
+            </div>
+
+            <!-- Auto Orders List & Logs -->
+            <div style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 8px; max-height: 120px; overflow-y: auto;">
+              <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">Danh s\xE1ch l\u1EC7nh ch\u1EDD:</div>
+              ${(ctx.S.stock.autoOrders || []).map((o2) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 4px; margin-bottom: 4px;">
+                  <span style="color: ${o2.type === "TP" ? "#10b981" : "#ef4444"}; font-weight: bold;">${o2.type}</span>
+                  <span style="color: ${STOCKS[o2.ticker].color}; font-weight: bold;">${o2.ticker}</span>
+                  <span>${fmtMoney(o2.shares)} cp</span>
+                  <span>@ $${fmtMoney(o2.targetPrice)}</span>
+                  <button class="stk-auto-cancel" data-id="${o2.id}" style="background: none; border: 1px solid #ef4444; color: #ef4444; border-radius: 3px; cursor: pointer; font-size: 9px; padding: 2px 4px;">H\u1EE6Y</button>
+                </div>
+              `).join("")}
+              ${(ctx.S.stock.autoOrders?.length || 0) === 0 ? `<div style="font-size: 11px; color: #64748b; font-style: italic;">Ch\u01B0a c\xF3 l\u1EC7nh n\xE0o.</div>` : ""}
+
+              <div style="font-size: 11px; color: #94a3b8; margin-top: 8px; margin-bottom: 4px;">L\u1ECBch s\u1EED kh\u1EDBp l\u1EC7nh:</div>
+              ${(ctx.S.stock.orderLogs || []).slice(0, 10).map((l2) => {
+    let statusColor = "#94a3b8";
+    if (l2.status === "EXECUTED") statusColor = "#10b981";
+    else if (l2.status.startsWith("CANCELED")) statusColor = "#ef4444";
+    return `
+                <div style="display: flex; justify-content: space-between; font-size: 10px; color: #cbd5e1; padding: 2px 0;">
+                  <span>${new Date(l2.timestamp || Date.now()).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}</span>
+                  <span>${l2.type} ${l2.ticker} x${fmtMoney(l2.shares)}</span>
+                  <span style="color: ${statusColor}">${l2.status === "EXECUTED" ? `$${fmtMoney(l2.executionPrice)}` : l2.status}</span>
+                </div>
+              `;
+  }).join("")}
+            </div>
+          </div>
+          
         </div>
       </div>
     </div>
@@ -56989,6 +57083,43 @@ function openStockModal() {
       toast("Kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu \u0111\u1EC3 b\xE1n!");
     }
   });
+  if ($id("stk-auto-tp")) {
+    $id("stk-auto-tp").addEventListener("click", () => {
+      const shares = parseFloat($id("stk-auto-amt").value);
+      const price = parseFloat($id("stk-auto-price").value);
+      if (shares > 0 && price > 0 && placeAutoOrder(selectedStock, "TP", price, shares)) {
+        save();
+        openStockModal();
+        toast(`\u0110\xE3 \u0111\u1EB7t l\u1EC7nh Ch\u1ED1t L\u1EDDi ${selectedStock}`);
+      } else {
+        toast("S\u1ED1 l\u01B0\u1EE3ng ho\u1EB7c Gi\xE1 kh\xF4ng h\u1EE3p l\u1EC7 (ho\u1EB7c kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu)!");
+      }
+    });
+  }
+  if ($id("stk-auto-sl")) {
+    $id("stk-auto-sl").addEventListener("click", () => {
+      const shares = parseFloat($id("stk-auto-amt").value);
+      const price = parseFloat($id("stk-auto-price").value);
+      if (shares > 0 && price > 0 && placeAutoOrder(selectedStock, "SL", price, shares)) {
+        save();
+        openStockModal();
+        toast(`\u0110\xE3 \u0111\u1EB7t l\u1EC7nh C\u1EAFt L\u1ED7 ${selectedStock}`);
+      } else {
+        toast("S\u1ED1 l\u01B0\u1EE3ng ho\u1EB7c Gi\xE1 kh\xF4ng h\u1EE3p l\u1EC7 (ho\u1EB7c kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu)!");
+      }
+    });
+  }
+  const cancelBtns = stockView.querySelectorAll(".stk-auto-cancel");
+  cancelBtns.forEach((btn) => {
+    btn.addEventListener("click", (e2) => {
+      const id = e2.target.getAttribute("data-id");
+      if (cancelAutoOrder(id)) {
+        save();
+        openStockModal();
+        toast("\u0110\xE3 h\u1EE7y l\u1EC7nh!");
+      }
+    });
+  });
 }
 function resetStock() {
   ctx.S.stock = { balance: 0, debt: 0, portfolio: {}, history: {}, trends: {}, lastUpdate: Date.now(), totalDeposited: 0, totalWithdrawn: 0 };
@@ -57125,9 +57256,11 @@ __export(all_exports, {
   cacheWicon: () => cacheWicon,
   calculateInterest: () => calculateInterest,
   canCookRecipe: () => canCookRecipe,
+  cancelAutoOrder: () => cancelAutoOrder,
   cashOut: () => cashOut,
   cashOutHero: () => cashOutHero,
   charName: () => charName,
+  checkAutoOrders: () => checkAutoOrders,
   checkMarginCall: () => checkMarginCall,
   clampN: () => clampN,
   closeBlackjack: () => closeBlackjack,
@@ -57270,6 +57403,7 @@ __export(all_exports, {
   petTouch: () => petTouch,
   pickFrom: () => pickFrom,
   pileWith: () => pileWith,
+  placeAutoOrder: () => placeAutoOrder,
   placeBjWin: () => placeBjWin,
   placeDungeonWin: () => placeDungeonWin,
   placeHeroBar: () => placeHeroBar,

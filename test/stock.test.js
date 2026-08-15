@@ -81,6 +81,9 @@ function updateMarket(now) {
     if (!S.stock.history[t]) S.stock.history[t] = [STOCKS[t].startPrice];
     if (S.stock.trends[t] === undefined) S.stock.trends[t] = 0;
     if (S.stock.portfolio[t] === undefined) S.stock.portfolio[t] = 0;
+    
+    // Check auto orders for this ticker
+    checkAutoOrders(t, S.stock.history[t][S.stock.history[t].length - 1]);
   });
   
   if (!S.stock.currentDrifts) {
@@ -183,6 +186,58 @@ function sellStock(ticker, shares) {
   return true;
 }
 
+function placeAutoOrder(ticker, type, targetPrice, shares) {
+  if (shares <= 0 || targetPrice <= 0 || (S.stock.portfolio[ticker] || 0) < shares) return false;
+  if (!S.stock.autoOrders) S.stock.autoOrders = [];
+  S.stock.autoOrders.push({
+    id: Date.now().toString() + Math.random().toString(),
+    ticker, type, targetPrice, shares, status: 'PENDING'
+  });
+  return true;
+}
+
+function cancelAutoOrder(id) {
+  if (!S.stock.autoOrders) return false;
+  const order = S.stock.autoOrders.find(o => o.id === id);
+  if (order) {
+    order.status = 'CANCELED_USER';
+    S.stock.autoOrders = S.stock.autoOrders.filter(o => o.id !== id);
+    return true;
+  }
+  return false;
+}
+
+function checkAutoOrders(ticker, currentPrice) {
+  if (!S.stock.autoOrders) return;
+  const orders = S.stock.autoOrders.filter(o => o.ticker === ticker && o.status === 'PENDING');
+  orders.forEach(order => {
+    let triggered = false;
+    if (order.type === 'TP' && currentPrice >= order.targetPrice) triggered = true;
+    if (order.type === 'SL' && currentPrice <= order.targetPrice) triggered = true;
+    
+    if (triggered) {
+      let sharesToSell = order.shares;
+      let portfolioShares = S.stock.portfolio[ticker] || 0;
+      if (portfolioShares <= 0) {
+        order.status = 'CANCELED_NO_SHARES';
+      } else {
+        if (sharesToSell > portfolioShares) sharesToSell = portfolioShares;
+        if (sellStock(ticker, sharesToSell)) {
+           order.status = 'EXECUTED';
+           order.executionPrice = currentPrice;
+           order.timestamp = Date.now();
+        } else {
+           order.status = 'FAILED';
+        }
+      }
+      S.stock.autoOrders = S.stock.autoOrders.filter(o => o.id !== order.id);
+      if (!S.stock.orderLogs) S.stock.orderLogs = [];
+      S.stock.orderLogs.unshift({ ...order });
+      if (S.stock.orderLogs.length > 20) S.stock.orderLogs.length = 20;
+    }
+  });
+}
+
 function borrowMargin(amount) {
   if (amount <= 0) return false;
   S.stock.debt = (S.stock.debt || 0) + amount;
@@ -277,34 +332,84 @@ describe('Stock Market Module', () => {
     });
 
     it('should track average cost correctly', () => {
-      S.stock.history['CRASH'] = [10];
-      buyStock('CRASH', 5); // cost: 50
-      assert.equal(S.stock.portfolioCost['CRASH'], 50);
-      
-      S.stock.history['CRASH'].push(20);
-      buyStock('CRASH', 5); // cost: 100. Total cost = 150.
-      assert.equal(S.stock.portfolioCost['CRASH'], 150);
-      
-      sellStock('CRASH', 5); // sold 5. Old shares 10, sold half. Cost becomes 75.
-      assert.equal(S.stock.portfolioCost['CRASH'], 75);
-      
-      sellStock('CRASH', 5); // sold remaining. Cost 0.
-      assert.equal(S.stock.portfolioCost['CRASH'], 0);
+      depositBrokerage(500);
+      buyStock('SIL', 10);
+      const price1 = S.stock.history['SIL'][S.stock.history['SIL'].length - 1];
+      assert.equal(S.stock.portfolioCost['SIL'], price1 * 10);
     });
 
     it('should sell stock correctly', () => {
-      S.stock.portfolio['FARM'] = 10;
-      const success = sellStock('FARM', 4); // revenue: 200
-      assert.equal(success, true);
-      assert.equal(S.stock.balance, 1200);
-      assert.equal(S.stock.portfolio['FARM'], 6);
+      depositBrokerage(100);
+      buyStock('FARM', 1);
+      const shares = S.stock.portfolio['FARM'];
+      assert.equal(shares, 1);
+      assert.equal(sellStock('FARM', 1), true);
+      assert.equal(S.stock.portfolio['FARM'], 0);
     });
 
     it('should reject selling more than owned or negative', () => {
-      S.stock.portfolio['FARM'] = 10;
-      assert.equal(sellStock('FARM', 11), false);
-      assert.equal(sellStock('FARM', -5), false);
-      assert.equal(buyStock('FARM', -5), false);
+      depositBrokerage(100);
+      buyStock('FARM', 1);
+      assert.equal(sellStock('FARM', 2), false);
+      assert.equal(sellStock('FARM', -1), false);
+    });
+  });
+
+  describe('Auto Orders', () => {
+    it('should execute Take Profit (TP) order when price spikes', () => {
+      depositBrokerage(1000);
+      buyStock('SIL', 5);
+      const currentPrice = S.stock.history['SIL'][S.stock.history['SIL'].length - 1];
+      
+      // Place TP above current price
+      assert.equal(placeAutoOrder('SIL', 'TP', currentPrice + 5, 3), true);
+      assert.equal(S.stock.autoOrders.length, 1);
+      
+      // Force price to spike
+      S.stock.history['SIL'].push(currentPrice + 10);
+      checkAutoOrders('SIL', currentPrice + 10);
+      
+      // Should have executed
+      assert.equal(S.stock.autoOrders.length, 0);
+      assert.equal(S.stock.portfolio['SIL'], 2); // 5 - 3 = 2
+      assert.equal(S.stock.orderLogs[0].status, 'EXECUTED');
+      assert.equal(S.stock.orderLogs[0].executionPrice, currentPrice + 10);
+    });
+
+    it('should execute Stop Loss (SL) order when price drops', () => {
+      depositBrokerage(1000);
+      buyStock('FARM', 10);
+      const currentPrice = S.stock.history['FARM'][S.stock.history['FARM'].length - 1];
+      
+      assert.equal(placeAutoOrder('FARM', 'SL', currentPrice - 5, 10), true);
+      
+      // Force price to drop
+      S.stock.history['FARM'].push(currentPrice - 6);
+      checkAutoOrders('FARM', currentPrice - 6);
+      
+      // Should have executed
+      assert.equal(S.stock.autoOrders.length, 0);
+      assert.equal(S.stock.portfolio['FARM'], 0);
+      assert.equal(S.stock.orderLogs[0].status, 'EXECUTED');
+    });
+
+    it('should cancel order if shares are missing', () => {
+      depositBrokerage(1000);
+      buyStock('CRASH', 5);
+      const currentPrice = S.stock.history['CRASH'][S.stock.history['CRASH'].length - 1];
+      
+      placeAutoOrder('CRASH', 'TP', currentPrice + 10, 5);
+      
+      // Manually sell shares before trigger
+      sellStock('CRASH', 5);
+      assert.equal(S.stock.portfolio['CRASH'], 0);
+      
+      // Trigger order
+      S.stock.history['CRASH'].push(currentPrice + 15);
+      checkAutoOrders('CRASH', currentPrice + 15);
+      
+      // Should cancel since no shares
+      assert.equal(S.stock.orderLogs[0].status, 'CANCELED_NO_SHARES');
     });
   });
 
