@@ -307,7 +307,7 @@ function sansDungeonSpriteFor(dx, dy, step) {
 function petSVG(name3, px) {
   if (name3 === "sans") {
     const scale = px / 32;
-    return `<div style="position:relative; width:${px}px; height:${px}px;">
+    return `<div style="position:relative; display:inline-block; margin:0 auto; width:${px}px; height:${px}px;">
       <div style="transform-origin:bottom center; transform:scale(${scale}); width:32px; height:32px; position:absolute; bottom:0; left:50%; margin-left:-16px;">
         <img draggable="false" data-sans-overlay class="sans-overlay" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:none; image-rendering:pixelated; z-index:3; width:auto; height:auto; max-width:none; max-height:none;" />
         <img draggable="false" data-sans-sprite class="sans-sprite" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:block; image-rendering:pixelated; z-index:2; width:auto; height:auto; max-width:none; max-height:none;" />
@@ -10097,6 +10097,23 @@ function closeHeroMode() {
     cancelAnimationFrame(heroLoop);
     heroLoop = null;
   }
+  if (runState) {
+    if (runState.projectiles) {
+      runState.projectiles.forEach((p2) => {
+        if (p2.el) p2.el.remove();
+      });
+      runState.projectiles = [];
+    }
+    if (runState.pets) {
+      runState.pets.forEach((p2) => {
+        if (p2.gbEl) {
+          p2.gbEl.remove();
+          p2.gbEl = null;
+          p2.gbClosing = false;
+        }
+      });
+    }
+  }
   window.removeEventListener("resize", placeHeroBar);
   runState = null;
   const orb = $id("orb");
@@ -10316,11 +10333,22 @@ function heroTick() {
       }
       runState.stage++;
       if (runState.stage > ctx.S.hero.maxStage) ctx.S.hero.maxStage = runState.stage;
+      if (runState.projectiles) {
+        runState.projectiles.forEach((p2) => {
+          if (p2.el) p2.el.remove();
+        });
+        runState.projectiles = [];
+      }
       runState.pets.forEach((p2) => {
         if (p2.hp > 0) p2.hp = Math.min(p2.maxHp, p2.hp + p2.maxHp * 0.2);
         if (p2.id === "sans") {
           p2.muchBetterReady = true;
           p2.badTimeReady = true;
+        }
+        if (p2.gbEl) {
+          p2.gbEl.remove();
+          p2.gbEl = null;
+          p2.gbClosing = false;
         }
       });
       save();
@@ -10382,26 +10410,26 @@ function heroTick() {
               if (scene3) {
                 p2.gbEl = document.createElement("div");
                 p2.gbEl.style.position = "absolute";
-                p2.gbEl.style.transition = "top 0.2s ease-out";
-                p2.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gaster_blaster}blaster_front_open_01.png" style="height:64px; image-rendering:pixelated; transform: scaleX(-1);">`;
-                p2.gbEl.style.left = 60 + pIdx * 45 + "px";
-                p2.gbEl.style.top = "-100px";
+                p2.gbEl.style.transition = "left 0.2s ease-out";
+                p2.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gaster_blaster}blaster_front_open_01.png?v=2" style="height:64px; image-rendering:pixelated; transform: scaleX(-1);">`;
+                p2.gbEl.style.left = "400px";
+                p2.gbEl.style.bottom = "20px";
                 scene3.appendChild(p2.gbEl);
                 setTimeout(() => {
-                  if (p2.gbEl) p2.gbEl.style.top = "10px";
+                  if (p2.gbEl) p2.gbEl.style.left = 60 + pIdx * 45 + 35 + "px";
                 }, 10);
                 const img = p2.gbEl.querySelector("img");
                 setTimeout(() => {
-                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_open_02.png";
+                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_open_02.png?v=2";
                 }, 100);
                 setTimeout(() => {
-                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_fire_01.png";
+                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_fire_01.png?v=2";
                 }, 200);
                 setTimeout(() => {
-                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_fire_02.png";
+                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_fire_02.png?v=2";
                 }, 300);
                 setTimeout(() => {
-                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_fire_03.png";
+                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_fire_03.png?v=2";
                 }, 400);
               }
             }
@@ -10417,7 +10445,7 @@ function heroTick() {
             if (p2.skillActiveTime <= 0 && p2.gbEl && !p2.gbClosing) {
               p2.gbClosing = true;
               const img = p2.gbEl.querySelector("img");
-              if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_close.png";
+              if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_close.png?v=2";
               setTimeout(() => {
                 if (p2.gbEl) p2.gbEl.remove();
                 p2.gbEl = null;
@@ -10633,9 +10661,9 @@ function heroTick() {
               if (scene3) scene3.appendChild(boneEl);
               runState.projectiles.push({
                 x: 60 + pIdx * 45,
-                y: 50,
+                y: 65,
                 vx: 200,
-                vy: -150,
+                vy: 0,
                 type: "bone_blue",
                 dmg: Math.floor(p2.atk * 1.5),
                 karmaAmt: 2,
@@ -10758,7 +10786,7 @@ function heroTick() {
               if (scene3) scene3.appendChild(boneEl);
               runState.projectiles.push({
                 x: 60 + pIdx * 45,
-                y: 50,
+                y: 65,
                 vx: 180,
                 vy: 0,
                 type: "bone_white",
@@ -10970,12 +10998,8 @@ function heroTick() {
       proj.y += proj.vy * (dt2 / 1e3);
       let isDead = false;
       if (proj.type === "bone_blue") {
-        if (proj.x > 380 || proj.x < 50) {
+        if (proj.x > 400 || proj.x < 10) {
           proj.vx *= -1;
-          proj.bounces++;
-        }
-        if (proj.y > 100 || proj.y < -20) {
-          proj.vy *= -1;
           proj.bounces++;
         }
         if (proj.bounces >= proj.maxBounces) isDead = true;
@@ -10988,7 +11012,7 @@ function heroTick() {
         continue;
       }
       if (proj.el) {
-        proj.el.style.transform = `translate3d(${proj.x}px, ${proj.y}px, 0) ${proj.type === "bone_blue" ? "rotate(" + proj.bounces * 90 + "deg)" : ""}`;
+        proj.el.style.transform = `translate3d(${proj.x}px, ${proj.y}px, 0)`;
       }
       proj.hitCd = proj.hitCd || 0;
       if (proj.hitCd > 0) proj.hitCd -= dt2 / 1e3;
@@ -11244,7 +11268,7 @@ function renderHeroUI() {
     container.innerHTML = runState.pets.map((p2, i2) => {
       const isSans = p2.id === "sans";
       const hpColor = isSans ? "background:#00ffff;" : "";
-      const hpText = isSans ? '<div style="position:absolute; width:100%; text-align:center; top:0; left:0; font-size:7px; font-weight:bold; color:#000; line-height:6px; font-family:monospace;">DODGE</div>' : "";
+      const hpText = "";
       return `<div class="hero-pet idle" id="hpet-${i2}" style="z-index:${10 - i2}; ${extraStyle} opacity: ${p2.hp > 0 ? 1 : 0.3}">
          <div class="hp-bar-mini" style="position:relative; overflow:hidden;"><div class="hp-fill-mini" id="hp-pet-${i2}" style="width:${p2.hp / p2.maxHp * 100}%; ${hpColor}"></div>${hpText}</div>
          <div class="hero-bars-container">

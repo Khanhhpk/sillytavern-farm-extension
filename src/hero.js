@@ -526,6 +526,15 @@ export function closeHeroMode() {
     cancelAnimationFrame(heroLoop);
     heroLoop = null;
   }
+  if (runState) {
+      if (runState.projectiles) {
+          runState.projectiles.forEach(p => { if (p.el) p.el.remove(); });
+          runState.projectiles = [];
+      }
+      if (runState.pets) {
+          runState.pets.forEach(p => { if (p.gbEl) { p.gbEl.remove(); p.gbEl = null; p.gbClosing = false; } });
+      }
+  }
   window.removeEventListener('resize', placeHeroBar);
   runState = null;
   const orb = All.$id('orb');
@@ -785,9 +794,16 @@ function heroTick() {
       
       runState.stage++;
       if (runState.stage > ctx.S.hero.maxStage) ctx.S.hero.maxStage = runState.stage;
+      
+      if (runState.projectiles) {
+          runState.projectiles.forEach(p => { if (p.el) p.el.remove(); });
+          runState.projectiles = [];
+      }
+
       runState.pets.forEach(p => { 
         if (p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2); 
         if (p.id === 'sans') { p.muchBetterReady = true; p.badTimeReady = true; }
+        if (p.gbEl) { p.gbEl.remove(); p.gbEl = null; p.gbClosing = false; }
       });
       
       save();
@@ -857,19 +873,19 @@ function heroTick() {
                     if (scene) {
                         p.gbEl = document.createElement('div');
                         p.gbEl.style.position = 'absolute';
-                        p.gbEl.style.transition = 'top 0.2s ease-out';
-                        p.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gaster_blaster}blaster_front_open_01.png" style="height:64px; image-rendering:pixelated; transform: scaleX(-1);">`;
-                        p.gbEl.style.left = (60 + (pIdx * 45)) + 'px';
-                        p.gbEl.style.top = '-100px';
+                        p.gbEl.style.transition = 'left 0.2s ease-out';
+                        p.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gaster_blaster}blaster_front_open_01.png?v=2" style="height:64px; image-rendering:pixelated; transform: scaleX(-1);">`;
+                        p.gbEl.style.left = '400px';
+                        p.gbEl.style.bottom = '20px';
                         scene.appendChild(p.gbEl);
                         
-                        setTimeout(() => { if (p.gbEl) p.gbEl.style.top = '10px'; }, 10);
+                        setTimeout(() => { if (p.gbEl) p.gbEl.style.left = (60 + (pIdx * 45) + 35) + 'px'; }, 10);
                         
                         const img = p.gbEl.querySelector('img');
-                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_open_02.png'; }, 100);
-                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_fire_01.png'; }, 200);
-                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_fire_02.png'; }, 300);
-                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_fire_03.png'; }, 400);
+                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_open_02.png?v=2'; }, 100);
+                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_fire_01.png?v=2'; }, 200);
+                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_fire_02.png?v=2'; }, 300);
+                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_fire_03.png?v=2'; }, 400);
                     }
                 }
 
@@ -883,11 +899,10 @@ function heroTick() {
                     spawnSkillEffect(p.gbEl || pEl, mobEl, 'laser');
                 }
                 
-                // Cleanup on end
                 if (p.skillActiveTime <= 0 && p.gbEl && !p.gbClosing) {
                     p.gbClosing = true;
                     const img = p.gbEl.querySelector('img');
-                    if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_close.png';
+                    if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_close.png?v=2';
                     setTimeout(() => {
                         if (p.gbEl) p.gbEl.remove();
                         p.gbEl = null;
@@ -1110,7 +1125,7 @@ function heroTick() {
                 if (scene) scene.appendChild(boneEl);
                 
                 runState.projectiles.push({
-                    x: 60 + (pIdx * 45), y: 50, vx: 200, vy: -150,
+                    x: 60 + (pIdx * 45), y: 65, vx: 200, vy: 0,
                     type: 'bone_blue', dmg: Math.floor(p.atk * 1.5), karmaAmt: 2,
                     el: boneEl, hitCd: 0, bounces: 0, maxBounces: aSk.val
                 });
@@ -1229,7 +1244,7 @@ function heroTick() {
                 if (scene) scene.appendChild(boneEl);
                 
                 runState.projectiles.push({
-                    x: 60 + (pIdx * 45), y: 50, vx: 180, vy: 0,
+                    x: 60 + (pIdx * 45), y: 65, vx: 180, vy: 0,
                     type: 'bone_white', dmg: p.atk, karmaAmt: 2,
                     el: boneEl, hitCd: 0
                 });
@@ -1427,8 +1442,7 @@ function heroTick() {
         let isDead = false;
         
         if (proj.type === 'bone_blue') {
-            if (proj.x > 380 || proj.x < 50) { proj.vx *= -1; proj.bounces++; }
-            if (proj.y > 100 || proj.y < -20) { proj.vy *= -1; proj.bounces++; }
+            if (proj.x > 400 || proj.x < 10) { proj.vx *= -1; proj.bounces++; }
             if (proj.bounces >= proj.maxBounces) isDead = true;
         } else if (proj.type === 'bone_white') {
             if (proj.x > 450) isDead = true;
@@ -1441,7 +1455,7 @@ function heroTick() {
         }
         
         if (proj.el) {
-            proj.el.style.transform = `translate3d(${proj.x}px, ${proj.y}px, 0) ${proj.type==='bone_blue' ? 'rotate(' + (proj.bounces*90) + 'deg)' : ''}`;
+            proj.el.style.transform = `translate3d(${proj.x}px, ${proj.y}px, 0)`;
         }
         
         proj.hitCd = proj.hitCd || 0;
@@ -1676,7 +1690,7 @@ function renderHeroUI() {
     container.innerHTML = runState.pets.map((p, i) => {
       const isSans = p.id === 'sans';
       const hpColor = isSans ? 'background:#00ffff;' : '';
-      const hpText = isSans ? '<div style="position:absolute; width:100%; text-align:center; top:0; left:0; font-size:7px; font-weight:bold; color:#000; line-height:6px; font-family:monospace;">DODGE</div>' : '';
+      const hpText = '';
       return `<div class="hero-pet idle" id="hpet-${i}" style="z-index:${10-i}; ${extraStyle} opacity: ${p.hp > 0 ? 1 : 0.3}">
          <div class="hp-bar-mini" style="position:relative; overflow:hidden;"><div class="hp-fill-mini" id="hp-pet-${i}" style="width:${(p.hp/p.maxHp)*100}%; ${hpColor}"></div>${hpText}</div>
          <div class="hero-bars-container">

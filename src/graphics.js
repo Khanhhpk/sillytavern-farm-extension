@@ -1366,7 +1366,7 @@ export function petSVG(name, px) {
   /* ── Sans: trả về img đặc biệt có data-sans để JS cập nhật hướng ── */
   if (name === 'sans') {
     const scale = px / 32;
-    return `<div style="position:relative; width:${px}px; height:${px}px;">
+    return `<div style="position:relative; display:inline-block; margin:0 auto; width:${px}px; height:${px}px;">
       <div style="transform-origin:bottom center; transform:scale(${scale}); width:32px; height:32px; position:absolute; bottom:0; left:50%; margin-left:-16px;">
         <img draggable="false" data-sans-overlay class="sans-overlay" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:none; image-rendering:pixelated; z-index:3; width:auto; height:auto; max-width:none; max-height:none;" />
         <img draggable="false" data-sans-sprite class="sans-sprite" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:block; image-rendering:pixelated; z-index:2; width:auto; height:auto; max-width:none; max-height:none;" />
