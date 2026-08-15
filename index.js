@@ -10408,29 +10408,28 @@ function heroTick() {
             if (!p2.gbEl && !p2.gbClosing) {
               const scene3 = pEl ? pEl.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
               if (scene3) {
+                const ts = Date.now();
+                const gbBase = SANS_HERO_SPRITES.gaster_blaster;
                 p2.gbEl = document.createElement("div");
-                p2.gbEl.style.position = "absolute";
-                p2.gbEl.style.transition = "left 0.2s ease-out";
-                p2.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gaster_blaster}blaster_front_open_01.png?v=2" style="height:64px; image-rendering:pixelated; transform: scaleX(-1);">`;
-                p2.gbEl.style.left = "400px";
-                p2.gbEl.style.bottom = "20px";
+                p2.gbEl.style.cssText = "position:absolute; bottom:16px; right:-80px; transition:right 0.25s ease-out;";
+                p2.gbEl.innerHTML = `<img id="gb-img-${pIdx}" src="${gbBase}blaster_front_open_01.png" style="height:64px; image-rendering:pixelated; transform:scaleX(-1); display:block;">`;
                 scene3.appendChild(p2.gbEl);
                 setTimeout(() => {
-                  if (p2.gbEl) p2.gbEl.style.left = 60 + pIdx * 45 + 35 + "px";
+                  if (p2.gbEl) p2.gbEl.style.right = "30px";
                 }, 10);
-                const img = p2.gbEl.querySelector("img");
+                const img = document.getElementById("gb-img-" + pIdx);
                 setTimeout(() => {
-                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_open_02.png?v=2";
-                }, 100);
+                  if (img) img.src = gbBase + "blaster_front_open_02.png?_=" + ts;
+                }, 250);
                 setTimeout(() => {
-                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_fire_01.png?v=2";
-                }, 200);
-                setTimeout(() => {
-                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_fire_02.png?v=2";
-                }, 300);
-                setTimeout(() => {
-                  if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_fire_03.png?v=2";
+                  if (img) img.src = gbBase + "blaster_front_fire_01.png?_=" + ts;
                 }, 400);
+                setTimeout(() => {
+                  if (img) img.src = gbBase + "blaster_front_fire_02.png?_=" + ts;
+                }, 550);
+                setTimeout(() => {
+                  if (img) img.src = gbBase + "blaster_front_fire_03.png?_=" + ts;
+                }, 700);
               }
             }
             p2.gasterTick = (p2.gasterTick || 0) + dt2 / 1e3;
@@ -10445,12 +10444,14 @@ function heroTick() {
             if (p2.skillActiveTime <= 0 && p2.gbEl && !p2.gbClosing) {
               p2.gbClosing = true;
               const img = p2.gbEl.querySelector("img");
-              if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_close.png?v=2";
+              if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_close.png?_=" + Date.now();
               setTimeout(() => {
-                if (p2.gbEl) p2.gbEl.remove();
-                p2.gbEl = null;
+                if (p2.gbEl) {
+                  p2.gbEl.remove();
+                  p2.gbEl = null;
+                }
                 p2.gbClosing = false;
-              }, 200);
+              }, 300);
             }
           }
         }
@@ -10655,15 +10656,12 @@ function heroTick() {
               if (!runState.projectiles) runState.projectiles = [];
               const scene3 = pEl ? pEl.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
               const boneEl = document.createElement("div");
-              boneEl.className = "dg-projectile";
-              boneEl.style.position = "absolute";
-              boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_blue}" style="height:64px; image-rendering:pixelated;">`;
+              boneEl.style.cssText = "position:absolute; bottom:18px; left:0; pointer-events:none; z-index:9;";
+              boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_blue}" style="height:24px; image-rendering:pixelated; display:block;">`;
               if (scene3) scene3.appendChild(boneEl);
               runState.projectiles.push({
                 x: 60 + pIdx * 45,
-                y: 65,
                 vx: 200,
-                vy: 0,
                 type: "bone_blue",
                 dmg: Math.floor(p2.atk * 1.5),
                 karmaAmt: 2,
@@ -10780,15 +10778,12 @@ function heroTick() {
               const pEl2 = $id("hpet-" + pIdx);
               const scene3 = pEl2 ? pEl2.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
               const boneEl = document.createElement("div");
-              boneEl.className = "dg-projectile";
-              boneEl.style.position = "absolute";
-              boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_white}" style="height:32px; image-rendering:pixelated;">`;
+              boneEl.style.cssText = "position:absolute; bottom:18px; left:0; pointer-events:none; z-index:9;";
+              boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_white}" style="height:24px; image-rendering:pixelated; display:block;">`;
               if (scene3) scene3.appendChild(boneEl);
               runState.projectiles.push({
                 x: 60 + pIdx * 45,
-                y: 65,
-                vx: 180,
-                vy: 0,
+                vx: 200,
                 type: "bone_white",
                 dmg: p2.atk,
                 karmaAmt: 2,
@@ -10995,10 +10990,9 @@ function heroTick() {
     for (let i2 = runState.projectiles.length - 1; i2 >= 0; i2--) {
       const proj = runState.projectiles[i2];
       proj.x += proj.vx * (dt2 / 1e3);
-      proj.y += proj.vy * (dt2 / 1e3);
       let isDead = false;
       if (proj.type === "bone_blue") {
-        if (proj.x > 400 || proj.x < 10) {
+        if (proj.x > 420 || proj.x < 0) {
           proj.vx *= -1;
           proj.bounces++;
         }
@@ -11012,7 +11006,7 @@ function heroTick() {
         continue;
       }
       if (proj.el) {
-        proj.el.style.transform = `translate3d(${proj.x}px, ${proj.y}px, 0)`;
+        proj.el.style.left = proj.x + "px";
       }
       proj.hitCd = proj.hitCd || 0;
       if (proj.hitCd > 0) proj.hitCd -= dt2 / 1e3;
@@ -11021,7 +11015,7 @@ function heroTick() {
         activeMonsters.forEach((m2) => {
           if (m2.hp <= 0) return;
           const mEl = $id("hmob-" + m2.idx);
-          const dist = Math.hypot(m2.x - proj.x, 50 - proj.y);
+          const dist = Math.abs(m2.x - proj.x);
           if (dist < 40) {
             m2.hp -= proj.dmg;
             if (proj.karmaAmt) m2.karma = (m2.karma || 0) + proj.karmaAmt;
@@ -11275,7 +11269,7 @@ function renderHeroUI() {
            <div class="hero-bar-row"><div class="hero-bar-fill fill-cd" id="cd-pet-${i2}" style="width:0%"></div></div>
            ${p2.skillMaxCd > 0 ? `<div class="hero-bar-row"><div class="hero-bar-fill fill-sk" id="sk-pet-${i2}" style="width:0%"></div></div>` : ""}
          </div>
-         ${petSVG(p2.id, 32)}
+         ${p2.id === "sans" ? `<img draggable="false" data-sans-sprite class="sans-sprite" src="${SANS_FARM_SPRITES.idle}" style="height:32px; width:auto; image-rendering:pixelated; display:block; margin-bottom:2px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5));">` : petSVG(p2.id, 32)}
        </div>`;
     }).join("");
   }

@@ -1,6 +1,6 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
-import { spriteSVG, petSVG, PETS, SANS_HERO_SPRITES } from './graphics.js';
+import { spriteSVG, petSVG, PETS, SANS_HERO_SPRITES, SANS_FARM_SPRITES } from './graphics.js';
 import { CROPS } from './data.js';
 import { save } from './state.js';
 import { openModal, closeModal } from './shop.js';
@@ -871,21 +871,18 @@ function heroTick() {
                 if (!p.gbEl && !p.gbClosing) {
                     const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
                     if (scene) {
+                        const ts = Date.now();
+                        const gbBase = SANS_HERO_SPRITES.gaster_blaster;
                         p.gbEl = document.createElement('div');
-                        p.gbEl.style.position = 'absolute';
-                        p.gbEl.style.transition = 'left 0.2s ease-out';
-                        p.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gaster_blaster}blaster_front_open_01.png?v=2" style="height:64px; image-rendering:pixelated; transform: scaleX(-1);">`;
-                        p.gbEl.style.left = '400px';
-                        p.gbEl.style.bottom = '20px';
+                        p.gbEl.style.cssText = 'position:absolute; bottom:16px; right:-80px; transition:right 0.25s ease-out;';
+                        p.gbEl.innerHTML = `<img id="gb-img-${pIdx}" src="${gbBase}blaster_front_open_01.png" style="height:64px; image-rendering:pixelated; transform:scaleX(-1); display:block;">`;
                         scene.appendChild(p.gbEl);
-                        
-                        setTimeout(() => { if (p.gbEl) p.gbEl.style.left = (60 + (pIdx * 45) + 35) + 'px'; }, 10);
-                        
-                        const img = p.gbEl.querySelector('img');
-                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_open_02.png?v=2'; }, 100);
-                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_fire_01.png?v=2'; }, 200);
-                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_fire_02.png?v=2'; }, 300);
-                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_fire_03.png?v=2'; }, 400);
+                        setTimeout(() => { if (p.gbEl) p.gbEl.style.right = '30px'; }, 10);
+                        const img = document.getElementById('gb-img-' + pIdx);
+                        setTimeout(() => { if (img) img.src = gbBase + 'blaster_front_open_02.png?_=' + ts; }, 250);
+                        setTimeout(() => { if (img) img.src = gbBase + 'blaster_front_fire_01.png?_=' + ts; }, 400);
+                        setTimeout(() => { if (img) img.src = gbBase + 'blaster_front_fire_02.png?_=' + ts; }, 550);
+                        setTimeout(() => { if (img) img.src = gbBase + 'blaster_front_fire_03.png?_=' + ts; }, 700);
                     }
                 }
 
@@ -902,12 +899,11 @@ function heroTick() {
                 if (p.skillActiveTime <= 0 && p.gbEl && !p.gbClosing) {
                     p.gbClosing = true;
                     const img = p.gbEl.querySelector('img');
-                    if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_close.png?v=2';
+                    if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_close.png?_=' + Date.now();
                     setTimeout(() => {
-                        if (p.gbEl) p.gbEl.remove();
-                        p.gbEl = null;
+                        if (p.gbEl) { p.gbEl.remove(); p.gbEl = null; }
                         p.gbClosing = false;
-                    }, 200);
+                    }, 300);
                 }
             }
         }
@@ -1119,13 +1115,12 @@ function heroTick() {
                 if (!runState.projectiles) runState.projectiles = [];
                 const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
                 const boneEl = document.createElement('div');
-                boneEl.className = 'dg-projectile';
-                boneEl.style.position = 'absolute';
-                boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_blue}" style="height:64px; image-rendering:pixelated;">`;
+                boneEl.style.cssText = 'position:absolute; bottom:18px; left:0; pointer-events:none; z-index:9;';
+                boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_blue}" style="height:24px; image-rendering:pixelated; display:block;">`;
                 if (scene) scene.appendChild(boneEl);
                 
                 runState.projectiles.push({
-                    x: 60 + (pIdx * 45), y: 65, vx: 200, vy: 0,
+                    x: 60 + (pIdx * 45), vx: 200,
                     type: 'bone_blue', dmg: Math.floor(p.atk * 1.5), karmaAmt: 2,
                     el: boneEl, hitCd: 0, bounces: 0, maxBounces: aSk.val
                 });
@@ -1238,13 +1233,12 @@ function heroTick() {
                 const pEl = All.$id('hpet-' + pIdx);
                 const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
                 const boneEl = document.createElement('div');
-                boneEl.className = 'dg-projectile';
-                boneEl.style.position = 'absolute';
-                boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_white}" style="height:32px; image-rendering:pixelated;">`;
+                boneEl.style.cssText = 'position:absolute; bottom:18px; left:0; pointer-events:none; z-index:9;';
+                boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_white}" style="height:24px; image-rendering:pixelated; display:block;">`;
                 if (scene) scene.appendChild(boneEl);
                 
                 runState.projectiles.push({
-                    x: 60 + (pIdx * 45), y: 65, vx: 180, vy: 0,
+                    x: 60 + (pIdx * 45), vx: 200,
                     type: 'bone_white', dmg: p.atk, karmaAmt: 2,
                     el: boneEl, hitCd: 0
                 });
@@ -1438,11 +1432,10 @@ function heroTick() {
     for (let i = runState.projectiles.length - 1; i >= 0; i--) {
         const proj = runState.projectiles[i];
         proj.x += proj.vx * (dt/1000);
-        proj.y += proj.vy * (dt/1000);
         let isDead = false;
         
         if (proj.type === 'bone_blue') {
-            if (proj.x > 400 || proj.x < 10) { proj.vx *= -1; proj.bounces++; }
+            if (proj.x > 420 || proj.x < 0) { proj.vx *= -1; proj.bounces++; }
             if (proj.bounces >= proj.maxBounces) isDead = true;
         } else if (proj.type === 'bone_white') {
             if (proj.x > 450) isDead = true;
@@ -1455,7 +1448,7 @@ function heroTick() {
         }
         
         if (proj.el) {
-            proj.el.style.transform = `translate3d(${proj.x}px, ${proj.y}px, 0)`;
+            proj.el.style.left = proj.x + 'px';
         }
         
         proj.hitCd = proj.hitCd || 0;
@@ -1466,7 +1459,7 @@ function heroTick() {
             activeMonsters.forEach(m => {
                 if (m.hp <= 0) return;
                 const mEl = All.$id('hmob-' + m.idx);
-                const dist = Math.hypot(m.x - proj.x, 50 - proj.y);
+                const dist = Math.abs(m.x - proj.x);
                 if (dist < 40) {
                     m.hp -= proj.dmg;
                     if (proj.karmaAmt) m.karma = (m.karma || 0) + proj.karmaAmt;
@@ -1697,7 +1690,9 @@ function renderHeroUI() {
            <div class="hero-bar-row"><div class="hero-bar-fill fill-cd" id="cd-pet-${i}" style="width:0%"></div></div>
            ${p.skillMaxCd > 0 ? `<div class="hero-bar-row"><div class="hero-bar-fill fill-sk" id="sk-pet-${i}" style="width:0%"></div></div>` : ''}
          </div>
-         ${petSVG(p.id, 32)}
+         ${p.id === 'sans'
+           ? `<img draggable="false" data-sans-sprite class="sans-sprite" src="${SANS_FARM_SPRITES.idle}" style="height:32px; width:auto; image-rendering:pixelated; display:block; margin-bottom:2px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5));">`
+           : petSVG(p.id, 32)}
        </div>`;
     }).join('');
   }
