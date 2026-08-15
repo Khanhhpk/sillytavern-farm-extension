@@ -898,7 +898,18 @@ function heroTick() {
                         setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_open_02; }, 250);
                         setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_01; }, 400);
                         setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_02; }, 550);
-                        setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_03; }, 700);
+                        setTimeout(() => { 
+                            if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_03; 
+                            if (p.gbEl && !p.gbLaser) {
+                                p.gbLaser = document.createElement('div');
+                                p.gbLaser.className = 'laser-sans-continuous';
+                                p.gbLaser.style.left = '48px';
+                                p.gbLaser.style.top = '32px';
+                                p.gbEl.appendChild(p.gbLaser);
+                                // Small delay to trigger transition
+                                setTimeout(() => { if (p.gbLaser) p.gbLaser.classList.add('firing'); }, 50);
+                            }
+                        }, 700);
                     }
                 }
 
@@ -910,7 +921,12 @@ function heroTick() {
                     tMob.karma = (tMob.karma || 0) + 1;
                     const mobEl = All.$id('hmob-' + tMob.idx);
                     if (mobEl) setTimeout(() => showFloatDamage('-' + dmg, mobEl, '#fff'), 0);
-                    spawnSkillEffect(p.gbEl || pEl, mobEl, 'laser_sans');
+                }
+                
+                if (p.skillActiveTime <= 0.3 && p.gbLaser && !p.gbLaserEnding) {
+                    p.gbLaserEnding = true;
+                    p.gbLaser.classList.remove('firing');
+                    p.gbLaser.classList.add('ending');
                 }
                 
                 if (p.skillActiveTime <= 0 && p.gbEl && !p.gbClosing) {
@@ -920,6 +936,8 @@ function heroTick() {
                     setTimeout(() => {
                         if (p.gbEl) { p.gbEl.remove(); p.gbEl = null; }
                         p.gbClosing = false;
+                        p.gbLaser = null;
+                        p.gbLaserEnding = false;
                     }, 300);
                 }
             }

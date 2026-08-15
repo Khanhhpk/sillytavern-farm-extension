@@ -736,6 +736,11 @@ export const styleCSS = `
 
     .laser-beam { position: absolute; height: 4px; background: #ff88dd; z-index: 8; transform-origin: left center; pointer-events: none; animation: fxLaser 0.3s ease-out forwards; box-shadow: 0 0 8px #ff88dd, 0 0 15px #ff88dd; }
     .laser-sans { position: absolute; height: 32px; background: linear-gradient(to bottom, #00ffff, #ffffff, #00ffff); z-index: 8; transform-origin: left center; pointer-events: none; animation: fxLaserSans 0.3s ease-out forwards; box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; }
+    .laser-sans-continuous { position: absolute; height: 32px; background: linear-gradient(to bottom, #00ffff, #ffffff, #00ffff); z-index: 8; transform-origin: left center; pointer-events: none; box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; width: 1000px; transform: translateY(-50%); opacity: 0; transition: opacity 0.2s ease-out; }
+    .laser-sans-continuous.firing { opacity: 1; animation: laserPulse 0.1s infinite alternate; }
+    .laser-sans-continuous.ending { animation: laserEnd 0.3s forwards; }
+    @keyframes laserPulse { 0% { transform: translateY(-50%) scaleY(0.85); box-shadow: 0 0 10px #00ffff, 0 0 15px #00ffff; } 100% { transform: translateY(-50%) scaleY(1.15); box-shadow: 0 0 15px #00ffff, 0 0 30px #00ffff; } }
+    @keyframes laserEnd { 0% { opacity: 1; transform: translateY(-50%) scaleY(1); } 50% { opacity: 0.5; transform: translateY(-50%) scaleY(0.5); } 100% { opacity: 0; transform: translateY(-50%) scaleY(0); } }
     @keyframes fxLaserSans { 0% { opacity: 1; transform: scaleY(0.1); } 20% { transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(0); } }
     @keyframes fxLaser { 0% { opacity: 1; transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(3); } }
 

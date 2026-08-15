@@ -3452,6 +3452,11 @@ var init_style = __esm({
 
     .laser-beam { position: absolute; height: 4px; background: #ff88dd; z-index: 8; transform-origin: left center; pointer-events: none; animation: fxLaser 0.3s ease-out forwards; box-shadow: 0 0 8px #ff88dd, 0 0 15px #ff88dd; }
     .laser-sans { position: absolute; height: 32px; background: linear-gradient(to bottom, #00ffff, #ffffff, #00ffff); z-index: 8; transform-origin: left center; pointer-events: none; animation: fxLaserSans 0.3s ease-out forwards; box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; }
+    .laser-sans-continuous { position: absolute; height: 32px; background: linear-gradient(to bottom, #00ffff, #ffffff, #00ffff); z-index: 8; transform-origin: left center; pointer-events: none; box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; width: 1000px; transform: translateY(-50%); opacity: 0; transition: opacity 0.2s ease-out; }
+    .laser-sans-continuous.firing { opacity: 1; animation: laserPulse 0.1s infinite alternate; }
+    .laser-sans-continuous.ending { animation: laserEnd 0.3s forwards; }
+    @keyframes laserPulse { 0% { transform: translateY(-50%) scaleY(0.85); box-shadow: 0 0 10px #00ffff, 0 0 15px #00ffff; } 100% { transform: translateY(-50%) scaleY(1.15); box-shadow: 0 0 15px #00ffff, 0 0 30px #00ffff; } }
+    @keyframes laserEnd { 0% { opacity: 1; transform: translateY(-50%) scaleY(1); } 50% { opacity: 0.5; transform: translateY(-50%) scaleY(0.5); } 100% { opacity: 0; transform: translateY(-50%) scaleY(0); } }
     @keyframes fxLaserSans { 0% { opacity: 1; transform: scaleY(0.1); } 20% { transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(0); } }
     @keyframes fxLaser { 0% { opacity: 1; transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(3); } }
 
@@ -10457,6 +10462,16 @@ function heroTick() {
                 }, 550);
                 setTimeout(() => {
                   if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_03;
+                  if (p2.gbEl && !p2.gbLaser) {
+                    p2.gbLaser = document.createElement("div");
+                    p2.gbLaser.className = "laser-sans-continuous";
+                    p2.gbLaser.style.left = "48px";
+                    p2.gbLaser.style.top = "32px";
+                    p2.gbEl.appendChild(p2.gbLaser);
+                    setTimeout(() => {
+                      if (p2.gbLaser) p2.gbLaser.classList.add("firing");
+                    }, 50);
+                  }
                 }, 700);
               }
             }
@@ -10468,7 +10483,11 @@ function heroTick() {
               tMob.karma = (tMob.karma || 0) + 1;
               const mobEl = $id("hmob-" + tMob.idx);
               if (mobEl) setTimeout(() => showFloatDamage("-" + dmg, mobEl, "#fff"), 0);
-              spawnSkillEffect(p2.gbEl || pEl, mobEl, "laser_sans");
+            }
+            if (p2.skillActiveTime <= 0.3 && p2.gbLaser && !p2.gbLaserEnding) {
+              p2.gbLaserEnding = true;
+              p2.gbLaser.classList.remove("firing");
+              p2.gbLaser.classList.add("ending");
             }
             if (p2.skillActiveTime <= 0 && p2.gbEl && !p2.gbClosing) {
               p2.gbClosing = true;
@@ -10480,6 +10499,8 @@ function heroTick() {
                   p2.gbEl = null;
                 }
                 p2.gbClosing = false;
+                p2.gbLaser = null;
+                p2.gbLaserEnding = false;
               }, 300);
             }
           }
