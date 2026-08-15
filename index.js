@@ -3921,6 +3921,14 @@ function initUI() {
       <div class="close-x" id="race-close">\xD7</div>
     </div>
     <div class="race-view" id="race-view"></div>
+  </div>
+  
+  <div id="stock-win" class="dungeon-win" style="display:none">
+    <div class="titlebar" id="stock-drag">
+      <h1>${spriteSVG("stockMarket", 16)}S\xE0n Ch\u1EE9ng Kho\xE1n</h1>
+      <div class="close-x" id="stock-close">\xD7</div>
+    </div>
+    <div class="dungeon-view" id="stock-view" style="flex:1; overflow-y:auto; padding:10px;"></div>
   </div>`;
   sh.appendChild(ctx.ui);
   ctx.orb = $id("orb");
@@ -56309,15 +56317,27 @@ var init_lixi = __esm({
 });
 
 // src/stock.js
-function updateMarket() {
+function updateMarket(now2 = Date.now()) {
   if (!ctx.S.stock) return;
-  const now2 = Date.now();
-  const intervals = Math.floor((now2 - ctx.S.stock.lastUpdate) / 6e5);
   Object.keys(STOCKS).forEach((t2) => {
     if (!ctx.S.stock.history[t2]) ctx.S.stock.history[t2] = [STOCKS[t2].startPrice];
     if (ctx.S.stock.trends[t2] === void 0) ctx.S.stock.trends[t2] = 0;
     if (ctx.S.stock.portfolio[t2] === void 0) ctx.S.stock.portfolio[t2] = 0;
+    if (ctx.S.stock.history[t2].length === 1) {
+      for (let i2 = 0; i2 < 29; i2++) {
+        let currentPrice = ctx.S.stock.history[t2][ctx.S.stock.history[t2].length - 1];
+        let trend = ctx.S.stock.trends[t2] + (Math.random() - 0.5) * 0.5;
+        trend = Math.max(-1, Math.min(1, trend));
+        let changePercent = STOCKS[t2].baseVolatility * (Math.random() - 0.5 + trend * 0.5);
+        if (changePercent < -0.15) trend = -1;
+        if (changePercent > 0.15) trend = 1;
+        let newPrice = Math.max(1, currentPrice * (1 + changePercent));
+        ctx.S.stock.history[t2].push(newPrice);
+        ctx.S.stock.trends[t2] = trend;
+      }
+    }
   });
+  const intervals = Math.floor((now2 - ctx.S.stock.lastUpdate) / 6e5);
   if (intervals > 0) {
     ctx.S.stock.lastUpdate += intervals * 6e5;
     for (let i2 = 0; i2 < intervals; i2++) {
@@ -56409,7 +56429,12 @@ function renderStockChart(ticker) {
   const minPrice = Math.min(...history) * 0.9;
   const maxPrice = Math.max(...history) * 1.1;
   const range = Math.max(0.1, maxPrice - minPrice);
-  let html = `<div style="display: flex; align-items: flex-end; height: 150px; width: 100%; border-bottom: 2px solid #555; border-left: 2px solid #555; padding-left: 5px; gap: 4px;">`;
+  let html = `<div style="display: flex; align-items: flex-end; height: 180px; width: 100%; border-bottom: 2px solid #475569; padding-left: 5px; gap: 3px; position: relative;">`;
+  html += `
+    <div style="position: absolute; top: 25%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); pointer-events: none;"></div>
+    <div style="position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); pointer-events: none;"></div>
+    <div style="position: absolute; top: 75%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); pointer-events: none;"></div>
+  `;
   for (let i2 = 0; i2 < history.length; i2++) {
     const price = history[i2];
     const prevPrice = i2 > 0 ? history[i2 - 1] : price;
@@ -56432,72 +56457,106 @@ function openStockModal() {
   const currentPrice = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
   const sharesOwned = ctx.S.stock.portfolio[selectedStock] || 0;
   let bodyHTML = `
-    <div style="padding: 10px; background: #1a1a2e; border-radius: 8px; color: #fff;">
+    <div style="display: flex; flex-direction: column; height: 100%; gap: 15px; color: #e2e8f0;">
       
       <!-- Top Bar: Portfolio Info -->
-      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 10px;">
+      <div style="display: flex; justify-content: space-around; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
         <div style="text-align: center;">
-          <div style="font-size: 11px; color: #aaa;">T\u1ED5ng T\xE0i S\u1EA3n (Equity)</div>
-          <div style="font-weight: bold; color: #a855f7;">$${equity.toFixed(2)}</div>
+          <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">T\u1ED5ng T\xE0i S\u1EA3n</div>
+          <div style="font-weight: 800; font-size: 20px; color: #a855f7; text-shadow: 0 2px 4px rgba(168,85,247,0.3);">$${equity.toFixed(2)}</div>
         </div>
+        <div style="width: 1px; background: #334155;"></div>
         <div style="text-align: center;">
-          <div style="font-size: 11px; color: #aaa;">Ti\u1EC1n M\u1EB7t (Balance)</div>
-          <div style="font-weight: bold; color: #22c55e;">$${ctx.S.stock.balance.toFixed(2)}</div>
+          <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Ti\u1EC1n M\u1EB7t</div>
+          <div style="font-weight: 800; font-size: 20px; color: #22c55e; text-shadow: 0 2px 4px rgba(34,197,94,0.3);">$${ctx.S.stock.balance.toFixed(2)}</div>
         </div>
+        <div style="width: 1px; background: #334155;"></div>
         <div style="text-align: center;">
-          <div style="font-size: 11px; color: #aaa;">N\u1EE3 Margin</div>
-          <div style="font-weight: bold; color: #ef4444;">$${(ctx.S.stock.debt || 0).toFixed(2)}</div>
+          <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">N\u1EE3 Margin</div>
+          <div style="font-weight: 800; font-size: 20px; color: #ef4444; text-shadow: 0 2px 4px rgba(239,68,68,0.3);">$${(ctx.S.stock.debt || 0).toFixed(2)}</div>
         </div>
       </div>
 
-      <!-- Deposit / Withdraw UI -->
-      <div style="display: flex; gap: 5px; margin-bottom: 15px; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px;">
-        <div style="flex: 1;">
-          <div style="font-size: 11px; color: #aaa;">V\xED V\xE0ng (Coins): <span style="color:#eab308">${Math.floor(ctx.S.coins)} G</span></div>
-          <input type="number" id="stk-transfer-amt" value="1000" style="width:100%; padding: 4px; background: #2a2a4e; color: #fff; border: 1px solid #444; border-radius: 4px; margin-top: 4px;" />
-          <div style="font-size: 10px; color: #ef4444; margin-top: 2px;">*Ph\xED chuy\u1EC3n 10%</div>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 15px;">
-          <div class="buy" id="stk-deposit" style="font-size: 12px; padding: 4px 10px;">N\u1EA1p Ti\u1EC1n</div>
-          <div class="buy" id="stk-withdraw" style="font-size: 12px; padding: 4px 10px;">R\xFAt Ti\u1EC1n</div>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 15px;">
-          <div class="buy" id="stk-borrow" style="font-size: 12px; padding: 4px 10px; background: #ef4444;">Vay Margin</div>
-          <div class="buy" id="stk-repay" style="font-size: 12px; padding: 4px 10px; background: #22c55e;">Tr\u1EA3 Margin</div>
-        </div>
-      </div>
-
-      <!-- Tab Selector -->
-      <div style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">
-        ${Object.keys(STOCKS).map((t2) => `
-          <div class="buy" id="stk-tab-${t2}" style="flex: 1; text-align: center; ${selectedStock === t2 ? "background: #4a5568;" : ""}">
-            <div style="font-weight: bold; color: ${STOCKS[t2].color}">${t2}</div>
-            <div style="font-size: 11px;">$${ctx.S.stock.history[t2][ctx.S.stock.history[t2].length - 1].toFixed(2)}</div>
+      <!-- Main Layout: Sidebar & Content -->
+      <div style="display: flex; flex-wrap: wrap; gap: 15px; flex: 1;">
+        
+        <!-- Left Panel: Banking & Margin -->
+        <div style="flex: 1; min-width: 250px; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 15px;">
+          <div style="font-size: 14px; font-weight: bold; color: #cbd5e1; border-bottom: 1px solid #334155; padding-bottom: 8px;">Ng\xE2n H\xE0ng & Kh\u1EBF \u01AF\u1EDBc</div>
+          
+          <div style="background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #1e293b;">
+            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">S\u1ED1 d\u01B0 V\xED V\xE0ng: <span style="color:#eab308; font-weight: bold;">${Math.floor(ctx.S.coins)} G</span></div>
+            <input type="number" id="stk-transfer-amt" value="1000" style="width:100%; padding: 10px; background: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 6px; font-size: 16px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" />
+            <div style="font-size: 11px; color: #f87171; margin-top: 5px; font-style: italic;">*Ph\xED chuy\u1EC3n \u0111\u1ED5i li\xEAn ng\xE2n h\xE0ng 10%</div>
           </div>
-        `).join("")}
-      </div>
-
-      <!-- Chart Panel -->
-      <div style="margin-bottom: 15px; background: #0f0f1a; padding: 10px; border-radius: 4px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-          <div style="font-weight: bold; color: ${STOCKS[selectedStock].color};">${STOCKS[selectedStock].name}</div>
-          <div style="font-size: 12px; color: #aaa;">S\u1EDF h\u1EEFu: ${sharesOwned} cp ($${(sharesOwned * currentPrice).toFixed(2)})</div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button id="stk-deposit" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: opacity 0.2s; box-shadow: 0 2px 4px rgba(37,99,235,0.3);">N\u1EA1p Ti\u1EC1n</button>
+            <button id="stk-withdraw" style="background: #334155; color: white; border: 1px solid #475569; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s;">R\xFAt Ti\u1EC1n</button>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto;">
+            <button id="stk-borrow" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.3);">Vay Margin</button>
+            <button id="stk-repay" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(16,185,129,0.3);">Tr\u1EA3 Margin</button>
+          </div>
         </div>
-        ${renderStockChart(selectedStock)}
-      </div>
 
-      <!-- Trading Interface -->
-      <div style="display: flex; gap: 10px; align-items: center;">
-        <div style="flex: 1;">
-          <input type="number" id="stk-trade-amt" value="10" min="1" style="width:100%; padding: 8px; background: #2a2a4e; color: #fff; border: 1px solid #444; border-radius: 4px;" placeholder="S\u1ED1 l\u01B0\u1EE3ng c\u1ED5 phi\u1EBFu" />
+        <!-- Right Panel: Market & Chart -->
+        <div style="flex: 2; min-width: 300px; display: flex; flex-direction: column; gap: 15px;">
+          
+          <!-- Tab Selector -->
+          <div style="display: flex; gap: 8px;">
+            ${Object.keys(STOCKS).map((t2) => {
+    const isSelected = selectedStock === t2;
+    return `
+              <div id="stk-tab-${t2}" style="flex: 1; text-align: center; background: ${isSelected ? "#334155" : "#1e293b"}; border: 1px solid ${isSelected ? "#64748b" : "#334155"}; border-radius: 8px; padding: 10px; cursor: pointer; transition: all 0.2s; box-shadow: ${isSelected ? "0 4px 6px rgba(0,0,0,0.2)" : "none"};">
+                <div style="font-weight: 800; color: ${STOCKS[t2].color}; font-size: 16px;">${t2}</div>
+                <div style="font-size: 13px; color: #f8fafc; margin-top: 2px;">$${ctx.S.stock.history[t2][ctx.S.stock.history[t2].length - 1].toFixed(2)}</div>
+              </div>
+            `;
+  }).join("")}
+          </div>
+
+          <!-- Chart Panel -->
+          <div style="background: #0f172a; padding: 20px; border-radius: 12px; border: 1px solid #334155; flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px; z-index: 1;">
+              <div style="font-weight: 800; font-size: 18px; color: ${STOCKS[selectedStock].color};">${STOCKS[selectedStock].name}</div>
+              <div style="background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; font-size: 13px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2);">
+                S\u1EDF h\u1EEFu: <span style="font-weight: bold; color: #fff;">${sharesOwned}</span> cp ($${(sharesOwned * currentPrice).toFixed(2)})
+              </div>
+            </div>
+            ${renderStockChart(selectedStock)}
+          </div>
+
+          <!-- Trading Interface -->
+          <div style="display: flex; gap: 10px; align-items: center; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155;">
+            <div style="flex: 1;">
+              <input type="number" id="stk-trade-amt" value="10" min="1" style="width:100%; padding: 12px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 16px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" placeholder="S\u1ED1 l\u01B0\u1EE3ng mua/b\xE1n" />
+            </div>
+            <button id="stk-buy" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3); transition: transform 0.1s;">MUA</button>
+            <button id="stk-sell" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3); transition: transform 0.1s;">B\xC1N</button>
+          </div>
+          
         </div>
-        <div class="buy" id="stk-buy" style="background: #22c55e; padding: 8px 20px; font-weight: bold;">Mua</div>
-        <div class="buy" id="stk-sell" style="background: #ef4444; padding: 8px 20px; font-weight: bold;">B\xE1n</div>
       </div>
-
     </div>
   `;
-  openModal("S\xE0n Ch\u1EE9ng Kho\xE1n", bodyHTML);
+  const stockWin = $id("stock-win");
+  const stockView = $id("stock-view");
+  if (stockWin && stockView) {
+    closeWin();
+    stockWin.style.display = "flex";
+    stockWin.classList.remove("open-anim");
+    void stockWin.offsetWidth;
+    stockWin.classList.add("open-anim");
+    stockView.innerHTML = bodyHTML;
+    $id("stock-close").onclick = () => {
+      stockWin.style.display = "none";
+      if (renderStatus) renderStatus();
+    };
+  } else {
+    openModal("S\xE0n Ch\u1EE9ng Kho\xE1n", bodyHTML);
+  }
   $id("stk-deposit").addEventListener("click", () => {
     const amt = parseFloat($id("stk-transfer-amt").value);
     if (amt > 0 && depositBrokerage(amt)) {

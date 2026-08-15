@@ -239,6 +239,14 @@ export function initUI() {
       <div class="close-x" id="race-close">×</div>
     </div>
     <div class="race-view" id="race-view"></div>
+  </div>
+  
+  <div id="stock-win" class="dungeon-win" style="display:none">
+    <div class="titlebar" id="stock-drag">
+      <h1>${spriteSVG('stockMarket', 16)}Sàn Chứng Khoán</h1>
+      <div class="close-x" id="stock-close">×</div>
+    </div>
+    <div class="dungeon-view" id="stock-view" style="flex:1; overflow-y:auto; padding:10px;"></div>
   </div>`;
   sh.appendChild(ctx.ui);
   ctx.orb = $id('orb');
