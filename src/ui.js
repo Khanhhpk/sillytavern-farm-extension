@@ -394,3 +394,30 @@ window.testFarmReset = () => {
   localStorage.removeItem('farm_reset_announce_seen');
   console.log('[Farm Ext] Đã xóa cờ reset, hãy đóng mở lại cửa sổ nông trại để xem bảng thông báo.');
 };
+
+window.testSansLock = () => {
+    if (!ctx.S.achiv) return;
+    if (ctx.S.achiv.sans) ctx.S.achiv.sans.claimed = false;
+    ctx.S.pets = ctx.S.pets.filter(p => p !== 'sans');
+    ctx.S.petsOut = ctx.S.petsOut.filter(p => p !== 'sans');
+    save();
+    console.log('[Farm Ext] Đã khóa và xóa Sans khỏi Balo/Sân.');
+};
+
+window.testSansMax = () => {
+    ctx.S.coins = Math.max(ctx.S.coins || 0, 1000000000);
+    if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
+    ctx.S.stats.kills = Math.max(ctx.S.stats.kills || 0, 1000);
+    ctx.S.stats.totalCooked = Math.max(ctx.S.stats.totalCooked || 0, 100);
+    
+    ctx.S.passes.water = true;
+    ctx.S.passes.mine = true;
+    
+    const normalPetsList = Object.keys(PETS).filter(id => !PETS[id].hidden);
+    normalPetsList.forEach(id => {
+        if (!ctx.S.pets.includes(id)) ctx.S.pets.push(id);
+    });
+    
+    save();
+    console.log('[Farm Ext] Đã đẩy max thành tựu Sans (Vàng, Kills, Nấu ăn, Tất cả Pets).');
+};

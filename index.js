@@ -4100,6 +4100,28 @@ var init_ui = __esm({
       localStorage.removeItem("farm_reset_announce_seen");
       console.log("[Farm Ext] \u0110\xE3 x\xF3a c\u1EDD reset, h\xE3y \u0111\xF3ng m\u1EDF l\u1EA1i c\u1EEDa s\u1ED5 n\xF4ng tr\u1EA1i \u0111\u1EC3 xem b\u1EA3ng th\xF4ng b\xE1o.");
     };
+    window.testSansLock = () => {
+      if (!ctx.S.achiv) return;
+      if (ctx.S.achiv.sans) ctx.S.achiv.sans.claimed = false;
+      ctx.S.pets = ctx.S.pets.filter((p2) => p2 !== "sans");
+      ctx.S.petsOut = ctx.S.petsOut.filter((p2) => p2 !== "sans");
+      save();
+      console.log("[Farm Ext] \u0110\xE3 kh\xF3a v\xE0 x\xF3a Sans kh\u1ECFi Balo/S\xE2n.");
+    };
+    window.testSansMax = () => {
+      ctx.S.coins = Math.max(ctx.S.coins || 0, 1e9);
+      if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
+      ctx.S.stats.kills = Math.max(ctx.S.stats.kills || 0, 1e3);
+      ctx.S.stats.totalCooked = Math.max(ctx.S.stats.totalCooked || 0, 100);
+      ctx.S.passes.water = true;
+      ctx.S.passes.mine = true;
+      const normalPetsList = Object.keys(PETS).filter((id) => !PETS[id].hidden);
+      normalPetsList.forEach((id) => {
+        if (!ctx.S.pets.includes(id)) ctx.S.pets.push(id);
+      });
+      save();
+      console.log("[Farm Ext] \u0110\xE3 \u0111\u1EA9y max th\xE0nh t\u1EF1u Sans (V\xE0ng, Kills, N\u1EA5u \u0103n, T\u1EA5t c\u1EA3 Pets).");
+    };
   }
 });
 
