@@ -1191,9 +1191,14 @@ const _spHero = (p) => _sansBase + 'sans_sprites_hero/' + p;
 
 export const SANS_HERO_SPRITES = {
   bone_white: _spHero('bone_white_short.png'),
-  bone_blue: _spHero('bone_blue_long.png'),
+  bone_blue:  _spHero('bone_blue_long.png'),
   stool_chup: _spHero('stool_chup/'),
-  gaster_blaster: _spHero('gaster_blaster/')
+  gb_open_01: _spHero('gaster_blaster/blaster_front_open_01.png'),
+  gb_open_02: _spHero('gaster_blaster/blaster_front_open_02.png'),
+  gb_fire_01: _spHero('gaster_blaster/blaster_front_fire_01.png'),
+  gb_fire_02: _spHero('gaster_blaster/blaster_front_fire_02.png'),
+  gb_fire_03: _spHero('gaster_blaster/blaster_front_fire_03.png'),
+  gb_close:   _spHero('gaster_blaster/blaster_front_close.png'),
 };
 
 export const SANS_FARM_SPRITES = {

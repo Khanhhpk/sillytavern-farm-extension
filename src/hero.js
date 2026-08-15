@@ -871,17 +871,16 @@ function heroTick() {
                 if (!p.gbEl && !p.gbClosing) {
                     const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
                     if (scene) {
-                        const gbBase = SANS_HERO_SPRITES.gaster_blaster;
                         p.gbEl = document.createElement('div');
                         p.gbEl.style.cssText = 'position:absolute; bottom:16px; right:-80px; transition:right 0.25s ease-out;';
-                        p.gbEl.innerHTML = `<img id="gb-img-${pIdx}" src="${gbBase}blaster_front_open_01.png" style="height:64px; image-rendering:pixelated; transform:scaleX(-1); display:block;">`;
+                        p.gbEl.innerHTML = `<img id="gb-img-${pIdx}" src="${SANS_HERO_SPRITES.gb_open_01}" style="height:64px; image-rendering:pixelated; transform:scaleX(-1); display:block;">`;
                         scene.appendChild(p.gbEl);
                         setTimeout(() => { if (p.gbEl) p.gbEl.style.right = '30px'; }, 10);
                         const img = document.getElementById('gb-img-' + pIdx);
-                        setTimeout(() => { if (img) img.src = gbBase + 'blaster_front_open_02.png'; }, 250);
-                        setTimeout(() => { if (img) img.src = gbBase + 'blaster_front_fire_01.png'; }, 400);
-                        setTimeout(() => { if (img) img.src = gbBase + 'blaster_front_fire_02.png'; }, 550);
-                        setTimeout(() => { if (img) img.src = gbBase + 'blaster_front_fire_03.png'; }, 700);
+                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gb_open_02; }, 250);
+                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gb_fire_01; }, 400);
+                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gb_fire_02; }, 550);
+                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gb_fire_03; }, 700);
                     }
                 }
 
@@ -898,7 +897,7 @@ function heroTick() {
                 if (p.skillActiveTime <= 0 && p.gbEl && !p.gbClosing) {
                     p.gbClosing = true;
                     const img = p.gbEl.querySelector('img');
-                    if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + 'blaster_front_close.png';
+                    if (img) img.src = SANS_HERO_SPRITES.gb_close;
                     setTimeout(() => {
                         if (p.gbEl) { p.gbEl.remove(); p.gbEl = null; }
                         p.gbClosing = false;
