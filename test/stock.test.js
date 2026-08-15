@@ -4,16 +4,74 @@ import assert from 'node:assert/strict';
 // ─── Inline stock engine (mirrors stock.js) ────────────────────────────────
 
 const STOCKS = {
-  SIL: { name: 'SillyTavern Inc.', baseVolatility: 0.05, startPrice: 100 },
-  FARM: { name: 'Nông Sản Farm', baseVolatility: 0.15, startPrice: 50 },
-  CRASH: { name: 'Đa Cấp Coin', baseVolatility: 0.35, startPrice: 10 }
+  SIL: {
+    name: 'SillyTavern Inc.',
+    startPrice: 100,
+    vol: 0.035,
+    drift: -0.002,
+    trendDecay: 0.70,
+    trendNoise: 0.25,
+    gravityZones: [ { above: 3, pull: -0.20 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.12 } ],
+    swingCap: 0.08,
+  },
+  FARM: {
+    name: 'Nông Sản Farm',
+    startPrice: 50,
+    vol: 0.10,
+    drift: -0.005,
+    trendDecay: 0.78,
+    trendNoise: 0.35,
+    gravityZones: [ { above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.35, pull: 0.18 } ],
+    swingCap: 0.18,
+  },
+  CRASH: {
+    name: 'Đa Cấp Coin',
+    startPrice: 10,
+    vol: 0.22,
+    drift: -0.015,
+    trendDecay: 0.88,
+    trendNoise: 0.55,
+    gravityZones: [ { above: 15, pull: -0.55 }, { above: 5, pull: -0.20 }, { below: 0.2, pull: 0.10 } ],
+    swingCap: 0.30,
+    pumpChance: 0.03,
+    pumpStrength: 0.50,
+  }
 };
 
-// We will mock Math.random later, so we expose it via a wrapper.
 let randomFn = Math.random;
-
-// Fake state mimicking ctx.S
 let S = {};
+
+function stepPrice(t) {
+  const stockConfig = STOCKS[t];
+  const hist = S.stock.history[t];
+  let price = hist[hist.length - 1];
+  let trend = S.stock.trends[t];
+  const priceRatio = price / stockConfig.startPrice;
+
+  trend += (randomFn() - 0.5) * stockConfig.trendNoise;
+
+  if (stockConfig.pumpChance && randomFn() < stockConfig.pumpChance) {
+    trend += stockConfig.pumpStrength;
+  }
+
+  let gravity = 0;
+  for (const zone of stockConfig.gravityZones) {
+    if (zone.above !== undefined && priceRatio > zone.above) { gravity = zone.pull; break; }
+    if (zone.below !== undefined && priceRatio < zone.below) { gravity = zone.pull; break; }
+  }
+  trend += gravity;
+
+  trend *= stockConfig.trendDecay;
+  trend = Math.max(-1, Math.min(1, trend));
+
+  let change = stockConfig.drift + stockConfig.vol * ((randomFn() - 0.48) + trend * 0.5);
+  change = Math.max(-stockConfig.swingCap, Math.min(stockConfig.swingCap, change));
+
+  let newPrice = Math.max(1, price * (1 + change));
+  hist.push(newPrice);
+  if (hist.length > 30) hist.shift();
+  S.stock.trends[t] = trend;
+}
 
 function updateMarket(now) {
   if (!S.stock) return;
@@ -28,27 +86,7 @@ function updateMarket(now) {
   if (intervals > 0) {
     S.stock.lastUpdate += intervals * 600000;
     for (let i = 0; i < intervals; i++) {
-      Object.keys(STOCKS).forEach(t => {
-        const hist = S.stock.history[t];
-        let currentPrice = hist[hist.length - 1];
-        let trend = S.stock.trends[t];
-        
-        trend += (randomFn() - 0.5) * 0.5;
-        trend = Math.max(-1, Math.min(1, trend)); 
-        
-        let changePercent = STOCKS[t].baseVolatility * ((randomFn() - 0.5) + (trend * 0.5));
-        
-        if (changePercent < -0.15) trend = -1; 
-        if (changePercent > 0.15) trend = 1; 
-
-        let newPrice = currentPrice * (1 + changePercent);
-        newPrice = Math.max(1, newPrice);
-
-        hist.push(newPrice);
-        if (hist.length > 30) hist.shift(); 
-        
-        S.stock.trends[t] = trend;
-      });
+      Object.keys(STOCKS).forEach(t => stepPrice(t));
       checkMarginCall();
     }
   }
@@ -179,15 +217,12 @@ describe('Stock Market Module', () => {
 
     it('should reject invalid repay amounts', () => {
       borrowMargin(500);
-      // Not enough balance (if balance is drained)
       S.stock.balance = 0;
       assert.equal(repayMargin(200), false);
       
-      // Too much (more than debt)
       S.stock.balance = 2000;
       assert.equal(repayMargin(1000), false);
       
-      // Negative
       assert.equal(repayMargin(-100), false);
     });
   });
@@ -223,7 +258,7 @@ describe('Stock Market Module', () => {
     });
   });
 
-  describe('Market Engine', () => {
+  describe('Market Engine Validation', () => {
     it('should update prices based on time intervals', () => {
       updateMarket(600000 * 2); // 20 minutes passed
       assert.equal(S.stock.lastUpdate, 1200000);
@@ -235,25 +270,28 @@ describe('Stock Market Module', () => {
       assert.equal(S.stock.history['SIL'].length, 30);
     });
 
-    it('should trigger FOMO on huge spikes', () => {
-      // Force RNG to return 1.0 (huge spike)
-      randomFn = () => 1.0;
-      updateMarket(600000); // 1 interval
+    it('should enforce negative expected value (Gold Sink) over long term', () => {
+      // Restore standard random for this specific simulation
+      randomFn = Math.random;
       
-      // CRASH base volatility is 0.35
-      // changePercent = 0.35 * (0.5 + trend*0.5). If trend=0, change = 0.175
-      // 0.175 > 0.15, so FOMO should trigger, forcing trend to 1.
-      assert.equal(S.stock.trends['CRASH'], 1);
-    });
-
-    it('should trigger Panic on huge drops', () => {
-      // Force RNG to return 0.0 (huge drop)
-      randomFn = () => 0.0;
-      updateMarket(600000); // 1 interval
+      // Let's run 100 runs of 1000 candles for CRASH and check if the median is a huge loss (EV sink)
+      // Since CRASH has high outliers, we check the median
+      let endings = [];
+      for(let r=0; r<100; r++) {
+        S.stock.history['CRASH'] = [10];
+        S.stock.trends['CRASH'] = 0;
+        for(let i=0; i<1000; i++) {
+            stepPrice('CRASH');
+        }
+        endings.push(S.stock.history['CRASH'][S.stock.history['CRASH'].length - 1]);
+      }
       
-      // changePercent = 0.35 * (-0.5 + trend*0.5). If trend=0, change = -0.175
-      // -0.175 < -0.15, so Panic should trigger, forcing trend to -1.
-      assert.equal(S.stock.trends['CRASH'], -1);
+      endings.sort((a,b) => a-b);
+      let medianEnd = endings[Math.floor(endings.length/2)];
+      
+      // Since it's a gold sink with -1.5% drift, the median after 1000 candles should be effectively 1 (minimum price)
+      // or at least less than the start price of 10.
+      assert.ok(medianEnd < 10, 'CRASH median hold price over 1000 candles should be < start price (negative EV)');
     });
   });
 
@@ -261,12 +299,10 @@ describe('Stock Market Module', () => {
     it('should liquidate all assets if equity < 20% of debt', () => {
       borrowMargin(1000); // balance: 2000, debt: 1000. Equity: 2000.
       
-      // Buy heavily into CRASH
       S.stock.history['CRASH'].push(100); 
       buyStock('CRASH', 20); // spent 2000. balance: 0. 
       // Equity = 20 * 100 = 2000 - 1000 debt = 1000. (1000 > 200, safe)
       
-      // Simulate market crash
       S.stock.history['CRASH'].push(1); 
       // Equity = 20 * 1 = 20 - 1000 debt = -980. (-980 < 200, margin call)
       
