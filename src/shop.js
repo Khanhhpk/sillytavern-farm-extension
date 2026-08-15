@@ -32,13 +32,15 @@ export function closeModal() {
 /* ---------- Giao diện Bảng Thành Tựu Ngôi Sao ---------- */
 export function openAchivModal() {
   // Đồng bộ hệ thống dữ liệu chuẩn
-  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
-  if (!ctx.S.achiv) ctx.S.achiv = { naoya: { claimed: false } }; // Chỉ cần cờ đánh dấu đã nhận!
+  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
+  if (!ctx.S.achiv) ctx.S.achiv = { naoya: { claimed: false }, sans: { claimed: false } };
+  if (!ctx.S.achiv.sans) ctx.S.achiv.sans = { claimed: false };
   
   const stats = ctx.S.stats;
   const n = ctx.S.achiv.naoya;
+  const s = ctx.S.achiv.sans;
   
-  // Các Quest sau này cũng sẽ dùng chung cấu trúc y hệt thế này
+  // Naoya logic
   const q1 = Math.min(240, stats.totalHarvests);
   const q2 = Math.min(24, ctx.S.hero?.maxStage || 1);
   const q3 = Math.min(2400, stats.totalCrits);
@@ -48,11 +50,30 @@ export function openAchivModal() {
               done ? `<div class="buy" id="claimNaoya" style="text-align:center; padding:10px; font-size:14px; background:#fcd34d; color:#27272a; border-color:#d97706; box-shadow: 0 4px 10px rgba(252,211,77,0.4);">✦ ĐÓN KẺ KIÊU NGẠO VỀ NHÀ ✦</div>` :
               `<div class="buy off" style="text-align:center; padding:10px;">Chưa Đủ Điều Kiện</div>`;
 
+  // Sans logic
+  const formatNum = x => x >= 1e9 ? (x / 1e9).toFixed(1) + 'B' : x >= 1e6 ? (x / 1e6).toFixed(1) + 'M' : x;
+  const q4_1 = Math.min(1000000000, ctx.S.coins || 0);
+  
+  const normalPetsList = Object.keys(PETS).filter(id => !PETS[id].hidden);
+  const totalNormalPets = normalPetsList.length;
+  const ownedNormalPets = normalPetsList.filter(id => ctx.S.pets.includes(id)).length;
+  const passesScore = (ctx.S.passes.water ? 1 : 0) + (ctx.S.passes.sky ? 1 : 0);
+  const q4_2 = passesScore + ownedNormalPets;
+  const maxQ4_2 = 2 + totalNormalPets;
+
+  const q4_3 = Math.min(100, stats.totalCooked || 0);
+  const q4_4 = Math.min(1000, stats.kills || 0);
+  const doneSans = q4_1 >= 1e9 && q4_2 >= maxQ4_2 && q4_3 >= 100 && q4_4 >= 1000;
+
+  const btnSans = s.claimed ? `<div class="buy off" style="text-align:center; padding:10px;">Đã Triệu Hồi Sans</div>` :
+              doneSans ? `<div class="buy" id="claimSans" style="text-align:center; padding:10px; font-size:14px; background:#00ffff; color:#000; border-color:#008888; box-shadow: 0 4px 10px rgba(0,255,255,0.4); font-weight:bold;">✦ TRIỆU HỒI SANS ✦</div>` :
+              `<div class="buy off" style="text-align:center; padding:10px;">Chưa Đủ Điều Kiện</div>`;
+
   openModal('Thánh Phả Thành Tựu', `
       <div class="note" style="margin-bottom:12px;">Các Spec Pet (Thần Thú Độc Nhất) không thể dùng Vàng vấy bẩn. Bạn phải chứng minh thực lực qua Thành Tựu.</div>
       
       <!-- BỌC TOÀN BỘ BẰNG DETAILS ĐỂ CÓ THỂ THU GỌN TOÀN TẬP -->
-      <details style="background:#2c2538; border:2px solid #bd923b; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" open>
+      <details style="background:#2c2538; border:2px solid #bd923b; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" ${n.claimed ? '' : 'open'}>
           
           <summary style="display:flex; justify-content:space-between; align-items:center; padding:15px; cursor:pointer; outline:none;">
              <div style="font-weight:bold; font-size:15px; color:#fcd34d; text-shadow: 0 1px 2px #000;">
@@ -91,6 +112,45 @@ export function openAchivModal() {
               <div style="margin-top:10px;">${btn}</div>
           </div>
       </details>
+      
+      <details style="background:#1a202c; border:2px solid #00ffff; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" ${s.claimed ? '' : 'open'}>
+          <summary style="display:flex; justify-content:space-between; align-items:center; padding:15px; cursor:pointer; outline:none;">
+             <div style="font-weight:bold; font-size:15px; color:#00ffff; text-shadow: 0 1px 2px #000;">
+                 wanna have a bad time?
+             </div>
+             <div style="display:inline-block; vertical-align:middle; animation: pulse 2s infinite;">
+                 ${spriteSVG('achivStar', 24)}
+             </div>
+          </summary>
+          <div style="padding: 0 15px 15px 15px;">
+              <div style="font-size:12px; color:#a0aec0; margin-bottom:14px; font-style:italic; border-bottom: 1px solid #2d3748; padding-bottom: 10px;">
+                  "Triệu hồi Sans - The coolest skeleton around."
+              </div>
+              <div style="margin-top: 10px;">
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">1. Saving: <span style="color:#aaa; font-weight:normal;">Sở hữu 1 Tỷ Vàng</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #2d3748; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #3182ce, #63b3ed); width:${(q4_1/1e9)*100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${formatNum(q4_1)}/1B</div>
+                  </div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. All: <span style="color:#aaa; font-weight:normal;">Mở khóa 3 khu vườn và toàn bộ Pet</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #2d3748; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #3182ce, #63b3ed); width:${(q4_2/maxQ4_2)*100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q4_2}/${maxQ4_2}</div>
+                  </div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">3. Nice cooking: <span style="color:#aaa; font-weight:normal;">Nấu thành công 100 món ăn</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #2d3748; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #3182ce, #63b3ed); width:${(q4_3/100)*100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q4_3}/100</div>
+                  </div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">4. Slay: <span style="color:#aaa; font-weight:normal;">Tiêu diệt 1000 quái vật Hầm ngục</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #2d3748; height:10px; position:relative; margin-bottom:16px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #3182ce, #63b3ed); width:${(q4_4/1000)*100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q4_4}/1000</div>
+                  </div>
+              </div>
+              <div style="margin-top:10px;">${btnSans}</div>
+          </div>
+      </details>
   `);
 
   const claimBtn = All.$id('claimNaoya');
@@ -99,6 +159,17 @@ export function openAchivModal() {
       if (!ctx.S.pets.includes('naoyaSlime')) { 
           ctx.S.pets.push('naoyaSlime');
           toast('✦ BÙM! Naoya đã khinh bỉ bước vào Balo của bạn!');
+      }
+      save();
+      openAchivModal(); 
+  });
+  
+  const claimSansBtn = All.$id('claimSans');
+  if (claimSansBtn) claimSansBtn.addEventListener('click', () => {
+      ctx.S.achiv.sans.claimed = true;
+      if (!ctx.S.pets.includes('sans')) { 
+          ctx.S.pets.push('sans');
+          toast('✦ heh. Mất hơi lâu để mày gọi tao dậy đấy!');
       }
       save();
       openAchivModal(); 

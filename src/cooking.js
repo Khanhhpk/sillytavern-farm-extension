@@ -402,6 +402,9 @@ export function cookRecipe(recipeId) {
     const foodKey = `food_${recipeId}`;
     ctx.S.bag[foodKey] = (ctx.S.bag[foodKey] || 0) + 1;
 
+    if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
+    ctx.S.stats.totalCooked = (ctx.S.stats.totalCooked || 0) + 1;
+
     toast(`🍳 Đã nấu thành công món ${recipe.name}! Mùi thơm nức mũi!`);
     save(); All.renderStatus(); openKitchenModal();
 }

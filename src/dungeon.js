@@ -1101,6 +1101,8 @@ function combatLoop() {
     enemies = enemies.filter(e => {
         if (e.hp <= 0) {
             e.el.remove();
+            if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
+            ctx.S.stats.kills = (ctx.S.stats.kills || 0) + 1;
             if (e.gold) {
                 // Tiền mang về ngoài Farm tăng tuyến tính
                 const homeG = 1 + Math.floor(currentWave / 10);

@@ -2105,7 +2105,7 @@ var init_graphics = __esm({
       /* —— Át chủ bài (page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
       peach_soda: { name: "B\xE9 soda \u0111\xE0o", page: 1, price: 9999, cry: ["B\u1ED1p\u2014\u2014!", "(n\u1ED5i m\u1ED9t bong b\xF3ng nh\u1ECF)", "X\xEC~", "(v\u1ECB ng\xF2n ng\u1ECDt)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 tinh linh soda v\u1ECB \u0111\xE0o \xB7 d\u1EC5 th\u01B0\u01A1ng qu\xE1 m\u1EE9c n\xEAn \u0111\u1EAFt nh\u1EA5t" },
       penguin: { name: "Chim c\xE1nh c\u1EE5t", page: 1, price: 1e5, cry: ["Pingu!", "N\xFAp n\xFAp~", "Tr\u01B0\u1EE3t tuy\u1EBFt n\xE0o!", "C\xE1nh c\u1EE5t!"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 AFK m\u1ED7i 1 ti\u1EBFng mang v\u1EC1 1 v\xE9 gacha ng\u1EABu nhi\xEAn (70% v\xE9 th\u01B0\u1EDDng, 30% v\xE9 \u0111\u1EB7c bi\u1EC7t)" },
-      sans: { name: "Sans", page: 1, price: 0, special: true, cry: ["heh.", "...", "wanna have a bad time?", "(ng\u1EE7 g\u1EADt)", "cool dude.", "not gonna budge."], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 The coolest skeleton around \xB7 Si\xEAu th\xFA c\u01B0ng: T\u1EF1 \u0111\u1ED9ng ch\u0103m s\xF3c c\u1EA3 3 trang tr\u1EA1i" },
+      sans: { name: "Sans", page: 1, hidden: true, price: 0, special: true, cry: ["heh.", "...", "wanna have a bad time?", "(ng\u1EE7 g\u1EADt)", "cool dude.", "not gonna budge."], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t (Th\xE0nh t\u1EF1u) \xB7 The coolest skeleton around \xB7 Si\xEAu th\xFA c\u01B0ng: T\u1EF1 \u0111\u1ED9ng ch\u0103m s\xF3c c\u1EA3 3 trang tr\u1EA1i" },
       naoyaSlime: { name: "Naoya", page: 1, hidden: true, price: 0, cry: ["R\xE1c r\u01B0\u1EDFi!", "L\u0169 y\u1EBFu k\xE9m...", "B\u1EA9n h\u1EBFt c\u1EA3 ng\u01B0\u1EDDi!", "(l\u01B0\u1EDDm khinh b\u1EC9)"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t (Th\xE0nh t\u1EF1u) \xB7 K\u1EBB t\u1EF1 x\u01B0ng l\xE0 thi\xEAn t\xE0i nh\u01B0ng l\u1EA1i b\u1ECB k\u1EB9t trong h\xECnh h\xE0i Slime tr\xF2n vo n\xFAng n\xEDnh. \u1EDE trang tr\u1EA1i, m\u1ED7i ti\u1EBFng AFK c\xF3 5% t\u1EC9 l\u1EC7 mang v\u1EC1 V\xE9 Gacha Si\xEAu C\u01B0\u1EDDng." }
     };
     PASSES = {
@@ -6767,20 +6767,34 @@ function closeModal() {
   bagSellMode = false;
 }
 function openAchivModal() {
-  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
-  if (!ctx.S.achiv) ctx.S.achiv = { naoya: { claimed: false } };
+  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
+  if (!ctx.S.achiv) ctx.S.achiv = { naoya: { claimed: false }, sans: { claimed: false } };
+  if (!ctx.S.achiv.sans) ctx.S.achiv.sans = { claimed: false };
   const stats = ctx.S.stats;
   const n2 = ctx.S.achiv.naoya;
+  const s2 = ctx.S.achiv.sans;
   const q1 = Math.min(240, stats.totalHarvests);
   const q2 = Math.min(24, ctx.S.hero?.maxStage || 1);
   const q3 = Math.min(2400, stats.totalCrits);
   const done = q1 >= 240 && q2 >= 24 && q3 >= 2400;
   const btn = n2.claimed ? `<div class="buy off" style="text-align:center; padding:10px;">\u0110\xE3 \u0110\xE1nh Th\u1EE9c Naoya Slime</div>` : done ? `<div class="buy" id="claimNaoya" style="text-align:center; padding:10px; font-size:14px; background:#fcd34d; color:#27272a; border-color:#d97706; box-shadow: 0 4px 10px rgba(252,211,77,0.4);">\u2726 \u0110\xD3N K\u1EBA KI\xCAU NG\u1EA0O V\u1EC0 NH\xC0 \u2726</div>` : `<div class="buy off" style="text-align:center; padding:10px;">Ch\u01B0a \u0110\u1EE7 \u0110i\u1EC1u Ki\u1EC7n</div>`;
+  const formatNum = (x2) => x2 >= 1e9 ? (x2 / 1e9).toFixed(1) + "B" : x2 >= 1e6 ? (x2 / 1e6).toFixed(1) + "M" : x2;
+  const q4_1 = Math.min(1e9, ctx.S.coins || 0);
+  const normalPetsList = Object.keys(PETS).filter((id) => !PETS[id].hidden);
+  const totalNormalPets = normalPetsList.length;
+  const ownedNormalPets = normalPetsList.filter((id) => ctx.S.pets.includes(id)).length;
+  const passesScore = (ctx.S.passes.water ? 1 : 0) + (ctx.S.passes.sky ? 1 : 0);
+  const q4_2 = passesScore + ownedNormalPets;
+  const maxQ4_2 = 2 + totalNormalPets;
+  const q4_3 = Math.min(100, stats.totalCooked || 0);
+  const q4_4 = Math.min(1e3, stats.kills || 0);
+  const doneSans = q4_1 >= 1e9 && q4_2 >= maxQ4_2 && q4_3 >= 100 && q4_4 >= 1e3;
+  const btnSans = s2.claimed ? `<div class="buy off" style="text-align:center; padding:10px;">\u0110\xE3 Tri\u1EC7u H\u1ED3i Sans</div>` : doneSans ? `<div class="buy" id="claimSans" style="text-align:center; padding:10px; font-size:14px; background:#00ffff; color:#000; border-color:#008888; box-shadow: 0 4px 10px rgba(0,255,255,0.4); font-weight:bold;">\u2726 TRI\u1EC6U H\u1ED2I SANS \u2726</div>` : `<div class="buy off" style="text-align:center; padding:10px;">Ch\u01B0a \u0110\u1EE7 \u0110i\u1EC1u Ki\u1EC7n</div>`;
   openModal("Th\xE1nh Ph\u1EA3 Th\xE0nh T\u1EF1u", `
       <div class="note" style="margin-bottom:12px;">C\xE1c Spec Pet (Th\u1EA7n Th\xFA \u0110\u1ED9c Nh\u1EA5t) kh\xF4ng th\u1EC3 d\xF9ng V\xE0ng v\u1EA5y b\u1EA9n. B\u1EA1n ph\u1EA3i ch\u1EE9ng minh th\u1EF1c l\u1EF1c qua Th\xE0nh T\u1EF1u.</div>
       
       <!-- B\u1ECCC TO\xC0N B\u1ED8 B\u1EB0NG DETAILS \u0110\u1EC2 C\xD3 TH\u1EC2 THU G\u1ECCN TO\xC0N T\u1EACP -->
-      <details style="background:#2c2538; border:2px solid #bd923b; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" open>
+      <details style="background:#2c2538; border:2px solid #bd923b; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" ${n2.claimed ? "" : "open"}>
           
           <summary style="display:flex; justify-content:space-between; align-items:center; padding:15px; cursor:pointer; outline:none;">
              <div style="font-weight:bold; font-size:15px; color:#fcd34d; text-shadow: 0 1px 2px #000;">
@@ -6819,6 +6833,45 @@ function openAchivModal() {
               <div style="margin-top:10px;">${btn}</div>
           </div>
       </details>
+      
+      <details style="background:#1a202c; border:2px solid #00ffff; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" ${s2.claimed ? "" : "open"}>
+          <summary style="display:flex; justify-content:space-between; align-items:center; padding:15px; cursor:pointer; outline:none;">
+             <div style="font-weight:bold; font-size:15px; color:#00ffff; text-shadow: 0 1px 2px #000;">
+                 wanna have a bad time?
+             </div>
+             <div style="display:inline-block; vertical-align:middle; animation: pulse 2s infinite;">
+                 ${spriteSVG("achivStar", 24)}
+             </div>
+          </summary>
+          <div style="padding: 0 15px 15px 15px;">
+              <div style="font-size:12px; color:#a0aec0; margin-bottom:14px; font-style:italic; border-bottom: 1px solid #2d3748; padding-bottom: 10px;">
+                  "Tri\u1EC7u h\u1ED3i Sans - The coolest skeleton around."
+              </div>
+              <div style="margin-top: 10px;">
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">1. Saving: <span style="color:#aaa; font-weight:normal;">S\u1EDF h\u1EEFu 1 T\u1EF7 V\xE0ng</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #2d3748; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #3182ce, #63b3ed); width:${q4_1 / 1e9 * 100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${formatNum(q4_1)}/1B</div>
+                  </div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. All: <span style="color:#aaa; font-weight:normal;">M\u1EDF kh\xF3a 3 khu v\u01B0\u1EDDn v\xE0 to\xE0n b\u1ED9 Pet</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #2d3748; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #3182ce, #63b3ed); width:${q4_2 / maxQ4_2 * 100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q4_2}/${maxQ4_2}</div>
+                  </div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">3. Nice cooking: <span style="color:#aaa; font-weight:normal;">N\u1EA5u th\xE0nh c\xF4ng 100 m\xF3n \u0103n</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #2d3748; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #3182ce, #63b3ed); width:${q4_3 / 100 * 100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q4_3}/100</div>
+                  </div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">4. Slay: <span style="color:#aaa; font-weight:normal;">Ti\xEAu di\u1EC7t 1000 qu\xE1i v\u1EADt H\u1EA7m ng\u1EE5c</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #2d3748; height:10px; position:relative; margin-bottom:16px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #3182ce, #63b3ed); width:${q4_4 / 1e3 * 100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q4_4}/1000</div>
+                  </div>
+              </div>
+              <div style="margin-top:10px;">${btnSans}</div>
+          </div>
+      </details>
   `);
   const claimBtn = $id("claimNaoya");
   if (claimBtn) claimBtn.addEventListener("click", () => {
@@ -6826,6 +6879,16 @@ function openAchivModal() {
     if (!ctx.S.pets.includes("naoyaSlime")) {
       ctx.S.pets.push("naoyaSlime");
       toast("\u2726 B\xD9M! Naoya \u0111\xE3 khinh b\u1EC9 b\u01B0\u1EDBc v\xE0o Balo c\u1EE7a b\u1EA1n!");
+    }
+    save();
+    openAchivModal();
+  });
+  const claimSansBtn = $id("claimSans");
+  if (claimSansBtn) claimSansBtn.addEventListener("click", () => {
+    ctx.S.achiv.sans.claimed = true;
+    if (!ctx.S.pets.includes("sans")) {
+      ctx.S.pets.push("sans");
+      toast("\u2726 heh. M\u1EA5t h\u01A1i l\xE2u \u0111\u1EC3 m\xE0y g\u1ECDi tao d\u1EADy \u0111\u1EA5y!");
     }
     save();
     openAchivModal();
@@ -12805,6 +12868,8 @@ function combatLoop() {
     enemies = enemies.filter((e2) => {
       if (e2.hp <= 0) {
         e2.el.remove();
+        if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
+        ctx.S.stats.kills = (ctx.S.stats.kills || 0) + 1;
         if (e2.gold) {
           const homeG = 1 + Math.floor(currentWave / 10);
           totalGold += homeG;
@@ -55194,6 +55259,8 @@ function cookRecipe(recipeId) {
   }
   const foodKey = `food_${recipeId}`;
   ctx.S.bag[foodKey] = (ctx.S.bag[foodKey] || 0) + 1;
+  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
+  ctx.S.stats.totalCooked = (ctx.S.stats.totalCooked || 0) + 1;
   toast(`\u{1F373} \u0110\xE3 n\u1EA5u th\xE0nh c\xF4ng m\xF3n ${recipe.name}! M\xF9i th\u01A1m n\u1EE9c m\u0169i!`);
   save();
   renderStatus();
