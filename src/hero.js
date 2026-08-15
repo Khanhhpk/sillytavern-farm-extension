@@ -883,11 +883,12 @@ function heroTick() {
                     const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
                     if (scene) {
                         p.gbEl = document.createElement('div');
-                        p.gbEl.style.cssText = 'position:absolute; bottom:16px; right:-80px; transition:right 0.25s ease-out;';
-                        p.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gb_open_01}" style="height:64px; image-rendering:pixelated; transform:scaleX(-1); display:block;">`;
+                        p.gbEl.style.cssText = 'position:absolute; bottom:16px; left:-80px; transition:left 0.25s ease-out; z-index:10;';
+                        p.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gb_open_01}" style="height:64px; image-rendering:pixelated; display:block;">`;
                         scene.appendChild(p.gbEl);
                         const gbImg = p.gbEl.querySelector('img');
-                        setTimeout(() => { if (p.gbEl) p.gbEl.style.right = '30px'; }, 10);
+                        // Fly in from left and stop next to Sans (Sans is at 60 + pIdx*45)
+                        setTimeout(() => { if (p.gbEl) p.gbEl.style.left = (60 + (pIdx * 45) + 40) + 'px'; }, 10);
                         setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_open_02; }, 250);
                         setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_01; }, 400);
                         setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_02; }, 550);
@@ -896,12 +897,13 @@ function heroTick() {
                 }
 
                 p.gasterTick = (p.gasterTick || 0) + dt/1000;
-                if (p.gasterTick >= 0.5) {
-                    p.gasterTick -= 0.5;
-                    tMob.hp -= aSk.val; // 1 chuẩn
+                if (p.gasterTick >= 0.25) { // 4 ticks per second
+                    p.gasterTick -= 0.25;
+                    const dmg = Math.max(1, Math.floor(tMob.maxHp * 0.01)); // 1% max hp
+                    tMob.hp -= dmg;
                     tMob.karma = (tMob.karma || 0) + 1;
                     const mobEl = All.$id('hmob-' + tMob.idx);
-                    if (mobEl) setTimeout(() => showFloatDamage('-' + aSk.val, mobEl, '#fff'), 0);
+                    if (mobEl) setTimeout(() => showFloatDamage('-' + dmg, mobEl, '#fff'), 0);
                     spawnSkillEffect(p.gbEl || pEl, mobEl, 'laser');
                 }
                 
@@ -1492,8 +1494,8 @@ function heroTick() {
     // 4. Karma Update
     activeMonsters.forEach(m => {
         if (m.hp > 0 && m.karma && m.karma > 0) {
-            // Constant DPS: 0.5% maxHp per stack per second
-            const dps = m.maxHp * 0.005 * m.karma;
+            // Constant DPS: 1% maxHp per stack per second
+            const dps = m.maxHp * 0.01 * m.karma;
             m.hp -= dps * (dt/1000);
             
             // Visual -1 spam (tick rate = 2 * karma stacks per sec)

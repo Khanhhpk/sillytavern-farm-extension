@@ -10432,12 +10432,12 @@ function heroTick() {
               const scene3 = pEl ? pEl.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
               if (scene3) {
                 p2.gbEl = document.createElement("div");
-                p2.gbEl.style.cssText = "position:absolute; bottom:16px; right:-80px; transition:right 0.25s ease-out;";
-                p2.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gb_open_01}" style="height:64px; image-rendering:pixelated; transform:scaleX(-1); display:block;">`;
+                p2.gbEl.style.cssText = "position:absolute; bottom:16px; left:-80px; transition:left 0.25s ease-out; z-index:10;";
+                p2.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gb_open_01}" style="height:64px; image-rendering:pixelated; display:block;">`;
                 scene3.appendChild(p2.gbEl);
                 const gbImg = p2.gbEl.querySelector("img");
                 setTimeout(() => {
-                  if (p2.gbEl) p2.gbEl.style.right = "30px";
+                  if (p2.gbEl) p2.gbEl.style.left = 60 + pIdx * 45 + 40 + "px";
                 }, 10);
                 setTimeout(() => {
                   if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_open_02;
@@ -10454,12 +10454,13 @@ function heroTick() {
               }
             }
             p2.gasterTick = (p2.gasterTick || 0) + dt2 / 1e3;
-            if (p2.gasterTick >= 0.5) {
-              p2.gasterTick -= 0.5;
-              tMob.hp -= aSk.val;
+            if (p2.gasterTick >= 0.25) {
+              p2.gasterTick -= 0.25;
+              const dmg = Math.max(1, Math.floor(tMob.maxHp * 0.01));
+              tMob.hp -= dmg;
               tMob.karma = (tMob.karma || 0) + 1;
               const mobEl = $id("hmob-" + tMob.idx);
-              if (mobEl) setTimeout(() => showFloatDamage("-" + aSk.val, mobEl, "#fff"), 0);
+              if (mobEl) setTimeout(() => showFloatDamage("-" + dmg, mobEl, "#fff"), 0);
               spawnSkillEffect(p2.gbEl || pEl, mobEl, "laser");
             }
             if (p2.skillActiveTime <= 0 && p2.gbEl && !p2.gbClosing) {
@@ -11056,7 +11057,7 @@ function heroTick() {
     }
     activeMonsters.forEach((m2) => {
       if (m2.hp > 0 && m2.karma && m2.karma > 0) {
-        const dps = m2.maxHp * 5e-3 * m2.karma;
+        const dps = m2.maxHp * 0.01 * m2.karma;
         m2.hp -= dps * (dt2 / 1e3);
         const tickRate = 2 * m2.karma;
         m2._karmaTickAcc = (m2._karmaTickAcc || 0) + tickRate * dt2 / 1e3;
