@@ -562,6 +562,18 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       stockWin.style.display = 'none';
       if (All.renderStatus) All.renderStatus();
     };
+    
+    if (All.$id('stk-help-btn')) {
+      All.$id('stk-help-btn').onclick = (e) => {
+        e.stopPropagation();
+        const p = All.$id('stk-help-panel');
+        if (p) {
+          const isHidden = p.style.display === 'none';
+          p.style.display = isHidden ? 'block' : 'none';
+          window['_stkHelpOpen'] = isHidden;
+        }
+      };
+    }
   } else {
     // Fallback if ui hasn't been updated
     All.openModal('Sàn Chứng Khoán', bodyHTML);

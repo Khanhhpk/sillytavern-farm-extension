@@ -3925,7 +3925,7 @@ function initUI() {
   
   <div id="stock-win" class="dungeon-win" style="display:none">
     <div class="titlebar" id="stock-drag">
-      <h1>${spriteSVG("stockMarket", 16)}S\xE0n Ch\u1EE9ng Kho\xE1n <span id="stk-help-btn" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; background:rgba(255,255,255,0.2); border-radius:50%; font-size:12px; color:white; margin-left:8px; vertical-align:middle; transition:all 0.2s;" title="H\u01B0\u1EDBng d\u1EABn ch\u01A1i" onclick="const p=document.getElementById('stk-help-panel'); if(p){ const h = p.style.display==='none'; p.style.display = h ? 'block' : 'none'; window['_stkHelpOpen'] = h;} event.stopPropagation();">?</span></h1>
+      <h1>${spriteSVG("stockMarket", 16)}S\xE0n Ch\u1EE9ng Kho\xE1n <span id="stk-help-btn" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; background:rgba(0,0,0,0.15); border-radius:50%; font-size:12px; color:#475569; font-weight:bold; margin-left:8px; vertical-align:middle; transition:all 0.2s;" title="H\u01B0\u1EDBng d\u1EABn ch\u01A1i">?</span></h1>
       <div class="close-x" id="stock-close">\xD7</div>
     </div>
     <div class="dungeon-view" id="stock-view" style="flex:1; overflow-y:auto; padding:10px;"></div>
@@ -56806,6 +56806,17 @@ function openStockModal() {
       stockWin.style.display = "none";
       if (renderStatus) renderStatus();
     };
+    if ($id("stk-help-btn")) {
+      $id("stk-help-btn").onclick = (e2) => {
+        e2.stopPropagation();
+        const p2 = $id("stk-help-panel");
+        if (p2) {
+          const isHidden = p2.style.display === "none";
+          p2.style.display = isHidden ? "block" : "none";
+          window["_stkHelpOpen"] = isHidden;
+        }
+      };
+    }
   } else {
     openModal("S\xE0n Ch\u1EE9ng Kho\xE1n", bodyHTML);
   }
