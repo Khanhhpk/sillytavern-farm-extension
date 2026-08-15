@@ -29,11 +29,21 @@ export function updateMarket(now = Date.now()) {
     if (ctx.S.stock.history[t].length === 1) {
       for (let i = 0; i < 29; i++) {
         let currentPrice = ctx.S.stock.history[t][ctx.S.stock.history[t].length - 1];
-        let trend = ctx.S.stock.trends[t] + (Math.random() - 0.5) * 0.5;
+        let trend = ctx.S.stock.trends[t];
+        
+        trend += (Math.random() - 0.5) * 0.4;
+        let priceRatio = currentPrice / STOCKS[t].startPrice;
+        let gravity = 0;
+        if (priceRatio > 10) gravity = -0.3;
+        else if (priceRatio > 3) gravity = -0.1;
+        else if (priceRatio < 0.2) gravity = 0.2;
+        trend += gravity;
+        trend *= 0.8; 
         trend = Math.max(-1, Math.min(1, trend)); 
+        
         let changePercent = STOCKS[t].baseVolatility * ((Math.random() - 0.5) + (trend * 0.5));
-        if (changePercent < -0.15) trend = -1; 
-        if (changePercent > 0.15) trend = 1; 
+        changePercent = Math.max(-0.8, Math.min(0.8, changePercent));
+        
         let newPrice = Math.max(1, currentPrice * (1 + changePercent));
         ctx.S.stock.history[t].push(newPrice);
         ctx.S.stock.trends[t] = trend;
@@ -51,22 +61,28 @@ export function updateMarket(now = Date.now()) {
         let currentPrice = hist[hist.length - 1];
         let trend = ctx.S.stock.trends[t];
         
-        // Random walk for trend (momentum)
-        trend += (Math.random() - 0.5) * 0.5; // -0.25 to 0.25
-        trend = Math.max(-1, Math.min(1, trend)); // clamp -1 to 1
+        // Random walk for trend
+        trend += (Math.random() - 0.5) * 0.4;
         
-        // Price fluctuation: Base Volatility * (Random + Trend)
+        // Mean Reversion (Gravity)
+        let priceRatio = currentPrice / STOCKS[t].startPrice;
+        let gravity = 0;
+        if (priceRatio > 10) gravity = -0.3;
+        else if (priceRatio > 3) gravity = -0.1;
+        else if (priceRatio < 0.2) gravity = 0.2;
+        
+        trend += gravity;
+        trend *= 0.8; // Decay trend
+        trend = Math.max(-1, Math.min(1, trend));
+        
         let changePercent = STOCKS[t].baseVolatility * ((Math.random() - 0.5) + (trend * 0.5));
-        
-        // Panic / FOMO
-        if (changePercent < -0.15) trend = -1; // Panic
-        if (changePercent > 0.15) trend = 1; // FOMO
+        changePercent = Math.max(-0.8, Math.min(0.8, changePercent));
 
         let newPrice = currentPrice * (1 + changePercent);
-        newPrice = Math.max(1, newPrice); // minimum price is 1
+        newPrice = Math.max(1, newPrice);
 
         hist.push(newPrice);
-        if (hist.length > 30) hist.shift(); // keep last 30
+        if (hist.length > 30) hist.shift();
         
         ctx.S.stock.trends[t] = trend;
       });
