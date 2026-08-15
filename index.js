@@ -56355,6 +56355,25 @@ var init_lixi = __esm({
 });
 
 // src/stock.js
+function fmtMoney(num) {
+  if (num === 0) return "0.00";
+  const abs = Math.abs(num);
+  let res = "";
+  if (abs >= 1e18) res = (abs / 1e18).toFixed(2) + "Q";
+  else if (abs >= 1e15) res = (abs / 1e15).toFixed(2) + "q";
+  else if (abs >= 1e12) res = (abs / 1e12).toFixed(2) + "T";
+  else if (abs >= 1e9) res = (abs / 1e9).toFixed(2) + "B";
+  else if (abs >= 1e6) res = (abs / 1e6).toFixed(2) + "M";
+  else if (abs >= 1e3) res = (abs / 1e3).toFixed(2) + "K";
+  else res = abs.toFixed(2);
+  return (num < 0 ? "-" : "") + res;
+}
+function fmtPct(p2) {
+  if (p2 === 0) return "0.0%";
+  const abs = Math.abs(p2);
+  let str = abs >= 1e6 ? ">" + 1e6.toFixed(0) + "%" : abs.toFixed(1) + "%";
+  return (p2 > 0 ? "+" : "-") + str;
+}
 function updateMarket(now2 = Date.now()) {
   if (!ctx.S.stock) return;
   if (ctx.S.stock.totalDeposited === void 0) {
@@ -56535,30 +56554,28 @@ function openStockModal() {
   let plPercent = netInvested !== 0 ? pl / Math.abs(netInvested) * 100 : 0;
   let plColor = pl >= 0 ? "#22c55e" : "#ef4444";
   let bodyHTML = `
-    <div style="display: flex; flex-direction: column; height: 100%; gap: 15px; color: #e2e8f0;">
+    <div style="display: flex; flex-direction: column; height: 100%; gap: 12px; color: #e2e8f0;">
       
-      <!-- Top Bar: Portfolio Info -->
-      <div style="display: flex; justify-content: space-around; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-        <div style="text-align: center;">
-          <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">T\u1ED5ng T\xE0i S\u1EA3n</div>
-          <div style="font-weight: 800; font-size: 20px; color: #a855f7; text-shadow: 0 2px 4px rgba(168,85,247,0.3);">$${equity.toFixed(2)}</div>
+      <!-- Top Bar: Portfolio Info (responsive grid) -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; background: #1e293b; padding: 12px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">T\u1ED5ng TS</div>
+          <div style="font-weight: 800; font-size: 16px; color: #a855f7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(equity)}</div>
         </div>
-        <div style="width: 1px; background: #334155;"></div>
-        <div style="text-align: center;">
-          <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Ti\u1EC1n M\u1EB7t</div>
-          <div style="font-weight: 800; font-size: 20px; color: #22c55e; text-shadow: 0 2px 4px rgba(34,197,94,0.3);">$${ctx.S.stock.balance.toFixed(2)}</div>
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Ti\u1EC1n M\u1EB7t</div>
+          <div style="font-weight: 800; font-size: 16px; color: #22c55e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(ctx.S.stock.balance)}</div>
         </div>
-        <div style="width: 1px; background: #334155;"></div>
-        <div style="text-align: center;">
-          <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">\u0110\u1EA7u T\u01B0 / \u0110\xE3 R\xFAt</div>
-          <div style="font-weight: bold; font-size: 15px; color: #e2e8f0; margin-top: 2px;">
-            <span style="color:#eab308">+$${ctx.S.stock.totalDeposited.toFixed(0)}</span> / <span style="color:#06b6d4">-$${ctx.S.stock.totalWithdrawn.toFixed(0)}</span>
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">\u0110\u1EA7u T\u01B0 / R\xFAt</div>
+          <div style="font-size: 12px; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            <span style="color:#eab308">+$${fmtMoney(ctx.S.stock.totalDeposited)}</span><br><span style="color:#06b6d4">-$${fmtMoney(ctx.S.stock.totalWithdrawn)}</span>
           </div>
         </div>
-        <div style="width: 1px; background: #334155;"></div>
-        <div style="text-align: center;">
-          <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">L\xE3i / L\u1ED7 R\xF2ng</div>
-          <div style="font-weight: 800; font-size: 20px; color: ${plColor}; text-shadow: 0 2px 4px ${plColor}40;">${pl >= 0 ? "+" : ""}$${pl.toFixed(2)} (${plPercent > 0 ? "+" : ""}${plPercent.toFixed(1)}%)</div>
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">L\xE3i/L\u1ED7</div>
+          <div style="font-weight: 800; font-size: 14px; color: ${plColor}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${pl >= 0 ? "+" : ""}$${fmtMoney(pl)}</div>
+          <div style="font-size: 11px; color: ${plColor};">${fmtPct(plPercent)}</div>
         </div>
       </div>
 
@@ -56570,7 +56587,7 @@ function openStockModal() {
           <div style="font-size: 14px; font-weight: bold; color: #cbd5e1; border-bottom: 1px solid #334155; padding-bottom: 8px;">Ng\xE2n H\xE0ng & Kh\u1EBF \u01AF\u1EDBc</div>
           
           <div style="background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #1e293b;">
-            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">S\u1ED1 d\u01B0 V\xED V\xE0ng: <span style="color:#eab308; font-weight: bold;">${Math.floor(ctx.S.coins)} G</span></div>
+            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">V\xED V\xE0ng: <span style="color:#eab308; font-weight: bold;">${fmtMoney(Math.floor(ctx.S.coins))} G</span></div>
             <div style="display: flex; background: #1e293b; border: 1px solid #475569; border-radius: 6px; overflow: hidden;">
               <input type="number" id="stk-transfer-amt" value="1000" style="flex: 1; padding: 10px; background: transparent; color: #f8fafc; border: none; font-size: 16px; outline: none; transition: border-color 0.2s;" onfocus="this.parentElement.style.borderColor='#3b82f6'" onblur="this.parentElement.style.borderColor='#475569'" />
               <div style="display: flex; padding-right: 5px; gap: 5px; align-items: center;">
@@ -56602,20 +56619,20 @@ function openStockModal() {
     return `
               <div id="stk-tab-${t2}" style="flex: 1; text-align: center; background: ${isSelected ? "#334155" : "#1e293b"}; border: 1px solid ${isSelected ? "#64748b" : "#334155"}; border-radius: 8px; padding: 10px; cursor: pointer; transition: all 0.2s; box-shadow: ${isSelected ? "0 4px 6px rgba(0,0,0,0.2)" : "none"};">
                 <div style="font-weight: 800; color: ${STOCKS[t2].color}; font-size: 16px;">${t2}</div>
-                <div style="font-size: 13px; color: #f8fafc; margin-top: 2px;">$${ctx.S.stock.history[t2][ctx.S.stock.history[t2].length - 1].toFixed(2)}</div>
+                <div style="font-size: 12px; color: #f8fafc; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(ctx.S.stock.history[t2][ctx.S.stock.history[t2].length - 1])}</div>
               </div>
             `;
   }).join("")}
           </div>
 
           <!-- Chart Panel -->
-          <div style="background: #0f172a; padding: 20px; border-radius: 12px; border: 1px solid #334155; flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; z-index: 1;">
-              <div style="font-weight: 800; font-size: 18px; color: ${STOCKS[selectedStock].color};">${STOCKS[selectedStock].name}</div>
-              <div style="display: flex; gap: 10px;">
-                <button id="stk-forward" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(168,85,247,0.3)'" onmouseout="this.style.background='rgba(168,85,247,0.2)'" title="Tua nhanh 100 ph\xFAt (10 phi\xEAn)">Tua Nhanh (x10)</button>
-                <div style="background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 20px; font-size: 13px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2);">
-                  S\u1EDF h\u1EEFu: <span style="font-weight: bold; color: #fff;">${sharesOwned}</span> cp ($${(sharesOwned * currentPrice).toFixed(2)})
+          <div style="background: #0f172a; padding: 15px; border-radius: 12px; border: 1px solid #334155; flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; z-index: 1; flex-wrap: wrap; gap: 6px;">
+              <div style="font-weight: 800; font-size: 16px; color: ${STOCKS[selectedStock].color}; white-space: nowrap;">${STOCKS[selectedStock].name}</div>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                <button id="stk-forward" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Tua nhanh 100 ph\xFAt">Tua Nhanh (x10)</button>
+                <div style="background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 20px; font-size: 12px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">
+                  S\u1EDF h\u1EEFu: <span style="font-weight: bold; color: #fff;">${fmtMoney(sharesOwned)}</span>cp <span style="opacity:0.75">($${fmtMoney(sharesOwned * currentPrice)})</span>
                 </div>
               </div>
             </div>
