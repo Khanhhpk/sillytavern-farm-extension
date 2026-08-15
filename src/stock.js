@@ -305,6 +305,7 @@ export function openStockModal() {
   if (stockWin && stockView) {
     All.closeWin();
     stockWin.style.display = 'flex';
+    if (All.placeStockWin) All.placeStockWin();
     stockWin.classList.remove('open-anim');
     void stockWin.offsetWidth;
     stockWin.classList.add('open-anim');

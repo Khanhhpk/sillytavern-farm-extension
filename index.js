@@ -7613,6 +7613,16 @@ function placeRaceWin() {
   raceWin.style.left = Math.min(Math.max(x2, 0), Math.max(vw - w2, 0)) + "px";
   raceWin.style.top = Math.min(Math.max(y2, 0), vh - 60) + "px";
 }
+function placeStockWin() {
+  const stockWin = $id("stock-win");
+  if (!stockWin) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const w2 = Math.min(760, vw * 0.96);
+  let x2 = ctx.S.stockWin ? ctx.S.stockWin.fx * vw : (vw - w2) / 2;
+  let y2 = ctx.S.stockWin ? ctx.S.stockWin.fy * vh : vh * 0.04;
+  stockWin.style.left = Math.min(Math.max(x2, 0), Math.max(vw - w2, 0)) + "px";
+  stockWin.style.top = Math.min(Math.max(y2, 0), vh - 60) + "px";
+}
 function toggleWin() {
   try {
     if (ctx.win.classList.contains("open")) {
@@ -7765,6 +7775,34 @@ function initWindows() {
       raceWg = null;
       const raceWin = $id("race-win");
       ctx.S.raceWin = { fx: raceWin.offsetLeft / window.innerWidth, fy: raceWin.offsetTop / window.innerHeight };
+      save();
+    });
+  }
+  const stockDragBar = $id("stock-drag");
+  let stockWg = null;
+  if (stockDragBar) {
+    stockDragBar.addEventListener("pointerdown", (e2) => {
+      if (e2.target.id === "stock-close") return;
+      if (window.innerWidth <= 640) return;
+      stockDragBar.setPointerCapture(e2.pointerId);
+      const stockWin = $id("stock-win");
+      stockWg = { id: e2.pointerId, sx: e2.clientX, sy: e2.clientY, ox: stockWin.offsetLeft, oy: stockWin.offsetTop };
+    });
+    stockDragBar.addEventListener("pointermove", (e2) => {
+      if (!stockWg || e2.pointerId !== stockWg.id) return;
+      const stockWin = $id("stock-win");
+      stockWin.style.left = stockWg.ox + e2.clientX - stockWg.sx + "px";
+      stockWin.style.top = stockWg.oy + e2.clientY - stockWg.sy + "px";
+    });
+    stockDragBar.addEventListener("pointerup", (e2) => {
+      if (!stockWg || e2.pointerId !== stockWg.id) return;
+      try {
+        stockDragBar.releasePointerCapture(e2.pointerId);
+      } catch (er2) {
+      }
+      stockWg = null;
+      const stockWin = $id("stock-win");
+      ctx.S.stockWin = { fx: stockWin.offsetLeft / window.innerWidth, fy: stockWin.offsetTop / window.innerHeight };
       save();
     });
   }
@@ -56568,6 +56606,7 @@ function openStockModal() {
   if (stockWin && stockView) {
     closeWin();
     stockWin.style.display = "flex";
+    if (placeStockWin) placeStockWin();
     stockWin.classList.remove("open-anim");
     void stockWin.offsetWidth;
     stockWin.classList.add("open-anim");
@@ -56879,6 +56918,7 @@ __export(all_exports, {
   placeOrb: () => placeOrb,
   placePet: () => placePet,
   placeRaceWin: () => placeRaceWin,
+  placeStockWin: () => placeStockWin,
   placeWin: () => placeWin,
   plant: () => plant,
   playNaoyaCutscene: () => playNaoyaCutscene,

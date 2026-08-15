@@ -47,6 +47,16 @@ export function placeRaceWin() {
   raceWin.style.left = Math.min(Math.max(x, 0), Math.max(vw - w, 0)) + 'px';
   raceWin.style.top = Math.min(Math.max(y, 0), vh - 60) + 'px';
 }
+export function placeStockWin() {
+  const stockWin = All.$id('stock-win');
+  if (!stockWin) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const w = Math.min(760, vw * 0.96);
+  let x = ctx.S.stockWin ? ctx.S.stockWin.fx * vw : (vw - w) / 2;
+  let y = ctx.S.stockWin ? ctx.S.stockWin.fy * vh : vh * 0.04;
+  stockWin.style.left = Math.min(Math.max(x, 0), Math.max(vw - w, 0)) + 'px';
+  stockWin.style.top = Math.min(Math.max(y, 0), vh - 60) + 'px';
+}
 export function toggleWin() {
   try {
       if (ctx.win.classList.contains('open')) { closeWin(); return; }
@@ -188,6 +198,32 @@ export function initWindows() {
       raceWg = null;
       const raceWin = All.$id('race-win');
       ctx.S.raceWin = { fx: raceWin.offsetLeft / window.innerWidth, fy: raceWin.offsetTop / window.innerHeight };
+      All.save();
+    });
+  }
+
+  const stockDragBar = All.$id('stock-drag');
+  let stockWg = null;
+  if (stockDragBar) {
+    stockDragBar.addEventListener('pointerdown', e => {
+      if (e.target.id === 'stock-close') return;
+      if (window.innerWidth <= 640) return;
+      stockDragBar.setPointerCapture(e.pointerId);
+      const stockWin = All.$id('stock-win');
+      stockWg = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: stockWin.offsetLeft, oy: stockWin.offsetTop };
+    });
+    stockDragBar.addEventListener('pointermove', e => {
+      if (!stockWg || e.pointerId !== stockWg.id) return;
+      const stockWin = All.$id('stock-win');
+      stockWin.style.left = stockWg.ox + e.clientX - stockWg.sx + 'px';
+      stockWin.style.top = stockWg.oy + e.clientY - stockWg.sy + 'px';
+    });
+    stockDragBar.addEventListener('pointerup', e => {
+      if (!stockWg || e.pointerId !== stockWg.id) return;
+      try { stockDragBar.releasePointerCapture(e.pointerId); } catch (er) {}
+      stockWg = null;
+      const stockWin = All.$id('stock-win');
+      ctx.S.stockWin = { fx: stockWin.offsetLeft / window.innerWidth, fy: stockWin.offsetTop / window.innerHeight };
       All.save();
     });
   }
