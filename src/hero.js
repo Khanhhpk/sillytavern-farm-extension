@@ -1104,14 +1104,8 @@ function heroTick() {
                alivePets.forEach(ap => { ap.spdBuff = aSk.val; ap.spdBuffTimer = aSk.duration; });
                setTimeout(() => showFloatDamage('SPD BUFF', pEl, '#00e676'), 0);
             } else if (aSk.type === 'gaster_blaster') {
-                p.gbEl = document.createElement('div');
-                p.gbEl.className = 'gaster-blaster';
-                p.gbEl.style.position = 'absolute';
-                p.gbEl.style.left = (60 + (pIdx * 45)) + 'px';
-                p.gbEl.style.top = '10px';
-                p.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gb}" style="width:64px;">`;
-                All.sh.querySelector('.hero-scene').appendChild(p.gbEl);
-                p.gasterTick = 2.0;
+                p.gasterTick = 0;
+                p.gbClosing = false;
             } else if (aSk.type === 'blind') {
                tMob.blindCd = aSk.duration;
                setTimeout(() => showFloatDamage('BLIND', mobEl, '#607d8b'), 0);
@@ -1498,13 +1492,28 @@ function heroTick() {
     // 4. Karma Update
     activeMonsters.forEach(m => {
         if (m.hp > 0 && m.karma && m.karma > 0) {
+            // Constant DPS: 0.5% maxHp per stack per second
+            const dps = m.maxHp * 0.005 * m.karma;
+            m.hp -= dps * (dt/1000);
+            
+            // Visual -1 spam (tick rate = 2 * karma stacks per sec)
+            const tickRate = 2 * m.karma;
+            m._karmaTickAcc = (m._karmaTickAcc || 0) + (tickRate * dt/1000);
+            if (m._karmaTickAcc >= 1.0) {
+                const ticks = Math.floor(m._karmaTickAcc);
+                m._karmaTickAcc -= ticks;
+                const mEl = All.$id('hmob-' + m.idx);
+                if (mEl) {
+                    for(let i=0; i<Math.min(ticks, 5); i++) {
+                        setTimeout(() => showFloatDamage('-1', mEl, '#e040fb'), i * 50);
+                    }
+                }
+            }
+
+            // Stack decay: lose 1 stack per second
             m.karmaTimer = (m.karmaTimer || 0) + dt/1000;
             if (m.karmaTimer >= 1.0) {
                 m.karmaTimer -= 1.0;
-                const dmg = Math.max(1, Math.floor(m.maxHp * 0.005 * m.karma));
-                m.hp -= dmg;
-                const mEl = All.$id('hmob-' + m.idx);
-                if (mEl) setTimeout(() => showFloatDamage('-' + dmg, mEl, '#e040fb'), 0);
                 m.karma = Math.max(0, m.karma - 1);
             }
         }

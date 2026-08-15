@@ -10657,14 +10657,8 @@ function heroTick() {
               });
               setTimeout(() => showFloatDamage("SPD BUFF", pEl, "#00e676"), 0);
             } else if (aSk.type === "gaster_blaster") {
-              p2.gbEl = document.createElement("div");
-              p2.gbEl.className = "gaster-blaster";
-              p2.gbEl.style.position = "absolute";
-              p2.gbEl.style.left = 60 + pIdx * 45 + "px";
-              p2.gbEl.style.top = "10px";
-              p2.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gb}" style="width:64px;">`;
-              sh.querySelector(".hero-scene").appendChild(p2.gbEl);
-              p2.gasterTick = 2;
+              p2.gasterTick = 0;
+              p2.gbClosing = false;
             } else if (aSk.type === "blind") {
               tMob.blindCd = aSk.duration;
               setTimeout(() => showFloatDamage("BLIND", mobEl, "#607d8b"), 0);
@@ -11062,13 +11056,23 @@ function heroTick() {
     }
     activeMonsters.forEach((m2) => {
       if (m2.hp > 0 && m2.karma && m2.karma > 0) {
+        const dps = m2.maxHp * 5e-3 * m2.karma;
+        m2.hp -= dps * (dt2 / 1e3);
+        const tickRate = 2 * m2.karma;
+        m2._karmaTickAcc = (m2._karmaTickAcc || 0) + tickRate * dt2 / 1e3;
+        if (m2._karmaTickAcc >= 1) {
+          const ticks = Math.floor(m2._karmaTickAcc);
+          m2._karmaTickAcc -= ticks;
+          const mEl = $id("hmob-" + m2.idx);
+          if (mEl) {
+            for (let i2 = 0; i2 < Math.min(ticks, 5); i2++) {
+              setTimeout(() => showFloatDamage("-1", mEl, "#e040fb"), i2 * 50);
+            }
+          }
+        }
         m2.karmaTimer = (m2.karmaTimer || 0) + dt2 / 1e3;
         if (m2.karmaTimer >= 1) {
           m2.karmaTimer -= 1;
-          const dmg = Math.max(1, Math.floor(m2.maxHp * 5e-3 * m2.karma));
-          m2.hp -= dmg;
-          const mEl = $id("hmob-" + m2.idx);
-          if (mEl) setTimeout(() => showFloatDamage("-" + dmg, mEl, "#e040fb"), 0);
           m2.karma = Math.max(0, m2.karma - 1);
         }
       }
