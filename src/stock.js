@@ -55,13 +55,17 @@ function fmtMoney(num) {
   if (num === 0) return '0.00';
   const abs = Math.abs(num);
   let res = '';
-  if (abs >= 1e18) res = (abs / 1e18).toFixed(2) + 'Q';
-  else if (abs >= 1e15) res = (abs / 1e15).toFixed(2) + 'q';
-  else if (abs >= 1e12) res = (abs / 1e12).toFixed(2) + 'T';
-  else if (abs >= 1e9)  res = (abs / 1e9).toFixed(2)  + 'B';
-  else if (abs >= 1e6)  res = (abs / 1e6).toFixed(2)  + 'M';
-  else if (abs >= 1e3)  res = (abs / 1e3).toFixed(2)  + 'K';
-  else res = abs.toFixed(2);
+  if (abs >= 1000) {
+    const units = ["", "k", "m", "b", "t", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+    const tier = Math.floor(Math.log10(abs) / 3);
+    if (tier < units.length) {
+      res = (abs / Math.pow(10, tier * 3)).toFixed(2) + units[tier];
+    } else {
+      res = abs.toExponential(2);
+    }
+  } else {
+    res = abs.toFixed(2);
+  }
   return (num < 0 ? '-' : '') + res;
 }
 
@@ -646,16 +650,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     const amt = parseFloat(tradeInp.value) || 0;
     const price = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
     const total = amt * price;
-    let str = fmtMoney(total);
-    if (total >= 10000) {
-      const units = ["", "k", "m", "b", "t", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
-      const tier = Math.floor(Math.log10(total) / 3);
-      if (tier < units.length) {
-        str = (total / Math.pow(10, tier * 3)).toFixed(tier === 1 ? 1 : 2) + units[tier];
-      } else {
-        str = total.toExponential(2);
-      }
-    }
+    const str = fmtMoney(total);
     
     const buyBtn = All.$id('stk-buy');
     const sellBtn = All.$id('stk-sell');
