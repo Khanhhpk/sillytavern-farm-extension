@@ -10371,6 +10371,17 @@ function heroTick() {
           p2.muchBetterReady = true;
           p2.badTimeReady = true;
         }
+        p2.skillActiveTime = 0;
+        if (p2.gbEl) {
+          p2.gbEl.remove();
+          p2.gbEl = null;
+          p2.gbClosing = false;
+        }
+        if (p2.gbLaser) {
+          p2.gbLaser.remove();
+          p2.gbLaser = null;
+          p2.gbLaserEnding = false;
+        }
       });
       save();
       renderHeroUI();

@@ -809,6 +809,9 @@ function heroTick() {
       runState.pets.forEach(p => { 
         if (p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2); 
         if (p.id === 'sans') { p.muchBetterReady = true; p.badTimeReady = true; }
+        p.skillActiveTime = 0;
+        if (p.gbEl) { p.gbEl.remove(); p.gbEl = null; p.gbClosing = false; }
+        if (p.gbLaser) { p.gbLaser.remove(); p.gbLaser = null; p.gbLaserEnding = false; }
       });
       
       save();
