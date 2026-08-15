@@ -56422,14 +56422,17 @@ function updateMarket(now2 = Date.now()) {
     while (ctx.S.stock.history[t2].length < 30) stepPrice(t2);
   });
   if (!ctx.S.stock.nextIntervalMs) {
-    ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 18e4) + 6e4;
+    ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 16e4) + 2e4;
   }
+  let updated = false;
   while (now2 - ctx.S.stock.lastUpdate >= ctx.S.stock.nextIntervalMs) {
     ctx.S.stock.lastUpdate += ctx.S.stock.nextIntervalMs;
     Object.keys(STOCKS).forEach((t2) => stepPrice(t2));
     checkMarginCall();
-    ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 18e4) + 6e4;
+    ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 16e4) + 2e4;
+    updated = true;
   }
+  return updated;
 }
 function checkMarginCall() {
   let equity = ctx.S.stock.balance;
@@ -56555,6 +56558,13 @@ function renderStockChart(ticker) {
 function openStockModal() {
   if (!ctx.S.stock) return;
   updateMarket();
+  let currentTradeAmt = "10";
+  let currentTransferAmt = "1000";
+  const existingTrade = $id("stk-trade-amt");
+  const existingTransfer = $id("stk-transfer-amt");
+  if (existingTrade) currentTradeAmt = existingTrade.value;
+  if (existingTransfer) currentTransferAmt = existingTransfer.value;
+  const activeId = document.activeElement ? document.activeElement.id : null;
   let totalPortfolioValue = 0;
   Object.keys(STOCKS).forEach((t2) => {
     const price = ctx.S.stock.history[t2][ctx.S.stock.history[t2].length - 1];
@@ -56656,7 +56666,7 @@ function openStockModal() {
           <div style="background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #1e293b;">
             <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">V\xED V\xE0ng: <span style="color:#eab308; font-weight: bold;">${fmtMoney(Math.floor(ctx.S.coins))} G</span></div>
             <div style="display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
-              <input type="number" id="stk-transfer-amt" value="1000" style="flex: 1; min-width: 80px; padding: 8px; background: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" />
+              <input type="number" id="stk-transfer-amt" value="${currentTransferAmt}" style="flex: 1; min-width: 80px; padding: 8px; background: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" />
               <button id="stk-max-deposit" style="background: rgba(59,130,246,0.2); color: #3b82f6; border: 1px solid rgba(59,130,246,0.4); border-radius: 4px; padding: 6px 10px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">ALL G</button>
               <button id="stk-max-withdraw" style="background: rgba(148,163,184,0.2); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.4); border-radius: 4px; padding: 6px 10px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">ALL $</button>
             </div>
@@ -56726,7 +56736,7 @@ function openStockModal() {
           <!-- Trading Interface -->
           <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155;">
             <div style="flex: 1; min-width: 100px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
-              <input type="number" id="stk-trade-amt" value="10" min="1" style="flex: 1; min-width: 60px; padding: 9px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" placeholder="S\u1ED1 cp" />
+              <input type="number" id="stk-trade-amt" value="${currentTradeAmt}" min="1" style="flex: 1; min-width: 60px; padding: 9px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" placeholder="S\u1ED1 cp" />
               <button id="stk-max-buy" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 6px 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Mua t\u1ED1i \u0111a">MAX</button>
               <button id="stk-max-sell" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 6px 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="B\xE1n to\xE0n b\u1ED9">ALL</button>
             </div>
@@ -56754,6 +56764,10 @@ function openStockModal() {
     stockView.innerHTML = bodyHTML;
     if (isAlreadyOpen) {
       stockView.scrollTop = savedScroll;
+      if (activeId) {
+        const el = $id(activeId);
+        if (el && typeof el.focus === "function") el.focus();
+      }
     }
     $id("stock-close").onclick = () => {
       stockWin.style.display = "none";
@@ -56910,6 +56924,15 @@ var init_stock = __esm({
       }
     };
     selectedStock = "SIL";
+    setInterval(() => {
+      if (!ctx.S || !ctx.S.stock) return;
+      if (updateMarket()) {
+        const stockWin = $id("stock-win");
+        if (stockWin && stockWin.style.display === "flex") {
+          openStockModal();
+        }
+      }
+    }, 5e3);
   }
 });
 
