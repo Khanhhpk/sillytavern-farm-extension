@@ -477,13 +477,26 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
   const stockView = All.$id('stock-view');
   
   if (stockWin && stockView) {
+    const isAlreadyOpen = stockWin.style.display === 'flex';
+    const savedScroll = isAlreadyOpen ? stockView.scrollTop : 0;
+
     All.closeWin();
     stockWin.style.display = 'flex';
     if (All.placeStockWin) All.placeStockWin();
-    stockWin.classList.remove('open-anim');
-    void stockWin.offsetWidth;
-    stockWin.classList.add('open-anim');
+    
+    if (!isAlreadyOpen) {
+      stockWin.classList.remove('open-anim');
+      void stockWin.offsetWidth;
+      stockWin.classList.add('open-anim');
+    }
+    
     stockView.innerHTML = bodyHTML;
+    
+    if (isAlreadyOpen) {
+      requestAnimationFrame(() => {
+        stockView.scrollTop = savedScroll;
+      });
+    }
     
     All.$id('stock-close').onclick = () => {
       stockWin.style.display = 'none';

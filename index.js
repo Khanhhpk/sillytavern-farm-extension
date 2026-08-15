@@ -56730,13 +56730,22 @@ function openStockModal() {
   const stockWin = $id("stock-win");
   const stockView = $id("stock-view");
   if (stockWin && stockView) {
+    const isAlreadyOpen = stockWin.style.display === "flex";
+    const savedScroll = isAlreadyOpen ? stockView.scrollTop : 0;
     closeWin();
     stockWin.style.display = "flex";
     if (placeStockWin) placeStockWin();
-    stockWin.classList.remove("open-anim");
-    void stockWin.offsetWidth;
-    stockWin.classList.add("open-anim");
+    if (!isAlreadyOpen) {
+      stockWin.classList.remove("open-anim");
+      void stockWin.offsetWidth;
+      stockWin.classList.add("open-anim");
+    }
     stockView.innerHTML = bodyHTML;
+    if (isAlreadyOpen) {
+      requestAnimationFrame(() => {
+        stockView.scrollTop = savedScroll;
+      });
+    }
     $id("stock-close").onclick = () => {
       stockWin.style.display = "none";
       if (renderStatus) renderStatus();
