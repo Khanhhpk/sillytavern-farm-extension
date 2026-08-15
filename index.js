@@ -56744,8 +56744,10 @@ function openStockModal() {
               <button id="stk-max-buy" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 6px 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Mua t\u1ED1i \u0111a">MAX</button>
               <button id="stk-max-sell" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 6px 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="B\xE1n to\xE0n b\u1ED9">ALL</button>
             </div>
-            <button id="stk-buy" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">MUA</button>
-            <button id="stk-sell" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">B\xC1N</button>
+            <div style="display: flex; gap: 8px; flex: 1; min-width: 200px;">
+              <button id="stk-buy" style="flex: 1; white-space: nowrap; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 10px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">MUA</button>
+              <button id="stk-sell" style="flex: 1; white-space: nowrap; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 10px 10px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">B\xC1N</button>
+            </div>
           </div>
           
         </div>
