@@ -56743,7 +56743,6 @@ function openStockModal() {
   if (stockWin && stockView) {
     const isAlreadyOpen = stockWin.style.display === "flex";
     const savedScroll = isAlreadyOpen ? stockView.scrollTop : 0;
-    const currentScrollHeight = isAlreadyOpen ? stockView.scrollHeight : 0;
     closeWin();
     stockWin.style.display = "flex";
     if (placeStockWin) placeStockWin();
@@ -56752,17 +56751,9 @@ function openStockModal() {
       void stockWin.offsetWidth;
       stockWin.classList.add("open-anim");
     }
-    if (isAlreadyOpen) {
-      bodyHTML = `<div id="stk-scroll-lock" style="min-height: ${currentScrollHeight}px">${bodyHTML}</div>`;
-    }
     stockView.innerHTML = bodyHTML;
     if (isAlreadyOpen) {
       stockView.scrollTop = savedScroll;
-      setTimeout(() => {
-        stockView.scrollTop = savedScroll;
-        const lock = $id("stk-scroll-lock");
-        if (lock) lock.style.minHeight = "";
-      }, 50);
     }
     $id("stock-close").onclick = () => {
       stockWin.style.display = "none";

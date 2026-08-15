@@ -491,7 +491,6 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
   if (stockWin && stockView) {
     const isAlreadyOpen = stockWin.style.display === 'flex';
     const savedScroll = isAlreadyOpen ? stockView.scrollTop : 0;
-    const currentScrollHeight = isAlreadyOpen ? stockView.scrollHeight : 0;
 
     All.closeWin();
     stockWin.style.display = 'flex';
@@ -503,19 +502,10 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       stockWin.classList.add('open-anim');
     }
     
-    if (isAlreadyOpen) {
-      bodyHTML = `<div id="stk-scroll-lock" style="min-height: ${currentScrollHeight}px">${bodyHTML}</div>`;
-    }
-    
     stockView.innerHTML = bodyHTML;
     
     if (isAlreadyOpen) {
       stockView.scrollTop = savedScroll;
-      setTimeout(() => { 
-        stockView.scrollTop = savedScroll; 
-        const lock = All.$id('stk-scroll-lock');
-        if (lock) lock.style.minHeight = '';
-      }, 50);
     }
     
     All.$id('stock-close').onclick = () => {
