@@ -10951,8 +10951,12 @@ function heroTick() {
                   if (scene3) {
                     const imgBase = pEl ? pEl.querySelector("img") : null;
                     if (imgBase) imgBase.style.opacity = 0;
+                    const petRect = pEl.getBoundingClientRect();
+                    const sceneRect = scene3.getBoundingClientRect();
+                    const relLeft = petRect.left - sceneRect.left;
+                    const relBottom = sceneRect.bottom - petRect.bottom;
                     const ketchupEl = document.createElement("div");
-                    ketchupEl.style.cssText = `position:absolute; bottom:16px; left:${60 + pIdx * 45}px;`;
+                    ketchupEl.style.cssText = `position:absolute; bottom:${relBottom}px; left:${relLeft}px; pointer-events:none; z-index:10;`;
                     ketchupEl.innerHTML = `<img src="${SANS_HERO_SPRITES.stool_chup_1}" style="height:32px; image-rendering:pixelated; display:block;">`;
                     scene3.appendChild(ketchupEl);
                     const kImg = ketchupEl.querySelector("img");
