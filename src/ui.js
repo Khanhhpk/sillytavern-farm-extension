@@ -390,12 +390,12 @@ export function showResetAnnouncement() {
 }
 
 // @ts-ignore
-window.testFarmReset = () => {
+window['testFarmReset'] = () => {
   localStorage.removeItem('farm_reset_announce_seen');
   console.log('[Farm Ext] Đã xóa cờ reset, hãy đóng mở lại cửa sổ nông trại để xem bảng thông báo.');
 };
 
-window.testSansLock = () => {
+window['testSansLock'] = () => {
     if (!ctx.S.achiv) return;
     if (ctx.S.achiv.sans) ctx.S.achiv.sans.claimed = false;
     ctx.S.pets = ctx.S.pets.filter(p => p !== 'sans');
@@ -404,7 +404,7 @@ window.testSansLock = () => {
     console.log('[Farm Ext] Đã khóa và xóa Sans khỏi Balo/Sân.');
 };
 
-window.testSansMax = () => {
+window['testSansMax'] = () => {
     ctx.S.coins = Math.max(ctx.S.coins || 0, 1000000000);
     if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
     ctx.S.stats.kills = Math.max(ctx.S.stats.kills || 0, 1000);
