@@ -56582,7 +56582,7 @@ function openStockModal() {
     sessBlock = `
       <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; border: 1px solid #334155;">
         <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
-          <span>\u26A1 Ph\u01B0\u01A1ng N\xE0y</span>
+          <span>\u26A1 Phi\xEAn N\xE0y</span>
           <span style="color: #475569; font-size: 9px;">${sessLabel} tr\u01B0\u1EDBc</span>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">

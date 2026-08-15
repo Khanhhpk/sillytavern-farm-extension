@@ -327,7 +327,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     sessBlock = `
       <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; border: 1px solid #334155;">
         <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
-          <span>⚡ Phương Này</span>
+          <span>⚡ Phiên Này</span>
           <span style="color: #475569; font-size: 9px;">${sessLabel} trước</span>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
