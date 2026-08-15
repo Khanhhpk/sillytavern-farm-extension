@@ -264,6 +264,12 @@ export function renderStockChart(ticker) {
     <div style="position: absolute; top: 75%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); pointer-events: none;"></div>
   `;
   
+  const baseBottomPct = ((STOCKS[ticker].startPrice - minPrice) / range) * 100;
+  if (baseBottomPct >= 0 && baseBottomPct <= 100) {
+    html += `<div style="position: absolute; bottom: ${baseBottomPct}%; left: 0; width: 100%; height: 1px; border-bottom: 1px dashed rgba(234, 179, 8, 0.4); z-index: 1;" title="Giá nền: $${fmtMoney(STOCKS[ticker].startPrice)}"></div>`;
+  }
+
+  
   for (let i = 0; i < history.length; i++) {
     const price = history[i];
     const prevPrice = i > 0 ? history[i-1] : price;
@@ -404,6 +410,17 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
         </div>
       </div>
 
+      <!-- Help Panel -->
+      <div id="stk-help-panel" style="display: none; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px; color: #cbd5e1; font-size: 13px; line-height: 1.5; text-align: left;">
+        <p style="margin-top:0; color: #e2e8f0;"><b>📈 Sàn Chứng Khoán SillyTavern</b> hoạt động dựa trên thuật toán Random Walk kết hợp Lực hấp dẫn (Gravity).</p>
+        <ul style="padding-left: 20px; margin-bottom: 10px;">
+          <li style="margin-bottom: 4px;"><b style="color:#eab308">Giá nền (Base):</b> Giá trị thực của cổ phiếu. Đường đứt nét vàng trên biểu đồ đại diện cho Giá nền. Giá càng vọt xa Giá nền, "lực hút" kéo nó trở về càng mạnh. Canh mua khi giá rớt sâu dưới Giá nền là cách chơi an toàn nhất.</li>
+          <li style="margin-bottom: 4px;"><b style="color:#3b82f6">Vol (Biến động):</b> Biên độ dao động tối đa của mỗi phiên (nến).</li>
+          <li style="margin-bottom: 4px;"><b style="color:#ef4444">Drift (Độ trôi):</b> Lực đẩy bẩm sinh. Drift âm (-0.20%) nghĩa là về dài hạn cổ phiếu sẽ có xu hướng bào mòn tiền của bạn.</li>
+          <li><b style="color:#a855f7">Ký Quỹ (Margin):</b> Bạn có thể vay nợ để đánh lớn (tối đa x2 tài sản). Nhưng nếu tỉ lệ Nợ/Vốn chạm mốc 80%, bạn sẽ bị <b>Cháy tài khoản (Margin Call)</b> và mất trắng!</li>
+        </ul>
+      </div>
+
       <!-- Main Layout: Sidebar & Content -->
       <div style="display: flex; flex-wrap: wrap; gap: 12px; flex: 1;">
         
@@ -472,7 +489,15 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; z-index: 1; flex-wrap: wrap; gap: 6px;">
               <div>
                 <div style="font-weight: 800; font-size: 15px; color: ${STOCKS[selectedStock].color}; white-space: nowrap;">${STOCKS[selectedStock].name}</div>
-                <div style="font-size: 11px; color: #94a3b8;">Giá: $${fmtMoney(currentPrice)} | Vol: ±${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phiên | Drift: ${(STOCKS[selectedStock].drift * 100).toFixed(2)}%</div>
+                <div style="font-size: 11px; color: #94a3b8; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                  <span>Giá: <strong style="color: #f8fafc;">$${fmtMoney(currentPrice)}</strong></span>
+                  <span style="color: #475569;">|</span>
+                  <span title="Giá trị thực">Nền: <strong style="color: #eab308;">$${fmtMoney(STOCKS[selectedStock].startPrice)}</strong></span>
+                  <span style="color: #475569;">|</span>
+                  <span>Vol: ±${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phiên</span>
+                  <span style="color: #475569;">|</span>
+                  <span>Drift: ${(STOCKS[selectedStock].drift * 100).toFixed(2)}%</span>
+                </div>
               </div>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
 
@@ -485,15 +510,15 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
           </div>
 
           <!-- Trading Interface -->
-          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155;">
-            <div style="flex: 1; min-width: 100px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
-              <input type="number" id="stk-trade-amt" value="${currentTradeAmt}" min="1" style="flex: 1; min-width: 60px; padding: 9px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" placeholder="Số cp" />
-              <button id="stk-max-buy" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 6px 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Mua tối đa">MAX</button>
-              <button id="stk-max-sell" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 6px 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Bán toàn bộ">ALL</button>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155;">
+            <div style="flex: 1 1 140px; display: flex; gap: 5px; align-items: stretch;">
+              <input type="number" id="stk-trade-amt" value="${currentTradeAmt}" min="1" style="flex: 1; width: 0; padding: 9px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" placeholder="Số cp" />
+              <button id="stk-max-buy" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 0 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Mua tối đa">MAX</button>
+              <button id="stk-max-sell" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 0 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Bán toàn bộ">ALL</button>
             </div>
-            <div style="display: flex; gap: 8px; flex: 1; min-width: 200px;">
-              <button id="stk-buy" style="flex: 1; white-space: nowrap; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 10px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">MUA</button>
-              <button id="stk-sell" style="flex: 1; white-space: nowrap; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 10px 10px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">BÁN</button>
+            <div style="display: flex; gap: 8px; flex: 2 1 240px;">
+              <button id="stk-buy" style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 5px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">MUA</button>
+              <button id="stk-sell" style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 10px 5px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">BÁN</button>
             </div>
           </div>
           
@@ -537,7 +562,12 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     // Fallback if ui hasn't been updated
     All.openModal('Sàn Chứng Khoán', bodyHTML);
   }
+  // Restore help panel state if it was open
+  if (All.$id('stk-help-panel') && window._stkHelpOpen) {
+    All.$id('stk-help-panel').style.display = 'block';
+  }
 
+  // Bind Events
   const transferInp = All.$id('stk-transfer-amt');
   if (All.$id('stk-max-deposit')) {
     All.$id('stk-max-deposit').addEventListener('click', () => {

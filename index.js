@@ -3925,7 +3925,7 @@ function initUI() {
   
   <div id="stock-win" class="dungeon-win" style="display:none">
     <div class="titlebar" id="stock-drag">
-      <h1>${spriteSVG("stockMarket", 16)}S\xE0n Ch\u1EE9ng Kho\xE1n</h1>
+      <h1>${spriteSVG("stockMarket", 16)}S\xE0n Ch\u1EE9ng Kho\xE1n <span id="stk-help-btn" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; background:rgba(255,255,255,0.2); border-radius:50%; font-size:12px; color:white; margin-left:8px; vertical-align:middle; transition:all 0.2s;" title="H\u01B0\u1EDBng d\u1EABn ch\u01A1i" onclick="const p=document.getElementById('stk-help-panel'); if(p){ const h = p.style.display==='none'; p.style.display = h ? 'block' : 'none'; window._stkHelpOpen = h;} event.stopPropagation();">?</span></h1>
       <div class="close-x" id="stock-close">\xD7</div>
     </div>
     <div class="dungeon-view" id="stock-view" style="flex:1; overflow-y:auto; padding:10px;"></div>
@@ -56532,6 +56532,10 @@ function renderStockChart(ticker) {
     <div style="position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); pointer-events: none;"></div>
     <div style="position: absolute; top: 75%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); pointer-events: none;"></div>
   `;
+  const baseBottomPct = (STOCKS[ticker].startPrice - minPrice) / range * 100;
+  if (baseBottomPct >= 0 && baseBottomPct <= 100) {
+    html += `<div style="position: absolute; bottom: ${baseBottomPct}%; left: 0; width: 100%; height: 1px; border-bottom: 1px dashed rgba(234, 179, 8, 0.4); z-index: 1;" title="Gi\xE1 n\u1EC1n: $${fmtMoney(STOCKS[ticker].startPrice)}"></div>`;
+  }
   for (let i2 = 0; i2 < history.length; i2++) {
     const price = history[i2];
     const prevPrice = i2 > 0 ? history[i2 - 1] : price;
@@ -56656,6 +56660,17 @@ function openStockModal() {
         </div>
       </div>
 
+      <!-- Help Panel -->
+      <div id="stk-help-panel" style="display: none; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px; color: #cbd5e1; font-size: 13px; line-height: 1.5; text-align: left;">
+        <p style="margin-top:0; color: #e2e8f0;"><b>\u{1F4C8} S\xE0n Ch\u1EE9ng Kho\xE1n SillyTavern</b> ho\u1EA1t \u0111\u1ED9ng d\u1EF1a tr\xEAn thu\u1EADt to\xE1n Random Walk k\u1EBFt h\u1EE3p L\u1EF1c h\u1EA5p d\u1EABn (Gravity).</p>
+        <ul style="padding-left: 20px; margin-bottom: 10px;">
+          <li style="margin-bottom: 4px;"><b style="color:#eab308">Gi\xE1 n\u1EC1n (Base):</b> Gi\xE1 tr\u1ECB th\u1EF1c c\u1EE7a c\u1ED5 phi\u1EBFu. \u0110\u01B0\u1EDDng \u0111\u1EE9t n\xE9t v\xE0ng tr\xEAn bi\u1EC3u \u0111\u1ED3 \u0111\u1EA1i di\u1EC7n cho Gi\xE1 n\u1EC1n. Gi\xE1 c\xE0ng v\u1ECDt xa Gi\xE1 n\u1EC1n, "l\u1EF1c h\xFAt" k\xE9o n\xF3 tr\u1EDF v\u1EC1 c\xE0ng m\u1EA1nh. Canh mua khi gi\xE1 r\u1EDBt s\xE2u d\u01B0\u1EDBi Gi\xE1 n\u1EC1n l\xE0 c\xE1ch ch\u01A1i an to\xE0n nh\u1EA5t.</li>
+          <li style="margin-bottom: 4px;"><b style="color:#3b82f6">Vol (Bi\u1EBFn \u0111\u1ED9ng):</b> Bi\xEAn \u0111\u1ED9 dao \u0111\u1ED9ng t\u1ED1i \u0111a c\u1EE7a m\u1ED7i phi\xEAn (n\u1EBFn).</li>
+          <li style="margin-bottom: 4px;"><b style="color:#ef4444">Drift (\u0110\u1ED9 tr\xF4i):</b> L\u1EF1c \u0111\u1EA9y b\u1EA9m sinh. Drift \xE2m (-0.20%) ngh\u0129a l\xE0 v\u1EC1 d\xE0i h\u1EA1n c\u1ED5 phi\u1EBFu s\u1EBD c\xF3 xu h\u01B0\u1EDBng b\xE0o m\xF2n ti\u1EC1n c\u1EE7a b\u1EA1n.</li>
+          <li><b style="color:#a855f7">K\xFD Qu\u1EF9 (Margin):</b> B\u1EA1n c\xF3 th\u1EC3 vay n\u1EE3 \u0111\u1EC3 \u0111\xE1nh l\u1EDBn (t\u1ED1i \u0111a x2 t\xE0i s\u1EA3n). Nh\u01B0ng n\u1EBFu t\u1EC9 l\u1EC7 N\u1EE3/V\u1ED1n ch\u1EA1m m\u1ED1c 80%, b\u1EA1n s\u1EBD b\u1ECB <b>Ch\xE1y t\xE0i kho\u1EA3n (Margin Call)</b> v\xE0 m\u1EA5t tr\u1EAFng!</li>
+        </ul>
+      </div>
+
       <!-- Main Layout: Sidebar & Content -->
       <div style="display: flex; flex-wrap: wrap; gap: 12px; flex: 1;">
         
@@ -56725,7 +56740,15 @@ function openStockModal() {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; z-index: 1; flex-wrap: wrap; gap: 6px;">
               <div>
                 <div style="font-weight: 800; font-size: 15px; color: ${STOCKS[selectedStock].color}; white-space: nowrap;">${STOCKS[selectedStock].name}</div>
-                <div style="font-size: 11px; color: #94a3b8;">Gi\xE1: $${fmtMoney(currentPrice)} | Vol: \xB1${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phi\xEAn | Drift: ${(STOCKS[selectedStock].drift * 100).toFixed(2)}%</div>
+                <div style="font-size: 11px; color: #94a3b8; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                  <span>Gi\xE1: <strong style="color: #f8fafc;">$${fmtMoney(currentPrice)}</strong></span>
+                  <span style="color: #475569;">|</span>
+                  <span title="Gi\xE1 tr\u1ECB th\u1EF1c">N\u1EC1n: <strong style="color: #eab308;">$${fmtMoney(STOCKS[selectedStock].startPrice)}</strong></span>
+                  <span style="color: #475569;">|</span>
+                  <span>Vol: \xB1${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phi\xEAn</span>
+                  <span style="color: #475569;">|</span>
+                  <span>Drift: ${(STOCKS[selectedStock].drift * 100).toFixed(2)}%</span>
+                </div>
               </div>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
 
@@ -56738,15 +56761,15 @@ function openStockModal() {
           </div>
 
           <!-- Trading Interface -->
-          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155;">
-            <div style="flex: 1; min-width: 100px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
-              <input type="number" id="stk-trade-amt" value="${currentTradeAmt}" min="1" style="flex: 1; min-width: 60px; padding: 9px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" placeholder="S\u1ED1 cp" />
-              <button id="stk-max-buy" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 6px 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Mua t\u1ED1i \u0111a">MAX</button>
-              <button id="stk-max-sell" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 6px 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="B\xE1n to\xE0n b\u1ED9">ALL</button>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155;">
+            <div style="flex: 1 1 140px; display: flex; gap: 5px; align-items: stretch;">
+              <input type="number" id="stk-trade-amt" value="${currentTradeAmt}" min="1" style="flex: 1; width: 0; padding: 9px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" placeholder="S\u1ED1 cp" />
+              <button id="stk-max-buy" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 0 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Mua t\u1ED1i \u0111a">MAX</button>
+              <button id="stk-max-sell" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 0 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="B\xE1n to\xE0n b\u1ED9">ALL</button>
             </div>
-            <div style="display: flex; gap: 8px; flex: 1; min-width: 200px;">
-              <button id="stk-buy" style="flex: 1; white-space: nowrap; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 10px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">MUA</button>
-              <button id="stk-sell" style="flex: 1; white-space: nowrap; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 10px 10px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">B\xC1N</button>
+            <div style="display: flex; gap: 8px; flex: 2 1 240px;">
+              <button id="stk-buy" style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 5px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">MUA</button>
+              <button id="stk-sell" style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 10px 5px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">B\xC1N</button>
             </div>
           </div>
           
@@ -56781,6 +56804,9 @@ function openStockModal() {
     };
   } else {
     openModal("S\xE0n Ch\u1EE9ng Kho\xE1n", bodyHTML);
+  }
+  if ($id("stk-help-panel") && window._stkHelpOpen) {
+    $id("stk-help-panel").style.display = "block";
   }
   const transferInp = $id("stk-transfer-amt");
   if ($id("stk-max-deposit")) {
