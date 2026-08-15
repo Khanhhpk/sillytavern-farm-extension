@@ -63,7 +63,8 @@ export function updateMarket(now = Date.now()) {
         trend = Math.max(-1, Math.min(1, trend)); 
         
         let changePercent = STOCKS[t].baseVolatility * ((Math.random() - 0.5) + (trend * 0.5));
-        changePercent = Math.max(-0.8, Math.min(0.8, changePercent));
+        // Cap at ±30% per candle
+        changePercent = Math.max(-0.30, Math.min(0.30, changePercent));
         
         let newPrice = Math.max(1, currentPrice * (1 + changePercent));
         ctx.S.stock.history[t].push(newPrice);
@@ -97,7 +98,8 @@ export function updateMarket(now = Date.now()) {
         trend = Math.max(-1, Math.min(1, trend));
         
         let changePercent = STOCKS[t].baseVolatility * ((Math.random() - 0.5) + (trend * 0.5));
-        changePercent = Math.max(-0.8, Math.min(0.8, changePercent));
+        // Hard cap: limit single-candle swing to max ±30%
+        changePercent = Math.max(-0.30, Math.min(0.30, changePercent));
 
         let newPrice = currentPrice * (1 + changePercent);
         newPrice = Math.max(1, newPrice);
@@ -144,8 +146,20 @@ export function checkMarginCall() {
 export function depositBrokerage(amount) {
   if (amount <= 0 || ctx.S.coins < amount) return false;
   ctx.S.coins -= amount;
-  ctx.S.stock.balance += amount * 0.9;
-  ctx.S.stock.totalDeposited = (ctx.S.stock.totalDeposited || 0) + (amount * 0.9);
+  const received = amount * 0.9;
+  ctx.S.stock.balance += received;
+  ctx.S.stock.totalDeposited = (ctx.S.stock.totalDeposited || 0) + received;
+  // Reset session snapshot on new deposit
+  ctx.S.stock.session = {
+    startTime: Date.now(),
+    startBalance: ctx.S.stock.balance,
+    startPortfolio: Object.assign({}, ctx.S.stock.portfolio),
+    startPrices: Object.keys(STOCKS).reduce((acc, t) => {
+      const h = ctx.S.stock.history[t];
+      acc[t] = h ? h[h.length - 1] : STOCKS[t].startPrice;
+      return acc;
+    }, {})
+  };
   return true;
 }
 
@@ -225,7 +239,7 @@ export function renderStockChart(ticker) {
     const wickExtend = (seed % 4) + 1; // 1 to 4 percent wick
     
     html += `
-      <div style="flex: 1; min-width: 4px; position: relative; height: 100%;" title="Giá: $${price.toFixed(2)}">
+      <div style="flex: 1; min-width: 4px; position: relative; height: 100%;" title="$${fmtMoney(price)}">
         <!-- Wick -->
         <div style="position: absolute; width: 1px; background: ${color}; left: 50%; transform: translateX(-50%); 
                     bottom: ${Math.max(0, bottomPct - wickExtend)}%; height: ${heightPct + wickExtend * 2}%;"></div>
@@ -258,6 +272,57 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
   let plColor = pl >= 0 ? '#22c55e' : '#ef4444';
   let debtRatio = equity > 0 ? (((ctx.S.stock.debt || 0) / equity) * 100) : 0;
   let debtRatioColor = debtRatio > 50 ? '#ef4444' : debtRatio > 25 ? '#eab308' : '#22c55e';
+
+  // --- Session stats ---
+  const sess = ctx.S.stock.session;
+  let sessBlock = '';
+  if (sess && sess.startTime) {
+    // Current value of session-start portfolio at current prices
+    let sessPortfolioNow = 0;
+    let sessPortfolioStart = 0;
+    Object.keys(STOCKS).forEach(t => {
+      const sharesAtStart = sess.startPortfolio[t] || 0;
+      const priceNow = ctx.S.stock.history[t][ctx.S.stock.history[t].length - 1];
+      const priceStart = sess.startPrices[t] || priceNow;
+      sessPortfolioNow  += sharesAtStart * priceNow;
+      sessPortfolioStart += sharesAtStart * priceStart;
+    });
+    // Session equity start = startBalance + portfolio valued at start prices
+    const sessEquityStart = sess.startBalance + sessPortfolioStart;
+    // Session equity now = current balance + all current portfolio (incl. new buys)
+    const sessEquityNow = equity;
+    const sessPL = sessEquityNow - sessEquityStart;
+    const sessPLPct = sessEquityStart !== 0 ? (sessPL / Math.abs(sessEquityStart)) * 100 : 0;
+    const sessColor = sessPL >= 0 ? '#22c55e' : '#ef4444';
+    const sessDuration = Date.now() - sess.startTime;
+    const sessMins = Math.floor(sessDuration / 60000);
+    const sessHours = Math.floor(sessMins / 60);
+    const sessLabel = sessHours > 0 ? `${sessHours}h ${sessMins % 60}m` : `${sessMins}m`;
+    sessBlock = `
+      <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; border: 1px solid #334155;">
+        <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
+          <span>⚡ Phương Này</span>
+          <span style="color: #475569; font-size: 9px;">${sessLabel} trước</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+          <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 6px;">
+            <div style="font-size: 9px; color: #64748b;">Vốn ban đầu</div>
+            <div style="font-size: 11px; font-weight: bold; color: #e2e8f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(sessEquityStart)}</div>
+          </div>
+          <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 6px;">
+            <div style="font-size: 9px; color: #64748b;">Hiện tại</div>
+            <div style="font-size: 11px; font-weight: bold; color: #e2e8f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(sessEquityNow)}</div>
+          </div>
+          <div style="text-align: center; background: ${sessColor}18; border: 1px solid ${sessColor}40; padding: 5px; border-radius: 6px; grid-column: span 2;">
+            <div style="font-size: 9px; color: #64748b;">Lãi/Lỗ phiên</div>
+            <div style="font-size: 14px; font-weight: 800; color: ${sessColor};">${sessPL >= 0 ? '+' : ''}$${fmtMoney(sessPL)} <span style="font-size: 11px;">(${fmtPct(sessPLPct)})</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    sessBlock = `<div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; border: 1px dashed #334155; text-align: center; font-size: 11px; color: #475569;">⚡ Nạp tiền lần đầu để theo dõi phiên</div>`;
+  }
 
   let bodyHTML = `
     <div style="display: flex; flex-direction: column; height: 100%; gap: 12px; color: #e2e8f0;">
@@ -311,7 +376,9 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
             <button id="stk-deposit" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(37,99,235,0.3);">Nạp Tiền</button>
             <button id="stk-withdraw" style="background: #334155; color: white; border: 1px solid #475569; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;">Rút Tiền</button>
           </div>
-          
+
+          ${sessBlock}
+
           <!-- Margin Info -->
           <div style="background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155;">
             <div style="font-size: 12px; color: #94a3b8;">Nợ Margin: <span style="color: #ef4444; font-weight: bold;">$${fmtMoney(ctx.S.stock.debt || 0)}</span></div>
