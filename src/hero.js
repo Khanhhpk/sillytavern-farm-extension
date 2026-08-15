@@ -215,11 +215,11 @@ export function getPetStats(pId) {
   const st = PET_STATS[pId] || PET_STATS.default;
   
   return {
-    level: data.level,
-    exp: data.exp || 0,
-    maxHp: Math.floor(st.baseHp + (data.level - 1) * st.hpPerLv + enhHp * 50),
-    atk: Math.floor(st.baseAtk + (data.level - 1) * st.atkPerLv + enhAtk * 10),
-    spd: Number((st.baseSpd + enhSpd * 0.1).toFixed(2)),
+    level: pId === 'sans' ? 1 : data.level,
+    exp: pId === 'sans' ? 0 : (data.exp || 0),
+    maxHp: pId === 'sans' ? Math.floor(st.baseHp * Math.pow(1.5, enhHp)) : Math.floor(st.baseHp + (data.level - 1) * st.hpPerLv + enhHp * 50),
+    atk: pId === 'sans' ? st.baseAtk : Math.floor(st.baseAtk + (data.level - 1) * st.atkPerLv + enhAtk * 10),
+    spd: pId === 'sans' ? st.baseSpd : Number((st.baseSpd + enhSpd * 0.1).toFixed(2)),
     nextExp: Math.floor(100 * Math.pow(1.5, data.level - 1)),
     enhHpCost: 5000 + enhHp * 2000,
     enhAtkCost: 5000 + enhAtk * 2000,
@@ -320,8 +320,8 @@ function openPetSkills(pId) {
   
   const renderSkillRow = (typeId, skData, reqLvl, cost, isEquipped, isOtherEquipped) => {
     if (!skData) return '';
-    const isUnlocked = data[`${typeId}_unlocked`];
-    const levelMet = data.level >= reqLvl;
+    const isUnlocked = pId === 'sans' ? true : data[`${typeId}_unlocked`];
+    const levelMet = pId === 'sans' ? true : data.level >= reqLvl;
     let actionBtn = '';
     
     if (isUnlocked) {
@@ -368,7 +368,7 @@ function openPetSkills(pId) {
           <div style="font-size: 14px;">${pId === 'sans' ? 'DODGE' : 'HP'} Cơ bản: <b>${st.maxHp}</b> (+${st.enhHpLevel} Cường hóa)</div>
           <div style="font-size: 14px;">ATK Cơ bản: <b>${st.atk}</b> (+${st.enhAtkLevel} Cường hóa)</div>
           <div style="font-size: 14px;">Tốc đánh: <b>${st.spd}</b> (+${st.enhSpdLevel} Cường hóa)</div>
-          <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp/st.nextExp*100)}%"></div><span>${st.level >= 30 ? 'MAX LEVEL' : `EXP: ${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
+          <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${pId === 'sans' || st.level >= 30 ? 100 : Math.min(100, st.exp/st.nextExp*100)}%"></div><span>${pId === 'sans' ? 'MAX LEVEL' : (st.level >= 30 ? 'MAX LEVEL' : `EXP: ${Math.floor(st.exp)}/${st.nextExp}`)}</span></div>
         </div>
       </div>
       
@@ -385,14 +385,16 @@ function openPetSkills(pId) {
       <div class="hero-panel-section" style="margin-top:16px;">Cường Hóa (Enhance)</div>
       <div class="betsides">
         <div class="betside hero-deploy-btn" id="pet-enh-hp" data-pid="${pId}" data-cost="${st.enhHpCost}" style="margin-top:0; padding:10px; font-size:14px;">
-          +50 ${pId === 'sans' ? 'DODGE' : 'HP'}<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} Vàng)</span>
+          ${pId === 'sans' ? '+50% DODGE' : '+50 HP'}<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} Vàng)</span>
         </div>
+        ${pId === 'sans' ? '' : `
         <div class="betside hero-deploy-btn" id="pet-enh-atk" data-pid="${pId}" data-cost="${st.enhAtkCost}" style="margin-top:0; padding:10px; font-size:14px;">
           +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} Vàng)</span>
         </div>
         <div class="betside hero-deploy-btn" id="pet-enh-spd" data-pid="${pId}" data-cost="${st.enhSpdCost}" style="margin-top:0; padding:10px; font-size:14px;">
           +0.1 SPD<br><span style="font-size:12px; font-weight:normal;">(${st.enhSpdCost} Vàng)</span>
         </div>
+        `}
       </div>
       
       <div class="hero-deploy-btn" id="pet-back-btn" style="margin-top: 16px; background: #2c2538; border-color: #5d4a85;">
@@ -749,7 +751,7 @@ function heroTick() {
         if (petData.exp === undefined || isNaN(petData.exp)) petData.exp = 0;
         
         const pEl = All.$id('hpet-' + runState.pets.indexOf(p));
-        petData.exp += Math.floor(totalExp / runState.pets.length);
+        if (p.id !== 'sans') petData.exp += Math.floor(totalExp / runState.pets.length);
         
         let leveledUp = false;
         while (petData.level < 30) {
@@ -904,7 +906,7 @@ function heroTick() {
                     tMob.karma = (tMob.karma || 0) + 1;
                     const mobEl = All.$id('hmob-' + tMob.idx);
                     if (mobEl) setTimeout(() => showFloatDamage('-' + dmg, mobEl, '#fff'), 0);
-                    spawnSkillEffect(p.gbEl || pEl, mobEl, 'laser');
+                    spawnSkillEffect(p.gbEl || pEl, mobEl, 'laser_sans');
                 }
                 
                 if (p.skillActiveTime <= 0 && p.gbEl && !p.gbClosing) {
@@ -1593,24 +1595,29 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
     fx.style.top = (tRect.top - sRect.top + tRect.height/2 - 24) + 'px';
     setTimeout(() => fx.remove(), 800);
   }
-  else if (skillType === 'laser') {
+  else if (skillType === 'laser' || skillType === 'laser_sans') {
     if (!targetEl) return;
     const tRect = targetEl.getBoundingClientRect();
     const startRect = startEl.getBoundingClientRect();
     const sx = startRect.left - sRect.left + startRect.width/2;
     const sy = startRect.top - sRect.top + startRect.height/2;
-    const ex = tRect.left - sRect.left + tRect.width/2;
-    const ey = tRect.top - sRect.top + tRect.height/2;
     
-    const dist = Math.hypot(ex - sx, ey - sy);
-    const angle = Math.atan2(ey - sy, ex - sx);
+    let dist = 1000;
+    let angle = 0;
+    
+    if (skillType === 'laser') {
+        const ex = tRect.left - sRect.left + tRect.width/2;
+        const ey = tRect.top - sRect.top + tRect.height/2;
+        dist = Math.hypot(ex - sx, ey - sy);
+        angle = Math.atan2(ey - sy, ex - sx);
+    }
     
     const fx = document.createElement('div');
-    fx.className = 'laser-beam';
+    fx.className = skillType === 'laser_sans' ? 'laser-sans' : 'laser-beam';
     fx.style.width = dist + 'px';
     fx.style.left = sx + 'px';
     fx.style.top = sy + 'px';
-    fx.style.transform = `rotate(${angle}rad)`;
+    fx.style.transform = skillType === 'laser_sans' ? `translateY(-50%)` : `rotate(${angle}rad)`;
     scene.appendChild(fx);
     setTimeout(() => fx.remove(), 300);
   }

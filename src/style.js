@@ -735,6 +735,8 @@ export const styleCSS = `
     @keyframes fxStun { 0% { transform: translate(-50%, -100%) rotate(0deg); } 100% { transform: translate(-50%, -100%) rotate(360deg); } }
 
     .laser-beam { position: absolute; height: 4px; background: #ff88dd; z-index: 8; transform-origin: left center; pointer-events: none; animation: fxLaser 0.3s ease-out forwards; box-shadow: 0 0 8px #ff88dd, 0 0 15px #ff88dd; }
+    .laser-sans { position: absolute; height: 32px; background: linear-gradient(to bottom, #00ffff, #ffffff, #00ffff); z-index: 8; transform-origin: left center; pointer-events: none; animation: fxLaserSans 0.3s ease-out forwards; box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; }
+    @keyframes fxLaserSans { 0% { opacity: 1; transform: scaleY(0.1); } 20% { transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(0); } }
     @keyframes fxLaser { 0% { opacity: 1; transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(3); } }
 
     .pet-bump { animation: petBump 0.2s ease-out; }
