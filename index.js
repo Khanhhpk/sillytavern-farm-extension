@@ -10372,7 +10372,7 @@ function heroTick() {
       save();
       renderHeroUI();
       spawnMonster();
-    }, 1500);
+    }, 500);
     return;
   }
   const activeMonsters = runState.monsters.filter((m2) => m2.hp > 0 && m2.x <= 200 + m2.idx * 45 + 2);

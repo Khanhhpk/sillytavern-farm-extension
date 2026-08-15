@@ -811,7 +811,7 @@ function heroTick() {
       save();
       renderHeroUI();
       spawnMonster();
-    }, 1500);
+    }, 500);
     return;
   }
   
