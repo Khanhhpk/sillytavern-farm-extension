@@ -647,8 +647,15 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     const price = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
     const total = amt * price;
     let str = fmtMoney(total);
-    if (total >= 1000000) str = (total / 1000000).toFixed(2) + 'm';
-    else if (total >= 10000) str = (total / 1000).toFixed(1) + 'k';
+    if (total >= 10000) {
+      const units = ["", "k", "m", "b", "t", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+      const tier = Math.floor(Math.log10(total) / 3);
+      if (tier < units.length) {
+        str = (total / Math.pow(10, tier * 3)).toFixed(tier === 1 ? 1 : 2) + units[tier];
+      } else {
+        str = total.toExponential(2);
+      }
+    }
     
     const buyBtn = All.$id('stk-buy');
     const sellBtn = All.$id('stk-sell');

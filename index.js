@@ -56878,8 +56878,15 @@ function openStockModal() {
     const price = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
     const total = amt * price;
     let str = fmtMoney(total);
-    if (total >= 1e6) str = (total / 1e6).toFixed(2) + "m";
-    else if (total >= 1e4) str = (total / 1e3).toFixed(1) + "k";
+    if (total >= 1e4) {
+      const units = ["", "k", "m", "b", "t", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+      const tier = Math.floor(Math.log10(total) / 3);
+      if (tier < units.length) {
+        str = (total / Math.pow(10, tier * 3)).toFixed(tier === 1 ? 1 : 2) + units[tier];
+      } else {
+        str = total.toExponential(2);
+      }
+    }
     const buyBtn = $id("stk-buy");
     const sellBtn = $id("stk-sell");
     if (buyBtn) buyBtn.innerHTML = `MUA<div style="font-size:10px;font-weight:normal;opacity:0.8;margin-top:2px">-$${str}</div>`;
