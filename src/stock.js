@@ -246,97 +246,117 @@ export function openStockModal() {
   let totalPortfolioValue = 0;
   Object.keys(STOCKS).forEach(t => {
     const price = ctx.S.stock.history[t][ctx.S.stock.history[t].length - 1];
-    totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
+totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
   });
   let equity = ctx.S.stock.balance + totalPortfolioValue - (ctx.S.stock.debt || 0);
 
   const currentPrice = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
   const sharesOwned = ctx.S.stock.portfolio[selectedStock] || 0;
-
   let netInvested = ctx.S.stock.totalDeposited - ctx.S.stock.totalWithdrawn;
   let pl = equity - netInvested;
   let plPercent = netInvested !== 0 ? (pl / Math.abs(netInvested)) * 100 : 0;
   let plColor = pl >= 0 ? '#22c55e' : '#ef4444';
+  let debtRatio = equity > 0 ? (((ctx.S.stock.debt || 0) / equity) * 100) : 0;
+  let debtRatioColor = debtRatio > 50 ? '#ef4444' : debtRatio > 25 ? '#eab308' : '#22c55e';
 
   let bodyHTML = `
     <div style="display: flex; flex-direction: column; height: 100%; gap: 12px; color: #e2e8f0;">
       
       <!-- Top Bar: Portfolio Info (responsive grid) -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; background: #1e293b; padding: 12px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px;">
-          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Tổng TS</div>
-          <div style="font-weight: 800; font-size: 16px; color: #a855f7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(equity)}</div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px; background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Tổng TS</div>
+          <div style="font-weight: 800; font-size: 15px; color: #a855f7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(equity)}</div>
         </div>
-        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px;">
-          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Tiền Mặt</div>
-          <div style="font-weight: 800; font-size: 16px; color: #22c55e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(ctx.S.stock.balance)}</div>
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Tiền Mặt</div>
+          <div style="font-weight: 800; font-size: 15px; color: #22c55e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(ctx.S.stock.balance)}</div>
         </div>
-        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px;">
-          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Đầu Tư / Rút</div>
-          <div style="font-size: 12px; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Nợ Margin</div>
+          <div style="font-weight: 800; font-size: 15px; color: #ef4444; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(ctx.S.stock.debt || 0)}</div>
+          <div style="font-size: 10px; color: ${debtRatioColor};">${debtRatio.toFixed(1)}% vốn</div>
+        </div>
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Đầu Tư / Rút</div>
+          <div style="font-size: 11px; color: #e2e8f0;">
             <span style="color:#eab308">+$${fmtMoney(ctx.S.stock.totalDeposited)}</span><br><span style="color:#06b6d4">-$${fmtMoney(ctx.S.stock.totalWithdrawn)}</span>
           </div>
         </div>
-        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px;">
-          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Lãi/Lỗ</div>
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Lãi/Lỗ</div>
           <div style="font-weight: 800; font-size: 14px; color: ${plColor}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${pl >= 0 ? '+' : ''}$${fmtMoney(pl)}</div>
-          <div style="font-size: 11px; color: ${plColor};">${fmtPct(plPercent)}</div>
+          <div style="font-size: 10px; color: ${plColor};">${fmtPct(plPercent)}</div>
         </div>
       </div>
 
       <!-- Main Layout: Sidebar & Content -->
-      <div style="display: flex; flex-wrap: wrap; gap: 15px; flex: 1;">
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; flex: 1; overflow-y: auto;">
         
         <!-- Left Panel: Banking & Margin -->
-        <div style="flex: 1; min-width: 250px; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 15px;">
-          <div style="font-size: 14px; font-weight: bold; color: #cbd5e1; border-bottom: 1px solid #334155; padding-bottom: 8px;">Ngân Hàng & Khế Ước</div>
+        <div style="flex: 1; min-width: 230px; background: #1e293b; padding: 12px; border-radius: 12px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 13px; font-weight: bold; color: #cbd5e1; border-bottom: 1px solid #334155; padding-bottom: 6px;">Ngân Hàng & Khế Ước</div>
           
-          <div style="background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #1e293b;">
-            <div style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">Ví Vàng: <span style="color:#eab308; font-weight: bold;">${fmtMoney(Math.floor(ctx.S.coins))} G</span></div>
-            <div style="display: flex; background: #1e293b; border: 1px solid #475569; border-radius: 6px; overflow: hidden;">
-              <input type="number" id="stk-transfer-amt" value="1000" style="flex: 1; padding: 10px; background: transparent; color: #f8fafc; border: none; font-size: 16px; outline: none; transition: border-color 0.2s;" onfocus="this.parentElement.style.borderColor='#3b82f6'" onblur="this.parentElement.style.borderColor='#475569'" />
-              <div style="display: flex; padding-right: 5px; gap: 5px; align-items: center;">
-                <button id="stk-max-deposit" style="background: rgba(59,130,246,0.2); color: #3b82f6; border: 1px solid rgba(59,130,246,0.4); border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;" title="Nạp tối đa">ALL G</button>
-                <button id="stk-max-withdraw" style="background: rgba(148,163,184,0.2); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.4); border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;" title="Rút tối đa">ALL $</button>
-              </div>
+          <div style="background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #1e293b;">
+            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Ví Vàng: <span style="color:#eab308; font-weight: bold;">${fmtMoney(Math.floor(ctx.S.coins))} G</span></div>
+            <div style="display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
+              <input type="number" id="stk-transfer-amt" value="1000" style="flex: 1; min-width: 80px; padding: 8px; background: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" />
+              <button id="stk-max-deposit" style="background: rgba(59,130,246,0.2); color: #3b82f6; border: 1px solid rgba(59,130,246,0.4); border-radius: 4px; padding: 6px 10px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">ALL G</button>
+              <button id="stk-max-withdraw" style="background: rgba(148,163,184,0.2); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.4); border-radius: 4px; padding: 6px 10px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">ALL $</button>
             </div>
-            <div style="font-size: 11px; color: #f87171; margin-top: 5px; font-style: italic;">*Phí chuyển đổi liên ngân hàng 10%</div>
+            <div style="font-size: 10px; color: #f87171; margin-top: 4px; font-style: italic;">*Phí 10% mỗi lần chuyển đổi</div>
           </div>
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <button id="stk-deposit" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: opacity 0.2s; box-shadow: 0 2px 4px rgba(37,99,235,0.3);">Nạp Tiền</button>
-            <button id="stk-withdraw" style="background: #334155; color: white; border: 1px solid #475569; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: background 0.2s;">Rút Tiền</button>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button id="stk-deposit" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(37,99,235,0.3);">Nạp Tiền</button>
+            <button id="stk-withdraw" style="background: #334155; color: white; border: 1px solid #475569; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;">Rút Tiền</button>
           </div>
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto;">
-            <button id="stk-borrow" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.3);">Vay Margin</button>
-            <button id="stk-repay" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(16,185,129,0.3);">Trả Margin</button>
+          <!-- Margin Info -->
+          <div style="background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155;">
+            <div style="font-size: 12px; color: #94a3b8;">Nợ Margin: <span style="color: #ef4444; font-weight: bold;">$${fmtMoney(ctx.S.stock.debt || 0)}</span></div>
+            <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Tỉ lệ nợ/vốn: <span style="color: ${debtRatioColor}; font-weight: bold;">${debtRatio.toFixed(1)}%</span> (call ở 80%)</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto;">
+            <button id="stk-borrow" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.3);">Vay Margin</button>
+            <button id="stk-repay" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(16,185,129,0.3);">Trả Margin</button>
           </div>
         </div>
 
         <!-- Right Panel: Market & Chart -->
-        <div style="flex: 2; min-width: 300px; display: flex; flex-direction: column; gap: 15px;">
+        <div style="flex: 2; min-width: 280px; display: flex; flex-direction: column; gap: 10px;">
           
           <!-- Tab Selector -->
-          <div style="display: flex; gap: 8px;">
+          <div style="display: flex; gap: 6px;">
             ${Object.keys(STOCKS).map(t => {
               const isSelected = selectedStock === t;
+              const hist = ctx.S.stock.history[t];
+              const price = hist[hist.length - 1];
+              const prevPrice = hist.length > 1 ? hist[hist.length - 2] : price;
+              const chg = price - prevPrice;
+              const chgPct = prevPrice !== 0 ? (chg / prevPrice) * 100 : 0;
+              const chgColor = chg >= 0 ? '#22c55e' : '#ef4444';
               return `
-              <div id="stk-tab-${t}" style="flex: 1; text-align: center; background: ${isSelected ? '#334155' : '#1e293b'}; border: 1px solid ${isSelected ? '#64748b' : '#334155'}; border-radius: 8px; padding: 10px; cursor: pointer; transition: all 0.2s; box-shadow: ${isSelected ? '0 4px 6px rgba(0,0,0,0.2)' : 'none'};">
-                <div style="font-weight: 800; color: ${STOCKS[t].color}; font-size: 16px;">${t}</div>
-                <div style="font-size: 12px; color: #f8fafc; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(ctx.S.stock.history[t][ctx.S.stock.history[t].length - 1])}</div>
+              <div id="stk-tab-${t}" style="flex: 1; text-align: center; background: ${isSelected ? '#334155' : '#1e293b'}; border: 1px solid ${isSelected ? '#64748b' : '#334155'}; border-radius: 8px; padding: 8px 4px; cursor: pointer; transition: all 0.2s; box-shadow: ${isSelected ? '0 4px 6px rgba(0,0,0,0.2)' : 'none'};">
+                <div style="font-weight: 800; color: ${STOCKS[t].color}; font-size: 14px;">${t}</div>
+                <div style="font-size: 13px; color: #f8fafc; margin-top: 2px;">$${fmtMoney(price)}</div>
+                <div style="font-size: 10px; color: ${chgColor}; margin-top: 1px;">${chg >= 0 ? '▲' : '▼'} ${fmtPct(chgPct)}</div>
               </div>
             `}).join('')}
           </div>
 
           <!-- Chart Panel -->
-          <div style="background: #0f172a; padding: 15px; border-radius: 12px; border: 1px solid #334155; flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; z-index: 1; flex-wrap: wrap; gap: 6px;">
-              <div style="font-weight: 800; font-size: 16px; color: ${STOCKS[selectedStock].color}; white-space: nowrap;">${STOCKS[selectedStock].name}</div>
+          <div style="background: #0f172a; padding: 12px; border-radius: 12px; border: 1px solid #334155; flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; z-index: 1; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <div style="font-weight: 800; font-size: 15px; color: ${STOCKS[selectedStock].color}; white-space: nowrap;">${STOCKS[selectedStock].name}</div>
+                <div style="font-size: 11px; color: #94a3b8;">Giá: $${fmtMoney(currentPrice)} | Biến động: ${(STOCKS[selectedStock].baseVolatility * 100).toFixed(0)}%</div>
+              </div>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-                <button id="stk-forward" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Tua nhanh 100 phút">Tua Nhanh (x10)</button>
-                <div style="background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 20px; font-size: 12px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">
-                  Sở hữu: <span style="font-weight: bold; color: #fff;">${fmtMoney(sharesOwned)}</span>cp <span style="opacity:0.75">($${fmtMoney(sharesOwned * currentPrice)})</span>
+                <button id="stk-forward" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Tua nhanh 100 phút">Tua x10</button>
+                <div style="background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 20px; font-size: 11px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">
+                  ${fmtMoney(sharesOwned)} cp ($${fmtMoney(sharesOwned * currentPrice)})
                 </div>
               </div>
             </div>
@@ -344,19 +364,15 @@ export function openStockModal() {
           </div>
 
           <!-- Trading Interface -->
-          <div style="display: flex; gap: 10px; align-items: center; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155;">
-            <div style="flex: 1; display: flex; align-items: center; background: #0f172a; border: 1px solid #475569; border-radius: 6px; overflow: hidden; transition: border-color 0.2s;">
-              <input type="number" id="stk-trade-amt" value="10" min="1" style="width:100%; padding: 12px; background: transparent; color: #fff; border: none; font-size: 16px; outline: none;" onfocus="this.parentElement.style.borderColor='#3b82f6'" onblur="this.parentElement.style.borderColor='#475569'" placeholder="Số lượng cp" />
-              <div style="display: flex; padding-right: 5px; gap: 5px;">
-                <button id="stk-max-buy" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;" title="Mua tối đa bằng số dư">MAX MUA</button>
-                <button id="stk-max-sell" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;" title="Bán toàn bộ cp sở hữu">MAX BÁN</button>
-              </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155;">
+            <div style="flex: 1; min-width: 100px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
+              <input type="number" id="stk-trade-amt" value="10" min="1" style="flex: 1; min-width: 60px; padding: 9px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" placeholder="Số cp" />
+              <button id="stk-max-buy" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 6px 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Mua tối đa">MAX</button>
+              <button id="stk-max-sell" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 6px 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Bán toàn bộ">ALL</button>
             </div>
-            <button id="stk-buy" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">MUA</button>
-            <button id="stk-sell" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">BÁN</button>
+            <button id="stk-buy" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">MUA</button>
+            <button id="stk-sell" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">BÁN</button>
           </div>
-
-          <!-- Time Control (Removed duplicate button) -->
           
         </div>
       </div>
@@ -491,4 +507,13 @@ export function openStockModal() {
     openStockModal();
     All.toast("Đã tua nhanh 10 phiên giao dịch!");
   });
+}
+
+// Console command: window.FarmAll.resetStock()
+export function resetStock() {
+  ctx.S.stock = { balance: 0, debt: 0, portfolio: {}, history: {}, trends: {}, lastUpdate: Date.now(), totalDeposited: 0, totalWithdrawn: 0 };
+  selectedStock = 'SIL';
+  All.save();
+  if (All.toast) All.toast('Đã reset Sàn Chứng Khoán về ban đầu!');
+  console.log('[Stock] Reset complete.');
 }
