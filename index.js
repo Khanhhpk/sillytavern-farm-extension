@@ -10408,7 +10408,6 @@ function heroTick() {
             if (!p2.gbEl && !p2.gbClosing) {
               const scene3 = pEl ? pEl.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
               if (scene3) {
-                const ts = Date.now();
                 const gbBase = SANS_HERO_SPRITES.gaster_blaster;
                 p2.gbEl = document.createElement("div");
                 p2.gbEl.style.cssText = "position:absolute; bottom:16px; right:-80px; transition:right 0.25s ease-out;";
@@ -10419,16 +10418,16 @@ function heroTick() {
                 }, 10);
                 const img = document.getElementById("gb-img-" + pIdx);
                 setTimeout(() => {
-                  if (img) img.src = gbBase + "blaster_front_open_02.png?_=" + ts;
+                  if (img) img.src = gbBase + "blaster_front_open_02.png";
                 }, 250);
                 setTimeout(() => {
-                  if (img) img.src = gbBase + "blaster_front_fire_01.png?_=" + ts;
+                  if (img) img.src = gbBase + "blaster_front_fire_01.png";
                 }, 400);
                 setTimeout(() => {
-                  if (img) img.src = gbBase + "blaster_front_fire_02.png?_=" + ts;
+                  if (img) img.src = gbBase + "blaster_front_fire_02.png";
                 }, 550);
                 setTimeout(() => {
-                  if (img) img.src = gbBase + "blaster_front_fire_03.png?_=" + ts;
+                  if (img) img.src = gbBase + "blaster_front_fire_03.png";
                 }, 700);
               }
             }
@@ -10444,7 +10443,7 @@ function heroTick() {
             if (p2.skillActiveTime <= 0 && p2.gbEl && !p2.gbClosing) {
               p2.gbClosing = true;
               const img = p2.gbEl.querySelector("img");
-              if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_close.png?_=" + Date.now();
+              if (img) img.src = SANS_HERO_SPRITES.gaster_blaster + "blaster_front_close.png";
               setTimeout(() => {
                 if (p2.gbEl) {
                   p2.gbEl.remove();
