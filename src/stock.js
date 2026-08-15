@@ -131,13 +131,15 @@ export function updateMarket(now = Date.now()) {
     while (ctx.S.stock.history[t].length < 30) stepPrice(t);
   });
 
-  const intervals = Math.floor((now - ctx.S.stock.lastUpdate) / 600000);
-  if (intervals > 0) {
-    ctx.S.stock.lastUpdate += intervals * 600000;
-    for (let i = 0; i < intervals; i++) {
-      Object.keys(STOCKS).forEach(t => stepPrice(t));
-      checkMarginCall();
-    }
+  if (!ctx.S.stock.nextIntervalMs) {
+    ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 180000) + 60000;
+  }
+  
+  while (now - ctx.S.stock.lastUpdate >= ctx.S.stock.nextIntervalMs) {
+    ctx.S.stock.lastUpdate += ctx.S.stock.nextIntervalMs;
+    Object.keys(STOCKS).forEach(t => stepPrice(t));
+    checkMarginCall();
+    ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 180000) + 60000;
   }
 }
 
@@ -194,6 +196,16 @@ export function withdrawBrokerage(amount) {
   ctx.S.stock.balance -= amount;
   ctx.S.coins += amount * 0.9;
   ctx.S.stock.totalWithdrawn = (ctx.S.stock.totalWithdrawn || 0) + amount;
+  ctx.S.stock.session = {
+    startTime: Date.now(),
+    startBalance: ctx.S.stock.balance,
+    startPortfolio: Object.assign({}, ctx.S.stock.portfolio),
+    startPrices: Object.keys(STOCKS).reduce((acc, t) => {
+      const h = ctx.S.stock.history[t];
+      acc[t] = h ? h[h.length - 1] : STOCKS[t].startPrice;
+      return acc;
+    }, {})
+  };
   return true;
 }
 
@@ -448,7 +460,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
                 <div style="font-size: 11px; color: #94a3b8;">Giá: $${fmtMoney(currentPrice)} | Vol: ±${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phiên | Drift: ${(STOCKS[selectedStock].drift * 100).toFixed(2)}%</div>
               </div>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-                <button id="stk-forward" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Tua nhanh 100 phút">Tua x10</button>
+
                 <div style="background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 20px; font-size: 11px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">
                   ${fmtMoney(sharesOwned)} cp ($${fmtMoney(sharesOwned * currentPrice)})
                 </div>
@@ -605,15 +617,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     }
   });
 
-  All.$id('stk-forward').addEventListener('click', () => {
-    if (!ctx.S.stock) return;
-    // Tua nhanh 100 phút
-    ctx.S.stock.lastUpdate -= 600000 * 10;
-    updateMarket();
-    All.save();
-    openStockModal();
-    All.toast("Đã tua nhanh 10 phiên giao dịch!");
-  });
+
 }
 
 // Console command: window.FarmAll.resetStock()

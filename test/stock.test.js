@@ -75,7 +75,6 @@ function stepPrice(t) {
 
 function updateMarket(now) {
   if (!S.stock) return;
-  const intervals = Math.floor((now - S.stock.lastUpdate) / 600000); // 10 minutes
   
   Object.keys(STOCKS).forEach(t => {
     if (!S.stock.history[t]) S.stock.history[t] = [STOCKS[t].startPrice];
@@ -83,12 +82,15 @@ function updateMarket(now) {
     if (S.stock.portfolio[t] === undefined) S.stock.portfolio[t] = 0;
   });
   
-  if (intervals > 0) {
-    S.stock.lastUpdate += intervals * 600000;
-    for (let i = 0; i < intervals; i++) {
-      Object.keys(STOCKS).forEach(t => stepPrice(t));
-      checkMarginCall();
-    }
+  if (!S.stock.nextIntervalMs) {
+    S.stock.nextIntervalMs = Math.floor(randomFn() * 180000) + 60000;
+  }
+  
+  while (now - S.stock.lastUpdate >= S.stock.nextIntervalMs) {
+    S.stock.lastUpdate += S.stock.nextIntervalMs;
+    Object.keys(STOCKS).forEach(t => stepPrice(t));
+    checkMarginCall();
+    S.stock.nextIntervalMs = Math.floor(randomFn() * 180000) + 60000;
   }
 }
 
@@ -260,13 +262,16 @@ describe('Stock Market Module', () => {
 
   describe('Market Engine Validation', () => {
     it('should update prices based on time intervals', () => {
-      updateMarket(600000 * 2); // 20 minutes passed
-      assert.equal(S.stock.lastUpdate, 1200000);
+      // Setup predictable random interval
+      randomFn = () => 0; // nextIntervalMs will be 60000 (1 minute)
+      updateMarket(60000 * 2); // 2 minutes passed
+      assert.equal(S.stock.lastUpdate, 120000);
       assert.equal(S.stock.history['SIL'].length, 3); // 1 initial + 2 new
     });
 
     it('should cap history at 30 items', () => {
-      updateMarket(600000 * 50); // 50 intervals
+      randomFn = () => 0; // 1 min intervals
+      updateMarket(60000 * 50); // 50 intervals
       assert.equal(S.stock.history['SIL'].length, 30);
     });
 

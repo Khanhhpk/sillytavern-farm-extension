@@ -56421,13 +56421,14 @@ function updateMarket(now2 = Date.now()) {
     if (ctx.S.stock.portfolio[t2] === void 0) ctx.S.stock.portfolio[t2] = 0;
     while (ctx.S.stock.history[t2].length < 30) stepPrice(t2);
   });
-  const intervals = Math.floor((now2 - ctx.S.stock.lastUpdate) / 6e5);
-  if (intervals > 0) {
-    ctx.S.stock.lastUpdate += intervals * 6e5;
-    for (let i2 = 0; i2 < intervals; i2++) {
-      Object.keys(STOCKS).forEach((t2) => stepPrice(t2));
-      checkMarginCall();
-    }
+  if (!ctx.S.stock.nextIntervalMs) {
+    ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 18e4) + 6e4;
+  }
+  while (now2 - ctx.S.stock.lastUpdate >= ctx.S.stock.nextIntervalMs) {
+    ctx.S.stock.lastUpdate += ctx.S.stock.nextIntervalMs;
+    Object.keys(STOCKS).forEach((t2) => stepPrice(t2));
+    checkMarginCall();
+    ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 18e4) + 6e4;
   }
 }
 function checkMarginCall() {
@@ -56473,6 +56474,16 @@ function withdrawBrokerage(amount) {
   ctx.S.stock.balance -= amount;
   ctx.S.coins += amount * 0.9;
   ctx.S.stock.totalWithdrawn = (ctx.S.stock.totalWithdrawn || 0) + amount;
+  ctx.S.stock.session = {
+    startTime: Date.now(),
+    startBalance: ctx.S.stock.balance,
+    startPortfolio: Object.assign({}, ctx.S.stock.portfolio),
+    startPrices: Object.keys(STOCKS).reduce((acc, t2) => {
+      const h = ctx.S.stock.history[t2];
+      acc[t2] = h ? h[h.length - 1] : STOCKS[t2].startPrice;
+      return acc;
+    }, {})
+  };
   return true;
 }
 function buyStock(ticker, shares) {
@@ -56703,7 +56714,7 @@ function openStockModal() {
                 <div style="font-size: 11px; color: #94a3b8;">Gi\xE1: $${fmtMoney(currentPrice)} | Vol: \xB1${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phi\xEAn | Drift: ${(STOCKS[selectedStock].drift * 100).toFixed(2)}%</div>
               </div>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-                <button id="stk-forward" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Tua nhanh 100 ph\xFAt">Tua x10</button>
+
                 <div style="background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 20px; font-size: 11px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">
                   ${fmtMoney(sharesOwned)} cp ($${fmtMoney(sharesOwned * currentPrice)})
                 </div>
@@ -56839,14 +56850,6 @@ function openStockModal() {
     } else {
       toast("Kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu \u0111\u1EC3 b\xE1n!");
     }
-  });
-  $id("stk-forward").addEventListener("click", () => {
-    if (!ctx.S.stock) return;
-    ctx.S.stock.lastUpdate -= 6e5 * 10;
-    updateMarket();
-    save();
-    openStockModal();
-    toast("\u0110\xE3 tua nhanh 10 phi\xEAn giao d\u1ECBch!");
   });
 }
 function resetStock() {
