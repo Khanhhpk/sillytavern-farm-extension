@@ -431,11 +431,15 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
           <!-- Margin Info -->
           <div style="background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155;">
             <div style="font-size: 12px; color: #94a3b8;">Nợ Margin: <span style="color: #ef4444; font-weight: bold;">$${fmtMoney(ctx.S.stock.debt || 0)}</span></div>
-            <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Tỉ lệ nợ/vốn: <span style="color: ${debtRatioColor}; font-weight: bold;">${debtRatio.toFixed(1)}%</span> (call ở 80%)</div>
+            <div style="font-size: 10px; color: #64748b; margin-top: 2px; margin-bottom: 8px;">Tỉ lệ nợ/vốn: <span style="color: ${debtRatioColor}; font-weight: bold;">${debtRatio.toFixed(1)}%</span> (call ở 80%)</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+              <button id="stk-max-borrow" style="flex: 1; background: rgba(168,85,247,0.1); color: #a855f7; border: 1px solid rgba(168,85,247,0.3); border-radius: 4px; padding: 4px; font-size: 10px; font-weight: bold; cursor: pointer;">ALL Vay</button>
+              <button id="stk-max-repay" style="flex: 1; background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.3); border-radius: 4px; padding: 4px; font-size: 10px; font-weight: bold; cursor: pointer;">ALL Trả</button>
+            </div>
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto;">
-            <button id="stk-borrow" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.3);">Vay Margin</button>
+            <button id="stk-borrow" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.3);" title="Vay tiền (Phí 5%)">Vay Margin</button>
             <button id="stk-repay" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(16,185,129,0.3);">Trả Margin</button>
           </div>
         </div>
@@ -537,10 +541,17 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     All.$id('stk-max-deposit').addEventListener('click', () => {
       transferInp.value = Math.floor(ctx.S.coins);
     });
-  }
-  if (All.$id('stk-max-withdraw')) {
     All.$id('stk-max-withdraw').addEventListener('click', () => {
       transferInp.value = Math.floor(ctx.S.stock.balance);
+    });
+    All.$id('stk-max-borrow').addEventListener('click', () => {
+      let currentEquity = ctx.S.stock.balance + totalPortfolioValue - (ctx.S.stock.debt || 0);
+      const maxB = Math.floor((currentEquity * 2) - (ctx.S.stock.debt || 0));
+      transferInp.value = maxB > 0 ? maxB : 0;
+    });
+    All.$id('stk-max-repay').addEventListener('click', () => {
+      const maxR = Math.floor(Math.min((ctx.S.stock.debt || 0), ctx.S.stock.balance));
+      transferInp.value = maxR > 0 ? maxR : 0;
     });
   }
 
@@ -598,17 +609,33 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
   });
 
   const tradeInp = All.$id('stk-trade-amt');
+  
+  const updateTradeEst = () => {
+    const amt = parseFloat(tradeInp.value) || 0;
+    const price = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
+    const total = amt * price;
+    const buyBtn = All.$id('stk-buy');
+    const sellBtn = All.$id('stk-sell');
+    if (buyBtn) buyBtn.innerText = `MUA ($${fmtMoney(total)})`;
+    if (sellBtn) sellBtn.innerText = `BÁN ($${fmtMoney(total)})`;
+  };
+
   if (All.$id('stk-max-buy')) {
     All.$id('stk-max-buy').addEventListener('click', () => {
       const price = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
       tradeInp.value = Math.floor(ctx.S.stock.balance / price) || 0;
+      updateTradeEst();
     });
   }
   if (All.$id('stk-max-sell')) {
     All.$id('stk-max-sell').addEventListener('click', () => {
       tradeInp.value = ctx.S.stock.portfolio[selectedStock] || 0;
+      updateTradeEst();
     });
   }
+  
+  tradeInp.addEventListener('input', updateTradeEst);
+  updateTradeEst();
 
   All.$id('stk-buy').addEventListener('click', () => {
     const shares = parseFloat(All.$id('stk-trade-amt').value);
