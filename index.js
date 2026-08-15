@@ -901,6 +901,24 @@ var init_graphics = __esm({
         ".MMLMvvvvvvMLMM.",
         ".MMMMvvvvvvMMMM."
       ],
+      stockMarket: [
+        "................",
+        "...GG...........",
+        "..GGGG..........",
+        ".GG..GG.........",
+        "......GG........",
+        ".......GG.......",
+        "........GG......",
+        ".........GG.....",
+        "........GGGG....",
+        ".......GG..GG...",
+        "......GG....GG..",
+        ".....GG......GG.",
+        "....GG..........",
+        "...GG...........",
+        "..GG............",
+        "................"
+      ],
       fireball: [
         "................",
         ".......qq.......",
@@ -8005,6 +8023,10 @@ function renderPlots() {
             <div style="width:48px;height:48px;position:relative;margin:8px auto 0;">${spriteSVG("coin", 48)}</div>
             <div class="feature-name" style="color: #c8f5cc; text-shadow: 0 1px 2px #000;">Ng\xE2n H\xE0ng</div>
           </div>
+          <div class="explore-slot" id="eslot-stock" style="border-color: #a855f7; box-shadow: 0 4px 0 #7e22ce, inset 0 0 0 3px rgba(168,85,247,0.4);">
+            <div style="width:48px;height:48px;position:relative;margin:8px auto 0;">${spriteSVG("stockMarket", 48)}</div>
+            <div class="feature-name" style="color: #e9d5ff; text-shadow: 0 1px 2px #000;">S\xE0n CK</div>
+          </div>
         `;
         const cBtn = $id("eslot-casino");
         if (cBtn) cBtn.addEventListener("click", () => {
@@ -8018,6 +8040,8 @@ function renderPlots() {
         });
         const dBtn = $id("eslot-dungeon");
         if (dBtn) dBtn.addEventListener("click", () => openPanel("dungeon"));
+        const stkBtn = $id("eslot-stock");
+        if (stkBtn) stkBtn.addEventListener("click", () => openStockModal());
         const hBtn = $id("eslot-hero");
         if (hBtn) hBtn.addEventListener("click", () => openHeroPanel());
         const fBtn = $id("eslot-flea");
@@ -9760,6 +9784,7 @@ function loadState() {
   if (ctx.S.bankInvestTime === void 0) ctx.S.bankInvestTime = 0;
   if (ctx.S.bankDepositTime === void 0) ctx.S.bankDepositTime = Date.now();
   if (ctx.S.bankLastCollectionTime === void 0) ctx.S.bankLastCollectionTime = 0;
+  if (!ctx.S.stock) ctx.S.stock = { balance: 0, debt: 0, portfolio: {}, history: {}, trends: {}, lastUpdate: Date.now() };
   Object.keys(ctx.S.uniques || {}).forEach((k2) => {
     const item = ctx.S.uniques[k2];
     if (item && item.sp && item.spriteMap) {
@@ -56283,6 +56308,275 @@ var init_lixi = __esm({
   }
 });
 
+// src/stock.js
+function updateMarket() {
+  if (!ctx.S.stock) return;
+  const now2 = Date.now();
+  const intervals = Math.floor((now2 - ctx.S.stock.lastUpdate) / 6e5);
+  Object.keys(STOCKS).forEach((t2) => {
+    if (!ctx.S.stock.history[t2]) ctx.S.stock.history[t2] = [STOCKS[t2].startPrice];
+    if (ctx.S.stock.trends[t2] === void 0) ctx.S.stock.trends[t2] = 0;
+    if (ctx.S.stock.portfolio[t2] === void 0) ctx.S.stock.portfolio[t2] = 0;
+  });
+  if (intervals > 0) {
+    ctx.S.stock.lastUpdate += intervals * 6e5;
+    for (let i2 = 0; i2 < intervals; i2++) {
+      Object.keys(STOCKS).forEach((t2) => {
+        const hist = ctx.S.stock.history[t2];
+        let currentPrice = hist[hist.length - 1];
+        let trend = ctx.S.stock.trends[t2];
+        trend += (Math.random() - 0.5) * 0.5;
+        trend = Math.max(-1, Math.min(1, trend));
+        let changePercent = STOCKS[t2].baseVolatility * (Math.random() - 0.5 + trend * 0.5);
+        if (changePercent < -0.15) trend = -1;
+        if (changePercent > 0.15) trend = 1;
+        let newPrice = currentPrice * (1 + changePercent);
+        newPrice = Math.max(1, newPrice);
+        hist.push(newPrice);
+        if (hist.length > 30) hist.shift();
+        ctx.S.stock.trends[t2] = trend;
+      });
+      checkMarginCall();
+    }
+  }
+}
+function checkMarginCall() {
+  let equity = ctx.S.stock.balance;
+  Object.keys(ctx.S.stock.portfolio).forEach((t2) => {
+    const hist = ctx.S.stock.history[t2];
+    const currentPrice = hist ? hist[hist.length - 1] : 0;
+    equity += (ctx.S.stock.portfolio[t2] || 0) * currentPrice;
+  });
+  equity -= ctx.S.stock.debt || 0;
+  if (ctx.S.stock.debt > 0 && equity < ctx.S.stock.debt * 0.2) {
+    Object.keys(ctx.S.stock.portfolio).forEach((t2) => {
+      const hist = ctx.S.stock.history[t2];
+      const currentPrice = hist ? hist[hist.length - 1] : 0;
+      ctx.S.stock.balance += (ctx.S.stock.portfolio[t2] || 0) * currentPrice;
+      ctx.S.stock.portfolio[t2] = 0;
+    });
+    ctx.S.stock.balance -= ctx.S.stock.debt;
+    ctx.S.stock.debt = 0;
+    if (toast) toast("\u26A0\uFE0F B\u1ECA CALL MARGIN! B\xE1n th\xE1o to\xE0n b\u1ED9 t\xE0i s\u1EA3n!");
+  }
+}
+function depositBrokerage(amount) {
+  if (amount <= 0 || ctx.S.coins < amount) return false;
+  ctx.S.coins -= amount;
+  ctx.S.stock.balance += amount * 0.9;
+  return true;
+}
+function withdrawBrokerage(amount) {
+  if (amount <= 0 || ctx.S.stock.balance < amount) return false;
+  ctx.S.stock.balance -= amount;
+  ctx.S.coins += amount * 0.9;
+  return true;
+}
+function buyStock(ticker, shares) {
+  if (shares <= 0) return false;
+  const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
+  const cost = price * shares;
+  if (ctx.S.stock.balance >= cost) {
+    ctx.S.stock.balance -= cost;
+    ctx.S.stock.portfolio[ticker] += shares;
+    return true;
+  }
+  return false;
+}
+function sellStock(ticker, shares) {
+  if (shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
+  const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
+  const revenue = price * shares;
+  ctx.S.stock.portfolio[ticker] -= shares;
+  ctx.S.stock.balance += revenue;
+  return true;
+}
+function borrowMargin(amount) {
+  if (amount <= 0) return false;
+  ctx.S.stock.debt = (ctx.S.stock.debt || 0) + amount;
+  ctx.S.stock.balance += amount;
+  return true;
+}
+function repayMargin(amount) {
+  if (amount <= 0 || ctx.S.stock.balance < amount || (ctx.S.stock.debt || 0) < amount) return false;
+  ctx.S.stock.balance -= amount;
+  ctx.S.stock.debt -= amount;
+  return true;
+}
+function renderStockChart(ticker) {
+  const history = ctx.S.stock.history[ticker] || [];
+  if (history.length === 0) return "";
+  const minPrice = Math.min(...history) * 0.9;
+  const maxPrice = Math.max(...history) * 1.1;
+  const range = Math.max(0.1, maxPrice - minPrice);
+  let html = `<div style="display: flex; align-items: flex-end; height: 150px; width: 100%; border-bottom: 2px solid #555; border-left: 2px solid #555; padding-left: 5px; gap: 4px;">`;
+  for (let i2 = 0; i2 < history.length; i2++) {
+    const price = history[i2];
+    const prevPrice = i2 > 0 ? history[i2 - 1] : price;
+    const heightPct = (price - minPrice) / range * 100;
+    const color = price >= prevPrice ? "#22c55e" : "#ef4444";
+    html += `<div style="flex: 1; min-width: 5px; background: ${color}; height: ${Math.max(1, heightPct)}%; border-radius: 2px 2px 0 0;" title="${price.toFixed(2)}"></div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+function openStockModal() {
+  if (!ctx.S.stock) return;
+  updateMarket();
+  let totalPortfolioValue = 0;
+  Object.keys(STOCKS).forEach((t2) => {
+    const price = ctx.S.stock.history[t2][ctx.S.stock.history[t2].length - 1];
+    totalPortfolioValue += (ctx.S.stock.portfolio[t2] || 0) * price;
+  });
+  let equity = ctx.S.stock.balance + totalPortfolioValue - (ctx.S.stock.debt || 0);
+  const currentPrice = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
+  const sharesOwned = ctx.S.stock.portfolio[selectedStock] || 0;
+  let bodyHTML = `
+    <div style="padding: 10px; background: #1a1a2e; border-radius: 8px; color: #fff;">
+      
+      <!-- Top Bar: Portfolio Info -->
+      <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 10px;">
+        <div style="text-align: center;">
+          <div style="font-size: 11px; color: #aaa;">T\u1ED5ng T\xE0i S\u1EA3n (Equity)</div>
+          <div style="font-weight: bold; color: #a855f7;">$${equity.toFixed(2)}</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 11px; color: #aaa;">Ti\u1EC1n M\u1EB7t (Balance)</div>
+          <div style="font-weight: bold; color: #22c55e;">$${ctx.S.stock.balance.toFixed(2)}</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 11px; color: #aaa;">N\u1EE3 Margin</div>
+          <div style="font-weight: bold; color: #ef4444;">$${(ctx.S.stock.debt || 0).toFixed(2)}</div>
+        </div>
+      </div>
+
+      <!-- Deposit / Withdraw UI -->
+      <div style="display: flex; gap: 5px; margin-bottom: 15px; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px;">
+        <div style="flex: 1;">
+          <div style="font-size: 11px; color: #aaa;">V\xED V\xE0ng (Coins): <span style="color:#eab308">${Math.floor(ctx.S.coins)} G</span></div>
+          <input type="number" id="stk-transfer-amt" value="1000" style="width:100%; padding: 4px; background: #2a2a4e; color: #fff; border: 1px solid #444; border-radius: 4px; margin-top: 4px;" />
+          <div style="font-size: 10px; color: #ef4444; margin-top: 2px;">*Ph\xED chuy\u1EC3n 10%</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 15px;">
+          <div class="buy" id="stk-deposit" style="font-size: 12px; padding: 4px 10px;">N\u1EA1p Ti\u1EC1n</div>
+          <div class="buy" id="stk-withdraw" style="font-size: 12px; padding: 4px 10px;">R\xFAt Ti\u1EC1n</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 15px;">
+          <div class="buy" id="stk-borrow" style="font-size: 12px; padding: 4px 10px; background: #ef4444;">Vay Margin</div>
+          <div class="buy" id="stk-repay" style="font-size: 12px; padding: 4px 10px; background: #22c55e;">Tr\u1EA3 Margin</div>
+        </div>
+      </div>
+
+      <!-- Tab Selector -->
+      <div style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+        ${Object.keys(STOCKS).map((t2) => `
+          <div class="buy" id="stk-tab-${t2}" style="flex: 1; text-align: center; ${selectedStock === t2 ? "background: #4a5568;" : ""}">
+            <div style="font-weight: bold; color: ${STOCKS[t2].color}">${t2}</div>
+            <div style="font-size: 11px;">$${ctx.S.stock.history[t2][ctx.S.stock.history[t2].length - 1].toFixed(2)}</div>
+          </div>
+        `).join("")}
+      </div>
+
+      <!-- Chart Panel -->
+      <div style="margin-bottom: 15px; background: #0f0f1a; padding: 10px; border-radius: 4px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+          <div style="font-weight: bold; color: ${STOCKS[selectedStock].color};">${STOCKS[selectedStock].name}</div>
+          <div style="font-size: 12px; color: #aaa;">S\u1EDF h\u1EEFu: ${sharesOwned} cp ($${(sharesOwned * currentPrice).toFixed(2)})</div>
+        </div>
+        ${renderStockChart(selectedStock)}
+      </div>
+
+      <!-- Trading Interface -->
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <div style="flex: 1;">
+          <input type="number" id="stk-trade-amt" value="10" min="1" style="width:100%; padding: 8px; background: #2a2a4e; color: #fff; border: 1px solid #444; border-radius: 4px;" placeholder="S\u1ED1 l\u01B0\u1EE3ng c\u1ED5 phi\u1EBFu" />
+        </div>
+        <div class="buy" id="stk-buy" style="background: #22c55e; padding: 8px 20px; font-weight: bold;">Mua</div>
+        <div class="buy" id="stk-sell" style="background: #ef4444; padding: 8px 20px; font-weight: bold;">B\xE1n</div>
+      </div>
+
+    </div>
+  `;
+  openModal("S\xE0n Ch\u1EE9ng Kho\xE1n", bodyHTML);
+  $id("stk-deposit").addEventListener("click", () => {
+    const amt = parseFloat($id("stk-transfer-amt").value);
+    if (amt > 0 && depositBrokerage(amt)) {
+      save();
+      openStockModal();
+      if (renderStatus) renderStatus();
+    } else {
+      toast("Kh\xF4ng \u0111\u1EE7 V\xED V\xE0ng!");
+    }
+  });
+  $id("stk-withdraw").addEventListener("click", () => {
+    const amt = parseFloat($id("stk-transfer-amt").value);
+    if (amt > 0 && withdrawBrokerage(amt)) {
+      save();
+      openStockModal();
+      if (renderStatus) renderStatus();
+    } else {
+      toast("Kh\xF4ng \u0111\u1EE7 ti\u1EC1n trong T\xE0i kho\u1EA3n ch\u1EE9ng kho\xE1n!");
+    }
+  });
+  $id("stk-borrow").addEventListener("click", () => {
+    const amt = parseFloat($id("stk-transfer-amt").value);
+    let currentEquity = ctx.S.stock.balance + totalPortfolioValue - (ctx.S.stock.debt || 0);
+    if (amt > 0 && (ctx.S.stock.debt || 0) + amt <= currentEquity * 2) {
+      borrowMargin(amt);
+      save();
+      openStockModal();
+    } else {
+      toast("Kh\xF4ng th\u1EC3 vay qu\xE1 200% Equity!");
+    }
+  });
+  $id("stk-repay").addEventListener("click", () => {
+    const amt = parseFloat($id("stk-transfer-amt").value);
+    if (amt > 0 && repayMargin(amt)) {
+      save();
+      openStockModal();
+    } else {
+      toast("Kh\xF4ng \u0111\u1EE7 ti\u1EC1n m\u1EB7t ho\u1EB7c s\u1ED1 ti\u1EC1n tr\u1EA3 l\u1EDBn h\u01A1n N\u1EE3!");
+    }
+  });
+  Object.keys(STOCKS).forEach((t2) => {
+    $id(`stk-tab-${t2}`).addEventListener("click", () => {
+      selectedStock = t2;
+      openStockModal();
+    });
+  });
+  $id("stk-buy").addEventListener("click", () => {
+    const shares = parseFloat($id("stk-trade-amt").value);
+    if (shares > 0 && buyStock(selectedStock, shares)) {
+      save();
+      openStockModal();
+    } else {
+      toast("Kh\xF4ng \u0111\u1EE7 ti\u1EC1n m\u1EB7t \u0111\u1EC3 mua!");
+    }
+  });
+  $id("stk-sell").addEventListener("click", () => {
+    const shares = parseFloat($id("stk-trade-amt").value);
+    if (shares > 0 && sellStock(selectedStock, shares)) {
+      save();
+      openStockModal();
+    } else {
+      toast("Kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu \u0111\u1EC3 b\xE1n!");
+    }
+  });
+}
+var STOCKS, selectedStock;
+var init_stock = __esm({
+  "src/stock.js"() {
+    init_store();
+    init_all();
+    STOCKS = {
+      SIL: { name: "SillyTavern Inc.", baseVolatility: 0.05, startPrice: 100, color: "#3b82f6" },
+      FARM: { name: "N\xF4ng S\u1EA3n Farm", baseVolatility: 0.15, startPrice: 50, color: "#22c55e" },
+      CRASH: { name: "\u0110a C\u1EA5p Coin", baseVolatility: 0.35, startPrice: 10, color: "#ef4444" }
+    };
+    selectedStock = "SIL";
+  }
+});
+
 // src/all.js
 var all_exports = {};
 __export(all_exports, {
@@ -56316,6 +56610,7 @@ __export(all_exports, {
   SEC_LS_KEY: () => SEC_LS_KEY,
   SPR: () => SPR,
   SPRITE_PX: () => SPRITE_PX,
+  STOCKS: () => STOCKS,
   TOOLS: () => TOOLS,
   WITCH_CRY: () => WITCH_CRY,
   WORK_BAND: () => WORK_BAND,
@@ -56332,10 +56627,12 @@ __export(all_exports, {
   bagTab: () => bagTab,
   bjToast: () => bjToast,
   blockPrice: () => blockPrice,
+  borrowMargin: () => borrowMargin,
   buildEventPrompt: () => buildEventPrompt,
   buildTicket: () => buildTicket,
   buyBlock: () => buyBlock,
   buyConfirm: () => buyConfirm,
+  buyStock: () => buyStock,
   cacheBlockTxt: () => cacheBlockTxt,
   cacheCoins: () => cacheCoins,
   cacheDayTxt: () => cacheDayTxt,
@@ -56345,6 +56642,7 @@ __export(all_exports, {
   cashOut: () => cashOut,
   cashOutHero: () => cashOutHero,
   charName: () => charName,
+  checkMarginCall: () => checkMarginCall,
   clampN: () => clampN,
   closeBlackjack: () => closeBlackjack,
   closeDungeonView: () => closeDungeonView,
@@ -56358,6 +56656,7 @@ __export(all_exports, {
   curBlocks: () => curBlocks,
   curPlots: () => curPlots,
   decoLayer: () => decoLayer,
+  depositBrokerage: () => depositBrokerage,
   destroy: () => destroy,
   disposers: () => disposers,
   dragBar: () => dragBar,
@@ -56459,6 +56758,7 @@ __export(all_exports, {
   openSellDlg: () => openSellDlg,
   openSellSeedDlg: () => openSellSeedDlg,
   openSpriteViewerModal: () => openSpriteViewerModal,
+  openStockModal: () => openStockModal,
   openSyncHostModal: () => openSyncHostModal,
   openSyncJoinModal: () => openSyncJoinModal,
   openTakeout: () => openTakeout,
@@ -56510,9 +56810,11 @@ __export(all_exports, {
   renderPets: () => renderPets,
   renderPlots: () => renderPlots,
   renderStatus: () => renderStatus,
+  renderStockChart: () => renderStockChart,
   renderTimeout: () => renderTimeout,
   renderToolbar: () => renderToolbar,
   renderWitch: () => renderWitch,
+  repayMargin: () => repayMargin,
   requestDayEvent: () => requestDayEvent,
   resetDestroyed: () => resetDestroyed,
   resizeTimer: () => resizeTimer,
@@ -56535,6 +56837,7 @@ __export(all_exports, {
   sceneTimer: () => sceneTimer,
   sell: () => sell,
   sellSeed: () => sellSeed,
+  sellStock: () => sellStock,
   setInjection: () => setInjection,
   setMode: () => setMode,
   setPendingPick: () => setPendingPick,
@@ -56582,6 +56885,7 @@ __export(all_exports, {
   uiSelectFleaAdd: () => uiSelectFleaAdd,
   uiToggleLock: () => uiToggleLock,
   updateInjection: () => updateInjection,
+  updateMarket: () => updateMarket,
   updateNextScene: () => updateNextScene,
   useStarShard: () => useStarShard,
   wakePet: () => wakePet,
@@ -56593,7 +56897,8 @@ __export(all_exports, {
   weatherOf: () => weatherOf,
   wg: () => wg,
   witchArrive: () => witchArrive,
-  witchDeliver: () => witchDeliver
+  witchDeliver: () => witchDeliver,
+  withdrawBrokerage: () => withdrawBrokerage
 });
 var init_all = __esm({
   "src/all.js"() {
@@ -56622,6 +56927,7 @@ var init_all = __esm({
     init_cooking();
     init_bank();
     init_lixi();
+    init_stock();
   }
 });
 

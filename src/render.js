@@ -146,6 +146,10 @@ export function renderPlots() {
             <div style="width:48px;height:48px;position:relative;margin:8px auto 0;">${spriteSVG('coin', 48)}</div>
             <div class="feature-name" style="color: #c8f5cc; text-shadow: 0 1px 2px #000;">Ngân Hàng</div>
           </div>
+          <div class="explore-slot" id="eslot-stock" style="border-color: #a855f7; box-shadow: 0 4px 0 #7e22ce, inset 0 0 0 3px rgba(168,85,247,0.4);">
+            <div style="width:48px;height:48px;position:relative;margin:8px auto 0;">${spriteSVG('stockMarket', 48)}</div>
+            <div class="feature-name" style="color: #e9d5ff; text-shadow: 0 1px 2px #000;">Sàn CK</div>
+          </div>
         `;
         const cBtn = All.$id('eslot-casino');
         if (cBtn) cBtn.addEventListener('click', () => {
@@ -159,6 +163,8 @@ export function renderPlots() {
         });
         const dBtn = All.$id('eslot-dungeon');
         if (dBtn) dBtn.addEventListener('click', () => All.openPanel('dungeon'));
+        const stkBtn = All.$id('eslot-stock');
+        if (stkBtn) stkBtn.addEventListener('click', () => All.openStockModal());
         const hBtn = All.$id('eslot-hero');
         if (hBtn) hBtn.addEventListener('click', () => All.openHeroPanel());
         const fBtn = All.$id('eslot-flea');

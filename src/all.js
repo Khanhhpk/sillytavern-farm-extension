@@ -21,4 +21,6 @@ export * from './flea.js';
 export * from './blackjack.js';
 export * from './race.js';
 export * from './cooking.js';
-export * from './bank.js';export * from './lixi.js';
+export * from './bank.js';
+export * from './lixi.js';
+export * from './stock.js';

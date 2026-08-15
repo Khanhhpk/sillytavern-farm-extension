@@ -100,6 +100,7 @@ export function loadState() {
   if (ctx.S.bankInvestTime === undefined) ctx.S.bankInvestTime = 0;
   if (ctx.S.bankDepositTime === undefined) ctx.S.bankDepositTime = Date.now();
   if (ctx.S.bankLastCollectionTime === undefined) ctx.S.bankLastCollectionTime = 0;
+  if (!ctx.S.stock) ctx.S.stock = { balance: 0, debt: 0, portfolio: {}, history: {}, trends: {}, lastUpdate: Date.now() };
 
   Object.keys(ctx.S.uniques || {}).forEach(k => {
     const item = ctx.S.uniques[k];
