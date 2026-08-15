@@ -56690,25 +56690,34 @@ function openStockModal() {
       <!-- Help Panel -->
       <div id="stk-help-panel" style="display: none; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px; color: #cbd5e1; font-size: 13px; line-height: 1.5; text-align: left;">
         <details style="margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
-          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">\u{1F4D6} 1. C\u01A1 b\u1EA3n & Lu\u1EADt ch\u01A1i</summary>
-          <p style="margin-top:8px; margin-bottom:4px;"><b>\u{1F4C8} S\xE0n Ch\u1EE9ng Kho\xE1n SillyTavern</b> ho\u1EA1t \u0111\u1ED9ng d\u1EF1a tr\xEAn thu\u1EADt to\xE1n Random Walk k\u1EBFt h\u1EE3p L\u1EF1c h\u1EA5p d\u1EABn (Gravity).</p>
-          <p style="margin-top:0;">Ph\xED n\u1EA1p r\xFAt ti\u1EC1n l\xE0 <b>10%</b> m\u1ED7i l\u1EA7n giao d\u1ECBch. L\u1EC7nh mua b\xE1n ch\u1EE9ng kho\xE1n mi\u1EC5n ph\xED.</p>
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">\u{1F530} 1. H\u01B0\u1EDBng D\u1EABn Ch\u01A1i (D\xE0nh cho ng\u01B0\u1EDDi m\u1EDBi)</summary>
+          <div style="margin-top:8px;">
+            <p style="margin-top:0;">N\u1EBFu b\u1EA1n ch\u01B0a t\u1EEBng ch\u01A1i ch\u1EE9ng kho\xE1n, \u0111\u1EEBng lo! H\xE3y l\xE0m theo 4 b\u01B0\u1EDBc c\u01A1 b\u1EA3n sau:</p>
+            <ol style="padding-left: 20px; margin-bottom: 4px;">
+              <li style="margin-bottom: 4px;"><b>N\u1EA1p ti\u1EC1n:</b> \u1EDE g\xF3c tr\xE1i, nh\u1EADp s\u1ED1 V\xE0ng b\u1EA1n mu\u1ED1n ch\u01A1i v\xE0o \xF4 tr\u1ED1ng, r\u1ED3i b\u1EA5m <b>"N\u1EA1p Ti\u1EC1n"</b> \u0111\u1EC3 quy \u0111\u1ED5i ra Ti\u1EC1n M\u1EB7t ($). <i>(L\u01B0u \xFD: N\u1EA1p/R\xFAt s\u1EBD m\u1EA5t 10% ph\xED)</i>.</li>
+              <li style="margin-bottom: 4px;"><b>Ch\u1ECDn m\xE3:</b> Nh\xECn sang khu v\u1EF1c bi\u1EC3u \u0111\u1ED3 b\xEAn ph\u1EA3i. B\u1EA5m v\xE0o c\xE1c th\u1EBB (VD: <b>SIL, FARM, CRASH</b>) \u0111\u1EC3 xem gi\xE1 c\u1EE7a t\u1EEBng lo\u1EA1i. M\u0169i t\xEAn xanh/\u0111\u1ECF cho bi\u1EBFt gi\xE1 \u0111ang t\u0103ng hay gi\u1EA3m so v\u1EDBi phi\xEAn tr\u01B0\u1EDBc.</li>
+              <li style="margin-bottom: 4px;"><b>Mua v\xE0o (B\u1EAFt \u0111\xE1y):</b> Nh\u1EADp s\u1ED1 l\u01B0\u1EE3ng c\u1ED5 phi\u1EBFu b\u1EA1n mu\u1ED1n mua v\xE0o \xF4 "S\u1ED1 cp", r\u1ED3i b\u1EA5m n\xFAt <b>MUA</b> m\xE0u xanh. H\xE3y mua khi Gi\xE1 \u0111ang th\u1EA5p h\u01A1n <b>Gi\xE1 N\u1EC1n</b> (\u0111\u01B0\u1EDDng \u0111\u1EE9t n\xE9t m\xE0u v\xE0ng).</li>
+              <li style="margin-bottom: 4px;"><b>B\xE1n ra (Ch\u1ED1t l\u1EDDi):</b> \u0110\u1EE3i c\xE1c n\u1EBFn tr\xEAn bi\u1EC3u \u0111\u1ED3 ch\u1EA1y, khi gi\xE1 t\u0103ng cao h\u01A1n m\u1EE9c <b>Gi\xE1 V\u1ED1n</b> c\u1EE7a b\u1EA1n, b\u1EA5m n\xFAt <b>B\xC1N</b> m\xE0u \u0111\u1ECF \u0111\u1EC3 thu Ti\u1EC1n M\u1EB7t ($) v\u1EC1. Sau \u0111\xF3 b\u1EA1n c\xF3 th\u1EC3 R\xFAt Ti\u1EC1n \u0111\u1EC3 \u0111\u1ED5i ng\u01B0\u1EE3c ra V\xE0ng!</li>
+            </ol>
+          </div>
         </details>
         <details style="margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
-          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">\u{1F50D} 2. Gi\u1EA3i m\xE3 Ch\u1EC9 s\u1ED1</summary>
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">\u{1F50D} 2. Gi\u1EA3i m\xE3 C\xE1c Ch\u1EC9 S\u1ED1 (N\xE2ng cao)</summary>
           <ul style="padding-left: 20px; margin-top: 8px; margin-bottom: 4px;">
-            <li style="margin-bottom: 4px;"><b style="color:#eab308">Gi\xE1 n\u1EC1n (Base):</b> Gi\xE1 tr\u1ECB th\u1EF1c c\u1EE7a c\u1ED5 phi\u1EBFu. \u0110\u01B0\u1EDDng \u0111\u1EE9t n\xE9t v\xE0ng. Gi\xE1 c\xE0ng v\u1ECDt xa Gi\xE1 n\u1EC1n, "l\u1EF1c h\xFAt" k\xE9o v\u1EC1 c\xE0ng m\u1EA1nh.</li>
-            <li style="margin-bottom: 4px;"><b style="color:#3b82f6">Vol (Bi\u1EBFn \u0111\u1ED9ng):</b> Bi\xEAn \u0111\u1ED9 dao \u0111\u1ED9ng t\u1ED1i \u0111a c\u1EE7a m\u1ED7i n\u1EBFn.</li>
-            <li style="margin-bottom: 4px;"><b style="color:#ef4444">Drift (\u0110\u1ED9 tr\xF4i):</b> L\u1EF1c \u0111\u1EA9y b\u1EA9m sinh. Drift \xE2m ngh\u0129a l\xE0 v\u1EC1 d\xE0i h\u1EA1n c\u1ED5 phi\u1EBFu s\u1EBD c\xF3 xu h\u01B0\u1EDBng gi\u1EA3m. <b style="color:#22c55e">Drift thay \u0111\u1ED5i ng\u1EABu nhi\xEAn m\u1ED7i 100 n\u1EBFn (1 M\xF9a).</b></li>
-            <li><b style="color:#a855f7">S\u1EE9c mua Margin:</b> B\u1EA1n c\xF3 th\u1EC3 vay n\u1EE3 \u0111\u1EC3 mua th\xEAm (t\u1ED1i \u0111a x2 t\u1ED5ng t\xE0i s\u1EA3n). S\u1EE9c mua th\u1EF1c t\u1EBF b\u1EB1ng Ti\u1EC1n M\u1EB7t c\u1ED9ng H\u1EA1n m\u1EE9c vay.</li>
+            <li style="margin-bottom: 4px;"><b style="color:#eab308">Gi\xE1 n\u1EC1n (Base):</b> Gi\xE1 tr\u1ECB th\u1EF1c c\u1EE7a c\u1ED5 phi\u1EBFu (\u0110\u01B0\u1EDDng \u0111\u1EE9t n\xE9t). Gi\xE1 c\xE0ng v\u1ECDt xa Gi\xE1 n\u1EC1n, "l\u1EF1c h\xFAt" k\xE9o v\u1EC1 c\xE0ng m\u1EA1nh.</li>
+            <li style="margin-bottom: 4px;"><b style="color:#3b82f6">Vol (Bi\u1EBFn \u0111\u1ED9ng):</b> Bi\xEAn \u0111\u1ED9 dao \u0111\u1ED9ng t\u1ED1i \u0111a c\u1EE7a m\u1ED7i phi\xEAn (n\u1EBFn). Vol c\xE0ng to, gi\xE1 nh\u1EA3y c\xE0ng m\u1EA1nh.</li>
+            <li style="margin-bottom: 4px;"><b style="color:#ef4444">Drift (\u0110\u1ED9 tr\xF4i):</b> "L\u1EF1c \u0111\u1EA9y" ng\u1EA7m \u0111\u1ECBnh c\u1EE7a th\u1ECB tr\u01B0\u1EDDng. Drift \xE2m ngh\u0129a l\xE0 v\u1EC1 d\xE0i h\u1EA1n c\u1ED5 phi\u1EBFu s\u1EBD c\xF3 xu h\u01B0\u1EDBng r\u1EDBt gi\xE1 li\xEAn t\u1EE5c. <b style="color:#22c55e">C\u01A1 ch\u1EBF th\xFA v\u1ECB:</b> Drift s\u1EBD xoay chi\u1EC1u ng\u1EABu nhi\xEAn m\u1ED7i <b>100 n\u1EBFn (1 M\xF9a)</b>. H\xE3y nh\xECn thanh \u23F3 M\xF9a \u1EDF g\xF3c tr\xEAn!</li>
+            <li style="margin-bottom: 4px;"><b style="color:#a855f7">Gi\xE1 v\u1ED1n:</b> Trung b\xECnh s\u1ED1 ti\u1EC1n b\u1EA1n \u0111\xE3 b\u1ECF ra cho m\u1ED7i c\u1ED5 phi\u1EBFu \u0111ang gi\u1EEF.</li>
+            <li><b style="color:#a855f7">S\u1EE9c mua Margin:</b> Khi h\u1EBFt Ti\u1EC1n M\u1EB7t, b\u1EA1n c\xF3 th\u1EC3 vay n\u1EE3 \u0111\u1EC3 ti\u1EBFp t\u1EE5c \u0111\xE1nh l\u1EDBn (B\u1EA5m <b>Vay Margin</b>). T\u1ED5ng s\u1ED1 ti\u1EC1n b\u1EA1n c\xF3 th\u1EC3 vay t\u01B0\u01A1ng \u0111\u01B0\u01A1ng x2 t\u1ED5ng t\xE0i s\u1EA3n hi\u1EC7n c\xF3. S\u1EE9c mua th\u1EF1c t\u1EBF b\u1EB1ng Ti\u1EC1n M\u1EB7t c\u1ED9ng H\u1EA1n m\u1EE9c vay c\xF2n l\u1EA1i.</li>
           </ul>
         </details>
         <details style="background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
-          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">\u{1F4A1} 3. M\u1EB9o & Chi\u1EBFn thu\u1EADt</summary>
-          <ul style="padding-left: 20px; margin-top: 8px; margin-bottom: 4px;">
-            <li style="margin-bottom: 4px;">Canh mua khi gi\xE1 r\u1EDBt s\xE2u d\u01B0\u1EDBi Gi\xE1 n\u1EC1n l\xE0 c\xE1ch ch\u01A1i an to\xE0n nh\u1EA5t.</li>
-            <li style="margin-bottom: 4px;">Ch\xFA \xFD <b>M\xF9a (100 n\u1EBFn)</b> tr\xEAn g\xF3c ph\u1EA3i \u0111\u1EC3 \u0111\xF3n xu h\u01B0\u1EDBng Drift m\u1EDBi.</li>
-            <li>N\u1EBFu t\u1EC9 l\u1EC7 N\u1EE3/V\u1ED1n ch\u1EA1m m\u1ED1c 80%, b\u1EA1n s\u1EBD b\u1ECB <b>Ch\xE1y t\xE0i kho\u1EA3n (Margin Call)</b> v\xE0 m\u1EA5t tr\u1EAFng to\xE0n b\u1ED9 c\u1ED5 phi\u1EBFu! Qu\u1EA3n tr\u1ECB r\u1EE7i ro k\u1EF9 l\u01B0\u1EE1ng.</li>
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">\u{1F4A1} 3. C\u1EA3nh B\xE1o Ch\xE1y T\xE0i Kho\u1EA3n (Margin Call)</summary>
+          <p style="margin-top:8px; margin-bottom:4px; color:#fca5a5;">S\u1EED d\u1EE5ng \u0111\xF2n b\u1EA9y (Margin) l\xE0 con dao hai l\u01B0\u1EE1i!</p>
+          <ul style="padding-left: 20px; margin-top: 4px; margin-bottom: 4px;">
+            <li style="margin-bottom: 4px;">Khi b\u1EA1n vay n\u1EE3, b\u1EA1n s\u1EBD ph\u1EA3i tr\u1EA3 l\xE3i 5% m\u1ED7i l\u1EA7n b\u1EA5m Vay.</li>
+            <li style="margin-bottom: 4px;">N\u1EBFu th\u1ECB tr\u01B0\u1EDDng lao d\u1ED1c, T\u1ED5ng t\xE0i s\u1EA3n c\u1EE7a b\u1EA1n s\u1EBD gi\u1EA3m \u0111i.</li>
+            <li><b style="color:#ef4444">N\u1EBEU T\u1EC8 L\u1EC6 N\u1EE2 V\u01AF\u1EE2T QU\xC1 80% V\u1ED0N:</b> S\xE0n s\u1EBD ti\u1EBFn h\xE0nh <b>Call Margin</b>. To\xE0n b\u1ED9 c\u1ED5 phi\u1EBFu c\u1EE7a b\u1EA1n s\u1EBD b\u1ECB \xE9p b\xE1n th\xE1o t\u1EF1 \u0111\u1ED9ng \u1EDF gi\xE1 r\u1EBB m\u1EA1t \u0111\u1EC3 si\u1EBFt n\u1EE3. B\u1EA1n s\u1EBD m\u1EA5t tr\u1EAFng tay!</li>
           </ul>
         </details>
       </div>

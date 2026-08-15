@@ -446,25 +446,34 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       <!-- Help Panel -->
       <div id="stk-help-panel" style="display: none; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px; color: #cbd5e1; font-size: 13px; line-height: 1.5; text-align: left;">
         <details style="margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
-          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">📖 1. Cơ bản & Luật chơi</summary>
-          <p style="margin-top:8px; margin-bottom:4px;"><b>📈 Sàn Chứng Khoán SillyTavern</b> hoạt động dựa trên thuật toán Random Walk kết hợp Lực hấp dẫn (Gravity).</p>
-          <p style="margin-top:0;">Phí nạp rút tiền là <b>10%</b> mỗi lần giao dịch. Lệnh mua bán chứng khoán miễn phí.</p>
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">🔰 1. Hướng Dẫn Chơi (Dành cho người mới)</summary>
+          <div style="margin-top:8px;">
+            <p style="margin-top:0;">Nếu bạn chưa từng chơi chứng khoán, đừng lo! Hãy làm theo 4 bước cơ bản sau:</p>
+            <ol style="padding-left: 20px; margin-bottom: 4px;">
+              <li style="margin-bottom: 4px;"><b>Nạp tiền:</b> Ở góc trái, nhập số Vàng bạn muốn chơi vào ô trống, rồi bấm <b>"Nạp Tiền"</b> để quy đổi ra Tiền Mặt ($). <i>(Lưu ý: Nạp/Rút sẽ mất 10% phí)</i>.</li>
+              <li style="margin-bottom: 4px;"><b>Chọn mã:</b> Nhìn sang khu vực biểu đồ bên phải. Bấm vào các thẻ (VD: <b>SIL, FARM, CRASH</b>) để xem giá của từng loại. Mũi tên xanh/đỏ cho biết giá đang tăng hay giảm so với phiên trước.</li>
+              <li style="margin-bottom: 4px;"><b>Mua vào (Bắt đáy):</b> Nhập số lượng cổ phiếu bạn muốn mua vào ô "Số cp", rồi bấm nút <b>MUA</b> màu xanh. Hãy mua khi Giá đang thấp hơn <b>Giá Nền</b> (đường đứt nét màu vàng).</li>
+              <li style="margin-bottom: 4px;"><b>Bán ra (Chốt lời):</b> Đợi các nến trên biểu đồ chạy, khi giá tăng cao hơn mức <b>Giá Vốn</b> của bạn, bấm nút <b>BÁN</b> màu đỏ để thu Tiền Mặt ($) về. Sau đó bạn có thể Rút Tiền để đổi ngược ra Vàng!</li>
+            </ol>
+          </div>
         </details>
         <details style="margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
-          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">🔍 2. Giải mã Chỉ số</summary>
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">🔍 2. Giải mã Các Chỉ Số (Nâng cao)</summary>
           <ul style="padding-left: 20px; margin-top: 8px; margin-bottom: 4px;">
-            <li style="margin-bottom: 4px;"><b style="color:#eab308">Giá nền (Base):</b> Giá trị thực của cổ phiếu. Đường đứt nét vàng. Giá càng vọt xa Giá nền, "lực hút" kéo về càng mạnh.</li>
-            <li style="margin-bottom: 4px;"><b style="color:#3b82f6">Vol (Biến động):</b> Biên độ dao động tối đa của mỗi nến.</li>
-            <li style="margin-bottom: 4px;"><b style="color:#ef4444">Drift (Độ trôi):</b> Lực đẩy bẩm sinh. Drift âm nghĩa là về dài hạn cổ phiếu sẽ có xu hướng giảm. <b style="color:#22c55e">Drift thay đổi ngẫu nhiên mỗi 100 nến (1 Mùa).</b></li>
-            <li><b style="color:#a855f7">Sức mua Margin:</b> Bạn có thể vay nợ để mua thêm (tối đa x2 tổng tài sản). Sức mua thực tế bằng Tiền Mặt cộng Hạn mức vay.</li>
+            <li style="margin-bottom: 4px;"><b style="color:#eab308">Giá nền (Base):</b> Giá trị thực của cổ phiếu (Đường đứt nét). Giá càng vọt xa Giá nền, "lực hút" kéo về càng mạnh.</li>
+            <li style="margin-bottom: 4px;"><b style="color:#3b82f6">Vol (Biến động):</b> Biên độ dao động tối đa của mỗi phiên (nến). Vol càng to, giá nhảy càng mạnh.</li>
+            <li style="margin-bottom: 4px;"><b style="color:#ef4444">Drift (Độ trôi):</b> "Lực đẩy" ngầm định của thị trường. Drift âm nghĩa là về dài hạn cổ phiếu sẽ có xu hướng rớt giá liên tục. <b style="color:#22c55e">Cơ chế thú vị:</b> Drift sẽ xoay chiều ngẫu nhiên mỗi <b>100 nến (1 Mùa)</b>. Hãy nhìn thanh ⏳ Mùa ở góc trên!</li>
+            <li style="margin-bottom: 4px;"><b style="color:#a855f7">Giá vốn:</b> Trung bình số tiền bạn đã bỏ ra cho mỗi cổ phiếu đang giữ.</li>
+            <li><b style="color:#a855f7">Sức mua Margin:</b> Khi hết Tiền Mặt, bạn có thể vay nợ để tiếp tục đánh lớn (Bấm <b>Vay Margin</b>). Tổng số tiền bạn có thể vay tương đương x2 tổng tài sản hiện có. Sức mua thực tế bằng Tiền Mặt cộng Hạn mức vay còn lại.</li>
           </ul>
         </details>
         <details style="background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
-          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">💡 3. Mẹo & Chiến thuật</summary>
-          <ul style="padding-left: 20px; margin-top: 8px; margin-bottom: 4px;">
-            <li style="margin-bottom: 4px;">Canh mua khi giá rớt sâu dưới Giá nền là cách chơi an toàn nhất.</li>
-            <li style="margin-bottom: 4px;">Chú ý <b>Mùa (100 nến)</b> trên góc phải để đón xu hướng Drift mới.</li>
-            <li>Nếu tỉ lệ Nợ/Vốn chạm mốc 80%, bạn sẽ bị <b>Cháy tài khoản (Margin Call)</b> và mất trắng toàn bộ cổ phiếu! Quản trị rủi ro kỹ lưỡng.</li>
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">💡 3. Cảnh Báo Cháy Tài Khoản (Margin Call)</summary>
+          <p style="margin-top:8px; margin-bottom:4px; color:#fca5a5;">Sử dụng đòn bẩy (Margin) là con dao hai lưỡi!</p>
+          <ul style="padding-left: 20px; margin-top: 4px; margin-bottom: 4px;">
+            <li style="margin-bottom: 4px;">Khi bạn vay nợ, bạn sẽ phải trả lãi 5% mỗi lần bấm Vay.</li>
+            <li style="margin-bottom: 4px;">Nếu thị trường lao dốc, Tổng tài sản của bạn sẽ giảm đi.</li>
+            <li><b style="color:#ef4444">NẾU TỈ LỆ NỢ VƯỢT QUÁ 80% VỐN:</b> Sàn sẽ tiến hành <b>Call Margin</b>. Toàn bộ cổ phiếu của bạn sẽ bị ép bán tháo tự động ở giá rẻ mạt để siết nợ. Bạn sẽ mất trắng tay!</li>
           </ul>
         </details>
       </div>
