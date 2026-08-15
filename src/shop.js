@@ -169,7 +169,7 @@ export function openAchivModal() {
       ctx.S.achiv.sans.claimed = true;
       if (!ctx.S.pets.includes('sans')) { 
           ctx.S.pets.push('sans');
-          toast('✦ heh. Mất hơi lâu để mày gọi tao dậy đấy!');
+          toast('✦ heh. Sorry, ngủ quên mất, tới đâu rồi?');
       }
       save();
       openAchivModal(); 

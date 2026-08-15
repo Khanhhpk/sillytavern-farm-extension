@@ -6888,7 +6888,7 @@ function openAchivModal() {
     ctx.S.achiv.sans.claimed = true;
     if (!ctx.S.pets.includes("sans")) {
       ctx.S.pets.push("sans");
-      toast("\u2726 heh. M\u1EA5t h\u01A1i l\xE2u \u0111\u1EC3 m\xE0y g\u1ECDi tao d\u1EADy \u0111\u1EA5y!");
+      toast("\u2726 heh. Sorry, ng\u1EE7 qu\xEAn m\u1EA5t, t\u1EDBi \u0111\xE2u r\u1ED3i?");
     }
     save();
     openAchivModal();
