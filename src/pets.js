@@ -610,7 +610,7 @@ export function initPets() {
     if (def.job === 'plant') return petPlant(el, cry);
     if (def.job === 'fert') return petFert(el, cry);
     if (def.job === 'harvest') return petHarvest(el, cry);
-    if (def.job) return petBubble(el, cry);
+    if (def.job || petId === 'sans') return petBubble(el, cry);
     let txt = cry;
     if (now() - (ctx.S.petPoke[petId] || 0) >= POKE_CD) {
       ctx.S.petPoke[petId] = now();

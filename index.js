@@ -2106,7 +2106,7 @@ var init_graphics = __esm({
       peach_soda: { name: "B\xE9 soda \u0111\xE0o", page: 1, price: 9999, cry: ["B\u1ED1p\u2014\u2014!", "(n\u1ED5i m\u1ED9t bong b\xF3ng nh\u1ECF)", "X\xEC~", "(v\u1ECB ng\xF2n ng\u1ECDt)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 tinh linh soda v\u1ECB \u0111\xE0o \xB7 d\u1EC5 th\u01B0\u01A1ng qu\xE1 m\u1EE9c n\xEAn \u0111\u1EAFt nh\u1EA5t" },
       penguin: { name: "Chim c\xE1nh c\u1EE5t", page: 1, price: 1e5, cry: ["Pingu!", "N\xFAp n\xFAp~", "Tr\u01B0\u1EE3t tuy\u1EBFt n\xE0o!", "C\xE1nh c\u1EE5t!"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 AFK m\u1ED7i 1 ti\u1EBFng mang v\u1EC1 1 v\xE9 gacha ng\u1EABu nhi\xEAn (70% v\xE9 th\u01B0\u1EDDng, 30% v\xE9 \u0111\u1EB7c bi\u1EC7t)" },
       sans: { name: "Sans", page: 1, price: 0, special: true, cry: ["heh.", "...", "wanna have a bad time?", "(ng\u1EE7 g\u1EADt)", "cool dude.", "not gonna budge."], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 The coolest skeleton around \xB7 Si\xEAu th\xFA c\u01B0ng: T\u1EF1 \u0111\u1ED9ng ch\u0103m s\xF3c c\u1EA3 3 trang tr\u1EA1i" },
-      naoyaSlime: { name: "Naoya", page: 1, hidden: true, price: 0, cry: ["R\xE1c r\u01B0\u1EDFi!", "L\u0169 y\u1EBFu k\xE9m...", "B\u1EA9n h\u1EBFt c\u1EA3 ng\u01B0\u1EDDi!", "(l\u01B0\u1EDDm khinh b\u1EC9)"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t (Th\xE0nh t\u1EF1u) \xB7 K\u1EBB t\u1EF1 x\u01B0ng l\xE0 thi\xEAn t\xE0i nh\u01B0ng l\u1EA1i b\u1ECB k\u1EB9t trong h\xECnh h\xE0i Slime tr\xF2n vo n\xFAng n\xEDnh." }
+      naoyaSlime: { name: "Naoya", page: 1, hidden: true, price: 0, cry: ["R\xE1c r\u01B0\u1EDFi!", "L\u0169 y\u1EBFu k\xE9m...", "B\u1EA9n h\u1EBFt c\u1EA3 ng\u01B0\u1EDDi!", "(l\u01B0\u1EDDm khinh b\u1EC9)"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t (Th\xE0nh t\u1EF1u) \xB7 K\u1EBB t\u1EF1 x\u01B0ng l\xE0 thi\xEAn t\xE0i nh\u01B0ng l\u1EA1i b\u1ECB k\u1EB9t trong h\xECnh h\xE0i Slime tr\xF2n vo n\xFAng n\xEDnh. \u1EDE trang tr\u1EA1i, m\u1ED7i ti\u1EBFng AFK c\xF3 5% t\u1EC9 l\u1EC7 mang v\u1EC1 V\xE9 Gacha Si\xEAu C\u01B0\u1EDDng." }
     };
     PASSES = {
       water: { name: "V\xE9 v\xF9ng n\u01B0\u1EDBc", price: 6e3, desc: "M\u1EDF kho\xE1 ru\u1ED9ng v\xF9ng n\u01B0\u1EDBc (trang 2) + quy\u1EC1n mua b\xE9 tr\xF2n trang 2 v\xE0 h\u1EA1t gi\u1ED1ng thu\u1EF7 sinh, t\u1EB7ng k\xE8m \xF4 ru\u1ED9ng n\u1ED5i \u0111\u1EA7u ti\xEAn" },
@@ -4929,7 +4929,7 @@ function initPets() {
     if (def.job === "plant") return petPlant(el, cry);
     if (def.job === "fert") return petFert(el, cry);
     if (def.job === "harvest") return petHarvest(el, cry);
-    if (def.job) return petBubble(el, cry);
+    if (def.job || petId === "sans") return petBubble(el, cry);
     let txt = cry;
     if (now() - (ctx.S.petPoke[petId] || 0) >= POKE_CD) {
       ctx.S.petPoke[petId] = now();
@@ -8793,6 +8793,7 @@ function settle() {
       return;
     }
     const elapsed = now() - ctx.S.petFind[id];
+    if (id === "sans") return;
     if (id === "penguin") {
       const PENGUIN_CD = 60 * 60 * 1e3;
       if (elapsed >= PENGUIN_CD) {
@@ -8812,6 +8813,24 @@ function settle() {
         if (specGained > 0) msg.push(`${specGained} V\xE9 \u0110\u1EB7c Bi\u1EC7t`);
         toast(`Ch\xFA chim c\xE1nh c\u1EE5t v\u1EEBa \u0111i xa v\u1EC1 mang t\u1EB7ng b\u1EA1n: ${msg.join(" v\xE0 ")}!`);
         wChanged = true;
+      }
+      return;
+    }
+    if (id === "naoyaSlime") {
+      const NAOYA_CD = 60 * 60 * 1e3;
+      if (elapsed >= NAOYA_CD) {
+        const hours = Math.floor(elapsed / NAOYA_CD);
+        ctx.S.petFind[id] += hours * NAOYA_CD;
+        let superGained = 0;
+        for (let i2 = 0; i2 < hours; i2++) {
+          if (Math.random() < 0.05) superGained++;
+        }
+        if (superGained > 0) {
+          if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+          ctx.S.tickets.super = (ctx.S.tickets.super || 0) + superGained;
+          toast(`Naoya v\u1EEBa h\u1EADm h\u1EF1c quay v\u1EC1, n\xE9m cho b\u1EA1n ${superGained} V\xE9 Si\xEAu C\u01B0\u1EDDng: "C\u1EA7m l\u1EA5y \u0111\u1ED3 r\xE1c r\u01B0\u1EDFi n\xE0y \u0111i!"`);
+          wChanged = true;
+        }
       }
       return;
     }
