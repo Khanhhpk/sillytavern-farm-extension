@@ -4096,11 +4096,11 @@ var init_ui = __esm({
     init_utils();
     swX = null;
     swY = null;
-    window.testFarmReset = () => {
+    window["testFarmReset"] = () => {
       localStorage.removeItem("farm_reset_announce_seen");
       console.log("[Farm Ext] \u0110\xE3 x\xF3a c\u1EDD reset, h\xE3y \u0111\xF3ng m\u1EDF l\u1EA1i c\u1EEDa s\u1ED5 n\xF4ng tr\u1EA1i \u0111\u1EC3 xem b\u1EA3ng th\xF4ng b\xE1o.");
     };
-    window.testSansLock = () => {
+    window["testSansLock"] = () => {
       if (!ctx.S.achiv) return;
       if (ctx.S.achiv.sans) ctx.S.achiv.sans.claimed = false;
       ctx.S.pets = ctx.S.pets.filter((p2) => p2 !== "sans");
@@ -4108,7 +4108,7 @@ var init_ui = __esm({
       save();
       console.log("[Farm Ext] \u0110\xE3 kh\xF3a v\xE0 x\xF3a Sans kh\u1ECFi Balo/S\xE2n.");
     };
-    window.testSansMax = () => {
+    window["testSansMax"] = () => {
       ctx.S.coins = Math.max(ctx.S.coins || 0, 1e9);
       if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
       ctx.S.stats.kills = Math.max(ctx.S.stats.kills || 0, 1e3);
