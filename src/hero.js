@@ -217,8 +217,8 @@ export function getPetStats(pId) {
   return {
     level: pId === 'sans' ? 1 : data.level,
     exp: pId === 'sans' ? 0 : (data.exp || 0),
-    maxHp: pId === 'sans' ? Math.floor(st.baseHp * Math.pow(1.5, enhHp)) : Math.floor(st.baseHp + (data.level - 1) * st.hpPerLv + enhHp * 50),
-    atk: pId === 'sans' ? st.baseAtk : Math.floor(st.baseAtk + (data.level - 1) * st.atkPerLv + enhAtk * 10),
+    maxHp: pId === 'sans' ? Math.floor(st.baseHp * Math.pow(1.20, enhHp)) : Math.floor((st.baseHp + (data.level - 1) * st.hpPerLv) * Math.pow(1.15, enhHp)),
+    atk: pId === 'sans' ? st.baseAtk : Math.floor((st.baseAtk + (data.level - 1) * st.atkPerLv) * Math.pow(1.10, enhAtk)),
     spd: pId === 'sans' ? st.baseSpd : Number((st.baseSpd + enhSpd * 0.1).toFixed(2)),
     nextExp: Math.floor(500 * Math.pow(1.5, data.level - 1)),
     enhHpCost: 5000 + enhHp * 2000,
@@ -385,11 +385,11 @@ function openPetSkills(pId) {
       <div class="hero-panel-section" style="margin-top:16px;">Cường Hóa (Enhance)</div>
       <div class="betsides">
         <div class="betside hero-deploy-btn" id="pet-enh-hp" data-pid="${pId}" data-cost="${st.enhHpCost}" style="margin-top:0; padding:10px; font-size:14px;">
-          ${pId === 'sans' ? '+50% DODGE' : '+50 HP'}<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} Vàng)</span>
+          ${pId === 'sans' ? '+20% DODGE' : '+15% HP'}<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} Vàng)</span>
         </div>
         ${pId === 'sans' ? '' : `
         <div class="betside hero-deploy-btn" id="pet-enh-atk" data-pid="${pId}" data-cost="${st.enhAtkCost}" style="margin-top:0; padding:10px; font-size:14px;">
-          +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} Vàng)</span>
+          +10% ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} Vàng)</span>
         </div>
         <div class="betside hero-deploy-btn" id="pet-enh-spd" data-pid="${pId}" data-cost="${st.enhSpdCost}" style="margin-top:0; padding:10px; font-size:14px;">
           +0.1 SPD<br><span style="font-size:12px; font-weight:normal;">(${st.enhSpdCost} Vàng)</span>
