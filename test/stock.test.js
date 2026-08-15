@@ -85,7 +85,7 @@ function updateMarket(now) {
   
   if (!S.stock.currentDrifts) {
     S.stock.currentDrifts = {};
-    Object.keys(STOCKS).forEach(t => S.stock.currentDrifts[t] = STOCKS[t].drift + (randomFn() * 0.03) - 0.015);
+    Object.keys(STOCKS).forEach(t => S.stock.currentDrifts[t] = STOCKS[t].drift + (randomFn() * 0.04) - 0.02);
   }
 
   if (!S.stock.nextIntervalMs) {
@@ -99,7 +99,7 @@ function updateMarket(now) {
     S.stock.candleCount = (S.stock.candleCount || 0) + 1;
     if (S.stock.candleCount % 100 === 0) {
       Object.keys(STOCKS).forEach(t => {
-        S.stock.currentDrifts[t] = STOCKS[t].drift + (randomFn() * 0.03) - 0.015;
+        S.stock.currentDrifts[t] = STOCKS[t].drift + (randomFn() * 0.04) - 0.02;
       });
     }
 
@@ -330,7 +330,7 @@ describe('Stock Market Module', () => {
       updateMarket(1000000); // Forces interval updates to trigger tick
       assert.ok(S.stock.candleCount >= 100);
       assert.ok(S.stock.currentDrifts['CRASH'] !== undefined);
-      assert.ok(S.stock.currentDrifts['CRASH'] >= -0.03 && S.stock.currentDrifts['CRASH'] <= 0.0);
+      assert.ok(S.stock.currentDrifts['CRASH'] >= -0.035 && S.stock.currentDrifts['CRASH'] <= 0.005);
     });
 
     it('should enforce negative expected value (Gold Sink) over long term', () => {
