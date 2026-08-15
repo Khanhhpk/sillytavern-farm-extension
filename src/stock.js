@@ -283,23 +283,20 @@ export function renderStockChart(ticker) {
   const history = ctx.S.stock.history[ticker] || [];
   if (history.length === 0) return '';
   
-  const minPrice = Math.min(...history) * 0.9; // add 10% padding
-  const maxPrice = Math.max(...history) * 1.1;
-  const range = Math.max(0.1, maxPrice - minPrice);
+  const basePrice = STOCKS[ticker].startPrice;
+  const maxDiff = Math.max(basePrice * 0.05, ...history.map(p => Math.abs(p - basePrice))) * 1.15;
+  const minPrice = basePrice - maxDiff;
+  const maxPrice = basePrice + maxDiff;
+  const range = maxPrice - minPrice;
   
   let html = `<div style="display: flex; align-items: flex-end; height: 180px; width: 100%; border-bottom: 2px solid #475569; padding-left: 5px; gap: 4px; position: relative;">`;
   
   // Background grid lines
   html += `
     <div style="position: absolute; top: 25%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); pointer-events: none;"></div>
-    <div style="position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); pointer-events: none;"></div>
+    <div style="position: absolute; top: 50%; left: 0; width: 100%; height: 1px; border-bottom: 1px dashed rgba(234, 179, 8, 0.4); z-index: 1;" title="Giá nền: $${fmtMoney(basePrice)}"></div>
     <div style="position: absolute; top: 75%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); pointer-events: none;"></div>
   `;
-  
-  const baseBottomPct = ((STOCKS[ticker].startPrice - minPrice) / range) * 100;
-  if (baseBottomPct >= 0 && baseBottomPct <= 100) {
-    html += `<div style="position: absolute; bottom: ${baseBottomPct}%; left: 0; width: 100%; height: 1px; border-bottom: 1px dashed rgba(234, 179, 8, 0.4); z-index: 1;" title="Giá nền: $${fmtMoney(STOCKS[ticker].startPrice)}"></div>`;
-  }
 
   
   for (let i = 0; i < history.length; i++) {
