@@ -74,13 +74,6 @@ var init_store = __esm({
           console.log("\u274C N\xF4ng tr\u1EA1i ch\u01B0a \u0111\u01B0\u1EE3c t\u1EA3i (ctx.S null). H\xE3y m\u1EDF game m\u1ED9t l\u1EA7n tr\u01B0\u1EDBc.");
         }
       };
-      window["unlockTribulation"] = () => {
-        if (ctx.S) {
-          delete ctx.S.blockedUntil;
-          if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
-          console.log("\u2705 \u0110\xE3 gi\u1EA3i tr\u1EEB phong \u1EA5n Thi\xEAn Ki\u1EBFp! B\u1EA1n c\xF3 th\u1EC3 v\xE0o l\u1EA1i N\xF4ng Tr\u1EA1i.");
-        }
-      };
     }
   }
 });
@@ -4107,20 +4100,6 @@ var init_ui = __esm({
       ctx.S.petsOut = ctx.S.petsOut.filter((p2) => p2 !== "sans");
       save();
       console.log("[Farm Ext] \u0110\xE3 kh\xF3a v\xE0 x\xF3a Sans kh\u1ECFi Balo/S\xE2n.");
-    };
-    window["testSansMax"] = () => {
-      ctx.S.coins = Math.max(ctx.S.coins || 0, 1e9);
-      if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
-      ctx.S.stats.kills = Math.max(ctx.S.stats.kills || 0, 1e3);
-      ctx.S.stats.totalCooked = Math.max(ctx.S.stats.totalCooked || 0, 100);
-      ctx.S.passes.water = true;
-      ctx.S.passes.mine = true;
-      const normalPetsList = Object.keys(PETS).filter((id) => !PETS[id].hidden);
-      normalPetsList.forEach((id) => {
-        if (!ctx.S.pets.includes(id)) ctx.S.pets.push(id);
-      });
-      save();
-      console.log("[Farm Ext] \u0110\xE3 \u0111\u1EA9y max th\xE0nh t\u1EF1u Sans (V\xE0ng, Kills, N\u1EA5u \u0103n, T\u1EA5t c\u1EA3 Pets).");
     };
   }
 });

@@ -43,11 +43,5 @@ if (typeof window !== 'undefined') {
         }
     };
 
-    window['unlockTribulation'] = () => {
-        if (ctx.S) {
-            delete ctx.S.blockedUntil;
-            if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
-            console.log('✅ Đã giải trừ phong ấn Thiên Kiếp! Bạn có thể vào lại Nông Trại.');
-        }
-    };
+
 }
