@@ -409,7 +409,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
         
         <!-- Left Panel: Banking & Margin -->
         <div style="flex: 1; min-width: 230px; background: #1e293b; padding: 12px; border-radius: 12px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 12px;">
-          <div style="font-size: 13px; font-weight: bold; color: #cbd5e1; border-bottom: 1px solid #334155; padding-bottom: 6px;">Ngân Hàng & Khế Ước</div>
+          <div style="font-size: 13px; font-weight: bold; color: #cbd5e1; border-bottom: 1px solid #334155; padding-bottom: 6px;">Tài Khoản & Ký Quỹ</div>
           
           <div style="background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #1e293b;">
             <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Ví Vàng: <span style="color:#eab308; font-weight: bold;">${fmtMoney(Math.floor(ctx.S.coins))} G</span></div>
