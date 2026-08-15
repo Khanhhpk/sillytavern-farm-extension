@@ -876,7 +876,7 @@ function heroTick() {
                         p.gbEl.innerHTML = `<img id="gb-img-${pIdx}" src="${SANS_HERO_SPRITES.gb_open_01}" style="height:64px; image-rendering:pixelated; transform:scaleX(-1); display:block;">`;
                         scene.appendChild(p.gbEl);
                         setTimeout(() => { if (p.gbEl) p.gbEl.style.right = '30px'; }, 10);
-                        const img = document.getElementById('gb-img-' + pIdx);
+                        const img = /** @type {HTMLImageElement} */ (document.getElementById('gb-img-' + pIdx));
                         setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gb_open_02; }, 250);
                         setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gb_fire_01; }, 400);
                         setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gb_fire_02; }, 550);

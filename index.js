@@ -10420,7 +10420,10 @@ function heroTick() {
                 setTimeout(() => {
                   if (p2.gbEl) p2.gbEl.style.right = "30px";
                 }, 10);
-                const img = document.getElementById("gb-img-" + pIdx);
+                const img = (
+                  /** @type {HTMLImageElement} */
+                  document.getElementById("gb-img-" + pIdx)
+                );
                 setTimeout(() => {
                   if (img) img.src = SANS_HERO_SPRITES.gb_open_02;
                 }, 250);
