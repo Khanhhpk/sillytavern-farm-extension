@@ -56891,7 +56891,14 @@ function openStockModal() {
           <div style="background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155; margin-top: 8px;">
             <div style="font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 6px;">L\u1EC6NH T\u1EF0 \u0110\u1ED8NG B\xC1N (AUTO SELL)</div>
             <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch;">
-              <input type="number" id="stk-auto-amt" min="1" placeholder="S\u1ED1 cp" style="flex: 1; min-width: 60px; padding: 8px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 13px; outline: none;" />
+              <div style="flex: 1; min-width: 60px; display: flex; flex-direction: column; gap: 4px;">
+                <input type="number" id="stk-auto-amt" min="1" placeholder="S\u1ED1 cp" style="width: 100%; padding: 8px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 13px; outline: none; box-sizing: border-box;" />
+                <div style="display: flex; gap: 4px;">
+                  <button id="stk-auto-btn-14" style="flex: 1; background: #334155; color: #cbd5e1; border: none; border-radius: 4px; font-size: 9px; cursor: pointer; padding: 3px 0;">1/4</button>
+                  <button id="stk-auto-btn-12" style="flex: 1; background: #334155; color: #cbd5e1; border: none; border-radius: 4px; font-size: 9px; cursor: pointer; padding: 3px 0;">1/2</button>
+                  <button id="stk-auto-btn-all" style="flex: 1; background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; font-size: 9px; font-weight: bold; cursor: pointer; padding: 3px 0;">ALL</button>
+                </div>
+              </div>
               <input type="number" id="stk-auto-price" min="0.1" step="0.1" placeholder="Gi\xE1 m\u1EE5c ti\xEAu $" style="flex: 1; min-width: 80px; padding: 8px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 13px; outline: none;" />
               <div style="display: flex; gap: 4px; flex: 2; min-width: 140px;">
                 <button id="stk-auto-tp" style="flex: 1; background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 6px; padding: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">CH\u1ED0T L\u1EDCI</button>
@@ -57083,6 +57090,22 @@ function openStockModal() {
       toast("Kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu \u0111\u1EC3 b\xE1n!");
     }
   });
+  const autoAmtInp = $id("stk-auto-amt");
+  if ($id("stk-auto-btn-14")) {
+    $id("stk-auto-btn-14").addEventListener("click", () => {
+      autoAmtInp.value = Math.floor((ctx.S.stock.portfolio[selectedStock] || 0) * 0.25) || 0;
+    });
+  }
+  if ($id("stk-auto-btn-12")) {
+    $id("stk-auto-btn-12").addEventListener("click", () => {
+      autoAmtInp.value = Math.floor((ctx.S.stock.portfolio[selectedStock] || 0) * 0.5) || 0;
+    });
+  }
+  if ($id("stk-auto-btn-all")) {
+    $id("stk-auto-btn-all").addEventListener("click", () => {
+      autoAmtInp.value = ctx.S.stock.portfolio[selectedStock] || 0;
+    });
+  }
   if ($id("stk-auto-tp")) {
     $id("stk-auto-tp").addEventListener("click", () => {
       const shares = parseFloat($id("stk-auto-amt").value);
