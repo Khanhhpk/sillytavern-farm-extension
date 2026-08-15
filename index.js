@@ -9797,7 +9797,7 @@ function initHeroState() {
       let petData = ctx.S.hero.roster[pId];
       if (petData && petData.exp !== void 0 && !isNaN(petData.exp)) {
         while (petData.level < 30) {
-          const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
+          const nextExp = Math.floor(500 * Math.pow(1.5, petData.level - 1));
           if (petData.exp >= nextExp) {
             petData.exp -= nextExp;
             petData.level++;
@@ -9807,7 +9807,7 @@ function initHeroState() {
         }
         if (petData.level >= 30) {
           petData.level = 30;
-          petData.exp = Math.floor(100 * Math.pow(1.5, 29));
+          petData.exp = Math.floor(500 * Math.pow(1.5, 29));
         }
       }
     });
@@ -9825,7 +9825,7 @@ function getPetStats(pId) {
     maxHp: pId === "sans" ? Math.floor(st2.baseHp * Math.pow(1.5, enhHp)) : Math.floor(st2.baseHp + (data.level - 1) * st2.hpPerLv + enhHp * 50),
     atk: pId === "sans" ? st2.baseAtk : Math.floor(st2.baseAtk + (data.level - 1) * st2.atkPerLv + enhAtk * 10),
     spd: pId === "sans" ? st2.baseSpd : Number((st2.baseSpd + enhSpd * 0.1).toFixed(2)),
-    nextExp: Math.floor(100 * Math.pow(1.5, data.level - 1)),
+    nextExp: Math.floor(500 * Math.pow(1.5, data.level - 1)),
     enhHpCost: 5e3 + enhHp * 2e3,
     enhAtkCost: 5e3 + enhAtk * 2e3,
     enhSpdCost: 5e3 + enhSpd * 2e3,
@@ -10303,7 +10303,7 @@ function heroTick() {
         if (p2.id !== "sans") petData.exp += Math.floor(totalExp / runState.pets.length);
         let leveledUp = false;
         while (petData.level < 30) {
-          const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
+          const nextExp = Math.floor(500 * Math.pow(1.5, petData.level - 1));
           if (petData.exp >= nextExp) {
             petData.exp -= nextExp;
             petData.level++;
@@ -10314,7 +10314,7 @@ function heroTick() {
         }
         if (petData.level >= 30) {
           petData.level = 30;
-          petData.exp = Math.floor(100 * Math.pow(1.5, 29));
+          petData.exp = Math.floor(500 * Math.pow(1.5, 29));
         }
         if (leveledUp) {
           if (pEl) setTimeout(() => showFloatDamage("LEVEL UP!", pEl, "#f2c231"), 500);

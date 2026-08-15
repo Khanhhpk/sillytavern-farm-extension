@@ -189,7 +189,7 @@ export function initHeroState() {
       let petData = ctx.S.hero.roster[pId];
       if (petData && petData.exp !== undefined && !isNaN(petData.exp)) {
         while (petData.level < 30) {
-          const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
+          const nextExp = Math.floor(500 * Math.pow(1.5, petData.level - 1));
           if (petData.exp >= nextExp) {
             petData.exp -= nextExp;
             petData.level++;
@@ -199,7 +199,7 @@ export function initHeroState() {
         }
         if (petData.level >= 30) {
           petData.level = 30;
-          petData.exp = Math.floor(100 * Math.pow(1.5, 29));
+          petData.exp = Math.floor(500 * Math.pow(1.5, 29));
         }
       }
     });
@@ -220,7 +220,7 @@ export function getPetStats(pId) {
     maxHp: pId === 'sans' ? Math.floor(st.baseHp * Math.pow(1.5, enhHp)) : Math.floor(st.baseHp + (data.level - 1) * st.hpPerLv + enhHp * 50),
     atk: pId === 'sans' ? st.baseAtk : Math.floor(st.baseAtk + (data.level - 1) * st.atkPerLv + enhAtk * 10),
     spd: pId === 'sans' ? st.baseSpd : Number((st.baseSpd + enhSpd * 0.1).toFixed(2)),
-    nextExp: Math.floor(100 * Math.pow(1.5, data.level - 1)),
+    nextExp: Math.floor(500 * Math.pow(1.5, data.level - 1)),
     enhHpCost: 5000 + enhHp * 2000,
     enhAtkCost: 5000 + enhAtk * 2000,
     enhSpdCost: 5000 + enhSpd * 2000,
@@ -755,7 +755,7 @@ function heroTick() {
         
         let leveledUp = false;
         while (petData.level < 30) {
-          const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
+          const nextExp = Math.floor(500 * Math.pow(1.5, petData.level - 1));
           if (petData.exp >= nextExp) {
             petData.exp -= nextExp;
             petData.level++;
@@ -767,7 +767,7 @@ function heroTick() {
         
         if (petData.level >= 30) {
           petData.level = 30;
-          petData.exp = Math.floor(100 * Math.pow(1.5, 29)); // Cap it
+          petData.exp = Math.floor(500 * Math.pow(1.5, 29)); // Cap it
         }
         
         if (leveledUp) {
