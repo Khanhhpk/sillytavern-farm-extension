@@ -779,6 +779,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
 setInterval(() => {
   if (!ctx.S || !ctx.S.stock) return;
   if (updateMarket()) {
+    All.save();
     const stockWin = All.$id('stock-win');
     if (stockWin && stockWin.style.display === 'flex') {
       openStockModal();

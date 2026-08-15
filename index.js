@@ -902,21 +902,21 @@ var init_graphics = __esm({
         ".MMMMvvvvvvMMMM."
       ],
       stockMarket: [
-        "................",
-        "...GG...........",
-        "..GGGG..........",
-        ".GG..GG.........",
-        "......GG........",
-        ".......GG.......",
-        "........GG......",
-        ".........GG.....",
-        "........GGGG....",
-        ".......GG..GG...",
-        "......GG....GG..",
-        ".....GG......GG.",
-        "....GG..........",
-        "...GG...........",
-        "..GG............",
+        ".............EE.",
+        "............EEEE",
+        "...........EE.EE",
+        "..........EE..E.",
+        ".........EE.....",
+        ".....uu.EE......",
+        ".....uuEE.......",
+        ".E...uuE........",
+        ".EE..EE.........",
+        "RREEEEuu........",
+        "RREE.uuu........",
+        "RR...uuu...CCC..",
+        "RR...uuu...CCC..",
+        "RR...uuu...CCC..",
+        "MMMMMMMMMMMMMMMM",
         "................"
       ],
       fireball: [
@@ -57053,6 +57053,7 @@ var init_stock = __esm({
     setInterval(() => {
       if (!ctx.S || !ctx.S.stock) return;
       if (updateMarket()) {
+        save();
         const stockWin = $id("stock-win");
         if (stockWin && stockWin.style.display === "flex") {
           openStockModal();
