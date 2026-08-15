@@ -841,6 +841,17 @@ function heroTick() {
         }
       }
       
+      // Bone Time buff countdown
+      if (p.boneTimeActive && p.boneTimeDuration > 0) {
+        p.boneTimeDuration -= dt / 1000;
+        if (p.boneTimeDuration <= 0) {
+            p.boneTimeActive = false;
+            p.boneTimeDuration = 0;
+            p.spdBuff = p.spdBuff ? p.spdBuff / 3 : 1;
+            if (pEl) setTimeout(() => showFloatDamage('BONE TIME END', pEl, '#888'), 0);
+        }
+      }
+      
       // Active skills (with CD and Duration logic)
       if (p.skillActiveTime > 0) {
         p.skillActiveTime -= dt / 1000;
@@ -873,14 +884,14 @@ function heroTick() {
                     if (scene) {
                         p.gbEl = document.createElement('div');
                         p.gbEl.style.cssText = 'position:absolute; bottom:16px; right:-80px; transition:right 0.25s ease-out;';
-                        p.gbEl.innerHTML = `<img id="gb-img-${pIdx}" src="${SANS_HERO_SPRITES.gb_open_01}" style="height:64px; image-rendering:pixelated; transform:scaleX(-1); display:block;">`;
+                        p.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gb_open_01}" style="height:64px; image-rendering:pixelated; transform:scaleX(-1); display:block;">`;
                         scene.appendChild(p.gbEl);
+                        const gbImg = p.gbEl.querySelector('img');
                         setTimeout(() => { if (p.gbEl) p.gbEl.style.right = '30px'; }, 10);
-                        const img = /** @type {HTMLImageElement} */ (document.getElementById('gb-img-' + pIdx));
-                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gb_open_02; }, 250);
-                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gb_fire_01; }, 400);
-                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gb_fire_02; }, 550);
-                        setTimeout(() => { if (img) img.src = SANS_HERO_SPRITES.gb_fire_03; }, 700);
+                        setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_open_02; }, 250);
+                        setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_01; }, 400);
+                        setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_02; }, 550);
+                        setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_03; }, 700);
                     }
                 }
 
@@ -1110,18 +1121,10 @@ function heroTick() {
                p.sugarTimer = aSk.duration;
                setTimeout(() => showFloatDamage('SUGAR RUSH', pEl, '#ff80ab'), 0);
             } else if (aSk.type === 'bone_time') {
-                if (!runState.projectiles) runState.projectiles = [];
-                const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
-                const boneEl = document.createElement('div');
-                boneEl.style.cssText = 'position:absolute; bottom:18px; left:0; pointer-events:none; z-index:9;';
-                boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_blue}" style="height:24px; image-rendering:pixelated; display:block;">`;
-                if (scene) scene.appendChild(boneEl);
-                
-                runState.projectiles.push({
-                    x: 60 + (pIdx * 45), vx: 200,
-                    type: 'bone_blue', dmg: Math.floor(p.atk * 1.5), karmaAmt: 2,
-                    el: boneEl, hitCd: 0, bounces: 0, maxBounces: aSk.val
-                });
+                // Buff mode: x3 attack speed + bone on every hit for the duration
+                p.boneTimeActive = true;
+                p.boneTimeDuration = aSk.duration || 2;
+                p.spdBuff = (p.spdBuff || 1) * 3;
                 setTimeout(() => showFloatDamage('BONE TIME!', pEl, '#00ffff'), 0);
             } else if (aSk.type === 'snowball_roll') {
                const dmg = p.atk * aSk.val;
@@ -1230,16 +1233,30 @@ function heroTick() {
                 if (!runState.projectiles) runState.projectiles = [];
                 const pEl = All.$id('hpet-' + pIdx);
                 const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
+                
+                // Always spawn white bone (normal attack)
                 const boneEl = document.createElement('div');
                 boneEl.style.cssText = 'position:absolute; bottom:18px; left:0; pointer-events:none; z-index:9;';
                 boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_white}" style="height:24px; image-rendering:pixelated; display:block;">`;
                 if (scene) scene.appendChild(boneEl);
-                
                 runState.projectiles.push({
                     x: 60 + (pIdx * 45), vx: 200,
                     type: 'bone_white', dmg: p.atk, karmaAmt: 2,
                     el: boneEl, hitCd: 0
                 });
+
+                // During Bone Time buff: also spawn a bouncing blue bone
+                if (p.boneTimeActive) {
+                    const blueEl = document.createElement('div');
+                    blueEl.style.cssText = 'position:absolute; bottom:18px; left:0; pointer-events:none; z-index:9;';
+                    blueEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_blue}" style="height:24px; image-rendering:pixelated; display:block;">`;
+                    if (scene) scene.appendChild(blueEl);
+                    runState.projectiles.push({
+                        x: 60 + (pIdx * 45), vx: 200,
+                        type: 'bone_blue', dmg: Math.floor(p.atk * 1.5), karmaAmt: 2,
+                        el: blueEl, hitCd: 0, bounces: 0, maxBounces: 6
+                    });
+                }
                 
                 if (pEl) { pEl.classList.remove('idle'); pEl.classList.add('attack'); setTimeout(() => { pEl.classList.remove('attack'); pEl.classList.add('idle'); }, 300); }
                 return; // SKIP NORMAL DAMAGE
@@ -1365,23 +1382,23 @@ function heroTick() {
                             if (imgBase) imgBase.style.opacity = 0;
                             
                             const ketchupEl = document.createElement('div');
-                            ketchupEl.style.position = 'absolute';
-                            ketchupEl.innerHTML = `<img src="${SANS_HERO_SPRITES.stool_chup}sprite-10-1.png" style="height:48px; image-rendering:pixelated; transform: scaleX(-1);">`;
-                            ketchupEl.style.left = (60 + (pIdx * 45)) + 'px';
-                            ketchupEl.style.bottom = '10px';
+                            ketchupEl.style.cssText = `position:absolute; bottom:16px; left:${60 + (pIdx * 45)}px;`;
+                            ketchupEl.innerHTML = `<img src="${SANS_HERO_SPRITES.stool_chup_1}" style="height:32px; image-rendering:pixelated; display:block;">`;
                             scene.appendChild(ketchupEl);
                             
                             const kImg = ketchupEl.querySelector('img');
-                            for (let i = 2; i <= 10; i++) {
+                            // 10 frames, cycle 3 times over 3s (each frame ~100ms, 30 steps total)
+                            const frames = [SANS_HERO_SPRITES.stool_chup_1, SANS_HERO_SPRITES.stool_chup_2, SANS_HERO_SPRITES.stool_chup_3, SANS_HERO_SPRITES.stool_chup_4, SANS_HERO_SPRITES.stool_chup_5, SANS_HERO_SPRITES.stool_chup_6, SANS_HERO_SPRITES.stool_chup_7, SANS_HERO_SPRITES.stool_chup_8, SANS_HERO_SPRITES.stool_chup_9, SANS_HERO_SPRITES.stool_chup_10];
+                            for (let i = 1; i <= 30; i++) {
                                 setTimeout(() => {
-                                    if (kImg) kImg.src = SANS_HERO_SPRITES.stool_chup + `sprite-10-${i}.png`;
-                                }, (i - 1) * 100);
+                                    if (kImg) kImg.src = frames[i % 10];
+                                }, i * 100);
                             }
 
                             setTimeout(() => {
                                 ketchupEl.remove();
                                 if (imgBase) imgBase.style.opacity = 1;
-                            }, 1000);
+                            }, 3000);
                         }
                         if (pEl) setTimeout(() => showFloatDamage('MUCH BETTER', pEl, '#ff0000'), 0);
                         
@@ -1391,7 +1408,7 @@ function heroTick() {
                             const hpPet = All.$id('hp-pet-' + pIdx);
                             if (hpPet) hpPet.style.width = ((target.hp / target.maxHp) * 100) + '%';
                             if (pEl) showFloatDamage('HEAL 50%', pEl, '#a4dc8c');
-                        }, 1000);
+                        }, 3000);
                     }
                     if (sData.passive_eq === 'p2' && (target.hp / target.maxHp) < 0.5 && target.badTimeReady !== false) {
                         target.badTimeReady = false;

@@ -2036,7 +2036,16 @@ var init_graphics = __esm({
     SANS_HERO_SPRITES = {
       bone_white: _spHero("bone_white_short.png"),
       bone_blue: _spHero("bone_blue_long.png"),
-      stool_chup: _spHero("stool_chup/"),
+      stool_chup_1: _spHero("stool_chup/sprite-10-1.png"),
+      stool_chup_2: _spHero("stool_chup/sprite-10-2.png"),
+      stool_chup_3: _spHero("stool_chup/sprite-10-3.png"),
+      stool_chup_4: _spHero("stool_chup/sprite-10-4.png"),
+      stool_chup_5: _spHero("stool_chup/sprite-10-5.png"),
+      stool_chup_6: _spHero("stool_chup/sprite-10-6.png"),
+      stool_chup_7: _spHero("stool_chup/sprite-10-7.png"),
+      stool_chup_8: _spHero("stool_chup/sprite-10-8.png"),
+      stool_chup_9: _spHero("stool_chup/sprite-10-9.png"),
+      stool_chup_10: _spHero("stool_chup/sprite-10-10.png"),
       gb_open_01: _spHero("gaster_blaster/blaster_front_open_01.png"),
       gb_open_02: _spHero("gaster_blaster/blaster_front_open_02.png"),
       gb_fire_01: _spHero("gaster_blaster/blaster_front_fire_01.png"),
@@ -10385,6 +10394,15 @@ function heroTick() {
           });
         }
       }
+      if (p2.boneTimeActive && p2.boneTimeDuration > 0) {
+        p2.boneTimeDuration -= dt2 / 1e3;
+        if (p2.boneTimeDuration <= 0) {
+          p2.boneTimeActive = false;
+          p2.boneTimeDuration = 0;
+          p2.spdBuff = p2.spdBuff ? p2.spdBuff / 3 : 1;
+          if (pEl) setTimeout(() => showFloatDamage("BONE TIME END", pEl, "#888"), 0);
+        }
+      }
       if (p2.skillActiveTime > 0) {
         p2.skillActiveTime -= dt2 / 1e3;
         const actEq = data.active_eq;
@@ -10415,26 +10433,23 @@ function heroTick() {
               if (scene3) {
                 p2.gbEl = document.createElement("div");
                 p2.gbEl.style.cssText = "position:absolute; bottom:16px; right:-80px; transition:right 0.25s ease-out;";
-                p2.gbEl.innerHTML = `<img id="gb-img-${pIdx}" src="${SANS_HERO_SPRITES.gb_open_01}" style="height:64px; image-rendering:pixelated; transform:scaleX(-1); display:block;">`;
+                p2.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gb_open_01}" style="height:64px; image-rendering:pixelated; transform:scaleX(-1); display:block;">`;
                 scene3.appendChild(p2.gbEl);
+                const gbImg = p2.gbEl.querySelector("img");
                 setTimeout(() => {
                   if (p2.gbEl) p2.gbEl.style.right = "30px";
                 }, 10);
-                const img = (
-                  /** @type {HTMLImageElement} */
-                  document.getElementById("gb-img-" + pIdx)
-                );
                 setTimeout(() => {
-                  if (img) img.src = SANS_HERO_SPRITES.gb_open_02;
+                  if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_open_02;
                 }, 250);
                 setTimeout(() => {
-                  if (img) img.src = SANS_HERO_SPRITES.gb_fire_01;
+                  if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_01;
                 }, 400);
                 setTimeout(() => {
-                  if (img) img.src = SANS_HERO_SPRITES.gb_fire_02;
+                  if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_02;
                 }, 550);
                 setTimeout(() => {
-                  if (img) img.src = SANS_HERO_SPRITES.gb_fire_03;
+                  if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_03;
                 }, 700);
               }
             }
@@ -10659,23 +10674,9 @@ function heroTick() {
               p2.sugarTimer = aSk.duration;
               setTimeout(() => showFloatDamage("SUGAR RUSH", pEl, "#ff80ab"), 0);
             } else if (aSk.type === "bone_time") {
-              if (!runState.projectiles) runState.projectiles = [];
-              const scene3 = pEl ? pEl.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
-              const boneEl = document.createElement("div");
-              boneEl.style.cssText = "position:absolute; bottom:18px; left:0; pointer-events:none; z-index:9;";
-              boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_blue}" style="height:24px; image-rendering:pixelated; display:block;">`;
-              if (scene3) scene3.appendChild(boneEl);
-              runState.projectiles.push({
-                x: 60 + pIdx * 45,
-                vx: 200,
-                type: "bone_blue",
-                dmg: Math.floor(p2.atk * 1.5),
-                karmaAmt: 2,
-                el: boneEl,
-                hitCd: 0,
-                bounces: 0,
-                maxBounces: aSk.val
-              });
+              p2.boneTimeActive = true;
+              p2.boneTimeDuration = aSk.duration || 2;
+              p2.spdBuff = (p2.spdBuff || 1) * 3;
               setTimeout(() => showFloatDamage("BONE TIME!", pEl, "#00ffff"), 0);
             } else if (aSk.type === "snowball_roll") {
               const dmg = p2.atk * aSk.val;
@@ -10796,6 +10797,23 @@ function heroTick() {
                 el: boneEl,
                 hitCd: 0
               });
+              if (p2.boneTimeActive) {
+                const blueEl = document.createElement("div");
+                blueEl.style.cssText = "position:absolute; bottom:18px; left:0; pointer-events:none; z-index:9;";
+                blueEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_blue}" style="height:24px; image-rendering:pixelated; display:block;">`;
+                if (scene3) scene3.appendChild(blueEl);
+                runState.projectiles.push({
+                  x: 60 + pIdx * 45,
+                  vx: 200,
+                  type: "bone_blue",
+                  dmg: Math.floor(p2.atk * 1.5),
+                  karmaAmt: 2,
+                  el: blueEl,
+                  hitCd: 0,
+                  bounces: 0,
+                  maxBounces: 6
+                });
+              }
               if (pEl2) {
                 pEl2.classList.remove("idle");
                 pEl2.classList.add("attack");
@@ -10934,21 +10952,20 @@ function heroTick() {
                     const imgBase = pEl ? pEl.querySelector("img") : null;
                     if (imgBase) imgBase.style.opacity = 0;
                     const ketchupEl = document.createElement("div");
-                    ketchupEl.style.position = "absolute";
-                    ketchupEl.innerHTML = `<img src="${SANS_HERO_SPRITES.stool_chup}sprite-10-1.png" style="height:48px; image-rendering:pixelated; transform: scaleX(-1);">`;
-                    ketchupEl.style.left = 60 + pIdx * 45 + "px";
-                    ketchupEl.style.bottom = "10px";
+                    ketchupEl.style.cssText = `position:absolute; bottom:16px; left:${60 + pIdx * 45}px;`;
+                    ketchupEl.innerHTML = `<img src="${SANS_HERO_SPRITES.stool_chup_1}" style="height:32px; image-rendering:pixelated; display:block;">`;
                     scene3.appendChild(ketchupEl);
                     const kImg = ketchupEl.querySelector("img");
-                    for (let i2 = 2; i2 <= 10; i2++) {
+                    const frames = [SANS_HERO_SPRITES.stool_chup_1, SANS_HERO_SPRITES.stool_chup_2, SANS_HERO_SPRITES.stool_chup_3, SANS_HERO_SPRITES.stool_chup_4, SANS_HERO_SPRITES.stool_chup_5, SANS_HERO_SPRITES.stool_chup_6, SANS_HERO_SPRITES.stool_chup_7, SANS_HERO_SPRITES.stool_chup_8, SANS_HERO_SPRITES.stool_chup_9, SANS_HERO_SPRITES.stool_chup_10];
+                    for (let i2 = 1; i2 <= 30; i2++) {
                       setTimeout(() => {
-                        if (kImg) kImg.src = SANS_HERO_SPRITES.stool_chup + `sprite-10-${i2}.png`;
-                      }, (i2 - 1) * 100);
+                        if (kImg) kImg.src = frames[i2 % 10];
+                      }, i2 * 100);
                     }
                     setTimeout(() => {
                       ketchupEl.remove();
                       if (imgBase) imgBase.style.opacity = 1;
-                    }, 1e3);
+                    }, 3e3);
                   }
                   if (pEl) setTimeout(() => showFloatDamage("MUCH BETTER", pEl, "#ff0000"), 0);
                   setTimeout(() => {
@@ -10957,7 +10974,7 @@ function heroTick() {
                     const hpPet2 = $id("hp-pet-" + pIdx);
                     if (hpPet2) hpPet2.style.width = target.hp / target.maxHp * 100 + "%";
                     if (pEl) showFloatDamage("HEAL 50%", pEl, "#a4dc8c");
-                  }, 1e3);
+                  }, 3e3);
                 }
                 if (sData.passive_eq === "p2" && target.hp / target.maxHp < 0.5 && target.badTimeReady !== false) {
                   target.badTimeReady = false;
