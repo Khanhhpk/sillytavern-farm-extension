@@ -56374,6 +56374,37 @@ function fmtPct(p2) {
   let str = abs >= 1e6 ? ">" + 1e6.toFixed(0) + "%" : abs.toFixed(1) + "%";
   return (p2 > 0 ? "+" : "-") + str;
 }
+function stepPrice(t2) {
+  const S = STOCKS[t2];
+  const hist = ctx.S.stock.history[t2];
+  let price = hist[hist.length - 1];
+  let trend = ctx.S.stock.trends[t2];
+  const priceRatio = price / S.startPrice;
+  trend += (Math.random() - 0.5) * S.trendNoise;
+  if (S.pumpChance && Math.random() < S.pumpChance) {
+    trend += S.pumpStrength;
+  }
+  let gravity = 0;
+  for (const zone of S.gravityZones) {
+    if (zone.above !== void 0 && priceRatio > zone.above) {
+      gravity = zone.pull;
+      break;
+    }
+    if (zone.below !== void 0 && priceRatio < zone.below) {
+      gravity = zone.pull;
+      break;
+    }
+  }
+  trend += gravity;
+  trend *= S.trendDecay;
+  trend = Math.max(-1, Math.min(1, trend));
+  let change = S.drift + S.vol * (Math.random() - 0.48 + trend * 0.5);
+  change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
+  let newPrice = Math.max(1, price * (1 + change));
+  hist.push(newPrice);
+  if (hist.length > 30) hist.shift();
+  ctx.S.stock.trends[t2] = trend;
+}
 function updateMarket(now2 = Date.now()) {
   if (!ctx.S.stock) return;
   if (ctx.S.stock.totalDeposited === void 0) {
@@ -56388,52 +56419,13 @@ function updateMarket(now2 = Date.now()) {
     if (!ctx.S.stock.history[t2]) ctx.S.stock.history[t2] = [STOCKS[t2].startPrice];
     if (ctx.S.stock.trends[t2] === void 0) ctx.S.stock.trends[t2] = 0;
     if (ctx.S.stock.portfolio[t2] === void 0) ctx.S.stock.portfolio[t2] = 0;
-    if (ctx.S.stock.history[t2].length === 1) {
-      for (let i2 = 0; i2 < 29; i2++) {
-        let currentPrice = ctx.S.stock.history[t2][ctx.S.stock.history[t2].length - 1];
-        let trend = ctx.S.stock.trends[t2];
-        trend += (Math.random() - 0.5) * 0.4;
-        let priceRatio = currentPrice / STOCKS[t2].startPrice;
-        let gravity = 0;
-        if (priceRatio > 10) gravity = -0.3;
-        else if (priceRatio > 3) gravity = -0.1;
-        else if (priceRatio < 0.2) gravity = 0.2;
-        trend += gravity;
-        trend *= 0.8;
-        trend = Math.max(-1, Math.min(1, trend));
-        let changePercent = STOCKS[t2].baseVolatility * (Math.random() - 0.5 + trend * 0.5);
-        changePercent = Math.max(-0.3, Math.min(0.3, changePercent));
-        let newPrice = Math.max(1, currentPrice * (1 + changePercent));
-        ctx.S.stock.history[t2].push(newPrice);
-        ctx.S.stock.trends[t2] = trend;
-      }
-    }
+    while (ctx.S.stock.history[t2].length < 30) stepPrice(t2);
   });
   const intervals = Math.floor((now2 - ctx.S.stock.lastUpdate) / 6e5);
   if (intervals > 0) {
     ctx.S.stock.lastUpdate += intervals * 6e5;
     for (let i2 = 0; i2 < intervals; i2++) {
-      Object.keys(STOCKS).forEach((t2) => {
-        const hist = ctx.S.stock.history[t2];
-        let currentPrice = hist[hist.length - 1];
-        let trend = ctx.S.stock.trends[t2];
-        trend += (Math.random() - 0.5) * 0.4;
-        let priceRatio = currentPrice / STOCKS[t2].startPrice;
-        let gravity = 0;
-        if (priceRatio > 10) gravity = -0.3;
-        else if (priceRatio > 3) gravity = -0.1;
-        else if (priceRatio < 0.2) gravity = 0.2;
-        trend += gravity;
-        trend *= 0.8;
-        trend = Math.max(-1, Math.min(1, trend));
-        let changePercent = STOCKS[t2].baseVolatility * (Math.random() - 0.5 + trend * 0.5);
-        changePercent = Math.max(-0.3, Math.min(0.3, changePercent));
-        let newPrice = currentPrice * (1 + changePercent);
-        newPrice = Math.max(1, newPrice);
-        hist.push(newPrice);
-        if (hist.length > 30) hist.shift();
-        ctx.S.stock.trends[t2] = trend;
-      });
+      Object.keys(STOCKS).forEach((t2) => stepPrice(t2));
       checkMarginCall();
     }
   }
@@ -56697,6 +56689,7 @@ function openStockModal() {
                 <div style="font-weight: 800; color: ${STOCKS[t2].color}; font-size: 14px;">${t2}</div>
                 <div style="font-size: 13px; color: #f8fafc; margin-top: 2px;">$${fmtMoney(price)}</div>
                 <div style="font-size: 10px; color: ${chgColor}; margin-top: 1px;">${chg >= 0 ? "\u25B2" : "\u25BC"} ${fmtPct(chgPct)}</div>
+                <div style="font-size: 9px; color: #475569; margin-top: 2px;">drift ${(STOCKS[t2].drift * 100).toFixed(2)}%/phi\xEAn</div>
               </div>
             `;
   }).join("")}
@@ -56707,7 +56700,7 @@ function openStockModal() {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; z-index: 1; flex-wrap: wrap; gap: 6px;">
               <div>
                 <div style="font-weight: 800; font-size: 15px; color: ${STOCKS[selectedStock].color}; white-space: nowrap;">${STOCKS[selectedStock].name}</div>
-                <div style="font-size: 11px; color: #94a3b8;">Gi\xE1: $${fmtMoney(currentPrice)} | Bi\u1EBFn \u0111\u1ED9ng: ${(STOCKS[selectedStock].baseVolatility * 100).toFixed(0)}%</div>
+                <div style="font-size: 11px; color: #94a3b8;">Gi\xE1: $${fmtMoney(currentPrice)} | Vol: \xB1${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phi\xEAn | Drift: ${(STOCKS[selectedStock].drift * 100).toFixed(2)}%</div>
               </div>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
                 <button id="stk-forward" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Tua nhanh 100 ph\xFAt">Tua x10</button>
@@ -56860,9 +56853,51 @@ var init_stock = __esm({
     init_store();
     init_all();
     STOCKS = {
-      SIL: { name: "SillyTavern Inc.", baseVolatility: 0.05, startPrice: 100, color: "#3b82f6" },
-      FARM: { name: "N\xF4ng S\u1EA3n Farm", baseVolatility: 0.15, startPrice: 50, color: "#22c55e" },
-      CRASH: { name: "\u0110a C\u1EA5p Coin", baseVolatility: 0.35, startPrice: 10, color: "#ef4444" }
+      // ─── BLUE CHIP ─── Safe, low swing, slight downward drift (inflation eats it slowly)
+      SIL: {
+        name: "SillyTavern Inc.",
+        startPrice: 100,
+        color: "#3b82f6",
+        // Per-candle volatility (random walk amplitude)
+        vol: 0.025,
+        // Intrinsic drift per candle — negative = house edge / inflation drag
+        drift: -3e-3,
+        // How fast trend momentum decays (higher = faster reversion to calm)
+        trendDecay: 0.7,
+        // Trend noise amplitude
+        trendNoise: 0.25,
+        // Mean-reversion gravity: kicks in when price strays far from startPrice
+        gravityZones: [{ above: 3, pull: -0.2 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.12 }],
+        // Hard cap on single candle % swing
+        swingCap: 0.08
+      },
+      // ─── MID RISK ─── Cyclical, medium swings, neutral drift but larger fees eat you
+      FARM: {
+        name: "N\xF4ng S\u1EA3n Farm",
+        startPrice: 50,
+        color: "#22c55e",
+        vol: 0.08,
+        drift: -5e-3,
+        trendDecay: 0.78,
+        trendNoise: 0.35,
+        gravityZones: [{ above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.35, pull: 0.18 }],
+        swingCap: 0.18
+      },
+      // ─── DEGEN ─── Meme/pump-dump, strong negative drift, rare huge spikes, usually bleeds
+      CRASH: {
+        name: "\u0110a C\u1EA5p Coin",
+        startPrice: 10,
+        color: "#ef4444",
+        vol: 0.18,
+        drift: -0.012,
+        trendDecay: 0.88,
+        trendNoise: 0.55,
+        gravityZones: [{ above: 15, pull: -0.55 }, { above: 5, pull: -0.2 }, { below: 0.2, pull: 0.1 }],
+        swingCap: 0.3,
+        // Occasional pump event: 5% chance per candle to ignite a strong uptrend
+        pumpChance: 0.05,
+        pumpStrength: 0.6
+      }
     };
     selectedStock = "SIL";
   }

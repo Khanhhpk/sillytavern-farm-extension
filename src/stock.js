@@ -2,9 +2,51 @@ import { ctx } from './store.js';
 import * as All from './all.js';
 
 export const STOCKS = {
-  SIL: { name: 'SillyTavern Inc.', baseVolatility: 0.05, startPrice: 100, color: '#3b82f6' },
-  FARM: { name: 'Nông Sản Farm', baseVolatility: 0.15, startPrice: 50, color: '#22c55e' },
-  CRASH: { name: 'Đa Cấp Coin', baseVolatility: 0.35, startPrice: 10, color: '#ef4444' }
+  // ─── BLUE CHIP ─── Safe, low swing, slight downward drift (inflation eats it slowly)
+  SIL: {
+    name: 'SillyTavern Inc.',
+    startPrice: 100,
+    color: '#3b82f6',
+    // Per-candle volatility (random walk amplitude)
+    vol: 0.025,
+    // Intrinsic drift per candle — negative = house edge / inflation drag
+    drift: -0.003,
+    // How fast trend momentum decays (higher = faster reversion to calm)
+    trendDecay: 0.70,
+    // Trend noise amplitude
+    trendNoise: 0.25,
+    // Mean-reversion gravity: kicks in when price strays far from startPrice
+    gravityZones: [ { above: 3, pull: -0.20 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.12 } ],
+    // Hard cap on single candle % swing
+    swingCap: 0.08,
+  },
+  // ─── MID RISK ─── Cyclical, medium swings, neutral drift but larger fees eat you
+  FARM: {
+    name: 'Nông Sản Farm',
+    startPrice: 50,
+    color: '#22c55e',
+    vol: 0.08,
+    drift: -0.005,
+    trendDecay: 0.78,
+    trendNoise: 0.35,
+    gravityZones: [ { above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.35, pull: 0.18 } ],
+    swingCap: 0.18,
+  },
+  // ─── DEGEN ─── Meme/pump-dump, strong negative drift, rare huge spikes, usually bleeds
+  CRASH: {
+    name: 'Đa Cấp Coin',
+    startPrice: 10,
+    color: '#ef4444',
+    vol: 0.18,
+    drift: -0.012,
+    trendDecay: 0.88,
+    trendNoise: 0.55,
+    gravityZones: [ { above: 15, pull: -0.55 }, { above: 5, pull: -0.20 }, { below: 0.2, pull: 0.10 } ],
+    swingCap: 0.30,
+    // Occasional pump event: 5% chance per candle to ignite a strong uptrend
+    pumpChance: 0.05,
+    pumpStrength: 0.6,
+  }
 };
 
 let selectedStock = 'SIL';
@@ -30,6 +72,45 @@ function fmtPct(p) {
   return (p > 0 ? '+' : '-') + str;
 }
 
+// Core per-candle price step — shared by both prefill and interval updates
+function stepPrice(t) {
+  const S = STOCKS[t];
+  const hist = ctx.S.stock.history[t];
+  let price = hist[hist.length - 1];
+  let trend = ctx.S.stock.trends[t];
+  const priceRatio = price / S.startPrice;
+
+  // 1. Trend random walk with per-stock noise
+  trend += (Math.random() - 0.5) * S.trendNoise;
+
+  // 2. CRASH: rare pump event — sudden FOMO spike
+  if (S.pumpChance && Math.random() < S.pumpChance) {
+    trend += S.pumpStrength;
+  }
+
+  // 3. Mean-reversion gravity (per-stock zones)
+  let gravity = 0;
+  for (const zone of S.gravityZones) {
+    if (zone.above !== undefined && priceRatio > zone.above) { gravity = zone.pull; break; }
+    if (zone.below !== undefined && priceRatio < zone.below) { gravity = zone.pull; break; }
+  }
+  trend += gravity;
+
+  // 4. Trend decay (momentum fades)
+  trend *= S.trendDecay;
+  trend = Math.max(-1, Math.min(1, trend));
+
+  // 5. Price change = drift (house edge) + vol * (random + trend bias)
+  let change = S.drift + S.vol * ((Math.random() - 0.48) + trend * 0.5);
+  //   Note: random range shifted slightly negative (0.48 vs 0.5) → house always has tiny edge
+  change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
+
+  let newPrice = Math.max(1, price * (1 + change));
+  hist.push(newPrice);
+  if (hist.length > 30) hist.shift();
+  ctx.S.stock.trends[t] = trend;
+}
+
 export function updateMarket(now = Date.now()) {
   if (!ctx.S.stock) return;
   
@@ -46,71 +127,16 @@ export function updateMarket(now = Date.now()) {
     if (!ctx.S.stock.history[t]) ctx.S.stock.history[t] = [STOCKS[t].startPrice];
     if (ctx.S.stock.trends[t] === undefined) ctx.S.stock.trends[t] = 0;
     if (ctx.S.stock.portfolio[t] === undefined) ctx.S.stock.portfolio[t] = 0;
-    
-    if (ctx.S.stock.history[t].length === 1) {
-      for (let i = 0; i < 29; i++) {
-        let currentPrice = ctx.S.stock.history[t][ctx.S.stock.history[t].length - 1];
-        let trend = ctx.S.stock.trends[t];
-        
-        trend += (Math.random() - 0.5) * 0.4;
-        let priceRatio = currentPrice / STOCKS[t].startPrice;
-        let gravity = 0;
-        if (priceRatio > 10) gravity = -0.3;
-        else if (priceRatio > 3) gravity = -0.1;
-        else if (priceRatio < 0.2) gravity = 0.2;
-        trend += gravity;
-        trend *= 0.8; 
-        trend = Math.max(-1, Math.min(1, trend)); 
-        
-        let changePercent = STOCKS[t].baseVolatility * ((Math.random() - 0.5) + (trend * 0.5));
-        // Cap at ±30% per candle
-        changePercent = Math.max(-0.30, Math.min(0.30, changePercent));
-        
-        let newPrice = Math.max(1, currentPrice * (1 + changePercent));
-        ctx.S.stock.history[t].push(newPrice);
-        ctx.S.stock.trends[t] = trend;
-      }
-    }
+    // Prefill 29 candles of history on first open
+    while (ctx.S.stock.history[t].length < 30) stepPrice(t);
   });
 
-  const intervals = Math.floor((now - ctx.S.stock.lastUpdate) / 600000); 
+  const intervals = Math.floor((now - ctx.S.stock.lastUpdate) / 600000);
   if (intervals > 0) {
     ctx.S.stock.lastUpdate += intervals * 600000;
-
     for (let i = 0; i < intervals; i++) {
-      Object.keys(STOCKS).forEach(t => {
-        const hist = ctx.S.stock.history[t];
-        let currentPrice = hist[hist.length - 1];
-        let trend = ctx.S.stock.trends[t];
-        
-        // Random walk for trend
-        trend += (Math.random() - 0.5) * 0.4;
-        
-        // Mean Reversion (Gravity)
-        let priceRatio = currentPrice / STOCKS[t].startPrice;
-        let gravity = 0;
-        if (priceRatio > 10) gravity = -0.3;
-        else if (priceRatio > 3) gravity = -0.1;
-        else if (priceRatio < 0.2) gravity = 0.2;
-        
-        trend += gravity;
-        trend *= 0.8; // Decay trend
-        trend = Math.max(-1, Math.min(1, trend));
-        
-        let changePercent = STOCKS[t].baseVolatility * ((Math.random() - 0.5) + (trend * 0.5));
-        // Hard cap: limit single-candle swing to max ±30%
-        changePercent = Math.max(-0.30, Math.min(0.30, changePercent));
-
-        let newPrice = currentPrice * (1 + changePercent);
-        newPrice = Math.max(1, newPrice);
-
-        hist.push(newPrice);
-        if (hist.length > 30) hist.shift();
-        
-        ctx.S.stock.trends[t] = trend;
-      });
-      
-      checkMarginCall(); // check margin every interval
+      Object.keys(STOCKS).forEach(t => stepPrice(t));
+      checkMarginCall();
     }
   }
 }
@@ -409,6 +435,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
                 <div style="font-weight: 800; color: ${STOCKS[t].color}; font-size: 14px;">${t}</div>
                 <div style="font-size: 13px; color: #f8fafc; margin-top: 2px;">$${fmtMoney(price)}</div>
                 <div style="font-size: 10px; color: ${chgColor}; margin-top: 1px;">${chg >= 0 ? '▲' : '▼'} ${fmtPct(chgPct)}</div>
+                <div style="font-size: 9px; color: #475569; margin-top: 2px;">drift ${(STOCKS[t].drift * 100).toFixed(2)}%/phiên</div>
               </div>
             `}).join('')}
           </div>
@@ -418,7 +445,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; z-index: 1; flex-wrap: wrap; gap: 6px;">
               <div>
                 <div style="font-weight: 800; font-size: 15px; color: ${STOCKS[selectedStock].color}; white-space: nowrap;">${STOCKS[selectedStock].name}</div>
-                <div style="font-size: 11px; color: #94a3b8;">Giá: $${fmtMoney(currentPrice)} | Biến động: ${(STOCKS[selectedStock].baseVolatility * 100).toFixed(0)}%</div>
+                <div style="font-size: 11px; color: #94a3b8;">Giá: $${fmtMoney(currentPrice)} | Vol: ±${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phiên | Drift: ${(STOCKS[selectedStock].drift * 100).toFixed(2)}%</div>
               </div>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
                 <button id="stk-forward" style="background: rgba(168,85,247,0.2); color: #c084fc; border: 1px solid rgba(168,85,247,0.4); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Tua nhanh 100 phút">Tua x10</button>
