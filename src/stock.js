@@ -135,6 +135,15 @@ export function updateMarket(now = Date.now()) {
     while (ctx.S.stock.history[t].length < 30) stepPrice(t);
   });
 
+  if (!ctx.S.stock.currentDrifts) {
+    ctx.S.stock.currentDrifts = {};
+    // Roll random drift immediately on first setup
+    Object.keys(STOCKS).forEach(t => {
+      // Fluctuates between -1.5% to +1.5% around the base drift
+      ctx.S.stock.currentDrifts[t] = STOCKS[t].drift + (Math.random() * 0.03) - 0.015;
+    });
+  }
+
   if (!ctx.S.stock.nextIntervalMs) {
     ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 160000) + 20000;
   }
@@ -144,16 +153,9 @@ export function updateMarket(now = Date.now()) {
     ctx.S.stock.lastUpdate += ctx.S.stock.nextIntervalMs;
 
     ctx.S.stock.candleCount = (ctx.S.stock.candleCount || 0) + 1;
-    if (!ctx.S.stock.currentDrifts) {
-      ctx.S.stock.currentDrifts = {};
-      // Roll random drift immediately on first setup instead of using base drift
-      Object.keys(STOCKS).forEach(t => {
-        ctx.S.stock.currentDrifts[t] = (Math.random() * 0.04) - 0.02;
-      });
-    }
     if (ctx.S.stock.candleCount % 100 === 0) {
       Object.keys(STOCKS).forEach(t => {
-        ctx.S.stock.currentDrifts[t] = (Math.random() * 0.04) - 0.02;
+        ctx.S.stock.currentDrifts[t] = STOCKS[t].drift + (Math.random() * 0.03) - 0.015;
       });
     }
 

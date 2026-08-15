@@ -83,6 +83,11 @@ function updateMarket(now) {
     if (S.stock.portfolio[t] === undefined) S.stock.portfolio[t] = 0;
   });
   
+  if (!S.stock.currentDrifts) {
+    S.stock.currentDrifts = {};
+    Object.keys(STOCKS).forEach(t => S.stock.currentDrifts[t] = STOCKS[t].drift + (randomFn() * 0.03) - 0.015);
+  }
+
   if (!S.stock.nextIntervalMs) {
     S.stock.nextIntervalMs = Math.floor(randomFn() * 160000) + 20000;
   }
@@ -92,13 +97,9 @@ function updateMarket(now) {
     S.stock.lastUpdate += S.stock.nextIntervalMs;
     
     S.stock.candleCount = (S.stock.candleCount || 0) + 1;
-    if (!S.stock.currentDrifts) {
-      S.stock.currentDrifts = {};
-      Object.keys(STOCKS).forEach(t => S.stock.currentDrifts[t] = STOCKS[t].drift);
-    }
     if (S.stock.candleCount % 100 === 0) {
       Object.keys(STOCKS).forEach(t => {
-        S.stock.currentDrifts[t] = (randomFn() * 0.04) - 0.02;
+        S.stock.currentDrifts[t] = STOCKS[t].drift + (randomFn() * 0.03) - 0.015;
       });
     }
 
@@ -329,7 +330,7 @@ describe('Stock Market Module', () => {
       updateMarket(1000000); // Forces interval updates to trigger tick
       assert.ok(S.stock.candleCount >= 100);
       assert.ok(S.stock.currentDrifts['CRASH'] !== undefined);
-      assert.ok(S.stock.currentDrifts['CRASH'] >= -0.02 && S.stock.currentDrifts['CRASH'] <= 0.02);
+      assert.ok(S.stock.currentDrifts['CRASH'] >= -0.03 && S.stock.currentDrifts['CRASH'] <= 0.0);
     });
 
     it('should enforce negative expected value (Gold Sink) over long term', () => {

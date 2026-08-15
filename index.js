@@ -56427,6 +56427,12 @@ function updateMarket(now2 = Date.now()) {
     if (ctx.S.stock.portfolio[t2] === void 0) ctx.S.stock.portfolio[t2] = 0;
     while (ctx.S.stock.history[t2].length < 30) stepPrice(t2);
   });
+  if (!ctx.S.stock.currentDrifts) {
+    ctx.S.stock.currentDrifts = {};
+    Object.keys(STOCKS).forEach((t2) => {
+      ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * 0.03 - 0.015;
+    });
+  }
   if (!ctx.S.stock.nextIntervalMs) {
     ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 16e4) + 2e4;
   }
@@ -56434,15 +56440,9 @@ function updateMarket(now2 = Date.now()) {
   while (now2 - ctx.S.stock.lastUpdate >= ctx.S.stock.nextIntervalMs) {
     ctx.S.stock.lastUpdate += ctx.S.stock.nextIntervalMs;
     ctx.S.stock.candleCount = (ctx.S.stock.candleCount || 0) + 1;
-    if (!ctx.S.stock.currentDrifts) {
-      ctx.S.stock.currentDrifts = {};
-      Object.keys(STOCKS).forEach((t2) => {
-        ctx.S.stock.currentDrifts[t2] = Math.random() * 0.04 - 0.02;
-      });
-    }
     if (ctx.S.stock.candleCount % 100 === 0) {
       Object.keys(STOCKS).forEach((t2) => {
-        ctx.S.stock.currentDrifts[t2] = Math.random() * 0.04 - 0.02;
+        ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * 0.03 - 0.015;
       });
     }
     Object.keys(STOCKS).forEach((t2) => stepPrice(t2));
