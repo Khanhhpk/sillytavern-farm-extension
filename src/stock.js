@@ -517,8 +517,8 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
               <button id="stk-max-sell" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 0 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Bán toàn bộ">ALL</button>
             </div>
             <div style="display: flex; gap: 8px; flex: 2 1 240px;">
-              <button id="stk-buy" style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 10px 5px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">MUA</button>
-              <button id="stk-sell" style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 10px 5px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">BÁN</button>
+              <button id="stk-buy" style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 6px 5px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">MUA<div style="font-size:10px;font-weight:normal;opacity:0.8;margin-top:2px">$0</div></button>
+              <button id="stk-sell" style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 6px 5px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">BÁN<div style="font-size:10px;font-weight:normal;opacity:0.8;margin-top:2px">$0</div></button>
             </div>
           </div>
           
@@ -646,10 +646,14 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     const amt = parseFloat(tradeInp.value) || 0;
     const price = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
     const total = amt * price;
+    let str = fmtMoney(total);
+    if (total >= 1000000) str = (total / 1000000).toFixed(2) + 'm';
+    else if (total >= 10000) str = (total / 1000).toFixed(1) + 'k';
+    
     const buyBtn = All.$id('stk-buy');
     const sellBtn = All.$id('stk-sell');
-    if (buyBtn) buyBtn.innerText = `MUA ($${fmtMoney(total)})`;
-    if (sellBtn) sellBtn.innerText = `BÁN ($${fmtMoney(total)})`;
+    if (buyBtn) buyBtn.innerHTML = `MUA<div style="font-size:10px;font-weight:normal;opacity:0.8;margin-top:2px">-$${str}</div>`;
+    if (sellBtn) sellBtn.innerHTML = `BÁN<div style="font-size:10px;font-weight:normal;opacity:0.8;margin-top:2px">+$${str}</div>`;
   };
 
   if (All.$id('stk-max-buy')) {
