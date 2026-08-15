@@ -1151,7 +1151,7 @@ function heroTick() {
       if (p.atkBuffTimer > 0) { p.atkBuffTimer -= dt/1000; if(p.atkBuffTimer<=0) p.atkBuff = null; }
       if (p.spdBuffTimer > 0) { p.spdBuffTimer -= dt/1000; if(p.spdBuffTimer<=0) p.spdBuff = null; }
       if (p.sugarTimer > 0) { p.sugarTimer -= dt/1000; if(p.sugarTimer<=0) { p.spdBuff = null; p.atkDebuff = null; } }
-      if (p.dmgResistTimer > 0) { p.dmgResistTimer -= dt/1000; if(p.dmgResistTimer<=0) p.dmgResist = 0; }
+      if (p.invincibleTimer > 0) { p.invincibleTimer -= dt/1000; }
       if (p.badTimeTimer > 0) { p.badTimeTimer -= dt/1000; }
 
       let rtSpdMult = 1.0;
@@ -1333,7 +1333,8 @@ function heroTick() {
             if (m.atkDebuff) mAtkMult *= m.atkDebuff;
             let dmg = Math.max(1, Math.floor(m.atk * mAtkMult * (0.8 + Math.random() * 0.4)));
             
-            if (target.dmgResist > 0) dmg = Math.floor(dmg * (1 - target.dmgResist));
+            if (target.invincibleTimer > 0) dmg = 0;
+            else if (target.dmgResist > 0) dmg = Math.floor(dmg * (1 - target.dmgResist));
             
             if (runState.waveTime <= 2.0 && ctx.S.hero.roster[target.id]?.passive_eq) {
                const pSkill = PET_SKILLS[target.id];
@@ -1373,8 +1374,7 @@ function heroTick() {
                     if (sData.passive_eq === 'p1' && target.hp <= 0 && target.muchBetterReady !== false) {
                         target.muchBetterReady = false;
                         target.hp = 1;
-                        target.dmgResist = 1; // 100% damage block
-                        target.dmgResistTimer = 1.0;
+                        target.invincibleTimer = 3.0; // 3s damage block
                         
                         const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
                         if (scene) {

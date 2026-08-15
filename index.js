@@ -10713,9 +10713,8 @@ function heroTick() {
           p2.atkDebuff = null;
         }
       }
-      if (p2.dmgResistTimer > 0) {
-        p2.dmgResistTimer -= dt2 / 1e3;
-        if (p2.dmgResistTimer <= 0) p2.dmgResist = 0;
+      if (p2.invincibleTimer > 0) {
+        p2.invincibleTimer -= dt2 / 1e3;
       }
       if (p2.badTimeTimer > 0) {
         p2.badTimeTimer -= dt2 / 1e3;
@@ -10912,7 +10911,8 @@ function heroTick() {
             let mAtkMult = mult;
             if (m2.atkDebuff) mAtkMult *= m2.atkDebuff;
             let dmg = Math.max(1, Math.floor(m2.atk * mAtkMult * (0.8 + Math.random() * 0.4)));
-            if (target.dmgResist > 0) dmg = Math.floor(dmg * (1 - target.dmgResist));
+            if (target.invincibleTimer > 0) dmg = 0;
+            else if (target.dmgResist > 0) dmg = Math.floor(dmg * (1 - target.dmgResist));
             if (runState.waveTime <= 2 && ctx.S.hero.roster[target.id]?.passive_eq) {
               const pSkill = PET_SKILLS[target.id];
               const pEq = ctx.S.hero.roster[target.id].passive_eq;
@@ -10945,8 +10945,7 @@ function heroTick() {
                 if (sData.passive_eq === "p1" && target.hp <= 0 && target.muchBetterReady !== false) {
                   target.muchBetterReady = false;
                   target.hp = 1;
-                  target.dmgResist = 1;
-                  target.dmgResistTimer = 1;
+                  target.invincibleTimer = 3;
                   const scene3 = pEl ? pEl.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
                   if (scene3) {
                     const imgBase = pEl ? pEl.querySelector("img") : null;
