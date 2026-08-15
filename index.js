@@ -9887,9 +9887,9 @@ function openHeroPanel() {
       <div class="hero-panel-section">L\u1ED1i \u0111\xE1nh</div>
       <div class="hero-style-list">${styleBtns}</div>
       
-      <div style="display: flex; gap: 8px;">
-        <div class="hero-deploy-btn" id="hero-deploy" style="flex: 1;">XU\u1EA4T PH\xC1T!</div>
-        <div class="hero-deploy-btn" id="hero-jump" style="width: auto; padding: 0 15px; background: #607d8b; border-color: #455a64;">JUMP STAGE</div>
+      <div style="display: flex; gap: 8px; margin-top: 20px;">
+        <div class="hero-deploy-btn" id="hero-deploy" style="flex: 1; margin-top: 0; display: flex; align-items: center; justify-content: center;">XU\u1EA4T PH\xC1T!</div>
+        <div class="hero-deploy-btn" id="hero-jump" style="width: auto; padding: 0 15px; margin-top: 0; background: linear-gradient(to bottom, #607d8b, #455a64); border-color: #78909c; display: flex; align-items: center; justify-content: center;">JUMP STAGE</div>
       </div>
     </div>
   `);
@@ -9996,7 +9996,7 @@ function openPetSkills(pId) {
   `);
   const mbody = $id("mbody");
 }
-function openHeroMode() {
+function openHeroMode(startStage = 1) {
   initHeroState();
   closeWin();
   if (ctx.S.hero.party.length === 0) {
@@ -10029,7 +10029,7 @@ function openHeroMode() {
   });
   ctx.S.hero.pressure = 0;
   runState = {
-    stage: 1,
+    stage: startStage,
     pets: ctx.S.hero.party.map((pId) => {
       const st2 = getPetStats(pId);
       const data = ctx.S.hero.roster[pId] || {};
@@ -11460,6 +11460,22 @@ function initHero() {
       if (ctx.S.hero.party.length === 0) return toast("Vui l\xF2ng x\u1EBFp \u0110\u1ED9i h\xECnh tr\u01B0\u1EDBc khi Xu\u1EA5t chi\u1EBFn!");
       closeModal();
       openHeroMode();
+      return;
+    }
+    el = e2.target.closest("#hero-jump");
+    if (el) {
+      if (ctx.S.hero.party.length === 0) return toast("Vui l\xF2ng x\u1EBFp \u0110\u1ED9i h\xECnh tr\u01B0\u1EDBc khi Xu\u1EA5t chi\u1EBFn!");
+      const maxStage = ctx.S.hero.maxStage || 1;
+      const jumpStr = prompt("Nh\u1EADp s\u1ED1 Stage mu\u1ED1n nh\u1EA3y t\u1EDBi (T\u1ED1i \u0111a " + maxStage + "):", maxStage);
+      if (jumpStr !== null) {
+        const jumpTo = parseInt(jumpStr);
+        if (!isNaN(jumpTo) && jumpTo > 0 && jumpTo <= maxStage) {
+          closeModal();
+          openHeroMode(jumpTo);
+        } else {
+          toast("Stage kh\xF4ng h\u1EE3p l\u1EC7!");
+        }
+      }
       return;
     }
     el = e2.target.closest(".sk-unlock-btn");

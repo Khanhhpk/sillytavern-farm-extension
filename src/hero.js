@@ -289,9 +289,9 @@ export function openHeroPanel() {
       <div class="hero-panel-section">Lối đánh</div>
       <div class="hero-style-list">${styleBtns}</div>
       
-      <div style="display: flex; gap: 8px;">
-        <div class="hero-deploy-btn" id="hero-deploy" style="flex: 1;">XUẤT PHÁT!</div>
-        <div class="hero-deploy-btn" id="hero-jump" style="width: auto; padding: 0 15px; background: #607d8b; border-color: #455a64;">JUMP STAGE</div>
+      <div style="display: flex; gap: 8px; margin-top: 20px;">
+        <div class="hero-deploy-btn" id="hero-deploy" style="flex: 1; margin-top: 0; display: flex; align-items: center; justify-content: center;">XUẤT PHÁT!</div>
+        <div class="hero-deploy-btn" id="hero-jump" style="width: auto; padding: 0 15px; margin-top: 0; background: linear-gradient(to bottom, #607d8b, #455a64); border-color: #78909c; display: flex; align-items: center; justify-content: center;">JUMP STAGE</div>
       </div>
     </div>
   `);
@@ -409,7 +409,7 @@ function openPetSkills(pId) {
   const mbody = All.$id('mbody');
 }
 
-export function openHeroMode() {
+export function openHeroMode(startStage = 1) {
   initHeroState();
   All.closeWin(); // Đóng bảng Farm chính thay vì chỉ ẩn display
   
@@ -448,8 +448,9 @@ export function openHeroMode() {
 
   // Khởi tạo Run
   ctx.S.hero.pressure = 0;
+  
   runState = {
-    stage: 1,
+    stage: startStage,
     pets: ctx.S.hero.party.map(pId => {
       const st = getPetStats(pId);
       const data = ctx.S.hero.roster[pId] || {};
@@ -1909,6 +1910,23 @@ export function initHero() {
     if (el) {
       if (ctx.S.hero.party.length === 0) return All.toast('Vui lòng xếp Đội hình trước khi Xuất chiến!');
       closeModal(); openHeroMode();
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('#hero-jump');
+    if (el) {
+      if (ctx.S.hero.party.length === 0) return All.toast('Vui lòng xếp Đội hình trước khi Xuất chiến!');
+      const maxStage = ctx.S.hero.maxStage || 1;
+      const jumpStr = prompt('Nhập số Stage muốn nhảy tới (Tối đa ' + maxStage + '):', maxStage);
+      if (jumpStr !== null) {
+          const jumpTo = parseInt(jumpStr);
+          if (!isNaN(jumpTo) && jumpTo > 0 && jumpTo <= maxStage) {
+              closeModal(); 
+              openHeroMode(jumpTo);
+          } else {
+              All.toast('Stage không hợp lệ!');
+          }
+      }
       return;
     }
     // @ts-ignore
