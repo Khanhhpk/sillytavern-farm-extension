@@ -64,7 +64,8 @@ function stepPrice(t) {
   trend *= stockConfig.trendDecay;
   trend = Math.max(-1, Math.min(1, trend));
 
-  let change = stockConfig.drift + stockConfig.vol * ((randomFn() - 0.48) + trend * 0.5);
+  let currentDrift = (S.stock && S.stock.currentDrifts && S.stock.currentDrifts[t] !== undefined) ? S.stock.currentDrifts[t] : stockConfig.drift;
+  let change = currentDrift + stockConfig.vol * ((randomFn() - 0.48) + trend * 0.5);
   change = Math.max(-stockConfig.swingCap, Math.min(stockConfig.swingCap, change));
 
   let newPrice = Math.max(1, price * (1 + change));
@@ -89,6 +90,18 @@ function updateMarket(now) {
   let updated = false;
   while (now - S.stock.lastUpdate >= S.stock.nextIntervalMs) {
     S.stock.lastUpdate += S.stock.nextIntervalMs;
+    
+    S.stock.candleCount = (S.stock.candleCount || 0) + 1;
+    if (!S.stock.currentDrifts) {
+      S.stock.currentDrifts = {};
+      Object.keys(STOCKS).forEach(t => S.stock.currentDrifts[t] = STOCKS[t].drift);
+    }
+    if (S.stock.candleCount % 100 === 0) {
+      Object.keys(STOCKS).forEach(t => {
+        S.stock.currentDrifts[t] = (randomFn() * 0.04) - 0.02;
+      });
+    }
+
     Object.keys(STOCKS).forEach(t => stepPrice(t));
     checkMarginCall();
     S.stock.nextIntervalMs = Math.floor(randomFn() * 160000) + 20000;
@@ -140,7 +153,9 @@ function buyStock(ticker, shares) {
   const cost = price * shares;
   if (S.stock.balance >= cost) {
     S.stock.balance -= cost;
-    S.stock.portfolio[ticker] += shares;
+    S.stock.portfolio[ticker] = (S.stock.portfolio[ticker] || 0) + shares;
+    if (!S.stock.portfolioCost) S.stock.portfolioCost = {};
+    S.stock.portfolioCost[ticker] = (S.stock.portfolioCost[ticker] || 0) + cost;
     return true;
   }
   return false;
@@ -150,8 +165,20 @@ function sellStock(ticker, shares) {
   if (shares <= 0 || (S.stock.portfolio[ticker] || 0) < shares) return false;
   const price = S.stock.history[ticker][S.stock.history[ticker].length - 1];
   const revenue = price * shares;
+  
+  if (!S.stock.portfolioCost) S.stock.portfolioCost = {};
+  const oldShares = S.stock.portfolio[ticker];
+  const avgCostPerShare = oldShares > 0 ? (S.stock.portfolioCost[ticker] || 0) / oldShares : 0;
+
   S.stock.portfolio[ticker] -= shares;
   S.stock.balance += revenue;
+
+  if (S.stock.portfolio[ticker] === 0) {
+    S.stock.portfolioCost[ticker] = 0;
+  } else {
+    S.stock.portfolioCost[ticker] -= (avgCostPerShare * shares);
+  }
+
   return true;
 }
 
@@ -247,6 +274,22 @@ describe('Stock Market Module', () => {
       assert.equal(S.stock.portfolio['SIL'], 0);
     });
 
+    it('should track average cost correctly', () => {
+      S.stock.history['CRASH'] = [10];
+      buyStock('CRASH', 5); // cost: 50
+      assert.equal(S.stock.portfolioCost['CRASH'], 50);
+      
+      S.stock.history['CRASH'].push(20);
+      buyStock('CRASH', 5); // cost: 100. Total cost = 150.
+      assert.equal(S.stock.portfolioCost['CRASH'], 150);
+      
+      sellStock('CRASH', 5); // sold 5. Old shares 10, sold half. Cost becomes 75.
+      assert.equal(S.stock.portfolioCost['CRASH'], 75);
+      
+      sellStock('CRASH', 5); // sold remaining. Cost 0.
+      assert.equal(S.stock.portfolioCost['CRASH'], 0);
+    });
+
     it('should sell stock correctly', () => {
       S.stock.portfolio['FARM'] = 10;
       const success = sellStock('FARM', 4); // revenue: 200
@@ -276,6 +319,16 @@ describe('Stock Market Module', () => {
       randomFn = () => 0; // 20s intervals
       updateMarket(20000 * 50); // 50 intervals
       assert.equal(S.stock.history['SIL'].length, 30);
+    });
+
+    it('should rotate dynamic drift every 100 ticks', () => {
+      S.stock.candleCount = 99;
+      S.stock.currentDrifts = { 'CRASH': -0.015 };
+      S.stock.lastUpdate = 0;
+      updateMarket(1000000); // Forces interval updates to trigger tick
+      assert.ok(S.stock.candleCount >= 100);
+      assert.ok(S.stock.currentDrifts['CRASH'] !== undefined);
+      assert.ok(S.stock.currentDrifts['CRASH'] >= -0.02 && S.stock.currentDrifts['CRASH'] <= 0.02);
     });
 
     it('should enforce negative expected value (Gold Sink) over long term', () => {

@@ -104,8 +104,8 @@ function stepPrice(t) {
   trend *= S.trendDecay;
   trend = Math.max(-1, Math.min(1, trend));
 
-  // 5. Price change = drift (house edge) + vol * (random + trend bias)
-  let change = S.drift + S.vol * ((Math.random() - 0.48) + trend * 0.5);
+  let currentDrift = (ctx.S.stock && ctx.S.stock.currentDrifts && ctx.S.stock.currentDrifts[t] !== undefined) ? ctx.S.stock.currentDrifts[t] : S.drift;
+  let change = currentDrift + S.vol * ((Math.random() - 0.48) + trend * 0.5);
   //   Note: random range shifted slightly negative (0.48 vs 0.5) → house always has tiny edge
   change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
 
@@ -142,6 +142,18 @@ export function updateMarket(now = Date.now()) {
   let updated = false;
   while (now - ctx.S.stock.lastUpdate >= ctx.S.stock.nextIntervalMs) {
     ctx.S.stock.lastUpdate += ctx.S.stock.nextIntervalMs;
+
+    ctx.S.stock.candleCount = (ctx.S.stock.candleCount || 0) + 1;
+    if (!ctx.S.stock.currentDrifts) {
+      ctx.S.stock.currentDrifts = {};
+      Object.keys(STOCKS).forEach(t => ctx.S.stock.currentDrifts[t] = STOCKS[t].drift);
+    }
+    if (ctx.S.stock.candleCount % 100 === 0) {
+      Object.keys(STOCKS).forEach(t => {
+        ctx.S.stock.currentDrifts[t] = (Math.random() * 0.04) - 0.02;
+      });
+    }
+
     Object.keys(STOCKS).forEach(t => stepPrice(t));
     checkMarginCall();
     ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 160000) + 20000;
@@ -222,7 +234,11 @@ export function buyStock(ticker, shares) {
   const cost = price * shares;
   if (ctx.S.stock.balance >= cost) {
     ctx.S.stock.balance -= cost;
-    ctx.S.stock.portfolio[ticker] += shares;
+    ctx.S.stock.portfolio[ticker] = (ctx.S.stock.portfolio[ticker] || 0) + shares;
+    
+    if (!ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost = {};
+    ctx.S.stock.portfolioCost[ticker] = (ctx.S.stock.portfolioCost[ticker] || 0) + cost;
+    
     return true;
   }
   return false;
@@ -232,8 +248,20 @@ export function sellStock(ticker, shares) {
   if (shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
   const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
   const revenue = price * shares;
+  
+  if (!ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost = {};
+  const oldShares = ctx.S.stock.portfolio[ticker];
+  const avgCostPerShare = oldShares > 0 ? (ctx.S.stock.portfolioCost[ticker] || 0) / oldShares : 0;
+  
   ctx.S.stock.portfolio[ticker] -= shares;
   ctx.S.stock.balance += revenue;
+  
+  if (ctx.S.stock.portfolio[ticker] === 0) {
+    ctx.S.stock.portfolioCost[ticker] = 0;
+  } else {
+    ctx.S.stock.portfolioCost[ticker] -= (avgCostPerShare * shares);
+  }
+  
   return true;
 }
 
@@ -361,6 +389,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; border: 1px solid #334155;">
         <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
           <span>⚡ Phiên Này</span>
+          <span style="color: #a855f7; font-weight: bold; margin-right: 10px;">⏳ Mùa: ${(ctx.S.stock.candleCount || 0) % 100}/100 nến</span>
           <span style="color: #475569; font-size: 9px;">${sessLabel} trước</span>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
@@ -415,14 +444,29 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       </div>
 
       <!-- Help Panel -->
-      <div id="stk-help-panel" style="display: none; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px; color: #cbd5e1; font-size: 13px; line-height: 1.5; text-align: left;">
-        <p style="margin-top:0; color: #e2e8f0;"><b>📈 Sàn Chứng Khoán SillyTavern</b> hoạt động dựa trên thuật toán Random Walk kết hợp Lực hấp dẫn (Gravity).</p>
-        <ul style="padding-left: 20px; margin-bottom: 10px;">
-          <li style="margin-bottom: 4px;"><b style="color:#eab308">Giá nền (Base):</b> Giá trị thực của cổ phiếu. Đường đứt nét vàng trên biểu đồ đại diện cho Giá nền. Giá càng vọt xa Giá nền, "lực hút" kéo nó trở về càng mạnh. Canh mua khi giá rớt sâu dưới Giá nền là cách chơi an toàn nhất.</li>
-          <li style="margin-bottom: 4px;"><b style="color:#3b82f6">Vol (Biến động):</b> Biên độ dao động tối đa của mỗi phiên (nến).</li>
-          <li style="margin-bottom: 4px;"><b style="color:#ef4444">Drift (Độ trôi):</b> Lực đẩy bẩm sinh. Drift âm (-0.20%) nghĩa là về dài hạn cổ phiếu sẽ có xu hướng bào mòn tiền của bạn.</li>
-          <li><b style="color:#a855f7">Ký Quỹ (Margin):</b> Bạn có thể vay nợ để đánh lớn (tối đa x2 tài sản). Nhưng nếu tỉ lệ Nợ/Vốn chạm mốc 80%, bạn sẽ bị <b>Cháy tài khoản (Margin Call)</b> và mất trắng!</li>
-        </ul>
+      <div id="stk-help-panel" style="display: none; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px; color: #cbd5e1; font-size: 13px; line-height: 1.5; text-align: left;">
+        <details style="margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">📖 1. Cơ bản & Luật chơi</summary>
+          <p style="margin-top:8px; margin-bottom:4px;"><b>📈 Sàn Chứng Khoán SillyTavern</b> hoạt động dựa trên thuật toán Random Walk kết hợp Lực hấp dẫn (Gravity).</p>
+          <p style="margin-top:0;">Phí nạp rút tiền là <b>10%</b> mỗi lần giao dịch. Lệnh mua bán chứng khoán miễn phí.</p>
+        </details>
+        <details style="margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">🔍 2. Giải mã Chỉ số</summary>
+          <ul style="padding-left: 20px; margin-top: 8px; margin-bottom: 4px;">
+            <li style="margin-bottom: 4px;"><b style="color:#eab308">Giá nền (Base):</b> Giá trị thực của cổ phiếu. Đường đứt nét vàng. Giá càng vọt xa Giá nền, "lực hút" kéo về càng mạnh.</li>
+            <li style="margin-bottom: 4px;"><b style="color:#3b82f6">Vol (Biến động):</b> Biên độ dao động tối đa của mỗi nến.</li>
+            <li style="margin-bottom: 4px;"><b style="color:#ef4444">Drift (Độ trôi):</b> Lực đẩy bẩm sinh. Drift âm nghĩa là về dài hạn cổ phiếu sẽ có xu hướng giảm. <b style="color:#22c55e">Drift thay đổi ngẫu nhiên mỗi 100 nến (1 Mùa).</b></li>
+            <li><b style="color:#a855f7">Sức mua Margin:</b> Bạn có thể vay nợ để mua thêm (tối đa x2 tổng tài sản). Sức mua thực tế bằng Tiền Mặt cộng Hạn mức vay.</li>
+          </ul>
+        </details>
+        <details style="background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">💡 3. Mẹo & Chiến thuật</summary>
+          <ul style="padding-left: 20px; margin-top: 8px; margin-bottom: 4px;">
+            <li style="margin-bottom: 4px;">Canh mua khi giá rớt sâu dưới Giá nền là cách chơi an toàn nhất.</li>
+            <li style="margin-bottom: 4px;">Chú ý <b>Mùa (100 nến)</b> trên góc phải để đón xu hướng Drift mới.</li>
+            <li>Nếu tỉ lệ Nợ/Vốn chạm mốc 80%, bạn sẽ bị <b>Cháy tài khoản (Margin Call)</b> và mất trắng toàn bộ cổ phiếu! Quản trị rủi ro kỹ lưỡng.</li>
+          </ul>
+        </details>
       </div>
 
       <!-- Main Layout: Sidebar & Content -->
@@ -433,7 +477,10 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
           <div style="font-size: 13px; font-weight: bold; color: #cbd5e1; border-bottom: 1px solid #334155; padding-bottom: 6px;">Tài Khoản & Ký Quỹ</div>
           
           <div style="background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #1e293b;">
-            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Ví Vàng: <span style="color:#eab308; font-weight: bold;">${fmtMoney(Math.floor(ctx.S.coins))} G</span></div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <div style="font-size: 12px; color: #94a3b8;">Ví Vàng: <span style="color:#eab308; font-weight: bold;">${fmtMoney(Math.floor(ctx.S.coins))} G</span></div>
+              <div style="font-size: 11px; color: #94a3b8;">Sức mua: <span style="color:#a855f7; font-weight: bold;">$${fmtMoney(ctx.S.stock.balance + Math.max(0, (equity * 2) - (ctx.S.stock.debt || 0)))}</span></div>
+            </div>
             <div style="display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
               <input type="number" id="stk-transfer-amt" value="${currentTransferAmt}" style="flex: 1; min-width: 80px; padding: 8px; background: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" />
               <button id="stk-max-deposit" style="background: rgba(59,130,246,0.2); color: #3b82f6; border: 1px solid rgba(59,130,246,0.4); border-radius: 4px; padding: 6px 10px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">ALL G</button>
@@ -483,7 +530,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
                 <div style="font-weight: 800; color: ${STOCKS[t].color}; font-size: 14px;">${t}</div>
                 <div style="font-size: 13px; color: #f8fafc; margin-top: 2px;">$${fmtMoney(price)}</div>
                 <div style="font-size: 10px; color: ${chgColor}; margin-top: 1px;">${chg >= 0 ? '▲' : '▼'} ${fmtPct(chgPct)}</div>
-                <div style="font-size: 9px; color: #475569; margin-top: 2px;">drift ${(STOCKS[t].drift * 100).toFixed(2)}%/phiên</div>
+                <div style="font-size: 9px; color: #475569; margin-top: 2px;">drift ${((ctx.S.stock.currentDrifts?.[t] ?? STOCKS[t].drift) * 100).toFixed(2)}%/phiên</div>
               </div>
             `}).join('')}
           </div>
@@ -500,13 +547,21 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
                   <span style="color: #475569;">|</span>
                   <span>Vol: ±${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phiên</span>
                   <span style="color: #475569;">|</span>
-                  <span>Drift: ${(STOCKS[selectedStock].drift * 100).toFixed(2)}%</span>
+                  <span>Drift: ${((ctx.S.stock.currentDrifts?.[selectedStock] ?? STOCKS[selectedStock].drift) * 100).toFixed(2)}%</span>
                 </div>
               </div>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
 
-                <div style="background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 20px; font-size: 11px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">
-                  ${fmtMoney(sharesOwned)} cp ($${fmtMoney(sharesOwned * currentPrice)})
+                <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                  <div style="background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 20px; font-size: 11px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">
+                    ${fmtMoney(sharesOwned)} cp ($${fmtMoney(sharesOwned * currentPrice)})
+                  </div>
+                  <div style="font-size:10px; margin-top:3px; color:#cbd5e1; white-space: nowrap;">
+                    Vốn: $${fmtMoney(sharesOwned > 0 ? (ctx.S.stock.portfolioCost?.[selectedStock] || 0) / sharesOwned : 0)} | 
+                    Lãi: <span style="color:${(sharesOwned * currentPrice) - (ctx.S.stock.portfolioCost?.[selectedStock] || 0) >= 0 ? '#22c55e' : '#ef4444'}">
+                      ${(sharesOwned * currentPrice) - (ctx.S.stock.portfolioCost?.[selectedStock] || 0) >= 0 ? '+' : ''}$${fmtMoney((sharesOwned * currentPrice) - (ctx.S.stock.portfolioCost?.[selectedStock] || 0))}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

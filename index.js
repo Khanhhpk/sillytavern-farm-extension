@@ -56403,7 +56403,8 @@ function stepPrice(t2) {
   trend += gravity;
   trend *= S.trendDecay;
   trend = Math.max(-1, Math.min(1, trend));
-  let change = S.drift + S.vol * (Math.random() - 0.48 + trend * 0.5);
+  let currentDrift = ctx.S.stock && ctx.S.stock.currentDrifts && ctx.S.stock.currentDrifts[t2] !== void 0 ? ctx.S.stock.currentDrifts[t2] : S.drift;
+  let change = currentDrift + S.vol * (Math.random() - 0.48 + trend * 0.5);
   change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
   let newPrice = Math.max(1, price * (1 + change));
   hist.push(newPrice);
@@ -56432,6 +56433,16 @@ function updateMarket(now2 = Date.now()) {
   let updated = false;
   while (now2 - ctx.S.stock.lastUpdate >= ctx.S.stock.nextIntervalMs) {
     ctx.S.stock.lastUpdate += ctx.S.stock.nextIntervalMs;
+    ctx.S.stock.candleCount = (ctx.S.stock.candleCount || 0) + 1;
+    if (!ctx.S.stock.currentDrifts) {
+      ctx.S.stock.currentDrifts = {};
+      Object.keys(STOCKS).forEach((t2) => ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift);
+    }
+    if (ctx.S.stock.candleCount % 100 === 0) {
+      Object.keys(STOCKS).forEach((t2) => {
+        ctx.S.stock.currentDrifts[t2] = Math.random() * 0.04 - 0.02;
+      });
+    }
     Object.keys(STOCKS).forEach((t2) => stepPrice(t2));
     checkMarginCall();
     ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 16e4) + 2e4;
@@ -56500,7 +56511,9 @@ function buyStock(ticker, shares) {
   const cost = price * shares;
   if (ctx.S.stock.balance >= cost) {
     ctx.S.stock.balance -= cost;
-    ctx.S.stock.portfolio[ticker] += shares;
+    ctx.S.stock.portfolio[ticker] = (ctx.S.stock.portfolio[ticker] || 0) + shares;
+    if (!ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost = {};
+    ctx.S.stock.portfolioCost[ticker] = (ctx.S.stock.portfolioCost[ticker] || 0) + cost;
     return true;
   }
   return false;
@@ -56509,8 +56522,16 @@ function sellStock(ticker, shares) {
   if (shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
   const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
   const revenue = price * shares;
+  if (!ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost = {};
+  const oldShares = ctx.S.stock.portfolio[ticker];
+  const avgCostPerShare = oldShares > 0 ? (ctx.S.stock.portfolioCost[ticker] || 0) / oldShares : 0;
   ctx.S.stock.portfolio[ticker] -= shares;
   ctx.S.stock.balance += revenue;
+  if (ctx.S.stock.portfolio[ticker] === 0) {
+    ctx.S.stock.portfolioCost[ticker] = 0;
+  } else {
+    ctx.S.stock.portfolioCost[ticker] -= avgCostPerShare * shares;
+  }
   return true;
 }
 function borrowMargin(amount) {
@@ -56613,6 +56634,7 @@ function openStockModal() {
       <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; border: 1px solid #334155;">
         <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
           <span>\u26A1 Phi\xEAn N\xE0y</span>
+          <span style="color: #a855f7; font-weight: bold; margin-right: 10px;">\u23F3 M\xF9a: ${(ctx.S.stock.candleCount || 0) % 100}/100 n\u1EBFn</span>
           <span style="color: #475569; font-size: 9px;">${sessLabel} tr\u01B0\u1EDBc</span>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
@@ -56666,14 +56688,29 @@ function openStockModal() {
       </div>
 
       <!-- Help Panel -->
-      <div id="stk-help-panel" style="display: none; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px; color: #cbd5e1; font-size: 13px; line-height: 1.5; text-align: left;">
-        <p style="margin-top:0; color: #e2e8f0;"><b>\u{1F4C8} S\xE0n Ch\u1EE9ng Kho\xE1n SillyTavern</b> ho\u1EA1t \u0111\u1ED9ng d\u1EF1a tr\xEAn thu\u1EADt to\xE1n Random Walk k\u1EBFt h\u1EE3p L\u1EF1c h\u1EA5p d\u1EABn (Gravity).</p>
-        <ul style="padding-left: 20px; margin-bottom: 10px;">
-          <li style="margin-bottom: 4px;"><b style="color:#eab308">Gi\xE1 n\u1EC1n (Base):</b> Gi\xE1 tr\u1ECB th\u1EF1c c\u1EE7a c\u1ED5 phi\u1EBFu. \u0110\u01B0\u1EDDng \u0111\u1EE9t n\xE9t v\xE0ng tr\xEAn bi\u1EC3u \u0111\u1ED3 \u0111\u1EA1i di\u1EC7n cho Gi\xE1 n\u1EC1n. Gi\xE1 c\xE0ng v\u1ECDt xa Gi\xE1 n\u1EC1n, "l\u1EF1c h\xFAt" k\xE9o n\xF3 tr\u1EDF v\u1EC1 c\xE0ng m\u1EA1nh. Canh mua khi gi\xE1 r\u1EDBt s\xE2u d\u01B0\u1EDBi Gi\xE1 n\u1EC1n l\xE0 c\xE1ch ch\u01A1i an to\xE0n nh\u1EA5t.</li>
-          <li style="margin-bottom: 4px;"><b style="color:#3b82f6">Vol (Bi\u1EBFn \u0111\u1ED9ng):</b> Bi\xEAn \u0111\u1ED9 dao \u0111\u1ED9ng t\u1ED1i \u0111a c\u1EE7a m\u1ED7i phi\xEAn (n\u1EBFn).</li>
-          <li style="margin-bottom: 4px;"><b style="color:#ef4444">Drift (\u0110\u1ED9 tr\xF4i):</b> L\u1EF1c \u0111\u1EA9y b\u1EA9m sinh. Drift \xE2m (-0.20%) ngh\u0129a l\xE0 v\u1EC1 d\xE0i h\u1EA1n c\u1ED5 phi\u1EBFu s\u1EBD c\xF3 xu h\u01B0\u1EDBng b\xE0o m\xF2n ti\u1EC1n c\u1EE7a b\u1EA1n.</li>
-          <li><b style="color:#a855f7">K\xFD Qu\u1EF9 (Margin):</b> B\u1EA1n c\xF3 th\u1EC3 vay n\u1EE3 \u0111\u1EC3 \u0111\xE1nh l\u1EDBn (t\u1ED1i \u0111a x2 t\xE0i s\u1EA3n). Nh\u01B0ng n\u1EBFu t\u1EC9 l\u1EC7 N\u1EE3/V\u1ED1n ch\u1EA1m m\u1ED1c 80%, b\u1EA1n s\u1EBD b\u1ECB <b>Ch\xE1y t\xE0i kho\u1EA3n (Margin Call)</b> v\xE0 m\u1EA5t tr\u1EAFng!</li>
-        </ul>
+      <div id="stk-help-panel" style="display: none; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px; color: #cbd5e1; font-size: 13px; line-height: 1.5; text-align: left;">
+        <details style="margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">\u{1F4D6} 1. C\u01A1 b\u1EA3n & Lu\u1EADt ch\u01A1i</summary>
+          <p style="margin-top:8px; margin-bottom:4px;"><b>\u{1F4C8} S\xE0n Ch\u1EE9ng Kho\xE1n SillyTavern</b> ho\u1EA1t \u0111\u1ED9ng d\u1EF1a tr\xEAn thu\u1EADt to\xE1n Random Walk k\u1EBFt h\u1EE3p L\u1EF1c h\u1EA5p d\u1EABn (Gravity).</p>
+          <p style="margin-top:0;">Ph\xED n\u1EA1p r\xFAt ti\u1EC1n l\xE0 <b>10%</b> m\u1ED7i l\u1EA7n giao d\u1ECBch. L\u1EC7nh mua b\xE1n ch\u1EE9ng kho\xE1n mi\u1EC5n ph\xED.</p>
+        </details>
+        <details style="margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">\u{1F50D} 2. Gi\u1EA3i m\xE3 Ch\u1EC9 s\u1ED1</summary>
+          <ul style="padding-left: 20px; margin-top: 8px; margin-bottom: 4px;">
+            <li style="margin-bottom: 4px;"><b style="color:#eab308">Gi\xE1 n\u1EC1n (Base):</b> Gi\xE1 tr\u1ECB th\u1EF1c c\u1EE7a c\u1ED5 phi\u1EBFu. \u0110\u01B0\u1EDDng \u0111\u1EE9t n\xE9t v\xE0ng. Gi\xE1 c\xE0ng v\u1ECDt xa Gi\xE1 n\u1EC1n, "l\u1EF1c h\xFAt" k\xE9o v\u1EC1 c\xE0ng m\u1EA1nh.</li>
+            <li style="margin-bottom: 4px;"><b style="color:#3b82f6">Vol (Bi\u1EBFn \u0111\u1ED9ng):</b> Bi\xEAn \u0111\u1ED9 dao \u0111\u1ED9ng t\u1ED1i \u0111a c\u1EE7a m\u1ED7i n\u1EBFn.</li>
+            <li style="margin-bottom: 4px;"><b style="color:#ef4444">Drift (\u0110\u1ED9 tr\xF4i):</b> L\u1EF1c \u0111\u1EA9y b\u1EA9m sinh. Drift \xE2m ngh\u0129a l\xE0 v\u1EC1 d\xE0i h\u1EA1n c\u1ED5 phi\u1EBFu s\u1EBD c\xF3 xu h\u01B0\u1EDBng gi\u1EA3m. <b style="color:#22c55e">Drift thay \u0111\u1ED5i ng\u1EABu nhi\xEAn m\u1ED7i 100 n\u1EBFn (1 M\xF9a).</b></li>
+            <li><b style="color:#a855f7">S\u1EE9c mua Margin:</b> B\u1EA1n c\xF3 th\u1EC3 vay n\u1EE3 \u0111\u1EC3 mua th\xEAm (t\u1ED1i \u0111a x2 t\u1ED5ng t\xE0i s\u1EA3n). S\u1EE9c mua th\u1EF1c t\u1EBF b\u1EB1ng Ti\u1EC1n M\u1EB7t c\u1ED9ng H\u1EA1n m\u1EE9c vay.</li>
+          </ul>
+        </details>
+        <details style="background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">\u{1F4A1} 3. M\u1EB9o & Chi\u1EBFn thu\u1EADt</summary>
+          <ul style="padding-left: 20px; margin-top: 8px; margin-bottom: 4px;">
+            <li style="margin-bottom: 4px;">Canh mua khi gi\xE1 r\u1EDBt s\xE2u d\u01B0\u1EDBi Gi\xE1 n\u1EC1n l\xE0 c\xE1ch ch\u01A1i an to\xE0n nh\u1EA5t.</li>
+            <li style="margin-bottom: 4px;">Ch\xFA \xFD <b>M\xF9a (100 n\u1EBFn)</b> tr\xEAn g\xF3c ph\u1EA3i \u0111\u1EC3 \u0111\xF3n xu h\u01B0\u1EDBng Drift m\u1EDBi.</li>
+            <li>N\u1EBFu t\u1EC9 l\u1EC7 N\u1EE3/V\u1ED1n ch\u1EA1m m\u1ED1c 80%, b\u1EA1n s\u1EBD b\u1ECB <b>Ch\xE1y t\xE0i kho\u1EA3n (Margin Call)</b> v\xE0 m\u1EA5t tr\u1EAFng to\xE0n b\u1ED9 c\u1ED5 phi\u1EBFu! Qu\u1EA3n tr\u1ECB r\u1EE7i ro k\u1EF9 l\u01B0\u1EE1ng.</li>
+          </ul>
+        </details>
       </div>
 
       <!-- Main Layout: Sidebar & Content -->
@@ -56684,7 +56721,10 @@ function openStockModal() {
           <div style="font-size: 13px; font-weight: bold; color: #cbd5e1; border-bottom: 1px solid #334155; padding-bottom: 6px;">T\xE0i Kho\u1EA3n & K\xFD Qu\u1EF9</div>
           
           <div style="background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #1e293b;">
-            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">V\xED V\xE0ng: <span style="color:#eab308; font-weight: bold;">${fmtMoney(Math.floor(ctx.S.coins))} G</span></div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <div style="font-size: 12px; color: #94a3b8;">V\xED V\xE0ng: <span style="color:#eab308; font-weight: bold;">${fmtMoney(Math.floor(ctx.S.coins))} G</span></div>
+              <div style="font-size: 11px; color: #94a3b8;">S\u1EE9c mua: <span style="color:#a855f7; font-weight: bold;">$${fmtMoney(ctx.S.stock.balance + Math.max(0, equity * 2 - (ctx.S.stock.debt || 0)))}</span></div>
+            </div>
             <div style="display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
               <input type="number" id="stk-transfer-amt" value="${currentTransferAmt}" style="flex: 1; min-width: 80px; padding: 8px; background: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" />
               <button id="stk-max-deposit" style="background: rgba(59,130,246,0.2); color: #3b82f6; border: 1px solid rgba(59,130,246,0.4); border-radius: 4px; padding: 6px 10px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">ALL G</button>
@@ -56734,7 +56774,7 @@ function openStockModal() {
                 <div style="font-weight: 800; color: ${STOCKS[t2].color}; font-size: 14px;">${t2}</div>
                 <div style="font-size: 13px; color: #f8fafc; margin-top: 2px;">$${fmtMoney(price)}</div>
                 <div style="font-size: 10px; color: ${chgColor}; margin-top: 1px;">${chg >= 0 ? "\u25B2" : "\u25BC"} ${fmtPct(chgPct)}</div>
-                <div style="font-size: 9px; color: #475569; margin-top: 2px;">drift ${(STOCKS[t2].drift * 100).toFixed(2)}%/phi\xEAn</div>
+                <div style="font-size: 9px; color: #475569; margin-top: 2px;">drift ${((ctx.S.stock.currentDrifts?.[t2] ?? STOCKS[t2].drift) * 100).toFixed(2)}%/phi\xEAn</div>
               </div>
             `;
   }).join("")}
@@ -56752,13 +56792,21 @@ function openStockModal() {
                   <span style="color: #475569;">|</span>
                   <span>Vol: \xB1${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phi\xEAn</span>
                   <span style="color: #475569;">|</span>
-                  <span>Drift: ${(STOCKS[selectedStock].drift * 100).toFixed(2)}%</span>
+                  <span>Drift: ${((ctx.S.stock.currentDrifts?.[selectedStock] ?? STOCKS[selectedStock].drift) * 100).toFixed(2)}%</span>
                 </div>
               </div>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
 
-                <div style="background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 20px; font-size: 11px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">
-                  ${fmtMoney(sharesOwned)} cp ($${fmtMoney(sharesOwned * currentPrice)})
+                <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                  <div style="background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 20px; font-size: 11px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">
+                    ${fmtMoney(sharesOwned)} cp ($${fmtMoney(sharesOwned * currentPrice)})
+                  </div>
+                  <div style="font-size:10px; margin-top:3px; color:#cbd5e1; white-space: nowrap;">
+                    V\u1ED1n: $${fmtMoney(sharesOwned > 0 ? (ctx.S.stock.portfolioCost?.[selectedStock] || 0) / sharesOwned : 0)} | 
+                    L\xE3i: <span style="color:${sharesOwned * currentPrice - (ctx.S.stock.portfolioCost?.[selectedStock] || 0) >= 0 ? "#22c55e" : "#ef4444"}">
+                      ${sharesOwned * currentPrice - (ctx.S.stock.portfolioCost?.[selectedStock] || 0) >= 0 ? "+" : ""}$${fmtMoney(sharesOwned * currentPrice - (ctx.S.stock.portfolioCost?.[selectedStock] || 0))}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
