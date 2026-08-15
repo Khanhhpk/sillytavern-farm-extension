@@ -562,7 +562,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       stockWin.style.display = 'none';
       if (All.renderStatus) All.renderStatus();
     };
-    
+
     if (All.$id('stk-help-btn')) {
       All.$id('stk-help-btn').onclick = (e) => {
         e.stopPropagation();

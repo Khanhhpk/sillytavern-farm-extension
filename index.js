@@ -7783,6 +7783,7 @@ function initWindows() {
   if (stockDragBar) {
     stockDragBar.addEventListener("pointerdown", (e2) => {
       if (e2.target.id === "stock-close") return;
+      if (e2.target.id === "stk-help-btn") return;
       if (window.innerWidth <= 640) return;
       stockDragBar.setPointerCapture(e2.pointerId);
       const stockWin = $id("stock-win");
