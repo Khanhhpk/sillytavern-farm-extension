@@ -185,7 +185,7 @@ function sellStock(ticker, shares) {
 function borrowMargin(amount) {
   if (amount <= 0) return false;
   S.stock.debt = (S.stock.debt || 0) + amount;
-  S.stock.balance += amount;
+  S.stock.balance += amount * 0.95; // 5% upfront fee
   return true;
 }
 
@@ -238,13 +238,14 @@ describe('Stock Market Module', () => {
     });
 
     it('should handle borrow and repay margin', () => {
+      // borrow 500, but there's a 5% upfront fee, so balance increases by 475 (500 * 0.95)
       assert.equal(borrowMargin(500), true);
       assert.equal(S.stock.debt, 500);
-      assert.equal(S.stock.balance, 1500);
+      assert.equal(S.stock.balance, 1475); // 1000 + 475
 
       assert.equal(repayMargin(200), true);
       assert.equal(S.stock.debt, 300);
-      assert.equal(S.stock.balance, 1300);
+      assert.equal(S.stock.balance, 1275); // 1475 - 200
     });
 
     it('should reject invalid repay amounts', () => {
@@ -358,11 +359,11 @@ describe('Stock Market Module', () => {
 
   describe('Margin Call Liquidation', () => {
     it('should liquidate all assets if equity < 20% of debt', () => {
-      borrowMargin(1000); // balance: 2000, debt: 1000. Equity: 2000.
+      borrowMargin(1000); // balance: 1000 + 950 = 1950, debt: 1000.
       
-      S.stock.history['CRASH'].push(100); 
-      buyStock('CRASH', 20); // spent 2000. balance: 0. 
-      // Equity = 20 * 100 = 2000 - 1000 debt = 1000. (1000 > 200, safe)
+      S.stock.history['CRASH'].push(97.5); 
+      buyStock('CRASH', 20); // spent 20 * 97.5 = 1950. balance: 0. 
+      // Equity = 20 * 97.5 = 1950 - 1000 debt = 950. (950 > 200, safe)
       
       S.stock.history['CRASH'].push(1); 
       // Equity = 20 * 1 = 20 - 1000 debt = -980. (-980 < 200, margin call)
@@ -375,9 +376,9 @@ describe('Stock Market Module', () => {
     });
 
     it('should not liquidate if equity exactly 20% of debt', () => {
-      borrowMargin(1000); // balance: 2000, debt: 1000.
-      S.stock.history['CRASH'].push(10);
-      buyStock('CRASH', 200); // balance: 0. Equity: 2000.
+      borrowMargin(1000); // balance: 1950, debt: 1000.
+      S.stock.history['CRASH'].push(9.75);
+      buyStock('CRASH', 200); // 200 * 9.75 = 1950. balance: 0. Equity: 1950.
       
       // Price drops to 6. Equity = 1200 - 1000 = 200 (exactly 20% of 1000)
       S.stock.history['CRASH'].push(6);

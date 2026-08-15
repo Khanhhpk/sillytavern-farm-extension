@@ -271,7 +271,7 @@ export function sellStock(ticker, shares) {
 export function borrowMargin(amount) {
   if (amount <= 0) return false;
   ctx.S.stock.debt = (ctx.S.stock.debt || 0) + amount;
-  ctx.S.stock.balance += amount;
+  ctx.S.stock.balance += amount * 0.95; // 5% upfront fee
   return true;
 }
 
