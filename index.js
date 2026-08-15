@@ -10288,7 +10288,7 @@ function heroTick() {
       if (!runState || !runState.monsters) return;
       let totalGold2 = 0;
       runState.monsters.forEach((m2) => {
-        totalGold2 += Math.floor((runState.stage * 30 + 100) * 0.6 * (m2.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
+        totalGold2 += Math.floor((runState.stage * 30 + 100) * Math.pow(1.01, Math.max(0, runState.stage - 1)) * 0.6 * (m2.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
       });
       let pGoldMult = 1;
       runState.pets.forEach((p2) => {
