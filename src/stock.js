@@ -8,9 +8,9 @@ export const STOCKS = {
     startPrice: 100,
     color: '#3b82f6',
     // Per-candle volatility (random walk amplitude)
-    vol: 0.025,
+    vol: 0.035,
     // Intrinsic drift per candle — negative = house edge / inflation drag
-    drift: -0.001,
+    drift: -0.002,
     // How fast trend momentum decays (higher = faster reversion to calm)
     trendDecay: 0.70,
     // Trend noise amplitude
@@ -25,8 +25,8 @@ export const STOCKS = {
     name: 'Nông Sản Farm',
     startPrice: 50,
     color: '#22c55e',
-    vol: 0.08,
-    drift: -0.003,
+    vol: 0.10,
+    drift: -0.005,
     trendDecay: 0.78,
     trendNoise: 0.35,
     gravityZones: [ { above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.35, pull: 0.18 } ],
@@ -37,15 +37,15 @@ export const STOCKS = {
     name: 'Đa Cấp Coin',
     startPrice: 10,
     color: '#ef4444',
-    vol: 0.18,
-    drift: -0.01,
+    vol: 0.22,
+    drift: -0.015,
     trendDecay: 0.88,
     trendNoise: 0.55,
     gravityZones: [ { above: 15, pull: -0.55 }, { above: 5, pull: -0.20 }, { below: 0.2, pull: 0.10 } ],
     swingCap: 0.30,
-    // Occasional pump event: 2% chance per candle to ignite a strong uptrend
-    pumpChance: 0.02,
-    pumpStrength: 0.45,
+    // Occasional pump event: 3% chance per candle to ignite a strong uptrend
+    pumpChance: 0.03,
+    pumpStrength: 0.50,
   }
 };
 

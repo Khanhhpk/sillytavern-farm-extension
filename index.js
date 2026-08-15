@@ -56859,9 +56859,9 @@ var init_stock = __esm({
         startPrice: 100,
         color: "#3b82f6",
         // Per-candle volatility (random walk amplitude)
-        vol: 0.025,
+        vol: 0.035,
         // Intrinsic drift per candle — negative = house edge / inflation drag
-        drift: -1e-3,
+        drift: -2e-3,
         // How fast trend momentum decays (higher = faster reversion to calm)
         trendDecay: 0.7,
         // Trend noise amplitude
@@ -56876,8 +56876,8 @@ var init_stock = __esm({
         name: "N\xF4ng S\u1EA3n Farm",
         startPrice: 50,
         color: "#22c55e",
-        vol: 0.08,
-        drift: -3e-3,
+        vol: 0.1,
+        drift: -5e-3,
         trendDecay: 0.78,
         trendNoise: 0.35,
         gravityZones: [{ above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.35, pull: 0.18 }],
@@ -56888,15 +56888,15 @@ var init_stock = __esm({
         name: "\u0110a C\u1EA5p Coin",
         startPrice: 10,
         color: "#ef4444",
-        vol: 0.18,
-        drift: -0.01,
+        vol: 0.22,
+        drift: -0.015,
         trendDecay: 0.88,
         trendNoise: 0.55,
         gravityZones: [{ above: 15, pull: -0.55 }, { above: 5, pull: -0.2 }, { below: 0.2, pull: 0.1 }],
         swingCap: 0.3,
-        // Occasional pump event: 2% chance per candle to ignite a strong uptrend
-        pumpChance: 0.02,
-        pumpStrength: 0.45
+        // Occasional pump event: 3% chance per candle to ignite a strong uptrend
+        pumpChance: 0.03,
+        pumpStrength: 0.5
       }
     };
     selectedStock = "SIL";

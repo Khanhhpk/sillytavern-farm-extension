@@ -2,8 +2,8 @@ const STOCKS = {
   SIL: {
     name: 'SillyTavern Inc.',
     startPrice: 100,
-    vol: 0.025,
-    drift: -0.001,
+    vol: 0.035,
+    drift: -0.002,
     trendDecay: 0.70,
     trendNoise: 0.25,
     gravityZones: [ { above: 3, pull: -0.20 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.12 } ],
@@ -12,8 +12,8 @@ const STOCKS = {
   FARM: {
     name: 'Nông Sản Farm',
     startPrice: 50,
-    vol: 0.08,
-    drift: -0.003,
+    vol: 0.10,
+    drift: -0.005,
     trendDecay: 0.78,
     trendNoise: 0.35,
     gravityZones: [ { above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.35, pull: 0.18 } ],
@@ -22,14 +22,14 @@ const STOCKS = {
   CRASH: {
     name: 'Đa Cấp Coin',
     startPrice: 10,
-    vol: 0.18,
-    drift: -0.01,
+    vol: 0.22,
+    drift: -0.015,
     trendDecay: 0.88,
     trendNoise: 0.55,
     gravityZones: [ { above: 15, pull: -0.55 }, { above: 5, pull: -0.20 }, { below: 0.2, pull: 0.10 } ],
     swingCap: 0.30,
-    pumpChance: 0.02,
-    pumpStrength: 0.45,
+    pumpChance: 0.03,
+    pumpStrength: 0.5,
   }
 };
 
@@ -89,18 +89,13 @@ function runSim(ticker, initialInvestment, numCandles, numRuns) {
     
     console.log(`--- SÀN ${ticker} ---`);
     console.log(`Vốn ban đầu: $${initialInvestment.toLocaleString()}`);
-    console.log(`Số nến test: ${numCandles} (Tương đương ${((numCandles * 10) / 60 / 24).toFixed(1)} ngày trong game)`);
-    console.log(`Số lần test lặp lại: ${numRuns}`);
-    console.log(`Lãi Đỉnh (Trong tất cả các lần test): +$${maxProfit.toLocaleString('en-US', {maximumFractionDigits: 0})} (+${(maxProfit/initialInvestment*100).toFixed(1)}%)`);
-    console.log(`Lỗ Đáy (Trong tất cả các lần test): -$${maxLoss.toLocaleString('en-US', {maximumFractionDigits: 0})} (-${(maxLoss/initialInvestment*100).toFixed(1)}%)`);
-    console.log(`Trung bình còn lại cuối phiên: $${avgEnding.toLocaleString('en-US', {maximumFractionDigits: 0})} (${((avgEnding-initialInvestment)/initialInvestment*100).toFixed(1)}%)`);
-    console.log(`Tình huống Hold tới cùng may nhất: $${maxEnding.toLocaleString('en-US', {maximumFractionDigits: 0})}`);
-    console.log(`Tình huống Hold tới cùng xui nhất: $${minEnding.toLocaleString('en-US', {maximumFractionDigits: 0})}`);
+    console.log(`Lãi Đỉnh (Ngắn hạn): +$${maxProfit.toLocaleString('en-US', {maximumFractionDigits: 0})} (+${(maxProfit/initialInvestment*100).toFixed(1)}%)`);
+    console.log(`Lỗ Đáy (Ngắn hạn): -$${maxLoss.toLocaleString('en-US', {maximumFractionDigits: 0})} (-${(maxLoss/initialInvestment*100).toFixed(1)}%)`);
+    console.log(`Trung bình còn lại (Hold 1000 nến): $${avgEnding.toLocaleString('en-US', {maximumFractionDigits: 0})} (${((avgEnding-initialInvestment)/initialInvestment*100).toFixed(1)}%)`);
     console.log();
 }
 
-console.log("=== KẾT QUẢ KIỂM ĐỊNH THỊ TRƯỜNG ===");
-console.log();
+console.log("=== KIỂM ĐỊNH LỢI ÍCH NGẮN HẠN vs DÀI HẠN ===");
 runSim('SIL', 10000, 1000, 500);
 runSim('FARM', 10000, 1000, 500);
 runSim('CRASH', 10000, 1000, 500);
