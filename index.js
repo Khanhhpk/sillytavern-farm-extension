@@ -56436,7 +56436,9 @@ function updateMarket(now2 = Date.now()) {
     ctx.S.stock.candleCount = (ctx.S.stock.candleCount || 0) + 1;
     if (!ctx.S.stock.currentDrifts) {
       ctx.S.stock.currentDrifts = {};
-      Object.keys(STOCKS).forEach((t2) => ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift);
+      Object.keys(STOCKS).forEach((t2) => {
+        ctx.S.stock.currentDrifts[t2] = Math.random() * 0.04 - 0.02;
+      });
     }
     if (ctx.S.stock.candleCount % 100 === 0) {
       Object.keys(STOCKS).forEach((t2) => {
