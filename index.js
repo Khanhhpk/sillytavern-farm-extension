@@ -9862,7 +9862,7 @@ function openHeroPanel() {
       <div class="h-r-pet" data-add="${pId}" title="Th\xEAm v\xE0o \u0111\u1ED9i h\xECnh">${petSVG(pId, 32)}</div>
       <div class="h-r-info" data-info="${pId}" title="C\u01B0\u1EDDng h\xF3a & K\u1EF9 n\u0103ng" style="cursor:pointer;">
         <div>Lv.${st2.level} (ATK: ${st2.atk} | HP: ${st2.maxHp} | SPD: ${st2.spd})</div>
-        <div class="h-r-bar"><div class="h-r-fill" style="width:${st2.level >= 30 ? 100 : Math.min(100, st2.exp / st2.nextExp * 100)}%"></div><span>${st2.level >= 30 ? "MAX" : `${Math.floor(st2.exp)}/${st2.nextExp}`}</span></div>
+        <div class="h-r-bar"><div class="h-r-fill" style="width:${pId === "sans" || st2.level >= 30 ? 100 : Math.min(100, st2.exp / st2.nextExp * 100)}%"></div><span>${pId === "sans" || st2.level >= 30 ? "MAX" : `${Math.floor(st2.exp)}/${st2.nextExp}`}</span></div>
       </div>
     </div>`;
   }).join("");
@@ -9887,7 +9887,10 @@ function openHeroPanel() {
       <div class="hero-panel-section">L\u1ED1i \u0111\xE1nh</div>
       <div class="hero-style-list">${styleBtns}</div>
       
-      <div class="hero-deploy-btn" id="hero-deploy">XU\u1EA4T PH\xC1T!</div>
+      <div style="display: flex; gap: 8px;">
+        <div class="hero-deploy-btn" id="hero-deploy" style="flex: 1;">XU\u1EA4T PH\xC1T!</div>
+        <div class="hero-deploy-btn" id="hero-jump" style="width: auto; padding: 0 15px; background: #607d8b; border-color: #455a64;">JUMP STAGE</div>
+      </div>
     </div>
   `);
   const mbody = $id("mbody");
@@ -10171,8 +10174,8 @@ function spawnMonster() {
     const hpMult = isThisBoss ? 5 : 1;
     const pressure = ctx.S.hero.pressure || 0;
     const pressureMult = 1 + pressure * 0.05;
-    const baseMaxHp = (runState.stage * 20 + 80) * hpMult * pressureMult;
-    const baseAtk = (runState.stage * 4 + 5) * (isThisBoss ? 2 : 1) * pressureMult;
+    const baseMaxHp = Math.floor(100 * Math.pow(1.08, runState.stage - 1) * hpMult * pressureMult);
+    const baseAtk = Math.floor(10 * Math.pow(1.06, runState.stage - 1) * (isThisBoss ? 2 : 1) * pressureMult);
     const baseCd = 2;
     let hpScale = 0.8 + Math.random() * 0.4;
     let atkScale = 0.8 + Math.random() * 0.4;
