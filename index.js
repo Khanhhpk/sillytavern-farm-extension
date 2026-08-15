@@ -56753,9 +56753,13 @@ function openStockModal() {
     }
     stockView.innerHTML = bodyHTML;
     if (isAlreadyOpen) {
-      requestAnimationFrame(() => {
+      stockView.scrollTop = savedScroll;
+      setTimeout(() => {
         stockView.scrollTop = savedScroll;
-      });
+      }, 0);
+      setTimeout(() => {
+        stockView.scrollTop = savedScroll;
+      }, 50);
     }
     $id("stock-close").onclick = () => {
       stockWin.style.display = "none";

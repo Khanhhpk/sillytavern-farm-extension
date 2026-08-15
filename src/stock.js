@@ -505,9 +505,9 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     stockView.innerHTML = bodyHTML;
     
     if (isAlreadyOpen) {
-      requestAnimationFrame(() => {
-        stockView.scrollTop = savedScroll;
-      });
+      stockView.scrollTop = savedScroll;
+      setTimeout(() => { stockView.scrollTop = savedScroll; }, 0);
+      setTimeout(() => { stockView.scrollTop = savedScroll; }, 50);
     }
     
     All.$id('stock-close').onclick = () => {
