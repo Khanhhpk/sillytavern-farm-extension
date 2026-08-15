@@ -10444,7 +10444,7 @@ function heroTick() {
                 scene3.appendChild(p2.gbEl);
                 const gbImg = p2.gbEl.querySelector("img");
                 setTimeout(() => {
-                  if (p2.gbEl) p2.gbEl.style.left = 60 + pIdx * 45 + 25 + "px";
+                  if (p2.gbEl) p2.gbEl.style.left = (pEl ? pEl.offsetLeft + 35 : 60 + pIdx * 45 + 25) + "px";
                 }, 10);
                 setTimeout(() => {
                   if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_open_02;

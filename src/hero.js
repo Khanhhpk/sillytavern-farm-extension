@@ -893,8 +893,8 @@ function heroTick() {
                         p.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gb_open_01}" style="height:64px; image-rendering:pixelated; display:block;">`;
                         scene.appendChild(p.gbEl);
                         const gbImg = p.gbEl.querySelector('img');
-                        // Fly in from left and stop next to Sans (Sans is at 60 + pIdx*45)
-                        setTimeout(() => { if (p.gbEl) p.gbEl.style.left = (60 + (pIdx * 45) + 25) + 'px'; }, 10);
+                        // Fly in from left and stop next to Sans (based on his actual DOM position)
+                        setTimeout(() => { if (p.gbEl) p.gbEl.style.left = (pEl ? pEl.offsetLeft + 35 : 60 + (pIdx * 45) + 25) + 'px'; }, 10);
                         setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_open_02; }, 250);
                         setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_01; }, 400);
                         setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_02; }, 550);
