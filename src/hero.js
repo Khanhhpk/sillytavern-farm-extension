@@ -447,7 +447,7 @@ export function openHeroMode(startStage = 1) {
   });
 
   // Khởi tạo Run
-  ctx.S.hero.pressure = 0;
+  ctx.S.hero.pressure = Math.floor((startStage - 1) / 5);
   
   runState = {
     stage: startStage,

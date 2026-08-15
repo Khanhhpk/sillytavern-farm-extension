@@ -10027,7 +10027,7 @@ function openHeroMode(startStage = 1) {
       if (type === "atk_party") partyAtkMult += val;
     }
   });
-  ctx.S.hero.pressure = 0;
+  ctx.S.hero.pressure = Math.floor((startStage - 1) / 5);
   runState = {
     stage: startStage,
     pets: ctx.S.hero.party.map((pId) => {
