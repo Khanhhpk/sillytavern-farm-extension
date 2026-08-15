@@ -6783,7 +6783,7 @@ function openAchivModal() {
   const normalPetsList = Object.keys(PETS).filter((id) => !PETS[id].hidden);
   const totalNormalPets = normalPetsList.length;
   const ownedNormalPets = normalPetsList.filter((id) => ctx.S.pets.includes(id)).length;
-  const passesScore = (ctx.S.passes.water ? 1 : 0) + (ctx.S.passes.sky ? 1 : 0);
+  const passesScore = (ctx.S.passes.water ? 1 : 0) + (ctx.S.passes.mine ? 1 : 0);
   const q4_2 = passesScore + ownedNormalPets;
   const maxQ4_2 = 2 + totalNormalPets;
   const q4_3 = Math.min(100, stats.totalCooked || 0);
