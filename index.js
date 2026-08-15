@@ -10370,8 +10370,8 @@ function heroTick() {
         if (p2.id === "sans") {
           p2.muchBetterReady = true;
           p2.badTimeReady = true;
+          p2.skillActiveTime = 0;
         }
-        p2.skillActiveTime = 0;
         if (p2.gbEl) {
           p2.gbEl.remove();
           p2.gbEl = null;
