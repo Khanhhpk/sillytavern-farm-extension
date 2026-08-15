@@ -563,7 +563,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     All.openModal('Sàn Chứng Khoán', bodyHTML);
   }
   // Restore help panel state if it was open
-  if (All.$id('stk-help-panel') && window._stkHelpOpen) {
+  if (All.$id('stk-help-panel') && window['_stkHelpOpen']) {
     All.$id('stk-help-panel').style.display = 'block';
   }
 

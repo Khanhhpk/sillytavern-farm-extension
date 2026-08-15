@@ -3925,7 +3925,7 @@ function initUI() {
   
   <div id="stock-win" class="dungeon-win" style="display:none">
     <div class="titlebar" id="stock-drag">
-      <h1>${spriteSVG("stockMarket", 16)}S\xE0n Ch\u1EE9ng Kho\xE1n <span id="stk-help-btn" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; background:rgba(255,255,255,0.2); border-radius:50%; font-size:12px; color:white; margin-left:8px; vertical-align:middle; transition:all 0.2s;" title="H\u01B0\u1EDBng d\u1EABn ch\u01A1i" onclick="const p=document.getElementById('stk-help-panel'); if(p){ const h = p.style.display==='none'; p.style.display = h ? 'block' : 'none'; window._stkHelpOpen = h;} event.stopPropagation();">?</span></h1>
+      <h1>${spriteSVG("stockMarket", 16)}S\xE0n Ch\u1EE9ng Kho\xE1n <span id="stk-help-btn" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; background:rgba(255,255,255,0.2); border-radius:50%; font-size:12px; color:white; margin-left:8px; vertical-align:middle; transition:all 0.2s;" title="H\u01B0\u1EDBng d\u1EABn ch\u01A1i" onclick="const p=document.getElementById('stk-help-panel'); if(p){ const h = p.style.display==='none'; p.style.display = h ? 'block' : 'none'; window['_stkHelpOpen'] = h;} event.stopPropagation();">?</span></h1>
       <div class="close-x" id="stock-close">\xD7</div>
     </div>
     <div class="dungeon-view" id="stock-view" style="flex:1; overflow-y:auto; padding:10px;"></div>
@@ -56805,7 +56805,7 @@ function openStockModal() {
   } else {
     openModal("S\xE0n Ch\u1EE9ng Kho\xE1n", bodyHTML);
   }
-  if ($id("stk-help-panel") && window._stkHelpOpen) {
+  if ($id("stk-help-panel") && window["_stkHelpOpen"]) {
     $id("stk-help-panel").style.display = "block";
   }
   const transferInp = $id("stk-transfer-amt");
