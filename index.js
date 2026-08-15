@@ -56357,6 +56357,14 @@ var init_lixi = __esm({
 // src/stock.js
 function updateMarket(now2 = Date.now()) {
   if (!ctx.S.stock) return;
+  if (ctx.S.stock.totalDeposited === void 0) {
+    let initialEquity = ctx.S.stock.balance - (ctx.S.stock.debt || 0);
+    Object.keys(STOCKS).forEach((t2) => {
+      initialEquity += (ctx.S.stock.portfolio?.[t2] || 0) * (ctx.S.stock.history?.[t2]?.[0] || STOCKS[t2].startPrice);
+    });
+    ctx.S.stock.totalDeposited = Math.max(0, initialEquity);
+    ctx.S.stock.totalWithdrawn = 0;
+  }
   Object.keys(STOCKS).forEach((t2) => {
     if (!ctx.S.stock.history[t2]) ctx.S.stock.history[t2] = [STOCKS[t2].startPrice];
     if (ctx.S.stock.trends[t2] === void 0) ctx.S.stock.trends[t2] = 0;
@@ -56422,12 +56430,14 @@ function depositBrokerage(amount) {
   if (amount <= 0 || ctx.S.coins < amount) return false;
   ctx.S.coins -= amount;
   ctx.S.stock.balance += amount * 0.9;
+  ctx.S.stock.totalDeposited = (ctx.S.stock.totalDeposited || 0) + amount * 0.9;
   return true;
 }
 function withdrawBrokerage(amount) {
   if (amount <= 0 || ctx.S.stock.balance < amount) return false;
   ctx.S.stock.balance -= amount;
   ctx.S.coins += amount * 0.9;
+  ctx.S.stock.totalWithdrawn = (ctx.S.stock.totalWithdrawn || 0) + amount;
   return true;
 }
 function buyStock(ticker, shares) {
@@ -56507,6 +56517,10 @@ function openStockModal() {
   let equity = ctx.S.stock.balance + totalPortfolioValue - (ctx.S.stock.debt || 0);
   const currentPrice = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
   const sharesOwned = ctx.S.stock.portfolio[selectedStock] || 0;
+  let netInvested = ctx.S.stock.totalDeposited - ctx.S.stock.totalWithdrawn;
+  let pl = equity - netInvested;
+  let plPercent = netInvested !== 0 ? pl / Math.abs(netInvested) * 100 : 0;
+  let plColor = pl >= 0 ? "#22c55e" : "#ef4444";
   let bodyHTML = `
     <div style="display: flex; flex-direction: column; height: 100%; gap: 15px; color: #e2e8f0;">
       
@@ -56523,8 +56537,15 @@ function openStockModal() {
         </div>
         <div style="width: 1px; background: #334155;"></div>
         <div style="text-align: center;">
-          <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">N\u1EE3 Margin</div>
-          <div style="font-weight: 800; font-size: 20px; color: #ef4444; text-shadow: 0 2px 4px rgba(239,68,68,0.3);">$${(ctx.S.stock.debt || 0).toFixed(2)}</div>
+          <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">\u0110\u1EA7u T\u01B0 / \u0110\xE3 R\xFAt</div>
+          <div style="font-weight: bold; font-size: 15px; color: #e2e8f0; margin-top: 2px;">
+            <span style="color:#eab308">+$${ctx.S.stock.totalDeposited.toFixed(0)}</span> / <span style="color:#06b6d4">-$${ctx.S.stock.totalWithdrawn.toFixed(0)}</span>
+          </div>
+        </div>
+        <div style="width: 1px; background: #334155;"></div>
+        <div style="text-align: center;">
+          <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">L\xE3i / L\u1ED7 R\xF2ng</div>
+          <div style="font-weight: 800; font-size: 20px; color: ${plColor}; text-shadow: 0 2px 4px ${plColor}40;">${pl >= 0 ? "+" : ""}$${pl.toFixed(2)} (${plPercent > 0 ? "+" : ""}${plPercent.toFixed(1)}%)</div>
         </div>
       </div>
 
@@ -56537,7 +56558,13 @@ function openStockModal() {
           
           <div style="background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #1e293b;">
             <div style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">S\u1ED1 d\u01B0 V\xED V\xE0ng: <span style="color:#eab308; font-weight: bold;">${Math.floor(ctx.S.coins)} G</span></div>
-            <input type="number" id="stk-transfer-amt" value="1000" style="width:100%; padding: 10px; background: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 6px; font-size: 16px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" />
+            <div style="display: flex; background: #1e293b; border: 1px solid #475569; border-radius: 6px; overflow: hidden;">
+              <input type="number" id="stk-transfer-amt" value="1000" style="flex: 1; padding: 10px; background: transparent; color: #f8fafc; border: none; font-size: 16px; outline: none; transition: border-color 0.2s;" onfocus="this.parentElement.style.borderColor='#3b82f6'" onblur="this.parentElement.style.borderColor='#475569'" />
+              <div style="display: flex; padding-right: 5px; gap: 5px; align-items: center;">
+                <button id="stk-max-deposit" style="background: rgba(59,130,246,0.2); color: #3b82f6; border: 1px solid rgba(59,130,246,0.4); border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;" title="N\u1EA1p t\u1ED1i \u0111a">ALL G</button>
+                <button id="stk-max-withdraw" style="background: rgba(148,163,184,0.2); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.4); border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;" title="R\xFAt t\u1ED1i \u0111a">ALL $</button>
+              </div>
+            </div>
             <div style="font-size: 11px; color: #f87171; margin-top: 5px; font-style: italic;">*Ph\xED chuy\u1EC3n \u0111\u1ED5i li\xEAn ng\xE2n h\xE0ng 10%</div>
           </div>
           
@@ -56584,18 +56611,18 @@ function openStockModal() {
 
           <!-- Trading Interface -->
           <div style="display: flex; gap: 10px; align-items: center; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155;">
-            <div style="flex: 1;">
-              <input type="number" id="stk-trade-amt" value="10" min="1" style="width:100%; padding: 12px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 16px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" placeholder="S\u1ED1 l\u01B0\u1EE3ng mua/b\xE1n" />
+            <div style="flex: 1; display: flex; align-items: center; background: #0f172a; border: 1px solid #475569; border-radius: 6px; overflow: hidden; transition: border-color 0.2s;">
+              <input type="number" id="stk-trade-amt" value="10" min="1" style="width:100%; padding: 12px; background: transparent; color: #fff; border: none; font-size: 16px; outline: none;" onfocus="this.parentElement.style.borderColor='#3b82f6'" onblur="this.parentElement.style.borderColor='#475569'" placeholder="S\u1ED1 l\u01B0\u1EE3ng cp" />
+              <div style="display: flex; padding-right: 5px; gap: 5px;">
+                <button id="stk-max-buy" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;" title="Mua t\u1ED1i \u0111a b\u1EB1ng s\u1ED1 d\u01B0">MAX MUA</button>
+                <button id="stk-max-sell" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;" title="B\xE1n to\xE0n b\u1ED9 cp s\u1EDF h\u1EEFu">MAX B\xC1N</button>
+              </div>
             </div>
-            <button id="stk-buy" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3); transition: transform 0.1s;">MUA</button>
-            <button id="stk-sell" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3); transition: transform 0.1s;">B\xC1N</button>
+            <button id="stk-buy" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">MUA</button>
+            <button id="stk-sell" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">B\xC1N</button>
           </div>
 
-          <!-- Time Control -->
-          <div style="display: flex; justify-content: flex-end; margin-top: 5px;">
-             <button id="stk-forward" style="background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; transition: background 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">\u23E9 Tua nhanh 10 phi\xEAn (100 ph\xFAt)</button>
-          </div>
-          
+          <!-- Time Control (Removed duplicate button) -->
           
         </div>
       </div>
@@ -56617,6 +56644,17 @@ function openStockModal() {
     };
   } else {
     openModal("S\xE0n Ch\u1EE9ng Kho\xE1n", bodyHTML);
+  }
+  const transferInp = $id("stk-transfer-amt");
+  if ($id("stk-max-deposit")) {
+    $id("stk-max-deposit").addEventListener("click", () => {
+      transferInp.value = Math.floor(ctx.S.coins);
+    });
+  }
+  if ($id("stk-max-withdraw")) {
+    $id("stk-max-withdraw").addEventListener("click", () => {
+      transferInp.value = Math.floor(ctx.S.stock.balance);
+    });
   }
   $id("stk-deposit").addEventListener("click", () => {
     const amt = parseFloat($id("stk-transfer-amt").value);
@@ -56664,6 +56702,18 @@ function openStockModal() {
       openStockModal();
     });
   });
+  const tradeInp = $id("stk-trade-amt");
+  if ($id("stk-max-buy")) {
+    $id("stk-max-buy").addEventListener("click", () => {
+      const price = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
+      tradeInp.value = Math.floor(ctx.S.stock.balance / price) || 0;
+    });
+  }
+  if ($id("stk-max-sell")) {
+    $id("stk-max-sell").addEventListener("click", () => {
+      tradeInp.value = ctx.S.stock.portfolio[selectedStock] || 0;
+    });
+  }
   $id("stk-buy").addEventListener("click", () => {
     const shares = parseFloat($id("stk-trade-amt").value);
     if (shares > 0 && buyStock(selectedStock, shares)) {

@@ -12,6 +12,15 @@ let selectedStock = 'SIL';
 export function updateMarket(now = Date.now()) {
   if (!ctx.S.stock) return;
   
+  if (ctx.S.stock.totalDeposited === undefined) {
+    let initialEquity = ctx.S.stock.balance - (ctx.S.stock.debt || 0);
+    Object.keys(STOCKS).forEach(t => {
+      initialEquity += (ctx.S.stock.portfolio?.[t] || 0) * (ctx.S.stock.history?.[t]?.[0] || STOCKS[t].startPrice);
+    });
+    ctx.S.stock.totalDeposited = Math.max(0, initialEquity);
+    ctx.S.stock.totalWithdrawn = 0;
+  }
+
   Object.keys(STOCKS).forEach(t => {
     if (!ctx.S.stock.history[t]) ctx.S.stock.history[t] = [STOCKS[t].startPrice];
     if (ctx.S.stock.trends[t] === undefined) ctx.S.stock.trends[t] = 0;
@@ -99,6 +108,7 @@ export function depositBrokerage(amount) {
   if (amount <= 0 || ctx.S.coins < amount) return false;
   ctx.S.coins -= amount;
   ctx.S.stock.balance += amount * 0.9;
+  ctx.S.stock.totalDeposited = (ctx.S.stock.totalDeposited || 0) + (amount * 0.9);
   return true;
 }
 
@@ -106,6 +116,7 @@ export function withdrawBrokerage(amount) {
   if (amount <= 0 || ctx.S.stock.balance < amount) return false;
   ctx.S.stock.balance -= amount;
   ctx.S.coins += amount * 0.9;
+  ctx.S.stock.totalWithdrawn = (ctx.S.stock.totalWithdrawn || 0) + amount;
   return true;
 }
 
@@ -205,6 +216,11 @@ export function openStockModal() {
   const currentPrice = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
   const sharesOwned = ctx.S.stock.portfolio[selectedStock] || 0;
 
+  let netInvested = ctx.S.stock.totalDeposited - ctx.S.stock.totalWithdrawn;
+  let pl = equity - netInvested;
+  let plPercent = netInvested !== 0 ? (pl / Math.abs(netInvested)) * 100 : 0;
+  let plColor = pl >= 0 ? '#22c55e' : '#ef4444';
+
   let bodyHTML = `
     <div style="display: flex; flex-direction: column; height: 100%; gap: 15px; color: #e2e8f0;">
       
@@ -221,8 +237,15 @@ export function openStockModal() {
         </div>
         <div style="width: 1px; background: #334155;"></div>
         <div style="text-align: center;">
-          <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Nợ Margin</div>
-          <div style="font-weight: 800; font-size: 20px; color: #ef4444; text-shadow: 0 2px 4px rgba(239,68,68,0.3);">$${(ctx.S.stock.debt || 0).toFixed(2)}</div>
+          <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Đầu Tư / Đã Rút</div>
+          <div style="font-weight: bold; font-size: 15px; color: #e2e8f0; margin-top: 2px;">
+            <span style="color:#eab308">+$${ctx.S.stock.totalDeposited.toFixed(0)}</span> / <span style="color:#06b6d4">-$${ctx.S.stock.totalWithdrawn.toFixed(0)}</span>
+          </div>
+        </div>
+        <div style="width: 1px; background: #334155;"></div>
+        <div style="text-align: center;">
+          <div style="font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">Lãi / Lỗ Ròng</div>
+          <div style="font-weight: 800; font-size: 20px; color: ${plColor}; text-shadow: 0 2px 4px ${plColor}40;">${pl >= 0 ? '+' : ''}$${pl.toFixed(2)} (${plPercent > 0 ? '+' : ''}${plPercent.toFixed(1)}%)</div>
         </div>
       </div>
 
@@ -235,7 +258,13 @@ export function openStockModal() {
           
           <div style="background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #1e293b;">
             <div style="font-size: 13px; color: #94a3b8; margin-bottom: 5px;">Số dư Ví Vàng: <span style="color:#eab308; font-weight: bold;">${Math.floor(ctx.S.coins)} G</span></div>
-            <input type="number" id="stk-transfer-amt" value="1000" style="width:100%; padding: 10px; background: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 6px; font-size: 16px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" />
+            <div style="display: flex; background: #1e293b; border: 1px solid #475569; border-radius: 6px; overflow: hidden;">
+              <input type="number" id="stk-transfer-amt" value="1000" style="flex: 1; padding: 10px; background: transparent; color: #f8fafc; border: none; font-size: 16px; outline: none; transition: border-color 0.2s;" onfocus="this.parentElement.style.borderColor='#3b82f6'" onblur="this.parentElement.style.borderColor='#475569'" />
+              <div style="display: flex; padding-right: 5px; gap: 5px; align-items: center;">
+                <button id="stk-max-deposit" style="background: rgba(59,130,246,0.2); color: #3b82f6; border: 1px solid rgba(59,130,246,0.4); border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;" title="Nạp tối đa">ALL G</button>
+                <button id="stk-max-withdraw" style="background: rgba(148,163,184,0.2); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.4); border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;" title="Rút tối đa">ALL $</button>
+              </div>
+            </div>
             <div style="font-size: 11px; color: #f87171; margin-top: 5px; font-style: italic;">*Phí chuyển đổi liên ngân hàng 10%</div>
           </div>
           
@@ -281,18 +310,18 @@ export function openStockModal() {
 
           <!-- Trading Interface -->
           <div style="display: flex; gap: 10px; align-items: center; background: #1e293b; padding: 15px; border-radius: 12px; border: 1px solid #334155;">
-            <div style="flex: 1;">
-              <input type="number" id="stk-trade-amt" value="10" min="1" style="width:100%; padding: 12px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 16px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" placeholder="Số lượng mua/bán" />
+            <div style="flex: 1; display: flex; align-items: center; background: #0f172a; border: 1px solid #475569; border-radius: 6px; overflow: hidden; transition: border-color 0.2s;">
+              <input type="number" id="stk-trade-amt" value="10" min="1" style="width:100%; padding: 12px; background: transparent; color: #fff; border: none; font-size: 16px; outline: none;" onfocus="this.parentElement.style.borderColor='#3b82f6'" onblur="this.parentElement.style.borderColor='#475569'" placeholder="Số lượng cp" />
+              <div style="display: flex; padding-right: 5px; gap: 5px;">
+                <button id="stk-max-buy" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;" title="Mua tối đa bằng số dư">MAX MUA</button>
+                <button id="stk-max-sell" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: bold; cursor: pointer;" title="Bán toàn bộ cp sở hữu">MAX BÁN</button>
+              </div>
             </div>
-            <button id="stk-buy" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3); transition: transform 0.1s;">MUA</button>
-            <button id="stk-sell" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3); transition: transform 0.1s;">BÁN</button>
+            <button id="stk-buy" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">MUA</button>
+            <button id="stk-sell" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">BÁN</button>
           </div>
 
-          <!-- Time Control -->
-          <div style="display: flex; justify-content: flex-end; margin-top: 5px;">
-             <button id="stk-forward" style="background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; transition: background 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">⏩ Tua nhanh 10 phiên (100 phút)</button>
-          </div>
-          
+          <!-- Time Control (Removed duplicate button) -->
           
         </div>
       </div>
@@ -318,6 +347,18 @@ export function openStockModal() {
   } else {
     // Fallback if ui hasn't been updated
     All.openModal('Sàn Chứng Khoán', bodyHTML);
+  }
+
+  const transferInp = All.$id('stk-transfer-amt');
+  if (All.$id('stk-max-deposit')) {
+    All.$id('stk-max-deposit').addEventListener('click', () => {
+      transferInp.value = Math.floor(ctx.S.coins);
+    });
+  }
+  if (All.$id('stk-max-withdraw')) {
+    All.$id('stk-max-withdraw').addEventListener('click', () => {
+      transferInp.value = Math.floor(ctx.S.stock.balance);
+    });
   }
 
   // Bind Events
@@ -372,6 +413,19 @@ export function openStockModal() {
       openStockModal();
     });
   });
+
+  const tradeInp = All.$id('stk-trade-amt');
+  if (All.$id('stk-max-buy')) {
+    All.$id('stk-max-buy').addEventListener('click', () => {
+      const price = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
+      tradeInp.value = Math.floor(ctx.S.stock.balance / price) || 0;
+    });
+  }
+  if (All.$id('stk-max-sell')) {
+    All.$id('stk-max-sell').addEventListener('click', () => {
+      tradeInp.value = ctx.S.stock.portfolio[selectedStock] || 0;
+    });
+  }
 
   All.$id('stk-buy').addEventListener('click', () => {
     const shares = parseFloat(All.$id('stk-trade-amt').value);
