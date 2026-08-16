@@ -53044,13 +53044,20 @@ function bjHandleMsg(fromPid, data) {
       bjPlayers[fromPid] = { name: safeName, status, netProfit: 0 };
       if (bjIsHost) {
         bjBroadcast({ type: "PLAYER_JOIN", pid: fromPid, name: safeName, status }, fromPid);
-        bjConns[fromPid].send({ type: "WELCOME", players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData, chatLog: bjChatLog });
+        bjConns[fromPid].send({ type: "WELCOME", version: ctx.S.version, players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData, chatLog: bjChatLog });
       }
       bjSystemChat(`${safeName} \u0111\xE3 v\xE0o ph\xF2ng`);
       bjRenderRoom();
       break;
     }
     case "WELCOME":
+      if (data.version !== ctx.S.version) {
+        bjToast("T\u1EEB ch\u1ED1i k\u1EBFt n\u1ED1i: Host \u0111ang d\xF9ng phi\xEAn b\u1EA3n game c\u0169/kh\xE1c!");
+        bjUpdateStatus("L\u1ED7i: Host kh\xE1c phi\xEAn b\u1EA3n!", "#e05");
+        if (bjConns[fromPid]) bjConns[fromPid].close();
+        bjHandleDisconnect(fromPid);
+        return;
+      }
       bjPlayers = data.players || {};
       bjSettings = data.settings || bjSettings;
       bjGameState = data.gameState || null;

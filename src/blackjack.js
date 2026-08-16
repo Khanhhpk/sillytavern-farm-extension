@@ -741,13 +741,20 @@ function bjHandleMsg(fromPid, data) {
             bjPlayers[fromPid] = { name: safeName, status, netProfit: 0 };
             if (bjIsHost) {
                 bjBroadcast({ type: 'PLAYER_JOIN', pid: fromPid, name: safeName, status }, fromPid);
-                bjConns[fromPid].send({ type: 'WELCOME', players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData, chatLog: bjChatLog });
+                bjConns[fromPid].send({ type: 'WELCOME', version: ctx.S.version, players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData, chatLog: bjChatLog });
             }
             bjSystemChat(`${safeName} đã vào phòng`);
             bjRenderRoom();
             break;
         }
         case 'WELCOME':
+            if (data.version !== ctx.S.version) {
+                bjToast('Từ chối kết nối: Host đang dùng phiên bản game cũ/khác!');
+                bjUpdateStatus('Lỗi: Host khác phiên bản!', '#e05');
+                if (bjConns[fromPid]) bjConns[fromPid].close();
+                bjHandleDisconnect(fromPid);
+                return;
+            }
             bjPlayers = data.players || {}; bjSettings = data.settings || bjSettings;
             bjGameState = data.gameState || null;
             bjRoomPhase = data.roomPhase || (bjGameState ? 'ingame' : 'lobby');
