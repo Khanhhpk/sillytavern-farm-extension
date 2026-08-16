@@ -591,8 +591,11 @@ export function uiSelectFleaAdd(type, id, max) {
     if (type === 'uniques') {
         const item = ctx.S.uniques?.[id];
         if (item && item.rarity) {
-            nameHtml += ` <span style="font-size:12px; color:${item.color || '#ff8000'};">(${item.rarity})</span>`;
+            nameHtml += ` <span style="display:inline-block; font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color || '#ff8000'}; color:#fff; white-space:nowrap;">${item.rarity}</span>`;
         }
+    }
+    if (type === 'bag' && id.includes('@')) {
+        nameHtml += ` <span style="font-size:11px;color:#8a5cc0">✦</span>`;
     }
     All.$id('lbl-flea-sel-name').innerHTML = nameHtml;
     All.$id('lbl-flea-sel-desc').innerText = getFleaItemDesc(id);
