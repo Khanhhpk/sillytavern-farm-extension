@@ -686,7 +686,7 @@ async function bjJoinRoom() {
         conn.on('open', () => {
             bjRoomId = code; bjMyId = bjPeer.id;
             bjSetupConn(conn);
-            conn.send({ type: 'HELLO', name: bjMyName(), id: bjMyId });
+            conn.send({ type: 'HELLO', name: bjMyName(), id: bjMyId, version: ctx.S.version });
         });
         conn.on('error', () => bjUpdateStatus('Lỗi kết nối!', '#e05'));
     });
@@ -721,7 +721,21 @@ function bjBroadcastProfits() {
 
 function bjHandleMsg(fromPid, data) {
     switch (data.type) {
+        case 'VERSION_MISMATCH': {
+            bjToast('Phòng chơi này thuộc về phiên bản game cũ/khác!');
+            bjUpdateStatus('Lỗi: Khác phiên bản!', '#e05');
+            if (bjConns[fromPid]) bjConns[fromPid].close();
+            bjHandleDisconnect(fromPid);
+            break;
+        }
         case 'HELLO': {
+            if (data.version !== ctx.S.version) {
+                if (bjIsHost && bjConns[fromPid]) {
+                    bjConns[fromPid].send({ type: 'VERSION_MISMATCH' });
+                    setTimeout(() => { if (bjConns[fromPid]) bjConns[fromPid].close(); bjHandleDisconnect(fromPid); }, 500);
+                }
+                return;
+            }
             const status = (bjGameState && bjRoomPhase !== 'summary') ? 'spectator' : 'idle';
             const safeName = bjEscapeHTML(data.name || 'Khách');
             bjPlayers[fromPid] = { name: safeName, status, netProfit: 0 };

@@ -52986,7 +52986,7 @@ async function bjJoinRoom() {
       bjRoomId = code;
       bjMyId = bjPeer.id;
       bjSetupConn(conn2);
-      conn2.send({ type: "HELLO", name: bjMyName(), id: bjMyId });
+      conn2.send({ type: "HELLO", name: bjMyName(), id: bjMyId, version: ctx.S.version });
     });
     conn2.on("error", () => bjUpdateStatus("L\u1ED7i k\u1EBFt n\u1ED1i!", "#e05"));
   });
@@ -53021,7 +53021,24 @@ function bjBroadcastProfits() {
 }
 function bjHandleMsg(fromPid, data) {
   switch (data.type) {
+    case "VERSION_MISMATCH": {
+      bjToast("Ph\xF2ng ch\u01A1i n\xE0y thu\u1ED9c v\u1EC1 phi\xEAn b\u1EA3n game c\u0169/kh\xE1c!");
+      bjUpdateStatus("L\u1ED7i: Kh\xE1c phi\xEAn b\u1EA3n!", "#e05");
+      if (bjConns[fromPid]) bjConns[fromPid].close();
+      bjHandleDisconnect(fromPid);
+      break;
+    }
     case "HELLO": {
+      if (data.version !== ctx.S.version) {
+        if (bjIsHost && bjConns[fromPid]) {
+          bjConns[fromPid].send({ type: "VERSION_MISMATCH" });
+          setTimeout(() => {
+            if (bjConns[fromPid]) bjConns[fromPid].close();
+            bjHandleDisconnect(fromPid);
+          }, 500);
+        }
+        return;
+      }
       const status = bjGameState && bjRoomPhase !== "summary" ? "spectator" : "idle";
       const safeName = bjEscapeHTML(data.name || "Kh\xE1ch");
       bjPlayers[fromPid] = { name: safeName, status, netProfit: 0 };
