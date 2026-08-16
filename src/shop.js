@@ -267,7 +267,7 @@ export function openPanel(kind) {
       <div class="items">${items}</div>`);
 
   } else if (kind === 'bag') {
-    const btabs = `<div class="tabs"><span class="tab${bagTab === 'crop' ? ' active' : ''}" data-btab="crop">Nông sản</span><span class="tab${bagTab === 'seed' ? ' active' : ''}" data-btab="seed">Hạt giống</span><span class="tab${bagTab === 'gacha' ? ' active' : ''}" data-btab="gacha">Đồ Gacha</span><span class="tab${bagTab === 'pet' ? ' active' : ''}" data-btab="pet">Bé tròn</span><span class="tab${bagTab === 'relic' ? ' active' : ''}" data-btab="relic">Quà của bé tròn</span></div>`;
+    const btabs = `<div class="tabs"><span class="tab${bagTab === 'crop' ? ' active' : ''}" data-btab="crop">Nông sản</span><span class="tab${bagTab === 'seed' ? ' active' : ''}" data-btab="seed">Hạt giống</span><span class="tab${bagTab === 'gacha' ? ' active' : ''}" data-btab="gacha">Đồ Gacha</span><span class="tab${bagTab === 'pet' ? ' active' : ''}" data-btab="pet">Bé tròn</span><span class="tab${bagTab === 'relic' ? ' active' : ''}" data-btab="relic">Quà của bé tròn</span><span class="tab${bagTab === 'prompt' ? ' active' : ''}" data-btab="prompt">Chính Văn</span></div>`;
     if (bagTab === 'seed') {
       const seedKeys = Object.keys(ctx.S.seeds || {}).filter(k => k !== 'mystery');
       const rows = seedKeys.map(key => {
@@ -311,6 +311,39 @@ export function openPanel(kind) {
       }
       openModal('Balo', btabs + sellBar + (rows || '<div class="note">Bạn chưa có hạt giống nào, ra cửa hàng mua thêm đi!</div>'));
 
+      return;
+    }
+    if (bagTab === 'prompt') {
+      const promptSettings = `
+<div class="prompt-mini-settings" style="display:flex; gap:12px; margin-bottom:8px; padding:8px; background:rgba(255,255,255,0.4); border-radius:6px; font-size:12px; color:#7a5c38;">
+  <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="syncItemsCheck" ${CS.syncItems ? 'checked' : ''}> Đồng bộ Đồ vật</label>
+  <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="syncGardenCheck" ${CS.syncGarden ? 'checked' : ''}> Đồng bộ Vườn rau</label>
+</div>`;
+      const promptKeys = Object.keys(ctx.S.bag_prompt || {});
+      const rows = promptKeys.map(key => {
+        const n = ctx.S.bag_prompt[key].count;
+        const isGacha = key.startsWith('unique@');
+        if (isGacha) {
+          const item = ctx.S.uniques?.[key] || { name: 'Vật phẩm Gacha', rarity: 'Đặc biệt', desc: '', color: '#4a90e2', sp: 'strawhat' };
+          return `
+          <div class="item"><span class="icon">${spriteSVG(item.sp, 32)}</span>
+            <span class="info"><div class="name" style="color:${item.color}">${item.name} ×${n} <span style="display:inline-block; font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff; white-space:nowrap;">${item.rarity}</span></div><div class="meta">Mang vào chính văn</div></span>
+            <span class="acts"><span class="ibtn" data-returngo="${key}" title="Thu hồi về Balo">${spriteSVG('undo', 16) || '↩'}</span></span></div>`;
+        } else {
+          const id = key.split('@')[0], mut = key.indexOf('@') > 0;
+          const def = CROPS[id] || { sp: 'seedLight', name: 'Nông sản lạ' };
+          const remain = Math.max(0, Math.floor((ctx.S.bag_prompt[key].expireAt - Date.now()) / 60000));
+          return `
+          <div class="item"><span class="icon">${spriteSVG(def.sp, 32)}</span>
+            <span class="info"><div class="name">${bagName(key)} ×${n}${mut ? ' <span style="font-size:11px;color:#8a5cc0">✦</span>' : ''}</div><div class="meta">Phân rã sau: ${remain} phút</div></span>
+            <span class="acts"></span></div>`;
+        }
+      }).join('');
+      openModal('Balo', btabs + promptSettings + '<div id="promptBagList">' + (rows || '<div class="note">Chưa có đồ vật nào được đưa vào Chính Văn. Bấm «!» ở các đồ vật trong balo để mang vào.</div>') + '</div>');
+      const sic = All.$id('syncItemsCheck');
+      const sgc = All.$id('syncGardenCheck');
+      if (sic) sic.addEventListener('change', () => { CS.syncItems = sic.checked; saveCharState(); All.updateInjection(); });
+      if (sgc) sgc.addEventListener('change', () => { CS.syncGarden = sgc.checked; saveCharState(); All.updateInjection(); });
       return;
     }
     if (bagTab === 'gacha') {

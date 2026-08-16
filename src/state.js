@@ -9,7 +9,7 @@ export const emptyPlots = () => { const a = []; for (let i = 0; i < 24; i++) a.p
 export function freshState() {
   return {
     version: 3, playerId: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : ('p-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9)), coins: TEST_MODE ? 9999 : 999, totalSales: 0, unlockedBlocks: 2,
-    plots: emptyPlots(), seeds: { douya: 4, mystery: 1 }, ferts: {}, bag: {}, petPoke: {},   // Quà khởi đầu: 4 giá đỗ + 1 hạt giống bí ẩn (popup dạy chơi hộp mù)
+    plots: emptyPlots(), seeds: { douya: 4, mystery: 1 }, ferts: {}, bag: {}, bag_prompt: {}, petPoke: {},   // Quà khởi đầu: 4 giá đỗ + 1 hạt giống bí ẩn (popup dạy chơi hộp mù)
     pets: ['slime'], passes: {}, petsOut: ['slime'], jobCfg: {}, petFind: {},   // Tặng slime xanh lúc mở đầu (thực hiện phương án #9)
     page: 1, plots2: emptyPlots(), plots3: emptyPlots(), unlockedBlocks2: 1, unlockedBlocks3: 1,   // v0.8: ba trang (vé vào trang 2/3 tặng kèm ô đất đầu tiên)
     day0: now(), orb: { fx: 0.94, fy: 0.6 }, win: null,
@@ -92,6 +92,7 @@ export function loadState() {
   if (ctx.S.bankDepositTime === undefined) ctx.S.bankDepositTime = Date.now();
   if (ctx.S.bankLastCollectionTime === undefined) ctx.S.bankLastCollectionTime = 0;
   if (!ctx.S.stock) ctx.S.stock = { balance: 0, debt: 0, portfolio: {}, history: {}, trends: {}, lastUpdate: Date.now() };
+  if (!ctx.S.bag_prompt) ctx.S.bag_prompt = {};
 
   Object.keys(ctx.S.uniques || {}).forEach(k => {
     const item = ctx.S.uniques[k];

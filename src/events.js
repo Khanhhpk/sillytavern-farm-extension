@@ -27,21 +27,21 @@ export function saveSec() {
   try { window.localStorage.setItem(SEC_LS_KEY, JSON.stringify({ url: SEC.url, key: btoa(SEC.key), model: SEC.model, autoReset: SEC.autoReset, resetHours: SEC.resetHours, wbLimit: SEC.wbLimit, chatDepth: SEC.chatDepth })); } catch (e) {}
 }
 /* Công tắc và prompt tự điền: lưu theo từng thẻ nhân vật */
-export let CS = { link: false, story: false, userPrompt: '' };
+export let CS = { link: false, story: false, syncItems: true, syncGarden: true, userPrompt: '' };
 export function loadCharState() {
   try {
     const cn = charName();
     const key = 'cs_' + cn;
     const o = (ctx.extension_settings[extensionName] || {})[key] || {};
-    CS = { link: !!o.link, story: !!o.story, userPrompt: o.userPrompt || '' };
-  } catch (e) { CS = { link: false, story: false, userPrompt: '' }; }
+    CS = { link: !!o.link, story: !!o.story, syncItems: o.syncItems !== false, syncGarden: o.syncGarden !== false, userPrompt: o.userPrompt || '' };
+  } catch (e) { CS = { link: false, story: false, syncItems: true, syncGarden: true, userPrompt: '' }; }
 }
 export function saveCharState() {
   try {
     const cn = charName();
     const key = 'cs_' + cn;
     if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};
-    ctx.extension_settings[extensionName][key] = { link: CS.link, story: CS.story, userPrompt: CS.userPrompt };
+    ctx.extension_settings[extensionName][key] = { link: CS.link, story: CS.story, syncItems: CS.syncItems, syncGarden: CS.syncGarden, userPrompt: CS.userPrompt };
     if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
   } catch (e) {}
 }
