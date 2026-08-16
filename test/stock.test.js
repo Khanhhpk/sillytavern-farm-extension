@@ -102,7 +102,10 @@ function updateMarket(now) {
     S.stock.candleCount = (S.stock.candleCount || 0) + 1;
     if (S.stock.candleCount % 100 === 0) {
       Object.keys(STOCKS).forEach(t => {
-        S.stock.currentDrifts[t] = STOCKS[t].drift + (randomFn() * 0.04) - 0.02;
+        const isExtreme = randomFn() < 0.1;
+        const range = isExtreme ? 0.04 : 0.02;
+        const offset = isExtreme ? -0.02 : -0.01;
+        S.stock.currentDrifts[t] = STOCKS[t].drift + (randomFn() * range) + offset;
       });
     }
 
