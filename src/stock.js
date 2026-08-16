@@ -236,8 +236,9 @@ export function checkMarginCall() {
 }
 
 export function depositBrokerage(amount) {
+  amount = Math.floor(amount);
   if (amount <= 0 || ctx.S.coins < amount) return false;
-  ctx.S.coins -= amount;
+  ctx.S.coins = Math.floor(ctx.S.coins) - amount;
   const received = amount * 0.9;
   ctx.S.stock.balance += received;
   ctx.S.stock.totalDeposited = (ctx.S.stock.totalDeposited || 0) + received;
@@ -258,7 +259,7 @@ export function depositBrokerage(amount) {
 export function withdrawBrokerage(amount) {
   if (amount <= 0 || ctx.S.stock.balance < amount) return false;
   ctx.S.stock.balance -= amount;
-  ctx.S.coins += amount * 0.9;
+  ctx.S.coins = Math.floor(ctx.S.coins) + Math.floor(amount * 0.9);
   ctx.S.stock.totalWithdrawn = (ctx.S.stock.totalWithdrawn || 0) + amount;
   ctx.S.stock.session = {
     startTime: Date.now(),
