@@ -506,9 +506,6 @@ function soloSurrender() {
     if (hand.surrendered || hand.stood) return;
     hand.surrendered = true;
     hand.stood = true;
-    const refund = Math.floor(s.bets[0] / 2);
-    ctx.S.coins = (ctx.S.coins || 0) + refund;
-    save(); renderStatus();
     soloNextHand();
 }
 
@@ -529,8 +526,8 @@ function soloRunDealer() {
     s.dealerHand[1].justRevealed = true;
     s.phase = 'dealer';
     soloRender();
-    const allBust = s.playerHands.every(h => handTotal(h) > 21);
-    if (allBust) { s.phase = 'done'; soloResolveAll(); soloRender(); return; }
+    const allBustOrSurrender = s.playerHands.every(h => handTotal(h) > 21 || h.surrendered);
+    if (allBustOrSurrender) { s.phase = 'done'; soloResolveAll(); soloRender(); return; }
     let step = 0;
     const iv = setInterval(() => {
         const total = handTotal(s.dealerHand);
@@ -560,6 +557,7 @@ function soloResolveAll() {
         const pBJ = isBlackjack(hand) && isOnly;
         const bet = s.bets[i];
         const lbl = isOnly ? '' : `Tay ${i + 1}: `;
+        if (hand.surrendered) { ctx.S.coins = (ctx.S.coins || 0) + Math.floor(bet / 2); results.push(`${lbl}🏳️ Đầu hàng (-${Math.ceil(bet / 2).toLocaleString()}G)`); continue; }
         if (pTotal > 21) { results.push(`${lbl}💀 Bust (mất ${bet.toLocaleString()}G)`); continue; }
         if (pBJ && dBJ) { ctx.S.coins = (ctx.S.coins || 0) + bet; results.push(`${lbl}🤝 Hoà BJ`); continue; }
         if (pBJ) { const p = bet + Math.floor(bet * 1.2); ctx.S.coins = (ctx.S.coins || 0) + p; results.push(`${lbl}♠ BLACKJACK +${Math.floor(bet*1.2).toLocaleString()}G`); continue; }

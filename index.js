@@ -52889,10 +52889,6 @@ function soloSurrender() {
   if (hand.surrendered || hand.stood) return;
   hand.surrendered = true;
   hand.stood = true;
-  const refund = Math.floor(s2.bets[0] / 2);
-  ctx.S.coins = (ctx.S.coins || 0) + refund;
-  save();
-  renderStatus();
   soloNextHand();
 }
 function soloNextHand() {
@@ -52913,8 +52909,8 @@ function soloRunDealer() {
   s2.dealerHand[1].justRevealed = true;
   s2.phase = "dealer";
   soloRender();
-  const allBust = s2.playerHands.every((h) => handTotal(h) > 21);
-  if (allBust) {
+  const allBustOrSurrender = s2.playerHands.every((h) => handTotal(h) > 21 || h.surrendered);
+  if (allBustOrSurrender) {
     s2.phase = "done";
     soloResolveAll();
     soloRender();
@@ -52950,6 +52946,11 @@ function soloResolveAll() {
     const pBJ = isBlackjack(hand) && isOnly;
     const bet = s2.bets[i2];
     const lbl = isOnly ? "" : `Tay ${i2 + 1}: `;
+    if (hand.surrendered) {
+      ctx.S.coins = (ctx.S.coins || 0) + Math.floor(bet / 2);
+      results.push(`${lbl}\u{1F3F3}\uFE0F \u0110\u1EA7u h\xE0ng (-${Math.ceil(bet / 2).toLocaleString()}G)`);
+      continue;
+    }
     if (pTotal > 21) {
       results.push(`${lbl}\u{1F480} Bust (m\u1EA5t ${bet.toLocaleString()}G)`);
       continue;
