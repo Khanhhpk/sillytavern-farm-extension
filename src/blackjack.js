@@ -69,6 +69,40 @@ function isSoft(hand) {
     return aces > 0 && total <= 21;
 }
 
+// --- SMART DEALER AI ---
+function calcSmartProfit(dealerTotal, playerHandsData) {
+    let profit = 0;
+    for (const h of playerHandsData) {
+        if (h.surrendered) continue;
+        if (h.total > 21) continue; // Player bust -> dealer already secured money
+        if (dealerTotal > 21) { profit -= h.bet; continue; } // Dealer bust -> pays non-bust players
+        if (dealerTotal > h.total) { profit += h.bet; continue; } // Dealer wins
+        if (dealerTotal < h.total) { profit -= h.bet; continue; } // Dealer loses
+    }
+    return profit;
+}
+
+function shouldSmartDealerHit(dealerHand, playerHandsData) {
+    const dTotal = handTotal(dealerHand);
+    const standProfit = calcSmartProfit(dTotal, playerHandsData);
+    
+    let hitEV = 0;
+    const weights = { '2':1, '3':1, '4':1, '5':1, '6':1, '7':1, '8':1, '9':1, '10':4, 'A':1 };
+    
+    for (const [rank, weight] of Object.entries(weights)) {
+        const simHand = [...dealerHand, { rank }];
+        const p = calcSmartProfit(handTotal(simHand), playerHandsData);
+        hitEV += p * (weight / 13);
+    }
+    
+    if (hitEV > standProfit) return true;
+    if (hitEV < standProfit) return false;
+    
+    // Equal or edge case, fallback to casino standard
+    if (dTotal < 17 || (isSoft(dealerHand) && dTotal === 17)) return true;
+    return false;
+}
+
 function buildShoe(numDecks, seed) {
     const cards = [];
     for (let d = 0; d < numDecks; d++) {
@@ -529,9 +563,13 @@ function soloRunDealer() {
     if (allBustOrSurrender) { s.phase = 'done'; soloResolveAll(); soloRender(); return; }
     let step = 0;
     const iv = setInterval(() => {
-        const total = handTotal(s.dealerHand);
-        const soft = isSoft(s.dealerHand);
-        if (total < 17 || (soft && total === 17)) {
+        const activeHands = s.playerHands.map((h, i) => ({
+            bet: s.bets[i],
+            total: handTotal(h),
+            surrendered: h.surrendered
+        }));
+        
+        if (shouldSmartDealerHit(s.dealerHand, activeHands)) {
             s.dealerHand.push(soloDrawCard());
             soloRender();
         } else {
@@ -1293,8 +1331,21 @@ function bjHostRunDealer() {
     bjBroadcast(revMsg); bjHandleMsg(bjMyId, revMsg);
     const step = () => {
         if (allBust) { bjHostEndRound(); return; }
-        const tot = handTotal(gs.dealerHand);
-        if (tot < 17 || (isSoft(gs.dealerHand) && tot === 17)) {
+        
+        const activeHands = [];
+        for (const pid of gs.turnOrder) {
+            const h = gs.hands[pid];
+            if (!h) continue;
+            for (let i = 0; i < h.cards.length; i++) {
+                activeHands.push({
+                    bet: h.bet[i],
+                    total: handTotal(h.cards[i]),
+                    surrendered: h.surrendered && h.cards.length === 1
+                });
+            }
+        }
+        
+        if (shouldSmartDealerHit(gs.dealerHand, activeHands)) {
             gs.dealerHand.push({ ...gs.shoe[gs.shoeIdx++] });
             const hitMsg = { type: 'ACTION', actionType: 'DEALER_HIT', dealerHand: gs.dealerHand };
             bjBroadcast(hitMsg); bjHandleMsg(bjMyId, hitMsg);

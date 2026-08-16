@@ -1,0 +1,5 @@
+- `[/]` Implement `calcSmartProfit` utility function
+- `[ ]` Implement `shouldSmartDealerHit` EV logic
+- `[ ]` Integrate `shouldSmartDealerHit` into `soloRunDealer`
+- `[ ]` Integrate `shouldSmartDealerHit` into `bjHostRunDealer`
+- `[ ]` Test cases
