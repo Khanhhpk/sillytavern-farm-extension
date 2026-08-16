@@ -204,18 +204,21 @@ window['grabLixi'] = async function(lixiId) {
                 throw "Không thể tự giật lì xì của mình!";
             }
             
-            // Lấy ngẫu nhiên từ 3% đến 14% tổng số TIỀN GỐC
-            let grabAmount = 0;
-            const min = Math.max(1, Math.floor(data.totalAmount * 0.03));
-            const max = Math.max(min, Math.floor(data.totalAmount * 0.14));
-            grabAmount = Math.floor(Math.random() * (max - min + 1)) + min;
-            
-            // Không thể lấy nhiều hơn số tiền còn lại trong bao
-            if (grabAmount > data.remainingAmount) {
-                grabAmount = data.remainingAmount;
+            // Lì xì giới hạn 4 lần giật: 40% - 30% - 20% - 10%
+            const grabIndex = (data.claimedBy || []).length;
+            if (grabIndex >= 4) {
+                throw "Lì xì đã được giật hết!";
             }
             
-            grabAmount = Math.min(grabAmount, data.remainingAmount);
+            const percents = [0.4, 0.3, 0.2, 0.1];
+            let grabAmount = Math.floor(data.totalAmount * percents[grabIndex]);
+            
+            // Đảm bảo không lỗi làm tròn khiến túi tiền còn dư 1 đồng (người cuối cùng lấy hết số lẻ)
+            if (grabIndex === 3) {
+                grabAmount = data.remainingAmount;
+            } else if (grabAmount > data.remainingAmount) {
+                grabAmount = data.remainingAmount;
+            }
             
             const newRemaining = data.remainingAmount - grabAmount;
             const newClaimedBy = data.claimedBy || [];

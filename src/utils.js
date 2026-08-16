@@ -136,6 +136,36 @@ export function settle() {
     renderStatus();
   }
   if (wChanged) save();
+  
+  /* Expiration cho đồ trong Chính Văn (10 phút) */
+  if (ctx.S.bag_prompt) {
+    let pChanged = false;
+    Object.keys(ctx.S.bag_prompt).forEach(key => {
+      const it = ctx.S.bag_prompt[key];
+      if (it.expireAt && now() >= it.expireAt) {
+        delete ctx.S.bag_prompt[key];
+        pChanged = true;
+        if (!key.startsWith('unique@')) {
+          if (Math.random() < 0.2) {
+            if (!ctx.S.ferts) ctx.S.ferts = {};
+            ctx.S.ferts['compost'] = (ctx.S.ferts['compost'] || 0) + 1;
+            toast('Một Nông sản trong Chính Văn đã thiu và hóa thành Phân ủ!');
+          } else {
+            toast('Một Nông sản trong Chính Văn đã bay hơi vì hết hạn!');
+          }
+        }
+      }
+    });
+    if (pChanged) {
+      save();
+      if (typeof All.updateInjection === 'function') All.updateInjection();
+      const open = (() => { try { return sh.getElementById('win').classList.contains('open'); } catch(e){return false;} })();
+      if (open && All.bagTab === 'prompt' && sh.getElementById('mtitle-text').innerText === 'Balo') {
+        try { All.openPanel('bag'); } catch(e){}
+      }
+    }
+  }
+
   /* Sửa #10: ngày mưa giảm một lần 10% thời gian còn lại của cây chưa chín (#27 sửa kèm: bù lại const d bị mất); v0.8 ba trang cùng mưa */
   if (!isRain()) return;
   const d = gameDay();

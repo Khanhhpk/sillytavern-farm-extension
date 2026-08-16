@@ -264,12 +264,34 @@ export function initWitch() {
       const n = clampN(All.$id('takeN').value, 1, have, 1) | 0;
       ctx.S.bag[key] = have - n;
       if (ctx.S.bag[key] <= 0) delete ctx.S.bag[key];
+      
+      if (!ctx.S.bag_prompt) ctx.S.bag_prompt = {};
+      if (!ctx.S.bag_prompt[key]) ctx.S.bag_prompt[key] = { count: 0 };
+      ctx.S.bag_prompt[key].count += n;
+      if (!key.startsWith('unique@')) {
+        ctx.S.bag_prompt[key].expireAt = now() + 10 * MIN;
+      }
+      
       const d = mutDescOf(key);
       takeoutNote = ((takeoutNote || []).filter(t => now() < t.until))
         .concat({ txt: n + ' ' + bagName(key) + (d ? ' (hiệu ứng đã định: ' + d + ')' : ''), until: now() + 10 * MIN });
-      save(); renderStatus();
-      toast('Đã lấy ra ' + n + ' ' + bagName(key));
+      save(); renderStatus(); All.updateInjection();
+      toast('Đã mang ' + n + ' ' + bagName(key) + ' vào Chính Văn');
       openPanel('bag');
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('[data-returngo]');
+    if (el) {
+      const key = el.dataset.returngo;
+      if (ctx.S.bag_prompt && ctx.S.bag_prompt[key]) {
+        const n = ctx.S.bag_prompt[key].count;
+        delete ctx.S.bag_prompt[key];
+        ctx.S.bag[key] = (ctx.S.bag[key] || 0) + n;
+        save(); All.updateInjection();
+        toast('Đã thu hồi ' + n + ' ' + bagName(key) + ' về Balo');
+        openPanel('bag');
+      }
       return;
     }
     // @ts-ignore
