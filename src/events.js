@@ -554,21 +554,32 @@ export function setInjection(text) {
 }
 export function updateInjection() {
   if (!CS.link || !CS.story) { setInjection(''); return; }
-  const counts = {}; let ripe = 0;
-  eachPage(plots => plots.forEach(p => {                // v0.8: tóm tắt gộp cả ba trang
-    const c = p.crop; if (!c) return;
-    counts[c.id] = (counts[c.id] || 0) + 1;
-    if (now() >= c.matureAt) ripe++;
-  }));
-  const field = Object.keys(counts).map(id => CROPS[id].name + '×' + counts[id]).join(', ') || 'đang để trống';
+  
+  let fieldText = 'Đất trống';
+  if (CS.syncGarden) {
+    const counts = {}; let ripe = 0;
+    eachPage(plots => plots.forEach(p => {                // v0.8: tóm tắt gộp cả ba trang
+      const c = p.crop; if (!c) return;
+      counts[c.id] = (counts[c.id] || 0) + 1;
+      if (now() >= c.matureAt) ripe++;
+    }));
+    fieldText = Object.keys(counts).map(id => CROPS[id].name + '×' + counts[id]).join(', ') || 'Đất trống';
+    if (ripe) fieldText += ` (có ${ripe} cây đã chín chờ thu)`;
+  } else {
+    fieldText = 'Khu vườn đang được che giấu, hãy bỏ qua.';
+  }
+
   const cropsArr = [];
   const specialArr = [];
-  Object.keys(ctx.S.bag).forEach(k => {
-    const d = mutDescOf(k);
-    const line = '  + ' + bagName(k) + ' ×' + ctx.S.bag[k] + (d ? ' (' + d + ')' : '');
-    if (k.startsWith('unique@')) specialArr.push(line);
-    else cropsArr.push(line);
-  });
+  if (CS.syncItems && ctx.S.bag_prompt) {
+    Object.keys(ctx.S.bag_prompt).forEach(k => {
+      const d = mutDescOf(k);
+      const n = ctx.S.bag_prompt[k].count;
+      const line = '  + ' + bagName(k) + ' ×' + n + (d ? ' (' + d + ')' : '');
+      if (k.startsWith('unique@')) specialArr.push(line);
+      else cropsArr.push(line);
+    });
+  }
   const cropsTxt = cropsArr.join('\n');
   const specialTxt = specialArr.join('\n');
 
@@ -583,12 +594,12 @@ export function updateInjection() {
   const promptText = `【Hệ thống Nông trại & Kho đồ】
 Người chơi có một hệ thống nông trại và túi đồ tồn tại song song với cốt truyện.
 Tình trạng hiện tại:
-- Đang trồng: ${field || 'Đất trống'}${ripe ? ` (có ${ripe} cây đã chín chờ thu)` : ''}
-${cropsTxt ? '- Nông sản tích trữ:\n' + cropsTxt : '- Nông sản tích trữ: Trống'}
-${specialTxt ? '- Vật phẩm đặc biệt tích trữ:\n' + specialTxt : ''}
+- Đang trồng: ${fieldText}
+${CS.syncItems ? (cropsTxt ? '- Đồ vật đang sử dụng trong cốt truyện:\n' + cropsTxt : '- Đồ vật đang sử dụng trong cốt truyện: Trống') : ''}
+${CS.syncItems && specialTxt ? '- Vật phẩm Gacha đang sử dụng:\n' + specialTxt : ''}
 ${ev && ev.flavor ? `- Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}` : ''}${takeoutNoteStr}
 
-* Hướng dẫn cho AI: Bạn KHÔNG THỂ nhìn thấu túi đồ của người chơi và KHÔNG BIẾT họ đang có những gì. Chỉ khi người chơi "lấy ra dùng" (ở mục HÀNH ĐỘNG VỪA XẢY RA), nhân vật mới nhìn thấy và phản ứng lại tự nhiên. ĐỪNG tự ý thao tác vườn rau hay thay đổi số lượng đồ vật, và ĐỪNG biến nó thành mạch chính của truyện trừ phi người chơi chủ động nhắc tới.`;
+* Hướng dẫn cho AI: Những đồ vật được liệt kê ở "Đồ vật đang sử dụng" là những thứ người chơi mang ra từ không gian nông trại của họ để tương tác trong mạch truyện chính. Hãy miêu tả chúng một cách tự nhiên. Nếu có ghi chú hiệu ứng, hãy dựa vào đó để phản hồi. ĐỪNG tự ý tạo thêm đồ vật hoặc can thiệp vườn rau trừ khi người chơi chủ động.`;
 
   setInjection(promptText);
 }
