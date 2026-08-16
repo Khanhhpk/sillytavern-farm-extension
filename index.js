@@ -56469,7 +56469,9 @@ function renderLixiSend() {
         remainingAmount: total,
         claimedBy: [],
         createdAt: Date.now(),
-        emptyAt: null
+        emptyAt: null,
+        senderBalance: ctx.S.coins
+        // Âm thầm gửi số dư hiện tại của người phát lên Firebase
       });
       toast("\u0110\xE3 ph\xE1t L\xEC x\xEC th\xE0nh c\xF4ng!");
       switchLixiTab("list");
