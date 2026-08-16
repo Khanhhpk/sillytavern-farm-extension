@@ -57024,7 +57024,7 @@ function openStockModal() {
       openStockModal();
       if (renderStatus) renderStatus();
     } else {
-      toast("Kh\xF4ng \u0111\u1EE7 V\xED V\xE0ng!");
+      stkToast("Kh\xF4ng \u0111\u1EE7 V\xED V\xE0ng!");
     }
   });
   $id("stk-withdraw").addEventListener("click", () => {
@@ -57034,7 +57034,7 @@ function openStockModal() {
       openStockModal();
       if (renderStatus) renderStatus();
     } else {
-      toast("Kh\xF4ng \u0111\u1EE7 ti\u1EC1n trong T\xE0i kho\u1EA3n ch\u1EE9ng kho\xE1n!");
+      stkToast("Kh\xF4ng \u0111\u1EE7 ti\u1EC1n trong T\xE0i kho\u1EA3n ch\u1EE9ng kho\xE1n!");
     }
   });
   $id("stk-borrow").addEventListener("click", () => {
@@ -57045,7 +57045,7 @@ function openStockModal() {
       save();
       openStockModal();
     } else {
-      toast("Kh\xF4ng th\u1EC3 vay qu\xE1 200% Equity!");
+      stkToast("Kh\xF4ng th\u1EC3 vay qu\xE1 200% Equity!");
     }
   });
   $id("stk-repay").addEventListener("click", () => {
@@ -57054,7 +57054,7 @@ function openStockModal() {
       save();
       openStockModal();
     } else {
-      toast("Kh\xF4ng \u0111\u1EE7 ti\u1EC1n m\u1EB7t ho\u1EB7c s\u1ED1 ti\u1EC1n tr\u1EA3 l\u1EDBn h\u01A1n N\u1EE3!");
+      stkToast("Kh\xF4ng \u0111\u1EE7 ti\u1EC1n m\u1EB7t ho\u1EB7c s\u1ED1 ti\u1EC1n tr\u1EA3 l\u1EDBn h\u01A1n N\u1EE3!");
     }
   });
   const resetSessBtn = $id("stk-reset-sess");
@@ -57079,7 +57079,7 @@ function openStockModal() {
         };
         save();
         openStockModal();
-        toast("\u0110\xE3 \u0111\u1EB7t l\u1EA1i m\u1ED1c theo d\xF5i L\xE3i/L\u1ED7 phi\xEAn!");
+        stkToast("\u0110\xE3 \u0111\u1EB7t l\u1EA1i m\u1ED1c theo d\xF5i L\xE3i/L\u1ED7 phi\xEAn!");
       }, 1e3);
     };
     const endHold = () => {
@@ -57133,7 +57133,7 @@ function openStockModal() {
       save();
       openStockModal();
     } else {
-      toast("Kh\xF4ng \u0111\u1EE7 ti\u1EC1n m\u1EB7t \u0111\u1EC3 mua!");
+      stkToast("Kh\xF4ng \u0111\u1EE7 ti\u1EC1n m\u1EB7t \u0111\u1EC3 mua!");
     }
   });
   $id("stk-sell").addEventListener("click", () => {
@@ -57141,9 +57141,9 @@ function openStockModal() {
     if (shares > 0 && sellStock(selectedStock, shares)) {
       save();
       openStockModal();
-      toast("\u0110\xE3 b\xE1n (Kh\u1EA5u tr\u1EEB 2% Ph\xED)");
+      stkToast("\u0110\xE3 b\xE1n (Kh\u1EA5u tr\u1EEB 2% Ph\xED)");
     } else {
-      toast("Kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu \u0111\u1EC3 b\xE1n!");
+      stkToast("Kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu \u0111\u1EC3 b\xE1n!");
     }
   });
   const autoAmtInp = $id("stk-auto-amt");
@@ -57169,9 +57169,9 @@ function openStockModal() {
       if (shares > 0 && price > 0 && placeAutoOrder(selectedStock, "TP", price, shares)) {
         save();
         openStockModal();
-        toast(`\u0110\xE3 \u0111\u1EB7t l\u1EC7nh Ch\u1ED1t L\u1EDDi ${selectedStock}`);
+        stkToast(`\u0110\xE3 \u0111\u1EB7t l\u1EC7nh Ch\u1ED1t L\u1EDDi ${selectedStock}`);
       } else {
-        toast("S\u1ED1 l\u01B0\u1EE3ng ho\u1EB7c Gi\xE1 kh\xF4ng h\u1EE3p l\u1EC7 (ho\u1EB7c kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu)!");
+        stkToast("S\u1ED1 l\u01B0\u1EE3ng ho\u1EB7c Gi\xE1 kh\xF4ng h\u1EE3p l\u1EC7 (ho\u1EB7c kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu)!");
       }
     });
   }
@@ -57182,9 +57182,9 @@ function openStockModal() {
       if (shares > 0 && price > 0 && placeAutoOrder(selectedStock, "SL", price, shares)) {
         save();
         openStockModal();
-        toast(`\u0110\xE3 \u0111\u1EB7t l\u1EC7nh C\u1EAFt L\u1ED7 ${selectedStock}`);
+        stkToast(`\u0110\xE3 \u0111\u1EB7t l\u1EC7nh C\u1EAFt L\u1ED7 ${selectedStock}`);
       } else {
-        toast("S\u1ED1 l\u01B0\u1EE3ng ho\u1EB7c Gi\xE1 kh\xF4ng h\u1EE3p l\u1EC7 (ho\u1EB7c kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu)!");
+        stkToast("S\u1ED1 l\u01B0\u1EE3ng ho\u1EB7c Gi\xE1 kh\xF4ng h\u1EE3p l\u1EC7 (ho\u1EB7c kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu)!");
       }
     });
   }
@@ -57195,7 +57195,7 @@ function openStockModal() {
       if (cancelAutoOrder(id)) {
         save();
         openStockModal();
-        toast("\u0110\xE3 h\u1EE7y l\u1EC7nh!");
+        stkToast("\u0110\xE3 h\u1EE7y l\u1EC7nh!");
       }
     });
   });
@@ -57204,14 +57204,41 @@ function resetStock() {
   ctx.S.stock = { balance: 0, debt: 0, portfolio: {}, history: {}, trends: {}, lastUpdate: Date.now(), totalDeposited: 0, totalWithdrawn: 0 };
   selectedStock = "SIL";
   save();
-  if (toast) toast("\u0110\xE3 reset S\xE0n Ch\u1EE9ng Kho\xE1n v\u1EC1 ban \u0111\u1EA7u!");
+  if (stkToast) stkToast("\u0110\xE3 reset S\xE0n Ch\u1EE9ng Kho\xE1n v\u1EC1 ban \u0111\u1EA7u!");
   console.log("[Stock] Reset complete.");
 }
-var STOCKS, selectedStock;
+var stkToastTimer, stkToast, STOCKS, selectedStock;
 var init_stock = __esm({
   "src/stock.js"() {
     init_store();
     init_all();
+    stkToastTimer = null;
+    stkToast = (msg) => {
+      const win = $id("stock-win");
+      if (!win) return;
+      let t2 = $id("stk-toast");
+      if (!t2) {
+        t2 = document.createElement("div");
+        t2.id = "stk-toast";
+        t2.style.cssText = `
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.85); color: white; padding: 8px 16px; border-radius: 20px;
+      font-size: 13px; z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+      white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-weight: bold;
+    `;
+        win.appendChild(t2);
+      }
+      t2.textContent = msg;
+      t2.style.display = "block";
+      setTimeout(() => t2.style.opacity = "1", 10);
+      if (stkToastTimer) clearTimeout(stkToastTimer);
+      stkToastTimer = setTimeout(() => {
+        t2.style.opacity = "0";
+        setTimeout(() => {
+          if (t2.style.opacity === "0") t2.style.display = "none";
+        }, 300);
+      }, 2e3);
+    };
     STOCKS = {
       // ─── BLUE CHIP ─── Safe, low swing, slight downward drift (inflation eats it slowly)
       SIL: {

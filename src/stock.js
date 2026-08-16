@@ -1,6 +1,32 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
 
+let stkToastTimer = null;
+const stkToast = (msg) => {
+  const win = All.$id('stock-win');
+  if (!win) return;
+  let t = All.$id('stk-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'stk-toast';
+    t.style.cssText = `
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.85); color: white; padding: 8px 16px; border-radius: 20px;
+      font-size: 13px; z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+      white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-weight: bold;
+    `;
+    win.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.opacity = '1', 10);
+  if (stkToastTimer) clearTimeout(stkToastTimer);
+  stkToastTimer = setTimeout(() => {
+    t.style.opacity = '0';
+    setTimeout(() => { if(t.style.opacity === '0') t.style.display = 'none'; }, 300);
+  }, 2000);
+};
+
 export const STOCKS = {
   // ─── BLUE CHIP ─── Safe, low swing, slight downward drift (inflation eats it slowly)
   SIL: {
@@ -802,7 +828,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       openStockModal();
       if(All.renderStatus) All.renderStatus();
     } else {
-      All.toast("Không đủ Ví Vàng!");
+      stkToast("Không đủ Ví Vàng!");
     }
   });
 
@@ -813,7 +839,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       openStockModal();
       if(All.renderStatus) All.renderStatus();
     } else {
-      All.toast("Không đủ tiền trong Tài khoản chứng khoán!");
+      stkToast("Không đủ tiền trong Tài khoản chứng khoán!");
     }
   });
   
@@ -826,7 +852,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       All.save();
       openStockModal();
     } else {
-      All.toast("Không thể vay quá 200% Equity!");
+      stkToast("Không thể vay quá 200% Equity!");
     }
   });
 
@@ -836,7 +862,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       All.save();
       openStockModal();
     } else {
-      All.toast("Không đủ tiền mặt hoặc số tiền trả lớn hơn Nợ!");
+      stkToast("Không đủ tiền mặt hoặc số tiền trả lớn hơn Nợ!");
     }
   });
 
@@ -863,7 +889,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
         };
         All.save();
         openStockModal();
-        All.toast("Đã đặt lại mốc theo dõi Lãi/Lỗ phiên!");
+        stkToast("Đã đặt lại mốc theo dõi Lãi/Lỗ phiên!");
       }, 1000); // 1 second hold
     };
     const endHold = () => {
@@ -924,7 +950,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       All.save();
       openStockModal();
     } else {
-      All.toast("Không đủ tiền mặt để mua!");
+      stkToast("Không đủ tiền mặt để mua!");
     }
   });
 
@@ -933,9 +959,9 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     if (shares > 0 && sellStock(selectedStock, shares)) {
       All.save();
       openStockModal();
-      All.toast("Đã bán (Khấu trừ 2% Phí)");
+      stkToast("Đã bán (Khấu trừ 2% Phí)");
     } else {
-      All.toast("Không đủ cổ phiếu để bán!");
+      stkToast("Không đủ cổ phiếu để bán!");
     }
   });
 
@@ -963,9 +989,9 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       if (shares > 0 && price > 0 && placeAutoOrder(selectedStock, 'TP', price, shares)) {
         All.save();
         openStockModal();
-        All.toast(`Đã đặt lệnh Chốt Lời ${selectedStock}`);
+        stkToast(`Đã đặt lệnh Chốt Lời ${selectedStock}`);
       } else {
-        All.toast("Số lượng hoặc Giá không hợp lệ (hoặc không đủ cổ phiếu)!");
+        stkToast("Số lượng hoặc Giá không hợp lệ (hoặc không đủ cổ phiếu)!");
       }
     });
   }
@@ -977,9 +1003,9 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       if (shares > 0 && price > 0 && placeAutoOrder(selectedStock, 'SL', price, shares)) {
         All.save();
         openStockModal();
-        All.toast(`Đã đặt lệnh Cắt Lỗ ${selectedStock}`);
+        stkToast(`Đã đặt lệnh Cắt Lỗ ${selectedStock}`);
       } else {
-        All.toast("Số lượng hoặc Giá không hợp lệ (hoặc không đủ cổ phiếu)!");
+        stkToast("Số lượng hoặc Giá không hợp lệ (hoặc không đủ cổ phiếu)!");
       }
     });
   }
@@ -991,7 +1017,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       if (cancelAutoOrder(id)) {
         All.save();
         openStockModal();
-        All.toast("Đã hủy lệnh!");
+        stkToast("Đã hủy lệnh!");
       }
     });
   });
@@ -1015,6 +1041,6 @@ export function resetStock() {
   ctx.S.stock = { balance: 0, debt: 0, portfolio: {}, history: {}, trends: {}, lastUpdate: Date.now(), totalDeposited: 0, totalWithdrawn: 0 };
   selectedStock = 'SIL';
   All.save();
-  if (All.toast) All.toast('Đã reset Sàn Chứng Khoán về ban đầu!');
+  if (stkToast) stkToast('Đã reset Sàn Chứng Khoán về ban đầu!');
   console.log('[Stock] Reset complete.');
 }
