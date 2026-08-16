@@ -56444,6 +56444,9 @@ function updateMarket(now2 = Date.now()) {
       Object.keys(STOCKS).forEach((t2) => {
         ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * 0.02 - 0.01;
       });
+      if (ctx.S.stock.debt && ctx.S.stock.debt > 0) {
+        ctx.S.stock.debt *= 1.01;
+      }
     }
     Object.keys(STOCKS).forEach((t2) => {
       stepPrice(t2);
@@ -56526,11 +56529,12 @@ function buyStock(ticker, shares) {
 function sellStock(ticker, shares) {
   if (shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
   const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
-  const revenue = price * shares;
+  const revenue = price * shares * 0.98;
   if (!ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost = {};
   const oldShares = ctx.S.stock.portfolio[ticker];
   const avgCostPerShare = oldShares > 0 ? (ctx.S.stock.portfolioCost[ticker] || 0) / oldShares : 0;
   ctx.S.stock.portfolio[ticker] -= shares;
+  if (ctx.S.stock.portfolio[ticker] < 1e-6) ctx.S.stock.portfolio[ticker] = 0;
   ctx.S.stock.balance += revenue;
   if (ctx.S.stock.portfolio[ticker] === 0) {
     ctx.S.stock.portfolioCost[ticker] = 0;
@@ -56594,7 +56598,7 @@ function checkAutoOrders(ticker, currentPrice) {
 function borrowMargin(amount) {
   if (amount <= 0) return false;
   ctx.S.stock.debt = (ctx.S.stock.debt || 0) + amount;
-  ctx.S.stock.balance += amount * 0.95;
+  ctx.S.stock.balance += amount * 0.98;
   return true;
 }
 function repayMargin(amount) {
@@ -56825,7 +56829,7 @@ function openStockModal() {
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto;">
-            <button id="stk-borrow" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.3);" title="Vay ti\u1EC1n (Ph\xED 5%)">Vay Margin</button>
+            <button id="stk-borrow" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.3);" title="Vay ti\u1EC1n (Ph\xED 2%)">Vay Margin</button>
             <button id="stk-repay" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(16,185,129,0.3);">Tr\u1EA3 Margin</button>
           </div>
         </div>
@@ -57137,6 +57141,7 @@ function openStockModal() {
     if (shares > 0 && sellStock(selectedStock, shares)) {
       save();
       openStockModal();
+      toast("\u0110\xE3 b\xE1n (Kh\u1EA5u tr\u1EEB 2% Ph\xED)");
     } else {
       toast("Kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu \u0111\u1EC3 b\xE1n!");
     }
@@ -57216,7 +57221,7 @@ var init_stock = __esm({
         // Per-candle volatility (random walk amplitude)
         vol: 0.035,
         // Intrinsic drift per candle — negative = house edge / inflation drag
-        drift: 0,
+        drift: -2e-4,
         // How fast trend momentum decays (higher = faster reversion to calm)
         trendDecay: 0.7,
         // Trend noise amplitude

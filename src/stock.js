@@ -10,7 +10,7 @@ export const STOCKS = {
     // Per-candle volatility (random walk amplitude)
     vol: 0.035,
     // Intrinsic drift per candle — negative = house edge / inflation drag
-    drift: 0,
+    drift: -0.0002,
     // How fast trend momentum decays (higher = faster reversion to calm)
     trendDecay: 0.70,
     // Trend noise amplitude
@@ -160,6 +160,10 @@ export function updateMarket(now = Date.now()) {
       Object.keys(STOCKS).forEach(t => {
         ctx.S.stock.currentDrifts[t] = STOCKS[t].drift + (Math.random() * 0.02) - 0.01;
       });
+      // Lãi suất vay Margin (1% mỗi mùa 100 nến)
+      if (ctx.S.stock.debt && ctx.S.stock.debt > 0) {
+        ctx.S.stock.debt *= 1.01;
+      }
     }
 
     Object.keys(STOCKS).forEach(t => {
@@ -258,13 +262,14 @@ export function buyStock(ticker, shares) {
 export function sellStock(ticker, shares) {
   if (shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
   const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
-  const revenue = price * shares;
+  const revenue = price * shares * 0.98; // Thuế phí 2%
   
   if (!ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost = {};
   const oldShares = ctx.S.stock.portfolio[ticker];
   const avgCostPerShare = oldShares > 0 ? (ctx.S.stock.portfolioCost[ticker] || 0) / oldShares : 0;
   
   ctx.S.stock.portfolio[ticker] -= shares;
+  if (ctx.S.stock.portfolio[ticker] < 1e-6) ctx.S.stock.portfolio[ticker] = 0;
   ctx.S.stock.balance += revenue;
   
   if (ctx.S.stock.portfolio[ticker] === 0) {
@@ -331,7 +336,7 @@ export function checkAutoOrders(ticker, currentPrice) {
 export function borrowMargin(amount) {
   if (amount <= 0) return false;
   ctx.S.stock.debt = (ctx.S.stock.debt || 0) + amount;
-  ctx.S.stock.balance += amount * 0.95; // 5% upfront fee
+  ctx.S.stock.balance += amount * 0.98; // 2% upfront fee
   return true;
 }
 
@@ -590,7 +595,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto;">
-            <button id="stk-borrow" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.3);" title="Vay tiền (Phí 5%)">Vay Margin</button>
+            <button id="stk-borrow" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.3);" title="Vay tiền (Phí 2%)">Vay Margin</button>
             <button id="stk-repay" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(16,185,129,0.3);">Trả Margin</button>
           </div>
         </div>
@@ -928,6 +933,7 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     if (shares > 0 && sellStock(selectedStock, shares)) {
       All.save();
       openStockModal();
+      All.toast("Đã bán (Khấu trừ 2% Phí)");
     } else {
       All.toast("Không đủ cổ phiếu để bán!");
     }
