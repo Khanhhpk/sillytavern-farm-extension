@@ -6,7 +6,7 @@ import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, L
 import { toast } from './witch.js';
 import { isRain, gameDay } from './utils.js';
 import { todayEvent } from './events.js';
-import { curPlots, save, blockPrice, curBlocks, addBlock } from './state.js';
+import { curPlots, save, blockPrice, curBlocks } from './state.js';
 import { renderPlots, renderAll, renderStatus } from './render.js';
 import { plotEmote } from './ui.js';
 import { openPanel } from './shop.js';
@@ -163,7 +163,10 @@ export function buyBlock(bi) {
   const price = blockPrice(bi);
   if (ctx.S.coins < price) return toast('Không đủ vàng');
   if (bi !== curBlocks()) return;
-  ctx.S.coins -= price; addBlock();
+  ctx.S.coins -= price; 
+  if (ctx.S.page === 2) ctx.S.unlockedBlocks2++;
+  else if (ctx.S.page === 3) ctx.S.unlockedBlocks3++;
+  else ctx.S.unlockedBlocks++;
   save(); renderAll(); toast('Khai hoang thành công! Có ruộng mới rồi');
 }
 export function sell(key, n) {

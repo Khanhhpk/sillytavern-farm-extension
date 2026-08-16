@@ -449,7 +449,7 @@ export function settleIfLocked() {
   settleNow(order);
 }
 
-export function settleNow(order) {
+function settleNow(order) {
   const r = ctx.S.race;
   if (!r) return;
   const refs = r.entrants;

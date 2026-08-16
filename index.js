@@ -4283,7 +4283,9 @@ function buyBlock(bi) {
   if (ctx.S.coins < price) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng");
   if (bi !== curBlocks()) return;
   ctx.S.coins -= price;
-  addBlock();
+  if (ctx.S.page === 2) ctx.S.unlockedBlocks2++;
+  else if (ctx.S.page === 3) ctx.S.unlockedBlocks3++;
+  else ctx.S.unlockedBlocks++;
   save();
   renderAll();
   toast("Khai hoang th\xE0nh c\xF4ng! C\xF3 ru\u1ED9ng m\u1EDBi r\u1ED3i");
@@ -9812,7 +9814,6 @@ var init_events = __esm({
 // src/state.js
 var state_exports = {};
 __export(state_exports, {
-  addBlock: () => addBlock,
   blockPrice: () => blockPrice,
   curBlocks: () => curBlocks,
   curPlots: () => curPlots,
@@ -9970,7 +9971,7 @@ function save(immediate) {
   if (immediate) doSave();
   else ctx.saveTimer = setTimeout(doSave, 500);
 }
-var now, emptyPlots, blockPrice, pagePlots, curPlots, curBlocks, addBlock, eachPage, testMode;
+var now, emptyPlots, blockPrice, pagePlots, curPlots, curBlocks, eachPage, testMode;
 var init_state = __esm({
   "src/state.js"() {
     init_store();
@@ -9988,11 +9989,6 @@ var init_state = __esm({
     pagePlots = (pg) => pg === 2 ? ctx.S.plots2 : pg === 3 ? ctx.S.plots3 : ctx.S.plots;
     curPlots = () => pagePlots(ctx.S.page);
     curBlocks = () => ctx.S.page === 2 ? ctx.S.unlockedBlocks2 : ctx.S.page === 3 ? ctx.S.unlockedBlocks3 : ctx.S.unlockedBlocks;
-    addBlock = () => {
-      if (ctx.S.page === 2) ctx.S.unlockedBlocks2++;
-      else if (ctx.S.page === 3) ctx.S.unlockedBlocks3++;
-      else ctx.S.unlockedBlocks++;
-    };
     eachPage = (fn2) => [1, 2, 3].forEach((pg) => fn2(pagePlots(pg), pg));
     testMode = false;
     ctx.saveTimer = null;
@@ -57510,7 +57506,6 @@ __export(all_exports, {
   TOOLS: () => TOOLS,
   WITCH_CRY: () => WITCH_CRY,
   WORK_BAND: () => WORK_BAND,
-  addBlock: () => addBlock,
   applyDayEvent: () => applyDayEvent,
   applyPageSkin: () => applyPageSkin,
   applySansSprite: () => applySansSprite,
@@ -57742,12 +57737,10 @@ __export(all_exports, {
   setInjection: () => setInjection,
   setMode: () => setMode,
   setPendingPick: () => setPendingPick,
-  setPot: () => setPot,
   setTakeoutNote: () => setTakeoutNote,
   setTestMode: () => setTestMode,
   settle: () => settle,
   settleIfLocked: () => settleIfLocked,
-  settleNow: () => settleNow,
   settleRaceOnBoot: () => settleRaceOnBoot,
   setupExtButton: () => setupExtButton,
   setupSlashCommand: () => setupSlashCommand,
