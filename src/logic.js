@@ -15,8 +15,8 @@ import { openPanel } from './shop.js';
 export const fmtDur = m => m < 60 ? m + ' phút' : (m % 60 === 0 ? (m / 60) + ' giờ' : (m / 60).toFixed(1) + ' giờ');
 export function growMs(cropId) { return TEST_MODE ? GROW : (CROPS[cropId]?.grow || 30) * MIN; }
 export function regrowMs(cropId) { const c = CROPS[cropId] || {}; return TEST_MODE ? REGROW : (c.regrowM || Math.round((c.grow || 30) * 0.6)) * MIN; }
-export function plant(pi, cropId) {
-  if ((ctx.S.seeds[cropId] || 0) <= 0) return toast('Hết hạt giống này rồi');
+export function plant(pi, cropId, quiet) {
+  if ((ctx.S.seeds[cropId] || 0) <= 0) return quiet ? false : toast('Hết hạt giống này rồi');
   let realId = cropId;
   if (cropId === 'mystery') {                           // #29/#49: hộp mù hai lớp —— random ra họ × biến hình theo khu
     const fam = ['dream', 'key', 'fang'][Math.floor(Math.random() * 3)];
@@ -25,12 +25,12 @@ export function plant(pi, cropId) {
   else {
     const c = CROPS[cropId];
     if (!c) {
-      toast('Hạt giống này đã hỏng (không tồn tại trong phiên bản này)!');
+      if (!quiet) toast('Hạt giống này đã hỏng (không tồn tại trong phiên bản này)!');
       ctx.S.seeds[cropId] = 0;
-      return;
+      return false;
     }
     const z = c.zone || 1;                  // v0.8: cây kén đất
-    if (z !== ctx.S.page) return toast(c.name + ' phải trồng ở ' + ZONE_NAME[z] + ' (trang ' + z + ')');
+    if (z !== ctx.S.page) return quiet ? false : toast(c.name + ' phải trồng ở ' + ZONE_NAME[z] + ' (trang ' + z + ')');
   }
   ctx.S.seeds[cropId]--;
   const g = growMs(realId);
@@ -43,31 +43,33 @@ export function plant(pi, cropId) {
     c.evDay = gameDay();
   }
   curPlots()[pi].crop = c;
-  save(); renderPlots();
+  save(); if (!quiet) renderPlots();
   return true;
 }
-export function water(pi) {
+export function water(pi, quiet) {
   const c = curPlots()[pi].crop;
-  if (!c) return toast('Ô này chưa trồng gì');
-  if (now() >= c.matureAt) return toast('Chín rồi, thu nhanh đi!');
-  if (now() < c.wateredUntil) return toast('Vừa tưới xong mà');
+  if (!c) return quiet ? false : toast('Ô này chưa trồng gì');
+  if (now() >= c.matureAt) return quiet ? false : toast('Chín rồi, thu nhanh đi!');
+  if (now() < c.wateredUntil) return quiet ? false : toast('Vừa tưới xong mà');
   c.matureAt = now() + (c.matureAt - now()) * 0.75;
   c.wateredUntil = now() + WATER_CD;
-  save(); renderPlots(); toast('Tưới nước xong, cây mọc nhanh hơn!');
+  save(); if (!quiet) renderPlots();
+  if (!quiet) toast('Tưới nước xong, cây mọc nhanh hơn!');
+  return true;
 }
 export function fertilize(pi, fid, quiet) {
   const c = curPlots()[pi].crop;
-  if (!c) return toast('Ô này chưa trồng gì');
-  if ((ctx.S.ferts[fid] || 0) <= 0) return toast('Hết loại phân này rồi');
+  if (!c) return quiet ? false : toast('Ô này chưa trồng gì');
+  if ((ctx.S.ferts[fid] || 0) <= 0) return quiet ? false : toast('Hết loại phân này rồi');
   if (!c.fertUsed) c.fertUsed = {};
-  if (c.fertUsed[fid]) return toast('Vụ này đã bón ' + FERTS[fid].name + ' rồi');   // Sửa #3
+  if (c.fertUsed[fid]) return quiet ? false : toast('Vụ này đã bón ' + FERTS[fid].name + ' rồi');   // Sửa #3
   if (fid === 'compost') {
-    if (now() >= c.matureAt) return toast('Chín rồi, khỏi bón phân');
+    if (now() >= c.matureAt) return quiet ? false : toast('Chín rồi, khỏi bón phân');
     c.matureAt = now() + (c.matureAt - now()) * 0.75;
   } else c.shiny = true;                             // v1.0 B′: khi thu hoạch kết toán 25% giá bán thành vàng (thay cho cơ chế +1 sản lượng cũ)
   c.fertUsed[fid] = true;
   ctx.S.ferts[fid]--;
-  save(); renderPlots();
+  save(); if (!quiet) renderPlots();
   if (!quiet) plotEmote(pi, fid === 'compost' ? (Math.random() < 0.5 ? 'emLeaf' : 'emNote') : (Math.random() < 0.5 ? 'emHeart' : 'emStar'));   // Sửa #15
   return true;
 }
@@ -145,10 +147,10 @@ export function harvest(pi, quiet) {
     c.matureAt = now() + regrowMs(c.id);
     c.fertUsed = {};                                   // Vụ mới: phân bón và đột biến đều đặt lại
     delete c.rainDay; delete c.mut; delete c.mutRolled;
-    save(); renderPlots(); if (!quiet) toast('Thu hoạch ' + shownName + ' ×' + n + ' (còn thu được ' + c.left + ' vụ nữa)' + (shinyGain ? ' ✨+' + shinyGain + 'G' : ''));
+    save(); if (!quiet) renderPlots(); if (!quiet) toast('Thu hoạch ' + shownName + ' ×' + n + ' (còn thu được ' + c.left + ' vụ nữa)' + (shinyGain ? ' ✨+' + shinyGain + 'G' : ''));
   } else {
     curPlots()[pi].crop = null;
-    save(); renderPlots(); if (!quiet) toast('Thu hoạch ' + shownName + ' ×' + n + (def.regrow ? ' (cây này công thành thân thoái rồi)' : '') + (shinyGain ? ' ✨+' + shinyGain + 'G' : ''));
+    save(); if (!quiet) renderPlots(); if (!quiet) toast('Thu hoạch ' + shownName + ' ×' + n + (def.regrow ? ' (cây này công thành thân thoái rồi)' : '') + (shinyGain ? ' ✨+' + shinyGain + 'G' : ''));
   }
   return { name: shownName, n };
 }

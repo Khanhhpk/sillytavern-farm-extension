@@ -1,9 +1,33 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
-import { spriteSVG, petSVG, PETS } from './graphics.js';
+import { spriteSVG, petSVG, PETS, SANS_HERO_SPRITES, SANS_FARM_SPRITES } from './graphics.js';
 import { CROPS } from './data.js';
 import { save } from './state.js';
 import { openModal, closeModal } from './shop.js';
+
+
+let heroPanelScrollTop = 0;
+let heroRosterScrollTop = 0;
+
+function saveHeroScrolls() {
+    const mbody = All.$id('mbody');
+    if (mbody) {
+        heroPanelScrollTop = mbody.scrollTop;
+        const rosterEl = mbody.querySelector('.hero-pet-roster-list');
+        if (rosterEl) heroRosterScrollTop = rosterEl.scrollTop;
+    }
+}
+
+function restoreHeroScrolls() {
+    setTimeout(() => {
+        const mbody = All.$id('mbody');
+        if (mbody) {
+            mbody.scrollTop = heroPanelScrollTop;
+            const rosterEl = mbody.querySelector('.hero-pet-roster-list');
+            if (rosterEl) rosterEl.scrollTop = heroRosterScrollTop;
+        }
+    }, 0);
+}
 
 let heroLoop = null;
 let lastTick = 0;
@@ -108,6 +132,12 @@ export const PET_SKILLS = {
       p1: { name: 'Khinh Miệt Kẻ Yếu', type: 'execute', val: 0.24, desc: 'Tự động kiết liễu quái có HP < 24%' },
       p2: { name: 'Quy Tắc Khung Hình', type: 'combo_master', val: 4, desc: 'Cứ đòn đánh thứ 4 là Chí Mạng x3 Sát Thương' }
   },
+  sans: {
+    a1: { name: 'Gaster Blaster', type: 'gaster_blaster', val: 1.0, cd: 8, duration: 2, desc: 'Laser gây 1 sát thương chuẩn và 1 stack Karma mỗi 0.5s' },
+    a2: { name: 'Bone Time', type: 'bone_time', val: 5, cd: 12, duration: 2, desc: 'Xương nảy tường 5 lần (Bone Blue Long), sát thương liên tục' },
+    p1: { name: 'Much better', type: 'dodge_recover', val: 0.5, desc: 'Hết Dodge: Tạm thời bất tử, lôi ghế uống Ketchup hồi 50% Dodge (1 lần/ải)' },
+    p2: { name: 'Get dunked on', type: 'bad_time_mode', val: 0.5, desc: 'Dodge < 50%: Bật Bad Time Mode, giảm 50% thời gian hồi chiêu A1, A2 trong 5s' }
+  },
   default: { 
     a1: { name: 'Cố Gắng', type: 'atk_up', val: 0.2, cd: 5, duration: 3, desc: 'Tăng 20% ATK' }, 
     p1: { name: 'Lạc Quan', type: 'crit_rate', val: 0.2, desc: 'Tỉ lệ Bạo kích +20%' } 
@@ -131,6 +161,7 @@ export const PET_STATS = {
   peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
   penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5, baseSpd: 1.0 },
   naoyaSlime: { baseHp: 80, hpPerLv: 10, baseAtk: 24, atkPerLv: 6, baseSpd: 2.4 },
+  sans: { baseHp: 100, hpPerLv: 0, baseAtk: 1, atkPerLv: 0, baseSpd: 1.5 },
   default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1.0 }
 };
 
@@ -158,7 +189,7 @@ export function initHeroState() {
       let petData = ctx.S.hero.roster[pId];
       if (petData && petData.exp !== undefined && !isNaN(petData.exp)) {
         while (petData.level < 30) {
-          const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
+          const nextExp = Math.floor(500 * Math.pow(1.5, petData.level - 1));
           if (petData.exp >= nextExp) {
             petData.exp -= nextExp;
             petData.level++;
@@ -168,7 +199,7 @@ export function initHeroState() {
         }
         if (petData.level >= 30) {
           petData.level = 30;
-          petData.exp = Math.floor(100 * Math.pow(1.5, 29));
+          petData.exp = Math.floor(500 * Math.pow(1.5, 29));
         }
       }
     });
@@ -184,12 +215,12 @@ export function getPetStats(pId) {
   const st = PET_STATS[pId] || PET_STATS.default;
   
   return {
-    level: data.level,
-    exp: data.exp || 0,
-    maxHp: Math.floor(st.baseHp + (data.level - 1) * st.hpPerLv + enhHp * 50),
-    atk: Math.floor(st.baseAtk + (data.level - 1) * st.atkPerLv + enhAtk * 10),
-    spd: Number((st.baseSpd + enhSpd * 0.1).toFixed(2)),
-    nextExp: Math.floor(100 * Math.pow(1.5, data.level - 1)),
+    level: pId === 'sans' ? 1 : data.level,
+    exp: pId === 'sans' ? 0 : (data.exp || 0),
+    maxHp: pId === 'sans' ? Math.floor(st.baseHp * Math.pow(1.20, enhHp)) : Math.floor((st.baseHp + (data.level - 1) * st.hpPerLv) * Math.pow(1.15, enhHp)),
+    atk: pId === 'sans' ? st.baseAtk : Math.floor((st.baseAtk + (data.level - 1) * st.atkPerLv) * Math.pow(1.10, enhAtk)),
+    spd: pId === 'sans' ? st.baseSpd : Number((st.baseSpd + enhSpd * 0.1).toFixed(2)),
+    nextExp: Math.floor(500 * Math.pow(1.5, data.level - 1)),
     enhHpCost: 5000 + enhHp * 2000,
     enhAtkCost: 5000 + enhAtk * 2000,
     enhSpdCost: 5000 + enhSpd * 2000,
@@ -231,7 +262,7 @@ export function openHeroPanel() {
       <div class="h-r-pet" data-add="${pId}" title="Thêm vào đội hình">${petSVG(pId, 32)}</div>
       <div class="h-r-info" data-info="${pId}" title="Cường hóa & Kỹ năng" style="cursor:pointer;">
         <div>Lv.${st.level} (ATK: ${st.atk} | HP: ${st.maxHp} | SPD: ${st.spd})</div>
-        <div class="h-r-bar"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp/st.nextExp*100)}%"></div><span>${st.level >= 30 ? 'MAX' : `${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
+        <div class="h-r-bar"><div class="h-r-fill" style="width:${pId === 'sans' || st.level >= 30 ? 100 : Math.min(100, st.exp/st.nextExp*100)}%"></div><span>${pId === 'sans' || st.level >= 30 ? 'MAX' : `${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
       </div>
     </div>`;
   }).join('');
@@ -258,7 +289,10 @@ export function openHeroPanel() {
       <div class="hero-panel-section">Lối đánh</div>
       <div class="hero-style-list">${styleBtns}</div>
       
-      <div class="hero-deploy-btn" id="hero-deploy">XUẤT PHÁT!</div>
+      <div style="display: flex; gap: 8px; margin-top: 20px;">
+        <div class="hero-deploy-btn" id="hero-deploy" style="flex: 1; margin-top: 0; display: flex; align-items: center; justify-content: center;">XUẤT PHÁT!</div>
+        <div class="hero-deploy-btn" id="hero-jump" style="width: auto; padding: 0 15px; margin-top: 0; background: linear-gradient(to bottom, #607d8b, #455a64); border-color: #78909c; display: flex; align-items: center; justify-content: center;">JUMP STAGE</div>
+      </div>
     </div>
   `);
   
@@ -289,8 +323,8 @@ function openPetSkills(pId) {
   
   const renderSkillRow = (typeId, skData, reqLvl, cost, isEquipped, isOtherEquipped) => {
     if (!skData) return '';
-    const isUnlocked = data[`${typeId}_unlocked`];
-    const levelMet = data.level >= reqLvl;
+    const isUnlocked = pId === 'sans' ? true : data[`${typeId}_unlocked`];
+    const levelMet = pId === 'sans' ? true : data.level >= reqLvl;
     let actionBtn = '';
     
     if (isUnlocked) {
@@ -334,10 +368,10 @@ function openPetSkills(pId) {
         </div>
         <div style="flex:1;">
           <div style="font-size: 18px; font-weight:bold; color: #f2c231; margin-bottom: 4px;">Lv.${st.level}</div>
-          <div style="font-size: 14px;">HP Cơ bản: <b>${st.maxHp}</b> (+${st.enhHpLevel} Cường hóa)</div>
+          <div style="font-size: 14px;">${pId === 'sans' ? 'DODGE' : 'HP'} Cơ bản: <b>${st.maxHp}</b> (+${st.enhHpLevel} Cường hóa)</div>
           <div style="font-size: 14px;">ATK Cơ bản: <b>${st.atk}</b> (+${st.enhAtkLevel} Cường hóa)</div>
           <div style="font-size: 14px;">Tốc đánh: <b>${st.spd}</b> (+${st.enhSpdLevel} Cường hóa)</div>
-          <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${st.level >= 30 ? 100 : Math.min(100, st.exp/st.nextExp*100)}%"></div><span>${st.level >= 30 ? 'MAX LEVEL' : `EXP: ${Math.floor(st.exp)}/${st.nextExp}`}</span></div>
+          <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${pId === 'sans' || st.level >= 30 ? 100 : Math.min(100, st.exp/st.nextExp*100)}%"></div><span>${pId === 'sans' ? 'MAX LEVEL' : (st.level >= 30 ? 'MAX LEVEL' : `EXP: ${Math.floor(st.exp)}/${st.nextExp}`)}</span></div>
         </div>
       </div>
       
@@ -354,14 +388,16 @@ function openPetSkills(pId) {
       <div class="hero-panel-section" style="margin-top:16px;">Cường Hóa (Enhance)</div>
       <div class="betsides">
         <div class="betside hero-deploy-btn" id="pet-enh-hp" data-pid="${pId}" data-cost="${st.enhHpCost}" style="margin-top:0; padding:10px; font-size:14px;">
-          +50 HP<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} Vàng)</span>
+          ${pId === 'sans' ? '+20% DODGE' : '+15% HP'}<br><span style="font-size:12px; font-weight:normal;">(${st.enhHpCost} Vàng)</span>
         </div>
+        ${pId === 'sans' ? '' : `
         <div class="betside hero-deploy-btn" id="pet-enh-atk" data-pid="${pId}" data-cost="${st.enhAtkCost}" style="margin-top:0; padding:10px; font-size:14px;">
-          +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} Vàng)</span>
+          +10% ATK<br><span style="font-size:12px; font-weight:normal;">(${st.enhAtkCost} Vàng)</span>
         </div>
         <div class="betside hero-deploy-btn" id="pet-enh-spd" data-pid="${pId}" data-cost="${st.enhSpdCost}" style="margin-top:0; padding:10px; font-size:14px;">
           +0.1 SPD<br><span style="font-size:12px; font-weight:normal;">(${st.enhSpdCost} Vàng)</span>
         </div>
+        `}
       </div>
       
       <div class="hero-deploy-btn" id="pet-back-btn" style="margin-top: 16px; background: #2c2538; border-color: #5d4a85;">
@@ -373,7 +409,7 @@ function openPetSkills(pId) {
   const mbody = All.$id('mbody');
 }
 
-export function openHeroMode() {
+export function openHeroMode(startStage = 1) {
   initHeroState();
   All.closeWin(); // Đóng bảng Farm chính thay vì chỉ ẩn display
   
@@ -411,9 +447,10 @@ export function openHeroMode() {
   });
 
   // Khởi tạo Run
-  ctx.S.hero.pressure = 0;
+  ctx.S.hero.pressure = Math.floor((startStage - 1) / 5);
+  
   runState = {
-    stage: 1,
+    stage: startStage,
     pets: ctx.S.hero.party.map(pId => {
       const st = getPetStats(pId);
       const data = ctx.S.hero.roster[pId] || {};
@@ -495,6 +532,15 @@ export function closeHeroMode() {
     cancelAnimationFrame(heroLoop);
     heroLoop = null;
   }
+  if (runState) {
+      if (runState.projectiles) {
+          runState.projectiles.forEach(p => { if (p.el) p.el.remove(); });
+          runState.projectiles = [];
+      }
+      if (runState.pets) {
+          runState.pets.forEach(p => { if (p.gbEl) { p.gbEl.remove(); p.gbEl = null; p.gbClosing = false; } });
+      }
+  }
   window.removeEventListener('resize', placeHeroBar);
   runState = null;
   const orb = All.$id('orb');
@@ -542,8 +588,8 @@ function spawnMonster() {
     const pressure = ctx.S.hero.pressure || 0;
     const pressureMult = 1 + (pressure * 0.05);
 
-    const baseMaxHp = (runState.stage * 20 + 80) * hpMult * pressureMult;
-    const baseAtk = (runState.stage * 4 + 5) * (isThisBoss ? 2 : 1) * pressureMult;
+    const baseMaxHp = Math.floor(100 * Math.pow(1.08, runState.stage - 1) * hpMult * pressureMult);
+    const baseAtk = Math.floor(10 * Math.pow(1.06, runState.stage - 1) * (isThisBoss ? 2 : 1) * pressureMult);
     const baseCd = 2.0;
 
     let hpScale = 0.8 + Math.random() * 0.4;
@@ -685,7 +731,7 @@ function heroTick() {
       
       let totalGold = 0;
       runState.monsters.forEach(m => {
-         totalGold += Math.floor((runState.stage * 30 + 100) * 0.6 * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
+         totalGold += Math.floor((runState.stage * 30 + 100) * Math.pow(1.01, Math.max(0, runState.stage - 1)) * 0.6 * (m.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
       });
       
       let pGoldMult = 1.0;
@@ -709,11 +755,11 @@ function heroTick() {
         if (petData.exp === undefined || isNaN(petData.exp)) petData.exp = 0;
         
         const pEl = All.$id('hpet-' + runState.pets.indexOf(p));
-        petData.exp += Math.floor(totalExp / runState.pets.length);
+        if (p.id !== 'sans') petData.exp += Math.floor(totalExp / runState.pets.length);
         
         let leveledUp = false;
         while (petData.level < 30) {
-          const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
+          const nextExp = Math.floor(500 * Math.pow(1.5, petData.level - 1));
           if (petData.exp >= nextExp) {
             petData.exp -= nextExp;
             petData.level++;
@@ -725,7 +771,7 @@ function heroTick() {
         
         if (petData.level >= 30) {
           petData.level = 30;
-          petData.exp = Math.floor(100 * Math.pow(1.5, 29)); // Cap it
+          petData.exp = Math.floor(500 * Math.pow(1.5, 29)); // Cap it
         }
         
         if (leveledUp) {
@@ -754,12 +800,27 @@ function heroTick() {
       
       runState.stage++;
       if (runState.stage > ctx.S.hero.maxStage) ctx.S.hero.maxStage = runState.stage;
-      runState.pets.forEach(p => { if (p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2); });
+      
+      if (runState.projectiles) {
+          runState.projectiles.forEach(p => { if (p.el) p.el.remove(); });
+          runState.projectiles = [];
+      }
+
+      runState.pets.forEach(p => { 
+        if (p.hp > 0) p.hp = Math.min(p.maxHp, p.hp + p.maxHp * 0.2); 
+        if (p.id === 'sans') { 
+            p.muchBetterReady = true; 
+            p.badTimeReady = true; 
+            p.skillActiveTime = 0;
+        }
+        if (p.gbEl) { p.gbEl.remove(); p.gbEl = null; p.gbClosing = false; }
+        if (p.gbLaser) { p.gbLaser.remove(); p.gbLaser = null; p.gbLaserEnding = false; }
+      });
       
       save();
       renderHeroUI();
       spawnMonster();
-    }, 1500);
+    }, 500);
     return;
   }
   
@@ -791,6 +852,17 @@ function heroTick() {
         }
       }
       
+      // Bone Time buff countdown
+      if (p.boneTimeActive && p.boneTimeDuration > 0) {
+        p.boneTimeDuration -= dt / 1000;
+        if (p.boneTimeDuration <= 0) {
+            p.boneTimeActive = false;
+            p.boneTimeDuration = 0;
+            p.spdBuff = p.spdBuff ? p.spdBuff / 3 : 1;
+            if (pEl) setTimeout(() => showFloatDamage('BONE TIME END', pEl, '#888'), 0);
+        }
+      }
+      
       // Active skills (with CD and Duration logic)
       if (p.skillActiveTime > 0) {
         p.skillActiveTime -= dt / 1000;
@@ -810,11 +882,75 @@ function heroTick() {
                   const mobEl = All.$id('hmob-' + tMob.idx);
                   spawnSkillEffect(pEl, mobEl, aSk.type);
                 }
+            } else if (aSk.type === 'gaster_blaster') {
+                let tMob = null;
+                if (runState.focusTarget !== null && runState.monsters[runState.focusTarget] && runState.monsters[runState.focusTarget].hp > 0 && runState.monsters[runState.focusTarget].x <= 200 + (runState.focusTarget * 45) + 2) {
+                  tMob = runState.monsters[runState.focusTarget];
+                } else {
+                  tMob = activeMonsters[Math.floor(Math.random() * activeMonsters.length)];
+                }
+                
+                if (!p.gbEl && !p.gbClosing) {
+                    const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
+                    if (scene) {
+                        p.gbEl = document.createElement('div');
+                        p.gbEl.style.cssText = 'position:absolute; bottom:16px; left:-80px; transition:left 0.25s ease-out; z-index:10;';
+                        p.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gb_open_01}" style="height:64px; image-rendering:pixelated; display:block;">`;
+                        scene.appendChild(p.gbEl);
+                        const gbImg = p.gbEl.querySelector('img');
+                        // Fly in from left and stop next to Sans (based on his actual DOM position)
+                        setTimeout(() => { if (p.gbEl) p.gbEl.style.left = (pEl ? pEl.offsetLeft + 35 : 60 + (pIdx * 45) + 25) + 'px'; }, 10);
+                        setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_open_02; }, 250);
+                        setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_01; }, 400);
+                        setTimeout(() => { if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_02; }, 550);
+                        setTimeout(() => { 
+                            if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_03; 
+                            if (p.gbEl && !p.gbLaser) {
+                                p.gbLaser = document.createElement('div');
+                                p.gbLaser.className = 'laser-sans-continuous';
+                                p.gbLaser.style.left = '48px';
+                                p.gbLaser.style.top = '32px';
+                                p.gbEl.appendChild(p.gbLaser);
+                                // Small delay to trigger transition
+                                setTimeout(() => { if (p.gbLaser) p.gbLaser.classList.add('firing'); }, 50);
+                            }
+                        }, 700);
+                    }
+                }
+
+                p.gasterTick = (p.gasterTick || 0) + dt/1000;
+                if (p.gasterTick >= 0.25) { // 4 ticks per second
+                    p.gasterTick -= 0.25;
+                    const dmg = Math.max(1, Math.floor(tMob.maxHp * 0.01)); // 1% max hp
+                    tMob.hp -= dmg;
+                    tMob.karma = (tMob.karma || 0) + 1;
+                    const mobEl = All.$id('hmob-' + tMob.idx);
+                    if (mobEl) setTimeout(() => showFloatDamage('-' + dmg, mobEl, '#fff'), 0);
+                }
+                
+                if (p.skillActiveTime <= 0.3 && p.gbLaser && !p.gbLaserEnding) {
+                    p.gbLaserEnding = true;
+                    p.gbLaser.classList.remove('firing');
+                    p.gbLaser.classList.add('ending');
+                }
+                
+                if (p.skillActiveTime <= 0 && p.gbEl && !p.gbClosing) {
+                    p.gbClosing = true;
+                    const img = p.gbEl.querySelector('img');
+                    if (img) img.src = SANS_HERO_SPRITES.gb_close;
+                    setTimeout(() => {
+                        if (p.gbEl) { p.gbEl.remove(); p.gbEl = null; }
+                        p.gbClosing = false;
+                        p.gbLaser = null;
+                        p.gbLaserEnding = false;
+                    }, 300);
+                }
             }
         }
       } else if (p.skillMaxCd > 0) {
         let stSpdMult = 1.0;
         if (p.spdBuff) stSpdMult *= p.spdBuff;
+        if (p.badTimeTimer > 0) stSpdMult *= 2.0; // GET DUNKED ON speedup
         p.skillCd -= (dt / 1000) * stSpdMult;
         const skBar = All.$id('sk-pet-' + pIdx);
         if (skBar) skBar.style.width = Math.min(100, Math.max(0, ((p.skillMaxCd - p.skillCd) / p.skillMaxCd) * 100)) + '%';
@@ -998,6 +1134,9 @@ function heroTick() {
             } else if (aSk.type === 'party_speed_buff') {
                alivePets.forEach(ap => { ap.spdBuff = aSk.val; ap.spdBuffTimer = aSk.duration; });
                setTimeout(() => showFloatDamage('SPD BUFF', pEl, '#00e676'), 0);
+            } else if (aSk.type === 'gaster_blaster') {
+                p.gasterTick = 0;
+                p.gbClosing = false;
             } else if (aSk.type === 'blind') {
                tMob.blindCd = aSk.duration;
                setTimeout(() => showFloatDamage('BLIND', mobEl, '#607d8b'), 0);
@@ -1006,6 +1145,12 @@ function heroTick() {
                p.atkDebuff = 0.5;
                p.sugarTimer = aSk.duration;
                setTimeout(() => showFloatDamage('SUGAR RUSH', pEl, '#ff80ab'), 0);
+            } else if (aSk.type === 'bone_time') {
+                // Buff mode: x3 attack speed + bone on every hit for the duration
+                p.boneTimeActive = true;
+                p.boneTimeDuration = aSk.duration || 2;
+                p.spdBuff = (p.spdBuff || 1) * 3;
+                setTimeout(() => showFloatDamage('BONE TIME!', pEl, '#00ffff'), 0);
             } else if (aSk.type === 'snowball_roll') {
                const dmg = p.atk * aSk.val;
                tMob.hp -= dmg;
@@ -1031,6 +1176,8 @@ function heroTick() {
       if (p.atkBuffTimer > 0) { p.atkBuffTimer -= dt/1000; if(p.atkBuffTimer<=0) p.atkBuff = null; }
       if (p.spdBuffTimer > 0) { p.spdBuffTimer -= dt/1000; if(p.spdBuffTimer<=0) p.spdBuff = null; }
       if (p.sugarTimer > 0) { p.sugarTimer -= dt/1000; if(p.sugarTimer<=0) { p.spdBuff = null; p.atkDebuff = null; } }
+      if (p.invincibleTimer > 0) { p.invincibleTimer -= dt/1000; }
+      if (p.badTimeTimer > 0) { p.badTimeTimer -= dt/1000; }
 
       let rtSpdMult = 1.0;
       if (p.spdBuff) rtSpdMult *= p.spdBuff;
@@ -1107,6 +1254,39 @@ function heroTick() {
                 dmg = Math.floor(dmg * pSkill[passEq].val);
             }
             
+            if (p.id === 'sans') {
+                if (!runState.projectiles) runState.projectiles = [];
+                const pEl = All.$id('hpet-' + pIdx);
+                const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
+                
+                // Always spawn white bone (normal attack)
+                const boneEl = document.createElement('div');
+                boneEl.style.cssText = 'position:absolute; bottom:18px; left:0; pointer-events:none; z-index:9;';
+                boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_white}" style="height:24px; image-rendering:pixelated; display:block;">`;
+                if (scene) scene.appendChild(boneEl);
+                runState.projectiles.push({
+                    x: 60 + (pIdx * 45), vx: 200,
+                    type: 'bone_white', dmg: p.atk, karmaAmt: 2,
+                    el: boneEl, hitCd: 0
+                });
+
+                // During Bone Time buff: also spawn a bouncing blue bone
+                if (p.boneTimeActive) {
+                    const blueEl = document.createElement('div');
+                    blueEl.style.cssText = 'position:absolute; bottom:18px; left:0; pointer-events:none; z-index:9;';
+                    blueEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_blue}" style="height:24px; image-rendering:pixelated; display:block;">`;
+                    if (scene) scene.appendChild(blueEl);
+                    runState.projectiles.push({
+                        x: 60 + (pIdx * 45), vx: 200,
+                        type: 'bone_blue', dmg: Math.floor(p.atk * 1.5), karmaAmt: 2,
+                        el: blueEl, hitCd: 0, bounces: 0, maxBounces: 6
+                    });
+                }
+                
+                if (pEl) { pEl.classList.remove('idle'); pEl.classList.add('attack'); setTimeout(() => { pEl.classList.remove('attack'); pEl.classList.add('idle'); }, 300); }
+                return; // SKIP NORMAL DAMAGE
+            }
+
             const doDamage = () => {
               tMob.hp -= dmg;
               
@@ -1178,7 +1358,8 @@ function heroTick() {
             if (m.atkDebuff) mAtkMult *= m.atkDebuff;
             let dmg = Math.max(1, Math.floor(m.atk * mAtkMult * (0.8 + Math.random() * 0.4)));
             
-            if (target.dmgResist > 0) dmg = Math.floor(dmg * (1 - target.dmgResist));
+            if (target.invincibleTimer > 0) dmg = 0;
+            else if (target.dmgResist > 0) dmg = Math.floor(dmg * (1 - target.dmgResist));
             
             if (runState.waveTime <= 2.0 && ctx.S.hero.roster[target.id]?.passive_eq) {
                const pSkill = PET_SKILLS[target.id];
@@ -1210,6 +1391,65 @@ function heroTick() {
             }
 
             target.hp -= dmg;
+            
+            // SANS OVERRIDE: Much better & Get dunked on
+            if (target.id === 'sans') {
+                const sData = ctx.S.hero.roster['sans'];
+                if (sData) {
+                    if (sData.passive_eq === 'p1' && target.hp <= 0 && target.muchBetterReady !== false) {
+                        target.muchBetterReady = false;
+                        target.hp = 1;
+                        target.invincibleTimer = 3.0; // 3s damage block
+                        
+                        const scene = pEl ? (pEl.closest('.hero-scene') || All.sh.querySelector('.hero-scene')) : null;
+                        if (scene) {
+                            const imgBase = pEl ? pEl.querySelector('img') : null;
+                            if (imgBase) imgBase.style.opacity = 0;
+                            
+                            // Calculate position of pEl relative to scene
+                            const petRect = pEl.getBoundingClientRect();
+                            const sceneRect = scene.getBoundingClientRect();
+                            const relLeft = petRect.left - sceneRect.left;
+                            const relBottom = sceneRect.bottom - petRect.bottom;
+
+                            const ketchupEl = document.createElement('div');
+                            ketchupEl.style.cssText = `position:absolute; bottom:${relBottom}px; left:${relLeft}px; pointer-events:none; z-index:10;`;
+                            ketchupEl.innerHTML = `<img src="${SANS_HERO_SPRITES.stool_chup_1}" style="height:32px; image-rendering:pixelated; display:block;">`;
+                            scene.appendChild(ketchupEl);
+                            
+                            const kImg = ketchupEl.querySelector('img');
+                            // 10 frames, cycle 3 times over 3s (each frame ~100ms, 30 steps total)
+                            const frames = [SANS_HERO_SPRITES.stool_chup_1, SANS_HERO_SPRITES.stool_chup_2, SANS_HERO_SPRITES.stool_chup_3, SANS_HERO_SPRITES.stool_chup_4, SANS_HERO_SPRITES.stool_chup_5, SANS_HERO_SPRITES.stool_chup_6, SANS_HERO_SPRITES.stool_chup_7, SANS_HERO_SPRITES.stool_chup_8, SANS_HERO_SPRITES.stool_chup_9, SANS_HERO_SPRITES.stool_chup_10];
+                            for (let i = 1; i <= 30; i++) {
+                                setTimeout(() => {
+                                    if (kImg) kImg.src = frames[i % 10];
+                                }, i * 100);
+                            }
+
+                            setTimeout(() => {
+                                ketchupEl.remove();
+                                if (imgBase) imgBase.style.opacity = 1;
+                            }, 3000);
+                        }
+                        if (pEl) setTimeout(() => showFloatDamage('MUCH BETTER', pEl, '#ff0000'), 0);
+                        
+                        setTimeout(() => {
+                            if (!runState) return;
+                            target.hp = Math.min(target.maxHp, target.hp + target.maxHp * 0.5);
+                            const hpPet = All.$id('hp-pet-' + pIdx);
+                            if (hpPet) hpPet.style.width = ((target.hp / target.maxHp) * 100) + '%';
+                            if (pEl) showFloatDamage('HEAL 50%', pEl, '#a4dc8c');
+                        }, 3000);
+                    }
+                    if (sData.passive_eq === 'p2' && (target.hp / target.maxHp) < 0.5 && target.badTimeReady !== false) {
+                        target.badTimeReady = false;
+                        target.badTimeTimer = 5.0;
+                        if (pEl) setTimeout(() => showFloatDamage('GET DUNKED ON!', pEl, '#ff0000'), 0);
+                    }
+                }
+            }
+            // >>> END SANS OVERRIDE <<<
+
             if (target.hp <= 0 && target.cheatDeath > 0) {
                target.cheatDeath--;
                target.hp = 1;
@@ -1231,6 +1471,85 @@ function heroTick() {
         }
       }
     });
+
+    // 3. Projectiles Update
+    if (!runState.projectiles) runState.projectiles = [];
+    const scene = All.sh.querySelector('.hero-scene');
+    for (let i = runState.projectiles.length - 1; i >= 0; i--) {
+        const proj = runState.projectiles[i];
+        proj.x += proj.vx * (dt/1000);
+        let isDead = false;
+        
+        if (proj.type === 'bone_blue') {
+            if (proj.x > 420 || proj.x < 0) { proj.vx *= -1; proj.bounces++; }
+            if (proj.bounces >= proj.maxBounces) isDead = true;
+        } else if (proj.type === 'bone_white') {
+            if (proj.x > 450) isDead = true;
+        }
+        
+        if (isDead) {
+            if (proj.el) proj.el.remove();
+            runState.projectiles.splice(i, 1);
+            continue;
+        }
+        
+        if (proj.el) {
+            proj.el.style.left = proj.x + 'px';
+        }
+        
+        proj.hitCd = proj.hitCd || 0;
+        if (proj.hitCd > 0) proj.hitCd -= dt/1000;
+        
+        if (proj.hitCd <= 0) {
+            let hitAny = false;
+            activeMonsters.forEach(m => {
+                if (m.hp <= 0) return;
+                const mEl = All.$id('hmob-' + m.idx);
+                const dist = Math.abs(m.x - proj.x);
+                if (dist < 40) {
+                    m.hp -= proj.dmg;
+                    if (proj.karmaAmt) m.karma = (m.karma || 0) + proj.karmaAmt;
+                    if (mEl) {
+                        mEl.classList.remove('idle'); mEl.classList.add('hurt'); setTimeout(() => { mEl.classList.remove('hurt'); mEl.classList.add('idle'); }, 200);
+                        setTimeout(() => showFloatDamage('-' + proj.dmg, mEl, '#fff'), 0);
+                    }
+                    hitAny = true;
+                }
+            });
+            if (hitAny) proj.hitCd = proj.type === 'bone_blue' ? 0.3 : 0.5;
+        }
+    }
+
+    // 4. Karma Update
+    activeMonsters.forEach(m => {
+        if (m.hp > 0 && m.karma && m.karma > 0) {
+            // Constant DPS: 1% maxHp per stack per second
+            const dps = m.maxHp * 0.01 * m.karma;
+            m.hp -= dps * (dt/1000);
+            
+            // Visual -1 spam (tick rate = 2 * karma stacks per sec)
+            const tickRate = 2 * m.karma;
+            m._karmaTickAcc = (m._karmaTickAcc || 0) + (tickRate * dt/1000);
+            if (m._karmaTickAcc >= 1.0) {
+                const ticks = Math.floor(m._karmaTickAcc);
+                m._karmaTickAcc -= ticks;
+                const mEl = All.$id('hmob-' + m.idx);
+                if (mEl) {
+                    for(let i=0; i<Math.min(ticks, 5); i++) {
+                        setTimeout(() => showFloatDamage('-1', mEl, '#e040fb'), i * 50);
+                    }
+                }
+            }
+
+            // Stack decay: lose 1 stack per second
+            m.karmaTimer = (m.karmaTimer || 0) + dt/1000;
+            if (m.karmaTimer >= 1.0) {
+                m.karmaTimer -= 1.0;
+                m.karma = Math.max(0, m.karma - 1);
+            }
+        }
+    });
+
   }
   
   updateHeroStats();
@@ -1303,24 +1622,29 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
     fx.style.top = (tRect.top - sRect.top + tRect.height/2 - 24) + 'px';
     setTimeout(() => fx.remove(), 800);
   }
-  else if (skillType === 'laser') {
+  else if (skillType === 'laser' || skillType === 'laser_sans') {
     if (!targetEl) return;
     const tRect = targetEl.getBoundingClientRect();
     const startRect = startEl.getBoundingClientRect();
     const sx = startRect.left - sRect.left + startRect.width/2;
     const sy = startRect.top - sRect.top + startRect.height/2;
-    const ex = tRect.left - sRect.left + tRect.width/2;
-    const ey = tRect.top - sRect.top + tRect.height/2;
     
-    const dist = Math.hypot(ex - sx, ey - sy);
-    const angle = Math.atan2(ey - sy, ex - sx);
+    let dist = 1000;
+    let angle = 0;
+    
+    if (skillType === 'laser') {
+        const ex = tRect.left - sRect.left + tRect.width/2;
+        const ey = tRect.top - sRect.top + tRect.height/2;
+        dist = Math.hypot(ex - sx, ey - sy);
+        angle = Math.atan2(ey - sy, ex - sx);
+    }
     
     const fx = document.createElement('div');
-    fx.className = 'laser-beam';
+    fx.className = skillType === 'laser_sans' ? 'laser-sans' : 'laser-beam';
     fx.style.width = dist + 'px';
     fx.style.left = sx + 'px';
     fx.style.top = sy + 'px';
-    fx.style.transform = `rotate(${angle}rad)`;
+    fx.style.transform = skillType === 'laser_sans' ? `translateY(-50%)` : `rotate(${angle}rad)`;
     scene.appendChild(fx);
     setTimeout(() => fx.remove(), 300);
   }
@@ -1422,16 +1746,21 @@ function renderHeroUI() {
   const container = All.$id('hero-party');
   if (container) {
     const extraStyle = ctx.S.hero.style === 'defense' ? 'filter: drop-shadow(0 0 4px #4da6ff);' : '';
-    container.innerHTML = runState.pets.map((p, i) => 
-      `<div class="hero-pet idle" id="hpet-${i}" style="z-index:${10-i}; ${extraStyle} opacity: ${p.hp > 0 ? 1 : 0.3}">
-         <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-pet-${i}" style="width:${(p.hp/p.maxHp)*100}%"></div></div>
+    container.innerHTML = runState.pets.map((p, i) => {
+      const isSans = p.id === 'sans';
+      const hpColor = isSans ? 'background:#00ffff;' : '';
+      const hpText = '';
+      return `<div class="hero-pet idle" id="hpet-${i}" style="z-index:${10-i}; ${extraStyle} opacity: ${p.hp > 0 ? 1 : 0.3}">
+         <div class="hp-bar-mini" style="position:relative; overflow:hidden;"><div class="hp-fill-mini" id="hp-pet-${i}" style="width:${(p.hp/p.maxHp)*100}%; ${hpColor}"></div>${hpText}</div>
          <div class="hero-bars-container">
            <div class="hero-bar-row"><div class="hero-bar-fill fill-cd" id="cd-pet-${i}" style="width:0%"></div></div>
            ${p.skillMaxCd > 0 ? `<div class="hero-bar-row"><div class="hero-bar-fill fill-sk" id="sk-pet-${i}" style="width:0%"></div></div>` : ''}
          </div>
-         ${petSVG(p.id, 32)}
-       </div>`
-    ).join('');
+         ${p.id === 'sans'
+           ? `<img draggable="false" data-sans-sprite class="sans-sprite" src="${SANS_FARM_SPRITES.idle}" style="height:32px; width:auto; image-rendering:pixelated; display:block; margin-bottom:2px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5));">`
+           : petSVG(p.id, 32)}
+       </div>`;
+    }).join('');
   }
   updateHeroStats();
 }
@@ -1565,8 +1894,10 @@ export function initHero() {
     // @ts-ignore
     el = e.target.closest('.hero-slot.filled');
     if (el) {
+      saveHeroScrolls();
       ctx.S.hero.party.splice(parseInt(el.dataset.rem), 1);
       save(); openHeroPanel();
+      restoreHeroScrolls();
       return;
     }
     // @ts-ignore
@@ -1575,21 +1906,50 @@ export function initHero() {
       const pId = el.dataset.add;
       if (ctx.S.hero.party.includes(pId)) return;
       if (ctx.S.hero.party.length >= 3) return All.toast('Đội hình đã đầy! (Max 3)');
+      saveHeroScrolls();
       ctx.S.hero.party.push(pId);
       save(); openHeroPanel();
+      restoreHeroScrolls();
       return;
     }
     // @ts-ignore
     el = e.target.closest('.h-r-info');
-    if (el) { openPetSkills(el.dataset.info); return; }
+    if (el) { 
+        saveHeroScrolls();
+        openPetSkills(el.dataset.info); 
+        return; 
+    }
     // @ts-ignore
     el = e.target.closest('.hero-style-btn');
-    if (el) { ctx.S.hero.style = el.dataset.style; save(); openHeroPanel(); return; }
+    if (el) { 
+        saveHeroScrolls();
+        ctx.S.hero.style = el.dataset.style; 
+        save(); openHeroPanel(); 
+        restoreHeroScrolls();
+        return; 
+    }
     // @ts-ignore
     el = e.target.closest('#hero-deploy');
     if (el) {
       if (ctx.S.hero.party.length === 0) return All.toast('Vui lòng xếp Đội hình trước khi Xuất chiến!');
       closeModal(); openHeroMode();
+      return;
+    }
+    // @ts-ignore
+    el = e.target.closest('#hero-jump');
+    if (el) {
+      if (ctx.S.hero.party.length === 0) return All.toast('Vui lòng xếp Đội hình trước khi Xuất chiến!');
+      const maxStage = ctx.S.hero.maxStage || 1;
+      const jumpStr = prompt('Nhập số Stage muốn nhảy tới (Tối đa ' + maxStage + '):', maxStage);
+      if (jumpStr !== null) {
+          const jumpTo = parseInt(jumpStr);
+          if (!isNaN(jumpTo) && jumpTo > 0 && jumpTo <= maxStage) {
+              closeModal(); 
+              openHeroMode(jumpTo);
+          } else {
+              All.toast('Stage không hợp lệ!');
+          }
+      }
       return;
     }
     // @ts-ignore
@@ -1667,7 +2027,11 @@ export function initHero() {
     }
     // @ts-ignore
     el = e.target.closest('#pet-back-btn');
-    if (el) { openHeroPanel(); return; }
+    if (el) { 
+        openHeroPanel(); 
+        restoreHeroScrolls();
+        return; 
+    }
   });
 }
 

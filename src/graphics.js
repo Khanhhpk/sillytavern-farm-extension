@@ -341,6 +341,24 @@ export const SPR = {
     ".MMLMvvvvvvMLMM.",
     ".MMMMvvvvvvMMMM."
   ],
+  stockMarket: [
+    ".............EE.",
+    "............EEEE",
+    "...........EE.EE",
+    "..........EE..E.",
+    ".........EE.....",
+    ".....uu.EE......",
+    ".....uuEE.......",
+    ".E...uuE........",
+    ".EE..EE.........",
+    "RREEEEuu........",
+    "RREE.uuu........",
+    "RR...uuu...CCC..",
+    "RR...uuu...CCC..",
+    "RR...uuu...CCC..",
+    "MMMMMMMMMMMMMMMM",
+    "................"
+  ],
   fireball: [
     "................",
     ".......qq.......",
@@ -1173,7 +1191,221 @@ const PET_FX = {
   },
 };
 const petCache = new Map();
+
+/* ── Sans: đường dẫn sprite theo hướng di chuyển ── */
+/* Base path: resolve relative to this module file (index.js trong root extension) */
+const _sansBase = (() => {
+  try {
+    // import.meta.url = e.g. http://localhost:8000/extensions/sillytavern-farm-extension/index.js
+    const u = new URL('.', import.meta.url);
+    return u.href.endsWith('/') ? u.href : u.href + '/';
+  } catch {
+    return '/extensions/sillytavern-farm-extension/';
+  }
+})();
+const _spFarm = (p) => _sansBase + 'sans_sprites_farm/' + p;
+const _spDungeon = (p) => _sansBase + 'sans_sprites_dungeon/' + p;
+const _spHero = (p) => _sansBase + 'sans_sprites_hero/' + p;
+
+export const SANS_HERO_SPRITES = {
+  bone_white: _spHero('bone_white_short.png'),
+  bone_blue:  _spHero('bone_blue_long.png'),
+  stool_chup_1:  _spHero('stool_chup/sprite-10-1.png'),
+  stool_chup_2:  _spHero('stool_chup/sprite-10-2.png'),
+  stool_chup_3:  _spHero('stool_chup/sprite-10-3.png'),
+  stool_chup_4:  _spHero('stool_chup/sprite-10-4.png'),
+  stool_chup_5:  _spHero('stool_chup/sprite-10-5.png'),
+  stool_chup_6:  _spHero('stool_chup/sprite-10-6.png'),
+  stool_chup_7:  _spHero('stool_chup/sprite-10-7.png'),
+  stool_chup_8:  _spHero('stool_chup/sprite-10-8.png'),
+  stool_chup_9:  _spHero('stool_chup/sprite-10-9.png'),
+  stool_chup_10: _spHero('stool_chup/sprite-10-10.png'),
+  gb_open_01: _spHero('gaster_blaster/blaster_front_open_01.png'),
+  gb_open_02: _spHero('gaster_blaster/blaster_front_open_02.png'),
+  gb_fire_01: _spHero('gaster_blaster/blaster_front_fire_01.png'),
+  gb_fire_02: _spHero('gaster_blaster/blaster_front_fire_02.png'),
+  gb_fire_03: _spHero('gaster_blaster/blaster_front_fire_03.png'),
+  gb_close:   _spHero('gaster_blaster/blaster_front_close.png'),
+};
+
+export const SANS_FARM_SPRITES = {
+  idle:    _spFarm('overworld_walk/walk_front_idle.png'),
+  left:    _spFarm('overworld_walk/walk_left_idle.png'),
+  right:   _spFarm('overworld_walk/walk_right_idle.png'),
+  up:      _spFarm('overworld_walk/walk_back_idle.png'),
+  down:    _spFarm('overworld_walk/walk_front_idle.png'),
+  walkF1:  _spFarm('overworld_walk/walk_front_1.png'),
+  walkF2:  _spFarm('overworld_walk/walk_front_2.png'),
+  walkL1:  _spFarm('overworld_walk/walk_left_1.png'),
+  walkL2:  _spFarm('overworld_walk/walk_left_2.png'),
+  walkR1:  _spFarm('overworld_walk/walk_right_1.png'),
+  walkR2:  _spFarm('overworld_walk/walk_right_2.png'),
+  walkU1:  _spFarm('overworld_walk/walk_back_1.png'),
+  walkU2:  _spFarm('overworld_walk/walk_back_2.png')
+};
+
+export const SANS_DUNGEON_SPRITES = {
+  idle:    _spDungeon('overworld_walk/walk_front_idle.png'),
+  left:    _spDungeon('overworld_walk/walk_left_idle.png'),
+  right:   _spDungeon('overworld_walk/walk_right_idle.png'),
+  up:      _spDungeon('overworld_walk/walk_back_idle.png'),
+  down:    _spDungeon('overworld_walk/walk_front_idle.png'),
+  walkF1:  _spDungeon('overworld_walk/walk_front_1.png'),
+  walkF2:  _spDungeon('overworld_walk/walk_front_2.png'),
+  walkL1:  _spDungeon('overworld_walk/walk_left_1.png'),
+  walkL2:  _spDungeon('overworld_walk/walk_left_2.png'),
+  walkR1:  _spDungeon('overworld_walk/walk_right_1.png'),
+  walkR2:  _spDungeon('overworld_walk/walk_right_2.png'),
+  walkU1:  _spDungeon('overworld_walk/walk_back_1.png'),
+  walkU2:  _spDungeon('overworld_walk/walk_back_2.png'),
+  shrug:   _spDungeon('shrug/sprite-6-2.png'),
+  bone:    _spDungeon('bones/bone_white_long.png')
+};
+
+export function applySansSprite(el, sp) {
+  const img = el.querySelector('.sans-sprite') || el.querySelector('[data-sans-sprite]');
+  const legs = el.querySelector('.sans-legs');
+  const overlay = el.querySelector('.sans-overlay');
+  
+  if (img) {
+    img.src = sp.src;
+    img.style.transform = sp.flip ? 'translateX(-50%) scaleX(-1)' : 'translateX(-50%)';
+  }
+  if (overlay) {
+    if (sp.overlay) {
+      overlay.style.display = 'block';
+      overlay.src = sp.overlay;
+      overlay.style.transform = sp.flip ? 'translateX(-50%) scaleX(-1)' : 'translateX(-50%)';
+    } else {
+      overlay.style.display = 'none';
+    }
+  }
+}
+
+export function sansFarmSpriteForAction(action, step) {
+  const s = step || 0;
+  if (action === 'icecream') {
+    const phase = s % 10;
+    return { src: _spFarm(`icecream/sprite-18-${phase + 1}.png`), flip: false };
+  }
+  if (action === 'stool_chup') {
+    const phase = s % 10;
+    return { src: _spFarm(`stool_chup/sprite-10-${phase + 1}.png`), flip: false };
+  }
+  if (action === 'stool_comb') {
+    const phase = Math.floor((s % 9) / 3);
+    return { src: _spFarm(`stool_comb/sprite-9-${phase + 1}.png`), flip: false };
+  }
+  if (action === 'stool') {
+    const phase = Math.floor((s % 10) / 5); 
+    return { src: _spFarm(`stool/sprite-8-${phase + 1}.png`), flip: false };
+  }
+  if (action === 'sleep_stand') {
+    const phase = Math.floor((s % 10) / 5);
+    return { src: _spFarm(`sleep_stand/sprite-12-${phase + 1}.png`), flip: false };
+  }
+  if (action === 'magic') {
+    const phase = Math.floor((s % 10) / 2);
+    return { src: _spFarm(`magic/magic_0${phase + 1}.png`), flip: false };
+  }
+  return { src: SANS_FARM_SPRITES.idle, flip: false };
+}
+
+export function sansDungeonSpriteForAction(action, step) {
+  const s = step || 0;
+  if (action === 'sleep_stand') {
+    const phase = Math.floor((s % 10) / 5);
+    return { src: _spDungeon(`sleep_stand/sprite-12-${phase + 1}.png`), flip: false };
+  }
+  if (action === 'stool_chup') {
+    const phase = Math.floor((s % 10) / 5);
+    return { src: _spDungeon(`stool_chup/sprite-10-${phase + 1}.png`), flip: false };
+  }
+  if (action === 'magic') {
+    const phase = Math.floor((s % 10) / 2);
+    return { src: _spDungeon(`magic/magic_0${phase + 1}.png`), flip: false };
+  }
+  if (action === 'shrug') {
+    return { src: _spDungeon(`shrug/sprite-6-2.png`), flip: false };
+  }
+
+  if (action === 'gaster_charge') {
+    return { src: _spDungeon(`gaster_blaster/blaster_left_close.png`), flip: false };
+  }
+  if (action === 'gaster_fire') {
+    return { src: _spDungeon(`gaster_blaster/blaster_left_fire_01.png`), flip: false };
+  }
+  return { src: SANS_DUNGEON_SPRITES.idle, flip: false };
+}
+
+export function sansFarmSpriteFor(dx, dy, step) {
+  const s = step || 0;
+  const phase = s % 4;
+
+  if (Math.abs(dx) < 1 && Math.abs(dy) < 1)
+    return { src: SANS_FARM_SPRITES.idle, flip: false };
+
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+  if (angle > -45 && angle <= 45) {
+    if (phase === 1) return { src: SANS_FARM_SPRITES.walkR1, flip: false };
+    if (phase === 3) return { src: SANS_FARM_SPRITES.walkR2, flip: false };
+    return { src: SANS_FARM_SPRITES.right, flip: false };
+  } else if (angle > 45 && angle <= 135) {
+    if (phase === 1) return { src: SANS_FARM_SPRITES.walkU1, flip: false };
+    if (phase === 3) return { src: SANS_FARM_SPRITES.walkU2, flip: false };
+    return { src: SANS_FARM_SPRITES.up, flip: false };
+  } else if (angle > -135 && angle <= -45) {
+    if (phase === 1) return { src: SANS_FARM_SPRITES.walkF1, flip: false };
+    if (phase === 3) return { src: SANS_FARM_SPRITES.walkF2, flip: false };
+    return { src: SANS_FARM_SPRITES.down, flip: false };
+  } else {
+    if (phase === 1) return { src: SANS_FARM_SPRITES.walkL1, flip: false };
+    if (phase === 3) return { src: SANS_FARM_SPRITES.walkL2, flip: false };
+    return { src: SANS_FARM_SPRITES.left, flip: false };
+  }
+}
+
+export function sansDungeonSpriteFor(dx, dy, step) {
+  const s = step || 0;
+  const phase = s % 4;
+
+  if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01)
+    return { src: SANS_DUNGEON_SPRITES.idle, flip: false };
+
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+  if (angle > -45 && angle <= 45) {
+    if (phase === 1) return { src: SANS_DUNGEON_SPRITES.walkR1, flip: false };
+    if (phase === 3) return { src: SANS_DUNGEON_SPRITES.walkR2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.right, flip: false };
+  } else if (angle > 45 && angle <= 135) {
+    if (phase === 1) return { src: SANS_DUNGEON_SPRITES.walkF1, flip: false };
+    if (phase === 3) return { src: SANS_DUNGEON_SPRITES.walkF2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.down, flip: false };
+  } else if (angle > -135 && angle <= -45) {
+    if (phase === 1) return { src: SANS_DUNGEON_SPRITES.walkU1, flip: false };
+    if (phase === 3) return { src: SANS_DUNGEON_SPRITES.walkU2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.up, flip: false };
+  } else {
+    if (phase === 1) return { src: SANS_DUNGEON_SPRITES.walkL1, flip: false };
+    if (phase === 3) return { src: SANS_DUNGEON_SPRITES.walkL2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.left, flip: false };
+  }
+}
+
 export function petSVG(name, px) {
+  /* ── Sans: trả về img đặc biệt có data-sans để JS cập nhật hướng ── */
+  if (name === 'sans') {
+    const scale = px / 32;
+    return `<div style="position:relative; display:inline-block; margin:0 auto; width:${px}px; height:${px}px;">
+      <div style="transform-origin:bottom center; transform:scale(${scale}); width:32px; height:32px; position:absolute; bottom:0; left:50%; margin-left:-16px;">
+        <img draggable="false" data-sans-overlay class="sans-overlay" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:none; image-rendering:pixelated; z-index:3; width:auto; height:auto; max-width:none; max-height:none;" />
+        <img draggable="false" data-sans-sprite class="sans-sprite" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:block; image-rendering:pixelated; z-index:2; width:auto; height:auto; max-width:none; max-height:none;" />
+      </div>
+    </div>`;
+  }
+
   const key = name + '@' + px;
   if (petCache.has(key)) return petCache.get(key);
   const map = PET_SPR[name]; if (!map) return '';
@@ -1226,7 +1458,8 @@ export const PETS = {
   /* —— Át chủ bài (page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
   peach_soda: { name: 'Bé soda đào', page: 1, price: 9999, cry: ['Bốp——!', '(nổi một bong bóng nhỏ)', 'Xì~', '(vị ngòn ngọt)'], desc: 'Loại tìm kho báu · tinh linh soda vị đào · dễ thương quá mức nên đắt nhất' },
   penguin: { name: 'Chim cánh cụt', page: 1, price: 100000, cry: ['Pingu!', 'Núp núp~', 'Trượt tuyết nào!', 'Cánh cụt!'], desc: 'Loại đặc biệt · AFK mỗi 1 tiếng mang về 1 vé gacha ngẫu nhiên (70% vé thường, 30% vé đặc biệt)' },
-  naoyaSlime: { name: 'Naoya', page: 1, hidden: true, price: 0, cry: ['Rác rưởi!', 'Lũ yếu kém...', 'Bẩn hết cả người!', '(lườm khinh bỉ)'], desc: 'Loại đặc biệt (Thành tựu) · Kẻ tự xưng là thiên tài nhưng lại bị kẹt trong hình hài Slime tròn vo núng nính.' }
+  sans: { name: 'Sans', page: 1, hidden: true, price: 0, special: true, cry: ['heh.', '...', 'wanna have a bad time?', '(ngủ gật)', 'cool dude.', 'not gonna budge.'], desc: 'Loại đặc biệt (Thành tựu) · The coolest skeleton around · Siêu thú cưng: Tự động chăm sóc cả 3 trang trại' },
+  naoyaSlime: { name: 'Naoya', page: 1, hidden: true, price: 0, cry: ['Rác rưởi!', 'Lũ yếu kém...', 'Bẩn hết cả người!', '(lườm khinh bỉ)'], desc: 'Loại đặc biệt (Thành tựu) · Kẻ tự xưng là thiên tài nhưng lại bị kẹt trong hình hài Slime tròn vo núng nính. Ở trang trại, mỗi tiếng AFK có 5% tỉ lệ mang về Vé Gacha Siêu Cường.' }
 };
 export const PASSES = {
   water: { name: 'Vé vùng nước', price: 6000, desc: 'Mở khoá ruộng vùng nước (trang 2) + quyền mua bé tròn trang 2 và hạt giống thuỷ sinh, tặng kèm ô ruộng nổi đầu tiên' },

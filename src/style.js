@@ -95,13 +95,14 @@ export const styleCSS = `
     .field.pg3 .block.locked .plot { border-color: #6d657c; box-shadow: none; }
     .blocks { display: grid; grid-template-columns: repeat(3, max-content); gap: 14px; justify-content: center; }
     @media (max-width: 640px) {
+      #win, .dungeon-win { width: 100vw !important; height: 100vh !important; height: 100dvh !important; max-height: none !important; left: 0 !important; top: 0 !important; transform: none !important; border-radius: 0; border: none; outline: none; box-shadow: none; }
       .blocks { grid-template-columns: repeat(2, max-content); }
       .field { padding: 12px 12px 70px; }
       .titlebar { padding-top: max(32px, calc(9px + env(safe-area-inset-top, 0px))); }
       .titlebar h1 { font-size: 13px; letter-spacing: 0; }
       .titlebar h1 .sub { display: none; }
       .statusbar { gap: 6px 10px; font-size: 12px; padding: 6px 10px; }
-      .bottombar { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; }
+      .bottombar { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; display: grid !important; grid-template-columns: repeat(3, 1fr) !important; }
       .btn { font-size: 11px; padding: 6px 2px; }
       span.dside { display: none; }
       span.dbot { display: inline; }
@@ -159,6 +160,13 @@ export const styleCSS = `
     .pet[data-pet="jellyfish"] .pbody { animation: petfloat 3.2s ease-in-out infinite; }  /* Mây / ma / sứa: kiểu bay lơ lửng (đè lên walk) */
     .pet.sleep .pbody { animation: petsleep 3.6s ease-in-out infinite; }   /* v0.7②: ngủ = thở chậm (đè lên bay, ma cũng phải hạ cánh mà ngủ) */
     .pet.flip .pbody img { transform: scaleX(-1); }
+    /* ── Sans: pet đặc biệt ── */
+    .pet[data-pet="sans"] .pbody { animation: none !important; }
+    .pet[data-pet="sans"].flip .pbody img { transform: none; }   /* Sans xử lý flip riêng qua sprite src */
+    
+    .pet[data-pet="sans"].sleep .pbody img[data-sans-sprite] {
+      /* Animation handled in JS now */
+    }
     .zzz { position: absolute; bottom: calc(100% - 8px); left: 68%; font-size: 12px; font-weight: bold;
       color: #7a90c8; text-shadow: 1px 1px 0 #fff; pointer-events: none; animation: zrise 2.6s linear infinite; }
     .zzz.z2 { left: 52%; font-size: 10px; animation-delay: 1.3s; }
@@ -413,22 +421,25 @@ export const styleCSS = `
     .dg-slot.placed { opacity: 0.4; pointer-events: none; }
     .dg-entity { position: absolute; left: 0; top: 0; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; will-change: transform; transition: none !important; cursor: default; }
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
-    .dg-entity.flip img, .dg-entity.flip svg { transform: scaleX(-1); }
-    @media (max-width: 640px) {
-      #win, .dungeon-win { left: 0 !important; top: 0 !important; width: 100vw; height: 100vh; height: 100dvh; max-height: none; border: none; border-radius: 0; outline: none; }
-      .dungeon-view { padding: 4px; }
-      .dg-dock { height: 68px; padding: 0 8px; gap: 8px; }
-      .dg-slot { width: 52px; height: 52px; }
-    }
-    .dg-hp-bar { position: absolute; top: -12px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
+    .dg-hp-bar { position: absolute; top: -19px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; display: flex; }
     .dg-hp-fill { height: 100%; background: #a4dc8c; transition: width 0.1s; }
-    .dg-cd-bar { position: absolute; top: -7px; left: -4px; width: 40px; height: 3px; background: #333; border: 1px solid #111; border-radius: 1.5px; overflow: hidden; z-index: 2; }
+    .dg-karma-fill { height: 100%; background: #c34bc3; transition: width 0.1s; }
+    .dg-cd-bar { position: absolute; top: -13px; left: -4px; width: 40px; height: 3px; background: #333; border: 1px solid #111; border-radius: 1.5px; overflow: hidden; z-index: 2; }
     .dg-cd-fill { height: 100%; background: #ffeb3b; }
-    .dg-skill-cd-bar { position: absolute; top: -3px; left: 0px; width: 32px; height: 2px; background: #333; border: 1px solid #111; border-radius: 1px; overflow: hidden; z-index: 2; }
+    .dg-skill-cd-bar { position: absolute; top: -8px; left: -4px; width: 12px; height: 3px; background: #333; border: 1px solid #111; border-radius: 1px; overflow: hidden; z-index: 2; }
     .dg-skill-cd-fill { height: 100%; background: #00bcd4; }
+    .dg-stamina-bar { position: absolute; top: -25px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
+    .dg-stamina-fill { height: 100%; background: #ffd94d; transition: width 0.1s; }
+    .dg-skill-cd-bar.blue-magic { top: -8px; left: -4px; }
+    .dg-skill-cd-bar.blue-magic .dg-skill-cd-fill { background: #1a237e; }
+    .dg-skill-cd-bar.gravity-push { top: -8px; left: 10px; }
+    .dg-skill-cd-bar.gravity-push .dg-skill-cd-fill { background: #9c27b0; }
+    .dg-skill-cd-bar.gaster-blaster { top: -8px; left: 24px; }
+    .dg-skill-cd-bar.gaster-blaster .dg-skill-cd-fill { background: #e0f7fa; box-shadow: 0 0 2px #fff; }
     .dg-entity.enemy .dg-hp-fill { background: #e06578; }
     .dg-dmg { position: absolute; left: 0; top: 0; font-size: 14px; font-weight: bold; color: #ff4444; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; pointer-events: none; z-index: 10; animation: dmgFloat 0.8s ease-out forwards; }
     .dg-dmg.heal { color: #a4dc8c; }
+    .dg-dmg.karma { color: #d500f9; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
     .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
     
@@ -724,6 +735,13 @@ export const styleCSS = `
     @keyframes fxStun { 0% { transform: translate(-50%, -100%) rotate(0deg); } 100% { transform: translate(-50%, -100%) rotate(360deg); } }
 
     .laser-beam { position: absolute; height: 4px; background: #ff88dd; z-index: 8; transform-origin: left center; pointer-events: none; animation: fxLaser 0.3s ease-out forwards; box-shadow: 0 0 8px #ff88dd, 0 0 15px #ff88dd; }
+    .laser-sans { position: absolute; height: 32px; background: linear-gradient(to bottom, #00ffff, #ffffff, #00ffff); z-index: 8; transform-origin: left center; pointer-events: none; animation: fxLaserSans 0.3s ease-out forwards; box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; }
+    .laser-sans-continuous { position: absolute; height: 32px; background: linear-gradient(to bottom, #00ffff, #ffffff, #00ffff); z-index: 8; transform-origin: left center; pointer-events: none; box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; width: 1000px; transform: translateY(-50%); opacity: 0; transition: opacity 0.2s ease-out; }
+    .laser-sans-continuous.firing { opacity: 1; animation: laserPulse 0.1s infinite alternate; }
+    .laser-sans-continuous.ending { animation: laserEnd 0.3s forwards; }
+    @keyframes laserPulse { 0% { transform: translateY(-50%) scaleY(0.85); box-shadow: 0 0 10px #00ffff, 0 0 15px #00ffff; } 100% { transform: translateY(-50%) scaleY(1.15); box-shadow: 0 0 15px #00ffff, 0 0 30px #00ffff; } }
+    @keyframes laserEnd { 0% { opacity: 1; transform: translateY(-50%) scaleY(1); } 50% { opacity: 0.5; transform: translateY(-50%) scaleY(0.5); } 100% { opacity: 0; transform: translateY(-50%) scaleY(0); } }
+    @keyframes fxLaserSans { 0% { opacity: 1; transform: scaleY(0.1); } 20% { transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(0); } }
     @keyframes fxLaser { 0% { opacity: 1; transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(3); } }
 
     .pet-bump { animation: petBump 0.2s ease-out; }
@@ -986,6 +1004,7 @@ export const blackjackStyles = `
         border-top: none;
         border-left: none;
     }
+
+
 }
 `;
-

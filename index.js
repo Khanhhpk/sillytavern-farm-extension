@@ -53,34 +53,6 @@ var init_store = __esm({
       Object.assign(ctx, params);
     };
     if (typeof window !== "undefined") {
-      window["testTribulation"] = () => {
-        if (ctx.S) {
-          ctx.S.coins = 25e8;
-          ctx.S.needsTribulationCheck = true;
-          delete ctx.S.blockedUntil;
-          if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
-          console.log("\u2705 \u0110\xE3 gi\u1EA3 l\u1EADp m\u1ED1c t\xE0i s\u1EA3n 2.5 T\u1EF7 v\xE0 \xE9p ch\u1EA1y s\u1EF1 ki\u1EC7n Thi\xEAn Ki\u1EBFp! H\xE3y b\u1EA5m v\xE0o qu\u1EA3 c\u1EA7u N\xF4ng Tr\u1EA1i \u0111\u1EC3 xem.");
-        } else {
-          console.log("\u274C N\xF4ng tr\u1EA1i ch\u01B0a \u0111\u01B0\u1EE3c t\u1EA3i (ctx.S null). H\xE3y m\u1EDF game m\u1ED9t l\u1EA7n tr\u01B0\u1EDBc.");
-        }
-      };
-      window["testPoorTribulation"] = () => {
-        if (ctx.S) {
-          ctx.S.needsPoorTribulationNotice = true;
-          delete ctx.S.blockedUntil;
-          if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
-          console.log("\u2705 \u0110\xE3 gi\u1EA3 l\u1EADp ng\u01B0\u1EDDi ngh\xE8o g\u1EB7p Thi\xEAn \u0110\u1EA1o! H\xE3y b\u1EA5m v\xE0o qu\u1EA3 c\u1EA7u N\xF4ng Tr\u1EA1i \u0111\u1EC3 xem.");
-        } else {
-          console.log("\u274C N\xF4ng tr\u1EA1i ch\u01B0a \u0111\u01B0\u1EE3c t\u1EA3i (ctx.S null). H\xE3y m\u1EDF game m\u1ED9t l\u1EA7n tr\u01B0\u1EDBc.");
-        }
-      };
-      window["unlockTribulation"] = () => {
-        if (ctx.S) {
-          delete ctx.S.blockedUntil;
-          if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
-          console.log("\u2705 \u0110\xE3 gi\u1EA3i tr\u1EEB phong \u1EA5n Thi\xEAn Ki\u1EBFp! B\u1EA1n c\xF3 th\u1EC3 v\xE0o l\u1EA1i N\xF4ng Tr\u1EA1i.");
-        }
-      };
     }
   }
 });
@@ -109,7 +81,7 @@ var init_data = __esm({
       tomato: { name: "C\xE0 chua", grow: 20, regrowM: 15, seed: 100, sell: 90, sp: "tomato", regrow: true },
       strawberry: { name: "D\xE2u t\xE2y", grow: 90, seed: 350, sell: 800, sp: "strawberry" },
       pumpkin: { name: "B\xED ng\xF4", grow: 120, seed: 500, sell: 1300, sp: "pumpkin" },
-      moonberry: { name: "D\xE2u \xE1nh tr\u0103ng", grow: 180, seed: 600, sell: 1500, sp: "moonberry" },
+      moonberry: { name: "D\xE2u \xE1nh tr\u0103ng", grow: 180, seed: 600, sell: 2e3, sp: "moonberry" },
       /* —— Vùng nước (trang 2) —— */
       chuncai: { name: "Rau thu\u1EA7n", grow: 10, seed: 40, sell: 60, sp: "chuncai", zone: 2 },
       biqi: { name: "C\u1EE7 n\u0103ng", grow: 30, seed: 120, sell: 220, sp: "biqi", zone: 2 },
@@ -150,6 +122,32 @@ var init_data = __esm({
 });
 
 // src/graphics.js
+var graphics_exports = {};
+__export(graphics_exports, {
+  DYNAMIC_SPR: () => DYNAMIC_SPR,
+  GACHA_P: () => GACHA_P,
+  LP: () => LP,
+  P: () => P,
+  PASSES: () => PASSES,
+  PETS: () => PETS,
+  PET_P: () => PET_P,
+  PET_SPR: () => PET_SPR,
+  SANS_DUNGEON_SPRITES: () => SANS_DUNGEON_SPRITES,
+  SANS_FARM_SPRITES: () => SANS_FARM_SPRITES,
+  SANS_HERO_SPRITES: () => SANS_HERO_SPRITES,
+  SPR: () => SPR,
+  applySansSprite: () => applySansSprite,
+  mulberry32: () => mulberry32,
+  petSVG: () => petSVG,
+  registerDynamicSprite: () => registerDynamicSprite,
+  sansDungeonSpriteFor: () => sansDungeonSpriteFor,
+  sansDungeonSpriteForAction: () => sansDungeonSpriteForAction,
+  sansFarmSpriteFor: () => sansFarmSpriteFor,
+  sansFarmSpriteForAction: () => sansFarmSpriteForAction,
+  spriteSVG: () => spriteSVG,
+  tileURI: () => tileURI,
+  warmUpCache: () => warmUpCache
+});
 function mulberry32(a) {
   return function() {
     a |= 0;
@@ -159,7 +157,135 @@ function mulberry32(a) {
     return ((t2 ^ t2 >>> 14) >>> 0) / 4294967296;
   };
 }
+function applySansSprite(el, sp) {
+  const img = el.querySelector(".sans-sprite") || el.querySelector("[data-sans-sprite]");
+  const legs = el.querySelector(".sans-legs");
+  const overlay = el.querySelector(".sans-overlay");
+  if (img) {
+    img.src = sp.src;
+    img.style.transform = sp.flip ? "translateX(-50%) scaleX(-1)" : "translateX(-50%)";
+  }
+  if (overlay) {
+    if (sp.overlay) {
+      overlay.style.display = "block";
+      overlay.src = sp.overlay;
+      overlay.style.transform = sp.flip ? "translateX(-50%) scaleX(-1)" : "translateX(-50%)";
+    } else {
+      overlay.style.display = "none";
+    }
+  }
+}
+function sansFarmSpriteForAction(action, step) {
+  const s2 = step || 0;
+  if (action === "icecream") {
+    const phase2 = s2 % 10;
+    return { src: _spFarm(`icecream/sprite-18-${phase2 + 1}.png`), flip: false };
+  }
+  if (action === "stool_chup") {
+    const phase2 = s2 % 10;
+    return { src: _spFarm(`stool_chup/sprite-10-${phase2 + 1}.png`), flip: false };
+  }
+  if (action === "stool_comb") {
+    const phase2 = Math.floor(s2 % 9 / 3);
+    return { src: _spFarm(`stool_comb/sprite-9-${phase2 + 1}.png`), flip: false };
+  }
+  if (action === "stool") {
+    const phase2 = Math.floor(s2 % 10 / 5);
+    return { src: _spFarm(`stool/sprite-8-${phase2 + 1}.png`), flip: false };
+  }
+  if (action === "sleep_stand") {
+    const phase2 = Math.floor(s2 % 10 / 5);
+    return { src: _spFarm(`sleep_stand/sprite-12-${phase2 + 1}.png`), flip: false };
+  }
+  if (action === "magic") {
+    const phase2 = Math.floor(s2 % 10 / 2);
+    return { src: _spFarm(`magic/magic_0${phase2 + 1}.png`), flip: false };
+  }
+  return { src: SANS_FARM_SPRITES.idle, flip: false };
+}
+function sansDungeonSpriteForAction(action, step) {
+  const s2 = step || 0;
+  if (action === "sleep_stand") {
+    const phase2 = Math.floor(s2 % 10 / 5);
+    return { src: _spDungeon(`sleep_stand/sprite-12-${phase2 + 1}.png`), flip: false };
+  }
+  if (action === "stool_chup") {
+    const phase2 = Math.floor(s2 % 10 / 5);
+    return { src: _spDungeon(`stool_chup/sprite-10-${phase2 + 1}.png`), flip: false };
+  }
+  if (action === "magic") {
+    const phase2 = Math.floor(s2 % 10 / 2);
+    return { src: _spDungeon(`magic/magic_0${phase2 + 1}.png`), flip: false };
+  }
+  if (action === "shrug") {
+    return { src: _spDungeon(`shrug/sprite-6-2.png`), flip: false };
+  }
+  if (action === "gaster_charge") {
+    return { src: _spDungeon(`gaster_blaster/blaster_left_close.png`), flip: false };
+  }
+  if (action === "gaster_fire") {
+    return { src: _spDungeon(`gaster_blaster/blaster_left_fire_01.png`), flip: false };
+  }
+  return { src: SANS_DUNGEON_SPRITES.idle, flip: false };
+}
+function sansFarmSpriteFor(dx, dy, step) {
+  const s2 = step || 0;
+  const phase2 = s2 % 4;
+  if (Math.abs(dx) < 1 && Math.abs(dy) < 1)
+    return { src: SANS_FARM_SPRITES.idle, flip: false };
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  if (angle > -45 && angle <= 45) {
+    if (phase2 === 1) return { src: SANS_FARM_SPRITES.walkR1, flip: false };
+    if (phase2 === 3) return { src: SANS_FARM_SPRITES.walkR2, flip: false };
+    return { src: SANS_FARM_SPRITES.right, flip: false };
+  } else if (angle > 45 && angle <= 135) {
+    if (phase2 === 1) return { src: SANS_FARM_SPRITES.walkU1, flip: false };
+    if (phase2 === 3) return { src: SANS_FARM_SPRITES.walkU2, flip: false };
+    return { src: SANS_FARM_SPRITES.up, flip: false };
+  } else if (angle > -135 && angle <= -45) {
+    if (phase2 === 1) return { src: SANS_FARM_SPRITES.walkF1, flip: false };
+    if (phase2 === 3) return { src: SANS_FARM_SPRITES.walkF2, flip: false };
+    return { src: SANS_FARM_SPRITES.down, flip: false };
+  } else {
+    if (phase2 === 1) return { src: SANS_FARM_SPRITES.walkL1, flip: false };
+    if (phase2 === 3) return { src: SANS_FARM_SPRITES.walkL2, flip: false };
+    return { src: SANS_FARM_SPRITES.left, flip: false };
+  }
+}
+function sansDungeonSpriteFor(dx, dy, step) {
+  const s2 = step || 0;
+  const phase2 = s2 % 4;
+  if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01)
+    return { src: SANS_DUNGEON_SPRITES.idle, flip: false };
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  if (angle > -45 && angle <= 45) {
+    if (phase2 === 1) return { src: SANS_DUNGEON_SPRITES.walkR1, flip: false };
+    if (phase2 === 3) return { src: SANS_DUNGEON_SPRITES.walkR2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.right, flip: false };
+  } else if (angle > 45 && angle <= 135) {
+    if (phase2 === 1) return { src: SANS_DUNGEON_SPRITES.walkF1, flip: false };
+    if (phase2 === 3) return { src: SANS_DUNGEON_SPRITES.walkF2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.down, flip: false };
+  } else if (angle > -135 && angle <= -45) {
+    if (phase2 === 1) return { src: SANS_DUNGEON_SPRITES.walkU1, flip: false };
+    if (phase2 === 3) return { src: SANS_DUNGEON_SPRITES.walkU2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.up, flip: false };
+  } else {
+    if (phase2 === 1) return { src: SANS_DUNGEON_SPRITES.walkL1, flip: false };
+    if (phase2 === 3) return { src: SANS_DUNGEON_SPRITES.walkL2, flip: false };
+    return { src: SANS_DUNGEON_SPRITES.left, flip: false };
+  }
+}
 function petSVG(name3, px) {
+  if (name3 === "sans") {
+    const scale = px / 32;
+    return `<div style="position:relative; display:inline-block; margin:0 auto; width:${px}px; height:${px}px;">
+      <div style="transform-origin:bottom center; transform:scale(${scale}); width:32px; height:32px; position:absolute; bottom:0; left:50%; margin-left:-16px;">
+        <img draggable="false" data-sans-overlay class="sans-overlay" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:none; image-rendering:pixelated; z-index:3; width:auto; height:auto; max-width:none; max-height:none;" />
+        <img draggable="false" data-sans-sprite class="sans-sprite" src="${SANS_FARM_SPRITES.idle}" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); display:block; image-rendering:pixelated; z-index:2; width:auto; height:auto; max-width:none; max-height:none;" />
+      </div>
+    </div>`;
+  }
   const key = name3 + "@" + px;
   if (petCache.has(key)) return petCache.get(key);
   const map = PET_SPR[name3];
@@ -354,7 +480,7 @@ function warmUpCache(CROPS2) {
   }
   setTimeout(next, 1e3);
 }
-var P, GACHA_P, SPR, PET_P, PET_SPR, petLinear, PET_FX, petCache, PETS, PASSES, C2, DYNAMIC_SPR, spriteCache, tileCache, LP;
+var P, GACHA_P, SPR, PET_P, PET_SPR, petLinear, PET_FX, petCache, _sansBase, _spFarm, _spDungeon, _spHero, SANS_HERO_SPRITES, SANS_FARM_SPRITES, SANS_DUNGEON_SPRITES, PETS, PASSES, C2, DYNAMIC_SPR, spriteCache, tileCache, LP;
 var init_graphics = __esm({
   "src/graphics.js"() {
     init_state();
@@ -774,6 +900,24 @@ var init_graphics = __esm({
         "..MLMvvvvvvMLM..",
         ".MMLMvvvvvvMLMM.",
         ".MMMMvvvvvvMMMM."
+      ],
+      stockMarket: [
+        ".............EE.",
+        "............EEEE",
+        "...........EE.EE",
+        "..........EE..E.",
+        ".........EE.....",
+        ".....uu.EE......",
+        ".....uuEE.......",
+        ".E...uuE........",
+        ".EE..EE.........",
+        "RREEEEuu........",
+        "RREE.uuu........",
+        "RR...uuu...CCC..",
+        "RR...uuu...CCC..",
+        "RR...uuu...CCC..",
+        "MMMMMMMMMMMMMMMM",
+        "................"
       ],
       fireball: [
         "................",
@@ -1868,6 +2012,69 @@ var init_graphics = __esm({
       }
     };
     petCache = /* @__PURE__ */ new Map();
+    _sansBase = (() => {
+      try {
+        const u2 = new URL(".", import.meta.url);
+        return u2.href.endsWith("/") ? u2.href : u2.href + "/";
+      } catch {
+        return "/extensions/sillytavern-farm-extension/";
+      }
+    })();
+    _spFarm = (p2) => _sansBase + "sans_sprites_farm/" + p2;
+    _spDungeon = (p2) => _sansBase + "sans_sprites_dungeon/" + p2;
+    _spHero = (p2) => _sansBase + "sans_sprites_hero/" + p2;
+    SANS_HERO_SPRITES = {
+      bone_white: _spHero("bone_white_short.png"),
+      bone_blue: _spHero("bone_blue_long.png"),
+      stool_chup_1: _spHero("stool_chup/sprite-10-1.png"),
+      stool_chup_2: _spHero("stool_chup/sprite-10-2.png"),
+      stool_chup_3: _spHero("stool_chup/sprite-10-3.png"),
+      stool_chup_4: _spHero("stool_chup/sprite-10-4.png"),
+      stool_chup_5: _spHero("stool_chup/sprite-10-5.png"),
+      stool_chup_6: _spHero("stool_chup/sprite-10-6.png"),
+      stool_chup_7: _spHero("stool_chup/sprite-10-7.png"),
+      stool_chup_8: _spHero("stool_chup/sprite-10-8.png"),
+      stool_chup_9: _spHero("stool_chup/sprite-10-9.png"),
+      stool_chup_10: _spHero("stool_chup/sprite-10-10.png"),
+      gb_open_01: _spHero("gaster_blaster/blaster_front_open_01.png"),
+      gb_open_02: _spHero("gaster_blaster/blaster_front_open_02.png"),
+      gb_fire_01: _spHero("gaster_blaster/blaster_front_fire_01.png"),
+      gb_fire_02: _spHero("gaster_blaster/blaster_front_fire_02.png"),
+      gb_fire_03: _spHero("gaster_blaster/blaster_front_fire_03.png"),
+      gb_close: _spHero("gaster_blaster/blaster_front_close.png")
+    };
+    SANS_FARM_SPRITES = {
+      idle: _spFarm("overworld_walk/walk_front_idle.png"),
+      left: _spFarm("overworld_walk/walk_left_idle.png"),
+      right: _spFarm("overworld_walk/walk_right_idle.png"),
+      up: _spFarm("overworld_walk/walk_back_idle.png"),
+      down: _spFarm("overworld_walk/walk_front_idle.png"),
+      walkF1: _spFarm("overworld_walk/walk_front_1.png"),
+      walkF2: _spFarm("overworld_walk/walk_front_2.png"),
+      walkL1: _spFarm("overworld_walk/walk_left_1.png"),
+      walkL2: _spFarm("overworld_walk/walk_left_2.png"),
+      walkR1: _spFarm("overworld_walk/walk_right_1.png"),
+      walkR2: _spFarm("overworld_walk/walk_right_2.png"),
+      walkU1: _spFarm("overworld_walk/walk_back_1.png"),
+      walkU2: _spFarm("overworld_walk/walk_back_2.png")
+    };
+    SANS_DUNGEON_SPRITES = {
+      idle: _spDungeon("overworld_walk/walk_front_idle.png"),
+      left: _spDungeon("overworld_walk/walk_left_idle.png"),
+      right: _spDungeon("overworld_walk/walk_right_idle.png"),
+      up: _spDungeon("overworld_walk/walk_back_idle.png"),
+      down: _spDungeon("overworld_walk/walk_front_idle.png"),
+      walkF1: _spDungeon("overworld_walk/walk_front_1.png"),
+      walkF2: _spDungeon("overworld_walk/walk_front_2.png"),
+      walkL1: _spDungeon("overworld_walk/walk_left_1.png"),
+      walkL2: _spDungeon("overworld_walk/walk_left_2.png"),
+      walkR1: _spDungeon("overworld_walk/walk_right_1.png"),
+      walkR2: _spDungeon("overworld_walk/walk_right_2.png"),
+      walkU1: _spDungeon("overworld_walk/walk_back_1.png"),
+      walkU2: _spDungeon("overworld_walk/walk_back_2.png"),
+      shrug: _spDungeon("shrug/sprite-6-2.png"),
+      bone: _spDungeon("bones/bone_white_long.png")
+    };
     PETS = {
       /* —— Trang 1 —— */
       slime: { name: "Slime xanh", page: 1, price: 0, starter: true, cry: ["B\u1EE5p b\u1EE5p~", "B\u1EF1ppp!", "Gr\xF9 gr\xF9\u2026", "B\u1EE5p?", "Nh\u1EA3y nh\u1EA3y!"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 b\xE9 tr\xF2n t\u1ED5 ti\xEAn, b\u1EA1n \u0111\u1ED3ng h\xE0nh t\u1EEB \u0111\u1EA7u" },
@@ -1888,7 +2095,8 @@ var init_graphics = __esm({
       /* —— Át chủ bài (page 1 = không cần vé, đủ tiền là mang về được, thuần tuý thuế dễ thương) —— */
       peach_soda: { name: "B\xE9 soda \u0111\xE0o", page: 1, price: 9999, cry: ["B\u1ED1p\u2014\u2014!", "(n\u1ED5i m\u1ED9t bong b\xF3ng nh\u1ECF)", "X\xEC~", "(v\u1ECB ng\xF2n ng\u1ECDt)"], desc: "Lo\u1EA1i t\xECm kho b\xE1u \xB7 tinh linh soda v\u1ECB \u0111\xE0o \xB7 d\u1EC5 th\u01B0\u01A1ng qu\xE1 m\u1EE9c n\xEAn \u0111\u1EAFt nh\u1EA5t" },
       penguin: { name: "Chim c\xE1nh c\u1EE5t", page: 1, price: 1e5, cry: ["Pingu!", "N\xFAp n\xFAp~", "Tr\u01B0\u1EE3t tuy\u1EBFt n\xE0o!", "C\xE1nh c\u1EE5t!"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t \xB7 AFK m\u1ED7i 1 ti\u1EBFng mang v\u1EC1 1 v\xE9 gacha ng\u1EABu nhi\xEAn (70% v\xE9 th\u01B0\u1EDDng, 30% v\xE9 \u0111\u1EB7c bi\u1EC7t)" },
-      naoyaSlime: { name: "Naoya", page: 1, hidden: true, price: 0, cry: ["R\xE1c r\u01B0\u1EDFi!", "L\u0169 y\u1EBFu k\xE9m...", "B\u1EA9n h\u1EBFt c\u1EA3 ng\u01B0\u1EDDi!", "(l\u01B0\u1EDDm khinh b\u1EC9)"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t (Th\xE0nh t\u1EF1u) \xB7 K\u1EBB t\u1EF1 x\u01B0ng l\xE0 thi\xEAn t\xE0i nh\u01B0ng l\u1EA1i b\u1ECB k\u1EB9t trong h\xECnh h\xE0i Slime tr\xF2n vo n\xFAng n\xEDnh." }
+      sans: { name: "Sans", page: 1, hidden: true, price: 0, special: true, cry: ["heh.", "...", "wanna have a bad time?", "(ng\u1EE7 g\u1EADt)", "cool dude.", "not gonna budge."], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t (Th\xE0nh t\u1EF1u) \xB7 The coolest skeleton around \xB7 Si\xEAu th\xFA c\u01B0ng: T\u1EF1 \u0111\u1ED9ng ch\u0103m s\xF3c c\u1EA3 3 trang tr\u1EA1i" },
+      naoyaSlime: { name: "Naoya", page: 1, hidden: true, price: 0, cry: ["R\xE1c r\u01B0\u1EDFi!", "L\u0169 y\u1EBFu k\xE9m...", "B\u1EA9n h\u1EBFt c\u1EA3 ng\u01B0\u1EDDi!", "(l\u01B0\u1EDDm khinh b\u1EC9)"], desc: "Lo\u1EA1i \u0111\u1EB7c bi\u1EC7t (Th\xE0nh t\u1EF1u) \xB7 K\u1EBB t\u1EF1 x\u01B0ng l\xE0 thi\xEAn t\xE0i nh\u01B0ng l\u1EA1i b\u1ECB k\u1EB9t trong h\xECnh h\xE0i Slime tr\xF2n vo n\xFAng n\xEDnh. \u1EDE trang tr\u1EA1i, m\u1ED7i ti\u1EBFng AFK c\xF3 5% t\u1EC9 l\u1EC7 mang v\u1EC1 V\xE9 Gacha Si\xEAu C\u01B0\u1EDDng." }
     };
     PASSES = {
       water: { name: "V\xE9 v\xF9ng n\u01B0\u1EDBc", price: 6e3, desc: "M\u1EDF kho\xE1 ru\u1ED9ng v\xF9ng n\u01B0\u1EDBc (trang 2) + quy\u1EC1n mua b\xE9 tr\xF2n trang 2 v\xE0 h\u1EA1t gi\u1ED1ng thu\u1EF7 sinh, t\u1EB7ng k\xE8m \xF4 ru\u1ED9ng n\u1ED5i \u0111\u1EA7u ti\xEAn" },
@@ -2593,13 +2801,14 @@ var init_style = __esm({
     .field.pg3 .block.locked .plot { border-color: #6d657c; box-shadow: none; }
     .blocks { display: grid; grid-template-columns: repeat(3, max-content); gap: 14px; justify-content: center; }
     @media (max-width: 640px) {
+      #win, .dungeon-win { width: 100vw !important; height: 100vh !important; height: 100dvh !important; max-height: none !important; left: 0 !important; top: 0 !important; transform: none !important; border-radius: 0; border: none; outline: none; box-shadow: none; }
       .blocks { grid-template-columns: repeat(2, max-content); }
       .field { padding: 12px 12px 70px; }
       .titlebar { padding-top: max(32px, calc(9px + env(safe-area-inset-top, 0px))); }
       .titlebar h1 { font-size: 13px; letter-spacing: 0; }
       .titlebar h1 .sub { display: none; }
       .statusbar { gap: 6px 10px; font-size: 12px; padding: 6px 10px; }
-      .bottombar { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; }
+      .bottombar { padding: 8px 10px calc(10px + env(safe-area-inset-bottom)); gap: 8px; display: grid !important; grid-template-columns: repeat(3, 1fr) !important; }
       .btn { font-size: 11px; padding: 6px 2px; }
       span.dside { display: none; }
       span.dbot { display: inline; }
@@ -2657,6 +2866,13 @@ var init_style = __esm({
     .pet[data-pet="jellyfish"] .pbody { animation: petfloat 3.2s ease-in-out infinite; }  /* M\xE2y / ma / s\u1EE9a: ki\u1EC3u bay l\u01A1 l\u1EEDng (\u0111\xE8 l\xEAn walk) */
     .pet.sleep .pbody { animation: petsleep 3.6s ease-in-out infinite; }   /* v0.7\u2461: ng\u1EE7 = th\u1EDF ch\u1EADm (\u0111\xE8 l\xEAn bay, ma c\u0169ng ph\u1EA3i h\u1EA1 c\xE1nh m\xE0 ng\u1EE7) */
     .pet.flip .pbody img { transform: scaleX(-1); }
+    /* \u2500\u2500 Sans: pet \u0111\u1EB7c bi\u1EC7t \u2500\u2500 */
+    .pet[data-pet="sans"] .pbody { animation: none !important; }
+    .pet[data-pet="sans"].flip .pbody img { transform: none; }   /* Sans x\u1EED l\xFD flip ri\xEAng qua sprite src */
+    
+    .pet[data-pet="sans"].sleep .pbody img[data-sans-sprite] {
+      /* Animation handled in JS now */
+    }
     .zzz { position: absolute; bottom: calc(100% - 8px); left: 68%; font-size: 12px; font-weight: bold;
       color: #7a90c8; text-shadow: 1px 1px 0 #fff; pointer-events: none; animation: zrise 2.6s linear infinite; }
     .zzz.z2 { left: 52%; font-size: 10px; animation-delay: 1.3s; }
@@ -2911,22 +3127,25 @@ var init_style = __esm({
     .dg-slot.placed { opacity: 0.4; pointer-events: none; }
     .dg-entity { position: absolute; left: 0; top: 0; width: 32px; height: 32px; transform: translate(-50%, -50%); user-select: none; touch-action: none; will-change: transform; transition: none !important; cursor: default; }
     .dg-entity img { width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
-    .dg-entity.flip img, .dg-entity.flip svg { transform: scaleX(-1); }
-    @media (max-width: 640px) {
-      #win, .dungeon-win { left: 0 !important; top: 0 !important; width: 100vw; height: 100vh; height: 100dvh; max-height: none; border: none; border-radius: 0; outline: none; }
-      .dungeon-view { padding: 4px; }
-      .dg-dock { height: 68px; padding: 0 8px; gap: 8px; }
-      .dg-slot { width: 52px; height: 52px; }
-    }
-    .dg-hp-bar { position: absolute; top: -12px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
+    .dg-hp-bar { position: absolute; top: -19px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; display: flex; }
     .dg-hp-fill { height: 100%; background: #a4dc8c; transition: width 0.1s; }
-    .dg-cd-bar { position: absolute; top: -7px; left: -4px; width: 40px; height: 3px; background: #333; border: 1px solid #111; border-radius: 1.5px; overflow: hidden; z-index: 2; }
+    .dg-karma-fill { height: 100%; background: #c34bc3; transition: width 0.1s; }
+    .dg-cd-bar { position: absolute; top: -13px; left: -4px; width: 40px; height: 3px; background: #333; border: 1px solid #111; border-radius: 1.5px; overflow: hidden; z-index: 2; }
     .dg-cd-fill { height: 100%; background: #ffeb3b; }
-    .dg-skill-cd-bar { position: absolute; top: -3px; left: 0px; width: 32px; height: 2px; background: #333; border: 1px solid #111; border-radius: 1px; overflow: hidden; z-index: 2; }
+    .dg-skill-cd-bar { position: absolute; top: -8px; left: -4px; width: 12px; height: 3px; background: #333; border: 1px solid #111; border-radius: 1px; overflow: hidden; z-index: 2; }
     .dg-skill-cd-fill { height: 100%; background: #00bcd4; }
+    .dg-stamina-bar { position: absolute; top: -25px; left: -4px; width: 40px; height: 4px; background: #333; border: 1px solid #111; border-radius: 2px; overflow: hidden; z-index: 2; }
+    .dg-stamina-fill { height: 100%; background: #ffd94d; transition: width 0.1s; }
+    .dg-skill-cd-bar.blue-magic { top: -8px; left: -4px; }
+    .dg-skill-cd-bar.blue-magic .dg-skill-cd-fill { background: #1a237e; }
+    .dg-skill-cd-bar.gravity-push { top: -8px; left: 10px; }
+    .dg-skill-cd-bar.gravity-push .dg-skill-cd-fill { background: #9c27b0; }
+    .dg-skill-cd-bar.gaster-blaster { top: -8px; left: 24px; }
+    .dg-skill-cd-bar.gaster-blaster .dg-skill-cd-fill { background: #e0f7fa; box-shadow: 0 0 2px #fff; }
     .dg-entity.enemy .dg-hp-fill { background: #e06578; }
     .dg-dmg { position: absolute; left: 0; top: 0; font-size: 14px; font-weight: bold; color: #ff4444; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; pointer-events: none; z-index: 10; animation: dmgFloat 0.8s ease-out forwards; }
     .dg-dmg.heal { color: #a4dc8c; }
+    .dg-dmg.karma { color: #d500f9; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
     .dg-dmg.crit { color: #ff9800; font-size: 18px; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; z-index: 15; }
     @keyframes dmgFloat { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 20% { transform: translate(-50%, -15px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -30px) scale(1); } }
     
@@ -3222,6 +3441,13 @@ var init_style = __esm({
     @keyframes fxStun { 0% { transform: translate(-50%, -100%) rotate(0deg); } 100% { transform: translate(-50%, -100%) rotate(360deg); } }
 
     .laser-beam { position: absolute; height: 4px; background: #ff88dd; z-index: 8; transform-origin: left center; pointer-events: none; animation: fxLaser 0.3s ease-out forwards; box-shadow: 0 0 8px #ff88dd, 0 0 15px #ff88dd; }
+    .laser-sans { position: absolute; height: 32px; background: linear-gradient(to bottom, #00ffff, #ffffff, #00ffff); z-index: 8; transform-origin: left center; pointer-events: none; animation: fxLaserSans 0.3s ease-out forwards; box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; }
+    .laser-sans-continuous { position: absolute; height: 32px; background: linear-gradient(to bottom, #00ffff, #ffffff, #00ffff); z-index: 8; transform-origin: left center; pointer-events: none; box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; width: 1000px; transform: translateY(-50%); opacity: 0; transition: opacity 0.2s ease-out; }
+    .laser-sans-continuous.firing { opacity: 1; animation: laserPulse 0.1s infinite alternate; }
+    .laser-sans-continuous.ending { animation: laserEnd 0.3s forwards; }
+    @keyframes laserPulse { 0% { transform: translateY(-50%) scaleY(0.85); box-shadow: 0 0 10px #00ffff, 0 0 15px #00ffff; } 100% { transform: translateY(-50%) scaleY(1.15); box-shadow: 0 0 15px #00ffff, 0 0 30px #00ffff; } }
+    @keyframes laserEnd { 0% { opacity: 1; transform: translateY(-50%) scaleY(1); } 50% { opacity: 0.5; transform: translateY(-50%) scaleY(0.5); } 100% { opacity: 0; transform: translateY(-50%) scaleY(0); } }
+    @keyframes fxLaserSans { 0% { opacity: 1; transform: scaleY(0.1); } 20% { transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(0); } }
     @keyframes fxLaser { 0% { opacity: 1; transform: scaleY(1); } 100% { opacity: 0; transform: scaleY(3); } }
 
     .pet-bump { animation: petBump 0.2s ease-out; }
@@ -3483,6 +3709,8 @@ var init_style = __esm({
         border-top: none;
         border-left: none;
     }
+
+
 }
 `;
   }
@@ -3693,6 +3921,14 @@ function initUI() {
       <div class="close-x" id="race-close">\xD7</div>
     </div>
     <div class="race-view" id="race-view"></div>
+  </div>
+  
+  <div id="stock-win" class="dungeon-win" style="display:none">
+    <div class="titlebar" id="stock-drag">
+      <h1>${spriteSVG("stockMarket", 16)}S\xE0n Ch\u1EE9ng Kho\xE1n <span id="stk-help-btn" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; background:rgba(0,0,0,0.15); border-radius:50%; font-size:12px; color:#475569; font-weight:bold; margin-left:8px; vertical-align:middle; transition:all 0.2s;" title="H\u01B0\u1EDBng d\u1EABn ch\u01A1i">?</span></h1>
+      <div class="close-x" id="stock-close">\xD7</div>
+    </div>
+    <div class="dungeon-view" id="stock-view" style="flex:1; overflow-y:auto; padding:10px;"></div>
   </div>`;
   sh.appendChild(ctx.ui);
   ctx.orb = $id("orb");
@@ -3807,18 +4043,18 @@ function initUI() {
   }
 }
 function showResetAnnouncement() {
-  if (localStorage.getItem("farm_reset_announce_seen")) return;
-  console.log("[Farm Ext] B\u1EA3ng th\xF4ng b\xE1o Reset xu\u1EA5t hi\u1EC7n!");
+  if (localStorage.getItem("farm_reborn_announce_seen")) return;
+  console.log("[Farm Ext] B\u1EA3ng th\xF4ng b\xE1o Tr\xF9ng Sinh xu\u1EA5t hi\u1EC7n!");
   if (ctx.win.querySelector("#farm-reset-modal")) return;
   const m2 = document.createElement("div");
   m2.id = "farm-reset-modal";
   m2.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:20px; box-sizing:border-box; color:#fff; text-align:center; font-family:sans-serif; transition: opacity 0.5s;";
   const box = document.createElement("div");
-  box.style.cssText = "background:#222; border: 2px solid #555; border-radius:12px; padding:30px; max-width:400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); line-height:1.6;";
+  box.style.cssText = "background:#1a2e1a; border: 2px solid #4CAF50; border-radius:12px; padding:30px; max-width:400px; box-shadow: 0 10px 30px rgba(76,175,80,0.3); line-height:1.6;";
   box.innerHTML = `
-    <h2 style="color:#ff4444; margin-top:0; font-size:24px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #ff4444; padding-bottom:10px;">\u0110\u1EA1i Ki\u1EBFp Gi\xE1ng L\xE2m</h2>
-    <p style="font-size:16px; margin: 20px 0; font-style:italic;">Thi\xEAn c\u01A1 nhi\u1EC5u lo\u1EA1n, Thi\xEAn \u0111\u1EA1o suy t\xE0n, V\u1EA1n ch\xFAng suy vong. M\u1ED9t h\u01A1i t\xE0n, m\u1ED9t tia s\xE1ng, h\u1EBFt th\u1EA3y chuy\u1EC3n sinh, t\xE1i l\u1EADp t\u1EEB \u0111\u1EA7u.</p>
-    <p style="font-size:18px; font-weight:bold; color:#ffdd55; margin-bottom: 25px;">(C\xF2n 2 ng\xE0y n\u1EEFa l\xE0 reset to\xE0n b\u1ED9)</p>
+    <h2 style="color:#4CAF50; margin-top:0; font-size:24px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #4CAF50; padding-bottom:10px;">Tr\xF9ng Sinh Th\xE0nh C\xF4ng</h2>
+    <p style="font-size:16px; margin: 20px 0; font-style:italic;">Th\u1EBF gi\u1EDBi \u0111\xE3 \u0111\u01B0\u1EE3c thanh t\u1EA9y ho\xE0n to\xE0n. T\xE0i ph\xFA l\u1EA1m ph\xE1t tan bi\u1EBFn nh\u01B0 c\xE1t b\u1EE5i. M\u1ED9t k\u1EF7 nguy\xEAn m\u1EDBi r\u1EF1c r\u1EE1 v\xE0 c\xE2n b\u1EB1ng h\u01A1n \u0111\xE3 m\u1EDF ra!</p>
+    <p style="font-size:18px; font-weight:bold; color:#ffdd55; margin-bottom: 25px;">\u{1F31F} Ch\xFAc b\u1EA1n m\u1ED9t kh\u1EDFi \u0111\u1EA7u m\u1EDBi \u0111\u1EA7y may m\u1EAFn! \u{1F31F}</p>
     <button id="reset-announce-btn" disabled style="background:#555; color:#999; border:none; padding:12px 24px; font-size:16px; border-radius:6px; cursor:not-allowed; transition:all 0.3s;">\u0110\xF3ng (5s)</button>
   `;
   m2.appendChild(box);
@@ -3831,7 +4067,7 @@ function showResetAnnouncement() {
       btn.textContent = `\u0110\xF3ng (${timeLeft}s)`;
     } else {
       clearInterval(iv);
-      btn.textContent = "\u0110\xE3 r\xF5, chu\u1EA9n b\u1ECB chuy\u1EC3n sinh";
+      btn.textContent = "B\u1EAFt \u0111\u1EA7u h\xE0nh tr\xECnh m\u1EDBi";
       btn.style.background = "#4CAF50";
       btn.style.color = "#fff";
       btn.style.cursor = "pointer";
@@ -3839,7 +4075,7 @@ function showResetAnnouncement() {
     }
   }, 1e3);
   btn.addEventListener("click", () => {
-    localStorage.setItem("farm_reset_announce_seen", "1");
+    localStorage.setItem("farm_reborn_announce_seen", "1");
     m2.style.opacity = "0";
     setTimeout(() => m2.remove(), 500);
   });
@@ -3858,9 +4094,17 @@ var init_ui = __esm({
     init_utils();
     swX = null;
     swY = null;
-    window.testFarmReset = () => {
-      localStorage.removeItem("farm_reset_announce_seen");
+    window["testFarmReset"] = () => {
+      localStorage.removeItem("farm_reborn_announce_seen");
       console.log("[Farm Ext] \u0110\xE3 x\xF3a c\u1EDD reset, h\xE3y \u0111\xF3ng m\u1EDF l\u1EA1i c\u1EEDa s\u1ED5 n\xF4ng tr\u1EA1i \u0111\u1EC3 xem b\u1EA3ng th\xF4ng b\xE1o.");
+    };
+    window["testSansLock"] = () => {
+      if (!ctx.S.achiv) return;
+      if (ctx.S.achiv.sans) ctx.S.achiv.sans.claimed = false;
+      ctx.S.pets = ctx.S.pets.filter((p2) => p2 !== "sans");
+      ctx.S.petsOut = ctx.S.petsOut.filter((p2) => p2 !== "sans");
+      save();
+      console.log("[Farm Ext] \u0110\xE3 kh\xF3a v\xE0 x\xF3a Sans kh\u1ECFi Balo/S\xE2n.");
     };
   }
 });
@@ -3873,8 +4117,8 @@ function regrowMs(cropId) {
   const c2 = CROPS[cropId] || {};
   return TEST_MODE ? REGROW : (c2.regrowM || Math.round((c2.grow || 30) * 0.6)) * MIN;
 }
-function plant(pi, cropId) {
-  if ((ctx.S.seeds[cropId] || 0) <= 0) return toast("H\u1EBFt h\u1EA1t gi\u1ED1ng n\xE0y r\u1ED3i");
+function plant(pi, cropId, quiet) {
+  if ((ctx.S.seeds[cropId] || 0) <= 0) return quiet ? false : toast("H\u1EBFt h\u1EA1t gi\u1ED1ng n\xE0y r\u1ED3i");
   let realId = cropId;
   if (cropId === "mystery") {
     const fam = ["dream", "key", "fang"][Math.floor(Math.random() * 3)];
@@ -3882,12 +4126,12 @@ function plant(pi, cropId) {
   } else {
     const c3 = CROPS[cropId];
     if (!c3) {
-      toast("H\u1EA1t gi\u1ED1ng n\xE0y \u0111\xE3 h\u1ECFng (kh\xF4ng t\u1ED3n t\u1EA1i trong phi\xEAn b\u1EA3n n\xE0y)!");
+      if (!quiet) toast("H\u1EA1t gi\u1ED1ng n\xE0y \u0111\xE3 h\u1ECFng (kh\xF4ng t\u1ED3n t\u1EA1i trong phi\xEAn b\u1EA3n n\xE0y)!");
       ctx.S.seeds[cropId] = 0;
-      return;
+      return false;
     }
     const z = c3.zone || 1;
-    if (z !== ctx.S.page) return toast(c3.name + " ph\u1EA3i tr\u1ED3ng \u1EDF " + ZONE_NAME[z] + " (trang " + z + ")");
+    if (z !== ctx.S.page) return quiet ? false : toast(c3.name + " ph\u1EA3i tr\u1ED3ng \u1EDF " + ZONE_NAME[z] + " (trang " + z + ")");
   }
   ctx.S.seeds[cropId]--;
   const g = growMs(realId);
@@ -3904,34 +4148,35 @@ function plant(pi, cropId) {
   }
   curPlots()[pi].crop = c2;
   save();
-  renderPlots();
+  if (!quiet) renderPlots();
   return true;
 }
-function water(pi) {
+function water(pi, quiet) {
   const c2 = curPlots()[pi].crop;
-  if (!c2) return toast("\xD4 n\xE0y ch\u01B0a tr\u1ED3ng g\xEC");
-  if (now() >= c2.matureAt) return toast("Ch\xEDn r\u1ED3i, thu nhanh \u0111i!");
-  if (now() < c2.wateredUntil) return toast("V\u1EEBa t\u01B0\u1EDBi xong m\xE0");
+  if (!c2) return quiet ? false : toast("\xD4 n\xE0y ch\u01B0a tr\u1ED3ng g\xEC");
+  if (now() >= c2.matureAt) return quiet ? false : toast("Ch\xEDn r\u1ED3i, thu nhanh \u0111i!");
+  if (now() < c2.wateredUntil) return quiet ? false : toast("V\u1EEBa t\u01B0\u1EDBi xong m\xE0");
   c2.matureAt = now() + (c2.matureAt - now()) * 0.75;
   c2.wateredUntil = now() + WATER_CD;
   save();
-  renderPlots();
-  toast("T\u01B0\u1EDBi n\u01B0\u1EDBc xong, c\xE2y m\u1ECDc nhanh h\u01A1n!");
+  if (!quiet) renderPlots();
+  if (!quiet) toast("T\u01B0\u1EDBi n\u01B0\u1EDBc xong, c\xE2y m\u1ECDc nhanh h\u01A1n!");
+  return true;
 }
 function fertilize(pi, fid, quiet) {
   const c2 = curPlots()[pi].crop;
-  if (!c2) return toast("\xD4 n\xE0y ch\u01B0a tr\u1ED3ng g\xEC");
-  if ((ctx.S.ferts[fid] || 0) <= 0) return toast("H\u1EBFt lo\u1EA1i ph\xE2n n\xE0y r\u1ED3i");
+  if (!c2) return quiet ? false : toast("\xD4 n\xE0y ch\u01B0a tr\u1ED3ng g\xEC");
+  if ((ctx.S.ferts[fid] || 0) <= 0) return quiet ? false : toast("H\u1EBFt lo\u1EA1i ph\xE2n n\xE0y r\u1ED3i");
   if (!c2.fertUsed) c2.fertUsed = {};
-  if (c2.fertUsed[fid]) return toast("V\u1EE5 n\xE0y \u0111\xE3 b\xF3n " + FERTS[fid].name + " r\u1ED3i");
+  if (c2.fertUsed[fid]) return quiet ? false : toast("V\u1EE5 n\xE0y \u0111\xE3 b\xF3n " + FERTS[fid].name + " r\u1ED3i");
   if (fid === "compost") {
-    if (now() >= c2.matureAt) return toast("Ch\xEDn r\u1ED3i, kh\u1ECFi b\xF3n ph\xE2n");
+    if (now() >= c2.matureAt) return quiet ? false : toast("Ch\xEDn r\u1ED3i, kh\u1ECFi b\xF3n ph\xE2n");
     c2.matureAt = now() + (c2.matureAt - now()) * 0.75;
   } else c2.shiny = true;
   c2.fertUsed[fid] = true;
   ctx.S.ferts[fid]--;
   save();
-  renderPlots();
+  if (!quiet) renderPlots();
   if (!quiet) plotEmote(pi, fid === "compost" ? Math.random() < 0.5 ? "emLeaf" : "emNote" : Math.random() < 0.5 ? "emHeart" : "emStar");
   return true;
 }
@@ -4016,12 +4261,12 @@ function harvest(pi, quiet) {
     delete c2.mut;
     delete c2.mutRolled;
     save();
-    renderPlots();
+    if (!quiet) renderPlots();
     if (!quiet) toast("Thu ho\u1EA1ch " + shownName + " \xD7" + n2 + " (c\xF2n thu \u0111\u01B0\u1EE3c " + c2.left + " v\u1EE5 n\u1EEFa)" + (shinyGain ? " \u2728+" + shinyGain + "G" : ""));
   } else {
     curPlots()[pi].crop = null;
     save();
-    renderPlots();
+    if (!quiet) renderPlots();
     if (!quiet) toast("Thu ho\u1EA1ch " + shownName + " \xD7" + n2 + (def.regrow ? " (c\xE2y n\xE0y c\xF4ng th\xE0nh th\xE2n tho\xE1i r\u1ED3i)" : "") + (shinyGain ? " \u2728+" + shinyGain + "G" : ""));
   }
   return { name: shownName, n: n2 };
@@ -4104,12 +4349,14 @@ __export(pets_exports, {
   lastScene: () => lastScene,
   moveTo: () => moveTo,
   nextSceneAt: () => nextSceneAt,
+  petAnimT: () => petAnimT,
   petArrive: () => petArrive,
   petBubble: () => petBubble,
   petEl: () => petEl,
   petFert: () => petFert,
   petHarvest: () => petHarvest,
   petHopT: () => petHopT,
+  petIdleT: () => petIdleT,
   petPlant: () => petPlant,
   petPos: () => petPos,
   petSleepT: () => petSleepT,
@@ -4118,16 +4365,22 @@ __export(pets_exports, {
   petTouch: () => petTouch,
   pileWith: () => pileWith,
   placePet: () => placePet,
+  playSansAction: () => playSansAction,
   renderPets: () => renderPets,
+  sansIdleAction: () => sansIdleAction,
+  sansStep: () => sansStep,
+  sansUltimateFarm: () => sansUltimateFarm,
   scene: () => scene,
   sceneBusy: () => sceneBusy,
   sceneTimer: () => sceneTimer,
   sleepPet: () => sleepPet,
   stopHop: () => stopHop,
+  stopSansAction: () => stopSansAction,
   touchBase: () => touchBase,
   tryScene: () => tryScene,
   updateNextScene: () => updateNextScene,
   wakePet: () => wakePet,
+  wakeSans: () => wakeSans,
   walkTo: () => walkTo,
   wander: () => wander
 });
@@ -4152,21 +4405,23 @@ function petSpot(id) {
   return { x: x2, y: WORK_BAND + 6 + Math.random() * Math.max(20, H2 - WORK_BAND - 70) };
 }
 function placePet(el, p2, instant) {
+  const id = el.dataset.pet;
   if (instant) el.style.transitionProperty = "transform, translate";
   else {
-    const old = petPos[el.dataset.pet] || p2;
+    const old = petPos[id] || p2;
     const dist = Math.hypot(p2.x - old.x, p2.y - old.y);
     const dur = dist < 40 ? 0.5 : Math.min(11, Math.max(3, dist / 18));
     el.style.transitionProperty = "transform, translate";
     el.style.transitionDuration = ".12s, " + dur + "s";
     el.style.transitionTimingFunction = "ease, linear";
-    el.classList.toggle("flip", p2.x < old.x);
+    if (id !== "sans") el.classList.toggle("flip", p2.x < old.x);
   }
   el.style.translate = p2.x + "px " + -p2.y + "px";
-  petPos[el.dataset.pet] = p2;
+  petPos[id] = p2;
 }
 function hopStep(el) {
   const id = el.dataset.pet;
+  if (id === "sans" && window["sansManualControl"]) return;
   if (el.dataset.dragging) return;
   if (!el.isConnected) {
     stopHop(id);
@@ -4177,6 +4432,10 @@ function hopStep(el) {
     delete petTgt[id];
     el.classList.remove("walk");
     stopHop(id);
+    if (id === "sans") {
+      sansStep[id] = 0;
+      Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g2) => g2.applySansSprite(el, g2.sansFarmSpriteFor(0, 0)));
+    }
     const cb = petArrive[id];
     delete petArrive[id];
     if (cb) cb();
@@ -4185,7 +4444,14 @@ function hopStep(el) {
   const dx = tgt.x - cur.x, dy = tgt.y - cur.y, dist = Math.hypot(dx, dy);
   const len = Math.min(g.len, dist);
   const p2 = { x: cur.x + dx / dist * len, y: cur.y + dy / dist * len };
-  el.classList.toggle("flip", dx < 0);
+  el.classList.toggle("flip", id !== "sans" && dx < 0);
+  if (id === "sans") {
+    sansStep[id] = (sansStep[id] || 0) + 1;
+    Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g2) => {
+      const sp = g2.sansFarmSpriteFor(dx, dy, sansStep[id]);
+      g2.applySansSprite(el, sp);
+    });
+  }
   el.classList.add("walk");
   el.style.setProperty("--hopd", g.dur + "ms");
   el.style.setProperty("--hy", g.hy + "px");
@@ -4198,16 +4464,93 @@ function hopStep(el) {
 }
 function moveTo(el, p2) {
   const id = el.dataset.pet;
+  if (id === "sans" && window["sansManualControl"]) return;
   if (el.dataset.dragging) return;
   if (FLOATY[id]) return placePet(el, p2, false);
   petTgt[id] = p2;
   if (!petHopT[id]) hopStep(el);
 }
+function sansIdleAction(el) {
+  const actions = ["icecream", "stool", "stool_chup", "stool_comb"];
+  const act = actions[Math.floor(Math.random() * actions.length)];
+  const id = el.dataset.pet;
+  playSansAction(el, act);
+  petIdleT[id] = window.setTimeout(() => wakeSans(el), 15e3 + Math.random() * 15e3);
+}
+function wakeSans(el) {
+  const id = el.dataset.pet;
+  if (petIdleT[id]) {
+    window.clearTimeout(petIdleT[id]);
+    delete petIdleT[id];
+  }
+  delete el.dataset.sansAction;
+  stopSansAction(el);
+}
 function sleepPet(el) {
   const id = el.dataset.pet;
   el.classList.add("sleep");
+  if (id === "sans") playSansAction(el, "sleep_stand");
   el.insertAdjacentHTML("beforeend", '<span class="zzz">Z</span><span class="zzz z2">z</span>');
   petSleepT[id] = window.setTimeout(() => wakePet(el, false), 4e4 + Math.random() * 4e4);
+}
+function getBestSeedForZone(zone) {
+  let best = null;
+  let bestValue = -1;
+  for (const [id, count2] of Object.entries(ctx.S.seeds)) {
+    if (count2 <= 0) continue;
+    const def = CROPS[id];
+    if (!def) continue;
+    const z = def.zone || 1;
+    if (z === zone && def.sell > bestValue) {
+      bestValue = def.sell;
+      best = id;
+    }
+  }
+  return best;
+}
+function sansUltimateFarm(el) {
+  let acted = false;
+  const originalPage = ctx.S.page;
+  for (let page = 1; page <= 3; page++) {
+    ctx.S.page = page;
+    const blocks = page === 1 ? ctx.S.unlockedBlocks : page === 2 ? ctx.S.unlockedBlocks2 : ctx.S.unlockedBlocks3;
+    const plots = page === 1 ? ctx.S.plots : page === 2 ? ctx.S.plots2 : ctx.S.plots3;
+    if (!plots) continue;
+    for (let pi = 0; pi < blocks * 4; pi++) {
+      const plot = plots[pi];
+      if (!plot) continue;
+      if (plot.crop) {
+        if (now() >= plot.crop.matureAt) {
+          if (harvest(pi, true)) acted = true;
+        } else {
+          if (now() >= plot.crop.wateredUntil) {
+            if (water(pi, true)) acted = true;
+          }
+          if (ctx.S.ferts["compost"] > 0 && (!plot.crop.fertUsed || !plot.crop.fertUsed["compost"])) {
+            if (fertilize(pi, "compost", true)) acted = true;
+          }
+          if (ctx.S.ferts["shiny"] > 0 && (!plot.crop.fertUsed || !plot.crop.fertUsed["shiny"])) {
+            if (fertilize(pi, "shiny", true)) acted = true;
+          }
+        }
+      } else {
+        const bestSeed = getBestSeedForZone(page);
+        if (bestSeed) {
+          if (plant(pi, bestSeed, true)) acted = true;
+        }
+      }
+    }
+  }
+  ctx.S.page = originalPage;
+  if (acted) {
+    if (el) {
+      Promise.resolve().then(() => (init_render(), render_exports)).then((r2) => r2.renderPlots());
+      playSansAction(el, "magic");
+      petBubble(el, "heh, shortcuts.");
+      petIdleT["sans"] = window.setTimeout(() => wakeSans(el), 2e3);
+    }
+  }
+  return acted;
 }
 function wakePet(el, startled) {
   const id = el.dataset.pet;
@@ -4224,7 +4567,35 @@ function wakePet(el, startled) {
     const me = petEl(mate);
     if (startled && me && me.classList.contains("sleep")) window.setTimeout(() => wakePet(me, true), 260);
   }
+  if (id === "sans") stopSansAction(el);
   if (startled) petBubble(el, "?!");
+}
+function playSansAction(el, action) {
+  const id = el.dataset.pet;
+  if (petAnimT[id]) window.clearInterval(petAnimT[id]);
+  if (action !== "sleep_stand") el.dataset.sansAction = action;
+  sansStep[id] = 0;
+  petAnimT[id] = window.setInterval(() => {
+    if (!el.isConnected || el.classList.contains("walk")) return;
+    if (action !== "sleep_stand" && el.dataset.sansAction !== action) return stopSansAction(el);
+    if (action === "sleep_stand" && !el.classList.contains("sleep")) return stopSansAction(el);
+    sansStep[id] = (sansStep[id] || 0) + 1;
+    Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g) => {
+      const sp = g.sansFarmSpriteForAction(action, sansStep[id]);
+      g.applySansSprite(el, sp);
+    });
+  }, 200);
+}
+function stopSansAction(el) {
+  const id = el.dataset.pet;
+  if (petAnimT[id]) {
+    window.clearInterval(petAnimT[id]);
+    delete petAnimT[id];
+  }
+  const img = el.querySelector("[data-sans-sprite]");
+  if (img && !el.classList.contains("walk")) {
+    Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g) => g.applySansSprite(el, g.sansFarmSpriteFor(0, 0)));
+  }
 }
 function endScene() {
   if (!scene) return;
@@ -4348,6 +4719,10 @@ function renderPets() {
     window.clearTimeout(petSleepT[k2]);
     delete petSleepT[k2];
   });
+  Object.keys(petIdleT).forEach((k2) => {
+    window.clearTimeout(petIdleT[k2]);
+    delete petIdleT[k2];
+  });
   $id("mascots").dataset.drag = ctx.S.dragPet ? "1" : "0";
   $id("mascots").innerHTML = ctx.S.petsOut.map((id) => PETS[id] ? `<span class="pet" data-pet="${id}" title="Ch\u1ECDc ch\u1ECDc ${PETS[id].name}"><span class="pbody" style="animation-delay:-${(Math.random() * 1.8).toFixed(2)}s">${petSVG(id, 48)}</span></span>` : "").join("");
   sh.querySelectorAll("#mascots .pet").forEach((el) => {
@@ -4402,16 +4777,26 @@ function petFert(el, cry) {
 }
 function initPets() {
   wander = window.setInterval(() => {
+    if ((!ctx.win || !ctx.win.classList.contains("open")) && ctx.S && ctx.S.petsOut && ctx.S.petsOut.includes("sans")) {
+      sansUltimateFarm(null);
+    }
     if (!ctx.win || !ctx.win.classList.contains("open")) return;
     const ov = $id("mascots");
     if (!ov || ov.clientWidth === 0) return;
     if (!scene && now() >= nextSceneAt) tryScene();
     sh.querySelectorAll("#mascots .pet").forEach((el) => {
       const id = el.dataset.pet;
-      if (sceneBusy(id) || petTgt[id] || el.classList.contains("sleep")) return;
-      if (!PETS[id].job && Math.random() < 0.08) return sleepPet(el);
+      if (sceneBusy(id) || petTgt[id] || el.classList.contains("sleep") || el.dataset.sansAction) return;
+      const isSans = id === "sans";
+      if (isSans && sansUltimateFarm(el)) return;
+      const lazyChance = isSans ? 0.35 : 0.12;
+      if (!PETS[id].job && Math.random() < lazyChance) {
+        if (isSans && Math.random() < 0.7) return sansIdleAction(el);
+        return sleepPet(el);
+      }
       if (PETS[id].job && now() - (petTouch[id] || touchBase) > 5 * MIN && Math.random() < 0.08) return sleepPet(el);
-      if (Math.random() < 0.35) moveTo(el, petSpot(id));
+      const walkChance = isSans ? 0.1 : 0.35;
+      if (Math.random() < walkChance) moveTo(el, petSpot(id));
     });
   }, 7e3);
   let activeDrag = null;
@@ -4443,6 +4828,7 @@ function initPets() {
     }
     delete petTgt[id];
     delete petArrive[id];
+    if (el.dataset.sansAction) wakeSans(el);
     el.dataset.dragging = "true";
     const comp = window.getComputedStyle(el);
     let exactLeft = 0, exactBottom = 0;
@@ -4543,12 +4929,13 @@ function initPets() {
     const def = PETS[petId];
     if (!def) return;
     petTouch[petId] = now();
+    if (el.dataset.sansAction) wakeSans(el);
     if (el.classList.contains("sleep")) return wakePet(el, true);
     const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
     if (def.job === "plant") return petPlant(el, cry);
     if (def.job === "fert") return petFert(el, cry);
     if (def.job === "harvest") return petHarvest(el, cry);
-    if (def.job) return petBubble(el, cry);
+    if (def.job || petId === "sans") return petBubble(el, cry);
     let txt = cry;
     if (now() - (ctx.S.petPoke[petId] || 0) >= POKE_CD) {
       ctx.S.petPoke[petId] = now();
@@ -4594,7 +4981,7 @@ function initPets() {
     handlePetClick(el, el.dataset.pet);
   });
 }
-var petPos, petTgt, petHopT, WORK_BAND, FLOATY, GAITS, gaitOf, stopHop, petSleepT, petArrive, pileWith, petTouch, touchBase, scene, lastScene, nextSceneAt, updateNextScene, sceneBusy, sceneTimer, wander;
+var petPos, petTgt, petHopT, sansStep, WORK_BAND, FLOATY, GAITS, gaitOf, stopHop, petSleepT, petIdleT, petAnimT, petArrive, pileWith, petTouch, touchBase, scene, lastScene, nextSceneAt, updateNextScene, sceneBusy, sceneTimer, wander;
 var init_pets = __esm({
   "src/pets.js"() {
     init_state();
@@ -4609,6 +4996,7 @@ var init_pets = __esm({
     petPos = {};
     petTgt = {};
     petHopT = {};
+    sansStep = {};
     WORK_BAND = 74;
     FLOATY = { cloudMallow: 1, ghostBlob: 1, jellyfish: 1 };
     GAITS = {
@@ -4617,6 +5005,8 @@ var init_pets = __esm({
       // Bạch tuộc: bước lắt nhắt bò sát đất
       octoCream: { len: 8, dur: 290, hy: -4 },
       // Bạch tuộc kem: bò còn chậm rì hơn nữa
+      sans: { len: 18, dur: 400, hy: 0 },
+      // Sans: bước đi lậờ đờ, không nhảy (≈ FLOATY nhưng vẫn hop-based để trigger direction)
       _: { len: 14, dur: 330, hy: -9 }
       // Mặc định: kiểu nảy chuẩn của dòng slime
     };
@@ -4628,6 +5018,10 @@ var init_pets = __esm({
       }
     };
     petSleepT = {};
+    petIdleT = {};
+    petAnimT = {};
+    window["playSansAction"] = playSansAction;
+    window["stopSansAction"] = stopSansAction;
     petArrive = {};
     pileWith = {};
     petTouch = {};
@@ -4641,6 +5035,91 @@ var init_pets = __esm({
     sceneBusy = (id) => !!(scene && scene.ids.indexOf(id) >= 0);
     sceneTimer = (fn2, ms) => {
       if (scene) scene.timers.push(window.setTimeout(fn2, ms));
+    };
+    window["toggleSansControl"] = function() {
+      window["sansManualControl"] = !window["sansManualControl"];
+      const ov = $id("mascots");
+      const el = (
+        /** @type {HTMLElement} */
+        ov ? ov.querySelector('.pet[data-pet="sans"]') : null
+      );
+      if (!el) {
+        console.log("Sans ch\u01B0a xu\u1EA5t hi\u1EC7n tr\xEAn \u0111\u1ED3ng!");
+        window["sansManualControl"] = false;
+        return;
+      }
+      if (window["sansManualControl"]) {
+        console.log("=== SANS MANUAL CONTROL: B\u1EACT ===");
+        console.log("Ph\xEDm M\u0169i T\xEAn: Di chuy\u1EC3n");
+        console.log("Ph\xEDm 1: Ng\u1EE7 g\u1EADt (sleep_stand)");
+        console.log("Ph\xEDm 2: \u0102n kem (icecream)");
+        console.log("Ph\xEDm 3: X\xE0i ph\xE9p (magic)");
+        console.log("Ph\xEDm 5: Ng\u1ED3i gh\u1EBF (stool)");
+        console.log("Ph\xEDm 6: U\u1ED1ng Ketchup (stool_chup)");
+        console.log("Ph\xEDm 7: Ch\u1EA3i \u0111\u1EA7u (stool_comb)");
+        console.log("Ph\xEDm 4: Hu\u1EF7 h\xE0nh \u0111\u1ED9ng (stop)");
+        delete petTgt["sans"];
+        el.classList.remove("walk");
+        stopHop("sans");
+        if (el.dataset.sansAction) wakeSans(el);
+        window["_sansManualListener"] = function(e2) {
+          if (e2.target.tagName === "INPUT" || e2.target.tagName === "TEXTAREA") return;
+          const p2 = petPos["sans"] || { x: 100, y: 100 };
+          petPos["sans"] = p2;
+          let dx = 0, dy = 0;
+          const speed = 10;
+          if (e2.key === "ArrowUp") dy = speed;
+          if (e2.key === "ArrowDown") dy = -speed;
+          if (e2.key === "ArrowLeft") dx = -speed;
+          if (e2.key === "ArrowRight") dx = speed;
+          if (dx !== 0 || dy !== 0) {
+            e2.preventDefault();
+            p2.x += dx;
+            p2.y += dy;
+            const ov2 = document.getElementById("mascots");
+            const W = ov2 ? ov2.clientWidth : 380;
+            const H2 = ov2 ? ov2.clientHeight : 320;
+            p2.x = Math.max(0, Math.min(p2.x, W - 64));
+            p2.y = Math.max(WORK_BAND, Math.min(p2.y, H2 - 70));
+            el.style.transitionProperty = "none";
+            el.style.translate = p2.x + "px " + -p2.y + "px";
+            sansStep["sans"] = (sansStep["sans"] || 0) + 1;
+            Promise.resolve().then(() => (init_graphics(), graphics_exports)).then((g) => {
+              const sp = g.sansFarmSpriteFor(dx, dy, sansStep["sans"]);
+              g.applySansSprite(el, sp);
+            });
+          }
+          if (e2.key === "1") {
+            playSansAction(el, "sleep_stand");
+          }
+          if (e2.key === "2") {
+            playSansAction(el, "icecream");
+          }
+          if (e2.key === "3") {
+            playSansAction(el, "magic");
+          }
+          if (e2.key === "5") {
+            playSansAction(el, "stool");
+          }
+          if (e2.key === "6") {
+            playSansAction(el, "stool_chup");
+          }
+          if (e2.key === "7") {
+            playSansAction(el, "stool_comb");
+          }
+          if (e2.key === "4") {
+            stopSansAction(el);
+          }
+        };
+        window.addEventListener("keydown", window["_sansManualListener"]);
+      } else {
+        console.log("=== SANS MANUAL CONTROL: T\u1EAET ===");
+        if (window["_sansManualListener"]) {
+          window.removeEventListener("keydown", window["_sansManualListener"]);
+          delete window["_sansManualListener"];
+        }
+        stopSansAction(el);
+      }
     };
   }
 });
@@ -6294,20 +6773,34 @@ function closeModal() {
   bagSellMode = false;
 }
 function openAchivModal() {
-  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0 };
-  if (!ctx.S.achiv) ctx.S.achiv = { naoya: { claimed: false } };
+  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
+  if (!ctx.S.achiv) ctx.S.achiv = { naoya: { claimed: false }, sans: { claimed: false } };
+  if (!ctx.S.achiv.sans) ctx.S.achiv.sans = { claimed: false };
   const stats = ctx.S.stats;
   const n2 = ctx.S.achiv.naoya;
+  const s2 = ctx.S.achiv.sans;
   const q1 = Math.min(240, stats.totalHarvests);
   const q2 = Math.min(24, ctx.S.hero?.maxStage || 1);
   const q3 = Math.min(2400, stats.totalCrits);
   const done = q1 >= 240 && q2 >= 24 && q3 >= 2400;
   const btn = n2.claimed ? `<div class="buy off" style="text-align:center; padding:10px;">\u0110\xE3 \u0110\xE1nh Th\u1EE9c Naoya Slime</div>` : done ? `<div class="buy" id="claimNaoya" style="text-align:center; padding:10px; font-size:14px; background:#fcd34d; color:#27272a; border-color:#d97706; box-shadow: 0 4px 10px rgba(252,211,77,0.4);">\u2726 \u0110\xD3N K\u1EBA KI\xCAU NG\u1EA0O V\u1EC0 NH\xC0 \u2726</div>` : `<div class="buy off" style="text-align:center; padding:10px;">Ch\u01B0a \u0110\u1EE7 \u0110i\u1EC1u Ki\u1EC7n</div>`;
+  const formatNum = (x2) => x2 >= 1e9 ? (x2 / 1e9).toFixed(1) + "B" : x2 >= 1e6 ? (x2 / 1e6).toFixed(1) + "M" : x2;
+  const q4_1 = Math.min(1e9, ctx.S.coins || 0);
+  const normalPetsList = Object.keys(PETS).filter((id) => !PETS[id].hidden);
+  const totalNormalPets = normalPetsList.length;
+  const ownedNormalPets = normalPetsList.filter((id) => ctx.S.pets.includes(id)).length;
+  const passesScore = (ctx.S.passes.water ? 1 : 0) + (ctx.S.passes.mine ? 1 : 0);
+  const q4_2 = passesScore + ownedNormalPets;
+  const maxQ4_2 = 2 + totalNormalPets;
+  const q4_3 = Math.min(100, stats.totalCooked || 0);
+  const q4_4 = Math.min(1e3, stats.kills || 0);
+  const doneSans = q4_1 >= 1e9 && q4_2 >= maxQ4_2 && q4_3 >= 100 && q4_4 >= 1e3;
+  const btnSans = s2.claimed ? `<div class="buy off" style="text-align:center; padding:10px;">\u0110\xE3 Tri\u1EC7u H\u1ED3i Sans</div>` : doneSans ? `<div class="buy" id="claimSans" style="text-align:center; padding:10px; font-size:14px; background:#00ffff; color:#000; border-color:#008888; box-shadow: 0 4px 10px rgba(0,255,255,0.4); font-weight:bold;">\u2726 TRI\u1EC6U H\u1ED2I SANS \u2726</div>` : `<div class="buy off" style="text-align:center; padding:10px;">Ch\u01B0a \u0110\u1EE7 \u0110i\u1EC1u Ki\u1EC7n</div>`;
   openModal("Th\xE1nh Ph\u1EA3 Th\xE0nh T\u1EF1u", `
       <div class="note" style="margin-bottom:12px;">C\xE1c Spec Pet (Th\u1EA7n Th\xFA \u0110\u1ED9c Nh\u1EA5t) kh\xF4ng th\u1EC3 d\xF9ng V\xE0ng v\u1EA5y b\u1EA9n. B\u1EA1n ph\u1EA3i ch\u1EE9ng minh th\u1EF1c l\u1EF1c qua Th\xE0nh T\u1EF1u.</div>
       
       <!-- B\u1ECCC TO\xC0N B\u1ED8 B\u1EB0NG DETAILS \u0110\u1EC2 C\xD3 TH\u1EC2 THU G\u1ECCN TO\xC0N T\u1EACP -->
-      <details style="background:#2c2538; border:2px solid #bd923b; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" open>
+      <details style="background:#2c2538; border:2px solid #bd923b; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" ${n2.claimed ? "" : "open"}>
           
           <summary style="display:flex; justify-content:space-between; align-items:center; padding:15px; cursor:pointer; outline:none;">
              <div style="font-weight:bold; font-size:15px; color:#fcd34d; text-shadow: 0 1px 2px #000;">
@@ -6346,6 +6839,45 @@ function openAchivModal() {
               <div style="margin-top:10px;">${btn}</div>
           </div>
       </details>
+      
+      <details style="background:#1a202c; border:2px solid #00ffff; border-radius:10px; margin-bottom:10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);" ${s2.claimed ? "" : "open"}>
+          <summary style="display:flex; justify-content:space-between; align-items:center; padding:15px; cursor:pointer; outline:none;">
+             <div style="font-weight:bold; font-size:15px; color:#00ffff; text-shadow: 0 1px 2px #000;">
+                 wanna have a bad time?
+             </div>
+             <div style="display:inline-block; vertical-align:middle; animation: pulse 2s infinite;">
+                 ${spriteSVG("achivStar", 24)}
+             </div>
+          </summary>
+          <div style="padding: 0 15px 15px 15px;">
+              <div style="font-size:12px; color:#a0aec0; margin-bottom:14px; font-style:italic; border-bottom: 1px solid #2d3748; padding-bottom: 10px;">
+                  "Tri\u1EC7u h\u1ED3i Sans - The coolest skeleton around."
+              </div>
+              <div style="margin-top: 10px;">
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">1. Saving: <span style="color:#aaa; font-weight:normal;">S\u1EDF h\u1EEFu 1 T\u1EF7 V\xE0ng</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #2d3748; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #3182ce, #63b3ed); width:${q4_1 / 1e9 * 100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${formatNum(q4_1)}/1B</div>
+                  </div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">2. All: <span style="color:#aaa; font-weight:normal;">M\u1EDF kh\xF3a 3 khu v\u01B0\u1EDDn v\xE0 to\xE0n b\u1ED9 Pet</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #2d3748; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #3182ce, #63b3ed); width:${q4_2 / maxQ4_2 * 100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q4_2}/${maxQ4_2}</div>
+                  </div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">3. Nice cooking: <span style="color:#aaa; font-weight:normal;">N\u1EA5u th\xE0nh c\xF4ng 100 m\xF3n \u0103n</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #2d3748; height:10px; position:relative; margin-bottom:12px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #3182ce, #63b3ed); width:${q4_3 / 100 * 100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q4_3}/100</div>
+                  </div>
+                  <div style="font-size:12px; margin-bottom:4px; font-weight:bold; color:#fff;">4. Slay: <span style="color:#aaa; font-weight:normal;">Ti\xEAu di\u1EC7t 1000 qu\xE1i v\u1EADt H\u1EA7m ng\u1EE5c</span></div>
+                  <div class="achiv-bar" style="background:#000; border-radius:4px; border:1px solid #2d3748; height:10px; position:relative; margin-bottom:16px; overflow:hidden;">
+                      <div style="background:linear-gradient(90deg, #3182ce, #63b3ed); width:${q4_4 / 1e3 * 100}%; height:100%;"></div>
+                      <div style="position:absolute; right:2px; top:-2px; font-size:10px; color:#fff;">${q4_4}/1000</div>
+                  </div>
+              </div>
+              <div style="margin-top:10px;">${btnSans}</div>
+          </div>
+      </details>
   `);
   const claimBtn = $id("claimNaoya");
   if (claimBtn) claimBtn.addEventListener("click", () => {
@@ -6353,6 +6885,16 @@ function openAchivModal() {
     if (!ctx.S.pets.includes("naoyaSlime")) {
       ctx.S.pets.push("naoyaSlime");
       toast("\u2726 B\xD9M! Naoya \u0111\xE3 khinh b\u1EC9 b\u01B0\u1EDBc v\xE0o Balo c\u1EE7a b\u1EA1n!");
+    }
+    save();
+    openAchivModal();
+  });
+  const claimSansBtn = $id("claimSans");
+  if (claimSansBtn) claimSansBtn.addEventListener("click", () => {
+    ctx.S.achiv.sans.claimed = true;
+    if (!ctx.S.pets.includes("sans")) {
+      ctx.S.pets.push("sans");
+      toast("\u2726 heh. Sorry, ng\u1EE7 qu\xEAn m\u1EA5t, t\u1EDBi \u0111\xE2u r\u1ED3i?");
     }
     save();
     openAchivModal();
@@ -7071,6 +7613,16 @@ function placeRaceWin() {
   raceWin.style.left = Math.min(Math.max(x2, 0), Math.max(vw - w2, 0)) + "px";
   raceWin.style.top = Math.min(Math.max(y2, 0), vh - 60) + "px";
 }
+function placeStockWin() {
+  const stockWin = $id("stock-win");
+  if (!stockWin) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const w2 = Math.min(760, vw * 0.96);
+  let x2 = ctx.S.stockWin ? ctx.S.stockWin.fx * vw : (vw - w2) / 2;
+  let y2 = ctx.S.stockWin ? ctx.S.stockWin.fy * vh : vh * 0.04;
+  stockWin.style.left = Math.min(Math.max(x2, 0), Math.max(vw - w2, 0)) + "px";
+  stockWin.style.top = Math.min(Math.max(y2, 0), vh - 60) + "px";
+}
 function toggleWin() {
   try {
     if (ctx.win.classList.contains("open")) {
@@ -7226,6 +7778,35 @@ function initWindows() {
       save();
     });
   }
+  const stockDragBar = $id("stock-drag");
+  let stockWg = null;
+  if (stockDragBar) {
+    stockDragBar.addEventListener("pointerdown", (e2) => {
+      if (e2.target.id === "stock-close") return;
+      if (e2.target.id === "stk-help-btn") return;
+      if (window.innerWidth <= 640) return;
+      stockDragBar.setPointerCapture(e2.pointerId);
+      const stockWin = $id("stock-win");
+      stockWg = { id: e2.pointerId, sx: e2.clientX, sy: e2.clientY, ox: stockWin.offsetLeft, oy: stockWin.offsetTop };
+    });
+    stockDragBar.addEventListener("pointermove", (e2) => {
+      if (!stockWg || e2.pointerId !== stockWg.id) return;
+      const stockWin = $id("stock-win");
+      stockWin.style.left = stockWg.ox + e2.clientX - stockWg.sx + "px";
+      stockWin.style.top = stockWg.oy + e2.clientY - stockWg.sy + "px";
+    });
+    stockDragBar.addEventListener("pointerup", (e2) => {
+      if (!stockWg || e2.pointerId !== stockWg.id) return;
+      try {
+        stockDragBar.releasePointerCapture(e2.pointerId);
+      } catch (er2) {
+      }
+      stockWg = null;
+      const stockWin = $id("stock-win");
+      ctx.S.stockWin = { fx: stockWin.offsetLeft / window.innerWidth, fy: stockWin.offsetTop / window.innerHeight };
+      save();
+    });
+  }
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && ctx.win && ctx.win.classList.contains("open")) {
       renderDynamic();
@@ -7351,6 +7932,30 @@ var init_orb = __esm({
 });
 
 // src/render.js
+var render_exports = {};
+__export(render_exports, {
+  TOOLS: () => TOOLS,
+  buyConfirm: () => buyConfirm,
+  cacheBlockTxt: () => cacheBlockTxt,
+  cacheCoins: () => cacheCoins,
+  cacheDayTxt: () => cacheDayTxt,
+  cacheWicon: () => cacheWicon,
+  initRender: () => initRender,
+  mode: () => mode,
+  pendingPick: () => pendingPick,
+  pickFrom: () => pickFrom,
+  plotHTML: () => plotHTML,
+  renderAll: () => renderAll,
+  renderBanner: () => renderBanner,
+  renderChips: () => renderChips,
+  renderDynamic: () => renderDynamic,
+  renderPlots: () => renderPlots,
+  renderStatus: () => renderStatus,
+  renderToolbar: () => renderToolbar,
+  setMode: () => setMode,
+  setPendingPick: () => setPendingPick,
+  toolbarOpen: () => toolbarOpen
+});
 function setMode(val) {
   mode = val;
 }
@@ -7465,6 +8070,10 @@ function renderPlots() {
             <div style="width:48px;height:48px;position:relative;margin:8px auto 0;">${spriteSVG("coin", 48)}</div>
             <div class="feature-name" style="color: #c8f5cc; text-shadow: 0 1px 2px #000;">Ng\xE2n H\xE0ng</div>
           </div>
+          <div class="explore-slot" id="eslot-stock" style="border-color: #a855f7; box-shadow: 0 4px 0 #7e22ce, inset 0 0 0 3px rgba(168,85,247,0.4);">
+            <div style="width:48px;height:48px;position:relative;margin:8px auto 0;">${spriteSVG("stockMarket", 48)}</div>
+            <div class="feature-name" style="color: #e9d5ff; text-shadow: 0 1px 2px #000;">S\xE0n CK</div>
+          </div>
         `;
         const cBtn = $id("eslot-casino");
         if (cBtn) cBtn.addEventListener("click", () => {
@@ -7478,6 +8087,8 @@ function renderPlots() {
         });
         const dBtn = $id("eslot-dungeon");
         if (dBtn) dBtn.addEventListener("click", () => openPanel("dungeon"));
+        const stkBtn = $id("eslot-stock");
+        if (stkBtn) stkBtn.addEventListener("click", () => openStockModal());
         const hBtn = $id("eslot-hero");
         if (hBtn) hBtn.addEventListener("click", () => openHeroPanel());
         const fBtn = $id("eslot-flea");
@@ -8296,6 +8907,7 @@ function settle() {
       return;
     }
     const elapsed = now() - ctx.S.petFind[id];
+    if (id === "sans") return;
     if (id === "penguin") {
       const PENGUIN_CD = 60 * 60 * 1e3;
       if (elapsed >= PENGUIN_CD) {
@@ -8315,6 +8927,24 @@ function settle() {
         if (specGained > 0) msg.push(`${specGained} V\xE9 \u0110\u1EB7c Bi\u1EC7t`);
         toast(`Ch\xFA chim c\xE1nh c\u1EE5t v\u1EEBa \u0111i xa v\u1EC1 mang t\u1EB7ng b\u1EA1n: ${msg.join(" v\xE0 ")}!`);
         wChanged = true;
+      }
+      return;
+    }
+    if (id === "naoyaSlime") {
+      const NAOYA_CD = 60 * 60 * 1e3;
+      if (elapsed >= NAOYA_CD) {
+        const hours = Math.floor(elapsed / NAOYA_CD);
+        ctx.S.petFind[id] += hours * NAOYA_CD;
+        let superGained = 0;
+        for (let i2 = 0; i2 < hours; i2++) {
+          if (Math.random() < 0.05) superGained++;
+        }
+        if (superGained > 0) {
+          if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+          ctx.S.tickets.super = (ctx.S.tickets.super || 0) + superGained;
+          toast(`Naoya v\u1EEBa h\u1EADm h\u1EF1c quay v\u1EC1, n\xE9m cho b\u1EA1n ${superGained} V\xE9 Si\xEAu C\u01B0\u1EDDng: "C\u1EA7m l\u1EA5y \u0111\u1ED3 r\xE1c r\u01B0\u1EDFi n\xE0y \u0111i!"`);
+          wChanged = true;
+        }
       }
       return;
     }
@@ -9092,7 +9722,7 @@ __export(state_exports, {
 });
 function freshState() {
   return {
-    version: 2,
+    version: 3,
     playerId: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).substr(2, 9),
     coins: TEST_MODE ? 9999 : 999,
     totalSales: 0,
@@ -9125,15 +9755,7 @@ function loadState() {
     ctx.extension_settings[extensionName] = {};
   }
   const g = ctx.extension_settings[extensionName] || {};
-  if (g[NS] && g[NS].version === 1) {
-    g[NS].version = 2;
-    if (g[NS].coins >= 1e9) {
-      g[NS].needsTribulationCheck = true;
-    } else {
-      g[NS].needsPoorTribulationNotice = true;
-    }
-  }
-  ctx.S = g[NS] && g[NS].version === 2 ? g[NS] : freshState();
+  ctx.S = g[NS] && g[NS].version === 3 ? g[NS] : freshState();
   if (!ctx.S.playerId) ctx.S.playerId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).substr(2, 9);
   if (!ctx.S.petPoke) ctx.S.petPoke = {};
   if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
@@ -9201,6 +9823,7 @@ function loadState() {
   if (ctx.S.bankInvestTime === void 0) ctx.S.bankInvestTime = 0;
   if (ctx.S.bankDepositTime === void 0) ctx.S.bankDepositTime = Date.now();
   if (ctx.S.bankLastCollectionTime === void 0) ctx.S.bankLastCollectionTime = 0;
+  if (!ctx.S.stock) ctx.S.stock = { balance: 0, debt: 0, portfolio: {}, history: {}, trends: {}, lastUpdate: Date.now() };
   Object.keys(ctx.S.uniques || {}).forEach((k2) => {
     const item = ctx.S.uniques[k2];
     if (item && item.sp && item.spriteMap) {
@@ -9269,6 +9892,24 @@ var init_state = __esm({
 });
 
 // src/hero.js
+function saveHeroScrolls() {
+  const mbody = $id("mbody");
+  if (mbody) {
+    heroPanelScrollTop = mbody.scrollTop;
+    const rosterEl = mbody.querySelector(".hero-pet-roster-list");
+    if (rosterEl) heroRosterScrollTop = rosterEl.scrollTop;
+  }
+}
+function restoreHeroScrolls() {
+  setTimeout(() => {
+    const mbody = $id("mbody");
+    if (mbody) {
+      mbody.scrollTop = heroPanelScrollTop;
+      const rosterEl = mbody.querySelector(".hero-pet-roster-list");
+      if (rosterEl) rosterEl.scrollTop = heroRosterScrollTop;
+    }
+  }, 0);
+}
 function initHeroState() {
   if (!ctx.S.hero) {
     ctx.S.hero = {};
@@ -9287,7 +9928,7 @@ function initHeroState() {
       let petData = ctx.S.hero.roster[pId];
       if (petData && petData.exp !== void 0 && !isNaN(petData.exp)) {
         while (petData.level < 30) {
-          const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
+          const nextExp = Math.floor(500 * Math.pow(1.5, petData.level - 1));
           if (petData.exp >= nextExp) {
             petData.exp -= nextExp;
             petData.level++;
@@ -9297,7 +9938,7 @@ function initHeroState() {
         }
         if (petData.level >= 30) {
           petData.level = 30;
-          petData.exp = Math.floor(100 * Math.pow(1.5, 29));
+          petData.exp = Math.floor(500 * Math.pow(1.5, 29));
         }
       }
     });
@@ -9310,12 +9951,12 @@ function getPetStats(pId) {
   const enhSpd = data.enhSpd || 0;
   const st2 = PET_STATS[pId] || PET_STATS.default;
   return {
-    level: data.level,
-    exp: data.exp || 0,
-    maxHp: Math.floor(st2.baseHp + (data.level - 1) * st2.hpPerLv + enhHp * 50),
-    atk: Math.floor(st2.baseAtk + (data.level - 1) * st2.atkPerLv + enhAtk * 10),
-    spd: Number((st2.baseSpd + enhSpd * 0.1).toFixed(2)),
-    nextExp: Math.floor(100 * Math.pow(1.5, data.level - 1)),
+    level: pId === "sans" ? 1 : data.level,
+    exp: pId === "sans" ? 0 : data.exp || 0,
+    maxHp: pId === "sans" ? Math.floor(st2.baseHp * Math.pow(1.2, enhHp)) : Math.floor((st2.baseHp + (data.level - 1) * st2.hpPerLv) * Math.pow(1.15, enhHp)),
+    atk: pId === "sans" ? st2.baseAtk : Math.floor((st2.baseAtk + (data.level - 1) * st2.atkPerLv) * Math.pow(1.1, enhAtk)),
+    spd: pId === "sans" ? st2.baseSpd : Number((st2.baseSpd + enhSpd * 0.1).toFixed(2)),
+    nextExp: Math.floor(500 * Math.pow(1.5, data.level - 1)),
     enhHpCost: 5e3 + enhHp * 2e3,
     enhAtkCost: 5e3 + enhAtk * 2e3,
     enhSpdCost: 5e3 + enhSpd * 2e3,
@@ -9352,7 +9993,7 @@ function openHeroPanel() {
       <div class="h-r-pet" data-add="${pId}" title="Th\xEAm v\xE0o \u0111\u1ED9i h\xECnh">${petSVG(pId, 32)}</div>
       <div class="h-r-info" data-info="${pId}" title="C\u01B0\u1EDDng h\xF3a & K\u1EF9 n\u0103ng" style="cursor:pointer;">
         <div>Lv.${st2.level} (ATK: ${st2.atk} | HP: ${st2.maxHp} | SPD: ${st2.spd})</div>
-        <div class="h-r-bar"><div class="h-r-fill" style="width:${st2.level >= 30 ? 100 : Math.min(100, st2.exp / st2.nextExp * 100)}%"></div><span>${st2.level >= 30 ? "MAX" : `${Math.floor(st2.exp)}/${st2.nextExp}`}</span></div>
+        <div class="h-r-bar"><div class="h-r-fill" style="width:${pId === "sans" || st2.level >= 30 ? 100 : Math.min(100, st2.exp / st2.nextExp * 100)}%"></div><span>${pId === "sans" || st2.level >= 30 ? "MAX" : `${Math.floor(st2.exp)}/${st2.nextExp}`}</span></div>
       </div>
     </div>`;
   }).join("");
@@ -9377,7 +10018,10 @@ function openHeroPanel() {
       <div class="hero-panel-section">L\u1ED1i \u0111\xE1nh</div>
       <div class="hero-style-list">${styleBtns}</div>
       
-      <div class="hero-deploy-btn" id="hero-deploy">XU\u1EA4T PH\xC1T!</div>
+      <div style="display: flex; gap: 8px; margin-top: 20px;">
+        <div class="hero-deploy-btn" id="hero-deploy" style="flex: 1; margin-top: 0; display: flex; align-items: center; justify-content: center;">XU\u1EA4T PH\xC1T!</div>
+        <div class="hero-deploy-btn" id="hero-jump" style="width: auto; padding: 0 15px; margin-top: 0; background: linear-gradient(to bottom, #607d8b, #455a64); border-color: #78909c; display: flex; align-items: center; justify-content: center;">JUMP STAGE</div>
+      </div>
     </div>
   `);
   const mbody = $id("mbody");
@@ -9404,8 +10048,8 @@ function openPetSkills(pId) {
   const pSkill = PET_SKILLS[pId] || PET_SKILLS.default;
   const renderSkillRow = (typeId, skData, reqLvl, cost, isEquipped, isOtherEquipped) => {
     if (!skData) return "";
-    const isUnlocked = data[`${typeId}_unlocked`];
-    const levelMet = data.level >= reqLvl;
+    const isUnlocked = pId === "sans" ? true : data[`${typeId}_unlocked`];
+    const levelMet = pId === "sans" ? true : data.level >= reqLvl;
     let actionBtn = "";
     if (isUnlocked) {
       if (isEquipped) {
@@ -9444,10 +10088,10 @@ function openPetSkills(pId) {
         </div>
         <div style="flex:1;">
           <div style="font-size: 18px; font-weight:bold; color: #f2c231; margin-bottom: 4px;">Lv.${st2.level}</div>
-          <div style="font-size: 14px;">HP C\u01A1 b\u1EA3n: <b>${st2.maxHp}</b> (+${st2.enhHpLevel} C\u01B0\u1EDDng h\xF3a)</div>
+          <div style="font-size: 14px;">${pId === "sans" ? "DODGE" : "HP"} C\u01A1 b\u1EA3n: <b>${st2.maxHp}</b> (+${st2.enhHpLevel} C\u01B0\u1EDDng h\xF3a)</div>
           <div style="font-size: 14px;">ATK C\u01A1 b\u1EA3n: <b>${st2.atk}</b> (+${st2.enhAtkLevel} C\u01B0\u1EDDng h\xF3a)</div>
           <div style="font-size: 14px;">T\u1ED1c \u0111\xE1nh: <b>${st2.spd}</b> (+${st2.enhSpdLevel} C\u01B0\u1EDDng h\xF3a)</div>
-          <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${st2.level >= 30 ? 100 : Math.min(100, st2.exp / st2.nextExp * 100)}%"></div><span>${st2.level >= 30 ? "MAX LEVEL" : `EXP: ${Math.floor(st2.exp)}/${st2.nextExp}`}</span></div>
+          <div class="h-r-bar" style="margin-top:8px;"><div class="h-r-fill" style="width:${pId === "sans" || st2.level >= 30 ? 100 : Math.min(100, st2.exp / st2.nextExp * 100)}%"></div><span>${pId === "sans" ? "MAX LEVEL" : st2.level >= 30 ? "MAX LEVEL" : `EXP: ${Math.floor(st2.exp)}/${st2.nextExp}`}</span></div>
         </div>
       </div>
       
@@ -9464,14 +10108,16 @@ function openPetSkills(pId) {
       <div class="hero-panel-section" style="margin-top:16px;">C\u01B0\u1EDDng H\xF3a (Enhance)</div>
       <div class="betsides">
         <div class="betside hero-deploy-btn" id="pet-enh-hp" data-pid="${pId}" data-cost="${st2.enhHpCost}" style="margin-top:0; padding:10px; font-size:14px;">
-          +50 HP<br><span style="font-size:12px; font-weight:normal;">(${st2.enhHpCost} V\xE0ng)</span>
+          ${pId === "sans" ? "+20% DODGE" : "+15% HP"}<br><span style="font-size:12px; font-weight:normal;">(${st2.enhHpCost} V\xE0ng)</span>
         </div>
+        ${pId === "sans" ? "" : `
         <div class="betside hero-deploy-btn" id="pet-enh-atk" data-pid="${pId}" data-cost="${st2.enhAtkCost}" style="margin-top:0; padding:10px; font-size:14px;">
-          +10 ATK<br><span style="font-size:12px; font-weight:normal;">(${st2.enhAtkCost} V\xE0ng)</span>
+          +10% ATK<br><span style="font-size:12px; font-weight:normal;">(${st2.enhAtkCost} V\xE0ng)</span>
         </div>
         <div class="betside hero-deploy-btn" id="pet-enh-spd" data-pid="${pId}" data-cost="${st2.enhSpdCost}" style="margin-top:0; padding:10px; font-size:14px;">
           +0.1 SPD<br><span style="font-size:12px; font-weight:normal;">(${st2.enhSpdCost} V\xE0ng)</span>
         </div>
+        `}
       </div>
       
       <div class="hero-deploy-btn" id="pet-back-btn" style="margin-top: 16px; background: #2c2538; border-color: #5d4a85;">
@@ -9481,7 +10127,7 @@ function openPetSkills(pId) {
   `);
   const mbody = $id("mbody");
 }
-function openHeroMode() {
+function openHeroMode(startStage = 1) {
   initHeroState();
   closeWin();
   if (ctx.S.hero.party.length === 0) {
@@ -9512,9 +10158,9 @@ function openHeroMode() {
       if (type === "atk_party") partyAtkMult += val;
     }
   });
-  ctx.S.hero.pressure = 0;
+  ctx.S.hero.pressure = Math.floor((startStage - 1) / 5);
   runState = {
-    stage: 1,
+    stage: startStage,
     pets: ctx.S.hero.party.map((pId) => {
       const st2 = getPetStats(pId);
       const data = ctx.S.hero.roster[pId] || {};
@@ -9603,6 +10249,23 @@ function closeHeroMode() {
     cancelAnimationFrame(heroLoop);
     heroLoop = null;
   }
+  if (runState) {
+    if (runState.projectiles) {
+      runState.projectiles.forEach((p2) => {
+        if (p2.el) p2.el.remove();
+      });
+      runState.projectiles = [];
+    }
+    if (runState.pets) {
+      runState.pets.forEach((p2) => {
+        if (p2.gbEl) {
+          p2.gbEl.remove();
+          p2.gbEl = null;
+          p2.gbClosing = false;
+        }
+      });
+    }
+  }
   window.removeEventListener("resize", placeHeroBar);
   runState = null;
   const orb = $id("orb");
@@ -9642,8 +10305,8 @@ function spawnMonster() {
     const hpMult = isThisBoss ? 5 : 1;
     const pressure = ctx.S.hero.pressure || 0;
     const pressureMult = 1 + pressure * 0.05;
-    const baseMaxHp = (runState.stage * 20 + 80) * hpMult * pressureMult;
-    const baseAtk = (runState.stage * 4 + 5) * (isThisBoss ? 2 : 1) * pressureMult;
+    const baseMaxHp = Math.floor(100 * Math.pow(1.08, runState.stage - 1) * hpMult * pressureMult);
+    const baseAtk = Math.floor(10 * Math.pow(1.06, runState.stage - 1) * (isThisBoss ? 2 : 1) * pressureMult);
     const baseCd = 2;
     let hpScale = 0.8 + Math.random() * 0.4;
     let atkScale = 0.8 + Math.random() * 0.4;
@@ -9751,7 +10414,7 @@ function heroTick() {
       if (!runState || !runState.monsters) return;
       let totalGold2 = 0;
       runState.monsters.forEach((m2) => {
-        totalGold2 += Math.floor((runState.stage * 30 + 100) * 0.6 * (m2.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
+        totalGold2 += Math.floor((runState.stage * 30 + 100) * Math.pow(1.01, Math.max(0, runState.stage - 1)) * 0.6 * (m2.isBoss ? 5 : 1) * (0.8 + Math.random() * 0.4));
       });
       let pGoldMult = 1;
       runState.pets.forEach((p2) => {
@@ -9771,10 +10434,10 @@ function heroTick() {
         const petData = ctx.S.hero.roster[p2.id];
         if (petData.exp === void 0 || isNaN(petData.exp)) petData.exp = 0;
         const pEl = $id("hpet-" + runState.pets.indexOf(p2));
-        petData.exp += Math.floor(totalExp / runState.pets.length);
+        if (p2.id !== "sans") petData.exp += Math.floor(totalExp / runState.pets.length);
         let leveledUp = false;
         while (petData.level < 30) {
-          const nextExp = Math.floor(100 * Math.pow(1.5, petData.level - 1));
+          const nextExp = Math.floor(500 * Math.pow(1.5, petData.level - 1));
           if (petData.exp >= nextExp) {
             petData.exp -= nextExp;
             petData.level++;
@@ -9785,7 +10448,7 @@ function heroTick() {
         }
         if (petData.level >= 30) {
           petData.level = 30;
-          petData.exp = Math.floor(100 * Math.pow(1.5, 29));
+          petData.exp = Math.floor(500 * Math.pow(1.5, 29));
         }
         if (leveledUp) {
           if (pEl) setTimeout(() => showFloatDamage("LEVEL UP!", pEl, "#f2c231"), 500);
@@ -9822,13 +10485,34 @@ function heroTick() {
       }
       runState.stage++;
       if (runState.stage > ctx.S.hero.maxStage) ctx.S.hero.maxStage = runState.stage;
+      if (runState.projectiles) {
+        runState.projectiles.forEach((p2) => {
+          if (p2.el) p2.el.remove();
+        });
+        runState.projectiles = [];
+      }
       runState.pets.forEach((p2) => {
         if (p2.hp > 0) p2.hp = Math.min(p2.maxHp, p2.hp + p2.maxHp * 0.2);
+        if (p2.id === "sans") {
+          p2.muchBetterReady = true;
+          p2.badTimeReady = true;
+          p2.skillActiveTime = 0;
+        }
+        if (p2.gbEl) {
+          p2.gbEl.remove();
+          p2.gbEl = null;
+          p2.gbClosing = false;
+        }
+        if (p2.gbLaser) {
+          p2.gbLaser.remove();
+          p2.gbLaser = null;
+          p2.gbLaserEnding = false;
+        }
       });
       save();
       renderHeroUI();
       spawnMonster();
-    }, 1500);
+    }, 500);
     return;
   }
   const activeMonsters = runState.monsters.filter((m2) => m2.hp > 0 && m2.x <= 200 + m2.idx * 45 + 2);
@@ -9854,6 +10538,15 @@ function heroTick() {
           });
         }
       }
+      if (p2.boneTimeActive && p2.boneTimeDuration > 0) {
+        p2.boneTimeDuration -= dt2 / 1e3;
+        if (p2.boneTimeDuration <= 0) {
+          p2.boneTimeActive = false;
+          p2.boneTimeDuration = 0;
+          p2.spdBuff = p2.spdBuff ? p2.spdBuff / 3 : 1;
+          if (pEl) setTimeout(() => showFloatDamage("BONE TIME END", pEl, "#888"), 0);
+        }
+      }
       if (p2.skillActiveTime > 0) {
         p2.skillActiveTime -= dt2 / 1e3;
         const actEq = data.active_eq;
@@ -9872,11 +10565,82 @@ function heroTick() {
               const mobEl = $id("hmob-" + tMob.idx);
               spawnSkillEffect(pEl, mobEl, aSk.type);
             }
+          } else if (aSk.type === "gaster_blaster") {
+            let tMob = null;
+            if (runState.focusTarget !== null && runState.monsters[runState.focusTarget] && runState.monsters[runState.focusTarget].hp > 0 && runState.monsters[runState.focusTarget].x <= 200 + runState.focusTarget * 45 + 2) {
+              tMob = runState.monsters[runState.focusTarget];
+            } else {
+              tMob = activeMonsters[Math.floor(Math.random() * activeMonsters.length)];
+            }
+            if (!p2.gbEl && !p2.gbClosing) {
+              const scene3 = pEl ? pEl.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
+              if (scene3) {
+                p2.gbEl = document.createElement("div");
+                p2.gbEl.style.cssText = "position:absolute; bottom:16px; left:-80px; transition:left 0.25s ease-out; z-index:10;";
+                p2.gbEl.innerHTML = `<img src="${SANS_HERO_SPRITES.gb_open_01}" style="height:64px; image-rendering:pixelated; display:block;">`;
+                scene3.appendChild(p2.gbEl);
+                const gbImg = p2.gbEl.querySelector("img");
+                setTimeout(() => {
+                  if (p2.gbEl) p2.gbEl.style.left = (pEl ? pEl.offsetLeft + 35 : 60 + pIdx * 45 + 25) + "px";
+                }, 10);
+                setTimeout(() => {
+                  if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_open_02;
+                }, 250);
+                setTimeout(() => {
+                  if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_01;
+                }, 400);
+                setTimeout(() => {
+                  if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_02;
+                }, 550);
+                setTimeout(() => {
+                  if (gbImg) gbImg.src = SANS_HERO_SPRITES.gb_fire_03;
+                  if (p2.gbEl && !p2.gbLaser) {
+                    p2.gbLaser = document.createElement("div");
+                    p2.gbLaser.className = "laser-sans-continuous";
+                    p2.gbLaser.style.left = "48px";
+                    p2.gbLaser.style.top = "32px";
+                    p2.gbEl.appendChild(p2.gbLaser);
+                    setTimeout(() => {
+                      if (p2.gbLaser) p2.gbLaser.classList.add("firing");
+                    }, 50);
+                  }
+                }, 700);
+              }
+            }
+            p2.gasterTick = (p2.gasterTick || 0) + dt2 / 1e3;
+            if (p2.gasterTick >= 0.25) {
+              p2.gasterTick -= 0.25;
+              const dmg = Math.max(1, Math.floor(tMob.maxHp * 0.01));
+              tMob.hp -= dmg;
+              tMob.karma = (tMob.karma || 0) + 1;
+              const mobEl = $id("hmob-" + tMob.idx);
+              if (mobEl) setTimeout(() => showFloatDamage("-" + dmg, mobEl, "#fff"), 0);
+            }
+            if (p2.skillActiveTime <= 0.3 && p2.gbLaser && !p2.gbLaserEnding) {
+              p2.gbLaserEnding = true;
+              p2.gbLaser.classList.remove("firing");
+              p2.gbLaser.classList.add("ending");
+            }
+            if (p2.skillActiveTime <= 0 && p2.gbEl && !p2.gbClosing) {
+              p2.gbClosing = true;
+              const img = p2.gbEl.querySelector("img");
+              if (img) img.src = SANS_HERO_SPRITES.gb_close;
+              setTimeout(() => {
+                if (p2.gbEl) {
+                  p2.gbEl.remove();
+                  p2.gbEl = null;
+                }
+                p2.gbClosing = false;
+                p2.gbLaser = null;
+                p2.gbLaserEnding = false;
+              }, 300);
+            }
           }
         }
       } else if (p2.skillMaxCd > 0) {
         let stSpdMult = 1;
         if (p2.spdBuff) stSpdMult *= p2.spdBuff;
+        if (p2.badTimeTimer > 0) stSpdMult *= 2;
         p2.skillCd -= dt2 / 1e3 * stSpdMult;
         const skBar = $id("sk-pet-" + pIdx);
         if (skBar) skBar.style.width = Math.min(100, Math.max(0, (p2.skillMaxCd - p2.skillCd) / p2.skillMaxCd * 100)) + "%";
@@ -10053,6 +10817,9 @@ function heroTick() {
                 ap.spdBuffTimer = aSk.duration;
               });
               setTimeout(() => showFloatDamage("SPD BUFF", pEl, "#00e676"), 0);
+            } else if (aSk.type === "gaster_blaster") {
+              p2.gasterTick = 0;
+              p2.gbClosing = false;
             } else if (aSk.type === "blind") {
               tMob.blindCd = aSk.duration;
               setTimeout(() => showFloatDamage("BLIND", mobEl, "#607d8b"), 0);
@@ -10061,6 +10828,11 @@ function heroTick() {
               p2.atkDebuff = 0.5;
               p2.sugarTimer = aSk.duration;
               setTimeout(() => showFloatDamage("SUGAR RUSH", pEl, "#ff80ab"), 0);
+            } else if (aSk.type === "bone_time") {
+              p2.boneTimeActive = true;
+              p2.boneTimeDuration = aSk.duration || 2;
+              p2.spdBuff = (p2.spdBuff || 1) * 3;
+              setTimeout(() => showFloatDamage("BONE TIME!", pEl, "#00ffff"), 0);
             } else if (aSk.type === "snowball_roll") {
               const dmg = p2.atk * aSk.val;
               tMob.hp -= dmg;
@@ -10095,6 +10867,12 @@ function heroTick() {
           p2.spdBuff = null;
           p2.atkDebuff = null;
         }
+      }
+      if (p2.invincibleTimer > 0) {
+        p2.invincibleTimer -= dt2 / 1e3;
+      }
+      if (p2.badTimeTimer > 0) {
+        p2.badTimeTimer -= dt2 / 1e3;
       }
       let rtSpdMult = 1;
       if (p2.spdBuff) rtSpdMult *= p2.spdBuff;
@@ -10155,6 +10933,50 @@ function heroTick() {
             }
             if (passEq && pSkill[passEq] && pSkill[passEq].type === "initial_burst" && runState.waveTime <= 3) {
               dmg = Math.floor(dmg * pSkill[passEq].val);
+            }
+            if (p2.id === "sans") {
+              if (!runState.projectiles) runState.projectiles = [];
+              const pEl2 = $id("hpet-" + pIdx);
+              const scene3 = pEl2 ? pEl2.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
+              const boneEl = document.createElement("div");
+              boneEl.style.cssText = "position:absolute; bottom:18px; left:0; pointer-events:none; z-index:9;";
+              boneEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_white}" style="height:24px; image-rendering:pixelated; display:block;">`;
+              if (scene3) scene3.appendChild(boneEl);
+              runState.projectiles.push({
+                x: 60 + pIdx * 45,
+                vx: 200,
+                type: "bone_white",
+                dmg: p2.atk,
+                karmaAmt: 2,
+                el: boneEl,
+                hitCd: 0
+              });
+              if (p2.boneTimeActive) {
+                const blueEl = document.createElement("div");
+                blueEl.style.cssText = "position:absolute; bottom:18px; left:0; pointer-events:none; z-index:9;";
+                blueEl.innerHTML = `<img src="${SANS_HERO_SPRITES.bone_blue}" style="height:24px; image-rendering:pixelated; display:block;">`;
+                if (scene3) scene3.appendChild(blueEl);
+                runState.projectiles.push({
+                  x: 60 + pIdx * 45,
+                  vx: 200,
+                  type: "bone_blue",
+                  dmg: Math.floor(p2.atk * 1.5),
+                  karmaAmt: 2,
+                  el: blueEl,
+                  hitCd: 0,
+                  bounces: 0,
+                  maxBounces: 6
+                });
+              }
+              if (pEl2) {
+                pEl2.classList.remove("idle");
+                pEl2.classList.add("attack");
+                setTimeout(() => {
+                  pEl2.classList.remove("attack");
+                  pEl2.classList.add("idle");
+                }, 300);
+              }
+              return;
             }
             const doDamage = () => {
               tMob.hp -= dmg;
@@ -10244,7 +11066,8 @@ function heroTick() {
             let mAtkMult = mult;
             if (m2.atkDebuff) mAtkMult *= m2.atkDebuff;
             let dmg = Math.max(1, Math.floor(m2.atk * mAtkMult * (0.8 + Math.random() * 0.4)));
-            if (target.dmgResist > 0) dmg = Math.floor(dmg * (1 - target.dmgResist));
+            if (target.invincibleTimer > 0) dmg = 0;
+            else if (target.dmgResist > 0) dmg = Math.floor(dmg * (1 - target.dmgResist));
             if (runState.waveTime <= 2 && ctx.S.hero.roster[target.id]?.passive_eq) {
               const pSkill = PET_SKILLS[target.id];
               const pEq = ctx.S.hero.roster[target.id].passive_eq;
@@ -10271,6 +11094,53 @@ function heroTick() {
               }
             }
             target.hp -= dmg;
+            if (target.id === "sans") {
+              const sData = ctx.S.hero.roster["sans"];
+              if (sData) {
+                if (sData.passive_eq === "p1" && target.hp <= 0 && target.muchBetterReady !== false) {
+                  target.muchBetterReady = false;
+                  target.hp = 1;
+                  target.invincibleTimer = 3;
+                  const scene3 = pEl ? pEl.closest(".hero-scene") || sh.querySelector(".hero-scene") : null;
+                  if (scene3) {
+                    const imgBase = pEl ? pEl.querySelector("img") : null;
+                    if (imgBase) imgBase.style.opacity = 0;
+                    const petRect = pEl.getBoundingClientRect();
+                    const sceneRect = scene3.getBoundingClientRect();
+                    const relLeft = petRect.left - sceneRect.left;
+                    const relBottom = sceneRect.bottom - petRect.bottom;
+                    const ketchupEl = document.createElement("div");
+                    ketchupEl.style.cssText = `position:absolute; bottom:${relBottom}px; left:${relLeft}px; pointer-events:none; z-index:10;`;
+                    ketchupEl.innerHTML = `<img src="${SANS_HERO_SPRITES.stool_chup_1}" style="height:32px; image-rendering:pixelated; display:block;">`;
+                    scene3.appendChild(ketchupEl);
+                    const kImg = ketchupEl.querySelector("img");
+                    const frames = [SANS_HERO_SPRITES.stool_chup_1, SANS_HERO_SPRITES.stool_chup_2, SANS_HERO_SPRITES.stool_chup_3, SANS_HERO_SPRITES.stool_chup_4, SANS_HERO_SPRITES.stool_chup_5, SANS_HERO_SPRITES.stool_chup_6, SANS_HERO_SPRITES.stool_chup_7, SANS_HERO_SPRITES.stool_chup_8, SANS_HERO_SPRITES.stool_chup_9, SANS_HERO_SPRITES.stool_chup_10];
+                    for (let i2 = 1; i2 <= 30; i2++) {
+                      setTimeout(() => {
+                        if (kImg) kImg.src = frames[i2 % 10];
+                      }, i2 * 100);
+                    }
+                    setTimeout(() => {
+                      ketchupEl.remove();
+                      if (imgBase) imgBase.style.opacity = 1;
+                    }, 3e3);
+                  }
+                  if (pEl) setTimeout(() => showFloatDamage("MUCH BETTER", pEl, "#ff0000"), 0);
+                  setTimeout(() => {
+                    if (!runState) return;
+                    target.hp = Math.min(target.maxHp, target.hp + target.maxHp * 0.5);
+                    const hpPet2 = $id("hp-pet-" + pIdx);
+                    if (hpPet2) hpPet2.style.width = target.hp / target.maxHp * 100 + "%";
+                    if (pEl) showFloatDamage("HEAL 50%", pEl, "#a4dc8c");
+                  }, 3e3);
+                }
+                if (sData.passive_eq === "p2" && target.hp / target.maxHp < 0.5 && target.badTimeReady !== false) {
+                  target.badTimeReady = false;
+                  target.badTimeTimer = 5;
+                  if (pEl) setTimeout(() => showFloatDamage("GET DUNKED ON!", pEl, "#ff0000"), 0);
+                }
+              }
+            }
             if (target.hp <= 0 && target.cheatDeath > 0) {
               target.cheatDeath--;
               target.hp = 1;
@@ -10293,6 +11163,78 @@ function heroTick() {
           } else {
             if (pEl) setTimeout(() => showFloatDamage("MISS", pEl, "#aaddff"), 150);
           }
+        }
+      }
+    });
+    if (!runState.projectiles) runState.projectiles = [];
+    const scene2 = sh.querySelector(".hero-scene");
+    for (let i2 = runState.projectiles.length - 1; i2 >= 0; i2--) {
+      const proj = runState.projectiles[i2];
+      proj.x += proj.vx * (dt2 / 1e3);
+      let isDead = false;
+      if (proj.type === "bone_blue") {
+        if (proj.x > 420 || proj.x < 0) {
+          proj.vx *= -1;
+          proj.bounces++;
+        }
+        if (proj.bounces >= proj.maxBounces) isDead = true;
+      } else if (proj.type === "bone_white") {
+        if (proj.x > 450) isDead = true;
+      }
+      if (isDead) {
+        if (proj.el) proj.el.remove();
+        runState.projectiles.splice(i2, 1);
+        continue;
+      }
+      if (proj.el) {
+        proj.el.style.left = proj.x + "px";
+      }
+      proj.hitCd = proj.hitCd || 0;
+      if (proj.hitCd > 0) proj.hitCd -= dt2 / 1e3;
+      if (proj.hitCd <= 0) {
+        let hitAny = false;
+        activeMonsters.forEach((m2) => {
+          if (m2.hp <= 0) return;
+          const mEl = $id("hmob-" + m2.idx);
+          const dist = Math.abs(m2.x - proj.x);
+          if (dist < 40) {
+            m2.hp -= proj.dmg;
+            if (proj.karmaAmt) m2.karma = (m2.karma || 0) + proj.karmaAmt;
+            if (mEl) {
+              mEl.classList.remove("idle");
+              mEl.classList.add("hurt");
+              setTimeout(() => {
+                mEl.classList.remove("hurt");
+                mEl.classList.add("idle");
+              }, 200);
+              setTimeout(() => showFloatDamage("-" + proj.dmg, mEl, "#fff"), 0);
+            }
+            hitAny = true;
+          }
+        });
+        if (hitAny) proj.hitCd = proj.type === "bone_blue" ? 0.3 : 0.5;
+      }
+    }
+    activeMonsters.forEach((m2) => {
+      if (m2.hp > 0 && m2.karma && m2.karma > 0) {
+        const dps = m2.maxHp * 0.01 * m2.karma;
+        m2.hp -= dps * (dt2 / 1e3);
+        const tickRate = 2 * m2.karma;
+        m2._karmaTickAcc = (m2._karmaTickAcc || 0) + tickRate * dt2 / 1e3;
+        if (m2._karmaTickAcc >= 1) {
+          const ticks = Math.floor(m2._karmaTickAcc);
+          m2._karmaTickAcc -= ticks;
+          const mEl = $id("hmob-" + m2.idx);
+          if (mEl) {
+            for (let i2 = 0; i2 < Math.min(ticks, 5); i2++) {
+              setTimeout(() => showFloatDamage("-1", mEl, "#e040fb"), i2 * 50);
+            }
+          }
+        }
+        m2.karmaTimer = (m2.karmaTimer || 0) + dt2 / 1e3;
+        if (m2.karmaTimer >= 1) {
+          m2.karmaTimer -= 1;
+          m2.karma = Math.max(0, m2.karma - 1);
         }
       }
     });
@@ -10358,22 +11300,26 @@ function spawnSkillEffect(startEl, targetEl, skillType) {
     fx.style.left = tRect.left - sRect.left + tRect.width / 2 - 24 + "px";
     fx.style.top = tRect.top - sRect.top + tRect.height / 2 - 24 + "px";
     setTimeout(() => fx.remove(), 800);
-  } else if (skillType === "laser") {
+  } else if (skillType === "laser" || skillType === "laser_sans") {
     if (!targetEl) return;
     const tRect = targetEl.getBoundingClientRect();
     const startRect = startEl.getBoundingClientRect();
     const sx = startRect.left - sRect.left + startRect.width / 2;
     const sy = startRect.top - sRect.top + startRect.height / 2;
-    const ex = tRect.left - sRect.left + tRect.width / 2;
-    const ey = tRect.top - sRect.top + tRect.height / 2;
-    const dist = Math.hypot(ex - sx, ey - sy);
-    const angle = Math.atan2(ey - sy, ex - sx);
+    let dist = 1e3;
+    let angle = 0;
+    if (skillType === "laser") {
+      const ex = tRect.left - sRect.left + tRect.width / 2;
+      const ey = tRect.top - sRect.top + tRect.height / 2;
+      dist = Math.hypot(ex - sx, ey - sy);
+      angle = Math.atan2(ey - sy, ex - sx);
+    }
     const fx = document.createElement("div");
-    fx.className = "laser-beam";
+    fx.className = skillType === "laser_sans" ? "laser-sans" : "laser-beam";
     fx.style.width = dist + "px";
     fx.style.left = sx + "px";
     fx.style.top = sy + "px";
-    fx.style.transform = `rotate(${angle}rad)`;
+    fx.style.transform = skillType === "laser_sans" ? `translateY(-50%)` : `rotate(${angle}rad)`;
     scene2.appendChild(fx);
     setTimeout(() => fx.remove(), 300);
   } else if (damageSkills.includes(skillType)) {
@@ -10508,16 +11454,19 @@ function renderHeroUI() {
   const container = $id("hero-party");
   if (container) {
     const extraStyle = ctx.S.hero.style === "defense" ? "filter: drop-shadow(0 0 4px #4da6ff);" : "";
-    container.innerHTML = runState.pets.map(
-      (p2, i2) => `<div class="hero-pet idle" id="hpet-${i2}" style="z-index:${10 - i2}; ${extraStyle} opacity: ${p2.hp > 0 ? 1 : 0.3}">
-         <div class="hp-bar-mini"><div class="hp-fill-mini" id="hp-pet-${i2}" style="width:${p2.hp / p2.maxHp * 100}%"></div></div>
+    container.innerHTML = runState.pets.map((p2, i2) => {
+      const isSans = p2.id === "sans";
+      const hpColor = isSans ? "background:#00ffff;" : "";
+      const hpText = "";
+      return `<div class="hero-pet idle" id="hpet-${i2}" style="z-index:${10 - i2}; ${extraStyle} opacity: ${p2.hp > 0 ? 1 : 0.3}">
+         <div class="hp-bar-mini" style="position:relative; overflow:hidden;"><div class="hp-fill-mini" id="hp-pet-${i2}" style="width:${p2.hp / p2.maxHp * 100}%; ${hpColor}"></div>${hpText}</div>
          <div class="hero-bars-container">
            <div class="hero-bar-row"><div class="hero-bar-fill fill-cd" id="cd-pet-${i2}" style="width:0%"></div></div>
            ${p2.skillMaxCd > 0 ? `<div class="hero-bar-row"><div class="hero-bar-fill fill-sk" id="sk-pet-${i2}" style="width:0%"></div></div>` : ""}
          </div>
-         ${petSVG(p2.id, 32)}
-       </div>`
-    ).join("");
+         ${p2.id === "sans" ? `<img draggable="false" data-sans-sprite class="sans-sprite" src="${SANS_FARM_SPRITES.idle}" style="height:32px; width:auto; image-rendering:pixelated; display:block; margin-bottom:2px; filter:drop-shadow(0 2px 2px rgba(0,0,0,0.5));">` : petSVG(p2.id, 32)}
+       </div>`;
+    }).join("");
   }
   updateHeroStats();
 }
@@ -10625,9 +11574,11 @@ function initHero() {
     let el;
     el = e2.target.closest(".hero-slot.filled");
     if (el) {
+      saveHeroScrolls();
       ctx.S.hero.party.splice(parseInt(el.dataset.rem), 1);
       save();
       openHeroPanel();
+      restoreHeroScrolls();
       return;
     }
     el = e2.target.closest(".h-r-pet");
@@ -10635,21 +11586,26 @@ function initHero() {
       const pId = el.dataset.add;
       if (ctx.S.hero.party.includes(pId)) return;
       if (ctx.S.hero.party.length >= 3) return toast("\u0110\u1ED9i h\xECnh \u0111\xE3 \u0111\u1EA7y! (Max 3)");
+      saveHeroScrolls();
       ctx.S.hero.party.push(pId);
       save();
       openHeroPanel();
+      restoreHeroScrolls();
       return;
     }
     el = e2.target.closest(".h-r-info");
     if (el) {
+      saveHeroScrolls();
       openPetSkills(el.dataset.info);
       return;
     }
     el = e2.target.closest(".hero-style-btn");
     if (el) {
+      saveHeroScrolls();
       ctx.S.hero.style = el.dataset.style;
       save();
       openHeroPanel();
+      restoreHeroScrolls();
       return;
     }
     el = e2.target.closest("#hero-deploy");
@@ -10657,6 +11613,22 @@ function initHero() {
       if (ctx.S.hero.party.length === 0) return toast("Vui l\xF2ng x\u1EBFp \u0110\u1ED9i h\xECnh tr\u01B0\u1EDBc khi Xu\u1EA5t chi\u1EBFn!");
       closeModal();
       openHeroMode();
+      return;
+    }
+    el = e2.target.closest("#hero-jump");
+    if (el) {
+      if (ctx.S.hero.party.length === 0) return toast("Vui l\xF2ng x\u1EBFp \u0110\u1ED9i h\xECnh tr\u01B0\u1EDBc khi Xu\u1EA5t chi\u1EBFn!");
+      const maxStage = ctx.S.hero.maxStage || 1;
+      const jumpStr = prompt("Nh\u1EADp s\u1ED1 Stage mu\u1ED1n nh\u1EA3y t\u1EDBi (T\u1ED1i \u0111a " + maxStage + "):", maxStage);
+      if (jumpStr !== null) {
+        const jumpTo = parseInt(jumpStr);
+        if (!isNaN(jumpTo) && jumpTo > 0 && jumpTo <= maxStage) {
+          closeModal();
+          openHeroMode(jumpTo);
+        } else {
+          toast("Stage kh\xF4ng h\u1EE3p l\u1EC7!");
+        }
+      }
       return;
     }
     el = e2.target.closest(".sk-unlock-btn");
@@ -10735,6 +11707,7 @@ function initHero() {
     el = e2.target.closest("#pet-back-btn");
     if (el) {
       openHeroPanel();
+      restoreHeroScrolls();
       return;
     }
   });
@@ -10835,7 +11808,7 @@ function playNaoyaCutscene(attacker, attackerEl, targetEls, onComplete) {
     }
   }, 40);
 }
-var heroLoop, lastTick, PET_SKILLS, PET_STATS, runState, hToastTimer, hGesture;
+var heroPanelScrollTop, heroRosterScrollTop, heroLoop, lastTick, PET_SKILLS, PET_STATS, runState, hToastTimer, hGesture;
 var init_hero = __esm({
   "src/hero.js"() {
     init_store();
@@ -10844,6 +11817,8 @@ var init_hero = __esm({
     init_data();
     init_state();
     init_shop();
+    heroPanelScrollTop = 0;
+    heroRosterScrollTop = 0;
     heroLoop = null;
     lastTick = 0;
     PET_SKILLS = {
@@ -10943,6 +11918,12 @@ var init_hero = __esm({
         p1: { name: "Khinh Mi\u1EC7t K\u1EBB Y\u1EBFu", type: "execute", val: 0.24, desc: "T\u1EF1 \u0111\u1ED9ng ki\u1EBFt li\u1EC5u qu\xE1i c\xF3 HP < 24%" },
         p2: { name: "Quy T\u1EAFc Khung H\xECnh", type: "combo_master", val: 4, desc: "C\u1EE9 \u0111\xF2n \u0111\xE1nh th\u1EE9 4 l\xE0 Ch\xED M\u1EA1ng x3 S\xE1t Th\u01B0\u01A1ng" }
       },
+      sans: {
+        a1: { name: "Gaster Blaster", type: "gaster_blaster", val: 1, cd: 8, duration: 2, desc: "Laser g\xE2y 1 s\xE1t th\u01B0\u01A1ng chu\u1EA9n v\xE0 1 stack Karma m\u1ED7i 0.5s" },
+        a2: { name: "Bone Time", type: "bone_time", val: 5, cd: 12, duration: 2, desc: "X\u01B0\u01A1ng n\u1EA3y t\u01B0\u1EDDng 5 l\u1EA7n (Bone Blue Long), s\xE1t th\u01B0\u01A1ng li\xEAn t\u1EE5c" },
+        p1: { name: "Much better", type: "dodge_recover", val: 0.5, desc: "H\u1EBFt Dodge: T\u1EA1m th\u1EDDi b\u1EA5t t\u1EED, l\xF4i gh\u1EBF u\u1ED1ng Ketchup h\u1ED3i 50% Dodge (1 l\u1EA7n/\u1EA3i)" },
+        p2: { name: "Get dunked on", type: "bad_time_mode", val: 0.5, desc: "Dodge < 50%: B\u1EADt Bad Time Mode, gi\u1EA3m 50% th\u1EDDi gian h\u1ED3i chi\xEAu A1, A2 trong 5s" }
+      },
       default: {
         a1: { name: "C\u1ED1 G\u1EAFng", type: "atk_up", val: 0.2, cd: 5, duration: 3, desc: "T\u0103ng 20% ATK" },
         p1: { name: "L\u1EA1c Quan", type: "crit_rate", val: 0.2, desc: "T\u1EC9 l\u1EC7 B\u1EA1o k\xEDch +20%" }
@@ -10965,6 +11946,7 @@ var init_hero = __esm({
       peach_soda: { baseHp: 100, hpPerLv: 20, baseAtk: 11, atkPerLv: 3, baseSpd: 1.2 },
       penguin: { baseHp: 110, hpPerLv: 20, baseAtk: 10, atkPerLv: 2.5, baseSpd: 1 },
       naoyaSlime: { baseHp: 80, hpPerLv: 10, baseAtk: 24, atkPerLv: 6, baseSpd: 2.4 },
+      sans: { baseHp: 100, hpPerLv: 0, baseAtk: 1, atkPerLv: 0, baseSpd: 1.5 },
       default: { baseHp: 100, hpPerLv: 20, baseAtk: 10, atkPerLv: 3, baseSpd: 1 }
     };
     runState = null;
@@ -11083,12 +12065,23 @@ function loadDungeonState(saveData) {
   fullTeam = saveData.fullTeam.map((savedP) => {
     const el = document.createElement("div");
     el.className = "dg-entity pet";
-    el.innerHTML = `
-            <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+    let barsHtml = `
+            <div class="dg-hp-bar"><div class="dg-hp-fill"></div><div class="dg-karma-fill" style="width: 0%"></div></div>
             <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
             <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
-            ${petSVG(savedP.id, 32)}
         `;
+    if (savedP.id === "sans") {
+      barsHtml = `
+                <div class="dg-hp-bar"><div class="dg-hp-fill"></div><div class="dg-karma-fill" style="width: 0%"></div></div>
+                <div class="dg-cd-bar" style="display:none;"><div class="dg-cd-fill" style="width: 0%"></div></div>
+                <div class="dg-stamina-bar"><div class="dg-stamina-fill" style="width: 100%"></div></div>
+                <div class="dg-skill-cd-bar blue-magic" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                <div class="dg-skill-cd-bar gravity-push" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                <div class="dg-skill-cd-bar gaster-blaster" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+            `;
+    }
+    el.innerHTML = `${barsHtml}
+            ${petSVG(savedP.id, 32)}`;
     el.style.transform = `translate3d(${savedP.x - 16}px, ${savedP.y - 16}px, 0)`;
     arena.appendChild(el);
     const stat = PET_STATS2[savedP.id] || PET_STATS2.default;
@@ -11102,7 +12095,7 @@ function loadDungeonState(saveData) {
     savedP.range = Math.round(stat.range * Math.pow(1.05, u2.range || 0));
     savedP.maxCd = Math.max(0.15, stat.cd * Math.pow(0.92, u2.aspd || 0));
     if (savedP.dodge === void 0) savedP.dodge = savedP.id === "ghostBlob" ? 0.25 : 0.05;
-    return {
+    const memberObj = {
       ...savedP,
       el,
       type: "pet",
@@ -11114,6 +12107,18 @@ function loadDungeonState(saveData) {
       skillCd: savedP.skillCd || 0,
       maxSkillCd: savedP.maxSkillCd || stat.maxSkillCd || 0
     };
+    if (savedP.id === "sans") {
+      memberObj.stamina = savedP.stamina !== void 0 ? savedP.stamina : 100;
+      memberObj.maxStamina = 100;
+      memberObj.gravityCd = savedP.gravityCd || 0;
+      memberObj.gasterCd = savedP.gasterCd || 0;
+      memberObj.blueMagicCd = savedP.blueMagicCd || 0;
+      memberObj.tpCd = savedP.tpCd || 0;
+      memberObj.isResting = false;
+      memberObj.restTimer = 0;
+      memberObj.actionState = "idle";
+    }
+    return memberObj;
   });
   team = [...fullTeam];
   const isBoss = currentWave % 10 === 0;
@@ -11173,12 +12178,14 @@ function initPlacementPhase() {
   function updateDockNav() {
     if (!dockWrapper) return;
     const w2 = dockWrapper.clientWidth || 250;
-    const itemsPerPage = Math.max(1, Math.floor(w2 / 54));
+    const slotEl = slotsContainer.querySelector(".dg-slot");
+    const slotWidth = slotEl ? slotEl.offsetWidth + 10 : window.innerWidth <= 600 ? 60 : 74;
+    const itemsPerPage = Math.max(1, Math.floor((w2 + 10) / slotWidth));
     const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
     if (dockPage > maxPage) dockPage = maxPage;
     navLeft.style.opacity = dockPage > 0 ? "1" : "0.3";
     navRight.style.opacity = dockPage < maxPage ? "1" : "0.3";
-    const offset = dockPage * itemsPerPage * 54;
+    const offset = dockPage * itemsPerPage * slotWidth;
     slotsContainer.style.transform = `translateX(-${offset}px)`;
   }
   navLeft.addEventListener("pointerdown", (e2) => {
@@ -11191,7 +12198,9 @@ function initPlacementPhase() {
   navRight.addEventListener("pointerdown", (e2) => {
     e2.preventDefault();
     const w2 = dockWrapper.clientWidth || 250;
-    const itemsPerPage = Math.max(1, Math.floor(w2 / 54));
+    const slotEl = slotsContainer.querySelector(".dg-slot");
+    const slotWidth = slotEl ? slotEl.offsetWidth + 10 : window.innerWidth <= 600 ? 60 : 74;
+    const itemsPerPage = Math.max(1, Math.floor((w2 + 10) / slotWidth));
     const maxPage = Math.max(0, Math.ceil(ctx.S.pets.length / itemsPerPage) - 1);
     if (dockPage < maxPage) {
       dockPage++;
@@ -11250,12 +12259,23 @@ function initPlacementPhase() {
         const stat = PET_STATS2[pId] || PET_STATS2.default;
         const el = document.createElement("div");
         el.className = "dg-entity pet";
-        el.innerHTML = `
-                    <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+        let barsHtml = `
+                    <div class="dg-hp-bar"><div class="dg-hp-fill"></div><div class="dg-karma-fill" style="width: 0%"></div></div>
                     <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
                     <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
-                    ${petSVG(pId, 32)}
                 `;
+        if (pId === "sans") {
+          barsHtml = `
+                        <div class="dg-hp-bar"><div class="dg-hp-fill" style="width: 100%"></div></div>
+                        <div class="dg-cd-bar" style="display:none;"><div class="dg-cd-fill" style="width: 0%"></div></div>
+                        <div class="dg-stamina-bar"><div class="dg-stamina-fill" style="width: 100%"></div></div>
+                        <div class="dg-skill-cd-bar blue-magic" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                        <div class="dg-skill-cd-bar gravity-push" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                        <div class="dg-skill-cd-bar gaster-blaster" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
+                    `;
+        }
+        el.innerHTML = `${barsHtml}
+                    ${petSVG(pId, 32)}`;
         let x2 = e2.clientX - rect.left - 16;
         let y2 = e2.clientY - rect.top - 16;
         if (x2 > rect.width - 16) x2 = rect.width - 16;
@@ -11284,8 +12304,20 @@ function initPlacementPhase() {
           activeSkill: stat.activeSkill,
           ai: stat.ai,
           armor: stat.armor,
-          dockSlot: currentSlot
+          dockSlot: currentSlot,
+          upgrades: {}
         };
+        if (pId === "sans") {
+          memberObj.stamina = 100;
+          memberObj.maxStamina = 100;
+          memberObj.gravityCd = 0;
+          memberObj.gasterCd = 0;
+          memberObj.blueMagicCd = 0;
+          memberObj.tpCd = 0;
+          memberObj.isResting = false;
+          memberObj.restTimer = 0;
+          memberObj.actionState = "idle";
+        }
         team.push(memberObj);
         let isPlacedDragging = false;
         el.addEventListener("pointerdown", (ev) => {
@@ -11515,7 +12547,7 @@ function _doStartWave() {
     const el = document.createElement("div");
     el.className = "dg-entity enemy flip";
     el.innerHTML = `
-            <div class="dg-hp-bar"><div class="dg-hp-fill"></div></div>
+            <div class="dg-hp-bar"><div class="dg-hp-fill"></div><div class="dg-karma-fill" style="width: 0%"></div></div>
             <div class="dg-cd-bar"><div class="dg-cd-fill" style="width: 0%"></div></div>
             <div class="dg-skill-cd-bar" style="display:none;"><div class="dg-skill-cd-fill" style="width: 0%"></div></div>
             ${spriteSVG(type.sp || type.id, 32)}
@@ -11592,6 +12624,29 @@ function combatLoop() {
     updateEntities(enemies, team, stepDt, arenaRect);
     let newProjs = [];
     projectiles = projectiles.filter((p2) => {
+      if (p2.isBone) {
+        p2.lifetime -= stepDt;
+        if (p2.lifetime <= 0) {
+          p2.el.remove();
+          return false;
+        }
+        p2.x += p2.vx * stepDt;
+        p2.y += p2.vy * stepDt;
+        p2.el.style.left = p2.x + "px";
+        p2.el.style.top = p2.y + "px";
+        let hit = false;
+        p2.groupB.forEach((e2) => {
+          if (e2.hp > 0 && Math.hypot(e2.x - p2.x, e2.y - p2.y) < 12) {
+            if (p2.onHit) p2.onHit(e2);
+            hit = true;
+          }
+        });
+        if (hit) {
+          p2.el.remove();
+          return false;
+        }
+        return true;
+      }
       if (p2.isPuddle) {
         p2.lifetime -= stepDt;
         if (p2.lifetime <= 0) {
@@ -11857,6 +12912,8 @@ function combatLoop() {
     enemies = enemies.filter((e2) => {
       if (e2.hp <= 0) {
         e2.el.remove();
+        if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
+        ctx.S.stats.kills = (ctx.S.stats.kills || 0) + 1;
         if (e2.gold) {
           const homeG = 1 + Math.floor(currentWave / 10);
           totalGold += homeG;
@@ -11905,11 +12962,6 @@ function spawnDmg(target, amount, type) {
   dmg.style.top = target.y - 8 + "px";
   arena.appendChild(dmg);
   setTimeout(() => dmg.remove(), 800);
-  if (target.el && target.maxHp) {
-    const pct = Math.max(0, target.hp / target.maxHp) * 100;
-    const fill = target.el.querySelector(".dg-hp-fill");
-    if (fill) fill.style.width = pct + "%";
-  }
 }
 function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOverride) {
   const atk = Math.round(overrideAtk || attacker.atk);
@@ -11932,7 +12984,19 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     });
     return;
   }
-  if (target.type === "pet") {
+  if (target.id === "sans") {
+    if (target.stamina > 0) {
+      target.stamina -= 10;
+      if (target.stamina < 0) target.stamina = 0;
+      spawnDmg(target, 0, "miss");
+      target.incomingDmg = Math.max(0, (target.incomingDmg || 0) - atk);
+      target.el.style.filter = "drop-shadow(0 0 5px cyan)";
+      setTimeout(() => {
+        if (target.el) target.el.style.filter = "";
+      }, 150);
+      return;
+    }
+  } else if (target.type === "pet") {
     const dodgeChance = target.dodge !== void 0 ? target.dodge : target.id === "ghostBlob" ? 0.25 : 0.05;
     if (Math.random() < dodgeChance) {
       spawnDmg(target, 0, "miss");
@@ -11999,6 +13063,10 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
   if (skill === "poison") target.status.poison = 3;
   if (skill === "freeze") target.status.freeze = 3;
   if (skill === "root" && Math.random() < 0.3) target.status.root = 2;
+  if (attacker && attacker.id === "sans" && target.type === "enemy") {
+    target.status.karmaDuration = 3;
+    target.karmaStacks = (target.karmaStacks || 0) + 1;
+  }
   if (skill === "cleave" && attacker) {
     enemyGroup.forEach((e2) => {
       if (e2 !== target && e2.hp > 0 && Math.hypot(e2.x - target.x, e2.y - target.y) <= 40) {
@@ -12027,6 +13095,323 @@ function applyEffect(attacker, target, myGroup, enemyGroup, overrideAtk, skillOv
     });
   }
 }
+function updateSansAI(a, enemyGroup, dt2, arenaRect, arena, projectiles2) {
+  const staminaPct = Math.max(0, Math.min(100, a.stamina / a.maxStamina * 100));
+  const staminaFill = a.el.querySelector(".dg-stamina-fill");
+  if (staminaFill) staminaFill.style.width = staminaPct + "%";
+  ["blueMagicCd", "gravityCd", "gasterCd", "tpCd"].forEach((cdName) => {
+    if (a[cdName] > 0) a[cdName] -= dt2;
+  });
+  if (a._shrugTimer > 0) a._shrugTimer -= dt2;
+  const maxCds = {
+    blueMagicCd: 7 * Math.max(0.5, 1 - (a.upgrades.blueMagicCd || 0) * 0.05),
+    gravityCd: 13 * Math.max(0.5, 1 - (a.upgrades.gravityCd || 0) * 0.05),
+    gasterCd: 10 * Math.max(0.5, 1 - (a.upgrades.gasterCd || 0) * 0.05)
+  };
+  const maxTpCd = 2 * Math.max(0.5, 1 - (a.upgrades.tpCd || 0) * 0.1);
+  const classes = { blueMagicCd: ".blue-magic", gravityCd: ".gravity-push", gasterCd: ".gaster-blaster" };
+  for (let cdName in maxCds) {
+    const bar = a.el.querySelector(classes[cdName]);
+    if (bar) {
+      bar.style.display = "block";
+      const fill = bar.querySelector(".dg-skill-cd-fill");
+      if (fill) fill.style.width = Math.max(0, Math.min(100, (1 - Math.max(0, a[cdName]) / maxCds[cdName]) * 100)) + "%";
+    }
+  }
+  if (a.restPending > 0) {
+    a.restPending -= dt2;
+    const sp = sansDungeonSpriteForAction("shrug", 0);
+    applySansSprite(a.el, sp);
+    if (a.restPending <= 0) {
+      a.isResting = true;
+      a.restTimer = 4;
+      a._sleepStep = 0;
+      a._sleepAnim = Math.random() < 0.5 ? "sleep_stand" : "stool_chup";
+    }
+    return;
+  } else if (a.isResting) {
+    a.restTimer -= dt2;
+    a.stamina = Math.min(a.maxStamina, a.stamina + a.maxStamina / 4 * dt2);
+    if (!a._sleepStep) a._sleepStep = 0;
+    a._sleepStep += dt2 * 10;
+    const sp = sansDungeonSpriteForAction(a._sleepAnim || "sleep_stand", Math.floor(a._sleepStep));
+    applySansSprite(a.el, sp);
+    if (a.restTimer <= 0) a.isResting = false;
+    return;
+  }
+  if (a.cd > 0) a.cd -= dt2;
+  if (a.tpCd > 0) a.tpCd -= dt2;
+  let closest = null;
+  let minDist = Infinity;
+  enemyGroup.filter((b2) => b2.hp > 0).forEach((b2) => {
+    const dx = b2.x - a.x;
+    const dy = b2.y - a.y;
+    const dist = Math.max(0.1, Math.hypot(dx, dy));
+    if (dist < minDist) {
+      minDist = dist;
+      closest = { b: b2, dx, dy, dist };
+    }
+  });
+  let canGravityPush = a.gravityCd <= 0 && a.tpCd <= 0 && enemyGroup.filter((b2) => b2.hp > 0).length > 0;
+  if (canGravityPush) {
+    let isTired = a.stamina <= a.maxStamina * 0.2;
+    if (isTired) a.stamina -= 12;
+    else a.stamina -= 20;
+    a.gravityCd = maxCds.gravityCd;
+    a.actionTimer = 1;
+    if (isTired) a.restPending = 1;
+    if (arena) {
+      arena.style.animation = "dg-shake 0.4s";
+      setTimeout(() => {
+        if (arena) arena.style.animation = "";
+      }, 400);
+    }
+    const distTop = a.y - 30;
+    const distBottom = arenaRect.height - 30 - a.y;
+    const distLeft = a.x - 30;
+    const distRight = arenaRect.width - 30 - a.x;
+    const maxDist = Math.max(distTop, distBottom, distLeft, distRight);
+    let wallDirX = 0;
+    let wallDirY = 0;
+    if (maxDist === distTop) wallDirY = -1;
+    else if (maxDist === distBottom) wallDirY = 1;
+    else if (maxDist === distLeft) wallDirX = -1;
+    else if (maxDist === distRight) wallDirX = 1;
+    if (isTired) {
+      if (wallDirX !== 0) {
+        a.x = wallDirX > 0 ? 40 : arenaRect.width - 40;
+        a.y = 40 + Math.random() * (arenaRect.height - 80);
+      } else {
+        a.y = wallDirY > 0 ? 40 : arenaRect.height - 40;
+        a.x = 40 + Math.random() * (arenaRect.width - 80);
+      }
+      a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+      a._shrugTimer = 0.5;
+      a.restPending = 0.5;
+    }
+    enemyGroup.forEach((e2) => {
+      if (e2.hp > 0) {
+        e2.kb = {
+          time: 0.5,
+          dx: wallDirX,
+          dy: wallDirY,
+          speed: 1200 + Math.random() * 400,
+          wallDamage: true
+        };
+      }
+    });
+    return;
+  }
+  if (closest && closest.dist < 60 && a.tpCd <= 0 && a.stamina >= 10) {
+    a.stamina -= 10;
+    a.tpCd = maxTpCd;
+    const candidates = [
+      { x: a.x - 150, y: a.y },
+      { x: a.x + 150, y: a.y },
+      { x: a.x, y: a.y - 150 },
+      { x: a.x, y: a.y + 150 },
+      { x: a.x - 100, y: a.y - 100 },
+      { x: a.x + 100, y: a.y + 100 },
+      { x: a.x - 100, y: a.y + 100 },
+      { x: a.x + 100, y: a.y - 100 }
+    ];
+    let bestPos = { x: a.x, y: a.y };
+    let maxMinDist = -1;
+    candidates.forEach((pos) => {
+      pos.x = Math.max(30, Math.min(pos.x, arenaRect.width - 30));
+      pos.y = Math.max(30, Math.min(pos.y, arenaRect.height - 30));
+      let minDistToEnemies = Infinity;
+      enemyGroup.forEach((e2) => {
+        if (e2.hp > 0) {
+          let d = Math.hypot(e2.x - pos.x, e2.y - pos.y);
+          if (d < minDistToEnemies) minDistToEnemies = d;
+        }
+      });
+      if (minDistToEnemies > maxMinDist) {
+        maxMinDist = minDistToEnemies;
+        bestPos = pos;
+      }
+    });
+    a.x = bestPos.x;
+    a.y = bestPos.y;
+    a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+    a._shrugTimer = 0.5;
+    return;
+  }
+  if (closest && a.actionState === "idle") {
+    if (a.gasterCd <= 0 && a.stamina >= 15) {
+      a.gasterCd = maxCds.gasterCd;
+      a.stamina -= 15;
+      const sp = sansDungeonSpriteForAction("magic", 1);
+      applySansSprite(a.el, sp);
+      const dx = closest.dx;
+      const dy = closest.dy;
+      const dist = closest.dist || 1;
+      const dirX = dx / dist;
+      const dirY = dy / dist;
+      const angle = Math.atan2(dy, dx);
+      const bx = a.x - dirX * 30;
+      const by = a.y - dirY * 30 - 20;
+      const blaster = document.createElement("img");
+      blaster.className = "dg-gaster-blaster";
+      blaster.src = sansDungeonSpriteForAction("gaster_charge", 0).src;
+      blaster.style.position = "absolute";
+      blaster.style.width = "40px";
+      blaster.style.height = "40px";
+      blaster.style.objectFit = "contain";
+      blaster.style.left = bx - 20 + "px";
+      blaster.style.top = by - 20 + "px";
+      blaster.style.zIndex = "50";
+      let rotDeg = angle * 180 / Math.PI - 90;
+      blaster.style.transform = `rotate(${rotDeg}deg)`;
+      if (arena) arena.appendChild(blaster);
+      setTimeout(() => {
+        if (!arena || !arena.contains(blaster)) return;
+        blaster.src = sansDungeonSpriteForAction("gaster_fire", 0).src;
+        const laser = document.createElement("div");
+        laser.style.position = "absolute";
+        laser.style.height = "40px";
+        laser.style.width = "1500px";
+        laser.style.background = "linear-gradient(90deg, rgba(255,255,255,0.9) 0%, rgba(0,255,255,0.9) 20%, rgba(255,255,255,0.7) 100%)";
+        laser.style.left = bx + "px";
+        laser.style.top = by - 20 + "px";
+        laser.style.transformOrigin = "0 50%";
+        let laserRot = angle * 180 / Math.PI;
+        laser.style.transform = `rotate(${laserRot}deg)`;
+        laser.style.zIndex = "40";
+        if (arena) arena.appendChild(laser);
+        let dotTimer = 3;
+        let tickTimer = 0;
+        const hitInterval = setInterval(() => {
+          dotTimer -= 0.1;
+          tickTimer -= 0.1;
+          if (dotTimer <= 0 || !arena.contains(laser)) {
+            clearInterval(hitInterval);
+            if (laser.parentNode) laser.remove();
+            if (blaster.parentNode) blaster.remove();
+            return;
+          }
+          if (tickTimer <= 0) {
+            tickTimer = 0.2;
+            enemyGroup.forEach((e2) => {
+              if (e2.hp > 0) {
+                const evx = e2.x - bx;
+                const evy = e2.y - 16 - by;
+                const dot = evx * dirX + evy * dirY;
+                const perpDist = Math.abs(evx * dirY - evy * dirX);
+                if (dot > 0 && perpDist < 40) {
+                  e2.hp -= 1;
+                  spawnDmg(e2, -1);
+                  if (!e2.status) e2.status = {};
+                  e2.status.karmaDuration = 3;
+                  e2.karmaStacks = (e2.karmaStacks || 0) + 1;
+                }
+              }
+            });
+          }
+        }, 100);
+      }, 600);
+      return;
+    }
+    if (a.blueMagicCd <= 0 && a.stamina >= 10 && closest.dist < 100) {
+      a.blueMagicCd = maxCds.blueMagicCd;
+      a.stamina -= 10;
+      a.actionTimer = 0.5;
+      const target = closest.b;
+      if (!target.status) target.status = {};
+      target.status.stun = 2;
+      target.el.style.transition = "transform 0.2s cubic-bezier(0.25, 1, 0.5, 1)";
+      target.el.style.transform = `translate3d(${target.x - 16}px, ${target.y - 60}px, 0)`;
+      setTimeout(() => {
+        if (target.el) {
+          target.el.style.transition = "transform 0.1s cubic-bezier(0.5, 0, 0.75, 0)";
+          target.el.style.transform = `translate3d(${target.x - 16}px, ${target.y - 16}px, 0)`;
+        }
+        target.hp -= a.atk;
+        spawnDmg(target, -a.atk);
+        if (!target.status) target.status = {};
+        target.status.karmaDuration = 3;
+        target.karmaStacks = (target.karmaStacks || 0) + 1;
+      }, 300);
+      return;
+    }
+    if (a.cd <= 0 && closest.dist <= a.range) {
+      a.cd = a.maxCd;
+      const bone = document.createElement("div");
+      bone.innerHTML = `<img src="${SANS_DUNGEON_SPRITES.bone}" width="8" height="20">`;
+      bone.style.position = "absolute";
+      bone.style.left = a.x + "px";
+      bone.style.top = a.y - 16 + "px";
+      bone.style.zIndex = "50";
+      bone.style.animation = "dg-spin 0.5s linear infinite";
+      if (arena) arena.appendChild(bone);
+      const speed = 250;
+      projectiles2.push({
+        isBone: true,
+        lifetime: 2,
+        maxLifetime: 2,
+        vx: closest.dx / closest.dist * speed,
+        vy: closest.dy / closest.dist * speed,
+        x: a.x,
+        y: a.y,
+        el: bone,
+        a,
+        groupB: enemyGroup,
+        onHit: (tgt) => {
+          tgt.hp -= a.atk;
+          spawnDmg(tgt, -a.atk);
+          if (!tgt.status) tgt.status = {};
+          tgt.status.karmaDuration = 3;
+          tgt.karmaStacks = (tgt.karmaStacks || 0) + 1;
+        }
+      });
+      return;
+    }
+  }
+  if (a.actionState !== "idle") {
+    a.actionTimer -= dt2;
+    if (a.actionTimer <= 0) {
+      a.actionState = "idle";
+    } else {
+      if (a.actionState !== "magic" && a.actionState !== "shrug" && a.actionState !== "sleep_stand" && a.actionState !== "stool_chup") {
+        if (!a._actionStep) a._actionStep = 0;
+        a._actionStep += dt2 * 10;
+        const sp = sansDungeonSpriteForAction(a.actionState, Math.floor(a._actionStep));
+        if (closest && closest.dx < 0) sp.flip = true;
+        else sp.flip = false;
+        applySansSprite(a.el, sp);
+      }
+      return;
+    }
+  }
+  if (closest) {
+    let moveX = 0, moveY = 0;
+    const speed = a.speed * dt2;
+    if (closest.dist < a.range * 0.5) {
+      moveX = -(closest.dx / closest.dist) * speed;
+      moveY = -(closest.dy / closest.dist) * speed;
+    } else if (closest.dist > a.range * 0.9) {
+      moveX = closest.dx / closest.dist * speed;
+      moveY = closest.dy / closest.dist * speed;
+    }
+    if (moveX !== 0 || moveY !== 0) {
+      a.x += moveX;
+      a.y += moveY;
+      a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
+      a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
+      a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
+      if (!a._walkStep) a._walkStep = 0;
+      a._walkStep += dt2 * 10;
+      let sp = sansDungeonSpriteFor(moveX, moveY, Math.floor(a._walkStep));
+      if (a._shrugTimer > 0) sp = sansDungeonSpriteForAction("shrug", 0);
+      applySansSprite(a.el, sp);
+    } else {
+      let sp = sansDungeonSpriteForAction("idle", 0);
+      if (a._shrugTimer > 0) sp = sansDungeonSpriteForAction("shrug", 0);
+      applySansSprite(a.el, sp);
+    }
+  }
+}
 function updateEntities(groupA, groupB, dt2, arenaRect) {
   if (!arenaRect) {
     const a = arenaEl || $id("dg-arena");
@@ -12035,6 +13420,10 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
   const arena = arenaEl || $id("dg-arena");
   groupA.forEach((a) => {
     if (a.hp <= 0) return;
+    if (a.ai === "sans_ai") {
+      updateSansAI(a, groupB, dt2, arenaRect, arena, projectiles);
+      return;
+    }
     if (a.kb && a.kb.time > 0) {
       a.kb.time -= dt2;
       a.x += a.kb.dx * a.kb.speed * dt2;
@@ -12042,11 +13431,32 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
       a.x = Math.max(20, Math.min(a.x, arenaRect.width - 20));
       a.y = Math.max(20, Math.min(a.y, arenaRect.height - 20));
       a.el.style.transform = `translate3d(${a.x - 16}px, ${a.y - 16}px, 0)`;
-      let hitOther = false;
-      groupA.forEach((other) => {
-        if (!hitOther && other !== a && other.hp > 0 && Math.hypot(other.x - a.x, other.y - a.y) < 40) {
-          if (!other.status) other.status = {};
-          if (!other.status.stun) {
+      if (a.kb.wallDamage) {
+        if (a.x <= 20 || a.x >= arenaRect.width - 20 || a.y <= 20 || a.y >= arenaRect.height - 20) {
+          a.kb.time = 0;
+          a.hp -= 1;
+          spawnDmg(a, -1);
+          if (!a.status) a.status = {};
+          a.status.stun = 1;
+          a.karmaStacks = (a.karmaStacks || 0) + 5;
+          const sans = groupB.find((p2) => p2.id === "sans");
+          a.status.karmaDuration = 3;
+          const boom = document.createElement("div");
+          boom.className = "dg-boom-effect";
+          boom.style.width = "60px";
+          boom.style.height = "60px";
+          boom.style.left = a.x - 30 + "px";
+          boom.style.top = a.y - 30 + "px";
+          boom.style.background = "radial-gradient(circle, rgba(200,200,200,1) 0%, rgba(200,200,200,0) 70%)";
+          arena.appendChild(boom);
+          setTimeout(() => boom.remove(), 300);
+        }
+      }
+      if (!a.kb.wallDamage) {
+        let hitOther = false;
+        groupA.forEach((other) => {
+          if (!hitOther && other !== a && other.hp > 0 && Math.hypot(other.x - a.x, other.y - a.y) < 40) {
+            if (!other.status) other.status = {};
             hitOther = true;
             other.status.stun = 1.5;
             const impactX = other.x;
@@ -12068,10 +13478,10 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
               }
             });
           }
+        });
+        if (hitOther) {
+          a.kb.time = 0;
         }
-      });
-      if (hitOther) {
-        a.kb.time = 0;
       }
       return;
     }
@@ -12133,6 +13543,22 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
           a.hp -= dmg;
           spawnDmg(a, -dmg);
         }
+        if (eff === "karmaDuration") {
+          if (a.karmaStacks > 0) {
+            const sans = groupB.find((p2) => p2.id === "sans");
+            const tickRate = 2 * a.karmaStacks;
+            a._karmaTickAcc = (a._karmaTickAcc || 0) + tickRate * dt2;
+            if (a._karmaTickAcc >= 1) {
+              const ticks = Math.floor(a._karmaTickAcc);
+              const totalDmg = Math.max(1, Math.floor(a.maxHp * 7e-3 * ticks));
+              a.hp -= totalDmg;
+              a._karmaTickAcc -= ticks;
+              if (Math.random() < 0.35) spawnDmg(a, -1, "karma");
+            }
+          }
+        }
+      } else if (eff === "karmaDuration" && a.status[eff] <= 0) {
+        a.karmaStacks = 0;
       }
     }
     let statusHtml = "";
@@ -12155,6 +13581,17 @@ function updateEntities(groupA, groupB, dt2, arenaRect) {
     if (a._lastStatusHtml !== statusHtml) {
       statusDiv.innerHTML = statusHtml;
       a._lastStatusHtml = statusHtml;
+    }
+    if (a.el && a.maxHp) {
+      let expectedKarmaDmg = a.status && a.status.karmaDuration > 0 && a.karmaStacks > 0 ? a.maxHp * 5e-3 * a.karmaStacks * a.status.karmaDuration : 0;
+      if (expectedKarmaDmg >= a.hp) expectedKarmaDmg = a.hp - 1;
+      let safeHp = Math.max(1, a.hp - expectedKarmaDmg);
+      let safeHpPct = safeHp / a.maxHp * 100;
+      let karmaPct = (a.hp - safeHp) / a.maxHp * 100;
+      const hpFill = a.el.querySelector(".dg-hp-fill");
+      if (hpFill) hpFill.style.width = Math.max(0, safeHpPct) + "%";
+      const karmaFill = a.el.querySelector(".dg-karma-fill");
+      if (karmaFill) karmaFill.style.width = Math.max(0, karmaPct) + "%";
     }
     if (isStunned) return;
     let closest = null;
@@ -12922,7 +14359,7 @@ function showWaveRewards(isLoaded = false) {
     let petsHtml = '<div class="dg-shop-left">';
     fullTeam.forEach((p2, idx) => {
       const isSel = idx === selectedIdx;
-      const totalLv = Object.values(p2.upgrades).reduce((a, b2) => a + b2, 0);
+      const totalLv = Object.values(p2.upgrades).reduce((a, b2) => a + (Number(b2) || 0), 0);
       const formatNum = (n2) => n2 >= 1e6 ? (n2 / 1e6).toFixed(1) + "M" : n2 >= 1e3 ? (n2 / 1e3).toFixed(1) + "K" : Math.round(n2);
       petsHtml += `<div class="dg-shop-pet ${isSel ? "selected" : ""}" data-idx="${idx}">
                 ${petSVG(p2.id, 40)}
@@ -12956,22 +14393,35 @@ function showWaveRewards(isLoaded = false) {
       const hpMissingTeam = fullTeam.reduce((acc, member) => acc + (member.maxHp - member.hp), 0);
       const healTeamCost = Math.max(30, totalMaxHp > 0 ? Math.floor(waveBaseGold * 0.5 * (hpMissingTeam / totalMaxHp)) : 30);
       const calc = (base, lv) => Math.floor(base * Math.pow(1.18, lv));
-      const stats = [
-        // Hiệu quả HP & ATK upgrade: +10%→+15%
-        { id: "hp", name: "Max HP (+15%)", val: selectedPet.maxHp, lv: u2.hp, cost: calc(80, u2.hp) },
-        { id: "atk", name: "ATK (+15%)", val: selectedPet.atk, lv: u2.atk, cost: calc(80, u2.atk) },
-        // ATK SPD: giảm 8%/level, sàn 0.15s
-        { id: "aspd", name: "ATK SPD (+8%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u2.aspd, cost: calc(100, u2.aspd), forceCanBuy: selectedPet.maxCd > 0.16 },
-        { id: "spd", name: "Move Speed (+5%)", val: selectedPet.speed, lv: u2.spd, cost: calc(50, u2.spd), forceCanBuy: selectedPet.speed < 150 },
-        { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u2.critR, cost: calc(90, u2.critR), forceCanBuy: selectedPet.critRate < 0.59 },
-        { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u2.critD, cost: calc(90, u2.critD) },
-        { id: "dodge", name: "N\xE9 Tr\xE1nh (+5%)", val: (selectedPet.dodge * 100).toFixed(0) + "%", lv: u2.dodge || 0, cost: calc(100, u2.dodge || 0), forceCanBuy: selectedPet.dodge < 0.39 }
-      ];
-      if (PET_STATS2[selectedPet.id] && PET_STATS2[selectedPet.id].range > 60) {
-        stats.push({ id: "range", name: "T\u1EA7m \u0110\xE1nh (+5%)", val: Math.round(selectedPet.range), lv: u2.range || 0, cost: calc(70, u2.range || 0), forceCanBuy: selectedPet.range < 400 });
+      let stats = [];
+      if (selectedPet.id === "sans") {
+        stats = [
+          { id: "stamina", name: "Max Stamina (+5%)", val: selectedPet.maxStamina, lv: u2.stamina || 0, cost: calc(150, u2.stamina || 0) },
+          { id: "gasterCd", name: "Gaster CD (-5%)", val: (10 * Math.max(0.5, 1 - (u2.gasterCd || 0) * 0.05)).toFixed(1) + "s", lv: u2.gasterCd || 0, cost: calc(200, u2.gasterCd || 0), forceCanBuy: (u2.gasterCd || 0) < 10 },
+          { id: "blueMagicCd", name: "Stun CD (-5%)", val: (7 * Math.max(0.5, 1 - (u2.blueMagicCd || 0) * 0.05)).toFixed(1) + "s", lv: u2.blueMagicCd || 0, cost: calc(150, u2.blueMagicCd || 0), forceCanBuy: (u2.blueMagicCd || 0) < 10 },
+          { id: "gravityCd", name: "Gravity CD (-5%)", val: (13 * Math.max(0.5, 1 - (u2.gravityCd || 0) * 0.05)).toFixed(1) + "s", lv: u2.gravityCd || 0, cost: calc(150, u2.gravityCd || 0), forceCanBuy: (u2.gravityCd || 0) < 10 },
+          { id: "tpCd", name: "Teleport CD (-10%)", val: (2 * Math.max(0.5, 1 - (u2.tpCd || 0) * 0.1)).toFixed(1) + "s", lv: u2.tpCd || 0, cost: calc(300, u2.tpCd || 0), forceCanBuy: (u2.tpCd || 0) < 5 }
+        ];
+      } else {
+        stats = [
+          // Hiệu quả HP & ATK upgrade: +10%→+15%
+          { id: "hp", name: "Max HP (+15%)", val: selectedPet.maxHp, lv: u2.hp || 0, cost: calc(80, u2.hp || 0) },
+          { id: "atk", name: "ATK (+15%)", val: selectedPet.atk, lv: u2.atk || 0, cost: calc(80, u2.atk || 0) },
+          // ATK SPD: giảm 8%/level, sàn 0.15s
+          { id: "aspd", name: "ATK SPD (+8%)", val: selectedPet.maxCd.toFixed(2) + "s", lv: u2.aspd || 0, cost: calc(100, u2.aspd || 0), forceCanBuy: selectedPet.maxCd > 0.16 },
+          { id: "spd", name: "Move Speed (+5%)", val: selectedPet.speed, lv: u2.spd || 0, cost: calc(50, u2.spd || 0), forceCanBuy: selectedPet.speed < 150 },
+          { id: "critR", name: "Crit Rate (+5%)", val: (selectedPet.critRate * 100).toFixed(0) + "%", lv: u2.critR || 0, cost: calc(90, u2.critR || 0), forceCanBuy: selectedPet.critRate < 0.59 },
+          { id: "critD", name: "Crit Dmg (+20%)", val: (selectedPet.critDmg * 100).toFixed(0) + "%", lv: u2.critD || 0, cost: calc(90, u2.critD || 0) },
+          { id: "dodge", name: "N\xE9 Tr\xE1nh (+5%)", val: (selectedPet.dodge * 100).toFixed(0) + "%", lv: u2.dodge || 0, cost: calc(100, u2.dodge || 0), forceCanBuy: selectedPet.dodge < 0.39 }
+        ];
       }
-      if (selectedPet.maxSkillCd > 0) {
-        stats.push({ id: "skillCdR", name: "Gi\u1EA3m H\u1ED3i Chi\xEAu (+5%)", val: selectedPet.maxSkillCd.toFixed(1) + "s", lv: u2.skillCdR || 0, cost: Math.floor(1e3 * Math.pow(1.5, u2.skillCdR || 0)), forceCanBuy: (u2.skillCdR || 0) < 10 });
+      if (selectedPet.id !== "sans") {
+        if (PET_STATS2[selectedPet.id] && PET_STATS2[selectedPet.id].range > 60) {
+          stats.push({ id: "range", name: "T\u1EA7m \u0110\xE1nh (+5%)", val: Math.round(selectedPet.range), lv: u2.range || 0, cost: calc(70, u2.range || 0), forceCanBuy: selectedPet.range < 400 });
+        }
+        if (selectedPet.maxSkillCd > 0) {
+          stats.push({ id: "skillCdR", name: "Gi\u1EA3m H\u1ED3i Chi\xEAu (+5%)", val: selectedPet.maxSkillCd.toFixed(1) + "s", lv: u2.skillCdR || 0, cost: Math.floor(1e3 * Math.pow(1.5, u2.skillCdR || 0)), forceCanBuy: (u2.skillCdR || 0) < 10 });
+        }
       }
       stats.push(
         { id: "heal_pet", name: "H\u1ED3i M\xE1u (Full)", val: `${Math.round(selectedPet.hp)}/${selectedPet.maxHp}`, lv: "", cost: healPetCost, forceCanBuy: selectedPet.hp < selectedPet.maxHp },
@@ -12998,7 +14448,17 @@ function showWaveRewards(isLoaded = false) {
       shopHtml += `<div style="color:#aaa; text-align:center; flex:1; display:flex; align-items:center; justify-content:center;">Ch\u1ECDn m\u1ED9t Pet b\xEAn tr\xE1i \u0111\u1EC3 n\xE2ng c\u1EA5p.</div>`;
     }
     shopHtml += `</div>`;
+    let oldLeftScroll = 0;
+    let oldGridScroll = 0;
+    const oldLeftEl = overlay.querySelector(".dg-shop-left");
+    if (oldLeftEl) oldLeftScroll = oldLeftEl.scrollTop;
+    const oldGridEl = overlay.querySelector(".dg-shop-grid");
+    if (oldGridEl) oldGridScroll = oldGridEl.scrollTop;
     overlay.innerHTML = `<div class="dg-shop-box">${headerHtml}<div class="dg-shop-content">${petsHtml}${shopHtml}</div></div>`;
+    const newLeftEl = overlay.querySelector(".dg-shop-left");
+    if (newLeftEl) newLeftEl.scrollTop = oldLeftScroll;
+    const newGridEl = overlay.querySelector(".dg-shop-grid");
+    if (newGridEl) newGridEl.scrollTop = oldGridScroll;
     overlay.querySelectorAll(".dg-shop-pet").forEach((el) => {
       el.onclick = () => renderShop(parseInt(el.dataset.idx));
     });
@@ -13010,24 +14470,24 @@ function showWaveRewards(isLoaded = false) {
           shopGold -= cost;
           const p2 = selectedPet;
           if (statId === "hp") {
-            p2.upgrades.hp++;
+            p2.upgrades.hp = (p2.upgrades.hp || 0) + 1;
           }
           if (statId === "atk") {
-            p2.upgrades.atk++;
+            p2.upgrades.atk = (p2.upgrades.atk || 0) + 1;
           }
           if (statId === "aspd") {
-            p2.upgrades.aspd++;
+            p2.upgrades.aspd = (p2.upgrades.aspd || 0) + 1;
           }
           if (statId === "spd") {
-            p2.upgrades.spd++;
+            p2.upgrades.spd = (p2.upgrades.spd || 0) + 1;
           }
           if (statId === "critR") {
             p2.critRate = Math.min(0.6, p2.critRate + 0.05);
-            p2.upgrades.critR++;
+            p2.upgrades.critR = (p2.upgrades.critR || 0) + 1;
           }
           if (statId === "critD") {
             p2.critDmg = Math.round((p2.critDmg + 0.2) * 10) / 10;
-            p2.upgrades.critD++;
+            p2.upgrades.critD = (p2.upgrades.critD || 0) + 1;
           }
           if (statId === "dodge") {
             p2.dodge = Math.min(0.4, p2.dodge + 0.05);
@@ -13038,6 +14498,21 @@ function showWaveRewards(isLoaded = false) {
           }
           if (statId === "skillCdR") {
             p2.upgrades.skillCdR = (p2.upgrades.skillCdR || 0) + 1;
+          }
+          if (statId === "stamina") {
+            p2.upgrades.stamina = (p2.upgrades.stamina || 0) + 1;
+          }
+          if (statId === "gasterCd") {
+            p2.upgrades.gasterCd = (p2.upgrades.gasterCd || 0) + 1;
+          }
+          if (statId === "blueMagicCd") {
+            p2.upgrades.blueMagicCd = (p2.upgrades.blueMagicCd || 0) + 1;
+          }
+          if (statId === "gravityCd") {
+            p2.upgrades.gravityCd = (p2.upgrades.gravityCd || 0) + 1;
+          }
+          if (statId === "tpCd") {
+            p2.upgrades.tpCd = (p2.upgrades.tpCd || 0) + 1;
           }
           const stat = PET_STATS2[p2.id] || PET_STATS2.default;
           const oldMax = p2.maxHp > 0 ? p2.maxHp : 1;
@@ -13050,6 +14525,9 @@ function showWaveRewards(isLoaded = false) {
           p2.maxCd = Math.max(0.15, stat.cd * Math.pow(0.92, p2.upgrades.aspd || 0));
           if (stat.maxSkillCd) {
             p2.maxSkillCd = stat.maxSkillCd * (1 - (p2.upgrades.skillCdR || 0) * 0.05);
+          }
+          if (p2.id === "sans") {
+            p2.maxStamina = Math.round(100 * Math.pow(1.05, p2.upgrades.stamina || 0));
           }
           if (getActiveCookingBuffs && p2._cookBuffApplied) {
             const buffs = getActiveCookingBuffs();
@@ -13148,6 +14626,7 @@ var init_dungeon = __esm({
       penguin: { name: "C\xE1nh C\u1EE5t", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> \u0110\xF2n \u0111\xE1nh l\xE0m gi\u1EA3m 30% t\u1ED1c \u0111\u1ED9 di chuy\u1EC3n v\xE0 t\u1ED1c \u0111\xE1nh c\u1EE7a qu\xE1i.<br><b>Ch\u1EE7 \u0111\u1ED9ng (15s):</b> S\xFAt m\u1ED9t qu\u1EA3 c\u1EA7u tuy\u1EBFt l\u0103n d\u1ED9i t\u01B0\u1EDDng 5 l\u1EA7n, g\xE2y 200% s\xE1t th\u01B0\u01A1ng v\xE0 \u0111\xF3ng b\u0103ng 3 gi\xE2y.", hp: 150, atk: 20, range: 45, speed: 50, cd: 1, skill: "freeze", activeSkill: "blizzard", maxSkillCd: 15 },
       // Naoya: maxSkillCd 10s→12s
       naoyaSlime: { name: "Naoya", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng (12s):</b> \u0110\u1EA7u X\u1EA1 Ch\xFA Ph\xE1p - L\u01B0\u1EDBt 24 khung h\xECnh c\xF4ng k\xEDch to\xE0n map v\xE0 \u0111\xF3ng b\u0103ng qu\xE1i 1s.", hp: 100, atk: 35, range: 45, speed: 65, cd: 0.6, skill: "projection_sorcery", maxSkillCd: 12 },
+      sans: { name: "Sans", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> M\xE1u c\u1EF1c y\u1EBFu (1 HP) nh\u01B0ng c\xF3 thanh Th\u1EC3 l\u1EF1c \u0111\u1EC3 n\xE9 100% s\xE1t th\u01B0\u01A1ng. \u0110\xF2n \u0111\xE1nh th\u01B0\u1EDDng g\xE2y hi\u1EC7u \u1EE9ng R\xFAt m\xE1u Karma.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> \u0110\u1EA7y \u0111\u1EE7 tuy\u1EC7t k\u0129 Blue Magic, Gravity Push v\xE0 Gaster Blaster.", hp: 1, atk: 1, range: 200, speed: 35, cd: 0.2, ai: "sans_ai" },
       default: { name: "Pet V\xF4 Danh", desc: "<b>B\u1ECB \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.<br><b>Ch\u1EE7 \u0111\u1ED9ng:</b> Kh\xF4ng c\xF3.", hp: 130, atk: 12, range: 40, speed: 40, cd: 1 }
     };
     ENEMY_TYPES = [
@@ -18067,7 +19546,7 @@ var init_bundler = __esm({
 async function buildPeerConfigAsync() {
   const iceServers = [{ urls: "stun:stun.l.google.com:19302" }];
   try {
-    const apiKey = "MDgwZDg0ODYxZmZmYzdkMWNkZDY0NTk2OTNkMmJiNmIyZTcw" ? atob("MDgwZDg0ODYxZmZmYzdkMWNkZDY0NTk2OTNkMmJiNmIyZTcw") : "";
+    const apiKey = "ZmQ2NTY1Y2ZhYzU2NWY5M2FhNmYyMzRmYWZhNmI0YjlhY2U1" ? atob("ZmQ2NTY1Y2ZhYzU2NWY5M2FhNmYyMzRmYWZhNmI0YjlhY2U1") : "";
     const appName = "a2Fpei1leHRlbnNpb24=" ? atob("a2Fpei1leHRlbnNpb24=") : "";
     if (apiKey && appName) {
       const resp = await fetch(`https://${appName}.metered.live/api/v1/turn/credentials?apiKey=${apiKey}`);
@@ -18317,7 +19796,7 @@ function setupConnection() {
     closeTradeModal();
   });
   setTimeout(() => {
-    sendData({ type: "HELLO", playerId: ctx.S.playerId, username: ctx.S.username });
+    sendData({ type: "HELLO", playerId: ctx.S.playerId, username: ctx.S.username, version: ctx.S.version });
   }, 500);
   renderTradeRoom();
 }
@@ -18354,6 +19833,14 @@ function handleNetData(data) {
       executeTrade();
     }
   } else if (data.type === "HELLO") {
+    if (data.version !== ctx.S.version) {
+      cheatDetected = true;
+      toast("Giao d\u1ECBch th\u1EA5t b\u1EA1i: \u0110\u1ED1i t\xE1c \u0111ang d\xF9ng phi\xEAn b\u1EA3n game c\u0169/kh\xE1c!");
+      sendData({ type: "VERSION_MISMATCH" });
+      if (conn) conn.close();
+      closeTradeModal();
+      return;
+    }
     if (data.playerId === ctx.S.playerId) {
       cheatDetected = true;
       toast("Ph\xE1t hi\u1EC7n gian l\u1EADn: Kh\xF4ng th\u1EC3 giao d\u1ECBch v\u1EDBi ch\xEDnh m\xECnh (Tr\xF9ng ID Ng\u01B0\u1EDDi Ch\u01A1i)!");
@@ -18364,6 +19851,11 @@ function handleNetData(data) {
       if (data.username) partnerName = data.username;
       renderTradeRoom();
     }
+  } else if (data.type === "VERSION_MISMATCH") {
+    cheatDetected = true;
+    toast("Giao d\u1ECBch th\u1EA5t b\u1EA1i: Phi\xEAn b\u1EA3n game c\u1EE7a 2 m\xE1y kh\xF4ng kh\u1EDBp nhau!");
+    if (conn) conn.close();
+    closeTradeModal();
   } else if (data.type === "CHEAT_DETECTED") {
     cheatDetected = true;
     toast("Ph\xE1t hi\u1EC7n gian l\u1EADn: Kh\xF4ng th\u1EC3 giao d\u1ECBch v\u1EDBi ch\xEDnh m\xECnh (Tr\xF9ng ID Ng\u01B0\u1EDDi Ch\u01A1i)!");
@@ -18787,6 +20279,15 @@ async function executeSyncJoin() {
         return;
       }
       if (data && data.type === "FULL_SAVE" && data.data) {
+        if (data.data.version !== ctx.S.version) {
+          if (statusEl) {
+            statusEl.textContent = "Save kh\xF4ng t\u01B0\u01A1ng th\xEDch (kh\xE1c version)!";
+            statusEl.style.color = "#d32f2f";
+          }
+          toast("T\u1EEB ch\u1ED1i nh\u1EADn: Save n\xE0y thu\u1ED9c v\u1EC1 phi\xEAn b\u1EA3n c\u0169/kh\xE1c!");
+          syncConn.close();
+          return;
+        }
         if (statusEl) {
           statusEl.textContent = "\u0110\xE3 nh\u1EADn save! \u0110ang \xE1p d\u1EE5ng...";
           statusEl.style.color = "#4caf50";
@@ -50043,12 +51544,12 @@ var init_firebase = __esm({
     init_index_esm5();
     init_index_esm7();
     firebaseConfig = {
-      apiKey: dec("QUl6YVN5Qlg5cDVVWmg5X2hXRmR0akRlRXd4anp1ZHJVX0hlaDB3"),
-      authDomain: dec("ZmFybS1leHRlbnNpb24=") + ".firebaseapp.com",
-      projectId: dec("ZmFybS1leHRlbnNpb24="),
-      storageBucket: dec("ZmFybS1leHRlbnNpb24=") + ".appspot.com",
-      messagingSenderId: dec("ODc4MzI4MjQ0MDE4"),
-      appId: dec("MTo4NzgzMjgyNDQwMTg6d2ViOmUxMTFkN2NkZmZlNDkzMTBlMmQ5MmI=")
+      apiKey: dec("QUl6YVN5QzhZQlJERmdzbGRqUFRLTWdwSFlESWxXNHpzR2t3M2Jv"),
+      authDomain: dec("ZmFybWluZy05ZGVlYQ==") + ".firebaseapp.com",
+      projectId: dec("ZmFybWluZy05ZGVlYQ=="),
+      storageBucket: dec("ZmFybWluZy05ZGVlYQ==") + ".appspot.com",
+      messagingSenderId: dec("ODYxODU1MDI1MjM0"),
+      appId: dec("MTo4NjE4NTUwMjUyMzQ6d2ViOmZlNTI2MWJhNGMyNjFkYmQzOWI3OGI=")
     };
     app = null;
     db = null;
@@ -50807,6 +52308,10 @@ function bjSystemChat(msg) {
   }
   bjRenderChat();
 }
+function bjEscapeHTML(str) {
+  if (!str) return "";
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
 function cardValue(rank) {
   if (rank === "A") return 11;
   if (["J", "Q", "K"].includes(rank)) return 10;
@@ -50860,6 +52365,27 @@ function buildShoe(numDecks, seed) {
     [cards[i2], cards[j]] = [cards[j], cards[i2]];
   }
   return cards;
+}
+function bjSmartRig(shoe, idx, p1, p2, metric) {
+  let chance = 0;
+  if (metric >= 1e11) chance = 0.15;
+  else if (metric >= 1e10) chance = 0.1;
+  else if (metric >= 1e9) chance = 0.05;
+  if (chance === 0 || Math.random() >= chance) return;
+  let t1 = -1, t2 = -1;
+  for (let i2 = Math.max(idx + 5, p2 + 1); i2 < Math.min(shoe.length, idx + 100); i2++) {
+    if (t1 === -1 && ["10", "J", "Q", "K"].includes(shoe[i2].rank)) t1 = i2;
+    else if (t2 === -1 && ["10", "J", "Q", "K", "A"].includes(shoe[i2].rank)) t2 = i2;
+    if (t1 !== -1 && t2 !== -1) break;
+  }
+  if (t1 !== -1 && t2 !== -1) {
+    let tmp = shoe[p1];
+    shoe[p1] = shoe[t1];
+    shoe[t1] = tmp;
+    tmp = shoe[p2];
+    shoe[p2] = shoe[t2];
+    shoe[t2] = tmp;
+  }
 }
 function isBlackjack(hand) {
   if (hand.length !== 2) return false;
@@ -51068,6 +52594,7 @@ function soloStartRound() {
   s2.activeHandIdx = 0;
   s2.dealerHand = [];
   s2.splitAceIdxs = /* @__PURE__ */ new Set();
+  bjSmartRig(s2.shoe, s2.shoeIdx, s2.shoeIdx + 1, s2.shoeIdx + 3, ctx.S.coins || 0);
   s2.playerHands[0].push(soloDrawCard());
   s2.dealerHand.push(soloDrawCard());
   s2.playerHands[0].push(soloDrawCard());
@@ -51286,9 +52813,9 @@ function soloResolveAll() {
       continue;
     }
     if (pBJ) {
-      const p2 = bet + Math.floor(bet * 1.5);
+      const p2 = bet + Math.floor(bet * 1.2);
       ctx.S.coins = (ctx.S.coins || 0) + p2;
-      results.push(`${lbl}\u2660 BLACKJACK +${Math.floor(bet * 1.5).toLocaleString()}G`);
+      results.push(`${lbl}\u2660 BLACKJACK +${Math.floor(bet * 1.2).toLocaleString()}G`);
       continue;
     }
     if (dBJ) {
@@ -51329,7 +52856,7 @@ function soloNewRound() {
   soloRender();
 }
 function bjMyName() {
-  return ctx.S.username || "Kh\xE1ch";
+  return bjEscapeHTML(ctx.S.username || "Kh\xE1ch");
 }
 function openBlackjackRoom() {
   const win = $id("bj-win");
@@ -51459,7 +52986,7 @@ async function bjJoinRoom() {
       bjRoomId = code;
       bjMyId = bjPeer.id;
       bjSetupConn(conn2);
-      conn2.send({ type: "HELLO", name: bjMyName(), id: bjMyId });
+      conn2.send({ type: "HELLO", name: bjMyName(), id: bjMyId, version: ctx.S.version });
     });
     conn2.on("error", () => bjUpdateStatus("L\u1ED7i k\u1EBFt n\u1ED1i!", "#e05"));
   });
@@ -51494,17 +53021,43 @@ function bjBroadcastProfits() {
 }
 function bjHandleMsg(fromPid, data) {
   switch (data.type) {
+    case "VERSION_MISMATCH": {
+      bjToast("Ph\xF2ng ch\u01A1i n\xE0y thu\u1ED9c v\u1EC1 phi\xEAn b\u1EA3n game c\u0169/kh\xE1c!");
+      bjUpdateStatus("L\u1ED7i: Kh\xE1c phi\xEAn b\u1EA3n!", "#e05");
+      if (bjConns[fromPid]) bjConns[fromPid].close();
+      bjHandleDisconnect(fromPid);
+      break;
+    }
     case "HELLO": {
-      const status = bjGameState && bjRoomPhase !== "summary" ? "spectator" : "idle";
-      bjPlayers[fromPid] = { name: data.name || "Kh\xE1ch", status, netProfit: 0 };
-      if (bjIsHost) {
-        bjBroadcast({ type: "PLAYER_JOIN", pid: fromPid, name: data.name, status }, fromPid);
-        bjConns[fromPid].send({ type: "WELCOME", players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData, chatLog: bjChatLog });
+      if (data.version !== ctx.S.version) {
+        if (bjIsHost && bjConns[fromPid]) {
+          bjConns[fromPid].send({ type: "VERSION_MISMATCH" });
+          setTimeout(() => {
+            if (bjConns[fromPid]) bjConns[fromPid].close();
+            bjHandleDisconnect(fromPid);
+          }, 500);
+        }
+        return;
       }
+      const status = bjGameState && bjRoomPhase !== "summary" ? "spectator" : "idle";
+      const safeName = bjEscapeHTML(data.name || "Kh\xE1ch");
+      bjPlayers[fromPid] = { name: safeName, status, netProfit: 0 };
+      if (bjIsHost) {
+        bjBroadcast({ type: "PLAYER_JOIN", pid: fromPid, name: safeName, status }, fromPid);
+        bjConns[fromPid].send({ type: "WELCOME", version: ctx.S.version, players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData, chatLog: bjChatLog });
+      }
+      bjSystemChat(`${safeName} \u0111\xE3 v\xE0o ph\xF2ng`);
       bjRenderRoom();
       break;
     }
     case "WELCOME":
+      if (data.version !== ctx.S.version) {
+        bjToast("T\u1EEB ch\u1ED1i k\u1EBFt n\u1ED1i: Host \u0111ang d\xF9ng phi\xEAn b\u1EA3n game c\u0169/kh\xE1c!");
+        bjUpdateStatus("L\u1ED7i: Host kh\xE1c phi\xEAn b\u1EA3n!", "#e05");
+        if (bjConns[fromPid]) bjConns[fromPid].close();
+        bjHandleDisconnect(fromPid);
+        return;
+      }
       bjPlayers = data.players || {};
       bjSettings = data.settings || bjSettings;
       bjGameState = data.gameState || null;
@@ -51515,7 +53068,7 @@ function bjHandleMsg(fromPid, data) {
       bjRenderRoom();
       break;
     case "PLAYER_JOIN":
-      bjPlayers[data.pid] = { name: data.name || "Kh\xE1ch", status: data.status || "idle", netProfit: 0 };
+      bjPlayers[data.pid] = { name: bjEscapeHTML(data.name || "Kh\xE1ch"), status: data.status || "idle", netProfit: 0 };
       bjSystemChat(`${bjPlayers[data.pid].name} \u0111\xE3 v\xE0o ph\xF2ng`);
       bjRenderRoom();
       break;
@@ -51529,7 +53082,24 @@ function bjHandleMsg(fromPid, data) {
       if (bjIsHost) bjBroadcast({ type: "READY", pid: fromPid, ready: data.ready }, fromPid);
       bjRenderRoom();
       break;
+    case "BET_REQUEST":
+      if (bjIsHost) {
+        if (typeof data.bet !== "number" || data.bet <= 0 || !Number.isFinite(data.bet)) break;
+        if (data.bet < bjSettings.minBet) break;
+        if (bjSettings.maxBet > 0 && data.bet > bjSettings.maxBet) break;
+        if (!bjGameState || bjGameState.phase !== "betting" || bjGameState.betsIn && bjGameState.betsIn[fromPid]) break;
+        if (fromPid === bjMyId) {
+          ctx.S.coins -= data.bet;
+          save();
+          renderStatus();
+        } else if (bjConns[fromPid]) {
+          bjConns[fromPid].send({ type: "DEDUCT_COINS", amount: data.bet });
+        }
+        bjHandleMsg(fromPid, { type: "BET_PLACED", pid: fromPid, bet: data.bet });
+      }
+      break;
     case "BET_PLACED":
+      if (!bjIsHost && fromPid !== bjRoomId) break;
       if (bjGameState) {
         if (!bjGameState.hands[data.pid]) {
           bjGameState.hands[data.pid] = { cards: [[]], bet: [0], stood: [false], doubled: [false], activeHandIdx: 0, splitAceIdxs: [], insuranceBet: 0, surrendered: false };
@@ -51537,9 +53107,10 @@ function bjHandleMsg(fromPid, data) {
         bjGameState.hands[data.pid].bet[0] = data.bet;
         bjGameState.betsIn = bjGameState.betsIn || {};
         bjGameState.betsIn[data.pid] = data.bet;
-        if (bjIsHost && bjPlayers[data.pid]) {
-          bjPlayers[data.pid].netProfit = (bjPlayers[data.pid].netProfit || 0) - data.bet;
+        if (bjIsHost) {
+          if (bjPlayers[data.pid]) bjPlayers[data.pid].netProfit = (bjPlayers[data.pid].netProfit || 0) - data.bet;
           bjBroadcastProfits();
+          bjBroadcast({ type: "BET_PLACED", pid: data.pid, bet: data.bet });
         }
         const allBet = bjGameState.turnOrder.every((p2) => bjGameState.betsIn?.[p2] > 0);
         if (allBet && bjIsHost) {
@@ -51595,6 +53166,7 @@ function bjHandleMsg(fromPid, data) {
       bjHandleRoomAction(fromPid, data);
       break;
     case "SUMMARY_START":
+      if (!bjIsHost && fromPid !== bjRoomId) break;
       if (data.payouts) {
         const payout = data.payouts[bjMyId] || 0;
         if (payout > 0) {
@@ -51627,7 +53199,7 @@ function bjHandleMsg(fromPid, data) {
       bjRenderRoom();
       break;
     case "CHAT": {
-      const chatName = data.senderName || bjPlayers[fromPid]?.name || "?";
+      const chatName = bjEscapeHTML(data.senderName) || bjPlayers[fromPid]?.name || "?";
       bjChatLog.push({ name: chatName, msg: data.msg, ts: Date.now() });
       if (bjChatLog.length > 50) bjChatLog.shift();
       if (!$id("bj-chat-wrap")?.classList.contains("open")) {
@@ -51642,7 +53214,7 @@ function bjHandleMsg(fromPid, data) {
       break;
     }
     case "CHAT_REQ": {
-      const reqName = data.senderName || bjPlayers[fromPid]?.name || fromPid;
+      const reqName = bjEscapeHTML(data.senderName) || bjPlayers[fromPid]?.name || bjEscapeHTML(fromPid);
       bjChatLog.push({ name: reqName, isReq: true, reqData: data.reqData, ts: Date.now() });
       if (bjChatLog.length > 50) bjChatLog.shift();
       if (!$id("bj-chat-wrap")?.classList.contains("open")) {
@@ -51656,47 +53228,66 @@ function bjHandleMsg(fromPid, data) {
       }
       break;
     }
-    case "GIVE_MONEY": {
-      if (typeof data.amount !== "number" || data.amount <= 0) break;
+    case "GIVE_MONEY_REQ": {
+      if (typeof data.amount !== "number" || data.amount <= 0 || !Number.isFinite(data.amount)) break;
       const log2 = bjChatLog.find((e2) => e2.reqData && e2.reqData.reqId === data.reqId);
       if (log2) {
-        log2.reqData.fulfilled += data.amount;
-        if (log2.reqData.pid === bjMyId) {
-          ctx.S.coins = (ctx.S.coins || 0) + data.amount;
-          save();
-          renderStatus();
-          bjSystemChat(`${data.from} \u0111\xE3 cho b\u1EA1n ${data.amount.toLocaleString()}G!`);
+        if (bjIsHost) {
+          let actualGive = data.amount;
+          if (log2.reqData.fulfilled + actualGive > log2.reqData.amount) actualGive = log2.reqData.amount - log2.reqData.fulfilled;
+          if (actualGive <= 0) break;
+          if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - actualGive;
+          if (bjPlayers[log2.reqData.pid]) bjPlayers[log2.reqData.pid].netProfit = (bjPlayers[log2.reqData.pid].netProfit || 0) + actualGive;
+          bjBroadcastProfits();
+          if (fromPid === bjMyId) {
+            ctx.S.coins -= actualGive;
+            save();
+            renderStatus();
+          } else if (bjConns[fromPid]) {
+            bjConns[fromPid].send({ type: "DEDUCT_COINS", amount: actualGive });
+          }
+          if (log2.reqData.pid === bjMyId) {
+            ctx.S.coins = (ctx.S.coins || 0) + actualGive;
+            save();
+            renderStatus();
+            bjSystemChat(`${data.from} \u0111\xE3 cho b\u1EA1n ${actualGive.toLocaleString()}G!`);
+          } else if (bjConns[log2.reqData.pid]) {
+            bjConns[log2.reqData.pid].send({ type: "ADD_COINS", amount: actualGive, msg: `${data.from} \u0111\xE3 cho b\u1EA1n ${actualGive.toLocaleString()}G!` });
+          }
+          log2.reqData.fulfilled += actualGive;
+          bjRenderChat();
+          bjBroadcast({ type: "SYNC_REQ", reqId: data.reqId, fulfilled: log2.reqData.fulfilled });
         }
-        bjRenderChat();
       }
-      if (bjIsHost) {
-        if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - data.amount;
-        if (log2 && bjPlayers[log2.reqData.pid]) bjPlayers[log2.reqData.pid].netProfit = (bjPlayers[log2.reqData.pid].netProfit || 0) + data.amount;
-        bjBroadcastProfits();
-      }
-      if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
       break;
     }
-    case "GOLD_SEND": {
-      if (typeof data.amount !== "number" || data.amount <= 0) break;
-      const senderName = data.senderName || bjPlayers[fromPid]?.name || "?";
-      if (data.targetPid === bjMyId) {
+    case "SYNC_REQ":
+      if (fromPid === bjRoomId) {
+        const log2 = bjChatLog.find((e2) => e2.reqData && e2.reqData.reqId === data.reqId);
+        if (log2) {
+          log2.reqData.fulfilled = data.fulfilled;
+          bjRenderChat();
+        }
+      }
+      break;
+    case "ADD_COINS":
+      if (fromPid === bjRoomId && typeof data.amount === "number" && data.amount > 0) {
         ctx.S.coins = (ctx.S.coins || 0) + data.amount;
         save();
         renderStatus();
-        bjSystemChat(`${senderName} g\u1EEDi b\u1EA1n ${data.amount.toLocaleString()}G!`);
-      }
-      if (bjIsHost) {
-        if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - data.amount;
-        if (bjPlayers[data.targetPid]) bjPlayers[data.targetPid].netProfit = (bjPlayers[data.targetPid].netProfit || 0) + data.amount;
-        bjBroadcastProfits();
-        if (fromPid !== bjMyId) {
-          if (!data.senderName) data.senderName = senderName;
-          bjBroadcast(data, fromPid);
+        if (data.msg) {
+          bjSystemChat(data.msg);
+          bjToast(data.msg);
         }
       }
       break;
-    }
+    case "DEDUCT_COINS":
+      if (fromPid === bjRoomId && typeof data.amount === "number" && data.amount > 0) {
+        ctx.S.coins = (ctx.S.coins || 0) - data.amount;
+        save();
+        renderStatus();
+      }
+      break;
     case "UPDATE_PROFITS":
       if (data.profits) {
         for (const p2 in data.profits) {
@@ -51740,6 +53331,14 @@ function bjHandleDisconnect(pid) {
           if (bjGameState) {
             bjGameState.turnOrder = bjGameState.turnOrder.filter((p2) => p2 !== pid);
             if (bjGameState.currentTurn === pid) bjAdvanceTurn();
+            if (bjGameState.phase === "dealer" || bjGameState.phase === "dealer_bj") {
+              setTimeout(() => bjHostRunDealer(), 1e3);
+            } else if (bjGameState.phase === "betting") {
+              const allBet = bjGameState.turnOrder.every((p2) => bjGameState.betsIn?.[p2] > 0);
+              if (allBet) setTimeout(() => bjHostRunDealerInitial(), 1e3);
+            } else if (bjGameState.phase === "player" && bjGameState.currentTurn == null) {
+              bjAdvanceTurn();
+            }
           }
           if (bjRoomPhase === "summary" && !bjSummaryTimer) {
             bjSummaryTimer = setInterval(() => {
@@ -51806,6 +53405,13 @@ function bjHostRunDealerInitial() {
   const gs = bjGameState;
   const shoe = gs.shoe;
   let idx = gs.shoeIdx;
+  let maxBet = 0;
+  for (const pid of gs.turnOrder) {
+    if (gs.hands[pid].bet[0] > maxBet) maxBet = gs.hands[pid].bet[0];
+  }
+  const dealerP1 = idx + gs.turnOrder.length;
+  const dealerP2 = idx + gs.turnOrder.length * 2 + 1;
+  bjSmartRig(shoe, idx, dealerP1, dealerP2, maxBet * 10);
   const draw = (hidden) => ({ ...shoe[idx++], hidden: !!hidden, isNew: true });
   for (const pid of gs.turnOrder) {
     gs.hands[pid].cards[0].push(draw());
@@ -51852,6 +53458,13 @@ function bjCheckInsuranceAnswers() {
       h.insuranceBet = Math.floor(h.bet[0] / 2);
       h.insuranceBetPaid = true;
       if (bjPlayers[pid]) bjPlayers[pid].netProfit = (bjPlayers[pid].netProfit || 0) - h.insuranceBet;
+      if (pid === bjMyId) {
+        ctx.S.coins -= h.insuranceBet;
+        save();
+        renderStatus();
+      } else if (bjConns[pid]) {
+        bjConns[pid].send({ type: "DEDUCT_COINS", amount: h.insuranceBet });
+      }
       profitChanged = true;
     }
   }
@@ -51909,7 +53522,11 @@ function bjHandleRoomAction(fromPid, data) {
     return;
   }
   if (data.actionType === "INSURANCE_ANSWER") {
-    if (bjIsHost) {
+    if (bjIsHost && gs.phase === "insurance") {
+      if (data.answer === "even") {
+        const myH = gs.hands[fromPid];
+        if (!myH || !isBlackjack(myH.cards[0])) return;
+      }
       gs.insuranceAnswers = gs.insuranceAnswers || {};
       gs.insuranceAnswers[fromPid] = data.answer;
       bjCheckInsuranceAnswers();
@@ -51917,7 +53534,8 @@ function bjHandleRoomAction(fromPid, data) {
     return;
   }
   if (!bjIsHost) {
-    if (data.hand) {
+    if (fromPid !== bjRoomId) return;
+    if (data.hand && data.pid) {
       gs.hands[data.pid] = data.hand;
       if (data.shoeIdx !== void 0) gs.shoeIdx = data.shoeIdx;
     }
@@ -51938,14 +53556,30 @@ function bjHandleRoomAction(fromPid, data) {
     h.stood[idx] = true;
     if (idx + 1 < h.cards.length) h.activeHandIdx = idx + 1;
   } else if (data.actionType === "DOUBLE" && bjIsHost) {
+    if (h.cards[idx].length !== 2) return;
     h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++], isNew: true });
     if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - h.bet[idx];
+    if (fromPid === bjMyId) {
+      ctx.S.coins -= h.bet[idx];
+      save();
+      renderStatus();
+    } else if (bjConns[fromPid]) {
+      bjConns[fromPid].send({ type: "DEDUCT_COINS", amount: h.bet[idx] });
+    }
     h.bet[idx] *= 2;
     h.stood[idx] = true;
     h.doubled[idx] = true;
     bjBroadcastProfits();
   } else if (data.actionType === "SPLIT" && bjIsHost) {
+    if (h.cards[idx].length !== 2 || h.cards[idx][0].rank !== h.cards[idx][1].rank) return;
     if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - h.bet[idx];
+    if (fromPid === bjMyId) {
+      ctx.S.coins -= h.bet[idx];
+      save();
+      renderStatus();
+    } else if (bjConns[fromPid]) {
+      bjConns[fromPid].send({ type: "DEDUCT_COINS", amount: h.bet[idx] });
+    }
     const c2 = h.cards[idx].pop();
     h.cards.splice(idx + 1, 0, [c2]);
     const sc = gs.shoe[gs.shoeIdx++];
@@ -52034,7 +53668,7 @@ function bjHostEndRound() {
           continue;
         }
         if (pBJ) {
-          p2 += bet + Math.floor(bet * 1.5);
+          p2 += bet + Math.floor(bet * 1.2);
           continue;
         }
         if (dBJ) continue;
@@ -52054,11 +53688,6 @@ function bjHostEndRound() {
     if (bjPlayers[pid]) bjPlayers[pid].netProfit = (bjPlayers[pid].netProfit || 0) + payouts[pid];
   }
   bjBroadcastProfits();
-  if (payouts[bjMyId]) {
-    ctx.S.coins = (ctx.S.coins || 0) + payouts[bjMyId];
-    save();
-    renderStatus();
-  }
   const msg = { type: "SUMMARY_START", payouts, dealerHand: gs.dealerHand, gs: JSON.parse(JSON.stringify(gs)) };
   bjBroadcast(msg);
   bjHandleMsg(bjMyId, msg);
@@ -52405,8 +54034,6 @@ function bjBindMyActions() {
     const h = gs?.hands?.[bjMyId];
     const ins = Math.floor((h?.bet[0] || 0) / 2);
     if ((ctx.S.coins || 0) < ins) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng");
-    ctx.S.coins = (ctx.S.coins || 0) - ins;
-    save();
     bjRoomAction("INSURANCE_ANSWER", { answer: "ins" });
   });
   $id("bj-rm-skip-ins")?.addEventListener("click", () => bjRoomAction("INSURANCE_ANSWER", { answer: "skip" }));
@@ -52417,8 +54044,6 @@ function bjBindMyActions() {
     const idx = h?.activeHandIdx || 0;
     const bet = h?.bet[idx] || 0;
     if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Double");
-    ctx.S.coins = (ctx.S.coins || 0) - bet;
-    save();
     bjRoomAction("DOUBLE");
   });
   $id("bj-rm-split")?.addEventListener("click", () => {
@@ -52426,8 +54051,6 @@ function bjBindMyActions() {
     const idx = h?.activeHandIdx || 0;
     const bet = h?.bet[idx] || 0;
     if ((ctx.S.coins || 0) < bet) return bjToast("Kh\xF4ng \u0111\u1EE7 v\xE0ng Split");
-    ctx.S.coins = (ctx.S.coins || 0) - bet;
-    save();
     bjRoomAction("SPLIT");
   });
   $id("bj-rm-surrender")?.addEventListener("click", () => bjRoomAction("SURRENDER"));
@@ -52556,12 +54179,8 @@ var init_blackjack = __esm({
       const coins = ctx.S.coins || 0;
       if (coins < amt) return bjToast("B\u1EA1n kh\xF4ng \u0111\u1EE7 ti\u1EC1n!");
       const give = Math.min(amt, remaining);
-      ctx.S.coins = coins - give;
-      save();
-      renderStatus();
-      const msg = { type: "GIVE_MONEY", reqId, from: bjMyName(), amount: give };
-      bjHandleMsg(bjMyId, msg);
-      if (bjIsHost) bjBroadcast(msg);
+      const msg = { type: "GIVE_MONEY_REQ", reqId, from: bjMyName(), amount: give };
+      if (bjIsHost) bjHandleMsg(bjMyId, msg);
       else bjBroadcast(msg);
     };
   }
@@ -53730,6 +55349,8 @@ function cookRecipe(recipeId) {
   }
   const foodKey = `food_${recipeId}`;
   ctx.S.bag[foodKey] = (ctx.S.bag[foodKey] || 0) + 1;
+  if (!ctx.S.stats) ctx.S.stats = { totalHarvests: 0, totalCrits: 0, kills: 0, totalCooked: 0 };
+  ctx.S.stats.totalCooked = (ctx.S.stats.totalCooked || 0) + 1;
   toast(`\u{1F373} \u0110\xE3 n\u1EA5u th\xE0nh c\xF4ng m\xF3n ${recipe.name}! M\xF9i th\u01A1m n\u1EE9c m\u0169i!`);
   save();
   renderStatus();
@@ -54772,6 +56393,962 @@ var init_lixi = __esm({
   }
 });
 
+// src/stock.js
+function fmtMoney(num) {
+  if (num === 0) return "0.00";
+  const abs = Math.abs(num);
+  let res = "";
+  if (abs >= 1e3) {
+    const units = ["", "k", "m", "b", "t", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
+    const tier = Math.floor(Math.log10(abs) / 3);
+    if (tier < units.length) {
+      res = (abs / Math.pow(10, tier * 3)).toFixed(2) + units[tier];
+    } else {
+      res = abs.toExponential(2);
+    }
+  } else {
+    res = abs.toFixed(2);
+  }
+  return (num < 0 ? "-" : "") + res;
+}
+function fmtPct(p2) {
+  if (p2 === 0) return "0.0%";
+  const abs = Math.abs(p2);
+  let str = abs >= 1e6 ? ">" + 1e6.toFixed(0) + "%" : abs.toFixed(1) + "%";
+  return (p2 > 0 ? "+" : "-") + str;
+}
+function stepPrice(t2) {
+  const S = STOCKS[t2];
+  const hist = ctx.S.stock.history[t2];
+  let price = hist[hist.length - 1];
+  let trend = ctx.S.stock.trends[t2];
+  const priceRatio = price / S.startPrice;
+  trend += (Math.random() - 0.5) * S.trendNoise;
+  if (S.pumpChance && Math.random() < S.pumpChance) {
+    trend += S.pumpStrength;
+  }
+  let gravity = 0;
+  for (const zone of S.gravityZones) {
+    if (zone.above !== void 0 && priceRatio > zone.above) {
+      gravity = zone.pull;
+      break;
+    }
+    if (zone.below !== void 0 && priceRatio < zone.below) {
+      gravity = zone.pull;
+      break;
+    }
+  }
+  trend += gravity;
+  trend *= S.trendDecay;
+  trend = Math.max(-1, Math.min(1, trend));
+  let currentDrift = ctx.S.stock && ctx.S.stock.currentDrifts && ctx.S.stock.currentDrifts[t2] !== void 0 ? ctx.S.stock.currentDrifts[t2] : S.drift;
+  let change = currentDrift + S.vol * (Math.random() - 0.5 + trend * 0.5);
+  change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
+  let newPrice = Math.max(1, price * (1 + change));
+  hist.push(newPrice);
+  if (hist.length > 30) hist.shift();
+  ctx.S.stock.trends[t2] = trend;
+}
+function updateMarket(now2 = Date.now()) {
+  if (!ctx.S.stock) return;
+  if (ctx.S.stock.totalDeposited === void 0) {
+    let initialEquity = ctx.S.stock.balance - (ctx.S.stock.debt || 0);
+    Object.keys(STOCKS).forEach((t2) => {
+      initialEquity += (ctx.S.stock.portfolio?.[t2] || 0) * (ctx.S.stock.history?.[t2]?.[0] || STOCKS[t2].startPrice);
+    });
+    ctx.S.stock.totalDeposited = Math.max(0, initialEquity);
+    ctx.S.stock.totalWithdrawn = 0;
+  }
+  Object.keys(STOCKS).forEach((t2) => {
+    if (!ctx.S.stock.history[t2]) ctx.S.stock.history[t2] = [STOCKS[t2].startPrice];
+    if (ctx.S.stock.trends[t2] === void 0) ctx.S.stock.trends[t2] = 0;
+    if (ctx.S.stock.portfolio[t2] === void 0) ctx.S.stock.portfolio[t2] = 0;
+    while (ctx.S.stock.history[t2].length < 30) stepPrice(t2);
+  });
+  if (!ctx.S.stock.currentDrifts) {
+    ctx.S.stock.currentDrifts = {};
+    Object.keys(STOCKS).forEach((t2) => {
+      ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * 0.04 - 0.02;
+    });
+  }
+  if (!ctx.S.stock.nextIntervalMs) {
+    ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 16e4) + 2e4;
+  }
+  let updated = false;
+  while (now2 - ctx.S.stock.lastUpdate >= ctx.S.stock.nextIntervalMs) {
+    ctx.S.stock.lastUpdate += ctx.S.stock.nextIntervalMs;
+    ctx.S.stock.candleCount = (ctx.S.stock.candleCount || 0) + 1;
+    if (ctx.S.stock.candleCount % 100 === 0) {
+      Object.keys(STOCKS).forEach((t2) => {
+        const isExtreme = Math.random() < 0.1;
+        const range = isExtreme ? 0.04 : 0.02;
+        const offset = isExtreme ? -0.02 : -0.01;
+        ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * range + offset;
+      });
+      if (ctx.S.stock.debt && ctx.S.stock.debt > 0) {
+        ctx.S.stock.debt *= 1.01;
+      }
+    }
+    Object.keys(STOCKS).forEach((t2) => {
+      stepPrice(t2);
+      checkAutoOrders(t2, ctx.S.stock.history[t2][ctx.S.stock.history[t2].length - 1]);
+    });
+    checkMarginCall();
+    ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 16e4) + 2e4;
+    updated = true;
+  }
+  return updated;
+}
+function checkMarginCall() {
+  let equity = ctx.S.stock.balance;
+  Object.keys(ctx.S.stock.portfolio).forEach((t2) => {
+    const hist = ctx.S.stock.history[t2];
+    const currentPrice = hist ? hist[hist.length - 1] : 0;
+    equity += (ctx.S.stock.portfolio[t2] || 0) * currentPrice;
+  });
+  equity -= ctx.S.stock.debt || 0;
+  if (ctx.S.stock.debt > 0 && equity < ctx.S.stock.debt * 0.2) {
+    Object.keys(ctx.S.stock.portfolio).forEach((t2) => {
+      const hist = ctx.S.stock.history[t2];
+      const currentPrice = hist ? hist[hist.length - 1] : 0;
+      ctx.S.stock.balance += (ctx.S.stock.portfolio[t2] || 0) * currentPrice;
+      ctx.S.stock.portfolio[t2] = 0;
+    });
+    ctx.S.stock.balance -= ctx.S.stock.debt;
+    ctx.S.stock.debt = 0;
+    if (toast) toast("\u26A0\uFE0F B\u1ECA CALL MARGIN! B\xE1n th\xE1o to\xE0n b\u1ED9 t\xE0i s\u1EA3n!");
+  }
+}
+function depositBrokerage(amount) {
+  if (amount <= 0 || ctx.S.coins < amount) return false;
+  ctx.S.coins -= amount;
+  const received = amount * 0.9;
+  ctx.S.stock.balance += received;
+  ctx.S.stock.totalDeposited = (ctx.S.stock.totalDeposited || 0) + received;
+  ctx.S.stock.session = {
+    startTime: Date.now(),
+    startBalance: ctx.S.stock.balance,
+    startPortfolio: Object.assign({}, ctx.S.stock.portfolio),
+    startPrices: Object.keys(STOCKS).reduce((acc, t2) => {
+      const h = ctx.S.stock.history[t2];
+      acc[t2] = h ? h[h.length - 1] : STOCKS[t2].startPrice;
+      return acc;
+    }, {})
+  };
+  return true;
+}
+function withdrawBrokerage(amount) {
+  if (amount <= 0 || ctx.S.stock.balance < amount) return false;
+  ctx.S.stock.balance -= amount;
+  ctx.S.coins += amount * 0.9;
+  ctx.S.stock.totalWithdrawn = (ctx.S.stock.totalWithdrawn || 0) + amount;
+  ctx.S.stock.session = {
+    startTime: Date.now(),
+    startBalance: ctx.S.stock.balance,
+    startPortfolio: Object.assign({}, ctx.S.stock.portfolio),
+    startPrices: Object.keys(STOCKS).reduce((acc, t2) => {
+      const h = ctx.S.stock.history[t2];
+      acc[t2] = h ? h[h.length - 1] : STOCKS[t2].startPrice;
+      return acc;
+    }, {})
+  };
+  return true;
+}
+function buyStock(ticker, shares) {
+  if (shares <= 0) return false;
+  const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
+  const cost = price * shares;
+  if (ctx.S.stock.balance >= cost) {
+    ctx.S.stock.balance -= cost;
+    ctx.S.stock.portfolio[ticker] = (ctx.S.stock.portfolio[ticker] || 0) + shares;
+    if (!ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost = {};
+    ctx.S.stock.portfolioCost[ticker] = (ctx.S.stock.portfolioCost[ticker] || 0) + cost;
+    return true;
+  }
+  return false;
+}
+function sellStock(ticker, shares) {
+  if (shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
+  const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
+  const revenue = price * shares * 0.98;
+  if (!ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost = {};
+  const oldShares = ctx.S.stock.portfolio[ticker];
+  const avgCostPerShare = oldShares > 0 ? (ctx.S.stock.portfolioCost[ticker] || 0) / oldShares : 0;
+  ctx.S.stock.portfolio[ticker] -= shares;
+  if (ctx.S.stock.portfolio[ticker] < 1e-6) ctx.S.stock.portfolio[ticker] = 0;
+  ctx.S.stock.balance += revenue;
+  if (ctx.S.stock.portfolio[ticker] === 0) {
+    ctx.S.stock.portfolioCost[ticker] = 0;
+  } else {
+    ctx.S.stock.portfolioCost[ticker] -= avgCostPerShare * shares;
+  }
+  return true;
+}
+function placeAutoOrder(ticker, type, targetPrice, shares) {
+  if (shares <= 0 || targetPrice <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
+  if (!ctx.S.stock.autoOrders) ctx.S.stock.autoOrders = [];
+  ctx.S.stock.autoOrders.push({
+    id: Date.now().toString() + Math.random().toString(),
+    ticker,
+    type,
+    targetPrice,
+    shares,
+    status: "PENDING"
+  });
+  return true;
+}
+function cancelAutoOrder(id) {
+  if (!ctx.S.stock.autoOrders) return false;
+  const order = ctx.S.stock.autoOrders.find((o2) => o2.id === id);
+  if (order) {
+    order.status = "CANCELED_USER";
+    ctx.S.stock.autoOrders = ctx.S.stock.autoOrders.filter((o2) => o2.id !== id);
+    return true;
+  }
+  return false;
+}
+function checkAutoOrders(ticker, currentPrice) {
+  if (!ctx.S.stock.autoOrders) return;
+  const orders = ctx.S.stock.autoOrders.filter((o2) => o2.ticker === ticker && o2.status === "PENDING");
+  orders.forEach((order) => {
+    let triggered = false;
+    if (order.type === "TP" && currentPrice >= order.targetPrice) triggered = true;
+    if (order.type === "SL" && currentPrice <= order.targetPrice) triggered = true;
+    if (triggered) {
+      let sharesToSell = order.shares;
+      let portfolioShares = ctx.S.stock.portfolio[ticker] || 0;
+      if (portfolioShares <= 0) {
+        order.status = "CANCELED_NO_SHARES";
+      } else {
+        if (sharesToSell > portfolioShares) sharesToSell = portfolioShares;
+        if (sellStock(ticker, sharesToSell)) {
+          order.status = "EXECUTED";
+          order.executionPrice = currentPrice;
+          order.timestamp = Date.now();
+        } else {
+          order.status = "FAILED";
+        }
+      }
+      ctx.S.stock.autoOrders = ctx.S.stock.autoOrders.filter((o2) => o2.id !== order.id);
+      if (!ctx.S.stock.orderLogs) ctx.S.stock.orderLogs = [];
+      ctx.S.stock.orderLogs.unshift({ ...order });
+      if (ctx.S.stock.orderLogs.length > 20) ctx.S.stock.orderLogs.length = 20;
+    }
+  });
+}
+function borrowMargin(amount) {
+  if (amount <= 0) return false;
+  ctx.S.stock.debt = (ctx.S.stock.debt || 0) + amount;
+  ctx.S.stock.balance += amount * 0.98;
+  return true;
+}
+function repayMargin(amount) {
+  if (amount <= 0 || ctx.S.stock.balance < amount || (ctx.S.stock.debt || 0) < amount) return false;
+  ctx.S.stock.balance -= amount;
+  ctx.S.stock.debt -= amount;
+  return true;
+}
+function renderStockChart(ticker) {
+  const history = ctx.S.stock.history[ticker] || [];
+  if (history.length === 0) return "";
+  const basePrice = STOCKS[ticker].startPrice;
+  let minHist = Math.min(...history);
+  let maxHist = Math.max(...history);
+  let range = maxHist - minHist;
+  if (range === 0) range = basePrice * 0.01;
+  const minPrice = Math.max(0, minHist - range * 0.1);
+  const maxPrice = maxHist + range * 0.1;
+  range = maxPrice - minPrice;
+  let html = `<div style="display: flex; align-items: flex-end; height: 180px; width: 100%; border-bottom: 2px solid #475569; padding-left: 5px; gap: 4px; position: relative;">`;
+  html += `
+    <div style="position: absolute; top: 25%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); pointer-events: none;"></div>
+    <div style="position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); pointer-events: none;"></div>
+    <div style="position: absolute; top: 75%; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.05); pointer-events: none;"></div>
+  `;
+  if (basePrice >= minPrice && basePrice <= maxPrice) {
+    const basePct = (basePrice - minPrice) / range * 100;
+    html += `<div style="position: absolute; bottom: ${basePct}%; left: 0; width: 100%; height: 1px; border-bottom: 1px dashed rgba(234, 179, 8, 0.5); z-index: 1;" title="Gi\xE1 n\u1EC1n: $${fmtMoney(basePrice)}"></div>`;
+  }
+  for (let i2 = 0; i2 < history.length; i2++) {
+    const price = history[i2];
+    const prevPrice = i2 > 0 ? history[i2 - 1] : price;
+    const color = price >= prevPrice ? "#22c55e" : "#ef4444";
+    const lowEnd = Math.min(price, prevPrice);
+    const highEnd = Math.max(price, prevPrice);
+    const bottomPct = (lowEnd - minPrice) / range * 100;
+    const heightPct = Math.max(1, (highEnd - lowEnd) / range * 100);
+    const seed = price * 1e4;
+    const wickExtend = seed % 4 + 1;
+    html += `
+      <div style="flex: 1; min-width: 4px; position: relative; height: 100%;" title="$${fmtMoney(price)}">
+        <!-- Wick -->
+        <div style="position: absolute; width: 1px; background: ${color}; left: 50%; transform: translateX(-50%); 
+                    bottom: ${Math.max(0, bottomPct - wickExtend)}%; height: ${heightPct + wickExtend * 2}%;"></div>
+        <!-- Body -->
+        <div style="width: 100%; background: ${color}; position: absolute; bottom: ${bottomPct}%; height: ${heightPct}%; border-radius: 1px; z-index: 2;"></div>
+      </div>
+    `;
+  }
+  html += `</div>`;
+  return html;
+}
+function openStockModal() {
+  if (!ctx.S.stock) return;
+  updateMarket();
+  let currentTradeAmt = "10";
+  let currentTransferAmt = "1000";
+  const existingTrade = $id("stk-trade-amt");
+  const existingTransfer = $id("stk-transfer-amt");
+  if (existingTrade) currentTradeAmt = existingTrade.value;
+  if (existingTransfer) currentTransferAmt = existingTransfer.value;
+  const activeId = document.activeElement ? document.activeElement.id : null;
+  let totalPortfolioValue = 0;
+  Object.keys(STOCKS).forEach((t2) => {
+    const price = ctx.S.stock.history[t2][ctx.S.stock.history[t2].length - 1];
+    totalPortfolioValue += (ctx.S.stock.portfolio[t2] || 0) * price;
+  });
+  let equity = ctx.S.stock.balance + totalPortfolioValue - (ctx.S.stock.debt || 0);
+  const currentPrice = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
+  const sharesOwned = ctx.S.stock.portfolio[selectedStock] || 0;
+  let netInvested = ctx.S.stock.totalDeposited - ctx.S.stock.totalWithdrawn;
+  let pl = equity - netInvested;
+  let plPercent = netInvested !== 0 ? pl / Math.abs(netInvested) * 100 : 0;
+  let plColor = pl >= 0 ? "#22c55e" : "#ef4444";
+  let debtRatio = equity > 0 ? (ctx.S.stock.debt || 0) / equity * 100 : 0;
+  let debtRatioColor = debtRatio > 50 ? "#ef4444" : debtRatio > 25 ? "#eab308" : "#22c55e";
+  const sess = ctx.S.stock.session;
+  let sessBlock = "";
+  if (sess && sess.startTime) {
+    let sessPortfolioNow = 0;
+    let sessPortfolioStart = 0;
+    Object.keys(STOCKS).forEach((t2) => {
+      const sharesAtStart = sess.startPortfolio[t2] || 0;
+      const priceNow = ctx.S.stock.history[t2][ctx.S.stock.history[t2].length - 1];
+      const priceStart = sess.startPrices[t2] || priceNow;
+      sessPortfolioNow += sharesAtStart * priceNow;
+      sessPortfolioStart += sharesAtStart * priceStart;
+    });
+    const sessEquityStart = sess.startBalance + sessPortfolioStart;
+    const sessEquityNow = equity;
+    const sessPL = sessEquityNow - sessEquityStart;
+    const sessPLPct = sessEquityStart !== 0 ? sessPL / Math.abs(sessEquityStart) * 100 : 0;
+    const sessColor = sessPL >= 0 ? "#22c55e" : "#ef4444";
+    const sessDuration = Date.now() - sess.startTime;
+    const sessMins = Math.floor(sessDuration / 6e4);
+    const sessHours = Math.floor(sessMins / 60);
+    const sessLabel = sessHours > 0 ? `${sessHours}h ${sessMins % 60}m` : `${sessMins}m`;
+    sessBlock = `
+      <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; border: 1px solid #334155;">
+        <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <span>\u26A1 Phi\xEAn N\xE0y</span>
+            <button id="stk-reset-sess" title="\u1EA4n gi\u1EEF 1s \u0111\u1EC3 \u0111\u1EB7t l\u1EA1i m\u1ED1c l\u1EE3i nhu\u1EADn t\u1EEB s\u1ED1 TS hi\u1EC7n t\u1EA1i" style="background: none; border: 1px solid #475569; border-radius: 4px; color: #94a3b8; font-size: 9px; padding: 1px 4px; cursor: pointer; transition: all 0.3s;">\u{1F504}</button>
+          </div>
+          <span style="color: #a855f7; font-weight: bold; margin-right: 10px;">\u23F3 M\xF9a: ${(ctx.S.stock.candleCount || 0) % 100}/100 n\u1EBFn</span>
+          <span style="color: #475569; font-size: 9px;">${sessLabel} tr\u01B0\u1EDBc</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+          <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 6px;">
+            <div style="font-size: 9px; color: #64748b;">V\u1ED1n ban \u0111\u1EA7u</div>
+            <div style="font-size: 11px; font-weight: bold; color: #e2e8f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(sessEquityStart)}</div>
+          </div>
+          <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 6px;">
+            <div style="font-size: 9px; color: #64748b;">Hi\u1EC7n t\u1EA1i</div>
+            <div style="font-size: 11px; font-weight: bold; color: #e2e8f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(sessEquityNow)}</div>
+          </div>
+          <div style="text-align: center; background: ${sessColor}18; border: 1px solid ${sessColor}40; padding: 5px; border-radius: 6px; grid-column: span 2;">
+            <div style="font-size: 9px; color: #64748b;">L\xE3i/L\u1ED7 phi\xEAn</div>
+            <div style="font-size: 14px; font-weight: 800; color: ${sessColor};">${sessPL >= 0 ? "+" : ""}$${fmtMoney(sessPL)} <span style="font-size: 11px;">(${fmtPct(sessPLPct)})</span></div>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    sessBlock = `<div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; border: 1px dashed #334155; text-align: center; font-size: 11px; color: #475569;">\u26A1 N\u1EA1p ti\u1EC1n l\u1EA7n \u0111\u1EA7u \u0111\u1EC3 theo d\xF5i phi\xEAn</div>`;
+  }
+  let bodyHTML = `
+    <div style="display: flex; flex-direction: column; gap: 12px; color: #e2e8f0;">
+      
+      <!-- Top Bar: Portfolio Info (responsive grid) -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px; background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">T\u1ED5ng TS</div>
+          <div style="font-weight: 800; font-size: 15px; color: #a855f7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(equity)}</div>
+        </div>
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Ti\u1EC1n M\u1EB7t</div>
+          <div style="font-weight: 800; font-size: 15px; color: #22c55e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(ctx.S.stock.balance)}</div>
+        </div>
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">N\u1EE3 Margin</div>
+          <div style="font-weight: 800; font-size: 15px; color: #ef4444; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">$${fmtMoney(ctx.S.stock.debt || 0)}</div>
+          <div style="font-size: 10px; color: ${debtRatioColor};">${debtRatio.toFixed(1)}% v\u1ED1n</div>
+        </div>
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">\u0110\u1EA7u T\u01B0 / R\xFAt</div>
+          <div style="font-size: 11px; color: #e2e8f0;">
+            <span style="color:#eab308">+$${fmtMoney(ctx.S.stock.totalDeposited)}</span><br><span style="color:#06b6d4">-$${fmtMoney(ctx.S.stock.totalWithdrawn)}</span>
+          </div>
+        </div>
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 6px; border-radius: 8px;">
+          <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">L\xE3i/L\u1ED7</div>
+          <div style="font-weight: 800; font-size: 14px; color: ${plColor}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${pl >= 0 ? "+" : ""}$${fmtMoney(pl)}</div>
+          <div style="font-size: 10px; color: ${plColor};">${fmtPct(plPercent)}</div>
+        </div>
+      </div>
+
+      <!-- Help Panel -->
+      <div id="stk-help-panel" style="display: none; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 1px solid #475569; margin-bottom: 15px; color: #cbd5e1; font-size: 13px; line-height: 1.5; text-align: left;">
+        <details style="margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">\u{1F530} 1. H\u01B0\u1EDBng D\u1EABn Ch\u01A1i (D\xE0nh cho ng\u01B0\u1EDDi m\u1EDBi)</summary>
+          <div style="margin-top:8px;">
+            <p style="margin-top:0;">N\u1EBFu b\u1EA1n ch\u01B0a t\u1EEBng ch\u01A1i ch\u1EE9ng kho\xE1n, \u0111\u1EEBng lo! H\xE3y l\xE0m theo 4 b\u01B0\u1EDBc c\u01A1 b\u1EA3n sau:</p>
+            <ol style="padding-left: 20px; margin-bottom: 4px;">
+              <li style="margin-bottom: 4px;"><b>N\u1EA1p ti\u1EC1n:</b> \u1EDE g\xF3c tr\xE1i, nh\u1EADp s\u1ED1 V\xE0ng b\u1EA1n mu\u1ED1n ch\u01A1i v\xE0o \xF4 tr\u1ED1ng, r\u1ED3i b\u1EA5m <b>"N\u1EA1p Ti\u1EC1n"</b> \u0111\u1EC3 quy \u0111\u1ED5i ra Ti\u1EC1n M\u1EB7t ($). <i>(L\u01B0u \xFD: N\u1EA1p/R\xFAt s\u1EBD m\u1EA5t 10% ph\xED)</i>.</li>
+              <li style="margin-bottom: 4px;"><b>Ch\u1ECDn m\xE3:</b> Nh\xECn sang khu v\u1EF1c bi\u1EC3u \u0111\u1ED3 b\xEAn ph\u1EA3i. B\u1EA5m v\xE0o c\xE1c th\u1EBB (VD: <b>SIL, FARM, CRASH</b>) \u0111\u1EC3 xem gi\xE1 c\u1EE7a t\u1EEBng lo\u1EA1i. M\u0169i t\xEAn xanh/\u0111\u1ECF cho bi\u1EBFt gi\xE1 \u0111ang t\u0103ng hay gi\u1EA3m so v\u1EDBi phi\xEAn tr\u01B0\u1EDBc.</li>
+              <li style="margin-bottom: 4px;"><b>Mua v\xE0o (B\u1EAFt \u0111\xE1y):</b> Nh\u1EADp s\u1ED1 l\u01B0\u1EE3ng c\u1ED5 phi\u1EBFu b\u1EA1n mu\u1ED1n mua v\xE0o \xF4 "S\u1ED1 cp", r\u1ED3i b\u1EA5m n\xFAt <b>MUA</b> m\xE0u xanh. H\xE3y mua khi Gi\xE1 \u0111ang th\u1EA5p h\u01A1n <b>Gi\xE1 N\u1EC1n</b> (\u0111\u01B0\u1EDDng \u0111\u1EE9t n\xE9t m\xE0u v\xE0ng).</li>
+              <li style="margin-bottom: 4px;"><b>B\xE1n ra (Ch\u1ED1t l\u1EDDi):</b> \u0110\u1EE3i c\xE1c n\u1EBFn tr\xEAn bi\u1EC3u \u0111\u1ED3 ch\u1EA1y, khi gi\xE1 t\u0103ng cao h\u01A1n m\u1EE9c <b>Gi\xE1 V\u1ED1n</b> c\u1EE7a b\u1EA1n, b\u1EA5m n\xFAt <b>B\xC1N</b> m\xE0u \u0111\u1ECF \u0111\u1EC3 thu Ti\u1EC1n M\u1EB7t ($) v\u1EC1. Sau \u0111\xF3 b\u1EA1n c\xF3 th\u1EC3 R\xFAt Ti\u1EC1n \u0111\u1EC3 \u0111\u1ED5i ng\u01B0\u1EE3c ra V\xE0ng!</li>
+            </ol>
+          </div>
+        </details>
+        <details style="margin-bottom: 5px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">\u{1F50D} 2. Gi\u1EA3i m\xE3 C\xE1c Ch\u1EC9 S\u1ED1 (N\xE2ng cao)</summary>
+          <ul style="padding-left: 20px; margin-top: 8px; margin-bottom: 4px;">
+            <li style="margin-bottom: 4px;"><b style="color:#eab308">Gi\xE1 n\u1EC1n (Base):</b> Gi\xE1 tr\u1ECB th\u1EF1c c\u1EE7a c\u1ED5 phi\u1EBFu (\u0110\u01B0\u1EDDng \u0111\u1EE9t n\xE9t). Gi\xE1 c\xE0ng v\u1ECDt xa Gi\xE1 n\u1EC1n, "l\u1EF1c h\xFAt" k\xE9o v\u1EC1 c\xE0ng m\u1EA1nh.</li>
+            <li style="margin-bottom: 4px;"><b style="color:#3b82f6">Vol (Bi\u1EBFn \u0111\u1ED9ng):</b> Bi\xEAn \u0111\u1ED9 dao \u0111\u1ED9ng t\u1ED1i \u0111a c\u1EE7a m\u1ED7i phi\xEAn (n\u1EBFn). Vol c\xE0ng to, gi\xE1 nh\u1EA3y c\xE0ng m\u1EA1nh.</li>
+            <li style="margin-bottom: 4px;"><b style="color:#ef4444">Drift (\u0110\u1ED9 tr\xF4i):</b> "L\u1EF1c \u0111\u1EA9y" ng\u1EA7m \u0111\u1ECBnh c\u1EE7a th\u1ECB tr\u01B0\u1EDDng. Drift \xE2m ngh\u0129a l\xE0 v\u1EC1 d\xE0i h\u1EA1n c\u1ED5 phi\u1EBFu s\u1EBD c\xF3 xu h\u01B0\u1EDBng r\u1EDBt gi\xE1 li\xEAn t\u1EE5c. <b style="color:#22c55e">C\u01A1 ch\u1EBF th\xFA v\u1ECB:</b> Drift s\u1EBD xoay chi\u1EC1u ng\u1EABu nhi\xEAn m\u1ED7i <b>100 n\u1EBFn (1 M\xF9a)</b>. H\xE3y nh\xECn thanh \u23F3 M\xF9a \u1EDF g\xF3c tr\xEAn!</li>
+            <li style="margin-bottom: 4px;"><b style="color:#a855f7">Gi\xE1 v\u1ED1n:</b> Trung b\xECnh s\u1ED1 ti\u1EC1n b\u1EA1n \u0111\xE3 b\u1ECF ra cho m\u1ED7i c\u1ED5 phi\u1EBFu \u0111ang gi\u1EEF.</li>
+            <li><b style="color:#a855f7">S\u1EE9c mua Margin:</b> Khi h\u1EBFt Ti\u1EC1n M\u1EB7t, b\u1EA1n c\xF3 th\u1EC3 vay n\u1EE3 \u0111\u1EC3 ti\u1EBFp t\u1EE5c \u0111\xE1nh l\u1EDBn (B\u1EA5m <b>Vay Margin</b>). T\u1ED5ng s\u1ED1 ti\u1EC1n b\u1EA1n c\xF3 th\u1EC3 vay t\u01B0\u01A1ng \u0111\u01B0\u01A1ng x2 t\u1ED5ng t\xE0i s\u1EA3n hi\u1EC7n c\xF3. S\u1EE9c mua th\u1EF1c t\u1EBF b\u1EB1ng Ti\u1EC1n M\u1EB7t c\u1ED9ng H\u1EA1n m\u1EE9c vay c\xF2n l\u1EA1i.</li>
+          </ul>
+        </details>
+        <details style="background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 8px;">
+          <summary style="cursor:pointer; color:#e2e8f0; font-weight:bold; list-style: none;">\u{1F4A1} 3. C\u1EA3nh B\xE1o Ch\xE1y T\xE0i Kho\u1EA3n (Margin Call)</summary>
+          <p style="margin-top:8px; margin-bottom:4px; color:#fca5a5;">S\u1EED d\u1EE5ng \u0111\xF2n b\u1EA9y (Margin) l\xE0 con dao hai l\u01B0\u1EE1i!</p>
+          <ul style="padding-left: 20px; margin-top: 4px; margin-bottom: 4px;">
+            <li style="margin-bottom: 4px;">Khi b\u1EA1n vay n\u1EE3, b\u1EA1n s\u1EBD ph\u1EA3i tr\u1EA3 l\xE3i 5% m\u1ED7i l\u1EA7n b\u1EA5m Vay.</li>
+            <li style="margin-bottom: 4px;">N\u1EBFu th\u1ECB tr\u01B0\u1EDDng lao d\u1ED1c, T\u1ED5ng t\xE0i s\u1EA3n c\u1EE7a b\u1EA1n s\u1EBD gi\u1EA3m \u0111i.</li>
+            <li><b style="color:#ef4444">N\u1EBEU T\u1EC8 L\u1EC6 N\u1EE2 V\u01AF\u1EE2T QU\xC1 80% V\u1ED0N:</b> S\xE0n s\u1EBD ti\u1EBFn h\xE0nh <b>Call Margin</b>. To\xE0n b\u1ED9 c\u1ED5 phi\u1EBFu c\u1EE7a b\u1EA1n s\u1EBD b\u1ECB \xE9p b\xE1n th\xE1o t\u1EF1 \u0111\u1ED9ng \u1EDF gi\xE1 r\u1EBB m\u1EA1t \u0111\u1EC3 si\u1EBFt n\u1EE3. B\u1EA1n s\u1EBD m\u1EA5t tr\u1EAFng tay!</li>
+          </ul>
+        </details>
+      </div>
+
+      <!-- Main Layout: Sidebar & Content -->
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; flex: 1;">
+        
+        <!-- Left Panel: Banking & Margin -->
+        <div style="flex: 1; min-width: 230px; background: #1e293b; padding: 12px; border-radius: 12px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 13px; font-weight: bold; color: #cbd5e1; border-bottom: 1px solid #334155; padding-bottom: 6px;">T\xE0i Kho\u1EA3n & K\xFD Qu\u1EF9</div>
+          
+          <div style="background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #1e293b;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+              <div style="font-size: 12px; color: #94a3b8;">V\xED V\xE0ng: <span style="color:#eab308; font-weight: bold;">${fmtMoney(Math.floor(ctx.S.coins))} G</span></div>
+              <div style="font-size: 11px; color: #94a3b8;">S\u1EE9c mua: <span style="color:#a855f7; font-weight: bold;">$${fmtMoney(ctx.S.stock.balance + Math.max(0, equity * 2 - (ctx.S.stock.debt || 0)))}</span></div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
+              <input type="number" id="stk-transfer-amt" value="${currentTransferAmt}" style="flex: 1; min-width: 80px; padding: 8px; background: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" />
+              <button id="stk-max-deposit" style="background: rgba(59,130,246,0.2); color: #3b82f6; border: 1px solid rgba(59,130,246,0.4); border-radius: 4px; padding: 6px 10px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">ALL G</button>
+              <button id="stk-max-withdraw" style="background: rgba(148,163,184,0.2); color: #cbd5e1; border: 1px solid rgba(148,163,184,0.4); border-radius: 4px; padding: 6px 10px; font-size: 11px; font-weight: bold; cursor: pointer; white-space: nowrap;">ALL $</button>
+            </div>
+            <div style="font-size: 10px; color: #f87171; margin-top: 4px; font-style: italic;">*Ph\xED 10% m\u1ED7i l\u1EA7n chuy\u1EC3n \u0111\u1ED5i</div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button id="stk-deposit" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(37,99,235,0.3);">N\u1EA1p Ti\u1EC1n</button>
+            <button id="stk-withdraw" style="background: #334155; color: white; border: 1px solid #475569; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer;">R\xFAt Ti\u1EC1n</button>
+          </div>
+
+          ${sessBlock}
+
+          <!-- Margin Info -->
+          <div style="background: #0f172a; padding: 10px; border-radius: 8px; border: 1px solid #334155;">
+            <div style="font-size: 12px; color: #94a3b8;">N\u1EE3 Margin: <span style="color: #ef4444; font-weight: bold;">$${fmtMoney(ctx.S.stock.debt || 0)}</span></div>
+            <div style="font-size: 10px; color: #64748b; margin-top: 2px; margin-bottom: 8px;">T\u1EC9 l\u1EC7 n\u1EE3/v\u1ED1n: <span style="color: ${debtRatioColor}; font-weight: bold;">${debtRatio.toFixed(1)}%</span> (call \u1EDF 80%)</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+              <button id="stk-max-borrow" style="flex: 1; background: rgba(168,85,247,0.1); color: #a855f7; border: 1px solid rgba(168,85,247,0.3); border-radius: 4px; padding: 4px; font-size: 10px; font-weight: bold; cursor: pointer;">ALL Vay</button>
+              <button id="stk-max-repay" style="flex: 1; background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.3); border-radius: 4px; padding: 4px; font-size: 10px; font-weight: bold; cursor: pointer;">ALL Tr\u1EA3</button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto;">
+            <button id="stk-borrow" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(239,68,68,0.3);" title="Vay ti\u1EC1n (Ph\xED 2%)">Vay Margin</button>
+            <button id="stk-repay" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 9px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 2px 4px rgba(16,185,129,0.3);">Tr\u1EA3 Margin</button>
+          </div>
+        </div>
+
+        <!-- Right Panel: Market & Chart -->
+        <div style="flex: 2; min-width: 280px; display: flex; flex-direction: column; gap: 10px;">
+          
+          <!-- Tab Selector -->
+          <div style="display: flex; gap: 6px;">
+            ${Object.keys(STOCKS).map((t2) => {
+    const isSelected = selectedStock === t2;
+    const hist = ctx.S.stock.history[t2];
+    const price = hist[hist.length - 1];
+    const prevPrice = hist.length > 1 ? hist[hist.length - 2] : price;
+    const chg = price - prevPrice;
+    const chgPct = prevPrice !== 0 ? chg / prevPrice * 100 : 0;
+    const chgColor = chg >= 0 ? "#22c55e" : "#ef4444";
+    return `
+              <div id="stk-tab-${t2}" style="flex: 1; text-align: center; background: ${isSelected ? "#334155" : "#1e293b"}; border: 1px solid ${isSelected ? "#64748b" : "#334155"}; border-radius: 8px; padding: 8px 4px; cursor: pointer; transition: all 0.2s; box-shadow: ${isSelected ? "0 4px 6px rgba(0,0,0,0.2)" : "none"};">
+                <div style="font-weight: 800; color: ${STOCKS[t2].color}; font-size: 14px;">${t2}</div>
+                <div style="font-size: 13px; color: #f8fafc; margin-top: 2px;">$${fmtMoney(price)}</div>
+                <div style="font-size: 10px; color: ${chgColor}; margin-top: 1px;">${chg >= 0 ? "\u25B2" : "\u25BC"} ${fmtPct(chgPct)}</div>
+                <div style="font-size: 9px; color: #475569; margin-top: 2px;">drift ${((ctx.S.stock.currentDrifts?.[t2] ?? STOCKS[t2].drift) * 100).toFixed(2)}%/phi\xEAn</div>
+              </div>
+            `;
+  }).join("")}
+          </div>
+
+          <!-- Chart Panel -->
+          <div style="background: #0f172a; padding: 12px; border-radius: 12px; border: 1px solid #334155; flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; z-index: 1; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <div style="font-weight: 800; font-size: 15px; color: ${STOCKS[selectedStock].color}; white-space: nowrap;">${STOCKS[selectedStock].name}</div>
+                <div style="font-size: 11px; color: #94a3b8; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                  <span>Gi\xE1: <strong style="color: #f8fafc;">$${fmtMoney(currentPrice)}</strong></span>
+                  <span style="color: #475569;">|</span>
+                  <span title="Gi\xE1 tr\u1ECB th\u1EF1c">N\u1EC1n: <strong style="color: #eab308;">$${fmtMoney(STOCKS[selectedStock].startPrice)}</strong></span>
+                  <span style="color: #475569;">|</span>
+                  <span>Vol: \xB1${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phi\xEAn</span>
+                  <span style="color: #475569;">|</span>
+                  <span>Drift: ${((ctx.S.stock.currentDrifts?.[selectedStock] ?? STOCKS[selectedStock].drift) * 100).toFixed(2)}%</span>
+                </div>
+              </div>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+
+                <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                  <div style="background: rgba(255,255,255,0.1); padding: 3px 10px; border-radius: 20px; font-size: 11px; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); white-space: nowrap;">
+                    ${fmtMoney(sharesOwned)} cp ($${fmtMoney(sharesOwned * currentPrice)})
+                  </div>
+                  <div style="font-size:10px; margin-top:3px; color:#cbd5e1; white-space: nowrap;">
+                    V\u1ED1n: $${fmtMoney(sharesOwned > 0 ? (ctx.S.stock.portfolioCost?.[selectedStock] || 0) / sharesOwned : 0)} | 
+                    L\xE3i: <span style="color:${sharesOwned * currentPrice - (ctx.S.stock.portfolioCost?.[selectedStock] || 0) >= 0 ? "#22c55e" : "#ef4444"}">
+                      ${sharesOwned * currentPrice - (ctx.S.stock.portfolioCost?.[selectedStock] || 0) >= 0 ? "+" : ""}$${fmtMoney(sharesOwned * currentPrice - (ctx.S.stock.portfolioCost?.[selectedStock] || 0))}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            ${renderStockChart(selectedStock)}
+          </div>
+
+          <!-- Trading Interface -->
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155;">
+            <div style="flex: 1 1 140px; display: flex; gap: 5px; align-items: stretch;">
+              <input type="number" id="stk-trade-amt" value="${currentTradeAmt}" min="1" style="flex: 1; width: 0; padding: 9px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 15px; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#475569'" placeholder="S\u1ED1 cp" />
+              <button id="stk-max-buy" style="background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 4px; padding: 0 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="Mua t\u1ED1i \u0111a">MAX</button>
+              <button id="stk-max-sell" style="background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; padding: 0 8px; font-size: 10px; font-weight: bold; cursor: pointer; white-space: nowrap;" title="B\xE1n to\xE0n b\u1ED9">ALL</button>
+            </div>
+            <div style="display: flex; gap: 8px; flex: 2 1 240px;">
+              <button id="stk-buy" style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 6px 5px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 6px rgba(16,185,129,0.3);">MUA<div style="font-size:10px;font-weight:normal;opacity:0.8;margin-top:2px">$0</div></button>
+              <button id="stk-sell" style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 6px 5px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">B\xC1N<div style="font-size:10px;font-weight:normal;opacity:0.8;margin-top:2px">$0</div></button>
+            </div>
+          </div>
+          
+          <!-- Auto Orders Interface -->
+          <div style="background: #1e293b; padding: 10px; border-radius: 12px; border: 1px solid #334155; margin-top: 8px;">
+            <div style="font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 6px;">L\u1EC6NH T\u1EF0 \u0110\u1ED8NG B\xC1N (AUTO SELL)</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch;">
+              <div style="flex: 1; min-width: 60px; display: flex; flex-direction: column; gap: 4px;">
+                <input type="number" id="stk-auto-amt" min="1" placeholder="S\u1ED1 cp" style="width: 100%; padding: 8px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 13px; outline: none; box-sizing: border-box;" />
+                <div style="display: flex; gap: 4px;">
+                  <button id="stk-auto-btn-14" style="flex: 1; background: #334155; color: #cbd5e1; border: none; border-radius: 4px; font-size: 9px; cursor: pointer; padding: 3px 0;">1/4</button>
+                  <button id="stk-auto-btn-12" style="flex: 1; background: #334155; color: #cbd5e1; border: none; border-radius: 4px; font-size: 9px; cursor: pointer; padding: 3px 0;">1/2</button>
+                  <button id="stk-auto-btn-all" style="flex: 1; background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 4px; font-size: 9px; font-weight: bold; cursor: pointer; padding: 3px 0;">ALL</button>
+                </div>
+              </div>
+              <input type="number" id="stk-auto-price" min="0.1" step="0.1" placeholder="Gi\xE1 m\u1EE5c ti\xEAu $" style="flex: 1; min-width: 80px; padding: 8px; background: #0f172a; color: #fff; border: 1px solid #475569; border-radius: 6px; font-size: 13px; outline: none;" />
+              <div style="display: flex; gap: 4px; flex: 2; min-width: 140px;">
+                <button id="stk-auto-tp" style="flex: 1; background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.4); border-radius: 6px; padding: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">CH\u1ED0T L\u1EDCI</button>
+                <button id="stk-auto-sl" style="flex: 1; background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); border-radius: 6px; padding: 6px; font-size: 11px; font-weight: bold; cursor: pointer;">C\u1EAET L\u1ED6</button>
+              </div>
+            </div>
+
+            <!-- Auto Orders List & Logs -->
+            <div style="margin-top: 10px; border-top: 1px solid #334155; padding-top: 8px; max-height: 120px; overflow-y: auto;">
+              <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px;">Danh s\xE1ch l\u1EC7nh ch\u1EDD:</div>
+              ${(ctx.S.stock.autoOrders || []).map((o2) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 4px; margin-bottom: 4px;">
+                  <span style="color: ${o2.type === "TP" ? "#10b981" : "#ef4444"}; font-weight: bold;">${o2.type}</span>
+                  <span style="color: ${STOCKS[o2.ticker].color}; font-weight: bold;">${o2.ticker}</span>
+                  <span>${fmtMoney(o2.shares)} cp</span>
+                  <span>@ $${fmtMoney(o2.targetPrice)}</span>
+                  <button class="stk-auto-cancel" data-id="${o2.id}" style="background: none; border: 1px solid #ef4444; color: #ef4444; border-radius: 3px; cursor: pointer; font-size: 9px; padding: 2px 4px;">H\u1EE6Y</button>
+                </div>
+              `).join("")}
+              ${(ctx.S.stock.autoOrders?.length || 0) === 0 ? `<div style="font-size: 11px; color: #64748b; font-style: italic;">Ch\u01B0a c\xF3 l\u1EC7nh n\xE0o.</div>` : ""}
+
+              <div style="font-size: 11px; color: #94a3b8; margin-top: 8px; margin-bottom: 4px;">L\u1ECBch s\u1EED kh\u1EDBp l\u1EC7nh:</div>
+              ${(ctx.S.stock.orderLogs || []).slice(0, 10).map((l2) => {
+    let statusColor = "#94a3b8";
+    if (l2.status === "EXECUTED") statusColor = "#10b981";
+    else if (l2.status.startsWith("CANCELED")) statusColor = "#ef4444";
+    return `
+                <div style="display: flex; justify-content: space-between; font-size: 10px; color: #cbd5e1; padding: 2px 0;">
+                  <span>${new Date(l2.timestamp || Date.now()).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}</span>
+                  <span>${l2.type} ${l2.ticker} x${fmtMoney(l2.shares)}</span>
+                  <span style="color: ${statusColor}">${l2.status === "EXECUTED" ? `$${fmtMoney(l2.executionPrice)}` : l2.status}</span>
+                </div>
+              `;
+  }).join("")}
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  `;
+  const stockWin = $id("stock-win");
+  const stockView = $id("stock-view");
+  if (stockWin && stockView) {
+    const isAlreadyOpen = stockWin.style.display === "flex";
+    const savedScroll = isAlreadyOpen ? stockView.scrollTop : 0;
+    closeWin();
+    stockWin.style.display = "flex";
+    if (placeStockWin) placeStockWin();
+    if (!isAlreadyOpen) {
+      stockWin.classList.remove("open-anim");
+      void stockWin.offsetWidth;
+      stockWin.classList.add("open-anim");
+    }
+    stockView.innerHTML = bodyHTML;
+    if (isAlreadyOpen) {
+      stockView.scrollTop = savedScroll;
+      if (activeId) {
+        const el = $id(activeId);
+        if (el && typeof el.focus === "function") el.focus();
+      }
+    }
+    $id("stock-close").onclick = () => {
+      stockWin.style.display = "none";
+      if (renderStatus) renderStatus();
+    };
+    if ($id("stk-help-btn")) {
+      $id("stk-help-btn").onclick = (e2) => {
+        e2.stopPropagation();
+        const p2 = $id("stk-help-panel");
+        if (p2) {
+          const isHidden = p2.style.display === "none";
+          p2.style.display = isHidden ? "block" : "none";
+          window["_stkHelpOpen"] = isHidden;
+        }
+      };
+    }
+  } else {
+    openModal("S\xE0n Ch\u1EE9ng Kho\xE1n", bodyHTML);
+  }
+  if ($id("stk-help-panel") && window["_stkHelpOpen"]) {
+    $id("stk-help-panel").style.display = "block";
+  }
+  const transferInp = $id("stk-transfer-amt");
+  if ($id("stk-max-deposit")) {
+    $id("stk-max-deposit").addEventListener("click", () => {
+      transferInp.value = Math.floor(ctx.S.coins);
+    });
+    $id("stk-max-withdraw").addEventListener("click", () => {
+      transferInp.value = Math.floor(ctx.S.stock.balance);
+    });
+    $id("stk-max-borrow").addEventListener("click", () => {
+      let currentEquity = ctx.S.stock.balance + totalPortfolioValue - (ctx.S.stock.debt || 0);
+      const maxB = Math.floor(currentEquity * 2 - (ctx.S.stock.debt || 0));
+      transferInp.value = maxB > 0 ? maxB : 0;
+    });
+    $id("stk-max-repay").addEventListener("click", () => {
+      const maxR = Math.floor(Math.min(ctx.S.stock.debt || 0, ctx.S.stock.balance));
+      transferInp.value = maxR > 0 ? maxR : 0;
+    });
+  }
+  $id("stk-deposit").addEventListener("click", () => {
+    const amt = parseFloat($id("stk-transfer-amt").value);
+    if (amt > 0 && depositBrokerage(amt)) {
+      save();
+      openStockModal();
+      if (renderStatus) renderStatus();
+    } else {
+      stkToast("Kh\xF4ng \u0111\u1EE7 V\xED V\xE0ng!");
+    }
+  });
+  $id("stk-withdraw").addEventListener("click", () => {
+    const amt = parseFloat($id("stk-transfer-amt").value);
+    if (amt > 0 && withdrawBrokerage(amt)) {
+      save();
+      openStockModal();
+      if (renderStatus) renderStatus();
+    } else {
+      stkToast("Kh\xF4ng \u0111\u1EE7 ti\u1EC1n trong T\xE0i kho\u1EA3n ch\u1EE9ng kho\xE1n!");
+    }
+  });
+  $id("stk-borrow").addEventListener("click", () => {
+    const amt = parseFloat($id("stk-transfer-amt").value);
+    let currentEquity = ctx.S.stock.balance + totalPortfolioValue - (ctx.S.stock.debt || 0);
+    if (amt > 0 && (ctx.S.stock.debt || 0) + amt <= currentEquity * 2) {
+      borrowMargin(amt);
+      save();
+      openStockModal();
+    } else {
+      stkToast("Kh\xF4ng th\u1EC3 vay qu\xE1 200% Equity!");
+    }
+  });
+  $id("stk-repay").addEventListener("click", () => {
+    const amt = parseFloat($id("stk-transfer-amt").value);
+    if (amt > 0 && repayMargin(amt)) {
+      save();
+      openStockModal();
+    } else {
+      stkToast("Kh\xF4ng \u0111\u1EE7 ti\u1EC1n m\u1EB7t ho\u1EB7c s\u1ED1 ti\u1EC1n tr\u1EA3 l\u1EDBn h\u01A1n N\u1EE3!");
+    }
+  });
+  const resetSessBtn = $id("stk-reset-sess");
+  if (resetSessBtn) {
+    let holdTimeout;
+    const startHold = (e2) => {
+      if (e2.cancelable) e2.preventDefault();
+      resetSessBtn.style.color = "#ef4444";
+      resetSessBtn.style.borderColor = "#ef4444";
+      holdTimeout = setTimeout(() => {
+        resetSessBtn.style.color = "#22c55e";
+        resetSessBtn.style.borderColor = "#22c55e";
+        ctx.S.stock.session = {
+          startTime: Date.now(),
+          startBalance: ctx.S.stock.balance,
+          startPortfolio: Object.assign({}, ctx.S.stock.portfolio),
+          startPrices: Object.keys(STOCKS).reduce((acc, t2) => {
+            const h = ctx.S.stock.history[t2];
+            acc[t2] = h ? h[h.length - 1] : STOCKS[t2].startPrice;
+            return acc;
+          }, {})
+        };
+        save();
+        openStockModal();
+        stkToast("\u0110\xE3 \u0111\u1EB7t l\u1EA1i m\u1ED1c theo d\xF5i L\xE3i/L\u1ED7 phi\xEAn!");
+      }, 1e3);
+    };
+    const endHold = () => {
+      clearTimeout(holdTimeout);
+      if ($id("stk-reset-sess")) {
+        $id("stk-reset-sess").style.color = "#94a3b8";
+        $id("stk-reset-sess").style.borderColor = "#475569";
+      }
+    };
+    resetSessBtn.addEventListener("mousedown", startHold);
+    resetSessBtn.addEventListener("mouseup", endHold);
+    resetSessBtn.addEventListener("mouseleave", endHold);
+    resetSessBtn.addEventListener("touchstart", startHold);
+    resetSessBtn.addEventListener("touchend", endHold);
+  }
+  Object.keys(STOCKS).forEach((t2) => {
+    $id(`stk-tab-${t2}`).addEventListener("click", () => {
+      selectedStock = t2;
+      setTimeout(() => openStockModal(), 10);
+    });
+  });
+  const tradeInp = $id("stk-trade-amt");
+  const updateTradeEst = () => {
+    const amt = parseFloat(tradeInp.value) || 0;
+    const price = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
+    const total = amt * price;
+    const str = fmtMoney(total);
+    const buyBtn = $id("stk-buy");
+    const sellBtn = $id("stk-sell");
+    if (buyBtn) buyBtn.innerHTML = `MUA<div style="font-size:10px;font-weight:normal;opacity:0.8;margin-top:2px">-$${str}</div>`;
+    if (sellBtn) sellBtn.innerHTML = `B\xC1N<div style="font-size:10px;font-weight:normal;opacity:0.8;margin-top:2px">+$${str}</div>`;
+  };
+  if ($id("stk-max-buy")) {
+    $id("stk-max-buy").addEventListener("click", () => {
+      const price = ctx.S.stock.history[selectedStock][ctx.S.stock.history[selectedStock].length - 1];
+      tradeInp.value = Math.floor(ctx.S.stock.balance / price) || 0;
+      updateTradeEst();
+    });
+  }
+  if ($id("stk-max-sell")) {
+    $id("stk-max-sell").addEventListener("click", () => {
+      tradeInp.value = ctx.S.stock.portfolio[selectedStock] || 0;
+      updateTradeEst();
+    });
+  }
+  tradeInp.addEventListener("input", updateTradeEst);
+  updateTradeEst();
+  $id("stk-buy").addEventListener("click", () => {
+    const shares = parseFloat($id("stk-trade-amt").value);
+    if (shares > 0 && buyStock(selectedStock, shares)) {
+      save();
+      openStockModal();
+    } else {
+      stkToast("Kh\xF4ng \u0111\u1EE7 ti\u1EC1n m\u1EB7t \u0111\u1EC3 mua!");
+    }
+  });
+  $id("stk-sell").addEventListener("click", () => {
+    const shares = parseFloat($id("stk-trade-amt").value);
+    if (shares > 0 && sellStock(selectedStock, shares)) {
+      save();
+      openStockModal();
+      stkToast("\u0110\xE3 b\xE1n (Kh\u1EA5u tr\u1EEB 2% Ph\xED)");
+    } else {
+      stkToast("Kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu \u0111\u1EC3 b\xE1n!");
+    }
+  });
+  const autoAmtInp = $id("stk-auto-amt");
+  if ($id("stk-auto-btn-14")) {
+    $id("stk-auto-btn-14").addEventListener("click", () => {
+      autoAmtInp.value = Math.floor((ctx.S.stock.portfolio[selectedStock] || 0) * 0.25) || 0;
+    });
+  }
+  if ($id("stk-auto-btn-12")) {
+    $id("stk-auto-btn-12").addEventListener("click", () => {
+      autoAmtInp.value = Math.floor((ctx.S.stock.portfolio[selectedStock] || 0) * 0.5) || 0;
+    });
+  }
+  if ($id("stk-auto-btn-all")) {
+    $id("stk-auto-btn-all").addEventListener("click", () => {
+      autoAmtInp.value = ctx.S.stock.portfolio[selectedStock] || 0;
+    });
+  }
+  if ($id("stk-auto-tp")) {
+    $id("stk-auto-tp").addEventListener("click", () => {
+      const shares = parseFloat($id("stk-auto-amt").value);
+      const price = parseFloat($id("stk-auto-price").value);
+      if (shares > 0 && price > 0 && placeAutoOrder(selectedStock, "TP", price, shares)) {
+        save();
+        openStockModal();
+        stkToast(`\u0110\xE3 \u0111\u1EB7t l\u1EC7nh Ch\u1ED1t L\u1EDDi ${selectedStock}`);
+      } else {
+        stkToast("S\u1ED1 l\u01B0\u1EE3ng ho\u1EB7c Gi\xE1 kh\xF4ng h\u1EE3p l\u1EC7 (ho\u1EB7c kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu)!");
+      }
+    });
+  }
+  if ($id("stk-auto-sl")) {
+    $id("stk-auto-sl").addEventListener("click", () => {
+      const shares = parseFloat($id("stk-auto-amt").value);
+      const price = parseFloat($id("stk-auto-price").value);
+      if (shares > 0 && price > 0 && placeAutoOrder(selectedStock, "SL", price, shares)) {
+        save();
+        openStockModal();
+        stkToast(`\u0110\xE3 \u0111\u1EB7t l\u1EC7nh C\u1EAFt L\u1ED7 ${selectedStock}`);
+      } else {
+        stkToast("S\u1ED1 l\u01B0\u1EE3ng ho\u1EB7c Gi\xE1 kh\xF4ng h\u1EE3p l\u1EC7 (ho\u1EB7c kh\xF4ng \u0111\u1EE7 c\u1ED5 phi\u1EBFu)!");
+      }
+    });
+  }
+  const cancelBtns = stockView.querySelectorAll(".stk-auto-cancel");
+  cancelBtns.forEach((btn) => {
+    btn.addEventListener("click", (e2) => {
+      const id = e2.target.getAttribute("data-id");
+      if (cancelAutoOrder(id)) {
+        save();
+        openStockModal();
+        stkToast("\u0110\xE3 h\u1EE7y l\u1EC7nh!");
+      }
+    });
+  });
+}
+function resetStock() {
+  ctx.S.stock = { balance: 0, debt: 0, portfolio: {}, history: {}, trends: {}, lastUpdate: Date.now(), totalDeposited: 0, totalWithdrawn: 0 };
+  selectedStock = "SIL";
+  save();
+  if (stkToast) stkToast("\u0110\xE3 reset S\xE0n Ch\u1EE9ng Kho\xE1n v\u1EC1 ban \u0111\u1EA7u!");
+  console.log("[Stock] Reset complete.");
+}
+var stkToastTimer, stkToast, STOCKS, selectedStock;
+var init_stock = __esm({
+  "src/stock.js"() {
+    init_store();
+    init_all();
+    stkToastTimer = null;
+    stkToast = (msg) => {
+      const win = $id("stock-win");
+      if (!win) return;
+      let t2 = $id("stk-toast");
+      if (!t2) {
+        t2 = document.createElement("div");
+        t2.id = "stk-toast";
+        t2.style.cssText = `
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.85); color: white; padding: 8px 16px; border-radius: 20px;
+      font-size: 13px; z-index: 9999; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+      white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.5); font-weight: bold;
+    `;
+        win.appendChild(t2);
+      }
+      t2.textContent = msg;
+      t2.style.display = "block";
+      setTimeout(() => t2.style.opacity = "1", 10);
+      if (stkToastTimer) clearTimeout(stkToastTimer);
+      stkToastTimer = setTimeout(() => {
+        t2.style.opacity = "0";
+        setTimeout(() => {
+          if (t2.style.opacity === "0") t2.style.display = "none";
+        }, 300);
+      }, 2e3);
+    };
+    STOCKS = {
+      // ─── BLUE CHIP ─── Safe, low swing, slight downward drift (inflation eats it slowly)
+      SIL: {
+        name: "SillyTavern Inc.",
+        startPrice: 100,
+        color: "#3b82f6",
+        // Per-candle volatility (random walk amplitude)
+        vol: 0.035,
+        // Intrinsic drift per candle — negative = house edge / inflation drag
+        drift: -2e-4,
+        // How fast trend momentum decays (higher = faster reversion to calm)
+        trendDecay: 0.7,
+        // Trend noise amplitude
+        trendNoise: 0.25,
+        // Mean-reversion gravity: kicks in when price strays far from startPrice
+        gravityZones: [{ above: 3, pull: -0.2 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.12 }],
+        // Hard cap on single candle % swing
+        swingCap: 0.08
+      },
+      // ─── MID RISK ─── Cyclical, medium swings, neutral drift but larger fees eat you
+      FARM: {
+        name: "N\xF4ng S\u1EA3n Farm",
+        startPrice: 50,
+        color: "#22c55e",
+        vol: 0.1,
+        drift: 1e-3,
+        trendDecay: 0.78,
+        trendNoise: 0.35,
+        gravityZones: [{ above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.35, pull: 0.18 }],
+        swingCap: 0.18
+      },
+      // ─── DEGEN ─── Meme/pump-dump, strong negative drift, rare huge spikes, usually bleeds
+      CRASH: {
+        name: "\u0110a C\u1EA5p Coin",
+        color: "#ef4444",
+        startPrice: 10,
+        drift: -1e-3,
+        // Giảm nhẹ
+        vol: 0.22,
+        // 22% swing (crazy volatility)
+        trendNoise: 0.5,
+        trendDecay: 0.95,
+        // Trends last longer
+        gravityZones: [
+          { above: 10, pull: -0.2 },
+          // >$100
+          { below: 0.05, pull: 0.3 }
+          // <$0.5
+        ],
+        swingCap: 0.3,
+        // Occasional pump event: 3% chance per candle to ignite a strong uptrend
+        pumpChance: 0.03,
+        pumpStrength: 0.5
+      }
+    };
+    selectedStock = "SIL";
+    setInterval(() => {
+      if (!ctx.S || !ctx.S.stock) return;
+      if (updateMarket()) {
+        save();
+        const stockWin = $id("stock-win");
+        if (stockWin && stockWin.style.display === "flex") {
+          openStockModal();
+        }
+      }
+    }, 5e3);
+  }
+});
+
 // src/all.js
 var all_exports = {};
 __export(all_exports, {
@@ -54798,16 +57375,21 @@ __export(all_exports, {
   PET_SKILLS: () => PET_SKILLS,
   PET_SPR: () => PET_SPR,
   PET_STATS: () => PET_STATS,
+  SANS_DUNGEON_SPRITES: () => SANS_DUNGEON_SPRITES,
+  SANS_FARM_SPRITES: () => SANS_FARM_SPRITES,
+  SANS_HERO_SPRITES: () => SANS_HERO_SPRITES,
   SEC: () => SEC,
   SEC_LS_KEY: () => SEC_LS_KEY,
   SPR: () => SPR,
   SPRITE_PX: () => SPRITE_PX,
+  STOCKS: () => STOCKS,
   TOOLS: () => TOOLS,
   WITCH_CRY: () => WITCH_CRY,
   WORK_BAND: () => WORK_BAND,
   addBlock: () => addBlock,
   applyDayEvent: () => applyDayEvent,
   applyPageSkin: () => applyPageSkin,
+  applySansSprite: () => applySansSprite,
   applyTheme: () => applyTheme,
   applyViewState: () => applyViewState,
   bagName: () => bagName,
@@ -54817,19 +57399,24 @@ __export(all_exports, {
   bagTab: () => bagTab,
   bjToast: () => bjToast,
   blockPrice: () => blockPrice,
+  borrowMargin: () => borrowMargin,
   buildEventPrompt: () => buildEventPrompt,
   buildTicket: () => buildTicket,
   buyBlock: () => buyBlock,
   buyConfirm: () => buyConfirm,
+  buyStock: () => buyStock,
   cacheBlockTxt: () => cacheBlockTxt,
   cacheCoins: () => cacheCoins,
   cacheDayTxt: () => cacheDayTxt,
   cacheWicon: () => cacheWicon,
   calculateInterest: () => calculateInterest,
   canCookRecipe: () => canCookRecipe,
+  cancelAutoOrder: () => cancelAutoOrder,
   cashOut: () => cashOut,
   cashOutHero: () => cashOutHero,
   charName: () => charName,
+  checkAutoOrders: () => checkAutoOrders,
+  checkMarginCall: () => checkMarginCall,
   clampN: () => clampN,
   closeBlackjack: () => closeBlackjack,
   closeDungeonView: () => closeDungeonView,
@@ -54843,6 +57430,7 @@ __export(all_exports, {
   curBlocks: () => curBlocks,
   curPlots: () => curPlots,
   decoLayer: () => decoLayer,
+  depositBrokerage: () => depositBrokerage,
   destroy: () => destroy,
   disposers: () => disposers,
   dragBar: () => dragBar,
@@ -54944,6 +57532,7 @@ __export(all_exports, {
   openSellDlg: () => openSellDlg,
   openSellSeedDlg: () => openSellSeedDlg,
   openSpriteViewerModal: () => openSpriteViewerModal,
+  openStockModal: () => openStockModal,
   openSyncHostModal: () => openSyncHostModal,
   openSyncJoinModal: () => openSyncJoinModal,
   openTakeout: () => openTakeout,
@@ -54952,12 +57541,14 @@ __export(all_exports, {
   pagePlots: () => pagePlots,
   pageUnlocked: () => pageUnlocked,
   pendingPick: () => pendingPick,
+  petAnimT: () => petAnimT,
   petArrive: () => petArrive,
   petBubble: () => petBubble,
   petEl: () => petEl,
   petFert: () => petFert,
   petHarvest: () => petHarvest,
   petHopT: () => petHopT,
+  petIdleT: () => petIdleT,
   petPlant: () => petPlant,
   petPos: () => petPos,
   petSVG: () => petSVG,
@@ -54967,15 +57558,18 @@ __export(all_exports, {
   petTouch: () => petTouch,
   pickFrom: () => pickFrom,
   pileWith: () => pileWith,
+  placeAutoOrder: () => placeAutoOrder,
   placeBjWin: () => placeBjWin,
   placeDungeonWin: () => placeDungeonWin,
   placeHeroBar: () => placeHeroBar,
   placeOrb: () => placeOrb,
   placePet: () => placePet,
   placeRaceWin: () => placeRaceWin,
+  placeStockWin: () => placeStockWin,
   placeWin: () => placeWin,
   plant: () => plant,
   playNaoyaCutscene: () => playNaoyaCutscene,
+  playSansAction: () => playSansAction,
   plotEmote: () => plotEmote,
   plotHTML: () => plotHTML,
   raceView: () => raceView,
@@ -54992,16 +57586,26 @@ __export(all_exports, {
   renderPets: () => renderPets,
   renderPlots: () => renderPlots,
   renderStatus: () => renderStatus,
+  renderStockChart: () => renderStockChart,
   renderTimeout: () => renderTimeout,
   renderToolbar: () => renderToolbar,
   renderWitch: () => renderWitch,
+  repayMargin: () => repayMargin,
   requestDayEvent: () => requestDayEvent,
   resetDestroyed: () => resetDestroyed,
+  resetStock: () => resetStock,
   resizeTimer: () => resizeTimer,
   rollMutation: () => rollMutation,
   root: () => root,
   runState: () => runState,
   sanitizeEvent: () => sanitizeEvent,
+  sansDungeonSpriteFor: () => sansDungeonSpriteFor,
+  sansDungeonSpriteForAction: () => sansDungeonSpriteForAction,
+  sansFarmSpriteFor: () => sansFarmSpriteFor,
+  sansFarmSpriteForAction: () => sansFarmSpriteForAction,
+  sansIdleAction: () => sansIdleAction,
+  sansStep: () => sansStep,
+  sansUltimateFarm: () => sansUltimateFarm,
   save: () => save,
   saveCharState: () => saveCharState,
   saveSec: () => saveSec,
@@ -55010,6 +57614,7 @@ __export(all_exports, {
   sceneTimer: () => sceneTimer,
   sell: () => sell,
   sellSeed: () => sellSeed,
+  sellStock: () => sellStock,
   setInjection: () => setInjection,
   setMode: () => setMode,
   setPendingPick: () => setPendingPick,
@@ -55034,6 +57639,7 @@ __export(all_exports, {
   startTribulationEvent: () => startTribulationEvent,
   stopHop: () => stopHop,
   stopRaceAnim: () => stopRaceAnim,
+  stopSansAction: () => stopSansAction,
   takeoutNote: () => takeoutNote,
   testMode: () => testMode,
   testSecApi: () => testSecApi,
@@ -55056,9 +57662,11 @@ __export(all_exports, {
   uiSelectFleaAdd: () => uiSelectFleaAdd,
   uiToggleLock: () => uiToggleLock,
   updateInjection: () => updateInjection,
+  updateMarket: () => updateMarket,
   updateNextScene: () => updateNextScene,
   useStarShard: () => useStarShard,
   wakePet: () => wakePet,
+  wakeSans: () => wakeSans,
   walkTo: () => walkTo,
   wander: () => wander,
   warmUpCache: () => warmUpCache,
@@ -55066,7 +57674,8 @@ __export(all_exports, {
   weatherOf: () => weatherOf,
   wg: () => wg,
   witchArrive: () => witchArrive,
-  witchDeliver: () => witchDeliver
+  witchDeliver: () => witchDeliver,
+  withdrawBrokerage: () => withdrawBrokerage
 });
 var init_all = __esm({
   "src/all.js"() {
@@ -55095,6 +57704,7 @@ var init_all = __esm({
     init_cooking();
     init_bank();
     init_lixi();
+    init_stock();
   }
 });
 

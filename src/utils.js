@@ -60,6 +60,8 @@ export function settle() {
     
     const elapsed = now() - ctx.S.petFind[id];
 
+    if (id === 'sans') return; // Cố tình chặn Sans nhặt rác (Sans đã là siêu thú cưng)
+
     // Xử lý riêng cho Chim cánh cụt (stack vé theo giờ)
     if (id === 'penguin') {
       const PENGUIN_CD = 60 * 60 * 1000;
@@ -85,6 +87,28 @@ export function settle() {
         wChanged = true;
       }
       return; // Cánh cụt chuyên đi nhặt vé, không nhặt vàng rác nữa
+    }
+
+    // Xử lý riêng cho Naoya Slime
+    if (id === 'naoyaSlime') {
+      const NAOYA_CD = 60 * 60 * 1000;
+      if (elapsed >= NAOYA_CD) {
+        const hours = Math.floor(elapsed / NAOYA_CD);
+        ctx.S.petFind[id] += hours * NAOYA_CD;
+        
+        let superGained = 0;
+        for (let i = 0; i < hours; i++) {
+          if (Math.random() < 0.05) superGained++;
+        }
+        
+        if (superGained > 0) {
+          if (!ctx.S.tickets) ctx.S.tickets = { norm: 0, spec: 0, super: 0 };
+          ctx.S.tickets.super = (ctx.S.tickets.super || 0) + superGained;
+          toast(`Naoya vừa hậm hực quay về, ném cho bạn ${superGained} Vé Siêu Cường: "Cầm lấy đồ rác rưởi này đi!"`);
+          wChanged = true;
+        }
+      }
+      return; // Naoya chuyên đi tìm vé siêu cường
     }
 
     // Xử lý cho các pet nhặt kho báu bình thường

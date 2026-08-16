@@ -31,6 +31,11 @@ function bjSystemChat(msg) {
     if (!wrap || !wrap.classList.contains('open')) { bjUnreadChat++; bjRenderRoom(); }
     bjRenderChat();
 }
+
+function bjEscapeHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
 //  CARD ENGINE
 // ─────────────────────────────────────────────────────────────────────────────
 const SUITS = ['♠', '♥', '♦', '♣'];
@@ -85,6 +90,26 @@ function buildShoe(numDecks, seed) {
         [cards[i], cards[j]] = [cards[j], cards[i]];
     }
     return cards;
+}
+
+function bjSmartRig(shoe, idx, p1, p2, metric) {
+    let chance = 0;
+    if (metric >= 100000000000) chance = 0.15;      // >= 100B -> 15% chance
+    else if (metric >= 10000000000) chance = 0.10;  // >= 10B -> 10% chance
+    else if (metric >= 1000000000) chance = 0.05;   // >= 1B -> 5% chance
+    
+    if (chance === 0 || Math.random() >= chance) return;
+
+    let t1 = -1, t2 = -1;
+    for(let i = Math.max(idx + 5, p2 + 1); i < Math.min(shoe.length, idx + 100); i++) {
+        if (t1 === -1 && ['10','J','Q','K'].includes(shoe[i].rank)) t1 = i;
+        else if (t2 === -1 && ['10','J','Q','K','A'].includes(shoe[i].rank)) t2 = i;
+        if(t1 !== -1 && t2 !== -1) break;
+    }
+    if (t1 !== -1 && t2 !== -1) {
+        let tmp = shoe[p1]; shoe[p1] = shoe[t1]; shoe[t1] = tmp;
+        tmp = shoe[p2]; shoe[p2] = shoe[t2]; shoe[t2] = tmp;
+    }
 }
 
 function isBlackjack(hand) {
@@ -307,6 +332,8 @@ function soloStartRound() {
     save();
     s.bets = [want]; s.insuranceBet = 0; s.playerHands = [[]]; s.activeHandIdx = 0; s.dealerHand = []; s.splitAceIdxs = new Set();
 
+    bjSmartRig(s.shoe, s.shoeIdx, s.shoeIdx + 1, s.shoeIdx + 3, ctx.S.coins || 0);
+
     s.playerHands[0].push(soloDrawCard());
     s.dealerHand.push(soloDrawCard());
     s.playerHands[0].push(soloDrawCard());
@@ -499,7 +526,7 @@ function soloResolveAll() {
         const lbl = isOnly ? '' : `Tay ${i + 1}: `;
         if (pTotal > 21) { results.push(`${lbl}💀 Bust (mất ${bet.toLocaleString()}G)`); continue; }
         if (pBJ && dBJ) { ctx.S.coins = (ctx.S.coins || 0) + bet; results.push(`${lbl}🤝 Hoà BJ`); continue; }
-        if (pBJ) { const p = bet + Math.floor(bet * 1.5); ctx.S.coins = (ctx.S.coins || 0) + p; results.push(`${lbl}♠ BLACKJACK +${Math.floor(bet*1.5).toLocaleString()}G`); continue; }
+        if (pBJ) { const p = bet + Math.floor(bet * 1.2); ctx.S.coins = (ctx.S.coins || 0) + p; results.push(`${lbl}♠ BLACKJACK +${Math.floor(bet*1.2).toLocaleString()}G`); continue; }
         if (dBJ) { results.push(`${lbl}💔 Dealer BJ`); continue; }
         if (dBust || pTotal > dTotal) { ctx.S.coins = (ctx.S.coins || 0) + bet * 2; results.push(`${lbl}✅ Thắng +${bet.toLocaleString()}G`); continue; }
         if (pTotal === dTotal) { ctx.S.coins = (ctx.S.coins || 0) + bet; results.push(`${lbl}🤝 Hoà`); continue; }
@@ -543,7 +570,7 @@ let bjSummaryTimeLeft = 0;
 let bjSummaryData = null;
 const MAX_PLAYERS = 4;
 
-function bjMyName() { return ctx.S.username || 'Khách'; }
+function bjMyName() { return bjEscapeHTML(ctx.S.username || 'Khách'); }
 
 export function openBlackjackRoom() {
     const win = All.$id('bj-win');
@@ -659,7 +686,7 @@ async function bjJoinRoom() {
         conn.on('open', () => {
             bjRoomId = code; bjMyId = bjPeer.id;
             bjSetupConn(conn);
-            conn.send({ type: 'HELLO', name: bjMyName(), id: bjMyId });
+            conn.send({ type: 'HELLO', name: bjMyName(), id: bjMyId, version: ctx.S.version });
         });
         conn.on('error', () => bjUpdateStatus('Lỗi kết nối!', '#e05'));
     });
@@ -694,17 +721,40 @@ function bjBroadcastProfits() {
 
 function bjHandleMsg(fromPid, data) {
     switch (data.type) {
+        case 'VERSION_MISMATCH': {
+            bjToast('Phòng chơi này thuộc về phiên bản game cũ/khác!');
+            bjUpdateStatus('Lỗi: Khác phiên bản!', '#e05');
+            if (bjConns[fromPid]) bjConns[fromPid].close();
+            bjHandleDisconnect(fromPid);
+            break;
+        }
         case 'HELLO': {
-            const status = (bjGameState && bjRoomPhase !== 'summary') ? 'spectator' : 'idle';
-            bjPlayers[fromPid] = { name: data.name || 'Khách', status, netProfit: 0 };
-            if (bjIsHost) {
-                bjBroadcast({ type: 'PLAYER_JOIN', pid: fromPid, name: data.name, status }, fromPid);
-                bjConns[fromPid].send({ type: 'WELCOME', players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData, chatLog: bjChatLog });
+            if (data.version !== ctx.S.version) {
+                if (bjIsHost && bjConns[fromPid]) {
+                    bjConns[fromPid].send({ type: 'VERSION_MISMATCH' });
+                    setTimeout(() => { if (bjConns[fromPid]) bjConns[fromPid].close(); bjHandleDisconnect(fromPid); }, 500);
+                }
+                return;
             }
+            const status = (bjGameState && bjRoomPhase !== 'summary') ? 'spectator' : 'idle';
+            const safeName = bjEscapeHTML(data.name || 'Khách');
+            bjPlayers[fromPid] = { name: safeName, status, netProfit: 0 };
+            if (bjIsHost) {
+                bjBroadcast({ type: 'PLAYER_JOIN', pid: fromPid, name: safeName, status }, fromPid);
+                bjConns[fromPid].send({ type: 'WELCOME', version: ctx.S.version, players: bjPlayers, settings: bjSettings, gameState: bjGameState, roomPhase: bjRoomPhase, summaryData: bjSummaryData, chatLog: bjChatLog });
+            }
+            bjSystemChat(`${safeName} đã vào phòng`);
             bjRenderRoom();
             break;
         }
         case 'WELCOME':
+            if (data.version !== ctx.S.version) {
+                bjToast('Từ chối kết nối: Host đang dùng phiên bản game cũ/khác!');
+                bjUpdateStatus('Lỗi: Host khác phiên bản!', '#e05');
+                if (bjConns[fromPid]) bjConns[fromPid].close();
+                bjHandleDisconnect(fromPid);
+                return;
+            }
             bjPlayers = data.players || {}; bjSettings = data.settings || bjSettings;
             bjGameState = data.gameState || null;
             bjRoomPhase = data.roomPhase || (bjGameState ? 'ingame' : 'lobby');
@@ -713,7 +763,7 @@ function bjHandleMsg(fromPid, data) {
             bjMyStatus = (bjGameState && bjRoomPhase !== 'summary') ? 'spectator' : 'idle';
             bjRenderRoom(); break;
         case 'PLAYER_JOIN':
-            bjPlayers[data.pid] = { name: data.name || 'Khách', status: data.status || 'idle', netProfit: 0 };
+            bjPlayers[data.pid] = { name: bjEscapeHTML(data.name || 'Khách'), status: data.status || 'idle', netProfit: 0 };
             bjSystemChat(`${bjPlayers[data.pid].name} đã vào phòng`);
             bjRenderRoom(); break;
         case 'PLAYER_LEFT':
@@ -724,7 +774,22 @@ function bjHandleMsg(fromPid, data) {
             if (bjPlayers[fromPid]) bjPlayers[fromPid].status = data.ready ? 'ready' : 'idle';
             if (bjIsHost) bjBroadcast({ type: 'READY', pid: fromPid, ready: data.ready }, fromPid);
             bjRenderRoom(); break;
+        case 'BET_REQUEST':
+            if (bjIsHost) {
+                if (typeof data.bet !== 'number' || data.bet <= 0 || !Number.isFinite(data.bet)) break;
+                if (data.bet < bjSettings.minBet) break;
+                if (bjSettings.maxBet > 0 && data.bet > bjSettings.maxBet) break;
+                if (!bjGameState || bjGameState.phase !== 'betting' || (bjGameState.betsIn && bjGameState.betsIn[fromPid])) break;
+                if (fromPid === bjMyId) {
+                    ctx.S.coins -= data.bet; save(); renderStatus();
+                } else if (bjConns[fromPid]) {
+                    bjConns[fromPid].send({ type: 'DEDUCT_COINS', amount: data.bet });
+                }
+                bjHandleMsg(fromPid, { type: 'BET_PLACED', pid: fromPid, bet: data.bet });
+            }
+            break;
         case 'BET_PLACED':
+            if (!bjIsHost && fromPid !== bjRoomId) break;
             if (bjGameState) {
                 if (!bjGameState.hands[data.pid]) {
                     bjGameState.hands[data.pid] = { cards: [[]], bet: [0], stood: [false], doubled: [false], activeHandIdx: 0, splitAceIdxs: [], insuranceBet: 0, surrendered: false };
@@ -732,9 +797,10 @@ function bjHandleMsg(fromPid, data) {
                 bjGameState.hands[data.pid].bet[0] = data.bet;
                 bjGameState.betsIn = bjGameState.betsIn || {};
                 bjGameState.betsIn[data.pid] = data.bet;
-                if (bjIsHost && bjPlayers[data.pid]) {
-                    bjPlayers[data.pid].netProfit = (bjPlayers[data.pid].netProfit || 0) - data.bet;
+                if (bjIsHost) {
+                    if (bjPlayers[data.pid]) bjPlayers[data.pid].netProfit = (bjPlayers[data.pid].netProfit || 0) - data.bet;
                     bjBroadcastProfits();
+                    bjBroadcast({ type: 'BET_PLACED', pid: data.pid, bet: data.bet });
                 }
                 const allBet = bjGameState.turnOrder.every(p => bjGameState.betsIn?.[p] > 0);
                 if (allBet && bjIsHost) {
@@ -775,6 +841,7 @@ function bjHandleMsg(fromPid, data) {
         case 'ACTION':
             bjHandleRoomAction(fromPid, data); break;
         case 'SUMMARY_START':
+            if (!bjIsHost && fromPid !== bjRoomId) break;
             if (data.payouts) {
                 const payout = data.payouts[bjMyId] || 0;
                 if (payout > 0) {
@@ -801,7 +868,7 @@ function bjHandleMsg(fromPid, data) {
             bjGameState = null; bjRoomPhase = 'lobby'; bjSummaryData = null;
             bjRenderRoom(); break;
         case 'CHAT': {
-            const chatName = data.senderName || bjPlayers[fromPid]?.name || '?';
+            const chatName = bjEscapeHTML(data.senderName) || bjPlayers[fromPid]?.name || '?';
             bjChatLog.push({ name: chatName, msg: data.msg, ts: Date.now() });
             if (bjChatLog.length > 50) bjChatLog.shift();
             if (!All.$id('bj-chat-wrap')?.classList.contains('open')) { bjUnreadChat++; bjRenderRoom(); }
@@ -813,7 +880,7 @@ function bjHandleMsg(fromPid, data) {
             break;
         }
         case 'CHAT_REQ': {
-            const reqName = data.senderName || bjPlayers[fromPid]?.name || fromPid;
+            const reqName = bjEscapeHTML(data.senderName) || bjPlayers[fromPid]?.name || bjEscapeHTML(fromPid);
             bjChatLog.push({ name: reqName, isReq: true, reqData: data.reqData, ts: Date.now() });
             if (bjChatLog.length > 50) bjChatLog.shift();
             if (!All.$id('bj-chat-wrap')?.classList.contains('open')) { bjUnreadChat++; bjRenderRoom(); }
@@ -824,45 +891,53 @@ function bjHandleMsg(fromPid, data) {
             }
             break;
         }
-        case 'GIVE_MONEY': {
-            if (typeof data.amount !== 'number' || data.amount <= 0) break;
+        case 'GIVE_MONEY_REQ': {
+            if (typeof data.amount !== 'number' || data.amount <= 0 || !Number.isFinite(data.amount)) break;
             const log = bjChatLog.find(e => e.reqData && e.reqData.reqId === data.reqId);
             if (log) {
-                log.reqData.fulfilled += data.amount;
-                if (log.reqData.pid === bjMyId) {
-                    ctx.S.coins = (ctx.S.coins || 0) + data.amount;
-                    save(); renderStatus();
-                    bjSystemChat(`${data.from} đã cho bạn ${data.amount.toLocaleString()}G!`);
-                }
-                bjRenderChat();
-            }
-            if (bjIsHost) {
-                if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - data.amount;
-                if (log && bjPlayers[log.reqData.pid]) bjPlayers[log.reqData.pid].netProfit = (bjPlayers[log.reqData.pid].netProfit || 0) + data.amount;
-                bjBroadcastProfits();
-            }
-            if (bjIsHost && fromPid !== bjMyId) bjBroadcast(data, fromPid);
-            break;
-        }
-        case 'GOLD_SEND': {
-            if (typeof data.amount !== 'number' || data.amount <= 0) break;
-            const senderName = data.senderName || bjPlayers[fromPid]?.name || '?';
-            if (data.targetPid === bjMyId) {
-                ctx.S.coins = (ctx.S.coins || 0) + data.amount;
-                save(); renderStatus();
-                bjSystemChat(`${senderName} gửi bạn ${data.amount.toLocaleString()}G!`);
-            }
-            if (bjIsHost) {
-                if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - data.amount;
-                if (bjPlayers[data.targetPid]) bjPlayers[data.targetPid].netProfit = (bjPlayers[data.targetPid].netProfit || 0) + data.amount;
-                bjBroadcastProfits();
-                if (fromPid !== bjMyId) {
-                    if (!data.senderName) data.senderName = senderName;
-                    bjBroadcast(data, fromPid);
+                if (bjIsHost) {
+                    let actualGive = data.amount;
+                    if (log.reqData.fulfilled + actualGive > log.reqData.amount) actualGive = log.reqData.amount - log.reqData.fulfilled;
+                    if (actualGive <= 0) break;
+                    if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - actualGive;
+                    if (bjPlayers[log.reqData.pid]) bjPlayers[log.reqData.pid].netProfit = (bjPlayers[log.reqData.pid].netProfit || 0) + actualGive;
+                    bjBroadcastProfits();
+                    
+                    if (fromPid === bjMyId) {
+                        ctx.S.coins -= actualGive; save(); renderStatus();
+                    } else if (bjConns[fromPid]) {
+                        bjConns[fromPid].send({ type: 'DEDUCT_COINS', amount: actualGive });
+                    }
+
+                    if (log.reqData.pid === bjMyId) {
+                        ctx.S.coins = (ctx.S.coins || 0) + actualGive; save(); renderStatus();
+                        bjSystemChat(`${data.from} đã cho bạn ${actualGive.toLocaleString()}G!`);
+                    } else if (bjConns[log.reqData.pid]) {
+                        bjConns[log.reqData.pid].send({ type: 'ADD_COINS', amount: actualGive, msg: `${data.from} đã cho bạn ${actualGive.toLocaleString()}G!` });
+                    }
+                    log.reqData.fulfilled += actualGive; bjRenderChat();
+                    bjBroadcast({ type: 'SYNC_REQ', reqId: data.reqId, fulfilled: log.reqData.fulfilled });
                 }
             }
             break;
         }
+        case 'SYNC_REQ':
+            if (fromPid === bjRoomId) {
+                const log = bjChatLog.find(e => e.reqData && e.reqData.reqId === data.reqId);
+                if (log) { log.reqData.fulfilled = data.fulfilled; bjRenderChat(); }
+            }
+            break;
+        case 'ADD_COINS':
+            if (fromPid === bjRoomId && typeof data.amount === 'number' && data.amount > 0) {
+                ctx.S.coins = (ctx.S.coins || 0) + data.amount; save(); renderStatus();
+                if (data.msg) { bjSystemChat(data.msg); bjToast(data.msg); }
+            }
+            break;
+        case 'DEDUCT_COINS':
+            if (fromPid === bjRoomId && typeof data.amount === 'number' && data.amount > 0) {
+                ctx.S.coins = (ctx.S.coins || 0) - data.amount; save(); renderStatus();
+            }
+            break;
         case 'UPDATE_PROFITS':
             if (data.profits) {
                 for (const p in data.profits) {
@@ -908,6 +983,15 @@ function bjHandleDisconnect(pid) {
                     if (bjGameState) {
                         bjGameState.turnOrder = bjGameState.turnOrder.filter(p => p !== pid);
                         if (bjGameState.currentTurn === pid) bjAdvanceTurn();
+                        
+                        if (bjGameState.phase === 'dealer' || bjGameState.phase === 'dealer_bj') {
+                            setTimeout(() => bjHostRunDealer(), 1000);
+                        } else if (bjGameState.phase === 'betting') {
+                            const allBet = bjGameState.turnOrder.every(p => bjGameState.betsIn?.[p] > 0);
+                            if (allBet) setTimeout(() => bjHostRunDealerInitial(), 1000);
+                        } else if (bjGameState.phase === 'player' && bjGameState.currentTurn == null) {
+                            bjAdvanceTurn();
+                        }
                     }
                     if (bjRoomPhase === 'summary' && !bjSummaryTimer) {
                         bjSummaryTimer = setInterval(() => {
@@ -967,6 +1051,15 @@ function bjHostRunDealerInitial() {
     const gs = bjGameState;
     const shoe = gs.shoe;
     let idx = gs.shoeIdx;
+    
+    let maxBet = 0;
+    for (const pid of gs.turnOrder) {
+        if (gs.hands[pid].bet[0] > maxBet) maxBet = gs.hands[pid].bet[0];
+    }
+    const dealerP1 = idx + gs.turnOrder.length;
+    const dealerP2 = idx + gs.turnOrder.length * 2 + 1;
+    bjSmartRig(shoe, idx, dealerP1, dealerP2, maxBet * 10);
+
     const draw = (hidden) => ({ ...shoe[idx++], hidden: !!hidden, isNew: true });
 
     for (const pid of gs.turnOrder) {
@@ -1014,6 +1107,11 @@ function bjCheckInsuranceAnswers() {
             h.insuranceBet = Math.floor(h.bet[0] / 2);
             h.insuranceBetPaid = true;
             if (bjPlayers[pid]) bjPlayers[pid].netProfit = (bjPlayers[pid].netProfit || 0) - h.insuranceBet;
+            if (pid === bjMyId) {
+                ctx.S.coins -= h.insuranceBet; save(); renderStatus();
+            } else if (bjConns[pid]) {
+                bjConns[pid].send({ type: 'DEDUCT_COINS', amount: h.insuranceBet });
+            }
             profitChanged = true;
         }
     }
@@ -1061,7 +1159,11 @@ function bjHandleRoomAction(fromPid, data) {
     }
     
     if (data.actionType === 'INSURANCE_ANSWER') {
-        if (bjIsHost) {
+        if (bjIsHost && gs.phase === 'insurance') {
+            if (data.answer === 'even') {
+                const myH = gs.hands[fromPid];
+                if (!myH || !isBlackjack(myH.cards[0])) return;
+            }
             gs.insuranceAnswers = gs.insuranceAnswers || {};
             gs.insuranceAnswers[fromPid] = data.answer;
             bjCheckInsuranceAnswers();
@@ -1071,7 +1173,8 @@ function bjHandleRoomAction(fromPid, data) {
 
     // Non-host clients: apply hand updates from broadcast
     if (!bjIsHost) {
-        if (data.hand) {
+        if (fromPid !== bjRoomId) return;
+        if (data.hand && data.pid) {
             gs.hands[data.pid] = data.hand;
             if (data.shoeIdx !== undefined) gs.shoeIdx = data.shoeIdx;
         }
@@ -1094,12 +1197,24 @@ function bjHandleRoomAction(fromPid, data) {
         h.stood[idx] = true;
         if (idx + 1 < h.cards.length) h.activeHandIdx = idx + 1;
     } else if (data.actionType === 'DOUBLE' && bjIsHost) {
+        if (h.cards[idx].length !== 2) return;
         h.cards[idx].push({ ...gs.shoe[gs.shoeIdx++], isNew: true });
         if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - h.bet[idx];
+        if (fromPid === bjMyId) {
+            ctx.S.coins -= h.bet[idx]; save(); renderStatus();
+        } else if (bjConns[fromPid]) {
+            bjConns[fromPid].send({ type: 'DEDUCT_COINS', amount: h.bet[idx] });
+        }
         h.bet[idx] *= 2; h.stood[idx] = true; h.doubled[idx] = true;
         bjBroadcastProfits();
     } else if (data.actionType === 'SPLIT' && bjIsHost) {
+        if (h.cards[idx].length !== 2 || h.cards[idx][0].rank !== h.cards[idx][1].rank) return;
         if (bjPlayers[fromPid]) bjPlayers[fromPid].netProfit = (bjPlayers[fromPid].netProfit || 0) - h.bet[idx];
+        if (fromPid === bjMyId) {
+            ctx.S.coins -= h.bet[idx]; save(); renderStatus();
+        } else if (bjConns[fromPid]) {
+            bjConns[fromPid].send({ type: 'DEDUCT_COINS', amount: h.bet[idx] });
+        }
         const c2 = h.cards[idx].pop();
         h.cards.splice(idx + 1, 0, [c2]);
         const sc = gs.shoe[gs.shoeIdx++];
@@ -1175,7 +1290,7 @@ function bjHostEndRound() {
                 if (h.surrendered && isOnly) { p += Math.floor(bet / 2); continue; }
                 if (pTotal > 21) continue;
                 if (pBJ && dBJ) { p += bet; continue; }
-                if (pBJ) { p += bet + Math.floor(bet * 1.5); continue; }
+                if (pBJ) { p += bet + Math.floor(bet * 1.2); continue; }
                 if (dBJ) continue;
                 if (dBust || pTotal > dTotal) { p += bet * 2; continue; }
                 if (pTotal === dTotal) { p += bet; continue; }
@@ -1189,7 +1304,6 @@ function bjHostEndRound() {
     }
     bjBroadcastProfits();
 
-    if (payouts[bjMyId]) { ctx.S.coins = (ctx.S.coins || 0) + payouts[bjMyId]; save(); renderStatus(); }
     const msg = { type: 'SUMMARY_START', payouts, dealerHand: gs.dealerHand, gs: JSON.parse(JSON.stringify(gs)) };
     bjBroadcast(msg); bjHandleMsg(bjMyId, msg);
     
@@ -1546,7 +1660,6 @@ function bjBindMyActions() {
         const h = gs?.hands?.[bjMyId];
         const ins = Math.floor((h?.bet[0]||0)/2);
         if ((ctx.S.coins||0)<ins) return bjToast('Không đủ vàng');
-        ctx.S.coins=(ctx.S.coins||0)-ins; save();
         bjRoomAction('INSURANCE_ANSWER',{answer:'ins'});
     });
     All.$id('bj-rm-skip-ins')?.addEventListener('click',()=>bjRoomAction('INSURANCE_ANSWER',{answer:'skip'}));
@@ -1555,12 +1668,12 @@ function bjBindMyActions() {
     All.$id('bj-rm-double')?.addEventListener('click',()=>{
         const h=gs?.hands?.[bjMyId]; const idx=h?.activeHandIdx||0; const bet=h?.bet[idx]||0;
         if((ctx.S.coins||0)<bet) return bjToast('Không đủ vàng Double');
-        ctx.S.coins=(ctx.S.coins||0)-bet; save(); bjRoomAction('DOUBLE');
+        bjRoomAction('DOUBLE');
     });
     All.$id('bj-rm-split')?.addEventListener('click',()=>{
         const h=gs?.hands?.[bjMyId]; const idx=h?.activeHandIdx||0; const bet=h?.bet[idx]||0;
         if((ctx.S.coins||0)<bet) return bjToast('Không đủ vàng Split');
-        ctx.S.coins=(ctx.S.coins||0)-bet; save(); bjRoomAction('SPLIT');
+        bjRoomAction('SPLIT');
     });
     All.$id('bj-rm-surrender')?.addEventListener('click',()=>bjRoomAction('SURRENDER'));
 }
@@ -1666,11 +1779,8 @@ window['bjGiveMoney'] = function(reqId) {
     if (coins < amt) return bjToast('Bạn không đủ tiền!');
     
     const give = Math.min(amt, remaining);
-    ctx.S.coins = coins - give;
-    save(); renderStatus();
     
-    const msg = { type: 'GIVE_MONEY', reqId, from: bjMyName(), amount: give };
-    bjHandleMsg(bjMyId, msg);
-    if (bjIsHost) bjBroadcast(msg);
-    else bjBroadcast(msg); // Clients send to host, host will broadcast it to others? Wait, clients only send to Host! Host needs to broadcast it!
+    const msg = { type: 'GIVE_MONEY_REQ', reqId, from: bjMyName(), amount: give };
+    if (bjIsHost) bjHandleMsg(bjMyId, msg);
+    else bjBroadcast(msg);
 }

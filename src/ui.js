@@ -239,6 +239,14 @@ export function initUI() {
       <div class="close-x" id="race-close">×</div>
     </div>
     <div class="race-view" id="race-view"></div>
+  </div>
+  
+  <div id="stock-win" class="dungeon-win" style="display:none">
+    <div class="titlebar" id="stock-drag">
+      <h1>${spriteSVG('stockMarket', 16)}Sàn Chứng Khoán <span id="stk-help-btn" style="cursor:pointer; display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; background:rgba(0,0,0,0.15); border-radius:50%; font-size:12px; color:#475569; font-weight:bold; margin-left:8px; vertical-align:middle; transition:all 0.2s;" title="Hướng dẫn chơi">?</span></h1>
+      <div class="close-x" id="stock-close">×</div>
+    </div>
+    <div class="dungeon-view" id="stock-view" style="flex:1; overflow-y:auto; padding:10px;"></div>
   </div>`;
   sh.appendChild(ctx.ui);
   ctx.orb = $id('orb');
@@ -346,8 +354,8 @@ fieldEl.addEventListener('touchend', e => {
 }
 
 export function showResetAnnouncement() {
-  if (localStorage.getItem('farm_reset_announce_seen')) return;
-  console.log('[Farm Ext] Bảng thông báo Reset xuất hiện!');
+  if (localStorage.getItem('farm_reborn_announce_seen')) return;
+  console.log('[Farm Ext] Bảng thông báo Trùng Sinh xuất hiện!');
   if (ctx.win.querySelector('#farm-reset-modal')) return;
 
   const m = document.createElement('div');
@@ -355,11 +363,11 @@ export function showResetAnnouncement() {
   m.style.cssText = 'position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:20px; box-sizing:border-box; color:#fff; text-align:center; font-family:sans-serif; transition: opacity 0.5s;';
   
   const box = document.createElement('div');
-  box.style.cssText = 'background:#222; border: 2px solid #555; border-radius:12px; padding:30px; max-width:400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); line-height:1.6;';
+  box.style.cssText = 'background:#1a2e1a; border: 2px solid #4CAF50; border-radius:12px; padding:30px; max-width:400px; box-shadow: 0 10px 30px rgba(76,175,80,0.3); line-height:1.6;';
   box.innerHTML = `
-    <h2 style="color:#ff4444; margin-top:0; font-size:24px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #ff4444; padding-bottom:10px;">Đại Kiếp Giáng Lâm</h2>
-    <p style="font-size:16px; margin: 20px 0; font-style:italic;">Thiên cơ nhiễu loạn, Thiên đạo suy tàn, Vạn chúng suy vong. Một hơi tàn, một tia sáng, hết thảy chuyển sinh, tái lập từ đầu.</p>
-    <p style="font-size:18px; font-weight:bold; color:#ffdd55; margin-bottom: 25px;">(Còn 2 ngày nữa là reset toàn bộ)</p>
+    <h2 style="color:#4CAF50; margin-top:0; font-size:24px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #4CAF50; padding-bottom:10px;">Trùng Sinh Thành Công</h2>
+    <p style="font-size:16px; margin: 20px 0; font-style:italic;">Thế giới đã được thanh tẩy hoàn toàn. Tài phú lạm phát tan biến như cát bụi. Một kỷ nguyên mới rực rỡ và cân bằng hơn đã mở ra!</p>
+    <p style="font-size:18px; font-weight:bold; color:#ffdd55; margin-bottom: 25px;">🌟 Chúc bạn một khởi đầu mới đầy may mắn! 🌟</p>
     <button id="reset-announce-btn" disabled style="background:#555; color:#999; border:none; padding:12px 24px; font-size:16px; border-radius:6px; cursor:not-allowed; transition:all 0.3s;">Đóng (5s)</button>
   `;
   
@@ -374,7 +382,7 @@ export function showResetAnnouncement() {
       btn.textContent = `Đóng (${timeLeft}s)`;
     } else {
       clearInterval(iv);
-      btn.textContent = 'Đã rõ, chuẩn bị chuyển sinh';
+      btn.textContent = 'Bắt đầu hành trình mới';
       btn.style.background = '#4CAF50';
       btn.style.color = '#fff';
       btn.style.cursor = 'pointer';
@@ -383,14 +391,24 @@ export function showResetAnnouncement() {
   }, 1000);
   
   btn.addEventListener('click', () => {
-    localStorage.setItem('farm_reset_announce_seen', '1');
+    localStorage.setItem('farm_reborn_announce_seen', '1');
     m.style.opacity = '0';
     setTimeout(() => m.remove(), 500);
   });
 }
 
 // @ts-ignore
-window.testFarmReset = () => {
-  localStorage.removeItem('farm_reset_announce_seen');
+window['testFarmReset'] = () => {
+  localStorage.removeItem('farm_reborn_announce_seen');
   console.log('[Farm Ext] Đã xóa cờ reset, hãy đóng mở lại cửa sổ nông trại để xem bảng thông báo.');
 };
+
+window['testSansLock'] = () => {
+    if (!ctx.S.achiv) return;
+    if (ctx.S.achiv.sans) ctx.S.achiv.sans.claimed = false;
+    ctx.S.pets = ctx.S.pets.filter(p => p !== 'sans');
+    ctx.S.petsOut = ctx.S.petsOut.filter(p => p !== 'sans');
+    save();
+    console.log('[Farm Ext] Đã khóa và xóa Sans khỏi Balo/Sân.');
+};
+

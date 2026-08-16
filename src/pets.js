@@ -6,7 +6,7 @@ import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, L
 import { sh } from './ui.js';
 import { save, curBlocks, curPlots } from './state.js';
 import { renderStatus, pickFrom } from './render.js';
-import { plant, harvest, fertilize } from './logic.js';
+import { plant, harvest, fertilize, water } from './logic.js';
 
 /* ---------- Thú cưng: render động + chọc chọc (uỷ quyền listener, bong bóng trên đầu, đủ 10 phút mới thật sự rơi tiền) ---------- */
 /* extraClass tuỳ chọn: trường đua truyền 'rb' để đổi chỗ neo bong bóng.
@@ -23,12 +23,13 @@ export function petBubble(el, txt, extraClass) {
 }
 /* #26 (sửa lần 2): hàng dưới cùng (cao bằng một ô ruộng) = tầng đi lại riêng cho loại làm việc, không chạy lên trên; các bé khác đi lang thang tự do trong toàn khu ruộng phía trên hàng dưới, có thể băng ngang qua ruộng
    v0.7①: di chuyển kiểu nhảy —— bé không thuộc nhóm bay sẽ nhích tới điểm đích bằng từng cú nhảy nhỏ (mỗi cú = xê dịch ngang tuyến tính một bước + thân bay lên hạ xuống theo parabol), mây/ma thì trượt */
-export const petPos = {}, petTgt = {}, petHopT = {};            // Toạ độ / điểm đến / bộ đếm nhảy liên tiếp lúc chạy, không ghi vào save
+export const petPos = {}, petTgt = {}, petHopT = {}, sansStep = {};  // Toạ độ / điểm đến / bộ đếm nhảy / bước Sans
 export const WORK_BAND = 74;                                    // Chiều cao hàng dưới ≈ một ô ruộng (dành cho loại làm việc, loại đi dạo tính từ phía trên nó)
 export const FLOATY = { cloudMallow: 1, ghostBlob: 1, jellyfish: 1 };   // Danh sách bay: không nhảy, trượt đều (#43: bé sứa xoăn nhập hội, thành bộ ba bay lơ lửng)
 export const GAITS = {                                          // Dáng đi: len = độ dài một bước nhảy, dur = chu kỳ một cú nhảy (ms), hy = độ cao nhảy
   octo:      { len: 8,  dur: 260, hy: -4 },              // Bạch tuộc: bước lắt nhắt bò sát đất
   octoCream: { len: 8,  dur: 290, hy: -4 },              // Bạch tuộc kem: bò còn chậm rì hơn nữa
+  sans:      { len: 18, dur: 400, hy:  0 },              // Sans: bước đi lậờ đờ, không nhảy (≈ FLOATY nhưng vẫn hop-based để trigger direction)
   _:         { len: 14, dur: 330, hy: -9 },              // Mặc định: kiểu nảy chuẩn của dòng slime
 };
 export const gaitOf = id => GAITS[id] || GAITS._;
@@ -46,33 +47,47 @@ export function petSpot(id) {
   return { x, y: WORK_BAND + 6 + Math.random() * Math.max(20, H - WORK_BAND - 70) };
 }
 export function placePet(el, p, instant) {                      // Đặt vị trí: instant = dịch chuyển tức thì; nếu không thì trượt đều (dành riêng cho bé bay)
+  const id = el.dataset.pet;
   if (instant) el.style.transitionProperty = 'transform, translate';
   else {
-    const old = petPos[el.dataset.pet] || p;
+    const old = petPos[id] || p;
     const dist = Math.hypot(p.x - old.x, p.y - old.y);
     const dur = dist < 40 ? .5 : Math.min(11, Math.max(3, dist / 18));
     el.style.transitionProperty = 'transform, translate';
     el.style.transitionDuration = '.12s, ' + dur + 's';
     el.style.transitionTimingFunction = 'ease, linear';
-    el.classList.toggle('flip', p.x < old.x);
+    if (id !== 'sans') el.classList.toggle('flip', p.x < old.x);   // Sans manages its own flip
   }
   el.style.translate = p.x + 'px ' + (-p.y) + 'px';
-  petPos[el.dataset.pet] = p;
+  petPos[id] = p;
 }
 export function hopStep(el) {                                   // Một cú nhảy: nhích một bước về phía đích, tới nơi thì nghỉ
   const id = el.dataset.pet;
+  if (id === 'sans' && window['sansManualControl']) return;
   if (el.dataset.dragging) return; // Không can thiệp khi người dùng đang kéo
   if (!el.isConnected) { stopHop(id); return; }
   const cur = petPos[id], tgt = petTgt[id], g = gaitOf(id);
   if (!cur || !tgt || Math.hypot(tgt.x - cur.x, tgt.y - cur.y) < 3) {
     delete petTgt[id]; el.classList.remove('walk'); stopHop(id);
+    if (id === 'sans') {
+        sansStep[id] = 0;
+        import('./graphics.js').then(g => g.applySansSprite(el, g.sansFarmSpriteFor(0, 0)));
+    }
     const cb = petArrive[id]; delete petArrive[id]; if (cb) cb();   // v0.7③: callback khi tới nơi (dùng cho việc dàn cảnh tiểu phẩm)
     return;
   }
   const dx = tgt.x - cur.x, dy = tgt.y - cur.y, dist = Math.hypot(dx, dy);
   const len = Math.min(g.len, dist);
   const p = { x: cur.x + dx / dist * len, y: cur.y + dy / dist * len };
-  el.classList.toggle('flip', dx < 0);
+  el.classList.toggle('flip', id !== 'sans' && dx < 0);   // Sans tự xử lý flip qua sprite direction
+  /* ── Sans: đổi sprite theo hướng đi, xen kẽ walk frames ── */
+  if (id === 'sans') {
+    sansStep[id] = (sansStep[id] || 0) + 1;
+    import('./graphics.js').then(g => {
+      const sp = g.sansFarmSpriteFor(dx, dy, sansStep[id]);
+      g.applySansSprite(el, sp);
+    });
+  }
   el.classList.add('walk');
   el.style.setProperty('--hopd', g.dur + 'ms');
   el.style.setProperty('--hy', g.hy + 'px');
@@ -85,6 +100,7 @@ export function hopStep(el) {                                   // Một cú nh�
 }
 export function moveTo(el, p) {                                 // Lên đường tới p: bé bay thì trượt, còn lại thì nhảy liên tiếp
   const id = el.dataset.pet;
+  if (id === 'sans' && window['sansManualControl']) return;
   if (el.dataset.dragging) return; // Không giành quyền điều khiển
   if (FLOATY[id]) return placePet(el, p, false);
   petTgt[id] = p;
@@ -92,11 +108,94 @@ export function moveTo(el, p) {                                 // Lên đườn
 }
 /* v0.7②: ngủ —— bé đi dạo rảnh mãi rồi nằm bẹp xuống thả chữ Z (bé làm việc đang trong ca thì không ngủ); chọc = giật mình tỉnh dậy kêu "?!", không ai chọc thì cũng tự tỉnh */
 export const petSleepT = {};
+export const petIdleT = {};
+export function sansIdleAction(el) {
+  const actions = ['icecream', 'stool', 'stool_chup', 'stool_comb'];
+  const act = actions[Math.floor(Math.random() * actions.length)];
+  const id = el.dataset.pet;
+  playSansAction(el, act);
+  petIdleT[id] = window.setTimeout(() => wakeSans(el), 15000 + Math.random() * 15000);
+}
+export function wakeSans(el) {
+  const id = el.dataset.pet;
+  if (petIdleT[id]) { window.clearTimeout(petIdleT[id]); delete petIdleT[id]; }
+  delete el.dataset.sansAction;
+  stopSansAction(el);
+}
+
 export function sleepPet(el) {
   const id = el.dataset.pet;
   el.classList.add('sleep');
+  if (id === 'sans') playSansAction(el, 'sleep_stand');
   el.insertAdjacentHTML('beforeend', '<span class="zzz">Z</span><span class="zzz z2">z</span>');
   petSleepT[id] = window.setTimeout(() => wakePet(el, false), 40000 + Math.random() * 40000);
+}
+
+// Logic Tự động hoá của Sans
+function getBestSeedForZone(zone) {
+  let best = null;
+  let bestValue = -1;
+  for (const [id, count] of Object.entries(ctx.S.seeds)) {
+    if (count <= 0) continue;
+    const def = CROPS[id];
+    if (!def) continue;
+    const z = def.zone || 1;
+    if (z === zone && def.sell > bestValue) {
+      bestValue = def.sell;
+      best = id;
+    }
+  }
+  return best;
+}
+
+export function sansUltimateFarm(el) {
+  let acted = false;
+  const originalPage = ctx.S.page;
+  
+  for (let page = 1; page <= 3; page++) {
+    ctx.S.page = page;
+    const blocks = page === 1 ? ctx.S.unlockedBlocks : (page === 2 ? ctx.S.unlockedBlocks2 : ctx.S.unlockedBlocks3);
+    const plots = page === 1 ? ctx.S.plots : (page === 2 ? ctx.S.plots2 : ctx.S.plots3);
+    
+    if (!plots) continue;
+    
+    for (let pi = 0; pi < blocks * 4; pi++) {
+      const plot = plots[pi];
+      if (!plot) continue;
+      
+      if (plot.crop) {
+        if (now() >= plot.crop.matureAt) {
+          if (harvest(pi, true)) acted = true;
+        } else {
+          if (now() >= plot.crop.wateredUntil) {
+            if (water(pi, true)) acted = true;
+          }
+          if (ctx.S.ferts['compost'] > 0 && (!plot.crop.fertUsed || !plot.crop.fertUsed['compost'])) {
+            if (fertilize(pi, 'compost', true)) acted = true;
+          }
+          if (ctx.S.ferts['shiny'] > 0 && (!plot.crop.fertUsed || !plot.crop.fertUsed['shiny'])) {
+            if (fertilize(pi, 'shiny', true)) acted = true;
+          }
+        }
+      } else {
+        const bestSeed = getBestSeedForZone(page);
+        if (bestSeed) {
+          if (plant(pi, bestSeed, true)) acted = true;
+        }
+      }
+    }
+  }
+  ctx.S.page = originalPage;
+  
+  if (acted) {
+    if (el) {
+      import('./render.js').then(r => r.renderPlots()); // Trigger a single render update for the current page
+      playSansAction(el, 'magic');
+      petBubble(el, 'heh, shortcuts.');
+      petIdleT['sans'] = window.setTimeout(() => wakeSans(el), 2000); // 2s duration for magic animation
+    }
+  }
+  return acted;
 }
 export function wakePet(el, startled) {
   const id = el.dataset.pet;
@@ -110,8 +209,51 @@ export function wakePet(el, startled) {
     const me = petEl(mate);
     if (startled && me && me.classList.contains('sleep')) window.setTimeout(() => wakePet(me, true), 260);
   }
+  if (id === 'sans') stopSansAction(el);
   if (startled) petBubble(el, '?!');
 }
+
+export const petAnimT = {}; // Bảng lưu timer hoạt ảnh đặc biệt
+
+export function playSansAction(el, action) {
+  const id = el.dataset.pet;
+  if (petAnimT[id]) window.clearInterval(petAnimT[id]);
+  
+  if (action !== 'sleep_stand') el.dataset.sansAction = action;
+  sansStep[id] = 0;
+  
+  petAnimT[id] = window.setInterval(() => {
+    if (!el.isConnected || el.classList.contains('walk')) return;
+    
+    // Tự động dừng nếu state bị xoá (ví dụ gọi script test ngoài luồng)
+    if (action !== 'sleep_stand' && el.dataset.sansAction !== action) return stopSansAction(el);
+    if (action === 'sleep_stand' && !el.classList.contains('sleep')) return stopSansAction(el);
+    
+    sansStep[id] = (sansStep[id] || 0) + 1;
+    import('./graphics.js').then(g => {
+      const sp = g.sansFarmSpriteForAction(action, sansStep[id]);
+      g.applySansSprite(el, sp);
+    });
+  }, 200); // 200ms mỗi frame
+}
+
+export function stopSansAction(el) {
+  const id = el.dataset.pet;
+  if (petAnimT[id]) {
+    window.clearInterval(petAnimT[id]);
+    delete petAnimT[id];
+  }
+  const img = el.querySelector('[data-sans-sprite]');
+  if (img && !el.classList.contains('walk')) {
+    import('./graphics.js').then(g => g.applySansSprite(el, g.sansFarmSpriteFor(0, 0)));
+  }
+}
+
+// Cho phép người dùng test trên console
+window['playSansAction'] = playSansAction;
+window['stopSansAction'] = stopSansAction;
+
+
 /* v0.7③: kho tương tác trứng phục sinh —— tiểu phẩm ngẫu nhiên tần suất thấp (đụng đầu nảy ra / lây ngáp / ngủ chồng đống / rượt đuổi):
    chọn diễn viên rồi khoá lại (tuần tra không giành người), diễn xong ai về nhà nấy; render lại bảng = tắt đèn giải tán; cùng một vở không diễn liên tiếp */
 export const petArrive = {};                                    // Callback khi nhảy tới nơi
@@ -220,6 +362,7 @@ export function renderPets() {
   for (const k in petArrive) delete petArrive[k];
   for (const k in pileWith) delete pileWith[k];
   Object.keys(petSleepT).forEach(k => { window.clearTimeout(petSleepT[k]); delete petSleepT[k]; });
+  Object.keys(petIdleT).forEach(k => { window.clearTimeout(petIdleT[k]); delete petIdleT[k]; });
   All.$id('mascots').dataset.drag = ctx.S.dragPet ? '1' : '0';   // Bật touch-action:none cho .pet khi cho phép kéo (xem style.js)
   All.$id('mascots').innerHTML = ctx.S.petsOut.map(id => PETS[id]
     ? `<span class="pet" data-pet="${id}" title="Chọc chọc ${PETS[id].name}"><span class="pbody" style="animation-delay:-${(Math.random() * 1.8).toFixed(2)}s">${petSVG(id, 48)}</span></span>` : '').join('');
@@ -277,6 +420,11 @@ export function petFert(el, cry) {                             // Bé bí ẩn: 
 
 export function initPets() {
   wander = window.setInterval(() => {                  // Nhịp tuần tra: cứ 7s lại giao điểm đến / ru ngủ / mở tiểu phẩm cho các bé đang rảnh
+    // Chạy ngầm tính năng siêu thú cưng của Sans kể cả khi đóng bảng
+    if ((!ctx.win || !ctx.win.classList.contains('open')) && ctx.S && ctx.S.petsOut && ctx.S.petsOut.includes('sans')) {
+      sansUltimateFarm(null);
+    }
+    
     if (!ctx.win || !ctx.win.classList.contains('open')) return;           // Tối ưu: Dừng tuần tra và tính toán vị trí khi bảng bị ẩn
     const ov = All.$id('mascots');
     if (!ov || ov.clientWidth === 0) return;
@@ -284,10 +432,24 @@ export function initPets() {
     sh.querySelectorAll('#mascots .pet').forEach(el => {
       // @ts-ignore
       const id = el.dataset.pet;
-      if (sceneBusy(id) || petTgt[id] || el.classList.contains('sleep')) return;   // Đang diễn / đang đi / đang ngủ thì đừng làm phiền
-      if (!PETS[id].job && Math.random() < 0.08) return sleepPet(el);   // Rảnh lâu quá thì chợp mắt một giấc
+      if (sceneBusy(id) || petTgt[id] || el.classList.contains('sleep') || el.dataset.sansAction) return;   // Đang diễn / đang đi / đang ngủ thì đừng làm phiền
+      
+      const isSans = id === 'sans';
+      
+      // Khả năng siêu cấp tự động hoá của Sans
+      if (isSans && sansUltimateFarm(el)) return;
+      
+      const lazyChance = isSans ? 0.35 : 0.12;
+      
+      if (!PETS[id].job && Math.random() < lazyChance) {
+        if (isSans && Math.random() < 0.70) return sansIdleAction(el);
+        return sleepPet(el);
+      }
+      
       if (PETS[id].job && now() - (petTouch[id] || touchBase) > 5 * MIN && Math.random() < 0.08) return sleepPet(el);   // Bé làm việc 5 phút không ai đoái hoài thì đứng ngủ (tưới tự động không bị ảnh hưởng, mây ngủ vẫn mưa nhé)
-      if (Math.random() < 0.35) moveTo(el, petSpot(id));
+      
+      const walkChance = isSans ? 0.10 : 0.35;
+      if (Math.random() < walkChance) moveTo(el, petSpot(id));
     });
   }, 7000);
   let activeDrag = null;
@@ -324,6 +486,7 @@ export function initPets() {
     if (petHopT[id]) { clearTimeout(petHopT[id]); petHopT[id] = null; }
     delete petTgt[id];
     delete petArrive[id];
+    if (el.dataset.sansAction) wakeSans(el);
     el.dataset.dragging = 'true'; // Đánh dấu đang bị người dùng điều khiển
 
     // Lấy toạ độ thực tế (mid-air) nếu bé đang nhảy dở
@@ -441,12 +604,13 @@ export function initPets() {
     const def = PETS[petId];
     if (!def) return;
     petTouch[petId] = now();
+    if (el.dataset.sansAction) wakeSans(el);
     if (el.classList.contains('sleep')) return wakePet(el, true);
     const cry = def.cry[Math.floor(Math.random() * def.cry.length)];
     if (def.job === 'plant') return petPlant(el, cry);
     if (def.job === 'fert') return petFert(el, cry);
     if (def.job === 'harvest') return petHarvest(el, cry);
-    if (def.job) return petBubble(el, cry);
+    if (def.job || petId === 'sans') return petBubble(el, cry);
     let txt = cry;
     if (now() - (ctx.S.petPoke[petId] || 0) >= POKE_CD) {
       ctx.S.petPoke[petId] = now();
@@ -503,3 +667,81 @@ export function initPets() {
     handlePetClick(el, el.dataset.pet);
   });
 }
+
+// Lệnh Console ẩn để điều khiển thủ công (Debug)
+window['toggleSansControl'] = function() {
+  window['sansManualControl'] = !window['sansManualControl'];
+  const ov = All.$id('mascots');
+  const el = /** @type {HTMLElement} */ (ov ? ov.querySelector('.pet[data-pet="sans"]') : null);
+  if (!el) {
+    console.log("Sans chưa xuất hiện trên đồng!");
+    window['sansManualControl'] = false;
+    return;
+  }
+
+  if (window['sansManualControl']) {
+      console.log("=== SANS MANUAL CONTROL: BẬT ===");
+      console.log("Phím Mũi Tên: Di chuyển");
+      console.log("Phím 1: Ngủ gật (sleep_stand)");
+      console.log("Phím 2: Ăn kem (icecream)");
+      console.log("Phím 3: Xài phép (magic)");
+      console.log("Phím 5: Ngồi ghế (stool)");
+      console.log("Phím 6: Uống Ketchup (stool_chup)");
+      console.log("Phím 7: Chải đầu (stool_comb)");
+      console.log("Phím 4: Huỷ hành động (stop)");
+      
+      delete petTgt['sans']; 
+      el.classList.remove('walk');
+      stopHop('sans');
+      if (el.dataset.sansAction) wakeSans(el);
+      
+      window['_sansManualListener'] = function(e) {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+          const p = petPos['sans'] || {x: 100, y: 100};
+          petPos['sans'] = p;
+          let dx = 0, dy = 0;
+          const speed = 10;
+          if (e.key === 'ArrowUp') dy = speed;
+          if (e.key === 'ArrowDown') dy = -speed;
+          if (e.key === 'ArrowLeft') dx = -speed;
+          if (e.key === 'ArrowRight') dx = speed;
+          
+          if (dx !== 0 || dy !== 0) {
+              e.preventDefault();
+              p.x += dx; p.y += dy;
+              
+              const ov = document.getElementById('mascots');
+              const W = ov ? ov.clientWidth : 380;
+              const H = ov ? ov.clientHeight : 320;
+              p.x = Math.max(0, Math.min(p.x, W - 64));
+              p.y = Math.max(WORK_BAND, Math.min(p.y, H - 70));
+              
+              el.style.transitionProperty = 'none';
+              el.style.translate = p.x + 'px ' + (-p.y) + 'px';
+              
+              // Cập nhật sprite thủ công
+              sansStep['sans'] = (sansStep['sans'] || 0) + 1;
+              import('./graphics.js').then(g => {
+                  const sp = g.sansFarmSpriteFor(dx, dy, sansStep['sans']);
+                  g.applySansSprite(el, sp);
+              });
+          }
+          
+          if (e.key === '1') { playSansAction(el, 'sleep_stand'); }
+          if (e.key === '2') { playSansAction(el, 'icecream'); }
+          if (e.key === '3') { playSansAction(el, 'magic'); }
+          if (e.key === '5') { playSansAction(el, 'stool'); }
+          if (e.key === '6') { playSansAction(el, 'stool_chup'); }
+          if (e.key === '7') { playSansAction(el, 'stool_comb'); }
+          if (e.key === '4') { stopSansAction(el); }
+      };
+      window.addEventListener('keydown', window['_sansManualListener']);
+  } else {
+      console.log("=== SANS MANUAL CONTROL: TẮT ===");
+      if (window['_sansManualListener']) {
+          window.removeEventListener('keydown', window['_sansManualListener']);
+          delete window['_sansManualListener'];
+      }
+      stopSansAction(el);
+  }
+};

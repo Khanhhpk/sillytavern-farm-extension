@@ -8,7 +8,7 @@ export const now = () => Date.now();
 export const emptyPlots = () => { const a = []; for (let i = 0; i < 24; i++) a.push({ crop: null }); return a; };
 export function freshState() {
   return {
-    version: 2, playerId: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : ('p-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9)), coins: TEST_MODE ? 9999 : 999, totalSales: 0, unlockedBlocks: 2,
+    version: 3, playerId: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : ('p-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9)), coins: TEST_MODE ? 9999 : 999, totalSales: 0, unlockedBlocks: 2,
     plots: emptyPlots(), seeds: { douya: 4, mystery: 1 }, ferts: {}, bag: {}, petPoke: {},   // Quà khởi đầu: 4 giá đỗ + 1 hạt giống bí ẩn (popup dạy chơi hộp mù)
     pets: ['slime'], passes: {}, petsOut: ['slime'], jobCfg: {}, petFind: {},   // Tặng slime xanh lúc mở đầu (thực hiện phương án #9)
     page: 1, plots2: emptyPlots(), plots3: emptyPlots(), unlockedBlocks2: 1, unlockedBlocks3: 1,   // v0.8: ba trang (vé vào trang 2/3 tặng kèm ô đất đầu tiên)
@@ -23,17 +23,8 @@ export function loadState() {
   }
   const g = ctx.extension_settings[extensionName] || {};
   
-  // Migration logic v1 -> v2
-  if (g[NS] && g[NS].version === 1) {
-      g[NS].version = 2;
-      if (g[NS].coins >= 1000000000) {
-          g[NS].needsTribulationCheck = true;
-      } else {
-          g[NS].needsPoorTribulationNotice = true;
-      }
-  }
-
-  ctx.S = g[NS] && g[NS].version === 2 ? g[NS] : freshState();
+  // Hard reset v3
+  ctx.S = g[NS] && g[NS].version === 3 ? g[NS] : freshState();
   if (!ctx.S.playerId) ctx.S.playerId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : ('p-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9));
   if (!ctx.S.petPoke) ctx.S.petPoke = {};
   if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
@@ -100,6 +91,7 @@ export function loadState() {
   if (ctx.S.bankInvestTime === undefined) ctx.S.bankInvestTime = 0;
   if (ctx.S.bankDepositTime === undefined) ctx.S.bankDepositTime = Date.now();
   if (ctx.S.bankLastCollectionTime === undefined) ctx.S.bankLastCollectionTime = 0;
+  if (!ctx.S.stock) ctx.S.stock = { balance: 0, debt: 0, portfolio: {}, history: {}, trends: {}, lastUpdate: Date.now() };
 
   Object.keys(ctx.S.uniques || {}).forEach(k => {
     const item = ctx.S.uniques[k];
