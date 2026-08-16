@@ -56404,7 +56404,7 @@ function stepPrice(t2) {
   trend *= S.trendDecay;
   trend = Math.max(-1, Math.min(1, trend));
   let currentDrift = ctx.S.stock && ctx.S.stock.currentDrifts && ctx.S.stock.currentDrifts[t2] !== void 0 ? ctx.S.stock.currentDrifts[t2] : S.drift;
-  let change = currentDrift + S.vol * (Math.random() - 0.48 + trend * 0.5);
+  let change = currentDrift + S.vol * (Math.random() - 0.5 + trend * 0.5);
   change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
   let newPrice = Math.max(1, price * (1 + change));
   hist.push(newPrice);
@@ -56442,7 +56442,7 @@ function updateMarket(now2 = Date.now()) {
     ctx.S.stock.candleCount = (ctx.S.stock.candleCount || 0) + 1;
     if (ctx.S.stock.candleCount % 100 === 0) {
       Object.keys(STOCKS).forEach((t2) => {
-        ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * 0.04 - 0.02;
+        ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * 0.02 - 0.01;
       });
     }
     Object.keys(STOCKS).forEach((t2) => {
@@ -57216,7 +57216,7 @@ var init_stock = __esm({
         // Per-candle volatility (random walk amplitude)
         vol: 0.035,
         // Intrinsic drift per candle — negative = house edge / inflation drag
-        drift: -2e-3,
+        drift: 0,
         // How fast trend momentum decays (higher = faster reversion to calm)
         trendDecay: 0.7,
         // Trend noise amplitude
@@ -57232,7 +57232,7 @@ var init_stock = __esm({
         startPrice: 50,
         color: "#22c55e",
         vol: 0.1,
-        drift: -5e-3,
+        drift: 1e-3,
         trendDecay: 0.78,
         trendNoise: 0.35,
         gravityZones: [{ above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.35, pull: 0.18 }],
@@ -57241,13 +57241,21 @@ var init_stock = __esm({
       // ─── DEGEN ─── Meme/pump-dump, strong negative drift, rare huge spikes, usually bleeds
       CRASH: {
         name: "\u0110a C\u1EA5p Coin",
-        startPrice: 10,
         color: "#ef4444",
+        startPrice: 10,
+        drift: -1e-3,
+        // Giảm nhẹ
         vol: 0.22,
-        drift: -0.015,
-        trendDecay: 0.88,
-        trendNoise: 0.55,
-        gravityZones: [{ above: 15, pull: -0.55 }, { above: 5, pull: -0.2 }, { below: 0.2, pull: 0.1 }],
+        // 22% swing (crazy volatility)
+        trendNoise: 0.5,
+        trendDecay: 0.95,
+        // Trends last longer
+        gravityZones: [
+          { above: 10, pull: -0.2 },
+          // >$100
+          { below: 0.05, pull: 0.3 }
+          // <$0.5
+        ],
         swingCap: 0.3,
         // Occasional pump event: 3% chance per candle to ignite a strong uptrend
         pumpChance: 0.03,
