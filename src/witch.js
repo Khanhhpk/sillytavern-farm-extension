@@ -112,8 +112,12 @@ export function setTakeoutNote(val) { takeoutNote = val; }
 export function openTakeout(key) {
   const have = ctx.S.bag[key] || 0;
   if (have <= 0) return;
+  const isGacha = key.startsWith('unique@');
+  const noteText = isGacha
+    ? `Lấy ra = đưa vào Tab Chính Văn để tương tác trong cốt truyện. <b style="color:var(--accFg)">Đồ Gacha có thể thu hồi về balo bất cứ lúc nào.</b>`
+    : `Lấy ra = đưa vào Tab Chính Văn để dùng trong cốt truyện. <b style="color:var(--accFg)">Không quy ra tiền. Nông sản sẽ tự phân rã sau 10 phút nếu không dùng tới.</b>`;
   openModal('Lấy ra · ' + bagName(key), `
-    <div class="note" style="margin-bottom:8px">Lấy ra = mang khỏi balo để dùng trong cốt truyện. <b style="color:var(--accFg)">Không quy ra tiền, lấy ra rồi không bỏ lại balo được!</b></div>
+    <div class="note" style="margin-bottom:8px">${noteText}</div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <input class="inp" id="takeN" type="number" min="1" max="${have}" value="1" style="width:90px">
       <span style="font-size:12px;color:#7a5c38">/ đang có ${have}</span>

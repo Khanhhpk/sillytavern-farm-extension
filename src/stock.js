@@ -63,18 +63,19 @@ export const STOCKS = {
     name: 'Đa Cấp Coin',
     color: '#ef4444',
     startPrice: 10,
-    drift: -0.001, // Giảm nhẹ
-    vol: 0.22, // 22% swing (crazy volatility)
-    trendNoise: 0.5,
-    trendDecay: 0.95, // Trends last longer
+    drift: -0.003, // Tăng độ trôi âm (Hold lâu chết chắc)
+    vol: 0.25, // Tăng RNG nến giật cục
+    trendNoise: 0.35, // Đã giảm thêm để tránh xu hướng ngẫu nhiên mập lên quá đà
+    trendDecay: 0.80, // Trend tàn ở mức trung bình, vừa đủ để gợn sóng
     gravityZones: [
-      { above: 10.0, pull: -0.2 }, // >$100
-      { below: 0.05, pull: 0.3 } // <$0.5
+      { above: 10.0, pull: -1.0 }, // >$100 (x10) -> Đạp nát không cho lên nữa
+      { above: 5.0, pull: -0.3 },  // >$50 (x5) -> Lực bán xả mạnh
+      { below: 0.1, pull: 0.15 }   // <$1 -> Lực đỡ yếu hơn, bắt đáy vẫn có rủi ro chôn vốn
     ],
     swingCap: 0.30,
-    // Occasional pump event: 3% chance per candle to ignite a strong uptrend
-    pumpChance: 0.03,
-    pumpStrength: 0.50,
+    // Occasional pump event: 2% chance per candle to ignite a strong uptrend
+    pumpChance: 0.02,
+    pumpStrength: 0.60,
   }
 };
 
@@ -237,7 +238,7 @@ export function checkMarginCall() {
 
 export function depositBrokerage(amount) {
   amount = Math.floor(amount);
-  if (amount <= 0 || ctx.S.coins < amount) return false;
+  if (!Number.isFinite(amount) || amount <= 0 || ctx.S.coins < amount) return false;
   ctx.S.coins = Math.floor(ctx.S.coins) - amount;
   const received = amount * 0.9;
   ctx.S.stock.balance += received;
@@ -257,7 +258,7 @@ export function depositBrokerage(amount) {
 }
 
 export function withdrawBrokerage(amount) {
-  if (amount <= 0 || ctx.S.stock.balance < amount) return false;
+  if (!Number.isFinite(amount) || amount <= 0 || ctx.S.stock.balance < amount) return false;
   ctx.S.stock.balance -= amount;
   ctx.S.coins = Math.floor(ctx.S.coins) + Math.floor(amount * 0.9);
   ctx.S.stock.totalWithdrawn = (ctx.S.stock.totalWithdrawn || 0) + amount;
@@ -275,7 +276,7 @@ export function withdrawBrokerage(amount) {
 }
 
 export function buyStock(ticker, shares) {
-  if (shares <= 0) return false;
+  if (!Number.isFinite(shares) || shares <= 0) return false;
   const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
   const cost = price * shares;
   if (ctx.S.stock.balance >= cost) {
@@ -291,7 +292,7 @@ export function buyStock(ticker, shares) {
 }
 
 export function sellStock(ticker, shares) {
-  if (shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
+  if (!Number.isFinite(shares) || shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
   const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
   const revenue = price * shares * 0.98; // Thuế phí 2%
   
@@ -313,7 +314,7 @@ export function sellStock(ticker, shares) {
 }
 
 export function placeAutoOrder(ticker, type, targetPrice, shares) {
-  if (shares <= 0 || targetPrice <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
+  if (!Number.isFinite(shares) || !Number.isFinite(targetPrice) || shares <= 0 || targetPrice <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
   if (!ctx.S.stock.autoOrders) ctx.S.stock.autoOrders = [];
   ctx.S.stock.autoOrders.push({
     id: Date.now().toString() + Math.random().toString(),
@@ -365,14 +366,14 @@ export function checkAutoOrders(ticker, currentPrice) {
 }
 
 export function borrowMargin(amount) {
-  if (amount <= 0) return false;
+  if (!Number.isFinite(amount) || amount <= 0) return false;
   ctx.S.stock.debt = (ctx.S.stock.debt || 0) + amount;
   ctx.S.stock.balance += amount * 0.98; // 2% upfront fee
   return true;
 }
 
 export function repayMargin(amount) {
-  if (amount <= 0 || ctx.S.stock.balance < amount || (ctx.S.stock.debt || 0) < amount) return false;
+  if (!Number.isFinite(amount) || amount <= 0 || ctx.S.stock.balance < amount || (ctx.S.stock.debt || 0) < amount) return false;
   ctx.S.stock.balance -= amount;
   ctx.S.stock.debt -= amount;
   return true;

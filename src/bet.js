@@ -9,7 +9,7 @@ import * as All from './all.js';
 /* Tiền trên bàn nằm ở đúng một trường trong save. Không lưu số gốc, không lưu chuỗi roll —
    mở lại cửa sổ là phiên mới. Mục đích duy nhất là để tiền không bốc hơi khi F5 giữa chừng. */
 export function getPot() { return safeAmount(ctx.S.betPot); }
-export function setPot(v) { ctx.S.betPot = safeAmount(v); }
+function setPot(v) { ctx.S.betPot = safeAmount(v); }
 
 let anchor = 0;                                         // Số gốc của ván hiện tại
 let chain = [];                                         // Chuỗi roll để hiển thị, tối đa 8 số

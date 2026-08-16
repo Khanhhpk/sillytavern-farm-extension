@@ -115,7 +115,6 @@ export function loadState() {
 export const pagePlots = pg => pg === 2 ? ctx.S.plots2 : pg === 3 ? ctx.S.plots3 : ctx.S.plots;
 export const curPlots = () => pagePlots(ctx.S.page);
 export const curBlocks = () => ctx.S.page === 2 ? ctx.S.unlockedBlocks2 : ctx.S.page === 3 ? ctx.S.unlockedBlocks3 : ctx.S.unlockedBlocks;
-export const addBlock = () => { if (ctx.S.page === 2) ctx.S.unlockedBlocks2++; else if (ctx.S.page === 3) ctx.S.unlockedBlocks3++; else ctx.S.unlockedBlocks++; };
 export const eachPage = fn => [1, 2, 3].forEach(pg => fn(pagePlots(pg), pg));
 export let testMode = false;
 export function setTestMode(v) { testMode = v; }

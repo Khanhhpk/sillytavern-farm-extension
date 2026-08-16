@@ -3,6 +3,7 @@ import * as All from './all.js';
 import { db } from './firebase.js';
 import { collection, addDoc, getDocs, doc, updateDoc, query, where, deleteDoc } from 'firebase/firestore';
 import { CROPS, FERTS } from './data.js';
+import { bagPrice, bagName, mutDescOf } from './logic.js';
 
 let currentFleaItems = {};
 
@@ -220,6 +221,8 @@ export function renderFleaItems() {
         let rarityBadge = '';
         if (data.itemId.startsWith('unique@') && data.itemData && data.itemData.rarity) {
             rarityBadge = `<span style="display:inline-block; white-space:nowrap; font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || '#ff8000'}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
+        } else if (data.itemId.includes('@')) {
+            rarityBadge = ` <span style="font-size:11px;color:#8a5cc0; margin-left:4px; vertical-align:middle;">✦</span>`;
         }
 
         html += `
@@ -417,12 +420,19 @@ async function renderHistory() {
             if (rawBuyerName.length > 16) rawBuyerName = rawBuyerName.substring(0, 16) + '...';
             const buyerName = escapeHtml(rawBuyerName);
             
+            let rarityBadge = '';
+            if (data.itemId.startsWith('unique@') && data.itemData && data.itemData.rarity) {
+                rarityBadge = `<span style="display:inline-block; white-space:nowrap; font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || '#ff8000'}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
+            } else if (data.itemId.includes('@')) {
+                rarityBadge = ` <span style="font-size:11px;color:#8a5cc0; margin-left:4px; vertical-align:middle;">✦</span>`;
+            }
+
             html += `
                 <div class="flea-item mine">
                     <div style="display:flex; flex:1; align-items:center;">
                         <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
                         <div class="flea-item-info">
-                            <div class="flea-item-name">${itemName} x${data.amount}</div>
+                            <div class="flea-item-name">${itemName} x${data.amount}${rarityBadge}</div>
                             <div class="flea-item-seller" style="font-size: 11px; color: #2e7d32; margin-top: 2px;">Người mua: ${buyerName}</div>
                         </div>
                     </div>
@@ -506,17 +516,24 @@ function getFleaItemName(id, itemData = null) {
     if (id === 'prism') return 'Mảnh lăng quang';
     if (id === 'star') return 'Mảnh ngôi sao';
     if (id === 'legend') return 'Mảnh Huyền Thoại';
-    if (id === 'compost') return 'Phân Hữu Cơ';
-    if (id === 'shiny') return 'Phân Bón Bạc';
+    if (FERTS[id]) return FERTS[id].name;
+    
+    // Sử dụng chung logic hiển thị tên như trong Balo (cho đồ Gacha, nông sản thường và đột biến)
     if (id.startsWith('unique@')) {
-        return itemData?.name || ctx.S.uniques?.[id]?.name || 'Bảo vật bí ẩn';
+        return itemData?.name || bagName(id);
     }
-    if (id.includes('@')) {
-        const parts = id.split('@');
-        const mutName = parts[1] || 'Đột biến';
-        return `[Đột biến ${mutName}] ${CROPS[parts[0]]?.name || parts[0]}`;
+    if (id.includes('@') || CROPS[id]) {
+        return bagName(id);
     }
-    return CROPS[id]?.name || id;
+    return id;
+}
+
+
+function getFleaBasePrice(id, type) {
+    if (type === 'ferts') return FERTS[id]?.price || 0;
+    if (type === 'seeds') { const def = CROPS[id]; return def ? Math.floor((def.seed || 0) * 0.5) : 0; }
+    // bag, uniques — dùng chung bagPrice() (đã tính ×1.25 cho đột biến)
+    return bagPrice(id);
 }
 
 function getFleaItemIcon(id, itemData = null) {
@@ -529,7 +546,7 @@ function getFleaItemIcon(id, itemData = null) {
         const sId = id.charAt(0).toUpperCase() + id.slice(1);
         return id === 'legend' ? All.spriteSVG('legendShard', 20) : All.spriteSVG('shard' + sId, 20);
     }
-    if (id === 'compost' || id === 'shiny') return All.spriteSVG('fert_' + id, 20);
+    if (id === 'compost' || id === 'shiny') return All.spriteSVG('toolFert', 20);
     if (id.startsWith('unique@')) {
         const item = itemData || ctx.S.uniques?.[id] || { sp: 'strawhat', color: '#4a90e2' };
         if (item.spriteMap && item.sp) {
@@ -553,21 +570,14 @@ function getFleaItemDesc(id, itemData = null) {
     if (id === 'prism') return 'Mảnh ghép quý hiếm dùng để đổi phần thưởng lớn.';
     if (id === 'star') return 'Mảnh ghép nâng cấp đặc biệt.';
     if (id === 'legend') return 'Mảnh ghép huyền thoại cực hiếm.';
-    if (id === 'compost') return 'Giảm 25% thời gian phát triển của cây trồng.';
-    if (id === 'shiny') return 'Tăng 50% tốc độ lớn và tăng 25% tỷ lệ đột biến.';
+    if (FERTS[id]) return FERTS[id].desc;
     if (id.startsWith('unique@')) {
-        return itemData?.desc || ctx.S.uniques?.[id]?.desc || 'Một bảo vật bí ẩn không rõ nguồn gốc.';
+        return itemData?.desc || mutDescOf(id) || 'Một bảo vật bí ẩn không rõ nguồn gốc.';
     }
     if (id.includes('@')) {
         if (itemData && itemData.mutDesc) return itemData.mutDesc;
-        const parts = id.split('@');
-        if (parts[1] && ctx.S.mutDesc) {
-            const mutCode = parts.slice(1).join('@');
-            const cname = (CROPS[parts[0]] || { name: '' }).name;
-            const desc = ctx.S.mutDesc[mutCode + '@' + cname] || ctx.S.mutDesc[parts[1]];
-            if (desc) return desc;
-        }
-        return 'Cây trồng đột biến đặc biệt.';
+        const localDesc = mutDescOf(id);
+        return localDesc ? localDesc : 'Cây trồng đột biến đặc biệt.';
     }
     return CROPS[id]?.desc || 'Vật phẩm nông trại.';
 }
@@ -588,11 +598,17 @@ export function uiSelectFleaAdd(type, id, max) {
     if (type === 'uniques') {
         const item = ctx.S.uniques?.[id];
         if (item && item.rarity) {
-            nameHtml += ` <span style="font-size:12px; color:${item.color || '#ff8000'};">(${item.rarity})</span>`;
+            nameHtml += ` <span style="display:inline-block; font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color || '#ff8000'}; color:#fff; white-space:nowrap;">${item.rarity}</span>`;
         }
+    }
+    if (type === 'bag' && id.includes('@')) {
+        nameHtml += ` <span style="font-size:11px;color:#8a5cc0">✦</span>`;
     }
     All.$id('lbl-flea-sel-name').innerHTML = nameHtml;
     All.$id('lbl-flea-sel-desc').innerText = getFleaItemDesc(id);
+    const basePrice = getFleaBasePrice(id, type);
+    const basePriceEl = All.$id('lbl-flea-sel-baseprice');
+    if (basePriceEl) basePriceEl.innerText = basePrice > 0 ? `Giá gốc: ${basePrice.toLocaleString()} G/cái` : '';
     All.$id('flea-post-amount').value = 1;
     All.$id('flea-post-amount').max = max;
 }
@@ -655,6 +671,7 @@ function renderPostItem() {
                         <div style="flex:1;">
                             <div id="lbl-flea-sel-name" style="font-size:15px; font-weight:bold; color:#d32f2f; margin-bottom:5px;"></div>
                             <div id="lbl-flea-sel-desc" style="font-size:11px; color:#555; line-height:1.3;"></div>
+                            <div id="lbl-flea-sel-baseprice" style="font-size:11px; color:#a0703a; font-style:italic; margin-top:4px;"></div>
                         </div>
                     </div>
                     

@@ -6,7 +6,7 @@ import { mulberry32, petSVG, spriteSVG, tileURI, warmUpCache, PETS, PASSES, P, L
 import { toast } from './witch.js';
 import { isRain, gameDay } from './utils.js';
 import { todayEvent } from './events.js';
-import { curPlots, save, blockPrice, curBlocks, addBlock } from './state.js';
+import { curPlots, save, blockPrice, curBlocks } from './state.js';
 import { renderPlots, renderAll, renderStatus } from './render.js';
 import { plotEmote } from './ui.js';
 import { openPanel } from './shop.js';
@@ -160,16 +160,20 @@ export function shovel(pi) {
   save(); renderPlots(); toast('Đã xới bỏ');
 }
 export function buyBlock(bi) {
+  if (!Number.isFinite(bi) || bi < 0) return;
   const price = blockPrice(bi);
-  if (ctx.S.coins < price) return toast('Không đủ vàng');
+  if (!Number.isFinite(price) || ctx.S.coins < price) return toast('Không đủ vàng');
   if (bi !== curBlocks()) return;
-  ctx.S.coins -= price; addBlock();
+  ctx.S.coins -= price; 
+  if (ctx.S.page === 2) ctx.S.unlockedBlocks2++;
+  else if (ctx.S.page === 3) ctx.S.unlockedBlocks3++;
+  else ctx.S.unlockedBlocks++;
   save(); renderAll(); toast('Khai hoang thành công! Có ruộng mới rồi');
 }
 export function sell(key, n) {
   const have = ctx.S.bag[key] || 0;
   n = Math.min(n, have);
-  if (n <= 0) return;
+  if (!Number.isFinite(n) || n <= 0) return;
   const gain = bagPrice(key) * n;
   ctx.S.bag[key] = have - n;
   if (ctx.S.bag[key] === 0) delete ctx.S.bag[key];
@@ -180,7 +184,7 @@ export function sell(key, n) {
 export function sellSeed(id, n) {
   const have = ctx.S.seeds[id] || 0;
   n = Math.min(n, have);
-  if (n <= 0) return;
+  if (!Number.isFinite(n) || n <= 0) return;
   const def = CROPS[id] || { seed: 100 };
   const gain = Math.floor((def.seed || 100) * 0.5) * n;
   ctx.S.seeds[id] = have - n;

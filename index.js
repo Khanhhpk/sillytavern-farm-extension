@@ -4279,11 +4279,14 @@ function shovel(pi) {
   toast("\u0110\xE3 x\u1EDBi b\u1ECF");
 }
 function buyBlock(bi) {
+  if (!Number.isFinite(bi) || bi < 0) return;
   const price = blockPrice(bi);
-  if (ctx.S.coins < price) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng");
+  if (!Number.isFinite(price) || ctx.S.coins < price) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng");
   if (bi !== curBlocks()) return;
   ctx.S.coins -= price;
-  addBlock();
+  if (ctx.S.page === 2) ctx.S.unlockedBlocks2++;
+  else if (ctx.S.page === 3) ctx.S.unlockedBlocks3++;
+  else ctx.S.unlockedBlocks++;
   save();
   renderAll();
   toast("Khai hoang th\xE0nh c\xF4ng! C\xF3 ru\u1ED9ng m\u1EDBi r\u1ED3i");
@@ -4291,7 +4294,7 @@ function buyBlock(bi) {
 function sell(key, n2) {
   const have = ctx.S.bag[key] || 0;
   n2 = Math.min(n2, have);
-  if (n2 <= 0) return;
+  if (!Number.isFinite(n2) || n2 <= 0) return;
   const gain = bagPrice(key) * n2;
   ctx.S.bag[key] = have - n2;
   if (ctx.S.bag[key] === 0) delete ctx.S.bag[key];
@@ -4305,7 +4308,7 @@ function sell(key, n2) {
 function sellSeed(id, n2) {
   const have = ctx.S.seeds[id] || 0;
   n2 = Math.min(n2, have);
-  if (n2 <= 0) return;
+  if (!Number.isFinite(n2) || n2 <= 0) return;
   const def = CROPS[id] || { seed: 100 };
   const gain = Math.floor((def.seed || 100) * 0.5) * n2;
   ctx.S.seeds[id] = have - n2;
@@ -8657,8 +8660,10 @@ function setTakeoutNote(val) {
 function openTakeout(key) {
   const have = ctx.S.bag[key] || 0;
   if (have <= 0) return;
+  const isGacha = key.startsWith("unique@");
+  const noteText = isGacha ? `L\u1EA5y ra = \u0111\u01B0a v\xE0o Tab Ch\xEDnh V\u0103n \u0111\u1EC3 t\u01B0\u01A1ng t\xE1c trong c\u1ED1t truy\u1EC7n. <b style="color:var(--accFg)">\u0110\u1ED3 Gacha c\xF3 th\u1EC3 thu h\u1ED3i v\u1EC1 balo b\u1EA5t c\u1EE9 l\xFAc n\xE0o.</b>` : `L\u1EA5y ra = \u0111\u01B0a v\xE0o Tab Ch\xEDnh V\u0103n \u0111\u1EC3 d\xF9ng trong c\u1ED1t truy\u1EC7n. <b style="color:var(--accFg)">Kh\xF4ng quy ra ti\u1EC1n. N\xF4ng s\u1EA3n s\u1EBD t\u1EF1 ph\xE2n r\xE3 sau 10 ph\xFAt n\u1EBFu kh\xF4ng d\xF9ng t\u1EDBi.</b>`;
   openModal("L\u1EA5y ra \xB7 " + bagName(key), `
-    <div class="note" style="margin-bottom:8px">L\u1EA5y ra = mang kh\u1ECFi balo \u0111\u1EC3 d\xF9ng trong c\u1ED1t truy\u1EC7n. <b style="color:var(--accFg)">Kh\xF4ng quy ra ti\u1EC1n, l\u1EA5y ra r\u1ED3i kh\xF4ng b\u1ECF l\u1EA1i balo \u0111\u01B0\u1EE3c!</b></div>
+    <div class="note" style="margin-bottom:8px">${noteText}</div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <input class="inp" id="takeN" type="number" min="1" max="${have}" value="1" style="width:90px">
       <span style="font-size:12px;color:#7a5c38">/ \u0111ang c\xF3 ${have}</span>
@@ -9810,7 +9815,6 @@ var init_events = __esm({
 // src/state.js
 var state_exports = {};
 __export(state_exports, {
-  addBlock: () => addBlock,
   blockPrice: () => blockPrice,
   curBlocks: () => curBlocks,
   curPlots: () => curPlots,
@@ -9968,7 +9972,7 @@ function save(immediate) {
   if (immediate) doSave();
   else ctx.saveTimer = setTimeout(doSave, 500);
 }
-var now, emptyPlots, blockPrice, pagePlots, curPlots, curBlocks, addBlock, eachPage, testMode;
+var now, emptyPlots, blockPrice, pagePlots, curPlots, curBlocks, eachPage, testMode;
 var init_state = __esm({
   "src/state.js"() {
     init_store();
@@ -9986,11 +9990,6 @@ var init_state = __esm({
     pagePlots = (pg) => pg === 2 ? ctx.S.plots2 : pg === 3 ? ctx.S.plots3 : ctx.S.plots;
     curPlots = () => pagePlots(ctx.S.page);
     curBlocks = () => ctx.S.page === 2 ? ctx.S.unlockedBlocks2 : ctx.S.page === 3 ? ctx.S.unlockedBlocks3 : ctx.S.unlockedBlocks;
-    addBlock = () => {
-      if (ctx.S.page === 2) ctx.S.unlockedBlocks2++;
-      else if (ctx.S.page === 3) ctx.S.unlockedBlocks3++;
-      else ctx.S.unlockedBlocks++;
-    };
     eachPage = (fn2) => [1, 2, 3].forEach((pg) => fn2(pagePlots(pg), pg));
     testMode = false;
     ctx.saveTimer = null;
@@ -19700,8 +19699,7 @@ function getItemName(id) {
   if (id === "prism") return "M\u1EA3nh l\u0103ng quang";
   if (id === "star") return "M\u1EA3nh ng\xF4i sao";
   if (id === "legend") return "M\u1EA3nh Huy\u1EC1n Tho\u1EA1i";
-  if (id === "compost") return "Ph\xE2n H\u1EEFu C\u01A1";
-  if (id === "shiny") return "Ph\xE2n B\xF3n B\u1EA1c";
+  if (FERTS[id]) return FERTS[id].name;
   if (id.startsWith("unique@")) {
     const item = ctx.S.uniques?.[id] || theirUniques[id];
     return item?.name || "V\u1EADt ph\u1EA9m Gacha";
@@ -19721,8 +19719,7 @@ function getItemDesc(id) {
   if (id === "prism") return "D\xF9ng \u0111\u1EC3 n\xE2ng c\u1EA5p";
   if (id === "star") return "M\u1EA3nh sao qu\xFD hi\u1EBFm";
   if (id === "legend") return "M\u1EA3nh huy\u1EC1n tho\u1EA1i qu\xFD hi\u1EBFm";
-  if (id === "compost") return "Gi\u1EA3m 25% th\u1EDDi gian tr\u1ED3ng c\xE2y";
-  if (id === "shiny") return "Nh\u1EADn th\xEAm 25% ti\u1EC1n xu khi thu ho\u1EA1ch";
+  if (FERTS[id]) return FERTS[id].desc;
   if (id.startsWith("unique@")) {
     const item = ctx.S.uniques?.[id] || theirUniques[id];
     return item?.desc ? item.desc.replace(/"/g, "&quot;") : "V\u1EADt ph\u1EA9m b\xED \u1EA9n";
@@ -19743,7 +19740,7 @@ function getItemIcon(id) {
     const sId = id.charAt(0).toUpperCase() + id.slice(1);
     return id === "legend" ? spriteSVG("legendShard", 20) : spriteSVG("shard" + sId, 20);
   }
-  if (id === "compost" || id === "shiny") return spriteSVG("fert_" + id, 20);
+  if (FERTS[id]) return spriteSVG("toolFert", 20);
   if (id.startsWith("unique@")) {
     const item = ctx.S.uniques?.[id] || theirUniques[id] || { sp: "strawhat", color: "#4a90e2" };
     return `<span style="color:${item.color}">${spriteSVG(item.sp, 20)}</span>`;
@@ -51858,6 +51855,8 @@ function renderFleaItems() {
     let rarityBadge = "";
     if (data.itemId.startsWith("unique@") && data.itemData && data.itemData.rarity) {
       rarityBadge = `<span style="display:inline-block; white-space:nowrap; font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || "#ff8000"}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
+    } else if (data.itemId.includes("@")) {
+      rarityBadge = ` <span style="font-size:11px;color:#8a5cc0; margin-left:4px; vertical-align:middle;">\u2726</span>`;
     }
     html += `
             <div class="flea-item ${isMine ? "mine" : ""}">
@@ -52015,12 +52014,18 @@ async function renderHistory() {
       let rawBuyerName = data.buyerName || "Ng\u01B0\u1EDDi mua \u1EA9n danh";
       if (rawBuyerName.length > 16) rawBuyerName = rawBuyerName.substring(0, 16) + "...";
       const buyerName = escapeHtml(rawBuyerName);
+      let rarityBadge = "";
+      if (data.itemId.startsWith("unique@") && data.itemData && data.itemData.rarity) {
+        rarityBadge = `<span style="display:inline-block; white-space:nowrap; font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || "#ff8000"}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
+      } else if (data.itemId.includes("@")) {
+        rarityBadge = ` <span style="font-size:11px;color:#8a5cc0; margin-left:4px; vertical-align:middle;">\u2726</span>`;
+      }
       html += `
                 <div class="flea-item mine">
                     <div style="display:flex; flex:1; align-items:center;">
                         <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
                         <div class="flea-item-info">
-                            <div class="flea-item-name">${itemName} x${data.amount}</div>
+                            <div class="flea-item-name">${itemName} x${data.amount}${rarityBadge}</div>
                             <div class="flea-item-seller" style="font-size: 11px; color: #2e7d32; margin-top: 2px;">Ng\u01B0\u1EDDi mua: ${buyerName}</div>
                         </div>
                     </div>
@@ -52097,17 +52102,22 @@ function getFleaItemName(id, itemData = null) {
   if (id === "prism") return "M\u1EA3nh l\u0103ng quang";
   if (id === "star") return "M\u1EA3nh ng\xF4i sao";
   if (id === "legend") return "M\u1EA3nh Huy\u1EC1n Tho\u1EA1i";
-  if (id === "compost") return "Ph\xE2n H\u1EEFu C\u01A1";
-  if (id === "shiny") return "Ph\xE2n B\xF3n B\u1EA1c";
+  if (FERTS[id]) return FERTS[id].name;
   if (id.startsWith("unique@")) {
-    return itemData?.name || ctx.S.uniques?.[id]?.name || "B\u1EA3o v\u1EADt b\xED \u1EA9n";
+    return itemData?.name || bagName(id);
   }
-  if (id.includes("@")) {
-    const parts = id.split("@");
-    const mutName = parts[1] || "\u0110\u1ED9t bi\u1EBFn";
-    return `[\u0110\u1ED9t bi\u1EBFn ${mutName}] ${CROPS[parts[0]]?.name || parts[0]}`;
+  if (id.includes("@") || CROPS[id]) {
+    return bagName(id);
   }
-  return CROPS[id]?.name || id;
+  return id;
+}
+function getFleaBasePrice(id, type) {
+  if (type === "ferts") return FERTS[id]?.price || 0;
+  if (type === "seeds") {
+    const def = CROPS[id];
+    return def ? Math.floor((def.seed || 0) * 0.5) : 0;
+  }
+  return bagPrice(id);
 }
 function getFleaItemIcon(id, itemData = null) {
   if (id === "coins") return spriteSVG("coin", 20);
@@ -52119,7 +52129,7 @@ function getFleaItemIcon(id, itemData = null) {
     const sId = id.charAt(0).toUpperCase() + id.slice(1);
     return id === "legend" ? spriteSVG("legendShard", 20) : spriteSVG("shard" + sId, 20);
   }
-  if (id === "compost" || id === "shiny") return spriteSVG("fert_" + id, 20);
+  if (id === "compost" || id === "shiny") return spriteSVG("toolFert", 20);
   if (id.startsWith("unique@")) {
     const item = itemData || ctx.S.uniques?.[id] || { sp: "strawhat", color: "#4a90e2" };
     if (item.spriteMap && item.sp) {
@@ -52142,21 +52152,14 @@ function getFleaItemDesc(id, itemData = null) {
   if (id === "prism") return "M\u1EA3nh gh\xE9p qu\xFD hi\u1EBFm d\xF9ng \u0111\u1EC3 \u0111\u1ED5i ph\u1EA7n th\u01B0\u1EDFng l\u1EDBn.";
   if (id === "star") return "M\u1EA3nh gh\xE9p n\xE2ng c\u1EA5p \u0111\u1EB7c bi\u1EC7t.";
   if (id === "legend") return "M\u1EA3nh gh\xE9p huy\u1EC1n tho\u1EA1i c\u1EF1c hi\u1EBFm.";
-  if (id === "compost") return "Gi\u1EA3m 25% th\u1EDDi gian ph\xE1t tri\u1EC3n c\u1EE7a c\xE2y tr\u1ED3ng.";
-  if (id === "shiny") return "T\u0103ng 50% t\u1ED1c \u0111\u1ED9 l\u1EDBn v\xE0 t\u0103ng 25% t\u1EF7 l\u1EC7 \u0111\u1ED9t bi\u1EBFn.";
+  if (FERTS[id]) return FERTS[id].desc;
   if (id.startsWith("unique@")) {
-    return itemData?.desc || ctx.S.uniques?.[id]?.desc || "M\u1ED9t b\u1EA3o v\u1EADt b\xED \u1EA9n kh\xF4ng r\xF5 ngu\u1ED3n g\u1ED1c.";
+    return itemData?.desc || mutDescOf(id) || "M\u1ED9t b\u1EA3o v\u1EADt b\xED \u1EA9n kh\xF4ng r\xF5 ngu\u1ED3n g\u1ED1c.";
   }
   if (id.includes("@")) {
     if (itemData && itemData.mutDesc) return itemData.mutDesc;
-    const parts = id.split("@");
-    if (parts[1] && ctx.S.mutDesc) {
-      const mutCode = parts.slice(1).join("@");
-      const cname = (CROPS[parts[0]] || { name: "" }).name;
-      const desc = ctx.S.mutDesc[mutCode + "@" + cname] || ctx.S.mutDesc[parts[1]];
-      if (desc) return desc;
-    }
-    return "C\xE2y tr\u1ED3ng \u0111\u1ED9t bi\u1EBFn \u0111\u1EB7c bi\u1EC7t.";
+    const localDesc = mutDescOf(id);
+    return localDesc ? localDesc : "C\xE2y tr\u1ED3ng \u0111\u1ED9t bi\u1EBFn \u0111\u1EB7c bi\u1EC7t.";
   }
   return CROPS[id]?.desc || "V\u1EADt ph\u1EA9m n\xF4ng tr\u1EA1i.";
 }
@@ -52172,11 +52175,17 @@ function uiSelectFleaAdd(type, id, max) {
   if (type === "uniques") {
     const item = ctx.S.uniques?.[id];
     if (item && item.rarity) {
-      nameHtml += ` <span style="font-size:12px; color:${item.color || "#ff8000"};">(${item.rarity})</span>`;
+      nameHtml += ` <span style="display:inline-block; font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color || "#ff8000"}; color:#fff; white-space:nowrap;">${item.rarity}</span>`;
     }
+  }
+  if (type === "bag" && id.includes("@")) {
+    nameHtml += ` <span style="font-size:11px;color:#8a5cc0">\u2726</span>`;
   }
   $id("lbl-flea-sel-name").innerHTML = nameHtml;
   $id("lbl-flea-sel-desc").innerText = getFleaItemDesc(id);
+  const basePrice = getFleaBasePrice(id, type);
+  const basePriceEl = $id("lbl-flea-sel-baseprice");
+  if (basePriceEl) basePriceEl.innerText = basePrice > 0 ? `Gi\xE1 g\u1ED1c: ${basePrice.toLocaleString()} G/c\xE1i` : "";
   $id("flea-post-amount").value = 1;
   $id("flea-post-amount").max = max;
 }
@@ -52236,6 +52245,7 @@ function renderPostItem() {
                         <div style="flex:1;">
                             <div id="lbl-flea-sel-name" style="font-size:15px; font-weight:bold; color:#d32f2f; margin-bottom:5px;"></div>
                             <div id="lbl-flea-sel-desc" style="font-size:11px; color:#555; line-height:1.3;"></div>
+                            <div id="lbl-flea-sel-baseprice" style="font-size:11px; color:#a0703a; font-style:italic; margin-top:4px;"></div>
                         </div>
                     </div>
                     
@@ -52379,6 +52389,7 @@ var init_flea = __esm({
     init_firebase();
     init_index_esm7();
     init_data();
+    init_logic();
     currentFleaItems = {};
     selectedFleaType = null;
     selectedFleaId = null;
@@ -52477,6 +52488,9 @@ function bjSmartRig(shoe, idx, p1, p2, metric) {
   if (metric >= 1e11) chance = 0.15;
   else if (metric >= 1e10) chance = 0.1;
   else if (metric >= 1e9) chance = 0.05;
+  else if (metric >= 1e8) chance = 0.03;
+  else if (metric >= 1e7) chance = 0.02;
+  else if (metric >= 1e6) chance = 0.01;
   if (chance === 0 || Math.random() >= chance) return;
   let t1 = -1, t2 = -1;
   for (let i2 = Math.max(idx + 5, p2 + 1); i2 < Math.min(shoe.length, idx + 100); i2++) {
@@ -52491,6 +52505,30 @@ function bjSmartRig(shoe, idx, p1, p2, metric) {
     tmp = shoe[p2];
     shoe[p2] = shoe[t2];
     shoe[t2] = tmp;
+  }
+}
+function bjDealerPeekRig(shoe, shoeIdx, winStreak) {
+  if (winStreak < 4) return;
+  let chance = 0;
+  if (winStreak >= 7) chance = 0.25;
+  else if (winStreak >= 5) chance = 0.15;
+  else chance = 0.05;
+  if (Math.random() >= chance) return;
+  const dealerVisPos = shoeIdx + 1;
+  const dealerHidPos = shoeIdx + 3;
+  if (dealerHidPos >= shoe.length) return;
+  const visVal = cardValue(shoe[dealerVisPos].rank);
+  for (let i2 = shoeIdx + 4; i2 < Math.min(shoe.length, shoeIdx + 80); i2++) {
+    const cand = shoe[i2];
+    let hidVal = cardValue(cand.rank);
+    let total = visVal + hidVal;
+    if (cand.rank === "A" && total > 21) total -= 10;
+    if (total >= 17 && total <= 21) {
+      const tmp = shoe[dealerHidPos];
+      shoe[dealerHidPos] = shoe[i2];
+      shoe[i2] = tmp;
+      return;
+    }
   }
 }
 function isBlackjack(hand) {
@@ -52531,6 +52569,7 @@ function openBlackjackSolo() {
     bets: [0],
     insuranceBet: 0,
     splitAceIdxs: /* @__PURE__ */ new Set(),
+    winStreak: 0,
     settings: { minBet: 10, maxBet: 0, numDecks: 6 }
   };
   soloState.shoe = buildShoe(soloState.settings.numDecks, Date.now() & 4294967295);
@@ -52701,6 +52740,7 @@ function soloStartRound() {
   s2.dealerHand = [];
   s2.splitAceIdxs = /* @__PURE__ */ new Set();
   bjSmartRig(s2.shoe, s2.shoeIdx, s2.shoeIdx + 1, s2.shoeIdx + 3, ctx.S.coins || 0);
+  bjDealerPeekRig(s2.shoe, s2.shoeIdx, s2.winStreak || 0);
   s2.playerHands[0].push(soloDrawCard());
   s2.dealerHand.push(soloDrawCard());
   s2.playerHands[0].push(soloDrawCard());
@@ -52898,6 +52938,7 @@ function soloRunDealer() {
 }
 function soloResolveAll() {
   const s2 = soloState;
+  const coinsBeforeResolve = ctx.S.coins || 0;
   const dTotal = handTotal(s2.dealerHand);
   const dBJ = isBlackjack(s2.dealerHand);
   const dBust = dTotal > 21;
@@ -52943,6 +52984,11 @@ function soloResolveAll() {
   save();
   renderStatus();
   showMsg(results.join("\n"));
+  if ((ctx.S.coins || 0) > coinsBeforeResolve) {
+    s2.winStreak = (s2.winStreak || 0) + 1;
+  } else {
+    s2.winStreak = 0;
+  }
 }
 function showMsg(text) {
   const el = $id("bj-message");
@@ -56630,7 +56676,7 @@ function checkMarginCall() {
 }
 function depositBrokerage(amount) {
   amount = Math.floor(amount);
-  if (amount <= 0 || ctx.S.coins < amount) return false;
+  if (!Number.isFinite(amount) || amount <= 0 || ctx.S.coins < amount) return false;
   ctx.S.coins = Math.floor(ctx.S.coins) - amount;
   const received = amount * 0.9;
   ctx.S.stock.balance += received;
@@ -56648,7 +56694,7 @@ function depositBrokerage(amount) {
   return true;
 }
 function withdrawBrokerage(amount) {
-  if (amount <= 0 || ctx.S.stock.balance < amount) return false;
+  if (!Number.isFinite(amount) || amount <= 0 || ctx.S.stock.balance < amount) return false;
   ctx.S.stock.balance -= amount;
   ctx.S.coins = Math.floor(ctx.S.coins) + Math.floor(amount * 0.9);
   ctx.S.stock.totalWithdrawn = (ctx.S.stock.totalWithdrawn || 0) + amount;
@@ -56665,7 +56711,7 @@ function withdrawBrokerage(amount) {
   return true;
 }
 function buyStock(ticker, shares) {
-  if (shares <= 0) return false;
+  if (!Number.isFinite(shares) || shares <= 0) return false;
   const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
   const cost = price * shares;
   if (ctx.S.stock.balance >= cost) {
@@ -56678,7 +56724,7 @@ function buyStock(ticker, shares) {
   return false;
 }
 function sellStock(ticker, shares) {
-  if (shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
+  if (!Number.isFinite(shares) || shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
   const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
   const revenue = price * shares * 0.98;
   if (!ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost = {};
@@ -56695,7 +56741,7 @@ function sellStock(ticker, shares) {
   return true;
 }
 function placeAutoOrder(ticker, type, targetPrice, shares) {
-  if (shares <= 0 || targetPrice <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
+  if (!Number.isFinite(shares) || !Number.isFinite(targetPrice) || shares <= 0 || targetPrice <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
   if (!ctx.S.stock.autoOrders) ctx.S.stock.autoOrders = [];
   ctx.S.stock.autoOrders.push({
     id: Date.now().toString() + Math.random().toString(),
@@ -56747,13 +56793,13 @@ function checkAutoOrders(ticker, currentPrice) {
   });
 }
 function borrowMargin(amount) {
-  if (amount <= 0) return false;
+  if (!Number.isFinite(amount) || amount <= 0) return false;
   ctx.S.stock.debt = (ctx.S.stock.debt || 0) + amount;
   ctx.S.stock.balance += amount * 0.98;
   return true;
 }
 function repayMargin(amount) {
-  if (amount <= 0 || ctx.S.stock.balance < amount || (ctx.S.stock.debt || 0) < amount) return false;
+  if (!Number.isFinite(amount) || amount <= 0 || ctx.S.stock.balance < amount || (ctx.S.stock.debt || 0) < amount) return false;
   ctx.S.stock.balance -= amount;
   ctx.S.stock.debt -= amount;
   return true;
@@ -57426,23 +57472,26 @@ var init_stock = __esm({
         name: "\u0110a C\u1EA5p Coin",
         color: "#ef4444",
         startPrice: 10,
-        drift: -1e-3,
-        // Giảm nhẹ
-        vol: 0.22,
-        // 22% swing (crazy volatility)
-        trendNoise: 0.5,
-        trendDecay: 0.95,
-        // Trends last longer
+        drift: -3e-3,
+        // Tăng độ trôi âm (Hold lâu chết chắc)
+        vol: 0.25,
+        // Tăng RNG nến giật cục
+        trendNoise: 0.35,
+        // Đã giảm thêm để tránh xu hướng ngẫu nhiên mập lên quá đà
+        trendDecay: 0.8,
+        // Trend tàn ở mức trung bình, vừa đủ để gợn sóng
         gravityZones: [
-          { above: 10, pull: -0.2 },
-          // >$100
-          { below: 0.05, pull: 0.3 }
-          // <$0.5
+          { above: 10, pull: -1 },
+          // >$100 (x10) -> Đạp nát không cho lên nữa
+          { above: 5, pull: -0.3 },
+          // >$50 (x5) -> Lực bán xả mạnh
+          { below: 0.1, pull: 0.15 }
+          // <$1 -> Lực đỡ yếu hơn, bắt đáy vẫn có rủi ro chôn vốn
         ],
         swingCap: 0.3,
-        // Occasional pump event: 3% chance per candle to ignite a strong uptrend
-        pumpChance: 0.03,
-        pumpStrength: 0.5
+        // Occasional pump event: 2% chance per candle to ignite a strong uptrend
+        pumpChance: 0.02,
+        pumpStrength: 0.6
       }
     };
     selectedStock = "SIL";
@@ -57496,7 +57545,6 @@ __export(all_exports, {
   TOOLS: () => TOOLS,
   WITCH_CRY: () => WITCH_CRY,
   WORK_BAND: () => WORK_BAND,
-  addBlock: () => addBlock,
   applyDayEvent: () => applyDayEvent,
   applyPageSkin: () => applyPageSkin,
   applySansSprite: () => applySansSprite,
@@ -57728,12 +57776,10 @@ __export(all_exports, {
   setInjection: () => setInjection,
   setMode: () => setMode,
   setPendingPick: () => setPendingPick,
-  setPot: () => setPot,
   setTakeoutNote: () => setTakeoutNote,
   setTestMode: () => setTestMode,
   settle: () => settle,
   settleIfLocked: () => settleIfLocked,
-  settleNow: () => settleNow,
   settleRaceOnBoot: () => settleRaceOnBoot,
   setupExtButton: () => setupExtButton,
   setupSlashCommand: () => setupSlashCommand,

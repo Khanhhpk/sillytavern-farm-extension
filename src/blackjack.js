@@ -96,7 +96,10 @@ function bjSmartRig(shoe, idx, p1, p2, metric) {
     let chance = 0;
     if (metric >= 100000000000) chance = 0.15;      // >= 100B -> 15% chance
     else if (metric >= 10000000000) chance = 0.10;  // >= 10B -> 10% chance
-    else if (metric >= 1000000000) chance = 0.05;   // >= 1B -> 5% chance
+    else if (metric >= 1000000000) chance = 0.05;   // >= 1B  ->  5% chance
+    else if (metric >= 100000000) chance = 0.03;    // >= 100M ->  3% chance
+    else if (metric >= 10000000) chance = 0.02;     // >= 10M  ->  2% chance
+    else if (metric >= 1000000) chance = 0.01;      // >= 1M   ->  1% chance
     
     if (chance === 0 || Math.random() >= chance) return;
 
@@ -109,6 +112,36 @@ function bjSmartRig(shoe, idx, p1, p2, metric) {
     if (t1 !== -1 && t2 !== -1) {
         let tmp = shoe[p1]; shoe[p1] = shoe[t1]; shoe[t1] = tmp;
         tmp = shoe[p2]; shoe[p2] = shoe[t2]; shoe[t2] = tmp;
+    }
+}
+
+// "Dealer Peek" rig — kích hoạt ngầm khi người chơi thắng liên tiếp >= 3 ván.
+// Bí mật hoán đổi lá bài úp của dealer sang lá giúp dealer đứng mạnh (17–21).
+function bjDealerPeekRig(shoe, shoeIdx, winStreak) {
+    if (winStreak < 4) return;
+    let chance = 0;
+    if (winStreak >= 7) chance = 0.25;
+    else if (winStreak >= 5) chance = 0.15;
+    else chance = 0.05; // streak 4
+    if (Math.random() >= chance) return;
+
+    const dealerVisPos = shoeIdx + 1; // lá ngửa của dealer
+    const dealerHidPos = shoeIdx + 3; // lá úp của dealer
+    if (dealerHidPos >= shoe.length) return;
+
+    const visVal = cardValue(shoe[dealerVisPos].rank);
+    // Tìm lá trong phần shoe chưa dùng tạo tổng điểm dealer 17–21
+    for (let i = shoeIdx + 4; i < Math.min(shoe.length, shoeIdx + 80); i++) {
+        const cand = shoe[i];
+        let hidVal = cardValue(cand.rank);
+        let total = visVal + hidVal;
+        if (cand.rank === 'A' && total > 21) total -= 10;
+        if (total >= 17 && total <= 21) {
+            const tmp = shoe[dealerHidPos];
+            shoe[dealerHidPos] = shoe[i];
+            shoe[i] = tmp;
+            return;
+        }
     }
 }
 
@@ -154,6 +187,7 @@ export function openBlackjackSolo() {
         bets: [0],
         insuranceBet: 0,
         splitAceIdxs: new Set(),
+        winStreak: 0,
         settings: { minBet: 10, maxBet: 0, numDecks: 6 },
     };
     soloState.shoe = buildShoe(soloState.settings.numDecks, Date.now() & 0xffffffff);
@@ -333,6 +367,7 @@ function soloStartRound() {
     s.bets = [want]; s.insuranceBet = 0; s.playerHands = [[]]; s.activeHandIdx = 0; s.dealerHand = []; s.splitAceIdxs = new Set();
 
     bjSmartRig(s.shoe, s.shoeIdx, s.shoeIdx + 1, s.shoeIdx + 3, ctx.S.coins || 0);
+    bjDealerPeekRig(s.shoe, s.shoeIdx, s.winStreak || 0);
 
     s.playerHands[0].push(soloDrawCard());
     s.dealerHand.push(soloDrawCard());
@@ -513,6 +548,7 @@ function soloRunDealer() {
 
 function soloResolveAll() {
     const s = soloState;
+    const coinsBeforeResolve = ctx.S.coins || 0;
     const dTotal = handTotal(s.dealerHand);
     const dBJ = isBlackjack(s.dealerHand);
     const dBust = dTotal > 21;
@@ -534,6 +570,12 @@ function soloResolveAll() {
     }
     save(); renderStatus();
     showMsg(results.join('\n'));
+    // Cập nhật chuỗi thắng để kích hoạt bjDealerPeekRig ở ván sau
+    if ((ctx.S.coins || 0) > coinsBeforeResolve) {
+        s.winStreak = (s.winStreak || 0) + 1;
+    } else {
+        s.winStreak = 0;
+    }
 }
 
 function showMsg(text) {
