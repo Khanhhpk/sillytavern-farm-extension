@@ -159,7 +159,10 @@ export function updateMarket(now = Date.now()) {
       });
     }
 
-    Object.keys(STOCKS).forEach(t => stepPrice(t));
+    Object.keys(STOCKS).forEach(t => {
+      stepPrice(t);
+      checkAutoOrders(t, ctx.S.stock.history[t][ctx.S.stock.history[t].length - 1]);
+    });
     checkMarginCall();
     ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 160000) + 20000;
     updated = true;

@@ -106,7 +106,10 @@ function updateMarket(now) {
       });
     }
 
-    Object.keys(STOCKS).forEach(t => stepPrice(t));
+    Object.keys(STOCKS).forEach(t => {
+      stepPrice(t);
+      checkAutoOrders(t, S.stock.history[t][S.stock.history[t].length - 1]);
+    });
     checkMarginCall();
     S.stock.nextIntervalMs = Math.floor(randomFn() * 160000) + 20000;
     updated = true;

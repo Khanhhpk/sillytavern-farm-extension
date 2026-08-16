@@ -56445,7 +56445,10 @@ function updateMarket(now2 = Date.now()) {
         ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * 0.04 - 0.02;
       });
     }
-    Object.keys(STOCKS).forEach((t2) => stepPrice(t2));
+    Object.keys(STOCKS).forEach((t2) => {
+      stepPrice(t2);
+      checkAutoOrders(t2, ctx.S.stock.history[t2][ctx.S.stock.history[t2].length - 1]);
+    });
     checkMarginCall();
     ctx.S.stock.nextIntervalMs = Math.floor(Math.random() * 16e4) + 2e4;
     updated = true;
