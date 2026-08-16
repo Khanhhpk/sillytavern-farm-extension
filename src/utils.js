@@ -145,6 +145,15 @@ export function settle() {
       if (it.expireAt && now() >= it.expireAt) {
         delete ctx.S.bag_prompt[key];
         pChanged = true;
+        if (!key.startsWith('unique@')) {
+          if (Math.random() < 0.2) {
+            if (!ctx.S.ferts) ctx.S.ferts = {};
+            ctx.S.ferts['compost'] = (ctx.S.ferts['compost'] || 0) + 1;
+            toast('Một Nông sản trong Chính Văn đã thiu và hóa thành Phân ủ!');
+          } else {
+            toast('Một Nông sản trong Chính Văn đã bay hơi vì hết hạn!');
+          }
+        }
       }
     });
     if (pChanged) {
