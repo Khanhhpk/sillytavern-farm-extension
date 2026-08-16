@@ -51860,6 +51860,8 @@ function renderFleaItems() {
     let rarityBadge = "";
     if (data.itemId.startsWith("unique@") && data.itemData && data.itemData.rarity) {
       rarityBadge = `<span style="display:inline-block; white-space:nowrap; font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || "#ff8000"}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
+    } else if (data.itemId.includes("@")) {
+      rarityBadge = ` <span style="font-size:11px;color:#8a5cc0; margin-left:4px; vertical-align:middle;">\u2726</span>`;
     }
     html += `
             <div class="flea-item ${isMine ? "mine" : ""}">
@@ -52017,12 +52019,18 @@ async function renderHistory() {
       let rawBuyerName = data.buyerName || "Ng\u01B0\u1EDDi mua \u1EA9n danh";
       if (rawBuyerName.length > 16) rawBuyerName = rawBuyerName.substring(0, 16) + "...";
       const buyerName = escapeHtml(rawBuyerName);
+      let rarityBadge = "";
+      if (data.itemId.startsWith("unique@") && data.itemData && data.itemData.rarity) {
+        rarityBadge = `<span style="display:inline-block; white-space:nowrap; font-size:10px; padding:2px 6px; border-radius:4px; background:${data.itemData.color || "#ff8000"}; color:#fff; margin-left:8px; vertical-align:middle; text-transform:uppercase;">${data.itemData.rarity}</span>`;
+      } else if (data.itemId.includes("@")) {
+        rarityBadge = ` <span style="font-size:11px;color:#8a5cc0; margin-left:4px; vertical-align:middle;">\u2726</span>`;
+      }
       html += `
                 <div class="flea-item mine">
                     <div style="display:flex; flex:1; align-items:center;">
                         <div class="flea-item-icon" style="margin-right: 12px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">${icon}</div>
                         <div class="flea-item-info">
-                            <div class="flea-item-name">${itemName} x${data.amount}</div>
+                            <div class="flea-item-name">${itemName} x${data.amount}${rarityBadge}</div>
                             <div class="flea-item-seller" style="font-size: 11px; color: #2e7d32; margin-top: 2px;">Ng\u01B0\u1EDDi mua: ${buyerName}</div>
                         </div>
                     </div>
