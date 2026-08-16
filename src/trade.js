@@ -248,9 +248,9 @@ function setupConnection() {
         closeTradeModal();
     });
     
-    // Anti-cheat check: send our playerId
+    // Anti-cheat check: send our playerId and version
     setTimeout(() => {
-        sendData({ type: 'HELLO', playerId: ctx.S.playerId, username: ctx.S.username });
+        sendData({ type: 'HELLO', playerId: ctx.S.playerId, username: ctx.S.username, version: ctx.S.version });
     }, 500);
     
     renderTradeRoom();
@@ -289,6 +289,14 @@ function handleNetData(data) {
             executeTrade();
         }
     } else if (data.type === 'HELLO') {
+        if (data.version !== ctx.S.version) {
+            cheatDetected = true;
+            All.toast('Giao dịch thất bại: Đối tác đang dùng phiên bản game cũ/khác!');
+            sendData({ type: 'VERSION_MISMATCH' });
+            if (conn) conn.close();
+            closeTradeModal();
+            return;
+        }
         if (data.playerId === ctx.S.playerId) {
             cheatDetected = true;
             All.toast('Phát hiện gian lận: Không thể giao dịch với chính mình (Trùng ID Người Chơi)!');
@@ -299,6 +307,11 @@ function handleNetData(data) {
             if (data.username) partnerName = data.username;
             renderTradeRoom();
         }
+    } else if (data.type === 'VERSION_MISMATCH') {
+        cheatDetected = true;
+        All.toast('Giao dịch thất bại: Phiên bản game của 2 máy không khớp nhau!');
+        if (conn) conn.close();
+        closeTradeModal();
     } else if (data.type === 'CHEAT_DETECTED') {
         cheatDetected = true;
         All.toast('Phát hiện gian lận: Không thể giao dịch với chính mình (Trùng ID Người Chơi)!');

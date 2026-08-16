@@ -19796,7 +19796,7 @@ function setupConnection() {
     closeTradeModal();
   });
   setTimeout(() => {
-    sendData({ type: "HELLO", playerId: ctx.S.playerId, username: ctx.S.username });
+    sendData({ type: "HELLO", playerId: ctx.S.playerId, username: ctx.S.username, version: ctx.S.version });
   }, 500);
   renderTradeRoom();
 }
@@ -19833,6 +19833,14 @@ function handleNetData(data) {
       executeTrade();
     }
   } else if (data.type === "HELLO") {
+    if (data.version !== ctx.S.version) {
+      cheatDetected = true;
+      toast("Giao d\u1ECBch th\u1EA5t b\u1EA1i: \u0110\u1ED1i t\xE1c \u0111ang d\xF9ng phi\xEAn b\u1EA3n game c\u0169/kh\xE1c!");
+      sendData({ type: "VERSION_MISMATCH" });
+      if (conn) conn.close();
+      closeTradeModal();
+      return;
+    }
     if (data.playerId === ctx.S.playerId) {
       cheatDetected = true;
       toast("Ph\xE1t hi\u1EC7n gian l\u1EADn: Kh\xF4ng th\u1EC3 giao d\u1ECBch v\u1EDBi ch\xEDnh m\xECnh (Tr\xF9ng ID Ng\u01B0\u1EDDi Ch\u01A1i)!");
@@ -19843,6 +19851,11 @@ function handleNetData(data) {
       if (data.username) partnerName = data.username;
       renderTradeRoom();
     }
+  } else if (data.type === "VERSION_MISMATCH") {
+    cheatDetected = true;
+    toast("Giao d\u1ECBch th\u1EA5t b\u1EA1i: Phi\xEAn b\u1EA3n game c\u1EE7a 2 m\xE1y kh\xF4ng kh\u1EDBp nhau!");
+    if (conn) conn.close();
+    closeTradeModal();
   } else if (data.type === "CHEAT_DETECTED") {
     cheatDetected = true;
     toast("Ph\xE1t hi\u1EC7n gian l\u1EADn: Kh\xF4ng th\u1EC3 giao d\u1ECBch v\u1EDBi ch\xEDnh m\xECnh (Tr\xF9ng ID Ng\u01B0\u1EDDi Ch\u01A1i)!");
