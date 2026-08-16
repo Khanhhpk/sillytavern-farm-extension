@@ -3,7 +3,7 @@ import * as All from './all.js';
 import { db } from './firebase.js';
 import { collection, addDoc, getDocs, doc, updateDoc, query, where, deleteDoc } from 'firebase/firestore';
 import { CROPS, FERTS } from './data.js';
-import { bagPrice } from './logic.js';
+import { bagPrice, bagName } from './logic.js';
 
 let currentFleaItems = {};
 
@@ -509,15 +509,15 @@ function getFleaItemName(id, itemData = null) {
     if (id === 'legend') return 'Mảnh Huyền Thoại';
     if (id === 'compost') return 'Phân Hữu Cơ';
     if (id === 'shiny') return 'Phân Bón Bạc';
+    
+    // Sử dụng chung logic hiển thị tên như trong Balo (cho đồ Gacha, nông sản thường và đột biến)
     if (id.startsWith('unique@')) {
-        return itemData?.name || ctx.S.uniques?.[id]?.name || 'Bảo vật bí ẩn';
+        return itemData?.name || bagName(id);
     }
-    if (id.includes('@')) {
-        const parts = id.split('@');
-        const mutName = parts[1] || 'Đột biến';
-        return `[Đột biến ${mutName}] ${CROPS[parts[0]]?.name || parts[0]}`;
+    if (id.includes('@') || CROPS[id]) {
+        return bagName(id);
     }
-    return CROPS[id]?.name || id;
+    return id;
 }
 
 

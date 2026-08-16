@@ -52102,14 +52102,12 @@ function getFleaItemName(id, itemData = null) {
   if (id === "compost") return "Ph\xE2n H\u1EEFu C\u01A1";
   if (id === "shiny") return "Ph\xE2n B\xF3n B\u1EA1c";
   if (id.startsWith("unique@")) {
-    return itemData?.name || ctx.S.uniques?.[id]?.name || "B\u1EA3o v\u1EADt b\xED \u1EA9n";
+    return itemData?.name || bagName(id);
   }
-  if (id.includes("@")) {
-    const parts = id.split("@");
-    const mutName = parts[1] || "\u0110\u1ED9t bi\u1EBFn";
-    return `[\u0110\u1ED9t bi\u1EBFn ${mutName}] ${CROPS[parts[0]]?.name || parts[0]}`;
+  if (id.includes("@") || CROPS[id]) {
+    return bagName(id);
   }
-  return CROPS[id]?.name || id;
+  return id;
 }
 function getFleaBasePrice(id, type) {
   if (type === "ferts") return FERTS[id]?.price || 0;
