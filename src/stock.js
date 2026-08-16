@@ -445,7 +445,10 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     sessBlock = `
       <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; border: 1px solid #334155;">
         <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
-          <span>⚡ Phiên Này</span>
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <span>⚡ Phiên Này</span>
+            <button id="stk-reset-sess" title="Ấn giữ 1s để đặt lại mốc lợi nhuận từ số TS hiện tại" style="background: none; border: 1px solid #475569; border-radius: 4px; color: #94a3b8; font-size: 9px; padding: 1px 4px; cursor: pointer; transition: all 0.3s;">🔄</button>
+          </div>
           <span style="color: #a855f7; font-weight: bold; margin-right: 10px;">⏳ Mùa: ${(ctx.S.stock.candleCount || 0) % 100}/100 nến</span>
           <span style="color: #475569; font-size: 9px;">${sessLabel} trước</span>
         </div>
@@ -817,6 +820,46 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       All.toast("Không đủ tiền mặt hoặc số tiền trả lớn hơn Nợ!");
     }
   });
+
+  const resetSessBtn = All.$id('stk-reset-sess');
+  if (resetSessBtn) {
+    let holdTimeout;
+    const startHold = (e) => {
+      if (e.cancelable) e.preventDefault(); // prevent text selection
+      resetSessBtn.style.color = '#ef4444';
+      resetSessBtn.style.borderColor = '#ef4444';
+      holdTimeout = setTimeout(() => {
+        resetSessBtn.style.color = '#22c55e';
+        resetSessBtn.style.borderColor = '#22c55e';
+        
+        ctx.S.stock.session = {
+          startTime: Date.now(),
+          startBalance: ctx.S.stock.balance,
+          startPortfolio: Object.assign({}, ctx.S.stock.portfolio),
+          startPrices: Object.keys(STOCKS).reduce((acc, t) => {
+            const h = ctx.S.stock.history[t];
+            acc[t] = h ? h[h.length - 1] : STOCKS[t].startPrice;
+            return acc;
+          }, {})
+        };
+        All.save();
+        openStockModal();
+        All.toast("Đã đặt lại mốc theo dõi Lãi/Lỗ phiên!");
+      }, 1000); // 1 second hold
+    };
+    const endHold = () => {
+      clearTimeout(holdTimeout);
+      if (All.$id('stk-reset-sess')) {
+        All.$id('stk-reset-sess').style.color = '#94a3b8';
+        All.$id('stk-reset-sess').style.borderColor = '#475569';
+      }
+    };
+    resetSessBtn.addEventListener('mousedown', startHold);
+    resetSessBtn.addEventListener('mouseup', endHold);
+    resetSessBtn.addEventListener('mouseleave', endHold);
+    resetSessBtn.addEventListener('touchstart', startHold);
+    resetSessBtn.addEventListener('touchend', endHold);
+  }
 
   Object.keys(STOCKS).forEach(t => {
     All.$id(`stk-tab-${t}`).addEventListener('click', () => {

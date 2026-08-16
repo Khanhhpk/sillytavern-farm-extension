@@ -56688,7 +56688,10 @@ function openStockModal() {
     sessBlock = `
       <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; border: 1px solid #334155;">
         <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
-          <span>\u26A1 Phi\xEAn N\xE0y</span>
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <span>\u26A1 Phi\xEAn N\xE0y</span>
+            <button id="stk-reset-sess" title="\u1EA4n gi\u1EEF 1s \u0111\u1EC3 \u0111\u1EB7t l\u1EA1i m\u1ED1c l\u1EE3i nhu\u1EADn t\u1EEB s\u1ED1 TS hi\u1EC7n t\u1EA1i" style="background: none; border: 1px solid #475569; border-radius: 4px; color: #94a3b8; font-size: 9px; padding: 1px 4px; cursor: pointer; transition: all 0.3s;">\u{1F504}</button>
+          </div>
           <span style="color: #a855f7; font-weight: bold; margin-right: 10px;">\u23F3 M\xF9a: ${(ctx.S.stock.candleCount || 0) % 100}/100 n\u1EBFn</span>
           <span style="color: #475569; font-size: 9px;">${sessLabel} tr\u01B0\u1EDBc</span>
         </div>
@@ -57043,6 +57046,44 @@ function openStockModal() {
       toast("Kh\xF4ng \u0111\u1EE7 ti\u1EC1n m\u1EB7t ho\u1EB7c s\u1ED1 ti\u1EC1n tr\u1EA3 l\u1EDBn h\u01A1n N\u1EE3!");
     }
   });
+  const resetSessBtn = $id("stk-reset-sess");
+  if (resetSessBtn) {
+    let holdTimeout;
+    const startHold = (e2) => {
+      if (e2.cancelable) e2.preventDefault();
+      resetSessBtn.style.color = "#ef4444";
+      resetSessBtn.style.borderColor = "#ef4444";
+      holdTimeout = setTimeout(() => {
+        resetSessBtn.style.color = "#22c55e";
+        resetSessBtn.style.borderColor = "#22c55e";
+        ctx.S.stock.session = {
+          startTime: Date.now(),
+          startBalance: ctx.S.stock.balance,
+          startPortfolio: Object.assign({}, ctx.S.stock.portfolio),
+          startPrices: Object.keys(STOCKS).reduce((acc, t2) => {
+            const h = ctx.S.stock.history[t2];
+            acc[t2] = h ? h[h.length - 1] : STOCKS[t2].startPrice;
+            return acc;
+          }, {})
+        };
+        save();
+        openStockModal();
+        toast("\u0110\xE3 \u0111\u1EB7t l\u1EA1i m\u1ED1c theo d\xF5i L\xE3i/L\u1ED7 phi\xEAn!");
+      }, 1e3);
+    };
+    const endHold = () => {
+      clearTimeout(holdTimeout);
+      if ($id("stk-reset-sess")) {
+        $id("stk-reset-sess").style.color = "#94a3b8";
+        $id("stk-reset-sess").style.borderColor = "#475569";
+      }
+    };
+    resetSessBtn.addEventListener("mousedown", startHold);
+    resetSessBtn.addEventListener("mouseup", endHold);
+    resetSessBtn.addEventListener("mouseleave", endHold);
+    resetSessBtn.addEventListener("touchstart", startHold);
+    resetSessBtn.addEventListener("touchend", endHold);
+  }
   Object.keys(STOCKS).forEach((t2) => {
     $id(`stk-tab-${t2}`).addEventListener("click", () => {
       selectedStock = t2;
