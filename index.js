@@ -81,7 +81,7 @@ var init_data = __esm({
       tomato: { name: "C\xE0 chua", grow: 20, regrowM: 15, seed: 100, sell: 90, sp: "tomato", regrow: true },
       strawberry: { name: "D\xE2u t\xE2y", grow: 90, seed: 350, sell: 800, sp: "strawberry" },
       pumpkin: { name: "B\xED ng\xF4", grow: 120, seed: 500, sell: 1300, sp: "pumpkin" },
-      moonberry: { name: "D\xE2u \xE1nh tr\u0103ng", grow: 180, seed: 600, sell: 1500, sp: "moonberry" },
+      moonberry: { name: "D\xE2u \xE1nh tr\u0103ng", grow: 180, seed: 600, sell: 2e3, sp: "moonberry" },
       /* —— Vùng nước (trang 2) —— */
       chuncai: { name: "Rau thu\u1EA7n", grow: 10, seed: 40, sell: 60, sp: "chuncai", zone: 2 },
       biqi: { name: "C\u1EE7 n\u0103ng", grow: 30, seed: 120, sell: 220, sp: "biqi", zone: 2 },
