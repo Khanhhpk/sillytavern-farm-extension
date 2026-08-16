@@ -9722,7 +9722,7 @@ __export(state_exports, {
 });
 function freshState() {
   return {
-    version: 2,
+    version: 3,
     playerId: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).substr(2, 9),
     coins: TEST_MODE ? 9999 : 999,
     totalSales: 0,
@@ -9755,15 +9755,7 @@ function loadState() {
     ctx.extension_settings[extensionName] = {};
   }
   const g = ctx.extension_settings[extensionName] || {};
-  if (g[NS] && g[NS].version === 1) {
-    g[NS].version = 2;
-    if (g[NS].coins >= 1e9) {
-      g[NS].needsTribulationCheck = true;
-    } else {
-      g[NS].needsPoorTribulationNotice = true;
-    }
-  }
-  ctx.S = g[NS] && g[NS].version === 2 ? g[NS] : freshState();
+  ctx.S = g[NS] && g[NS].version === 3 ? g[NS] : freshState();
   if (!ctx.S.playerId) ctx.S.playerId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).substr(2, 9);
   if (!ctx.S.petPoke) ctx.S.petPoke = {};
   if (!ctx.S.mutDesc) ctx.S.mutDesc = {};
