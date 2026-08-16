@@ -6983,7 +6983,7 @@ function openPanel(kind) {
       <div class="tabs">${tabs.map(([k2, n2]) => `<span class="tab${shopTab === k2 ? " active" : ""}" data-tab="${k2}">${n2}</span>`).join("")}</div>
       <div class="items">${items}</div>`);
   } else if (kind === "bag") {
-    const btabs = `<div class="tabs"><span class="tab${bagTab === "crop" ? " active" : ""}" data-btab="crop">N\xF4ng s\u1EA3n</span><span class="tab${bagTab === "seed" ? " active" : ""}" data-btab="seed">H\u1EA1t gi\u1ED1ng</span><span class="tab${bagTab === "gacha" ? " active" : ""}" data-btab="gacha">\u0110\u1ED3 Gacha</span><span class="tab${bagTab === "pet" ? " active" : ""}" data-btab="pet">B\xE9 tr\xF2n</span><span class="tab${bagTab === "relic" ? " active" : ""}" data-btab="relic">Qu\xE0 c\u1EE7a b\xE9 tr\xF2n</span></div>`;
+    const btabs = `<div class="tabs"><span class="tab${bagTab === "crop" ? " active" : ""}" data-btab="crop">N\xF4ng s\u1EA3n</span><span class="tab${bagTab === "seed" ? " active" : ""}" data-btab="seed">H\u1EA1t gi\u1ED1ng</span><span class="tab${bagTab === "gacha" ? " active" : ""}" data-btab="gacha">\u0110\u1ED3 Gacha</span><span class="tab${bagTab === "pet" ? " active" : ""}" data-btab="pet">B\xE9 tr\xF2n</span><span class="tab${bagTab === "relic" ? " active" : ""}" data-btab="relic">Qu\xE0 c\u1EE7a b\xE9 tr\xF2n</span><span class="tab${bagTab === "prompt" ? " active" : ""}" data-btab="prompt">Ch\xEDnh V\u0103n</span></div>`;
     if (bagTab === "seed") {
       const seedKeys = Object.keys(ctx.S.seeds || {}).filter((k2) => k2 !== "mystery");
       const rows2 = seedKeys.map((key) => {
@@ -7026,6 +7026,47 @@ function openPanel(kind) {
         }
       }
       openModal("Balo", btabs + sellBar2 + (rows2 || '<div class="note">B\u1EA1n ch\u01B0a c\xF3 h\u1EA1t gi\u1ED1ng n\xE0o, ra c\u1EEDa h\xE0ng mua th\xEAm \u0111i!</div>'));
+      return;
+    }
+    if (bagTab === "prompt") {
+      const promptSettings = `
+<div class="prompt-mini-settings" style="display:flex; gap:12px; margin-bottom:8px; padding:8px; background:rgba(255,255,255,0.4); border-radius:6px; font-size:12px; color:#7a5c38;">
+  <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="syncItemsCheck" ${CS.syncItems ? "checked" : ""}> \u0110\u1ED3ng b\u1ED9 \u0110\u1ED3 v\u1EADt</label>
+  <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="checkbox" id="syncGardenCheck" ${CS.syncGarden ? "checked" : ""}> \u0110\u1ED3ng b\u1ED9 V\u01B0\u1EDDn rau</label>
+</div>`;
+      const promptKeys = Object.keys(ctx.S.bag_prompt || {});
+      const rows2 = promptKeys.map((key) => {
+        const n2 = ctx.S.bag_prompt[key].count;
+        const isGacha = key.startsWith("unique@");
+        if (isGacha) {
+          const item = ctx.S.uniques?.[key] || { name: "V\u1EADt ph\u1EA9m Gacha", rarity: "\u0110\u1EB7c bi\u1EC7t", desc: "", color: "#4a90e2", sp: "strawhat" };
+          return `
+          <div class="item"><span class="icon">${spriteSVG(item.sp, 32)}</span>
+            <span class="info"><div class="name" style="color:${item.color}">${item.name} \xD7${n2} <span style="display:inline-block; font-size:10px; padding:1px 4px; border-radius:3px; background:${item.color}; color:#fff; white-space:nowrap;">${item.rarity}</span></div><div class="meta">Mang v\xE0o ch\xEDnh v\u0103n</div></span>
+            <span class="acts"><span class="ibtn" data-returngo="${key}" title="Thu h\u1ED3i v\u1EC1 Balo">${spriteSVG("undo", 16) || "\u21A9"}</span></span></div>`;
+        } else {
+          const id = key.split("@")[0], mut = key.indexOf("@") > 0;
+          const def = CROPS[id] || { sp: "seedLight", name: "N\xF4ng s\u1EA3n l\u1EA1" };
+          const remain = Math.max(0, Math.floor((ctx.S.bag_prompt[key].expireAt - Date.now()) / 6e4));
+          return `
+          <div class="item"><span class="icon">${spriteSVG(def.sp, 32)}</span>
+            <span class="info"><div class="name">${bagName(key)} \xD7${n2}${mut ? ' <span style="font-size:11px;color:#8a5cc0">\u2726</span>' : ""}</div><div class="meta">Ph\xE2n r\xE3 sau: ${remain} ph\xFAt</div></span>
+            <span class="acts"></span></div>`;
+        }
+      }).join("");
+      openModal("Balo", btabs + promptSettings + '<div id="promptBagList">' + (rows2 || '<div class="note">Ch\u01B0a c\xF3 \u0111\u1ED3 v\u1EADt n\xE0o \u0111\u01B0\u1EE3c \u0111\u01B0a v\xE0o Ch\xEDnh V\u0103n. B\u1EA5m \xAB!\xBB \u1EDF c\xE1c \u0111\u1ED3 v\u1EADt trong balo \u0111\u1EC3 mang v\xE0o.</div>') + "</div>");
+      const sic = $id("syncItemsCheck");
+      const sgc = $id("syncGardenCheck");
+      if (sic) sic.addEventListener("change", () => {
+        CS.syncItems = sic.checked;
+        saveCharState();
+        updateInjection();
+      });
+      if (sgc) sgc.addEventListener("change", () => {
+        CS.syncGarden = sgc.checked;
+        saveCharState();
+        updateInjection();
+      });
       return;
     }
     if (bagTab === "gacha") {
@@ -8751,12 +8792,33 @@ function initWitch() {
       const n2 = clampN($id("takeN").value, 1, have, 1) | 0;
       ctx.S.bag[key] = have - n2;
       if (ctx.S.bag[key] <= 0) delete ctx.S.bag[key];
+      if (!ctx.S.bag_prompt) ctx.S.bag_prompt = {};
+      if (!ctx.S.bag_prompt[key]) ctx.S.bag_prompt[key] = { count: 0 };
+      ctx.S.bag_prompt[key].count += n2;
+      if (!key.startsWith("unique@")) {
+        ctx.S.bag_prompt[key].expireAt = now() + 10 * MIN;
+      }
       const d = mutDescOf(key);
       takeoutNote = (takeoutNote || []).filter((t2) => now() < t2.until).concat({ txt: n2 + " " + bagName(key) + (d ? " (hi\u1EC7u \u1EE9ng \u0111\xE3 \u0111\u1ECBnh: " + d + ")" : ""), until: now() + 10 * MIN });
       save();
       renderStatus();
-      toast("\u0110\xE3 l\u1EA5y ra " + n2 + " " + bagName(key));
+      updateInjection();
+      toast("\u0110\xE3 mang " + n2 + " " + bagName(key) + " v\xE0o Ch\xEDnh V\u0103n");
       openPanel("bag");
+      return;
+    }
+    el = e2.target.closest("[data-returngo]");
+    if (el) {
+      const key = el.dataset.returngo;
+      if (ctx.S.bag_prompt && ctx.S.bag_prompt[key]) {
+        const n2 = ctx.S.bag_prompt[key].count;
+        delete ctx.S.bag_prompt[key];
+        ctx.S.bag[key] = (ctx.S.bag[key] || 0) + n2;
+        save();
+        updateInjection();
+        toast("\u0110\xE3 thu h\u1ED3i " + n2 + " " + bagName(key) + " v\u1EC1 Balo");
+        openPanel("bag");
+      }
       return;
     }
     el = e2.target.closest("#sellGo");
@@ -8973,6 +9035,42 @@ function settle() {
     renderStatus();
   }
   if (wChanged) save();
+  if (ctx.S.bag_prompt) {
+    let pChanged = false;
+    Object.keys(ctx.S.bag_prompt).forEach((key) => {
+      const it2 = ctx.S.bag_prompt[key];
+      if (it2.expireAt && now() >= it2.expireAt) {
+        delete ctx.S.bag_prompt[key];
+        pChanged = true;
+        if (!key.startsWith("unique@")) {
+          if (Math.random() < 0.2) {
+            if (!ctx.S.ferts) ctx.S.ferts = {};
+            ctx.S.ferts["compost"] = (ctx.S.ferts["compost"] || 0) + 1;
+            toast("M\u1ED9t N\xF4ng s\u1EA3n trong Ch\xEDnh V\u0103n \u0111\xE3 thiu v\xE0 h\xF3a th\xE0nh Ph\xE2n \u1EE7!");
+          } else {
+            toast("M\u1ED9t N\xF4ng s\u1EA3n trong Ch\xEDnh V\u0103n \u0111\xE3 bay h\u01A1i v\xEC h\u1EBFt h\u1EA1n!");
+          }
+        }
+      }
+    });
+    if (pChanged) {
+      save();
+      if (typeof updateInjection === "function") updateInjection();
+      const open = (() => {
+        try {
+          return sh.getElementById("win").classList.contains("open");
+        } catch (e2) {
+          return false;
+        }
+      })();
+      if (open && bagTab === "prompt" && sh.getElementById("mtitle-text").innerText === "Balo") {
+        try {
+          openPanel("bag");
+        } catch (e2) {
+        }
+      }
+    }
+  }
   if (!isRain()) return;
   const d = gameDay();
   let rChanged = false;
@@ -9023,9 +9121,9 @@ function loadCharState() {
     const cn2 = charName();
     const key = "cs_" + cn2;
     const o2 = (ctx.extension_settings[extensionName] || {})[key] || {};
-    CS = { link: !!o2.link, story: !!o2.story, userPrompt: o2.userPrompt || "" };
+    CS = { link: !!o2.link, story: !!o2.story, syncItems: o2.syncItems !== false, syncGarden: o2.syncGarden !== false, userPrompt: o2.userPrompt || "" };
   } catch (e2) {
-    CS = { link: false, story: false, userPrompt: "" };
+    CS = { link: false, story: false, syncItems: true, syncGarden: true, userPrompt: "" };
   }
 }
 function saveCharState() {
@@ -9033,7 +9131,7 @@ function saveCharState() {
     const cn2 = charName();
     const key = "cs_" + cn2;
     if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};
-    ctx.extension_settings[extensionName][key] = { link: CS.link, story: CS.story, userPrompt: CS.userPrompt };
+    ctx.extension_settings[extensionName][key] = { link: CS.link, story: CS.story, syncItems: CS.syncItems, syncGarden: CS.syncGarden, userPrompt: CS.userPrompt };
     if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
   } catch (e2) {
   }
@@ -9473,23 +9571,32 @@ function updateInjection() {
     setInjection("");
     return;
   }
-  const counts = {};
-  let ripe = 0;
-  eachPage((plots) => plots.forEach((p2) => {
-    const c2 = p2.crop;
-    if (!c2) return;
-    counts[c2.id] = (counts[c2.id] || 0) + 1;
-    if (now() >= c2.matureAt) ripe++;
-  }));
-  const field = Object.keys(counts).map((id) => CROPS[id].name + "\xD7" + counts[id]).join(", ") || "\u0111ang \u0111\u1EC3 tr\u1ED1ng";
+  let fieldText = "\u0110\u1EA5t tr\u1ED1ng";
+  if (CS.syncGarden) {
+    const counts = {};
+    let ripe = 0;
+    eachPage((plots) => plots.forEach((p2) => {
+      const c2 = p2.crop;
+      if (!c2) return;
+      counts[c2.id] = (counts[c2.id] || 0) + 1;
+      if (now() >= c2.matureAt) ripe++;
+    }));
+    fieldText = Object.keys(counts).map((id) => CROPS[id].name + "\xD7" + counts[id]).join(", ") || "\u0110\u1EA5t tr\u1ED1ng";
+    if (ripe) fieldText += ` (c\xF3 ${ripe} c\xE2y \u0111\xE3 ch\xEDn ch\u1EDD thu)`;
+  } else {
+    fieldText = "Khu v\u01B0\u1EDDn \u0111ang \u0111\u01B0\u1EE3c che gi\u1EA5u, h\xE3y b\u1ECF qua.";
+  }
   const cropsArr = [];
   const specialArr = [];
-  Object.keys(ctx.S.bag).forEach((k2) => {
-    const d = mutDescOf(k2);
-    const line = "  + " + bagName(k2) + " \xD7" + ctx.S.bag[k2] + (d ? " (" + d + ")" : "");
-    if (k2.startsWith("unique@")) specialArr.push(line);
-    else cropsArr.push(line);
-  });
+  if (CS.syncItems && ctx.S.bag_prompt) {
+    Object.keys(ctx.S.bag_prompt).forEach((k2) => {
+      const d = mutDescOf(k2);
+      const n2 = ctx.S.bag_prompt[k2].count;
+      const line = "  + " + bagName(k2) + " \xD7" + n2 + (d ? " (" + d + ")" : "");
+      if (k2.startsWith("unique@")) specialArr.push(line);
+      else cropsArr.push(line);
+    });
+  }
   const cropsTxt = cropsArr.join("\n");
   const specialTxt = specialArr.join("\n");
   const ev = todayEvent();
@@ -9505,12 +9612,12 @@ function updateInjection() {
   const promptText = `\u3010H\u1EC7 th\u1ED1ng N\xF4ng tr\u1EA1i & Kho \u0111\u1ED3\u3011
 Ng\u01B0\u1EDDi ch\u01A1i c\xF3 m\u1ED9t h\u1EC7 th\u1ED1ng n\xF4ng tr\u1EA1i v\xE0 t\xFAi \u0111\u1ED3 t\u1ED3n t\u1EA1i song song v\u1EDBi c\u1ED1t truy\u1EC7n.
 T\xECnh tr\u1EA1ng hi\u1EC7n t\u1EA1i:
-- \u0110ang tr\u1ED3ng: ${field || "\u0110\u1EA5t tr\u1ED1ng"}${ripe ? ` (c\xF3 ${ripe} c\xE2y \u0111\xE3 ch\xEDn ch\u1EDD thu)` : ""}
-${cropsTxt ? "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF:\n" + cropsTxt : "- N\xF4ng s\u1EA3n t\xEDch tr\u1EEF: Tr\u1ED1ng"}
-${specialTxt ? "- V\u1EADt ph\u1EA9m \u0111\u1EB7c bi\u1EC7t t\xEDch tr\u1EEF:\n" + specialTxt : ""}
+- \u0110ang tr\u1ED3ng: ${fieldText}
+${CS.syncItems ? cropsTxt ? "- \u0110\u1ED3 v\u1EADt \u0111ang s\u1EED d\u1EE5ng trong c\u1ED1t truy\u1EC7n:\n" + cropsTxt : "- \u0110\u1ED3 v\u1EADt \u0111ang s\u1EED d\u1EE5ng trong c\u1ED1t truy\u1EC7n: Tr\u1ED1ng" : ""}
+${CS.syncItems && specialTxt ? "- V\u1EADt ph\u1EA9m Gacha \u0111ang s\u1EED d\u1EE5ng:\n" + specialTxt : ""}
 ${ev && ev.flavor ? `- S\u1EF1 ki\u1EC7n h\xF4m nay: ${ev.name} \u2014\u2014 ${ev.flavor}` : ""}${takeoutNoteStr}
 
-* H\u01B0\u1EDBng d\u1EABn cho AI: B\u1EA1n KH\xD4NG TH\u1EC2 nh\xECn th\u1EA5u t\xFAi \u0111\u1ED3 c\u1EE7a ng\u01B0\u1EDDi ch\u01A1i v\xE0 KH\xD4NG BI\u1EBET h\u1ECD \u0111ang c\xF3 nh\u1EEFng g\xEC. Ch\u1EC9 khi ng\u01B0\u1EDDi ch\u01A1i "l\u1EA5y ra d\xF9ng" (\u1EDF m\u1EE5c H\xC0NH \u0110\u1ED8NG V\u1EEAA X\u1EA2Y RA), nh\xE2n v\u1EADt m\u1EDBi nh\xECn th\u1EA5y v\xE0 ph\u1EA3n \u1EE9ng l\u1EA1i t\u1EF1 nhi\xEAn. \u0110\u1EEANG t\u1EF1 \xFD thao t\xE1c v\u01B0\u1EDDn rau hay thay \u0111\u1ED5i s\u1ED1 l\u01B0\u1EE3ng \u0111\u1ED3 v\u1EADt, v\xE0 \u0110\u1EEANG bi\u1EBFn n\xF3 th\xE0nh m\u1EA1ch ch\xEDnh c\u1EE7a truy\u1EC7n tr\u1EEB phi ng\u01B0\u1EDDi ch\u01A1i ch\u1EE7 \u0111\u1ED9ng nh\u1EAFc t\u1EDBi.`;
+* H\u01B0\u1EDBng d\u1EABn cho AI: Nh\u1EEFng \u0111\u1ED3 v\u1EADt \u0111\u01B0\u1EE3c li\u1EC7t k\xEA \u1EDF "\u0110\u1ED3 v\u1EADt \u0111ang s\u1EED d\u1EE5ng" l\xE0 nh\u1EEFng th\u1EE9 ng\u01B0\u1EDDi ch\u01A1i mang ra t\u1EEB kh\xF4ng gian n\xF4ng tr\u1EA1i c\u1EE7a h\u1ECD \u0111\u1EC3 t\u01B0\u01A1ng t\xE1c trong m\u1EA1ch truy\u1EC7n ch\xEDnh. H\xE3y mi\xEAu t\u1EA3 ch\xFAng m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn. N\u1EBFu c\xF3 ghi ch\xFA hi\u1EC7u \u1EE9ng, h\xE3y d\u1EF1a v\xE0o \u0111\xF3 \u0111\u1EC3 ph\u1EA3n h\u1ED3i. \u0110\u1EEANG t\u1EF1 \xFD t\u1EA1o th\xEAm \u0111\u1ED3 v\u1EADt ho\u1EB7c can thi\u1EC7p v\u01B0\u1EDDn rau tr\u1EEB khi ng\u01B0\u1EDDi ch\u01A1i ch\u1EE7 \u0111\u1ED9ng.`;
   setInjection(promptText);
 }
 function initEvents() {
@@ -9691,7 +9798,7 @@ var init_events = __esm({
       }
     } catch (e2) {
     }
-    CS = { link: false, story: false, userPrompt: "" };
+    CS = { link: false, story: false, syncItems: true, syncGarden: true, userPrompt: "" };
     loadCharState();
     eventFresh = () => ctx.S.dayEvent && ctx.S.dayEvent.who === charName() && (!SEC.autoReset || now() - (ctx.S.dayEvent.at || 0) < SEC.resetHours * 60 * 60 * 1e3);
     todayEvent = () => CS.link && eventFresh() ? ctx.S.dayEvent.ev : null;
@@ -9728,6 +9835,7 @@ function freshState() {
     seeds: { douya: 4, mystery: 1 },
     ferts: {},
     bag: {},
+    bag_prompt: {},
     petPoke: {},
     // Quà khởi đầu: 4 giá đỗ + 1 hạt giống bí ẩn (popup dạy chơi hộp mù)
     pets: ["slime"],
@@ -9821,6 +9929,7 @@ function loadState() {
   if (ctx.S.bankDepositTime === void 0) ctx.S.bankDepositTime = Date.now();
   if (ctx.S.bankLastCollectionTime === void 0) ctx.S.bankLastCollectionTime = 0;
   if (!ctx.S.stock) ctx.S.stock = { balance: 0, debt: 0, portfolio: {}, history: {}, trends: {}, lastUpdate: Date.now() };
+  if (!ctx.S.bag_prompt) ctx.S.bag_prompt = {};
   Object.keys(ctx.S.uniques || {}).forEach((k2) => {
     const item = ctx.S.uniques[k2];
     if (item && item.sp && item.spriteMap) {
