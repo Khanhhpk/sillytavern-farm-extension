@@ -56442,7 +56442,10 @@ function updateMarket(now2 = Date.now()) {
     ctx.S.stock.candleCount = (ctx.S.stock.candleCount || 0) + 1;
     if (ctx.S.stock.candleCount % 100 === 0) {
       Object.keys(STOCKS).forEach((t2) => {
-        ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * 0.02 - 0.01;
+        const isExtreme = Math.random() < 0.1;
+        const range = isExtreme ? 0.04 : 0.02;
+        const offset = isExtreme ? -0.02 : -0.01;
+        ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * range + offset;
       });
       if (ctx.S.stock.debt && ctx.S.stock.debt > 0) {
         ctx.S.stock.debt *= 1.01;

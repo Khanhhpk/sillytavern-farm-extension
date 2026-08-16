@@ -184,7 +184,11 @@ export function updateMarket(now = Date.now()) {
     ctx.S.stock.candleCount = (ctx.S.stock.candleCount || 0) + 1;
     if (ctx.S.stock.candleCount % 100 === 0) {
       Object.keys(STOCKS).forEach(t => {
-        ctx.S.stock.currentDrifts[t] = STOCKS[t].drift + (Math.random() * 0.02) - 0.01;
+        // 10% cơ hội nổ "Mùa Cực Đoan" (Extreme Season) với biên độ ±2% thay vì ±1%
+        const isExtreme = Math.random() < 0.1;
+        const range = isExtreme ? 0.04 : 0.02;
+        const offset = isExtreme ? -0.02 : -0.01;
+        ctx.S.stock.currentDrifts[t] = STOCKS[t].drift + (Math.random() * range) + offset;
       });
       // Lãi suất vay Margin (1% mỗi mùa 100 nến)
       if (ctx.S.stock.debt && ctx.S.stock.debt > 0) {
