@@ -8657,8 +8657,10 @@ function setTakeoutNote(val) {
 function openTakeout(key) {
   const have = ctx.S.bag[key] || 0;
   if (have <= 0) return;
+  const isGacha = key.startsWith("unique@");
+  const noteText = isGacha ? `L\u1EA5y ra = \u0111\u01B0a v\xE0o Tab Ch\xEDnh V\u0103n \u0111\u1EC3 t\u01B0\u01A1ng t\xE1c trong c\u1ED1t truy\u1EC7n. <b style="color:var(--accFg)">\u0110\u1ED3 Gacha c\xF3 th\u1EC3 thu h\u1ED3i v\u1EC1 balo b\u1EA5t c\u1EE9 l\xFAc n\xE0o.</b>` : `L\u1EA5y ra = \u0111\u01B0a v\xE0o Tab Ch\xEDnh V\u0103n \u0111\u1EC3 d\xF9ng trong c\u1ED1t truy\u1EC7n. <b style="color:var(--accFg)">Kh\xF4ng quy ra ti\u1EC1n. N\xF4ng s\u1EA3n s\u1EBD t\u1EF1 ph\xE2n r\xE3 sau 10 ph\xFAt n\u1EBFu kh\xF4ng d\xF9ng t\u1EDBi.</b>`;
   openModal("L\u1EA5y ra \xB7 " + bagName(key), `
-    <div class="note" style="margin-bottom:8px">L\u1EA5y ra = mang kh\u1ECFi balo \u0111\u1EC3 d\xF9ng trong c\u1ED1t truy\u1EC7n. <b style="color:var(--accFg)">Kh\xF4ng quy ra ti\u1EC1n, l\u1EA5y ra r\u1ED3i kh\xF4ng b\u1ECF l\u1EA1i balo \u0111\u01B0\u1EE3c!</b></div>
+    <div class="note" style="margin-bottom:8px">${noteText}</div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <input class="inp" id="takeN" type="number" min="1" max="${have}" value="1" style="width:90px">
       <span style="font-size:12px;color:#7a5c38">/ \u0111ang c\xF3 ${have}</span>
