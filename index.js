@@ -4043,18 +4043,18 @@ function initUI() {
   }
 }
 function showResetAnnouncement() {
-  if (localStorage.getItem("farm_reset_announce_seen")) return;
-  console.log("[Farm Ext] B\u1EA3ng th\xF4ng b\xE1o Reset xu\u1EA5t hi\u1EC7n!");
+  if (localStorage.getItem("farm_reborn_announce_seen")) return;
+  console.log("[Farm Ext] B\u1EA3ng th\xF4ng b\xE1o Tr\xF9ng Sinh xu\u1EA5t hi\u1EC7n!");
   if (ctx.win.querySelector("#farm-reset-modal")) return;
   const m2 = document.createElement("div");
   m2.id = "farm-reset-modal";
   m2.style.cssText = "position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; display:flex; justify-content:center; align-items:center; flex-direction:column; padding:20px; box-sizing:border-box; color:#fff; text-align:center; font-family:sans-serif; transition: opacity 0.5s;";
   const box = document.createElement("div");
-  box.style.cssText = "background:#222; border: 2px solid #555; border-radius:12px; padding:30px; max-width:400px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); line-height:1.6;";
+  box.style.cssText = "background:#1a2e1a; border: 2px solid #4CAF50; border-radius:12px; padding:30px; max-width:400px; box-shadow: 0 10px 30px rgba(76,175,80,0.3); line-height:1.6;";
   box.innerHTML = `
-    <h2 style="color:#ff4444; margin-top:0; font-size:24px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #ff4444; padding-bottom:10px;">\u0110\u1EA1i Ki\u1EBFp Gi\xE1ng L\xE2m</h2>
-    <p style="font-size:16px; margin: 20px 0; font-style:italic;">Thi\xEAn c\u01A1 nhi\u1EC5u lo\u1EA1n, Thi\xEAn \u0111\u1EA1o suy t\xE0n, V\u1EA1n ch\xFAng suy vong. M\u1ED9t h\u01A1i t\xE0n, m\u1ED9t tia s\xE1ng, h\u1EBFt th\u1EA3y chuy\u1EC3n sinh, t\xE1i l\u1EADp t\u1EEB \u0111\u1EA7u.</p>
-    <p style="font-size:18px; font-weight:bold; color:#ffdd55; margin-bottom: 25px;">(C\xF2n 2 ng\xE0y n\u1EEFa l\xE0 reset to\xE0n b\u1ED9)</p>
+    <h2 style="color:#4CAF50; margin-top:0; font-size:24px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #4CAF50; padding-bottom:10px;">Tr\xF9ng Sinh Th\xE0nh C\xF4ng</h2>
+    <p style="font-size:16px; margin: 20px 0; font-style:italic;">Th\u1EBF gi\u1EDBi \u0111\xE3 \u0111\u01B0\u1EE3c thanh t\u1EA9y ho\xE0n to\xE0n. T\xE0i ph\xFA l\u1EA1m ph\xE1t tan bi\u1EBFn nh\u01B0 c\xE1t b\u1EE5i. M\u1ED9t k\u1EF7 nguy\xEAn m\u1EDBi r\u1EF1c r\u1EE1 v\xE0 c\xE2n b\u1EB1ng h\u01A1n \u0111\xE3 m\u1EDF ra!</p>
+    <p style="font-size:18px; font-weight:bold; color:#ffdd55; margin-bottom: 25px;">\u{1F31F} Ch\xFAc b\u1EA1n m\u1ED9t kh\u1EDFi \u0111\u1EA7u m\u1EDBi \u0111\u1EA7y may m\u1EAFn! \u{1F31F}</p>
     <button id="reset-announce-btn" disabled style="background:#555; color:#999; border:none; padding:12px 24px; font-size:16px; border-radius:6px; cursor:not-allowed; transition:all 0.3s;">\u0110\xF3ng (5s)</button>
   `;
   m2.appendChild(box);
@@ -4067,7 +4067,7 @@ function showResetAnnouncement() {
       btn.textContent = `\u0110\xF3ng (${timeLeft}s)`;
     } else {
       clearInterval(iv);
-      btn.textContent = "\u0110\xE3 r\xF5, chu\u1EA9n b\u1ECB chuy\u1EC3n sinh";
+      btn.textContent = "B\u1EAFt \u0111\u1EA7u h\xE0nh tr\xECnh m\u1EDBi";
       btn.style.background = "#4CAF50";
       btn.style.color = "#fff";
       btn.style.cursor = "pointer";
@@ -4075,7 +4075,7 @@ function showResetAnnouncement() {
     }
   }, 1e3);
   btn.addEventListener("click", () => {
-    localStorage.setItem("farm_reset_announce_seen", "1");
+    localStorage.setItem("farm_reborn_announce_seen", "1");
     m2.style.opacity = "0";
     setTimeout(() => m2.remove(), 500);
   });
@@ -4095,7 +4095,7 @@ var init_ui = __esm({
     swX = null;
     swY = null;
     window["testFarmReset"] = () => {
-      localStorage.removeItem("farm_reset_announce_seen");
+      localStorage.removeItem("farm_reborn_announce_seen");
       console.log("[Farm Ext] \u0110\xE3 x\xF3a c\u1EDD reset, h\xE3y \u0111\xF3ng m\u1EDF l\u1EA1i c\u1EEDa s\u1ED5 n\xF4ng tr\u1EA1i \u0111\u1EC3 xem b\u1EA3ng th\xF4ng b\xE1o.");
     };
     window["testSansLock"] = () => {
