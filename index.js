@@ -52111,6 +52111,16 @@ function getFleaItemName(id, itemData = null) {
   }
   return CROPS[id]?.name || id;
 }
+function getFleaBasePrice(id, type) {
+  if (type === "ferts") return FERTS[id]?.price || 0;
+  if (type === "seeds") {
+    const def = CROPS[id];
+    return def ? Math.floor((def.seed || 0) * 0.5) : 0;
+  }
+  if (type === "bag") return bagPrice ? bagPrice(id) : CROPS[id.split("@")[0]]?.sell || 0;
+  if (type === "uniques") return ctx.S.uniques?.[id]?.sell || 0;
+  return 0;
+}
 function getFleaItemIcon(id, itemData = null) {
   if (id === "coins") return spriteSVG("coin", 20);
   if (id === "norm" || id === "spec" || id === "super") {
@@ -52121,7 +52131,7 @@ function getFleaItemIcon(id, itemData = null) {
     const sId = id.charAt(0).toUpperCase() + id.slice(1);
     return id === "legend" ? spriteSVG("legendShard", 20) : spriteSVG("shard" + sId, 20);
   }
-  if (id === "compost" || id === "shiny") return spriteSVG("fert_" + id, 20);
+  if (id === "compost" || id === "shiny") return spriteSVG("toolFert", 20);
   if (id.startsWith("unique@")) {
     const item = itemData || ctx.S.uniques?.[id] || { sp: "strawhat", color: "#4a90e2" };
     if (item.spriteMap && item.sp) {
@@ -52179,6 +52189,9 @@ function uiSelectFleaAdd(type, id, max) {
   }
   $id("lbl-flea-sel-name").innerHTML = nameHtml;
   $id("lbl-flea-sel-desc").innerText = getFleaItemDesc(id);
+  const basePrice = getFleaBasePrice(id, type);
+  const basePriceEl = $id("lbl-flea-sel-baseprice");
+  if (basePriceEl) basePriceEl.innerText = basePrice > 0 ? `Gi\xE1 g\u1ED1c: ${basePrice.toLocaleString()} G/c\xE1i` : "";
   $id("flea-post-amount").value = 1;
   $id("flea-post-amount").max = max;
 }
@@ -52238,6 +52251,7 @@ function renderPostItem() {
                         <div style="flex:1;">
                             <div id="lbl-flea-sel-name" style="font-size:15px; font-weight:bold; color:#d32f2f; margin-bottom:5px;"></div>
                             <div id="lbl-flea-sel-desc" style="font-size:11px; color:#555; line-height:1.3;"></div>
+                            <div id="lbl-flea-sel-baseprice" style="font-size:11px; color:#a0703a; font-style:italic; margin-top:4px;"></div>
                         </div>
                     </div>
                     

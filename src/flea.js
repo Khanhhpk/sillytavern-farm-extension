@@ -519,6 +519,15 @@ function getFleaItemName(id, itemData = null) {
     return CROPS[id]?.name || id;
 }
 
+
+function getFleaBasePrice(id, type) {
+    if (type === 'ferts') return FERTS[id]?.price || 0;
+    if (type === 'seeds') { const def = CROPS[id]; return def ? Math.floor((def.seed || 0) * 0.5) : 0; }
+    if (type === 'bag') return All.bagPrice ? All.bagPrice(id) : (CROPS[id.split('@')[0]]?.sell || 0);
+    if (type === 'uniques') return ctx.S.uniques?.[id]?.sell || 0;
+    return 0;
+}
+
 function getFleaItemIcon(id, itemData = null) {
     if (id === 'coins') return All.spriteSVG('coin', 20);
     if (id === 'norm' || id === 'spec' || id === 'super') {
@@ -529,7 +538,7 @@ function getFleaItemIcon(id, itemData = null) {
         const sId = id.charAt(0).toUpperCase() + id.slice(1);
         return id === 'legend' ? All.spriteSVG('legendShard', 20) : All.spriteSVG('shard' + sId, 20);
     }
-    if (id === 'compost' || id === 'shiny') return All.spriteSVG('fert_' + id, 20);
+    if (id === 'compost' || id === 'shiny') return All.spriteSVG('toolFert', 20);
     if (id.startsWith('unique@')) {
         const item = itemData || ctx.S.uniques?.[id] || { sp: 'strawhat', color: '#4a90e2' };
         if (item.spriteMap && item.sp) {
@@ -593,6 +602,9 @@ export function uiSelectFleaAdd(type, id, max) {
     }
     All.$id('lbl-flea-sel-name').innerHTML = nameHtml;
     All.$id('lbl-flea-sel-desc').innerText = getFleaItemDesc(id);
+    const basePrice = getFleaBasePrice(id, type);
+    const basePriceEl = All.$id('lbl-flea-sel-baseprice');
+    if (basePriceEl) basePriceEl.innerText = basePrice > 0 ? `Giá gốc: ${basePrice.toLocaleString()} G/cái` : '';
     All.$id('flea-post-amount').value = 1;
     All.$id('flea-post-amount').max = max;
 }
@@ -655,6 +667,7 @@ function renderPostItem() {
                         <div style="flex:1;">
                             <div id="lbl-flea-sel-name" style="font-size:15px; font-weight:bold; color:#d32f2f; margin-bottom:5px;"></div>
                             <div id="lbl-flea-sel-desc" style="font-size:11px; color:#555; line-height:1.3;"></div>
+                            <div id="lbl-flea-sel-baseprice" style="font-size:11px; color:#a0703a; font-style:italic; margin-top:4px;"></div>
                         </div>
                     </div>
                     
