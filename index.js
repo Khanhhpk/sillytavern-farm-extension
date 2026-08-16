@@ -52153,18 +52153,12 @@ function getFleaItemDesc(id, itemData = null) {
   if (id === "compost") return "Gi\u1EA3m 25% th\u1EDDi gian ph\xE1t tri\u1EC3n c\u1EE7a c\xE2y tr\u1ED3ng.";
   if (id === "shiny") return "T\u0103ng 50% t\u1ED1c \u0111\u1ED9 l\u1EDBn v\xE0 t\u0103ng 25% t\u1EF7 l\u1EC7 \u0111\u1ED9t bi\u1EBFn.";
   if (id.startsWith("unique@")) {
-    return itemData?.desc || ctx.S.uniques?.[id]?.desc || "M\u1ED9t b\u1EA3o v\u1EADt b\xED \u1EA9n kh\xF4ng r\xF5 ngu\u1ED3n g\u1ED1c.";
+    return itemData?.desc || mutDescOf(id) || "M\u1ED9t b\u1EA3o v\u1EADt b\xED \u1EA9n kh\xF4ng r\xF5 ngu\u1ED3n g\u1ED1c.";
   }
   if (id.includes("@")) {
     if (itemData && itemData.mutDesc) return itemData.mutDesc;
-    const parts = id.split("@");
-    if (parts[1] && ctx.S.mutDesc) {
-      const mutCode = parts.slice(1).join("@");
-      const cname = (CROPS[parts[0]] || { name: "" }).name;
-      const desc = ctx.S.mutDesc[mutCode + "@" + cname] || ctx.S.mutDesc[parts[1]];
-      if (desc) return desc;
-    }
-    return "C\xE2y tr\u1ED3ng \u0111\u1ED9t bi\u1EBFn \u0111\u1EB7c bi\u1EC7t.";
+    const localDesc = mutDescOf(id);
+    return localDesc ? localDesc : "C\xE2y tr\u1ED3ng \u0111\u1ED9t bi\u1EBFn \u0111\u1EB7c bi\u1EC7t.";
   }
   return CROPS[id]?.desc || "V\u1EADt ph\u1EA9m n\xF4ng tr\u1EA1i.";
 }

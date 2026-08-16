@@ -3,7 +3,7 @@ import * as All from './all.js';
 import { db } from './firebase.js';
 import { collection, addDoc, getDocs, doc, updateDoc, query, where, deleteDoc } from 'firebase/firestore';
 import { CROPS, FERTS } from './data.js';
-import { bagPrice, bagName } from './logic.js';
+import { bagPrice, bagName, mutDescOf } from './logic.js';
 
 let currentFleaItems = {};
 
@@ -565,18 +565,12 @@ function getFleaItemDesc(id, itemData = null) {
     if (id === 'compost') return 'Giảm 25% thời gian phát triển của cây trồng.';
     if (id === 'shiny') return 'Tăng 50% tốc độ lớn và tăng 25% tỷ lệ đột biến.';
     if (id.startsWith('unique@')) {
-        return itemData?.desc || ctx.S.uniques?.[id]?.desc || 'Một bảo vật bí ẩn không rõ nguồn gốc.';
+        return itemData?.desc || mutDescOf(id) || 'Một bảo vật bí ẩn không rõ nguồn gốc.';
     }
     if (id.includes('@')) {
         if (itemData && itemData.mutDesc) return itemData.mutDesc;
-        const parts = id.split('@');
-        if (parts[1] && ctx.S.mutDesc) {
-            const mutCode = parts.slice(1).join('@');
-            const cname = (CROPS[parts[0]] || { name: '' }).name;
-            const desc = ctx.S.mutDesc[mutCode + '@' + cname] || ctx.S.mutDesc[parts[1]];
-            if (desc) return desc;
-        }
-        return 'Cây trồng đột biến đặc biệt.';
+        const localDesc = mutDescOf(id);
+        return localDesc ? localDesc : 'Cây trồng đột biến đặc biệt.';
     }
     return CROPS[id]?.desc || 'Vật phẩm nông trại.';
 }
