@@ -52947,8 +52947,8 @@ function soloResolveAll() {
     const bet = s2.bets[i2];
     const lbl = isOnly ? "" : `Tay ${i2 + 1}: `;
     if (hand.surrendered) {
-      ctx.S.coins = (ctx.S.coins || 0) + Math.floor(bet / 2);
-      results.push(`${lbl}\u{1F3F3}\uFE0F \u0110\u1EA7u h\xE0ng (-${Math.ceil(bet / 2).toLocaleString()}G)`);
+      ctx.S.coins = (ctx.S.coins || 0) + Math.floor(bet * 0.2);
+      results.push(`${lbl}\u{1F3F3}\uFE0F \u0110\u1EA7u h\xE0ng (-${Math.ceil(bet * 0.8).toLocaleString()}G)`);
       continue;
     }
     if (pTotal > 21) {
@@ -53812,7 +53812,7 @@ function bjHostEndRound() {
         const isOnly = h.cards.length === 1;
         const pBJ = isBlackjack(cards) && isOnly;
         if (h.surrendered && isOnly) {
-          p2 += Math.floor(bet / 2);
+          p2 += Math.floor(bet * 0.2);
           continue;
         }
         if (pTotal > 21) continue;
