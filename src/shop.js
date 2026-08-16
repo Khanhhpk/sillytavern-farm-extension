@@ -541,10 +541,7 @@ export function openPanel(kind) {
       toast('Đã lưu tên người chơi');
     });
     if (All.$id('openSandboxBtn')) All.$id('openSandboxBtn')?.addEventListener('click', () => {
-      openModal('Xưởng Chế Tác AI', openSandbox());
-      setTimeout(() => {
-        All.$id('sandboxDrawBtn')?.click();
-      }, 50);
+      openSandbox();
     });
     All.$id('openSpriteViewerBtn')?.addEventListener('click', openSpriteViewerModal);
     const testBtn = All.$id('testBtn');

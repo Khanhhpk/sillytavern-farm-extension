@@ -7254,10 +7254,7 @@ function openPanel(kind) {
       toast("\u0110\xE3 l\u01B0u t\xEAn ng\u01B0\u1EDDi ch\u01A1i");
     });
     if ($id("openSandboxBtn")) $id("openSandboxBtn")?.addEventListener("click", () => {
-      openModal("X\u01B0\u1EDFng Ch\u1EBF T\xE1c AI", openSandbox());
-      setTimeout(() => {
-        $id("sandboxDrawBtn")?.click();
-      }, 50);
+      openSandbox();
     });
     $id("openSpriteViewerBtn")?.addEventListener("click", openSpriteViewerModal);
     const testBtn = $id("testBtn");
