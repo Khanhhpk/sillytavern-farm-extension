@@ -74,31 +74,45 @@ function calcSmartProfit(dealerTotal, playerHandsData) {
     let profit = 0;
     for (const h of playerHandsData) {
         if (h.surrendered) continue;
-        if (h.total > 21) continue; // Player bust -> dealer already secured money
-        if (dealerTotal > 21) { profit -= h.bet; continue; } // Dealer bust -> pays non-bust players
-        if (dealerTotal > h.total) { profit += h.bet; continue; } // Dealer wins
-        if (dealerTotal < h.total) { profit -= h.bet; continue; } // Dealer loses
+        if (h.total > 21) continue; // Player bust -> dealer already secured money (no action needed)
+        if (dealerTotal > 21) { profit -= h.bet; continue; } // Dealer bust -> pays all non-bust players
+        if (dealerTotal > h.total) { profit += h.bet; continue; } // Dealer wins hand
+        if (dealerTotal < h.total) { profit -= h.bet; continue; } // Dealer loses hand
+        // Equal → tie, no profit change
     }
     return profit;
 }
 
 function shouldSmartDealerHit(dealerHand, playerHandsData) {
     const dTotal = handTotal(dealerHand);
+    
+    // Hard stop: Never hit on 21, never hit on nothing to gain
+    if (dTotal >= 21) return false;
+    
     const standProfit = calcSmartProfit(dTotal, playerHandsData);
     
-    let hitEV = 0;
-    const weights = { '2':1, '3':1, '4':1, '5':1, '6':1, '7':1, '8':1, '9':1, '10':4, 'A':1 };
+    // Probability distribution: in a standard deck, ranks 2-9 = 1/13 each (8 ranks),
+    // 10/J/Q/K = 4/13 combined, A = 1/13. Total = 13/13 = 1.0 ✓
+    const cardSamples = [
+        { rank: '2', prob: 1/13 }, { rank: '3', prob: 1/13 }, { rank: '4', prob: 1/13 },
+        { rank: '5', prob: 1/13 }, { rank: '6', prob: 1/13 }, { rank: '7', prob: 1/13 },
+        { rank: '8', prob: 1/13 }, { rank: '9', prob: 1/13 }, { rank: '10', prob: 4/13 },
+        { rank: 'A', prob: 1/13 },
+    ];
     
-    for (const [rank, weight] of Object.entries(weights)) {
-        const simHand = [...dealerHand, { rank }];
-        const p = calcSmartProfit(handTotal(simHand), playerHandsData);
-        hitEV += p * (weight / 13);
+    let hitEV = 0;
+    for (const { rank, prob } of cardSamples) {
+        // Deep-copy the hand so simulation doesn't mutate original
+        const simHand = dealerHand.map(c => ({ ...c }));
+        simHand.push({ rank, suit: '♠' }); // suit doesn't affect value
+        hitEV += calcSmartProfit(handTotal(simHand), playerHandsData) * prob;
     }
     
-    if (hitEV > standProfit) return true;
-    if (hitEV < standProfit) return false;
+    // HIT if expected value of hitting exceeds standing; use strict threshold to prefer standing on ties
+    if (hitEV > standProfit + 0.001) return true;
+    if (standProfit > hitEV + 0.001) return false;
     
-    // Equal or edge case, fallback to casino standard
+    // Tiebreaker: fall back to casino standard rule (must hit soft/hard < 17)
     if (dTotal < 17 || (isSoft(dealerHand) && dTotal === 17)) return true;
     return false;
 }
