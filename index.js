@@ -51530,12 +51530,12 @@ var init_firebase = __esm({
     init_index_esm5();
     init_index_esm7();
     firebaseConfig = {
-      apiKey: dec("QUl6YVN5Qlg5cDVVWmg5X2hXRmR0akRlRXd4anp1ZHJVX0hlaDB3"),
+      apiKey: dec("QUl6YVN5QUc1cWNfeGFrNnhyLVM2bWdSN2Q1SHBsTnN0cnhzbmRv"),
       authDomain: dec("ZmFybS1leHRlbnNpb24=") + ".firebaseapp.com",
       projectId: dec("ZmFybS1leHRlbnNpb24="),
       storageBucket: dec("ZmFybS1leHRlbnNpb24=") + ".appspot.com",
       messagingSenderId: dec("ODc4MzI4MjQ0MDE4"),
-      appId: dec("MTo4NzgzMjgyNDQwMTg6d2ViOmUxMTFkN2NkZmZlNDkzMTBlMmQ5MmI=")
+      appId: dec("MTo4NzgzMjgyNDQwMTg6d2ViOmQ3NjJmYmZkOGNhMjY1YmNlMmQ5MmI=")
     };
     app = null;
     db = null;
