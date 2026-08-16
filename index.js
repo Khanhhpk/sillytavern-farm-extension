@@ -52694,7 +52694,6 @@ function renderSoloActions() {
     const canSplit = hand.length === 2 && hand[0].rank === hand[1].rank && coins >= bet && s2.playerHands.length < 4;
     const canSurrender = hand.length === 2 && s2.activeHandIdx === 0 && s2.playerHands.length === 1;
     if (total > 21) {
-      setTimeout(() => soloNextHand(), 700);
       actEl.innerHTML = `<div class="bj-msg-sm">\u{1F480} Bust! T\u1EF1 \u0111\u1ED9ng chuy\u1EC3n tay...</div>`;
       return;
     }

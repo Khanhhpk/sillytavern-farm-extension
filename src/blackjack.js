@@ -320,7 +320,6 @@ function renderSoloActions() {
         const canSurrender = hand.length === 2 && s.activeHandIdx === 0 && s.playerHands.length === 1;
 
         if (total > 21) {
-            setTimeout(() => soloNextHand(), 700);
             actEl.innerHTML = `<div class="bj-msg-sm">💀 Bust! Tự động chuyển tay...</div>`;
             return;
         }
