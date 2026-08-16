@@ -20274,6 +20274,15 @@ async function executeSyncJoin() {
         return;
       }
       if (data && data.type === "FULL_SAVE" && data.data) {
+        if (data.data.version !== ctx.S.version) {
+          if (statusEl) {
+            statusEl.textContent = "Save kh\xF4ng t\u01B0\u01A1ng th\xEDch (kh\xE1c version)!";
+            statusEl.style.color = "#d32f2f";
+          }
+          toast("T\u1EEB ch\u1ED1i nh\u1EADn: Save n\xE0y thu\u1ED9c v\u1EC1 phi\xEAn b\u1EA3n c\u0169/kh\xE1c!");
+          syncConn.close();
+          return;
+        }
         if (statusEl) {
           statusEl.textContent = "\u0110\xE3 nh\u1EADn save! \u0110ang \xE1p d\u1EE5ng...";
           statusEl.style.color = "#4caf50";

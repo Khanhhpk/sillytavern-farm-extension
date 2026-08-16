@@ -138,6 +138,13 @@ export async function executeSyncJoin() {
                 return;
             }
             if (data && data.type === 'FULL_SAVE' && data.data) {
+                if (data.data.version !== ctx.S.version) {
+                    if (statusEl) { statusEl.textContent = 'Save không tương thích (khác version)!'; statusEl.style.color = '#d32f2f'; }
+                    All.toast('Từ chối nhận: Save này thuộc về phiên bản cũ/khác!');
+                    syncConn.close();
+                    return;
+                }
+                
                 if (statusEl) { statusEl.textContent = 'Đã nhận save! Đang áp dụng...'; statusEl.style.color = '#4caf50'; }
                 
                 if (!ctx.extension_settings[extensionName]) ctx.extension_settings[extensionName] = {};
