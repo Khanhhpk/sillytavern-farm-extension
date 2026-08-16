@@ -74,6 +74,11 @@ function calcSmartProfit(dealerTotal, playerHandsData) {
     let profit = 0;
     for (const h of playerHandsData) {
         if (h.surrendered) continue;
+        if (h.isBJ) {
+            // Dealer doesn't have a natural BJ if they are hitting, so they always lose to player's natural BJ.
+            profit -= h.bet * 1.2;
+            continue;
+        }
         if (h.total > 21) continue; // Player bust -> dealer already secured money (no action needed)
         if (dealerTotal > 21) { profit -= h.bet; continue; } // Dealer bust -> pays all non-bust players
         if (dealerTotal > h.total) { profit += h.bet; continue; } // Dealer wins hand
@@ -83,7 +88,7 @@ function calcSmartProfit(dealerTotal, playerHandsData) {
     return profit;
 }
 
-function shouldSmartDealerHit(dealerHand, playerHandsData) {
+function shouldSmartDealerHit(dealerHand, playerHandsData, shoe, shoeIdx) {
     const dTotal = handTotal(dealerHand);
     
     // Hard stop: Never hit on 21, never hit on nothing to gain
@@ -91,17 +96,19 @@ function shouldSmartDealerHit(dealerHand, playerHandsData) {
     
     const standProfit = calcSmartProfit(dTotal, playerHandsData);
     
-    // Probability distribution: in a standard deck, ranks 2-9 = 1/13 each (8 ranks),
-    // 10/J/Q/K = 4/13 combined, A = 1/13. Total = 13/13 = 1.0 ✓
-    const cardSamples = [
-        { rank: '2', prob: 1/13 }, { rank: '3', prob: 1/13 }, { rank: '4', prob: 1/13 },
-        { rank: '5', prob: 1/13 }, { rank: '6', prob: 1/13 }, { rank: '7', prob: 1/13 },
-        { rank: '8', prob: 1/13 }, { rank: '9', prob: 1/13 }, { rank: '10', prob: 4/13 },
-        { rank: 'A', prob: 1/13 },
-    ];
+    // TRULY SMART AI: Exact Card Counting
+    // Count exact frequencies of remaining cards in the shoe
+    const counts = { '2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'J':0, 'Q':0, 'K':0, 'A':0 };
+    let remaining = 0;
+    for (let i = shoeIdx; i < shoe.length; i++) {
+        counts[shoe[i].rank]++;
+        remaining++;
+    }
     
     let hitEV = 0;
-    for (const { rank, prob } of cardSamples) {
+    for (const [rank, count] of Object.entries(counts)) {
+        if (count === 0) continue;
+        const prob = count / remaining;
         // Deep-copy the hand so simulation doesn't mutate original
         const simHand = dealerHand.map(c => ({ ...c }));
         simHand.push({ rank, suit: '♠' }); // suit doesn't affect value
@@ -580,10 +587,11 @@ function soloRunDealer() {
         const activeHands = s.playerHands.map((h, i) => ({
             bet: s.bets[i],
             total: handTotal(h),
-            surrendered: h.surrendered
+            surrendered: h.surrendered,
+            isBJ: isBlackjack(h) && s.playerHands.length === 1
         }));
         
-        if (shouldSmartDealerHit(s.dealerHand, activeHands)) {
+        if (shouldSmartDealerHit(s.dealerHand, activeHands, s.shoe, s.shoeIdx)) {
             s.dealerHand.push(soloDrawCard());
             soloRender();
         } else {
@@ -1354,12 +1362,13 @@ function bjHostRunDealer() {
                 activeHands.push({
                     bet: h.bet[i],
                     total: handTotal(h.cards[i]),
-                    surrendered: h.surrendered && h.cards.length === 1
+                    surrendered: h.surrendered && h.cards.length === 1,
+                    isBJ: isBlackjack(h.cards[i]) && h.cards.length === 1
                 });
             }
         }
         
-        if (shouldSmartDealerHit(gs.dealerHand, activeHands)) {
+        if (shouldSmartDealerHit(gs.dealerHand, activeHands, gs.shoe, gs.shoeIdx)) {
             gs.dealerHand.push({ ...gs.shoe[gs.shoeIdx++] });
             const hitMsg = { type: 'ACTION', actionType: 'DEALER_HIT', dealerHand: gs.dealerHand };
             bjBroadcast(hitMsg); bjHandleMsg(bjMyId, hitMsg);

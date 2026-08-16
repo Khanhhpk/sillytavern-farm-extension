@@ -52464,6 +52464,10 @@ function calcSmartProfit(dealerTotal, playerHandsData) {
   let profit = 0;
   for (const h of playerHandsData) {
     if (h.surrendered) continue;
+    if (h.isBJ) {
+      profit -= h.bet * 1.2;
+      continue;
+    }
     if (h.total > 21) continue;
     if (dealerTotal > 21) {
       profit -= h.bet;
@@ -52480,24 +52484,20 @@ function calcSmartProfit(dealerTotal, playerHandsData) {
   }
   return profit;
 }
-function shouldSmartDealerHit(dealerHand, playerHandsData) {
+function shouldSmartDealerHit(dealerHand, playerHandsData, shoe, shoeIdx) {
   const dTotal = handTotal(dealerHand);
   if (dTotal >= 21) return false;
   const standProfit = calcSmartProfit(dTotal, playerHandsData);
-  const cardSamples = [
-    { rank: "2", prob: 1 / 13 },
-    { rank: "3", prob: 1 / 13 },
-    { rank: "4", prob: 1 / 13 },
-    { rank: "5", prob: 1 / 13 },
-    { rank: "6", prob: 1 / 13 },
-    { rank: "7", prob: 1 / 13 },
-    { rank: "8", prob: 1 / 13 },
-    { rank: "9", prob: 1 / 13 },
-    { rank: "10", prob: 4 / 13 },
-    { rank: "A", prob: 1 / 13 }
-  ];
+  const counts = { "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "J": 0, "Q": 0, "K": 0, "A": 0 };
+  let remaining = 0;
+  for (let i2 = shoeIdx; i2 < shoe.length; i2++) {
+    counts[shoe[i2].rank]++;
+    remaining++;
+  }
   let hitEV = 0;
-  for (const { rank, prob } of cardSamples) {
+  for (const [rank, count2] of Object.entries(counts)) {
+    if (count2 === 0) continue;
+    const prob = count2 / remaining;
     const simHand = dealerHand.map((c2) => ({ ...c2 }));
     simHand.push({ rank, suit: "\u2660" });
     hitEV += calcSmartProfit(handTotal(simHand), playerHandsData) * prob;
@@ -52967,9 +52967,10 @@ function soloRunDealer() {
     const activeHands = s2.playerHands.map((h, i2) => ({
       bet: s2.bets[i2],
       total: handTotal(h),
-      surrendered: h.surrendered
+      surrendered: h.surrendered,
+      isBJ: isBlackjack(h) && s2.playerHands.length === 1
     }));
-    if (shouldSmartDealerHit(s2.dealerHand, activeHands)) {
+    if (shouldSmartDealerHit(s2.dealerHand, activeHands, s2.shoe, s2.shoeIdx)) {
       s2.dealerHand.push(soloDrawCard());
       soloRender();
     } else {
@@ -53834,11 +53835,12 @@ function bjHostRunDealer() {
         activeHands.push({
           bet: h.bet[i2],
           total: handTotal(h.cards[i2]),
-          surrendered: h.surrendered && h.cards.length === 1
+          surrendered: h.surrendered && h.cards.length === 1,
+          isBJ: isBlackjack(h.cards[i2]) && h.cards.length === 1
         });
       }
     }
-    if (shouldSmartDealerHit(gs.dealerHand, activeHands)) {
+    if (shouldSmartDealerHit(gs.dealerHand, activeHands, gs.shoe, gs.shoeIdx)) {
       gs.dealerHand.push({ ...gs.shoe[gs.shoeIdx++] });
       const hitMsg = { type: "ACTION", actionType: "DEALER_HIT", dealerHand: gs.dealerHand };
       bjBroadcast(hitMsg);
