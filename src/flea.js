@@ -3,6 +3,7 @@ import * as All from './all.js';
 import { db } from './firebase.js';
 import { collection, addDoc, getDocs, doc, updateDoc, query, where, deleteDoc } from 'firebase/firestore';
 import { CROPS, FERTS } from './data.js';
+import { bagPrice } from './logic.js';
 
 let currentFleaItems = {};
 
@@ -523,9 +524,8 @@ function getFleaItemName(id, itemData = null) {
 function getFleaBasePrice(id, type) {
     if (type === 'ferts') return FERTS[id]?.price || 0;
     if (type === 'seeds') { const def = CROPS[id]; return def ? Math.floor((def.seed || 0) * 0.5) : 0; }
-    if (type === 'bag') return All.bagPrice ? All.bagPrice(id) : (CROPS[id.split('@')[0]]?.sell || 0);
-    if (type === 'uniques') return ctx.S.uniques?.[id]?.sell || 0;
-    return 0;
+    // bag, uniques — dùng chung bagPrice() (đã tính ×1.25 cho đột biến)
+    return bagPrice(id);
 }
 
 function getFleaItemIcon(id, itemData = null) {

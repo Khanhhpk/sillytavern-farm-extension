@@ -52117,9 +52117,7 @@ function getFleaBasePrice(id, type) {
     const def = CROPS[id];
     return def ? Math.floor((def.seed || 0) * 0.5) : 0;
   }
-  if (type === "bag") return bagPrice ? bagPrice(id) : CROPS[id.split("@")[0]]?.sell || 0;
-  if (type === "uniques") return ctx.S.uniques?.[id]?.sell || 0;
-  return 0;
+  return bagPrice(id);
 }
 function getFleaItemIcon(id, itemData = null) {
   if (id === "coins") return spriteSVG("coin", 20);
@@ -52395,6 +52393,7 @@ var init_flea = __esm({
     init_firebase();
     init_index_esm7();
     init_data();
+    init_logic();
     currentFleaItems = {};
     selectedFleaType = null;
     selectedFleaId = null;
