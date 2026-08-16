@@ -4279,8 +4279,9 @@ function shovel(pi) {
   toast("\u0110\xE3 x\u1EDBi b\u1ECF");
 }
 function buyBlock(bi) {
+  if (!Number.isFinite(bi) || bi < 0) return;
   const price = blockPrice(bi);
-  if (ctx.S.coins < price) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng");
+  if (!Number.isFinite(price) || ctx.S.coins < price) return toast("Kh\xF4ng \u0111\u1EE7 v\xE0ng");
   if (bi !== curBlocks()) return;
   ctx.S.coins -= price;
   if (ctx.S.page === 2) ctx.S.unlockedBlocks2++;
@@ -4293,7 +4294,7 @@ function buyBlock(bi) {
 function sell(key, n2) {
   const have = ctx.S.bag[key] || 0;
   n2 = Math.min(n2, have);
-  if (n2 <= 0) return;
+  if (!Number.isFinite(n2) || n2 <= 0) return;
   const gain = bagPrice(key) * n2;
   ctx.S.bag[key] = have - n2;
   if (ctx.S.bag[key] === 0) delete ctx.S.bag[key];
@@ -4307,7 +4308,7 @@ function sell(key, n2) {
 function sellSeed(id, n2) {
   const have = ctx.S.seeds[id] || 0;
   n2 = Math.min(n2, have);
-  if (n2 <= 0) return;
+  if (!Number.isFinite(n2) || n2 <= 0) return;
   const def = CROPS[id] || { seed: 100 };
   const gain = Math.floor((def.seed || 100) * 0.5) * n2;
   ctx.S.seeds[id] = have - n2;
@@ -56640,7 +56641,7 @@ function checkMarginCall() {
 }
 function depositBrokerage(amount) {
   amount = Math.floor(amount);
-  if (amount <= 0 || ctx.S.coins < amount) return false;
+  if (!Number.isFinite(amount) || amount <= 0 || ctx.S.coins < amount) return false;
   ctx.S.coins = Math.floor(ctx.S.coins) - amount;
   const received = amount * 0.9;
   ctx.S.stock.balance += received;
@@ -56658,7 +56659,7 @@ function depositBrokerage(amount) {
   return true;
 }
 function withdrawBrokerage(amount) {
-  if (amount <= 0 || ctx.S.stock.balance < amount) return false;
+  if (!Number.isFinite(amount) || amount <= 0 || ctx.S.stock.balance < amount) return false;
   ctx.S.stock.balance -= amount;
   ctx.S.coins = Math.floor(ctx.S.coins) + Math.floor(amount * 0.9);
   ctx.S.stock.totalWithdrawn = (ctx.S.stock.totalWithdrawn || 0) + amount;
@@ -56675,7 +56676,7 @@ function withdrawBrokerage(amount) {
   return true;
 }
 function buyStock(ticker, shares) {
-  if (shares <= 0) return false;
+  if (!Number.isFinite(shares) || shares <= 0) return false;
   const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
   const cost = price * shares;
   if (ctx.S.stock.balance >= cost) {
@@ -56688,7 +56689,7 @@ function buyStock(ticker, shares) {
   return false;
 }
 function sellStock(ticker, shares) {
-  if (shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
+  if (!Number.isFinite(shares) || shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
   const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
   const revenue = price * shares * 0.98;
   if (!ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost = {};
@@ -56705,7 +56706,7 @@ function sellStock(ticker, shares) {
   return true;
 }
 function placeAutoOrder(ticker, type, targetPrice, shares) {
-  if (shares <= 0 || targetPrice <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
+  if (!Number.isFinite(shares) || !Number.isFinite(targetPrice) || shares <= 0 || targetPrice <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
   if (!ctx.S.stock.autoOrders) ctx.S.stock.autoOrders = [];
   ctx.S.stock.autoOrders.push({
     id: Date.now().toString() + Math.random().toString(),
@@ -56757,13 +56758,13 @@ function checkAutoOrders(ticker, currentPrice) {
   });
 }
 function borrowMargin(amount) {
-  if (amount <= 0) return false;
+  if (!Number.isFinite(amount) || amount <= 0) return false;
   ctx.S.stock.debt = (ctx.S.stock.debt || 0) + amount;
   ctx.S.stock.balance += amount * 0.98;
   return true;
 }
 function repayMargin(amount) {
-  if (amount <= 0 || ctx.S.stock.balance < amount || (ctx.S.stock.debt || 0) < amount) return false;
+  if (!Number.isFinite(amount) || amount <= 0 || ctx.S.stock.balance < amount || (ctx.S.stock.debt || 0) < amount) return false;
   ctx.S.stock.balance -= amount;
   ctx.S.stock.debt -= amount;
   return true;

@@ -237,7 +237,7 @@ export function checkMarginCall() {
 
 export function depositBrokerage(amount) {
   amount = Math.floor(amount);
-  if (amount <= 0 || ctx.S.coins < amount) return false;
+  if (!Number.isFinite(amount) || amount <= 0 || ctx.S.coins < amount) return false;
   ctx.S.coins = Math.floor(ctx.S.coins) - amount;
   const received = amount * 0.9;
   ctx.S.stock.balance += received;
@@ -257,7 +257,7 @@ export function depositBrokerage(amount) {
 }
 
 export function withdrawBrokerage(amount) {
-  if (amount <= 0 || ctx.S.stock.balance < amount) return false;
+  if (!Number.isFinite(amount) || amount <= 0 || ctx.S.stock.balance < amount) return false;
   ctx.S.stock.balance -= amount;
   ctx.S.coins = Math.floor(ctx.S.coins) + Math.floor(amount * 0.9);
   ctx.S.stock.totalWithdrawn = (ctx.S.stock.totalWithdrawn || 0) + amount;
@@ -275,7 +275,7 @@ export function withdrawBrokerage(amount) {
 }
 
 export function buyStock(ticker, shares) {
-  if (shares <= 0) return false;
+  if (!Number.isFinite(shares) || shares <= 0) return false;
   const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
   const cost = price * shares;
   if (ctx.S.stock.balance >= cost) {
@@ -291,7 +291,7 @@ export function buyStock(ticker, shares) {
 }
 
 export function sellStock(ticker, shares) {
-  if (shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
+  if (!Number.isFinite(shares) || shares <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
   const price = ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1];
   const revenue = price * shares * 0.98; // Thuế phí 2%
   
@@ -313,7 +313,7 @@ export function sellStock(ticker, shares) {
 }
 
 export function placeAutoOrder(ticker, type, targetPrice, shares) {
-  if (shares <= 0 || targetPrice <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
+  if (!Number.isFinite(shares) || !Number.isFinite(targetPrice) || shares <= 0 || targetPrice <= 0 || (ctx.S.stock.portfolio[ticker] || 0) < shares) return false;
   if (!ctx.S.stock.autoOrders) ctx.S.stock.autoOrders = [];
   ctx.S.stock.autoOrders.push({
     id: Date.now().toString() + Math.random().toString(),
@@ -365,14 +365,14 @@ export function checkAutoOrders(ticker, currentPrice) {
 }
 
 export function borrowMargin(amount) {
-  if (amount <= 0) return false;
+  if (!Number.isFinite(amount) || amount <= 0) return false;
   ctx.S.stock.debt = (ctx.S.stock.debt || 0) + amount;
   ctx.S.stock.balance += amount * 0.98; // 2% upfront fee
   return true;
 }
 
 export function repayMargin(amount) {
-  if (amount <= 0 || ctx.S.stock.balance < amount || (ctx.S.stock.debt || 0) < amount) return false;
+  if (!Number.isFinite(amount) || amount <= 0 || ctx.S.stock.balance < amount || (ctx.S.stock.debt || 0) < amount) return false;
   ctx.S.stock.balance -= amount;
   ctx.S.stock.debt -= amount;
   return true;
