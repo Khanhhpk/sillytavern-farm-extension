@@ -56464,14 +56464,17 @@ var init_lixi = __esm({
           if (data.senderId === ctx.S.playerId) {
             throw "Kh\xF4ng th\u1EC3 t\u1EF1 gi\u1EADt l\xEC x\xEC c\u1EE7a m\xECnh!";
           }
-          let grabAmount = 0;
-          const min = Math.max(1, Math.floor(data.totalAmount * 0.03));
-          const max = Math.max(min, Math.floor(data.totalAmount * 0.14));
-          grabAmount = Math.floor(Math.random() * (max - min + 1)) + min;
-          if (grabAmount > data.remainingAmount) {
+          const grabIndex = (data.claimedBy || []).length;
+          if (grabIndex >= 4) {
+            throw "L\xEC x\xEC \u0111\xE3 \u0111\u01B0\u1EE3c gi\u1EADt h\u1EBFt!";
+          }
+          const percents = [0.4, 0.3, 0.2, 0.1];
+          let grabAmount = Math.floor(data.totalAmount * percents[grabIndex]);
+          if (grabIndex === 3) {
+            grabAmount = data.remainingAmount;
+          } else if (grabAmount > data.remainingAmount) {
             grabAmount = data.remainingAmount;
           }
-          grabAmount = Math.min(grabAmount, data.remainingAmount);
           const newRemaining = data.remainingAmount - grabAmount;
           const newClaimedBy = data.claimedBy || [];
           newClaimedBy.push(ctx.S.playerId);
