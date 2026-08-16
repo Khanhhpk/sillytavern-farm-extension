@@ -599,7 +599,7 @@ ${CS.syncItems ? (cropsTxt ? '- Đồ vật đang sử dụng trong cốt truy�
 ${CS.syncItems && specialTxt ? '- Vật phẩm Gacha đang sử dụng:\n' + specialTxt : ''}
 ${ev && ev.flavor ? `- Sự kiện hôm nay: ${ev.name} —— ${ev.flavor}` : ''}${takeoutNoteStr}
 
-* Hướng dẫn cho AI: Những đồ vật được liệt kê ở "Đồ vật đang sử dụng" là những thứ người chơi mang ra từ không gian nông trại của họ để tương tác trong mạch truyện chính. Hãy miêu tả chúng một cách tự nhiên. Nếu có ghi chú hiệu ứng, hãy dựa vào đó để phản hồi. ĐỪNG tự ý tạo thêm đồ vật hoặc can thiệp vườn rau trừ khi người chơi chủ động.`;
+* Hướng dẫn cho AI: Những đồ vật được liệt kê ở "Đồ vật đang sử dụng" là những thứ người chơi mang ra từ không gian nông trại của họ để tương tác trong mạch truyện chính. Hãy miêu tả chúng một cách tự nhiên. Nếu có ghi chú hiệu ứng, hãy dựa vào đó để phản hồi. ĐỪNG tự ý tạo thêm đồ vật hoặc can thiệp vườn rau trừ khi người chơi chủ động nhắc tới. ĐỪNG biến nó thành mạch chính của truyện trừ phi người chơi chủ động nhắc tới.`;
 
   setInjection(promptText);
 }
