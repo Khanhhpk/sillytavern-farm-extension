@@ -1,6 +1,6 @@
 import { ctx } from './store.js';
 import * as All from './all.js';
-import { CROPS } from './data.js';
+import { CROPS, FERTS } from './data.js';
 import { Peer } from 'peerjs';
 import { buildPeerConfigAsync } from './net.js';
 
@@ -27,8 +27,7 @@ function getItemName(id) {
     if (id === 'prism') return 'Mảnh lăng quang';
     if (id === 'star') return 'Mảnh ngôi sao';
     if (id === 'legend') return 'Mảnh Huyền Thoại';
-    if (id === 'compost') return 'Phân Hữu Cơ';
-    if (id === 'shiny') return 'Phân Bón Bạc';
+    if (FERTS[id]) return FERTS[id].name;
     if (id.startsWith('unique@')) {
         const item = ctx.S.uniques?.[id] || theirUniques[id];
         return item?.name || 'Vật phẩm Gacha';
@@ -49,8 +48,7 @@ function getItemDesc(id) {
     if (id === 'prism') return 'Dùng để nâng cấp';
     if (id === 'star') return 'Mảnh sao quý hiếm';
     if (id === 'legend') return 'Mảnh huyền thoại quý hiếm';
-    if (id === 'compost') return 'Giảm 25% thời gian trồng cây';
-    if (id === 'shiny') return 'Nhận thêm 25% tiền xu khi thu hoạch';
+    if (FERTS[id]) return FERTS[id].desc;
     if (id.startsWith('unique@')) {
         const item = ctx.S.uniques?.[id] || theirUniques[id];
         return item?.desc ? item.desc.replace(/"/g, '&quot;') : 'Vật phẩm bí ẩn';
@@ -72,7 +70,7 @@ function getItemIcon(id) {
         const sId = id.charAt(0).toUpperCase() + id.slice(1);
         return id === 'legend' ? All.spriteSVG('legendShard', 20) : All.spriteSVG('shard' + sId, 20);
     }
-    if (id === 'compost' || id === 'shiny') return All.spriteSVG('fert_' + id, 20);
+    if (FERTS[id]) return All.spriteSVG('toolFert', 20);
     if (id.startsWith('unique@')) {
         const item = ctx.S.uniques?.[id] || theirUniques[id] || { sp: 'strawhat', color: '#4a90e2' };
         return `<span style="color:${item.color}">${All.spriteSVG(item.sp, 20)}</span>`;

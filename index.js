@@ -19702,8 +19702,7 @@ function getItemName(id) {
   if (id === "prism") return "M\u1EA3nh l\u0103ng quang";
   if (id === "star") return "M\u1EA3nh ng\xF4i sao";
   if (id === "legend") return "M\u1EA3nh Huy\u1EC1n Tho\u1EA1i";
-  if (id === "compost") return "Ph\xE2n H\u1EEFu C\u01A1";
-  if (id === "shiny") return "Ph\xE2n B\xF3n B\u1EA1c";
+  if (FERTS[id]) return FERTS[id].name;
   if (id.startsWith("unique@")) {
     const item = ctx.S.uniques?.[id] || theirUniques[id];
     return item?.name || "V\u1EADt ph\u1EA9m Gacha";
@@ -19723,8 +19722,7 @@ function getItemDesc(id) {
   if (id === "prism") return "D\xF9ng \u0111\u1EC3 n\xE2ng c\u1EA5p";
   if (id === "star") return "M\u1EA3nh sao qu\xFD hi\u1EBFm";
   if (id === "legend") return "M\u1EA3nh huy\u1EC1n tho\u1EA1i qu\xFD hi\u1EBFm";
-  if (id === "compost") return "Gi\u1EA3m 25% th\u1EDDi gian tr\u1ED3ng c\xE2y";
-  if (id === "shiny") return "Nh\u1EADn th\xEAm 25% ti\u1EC1n xu khi thu ho\u1EA1ch";
+  if (FERTS[id]) return FERTS[id].desc;
   if (id.startsWith("unique@")) {
     const item = ctx.S.uniques?.[id] || theirUniques[id];
     return item?.desc ? item.desc.replace(/"/g, "&quot;") : "V\u1EADt ph\u1EA9m b\xED \u1EA9n";
@@ -19745,7 +19743,7 @@ function getItemIcon(id) {
     const sId = id.charAt(0).toUpperCase() + id.slice(1);
     return id === "legend" ? spriteSVG("legendShard", 20) : spriteSVG("shard" + sId, 20);
   }
-  if (id === "compost" || id === "shiny") return spriteSVG("fert_" + id, 20);
+  if (FERTS[id]) return spriteSVG("toolFert", 20);
   if (id.startsWith("unique@")) {
     const item = ctx.S.uniques?.[id] || theirUniques[id] || { sp: "strawhat", color: "#4a90e2" };
     return `<span style="color:${item.color}">${spriteSVG(item.sp, 20)}</span>`;
@@ -52107,8 +52105,7 @@ function getFleaItemName(id, itemData = null) {
   if (id === "prism") return "M\u1EA3nh l\u0103ng quang";
   if (id === "star") return "M\u1EA3nh ng\xF4i sao";
   if (id === "legend") return "M\u1EA3nh Huy\u1EC1n Tho\u1EA1i";
-  if (id === "compost") return "Ph\xE2n H\u1EEFu C\u01A1";
-  if (id === "shiny") return "Ph\xE2n B\xF3n B\u1EA1c";
+  if (FERTS[id]) return FERTS[id].name;
   if (id.startsWith("unique@")) {
     return itemData?.name || bagName(id);
   }
@@ -52158,8 +52155,7 @@ function getFleaItemDesc(id, itemData = null) {
   if (id === "prism") return "M\u1EA3nh gh\xE9p qu\xFD hi\u1EBFm d\xF9ng \u0111\u1EC3 \u0111\u1ED5i ph\u1EA7n th\u01B0\u1EDFng l\u1EDBn.";
   if (id === "star") return "M\u1EA3nh gh\xE9p n\xE2ng c\u1EA5p \u0111\u1EB7c bi\u1EC7t.";
   if (id === "legend") return "M\u1EA3nh gh\xE9p huy\u1EC1n tho\u1EA1i c\u1EF1c hi\u1EBFm.";
-  if (id === "compost") return "Gi\u1EA3m 25% th\u1EDDi gian ph\xE1t tri\u1EC3n c\u1EE7a c\xE2y tr\u1ED3ng.";
-  if (id === "shiny") return "T\u0103ng 50% t\u1ED1c \u0111\u1ED9 l\u1EDBn v\xE0 t\u0103ng 25% t\u1EF7 l\u1EC7 \u0111\u1ED9t bi\u1EBFn.";
+  if (FERTS[id]) return FERTS[id].desc;
   if (id.startsWith("unique@")) {
     return itemData?.desc || mutDescOf(id) || "M\u1ED9t b\u1EA3o v\u1EADt b\xED \u1EA9n kh\xF4ng r\xF5 ngu\u1ED3n g\u1ED1c.";
   }

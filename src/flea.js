@@ -516,8 +516,7 @@ function getFleaItemName(id, itemData = null) {
     if (id === 'prism') return 'Mảnh lăng quang';
     if (id === 'star') return 'Mảnh ngôi sao';
     if (id === 'legend') return 'Mảnh Huyền Thoại';
-    if (id === 'compost') return 'Phân Hữu Cơ';
-    if (id === 'shiny') return 'Phân Bón Bạc';
+    if (FERTS[id]) return FERTS[id].name;
     
     // Sử dụng chung logic hiển thị tên như trong Balo (cho đồ Gacha, nông sản thường và đột biến)
     if (id.startsWith('unique@')) {
@@ -571,8 +570,7 @@ function getFleaItemDesc(id, itemData = null) {
     if (id === 'prism') return 'Mảnh ghép quý hiếm dùng để đổi phần thưởng lớn.';
     if (id === 'star') return 'Mảnh ghép nâng cấp đặc biệt.';
     if (id === 'legend') return 'Mảnh ghép huyền thoại cực hiếm.';
-    if (id === 'compost') return 'Giảm 25% thời gian phát triển của cây trồng.';
-    if (id === 'shiny') return 'Tăng 50% tốc độ lớn và tăng 25% tỷ lệ đột biến.';
+    if (FERTS[id]) return FERTS[id].desc;
     if (id.startsWith('unique@')) {
         return itemData?.desc || mutDescOf(id) || 'Một bảo vật bí ẩn không rõ nguồn gốc.';
     }
