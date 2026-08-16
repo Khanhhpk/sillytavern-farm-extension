@@ -63,18 +63,19 @@ export const STOCKS = {
     name: 'Đa Cấp Coin',
     color: '#ef4444',
     startPrice: 10,
-    drift: -0.001, // Giảm nhẹ
-    vol: 0.22, // 22% swing (crazy volatility)
-    trendNoise: 0.5,
-    trendDecay: 0.95, // Trends last longer
+    drift: -0.003, // Tăng độ trôi âm (Hold lâu chết chắc)
+    vol: 0.25, // Tăng RNG nến giật cục
+    trendNoise: 0.35, // Đã giảm thêm để tránh xu hướng ngẫu nhiên mập lên quá đà
+    trendDecay: 0.80, // Trend tàn ở mức trung bình, vừa đủ để gợn sóng
     gravityZones: [
-      { above: 10.0, pull: -0.2 }, // >$100
-      { below: 0.05, pull: 0.3 } // <$0.5
+      { above: 10.0, pull: -1.0 }, // >$100 (x10) -> Đạp nát không cho lên nữa
+      { above: 5.0, pull: -0.3 },  // >$50 (x5) -> Lực bán xả mạnh
+      { below: 0.1, pull: 0.15 }   // <$1 -> Lực đỡ yếu hơn, bắt đáy vẫn có rủi ro chôn vốn
     ],
     swingCap: 0.30,
-    // Occasional pump event: 3% chance per candle to ignite a strong uptrend
-    pumpChance: 0.03,
-    pumpStrength: 0.50,
+    // Occasional pump event: 2% chance per candle to ignite a strong uptrend
+    pumpChance: 0.02,
+    pumpStrength: 0.60,
   }
 };
 

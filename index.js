@@ -52488,6 +52488,9 @@ function bjSmartRig(shoe, idx, p1, p2, metric) {
   if (metric >= 1e11) chance = 0.15;
   else if (metric >= 1e10) chance = 0.1;
   else if (metric >= 1e9) chance = 0.05;
+  else if (metric >= 1e8) chance = 0.03;
+  else if (metric >= 1e7) chance = 0.02;
+  else if (metric >= 1e6) chance = 0.01;
   if (chance === 0 || Math.random() >= chance) return;
   let t1 = -1, t2 = -1;
   for (let i2 = Math.max(idx + 5, p2 + 1); i2 < Math.min(shoe.length, idx + 100); i2++) {
@@ -52502,6 +52505,30 @@ function bjSmartRig(shoe, idx, p1, p2, metric) {
     tmp = shoe[p2];
     shoe[p2] = shoe[t2];
     shoe[t2] = tmp;
+  }
+}
+function bjDealerPeekRig(shoe, shoeIdx, winStreak) {
+  if (winStreak < 4) return;
+  let chance = 0;
+  if (winStreak >= 7) chance = 0.25;
+  else if (winStreak >= 5) chance = 0.15;
+  else chance = 0.05;
+  if (Math.random() >= chance) return;
+  const dealerVisPos = shoeIdx + 1;
+  const dealerHidPos = shoeIdx + 3;
+  if (dealerHidPos >= shoe.length) return;
+  const visVal = cardValue(shoe[dealerVisPos].rank);
+  for (let i2 = shoeIdx + 4; i2 < Math.min(shoe.length, shoeIdx + 80); i2++) {
+    const cand = shoe[i2];
+    let hidVal = cardValue(cand.rank);
+    let total = visVal + hidVal;
+    if (cand.rank === "A" && total > 21) total -= 10;
+    if (total >= 17 && total <= 21) {
+      const tmp = shoe[dealerHidPos];
+      shoe[dealerHidPos] = shoe[i2];
+      shoe[i2] = tmp;
+      return;
+    }
   }
 }
 function isBlackjack(hand) {
@@ -52542,6 +52569,7 @@ function openBlackjackSolo() {
     bets: [0],
     insuranceBet: 0,
     splitAceIdxs: /* @__PURE__ */ new Set(),
+    winStreak: 0,
     settings: { minBet: 10, maxBet: 0, numDecks: 6 }
   };
   soloState.shoe = buildShoe(soloState.settings.numDecks, Date.now() & 4294967295);
@@ -52712,6 +52740,7 @@ function soloStartRound() {
   s2.dealerHand = [];
   s2.splitAceIdxs = /* @__PURE__ */ new Set();
   bjSmartRig(s2.shoe, s2.shoeIdx, s2.shoeIdx + 1, s2.shoeIdx + 3, ctx.S.coins || 0);
+  bjDealerPeekRig(s2.shoe, s2.shoeIdx, s2.winStreak || 0);
   s2.playerHands[0].push(soloDrawCard());
   s2.dealerHand.push(soloDrawCard());
   s2.playerHands[0].push(soloDrawCard());
@@ -52909,6 +52938,7 @@ function soloRunDealer() {
 }
 function soloResolveAll() {
   const s2 = soloState;
+  const coinsBeforeResolve = ctx.S.coins || 0;
   const dTotal = handTotal(s2.dealerHand);
   const dBJ = isBlackjack(s2.dealerHand);
   const dBust = dTotal > 21;
@@ -52954,6 +52984,11 @@ function soloResolveAll() {
   save();
   renderStatus();
   showMsg(results.join("\n"));
+  if ((ctx.S.coins || 0) > coinsBeforeResolve) {
+    s2.winStreak = (s2.winStreak || 0) + 1;
+  } else {
+    s2.winStreak = 0;
+  }
 }
 function showMsg(text) {
   const el = $id("bj-message");
@@ -57437,23 +57472,26 @@ var init_stock = __esm({
         name: "\u0110a C\u1EA5p Coin",
         color: "#ef4444",
         startPrice: 10,
-        drift: -1e-3,
-        // Giảm nhẹ
-        vol: 0.22,
-        // 22% swing (crazy volatility)
-        trendNoise: 0.5,
-        trendDecay: 0.95,
-        // Trends last longer
+        drift: -3e-3,
+        // Tăng độ trôi âm (Hold lâu chết chắc)
+        vol: 0.25,
+        // Tăng RNG nến giật cục
+        trendNoise: 0.35,
+        // Đã giảm thêm để tránh xu hướng ngẫu nhiên mập lên quá đà
+        trendDecay: 0.8,
+        // Trend tàn ở mức trung bình, vừa đủ để gợn sóng
         gravityZones: [
-          { above: 10, pull: -0.2 },
-          // >$100
-          { below: 0.05, pull: 0.3 }
-          // <$0.5
+          { above: 10, pull: -1 },
+          // >$100 (x10) -> Đạp nát không cho lên nữa
+          { above: 5, pull: -0.3 },
+          // >$50 (x5) -> Lực bán xả mạnh
+          { below: 0.1, pull: 0.15 }
+          // <$1 -> Lực đỡ yếu hơn, bắt đáy vẫn có rủi ro chôn vốn
         ],
         swingCap: 0.3,
-        // Occasional pump event: 3% chance per candle to ignite a strong uptrend
-        pumpChance: 0.03,
-        pumpStrength: 0.5
+        // Occasional pump event: 2% chance per candle to ignite a strong uptrend
+        pumpChance: 0.02,
+        pumpStrength: 0.6
       }
     };
     selectedStock = "SIL";
