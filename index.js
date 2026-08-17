@@ -56632,6 +56632,8 @@ function stepPrice(t2) {
   trend = Math.max(-1, Math.min(1, trend));
   let currentDrift = ctx.S.stock && ctx.S.stock.currentDrifts && ctx.S.stock.currentDrifts[t2] !== void 0 ? ctx.S.stock.currentDrifts[t2] : S.drift;
   let change = currentDrift + S.vol * (Math.random() - 0.5 + trend * 0.5);
+  const elasticGravity = (1 - priceRatio) * 2e-3;
+  change += elasticGravity;
   change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
   if (Math.random() < 5e-3 && price > S.startPrice * 0.2) {
     const targetPrice = S.startPrice * (0.11 + Math.random() * 0.04);
@@ -56708,8 +56710,8 @@ function updateMarket(now2 = Date.now()) {
     if (ctx.S.stock.candleCount % 100 === 0) {
       Object.keys(STOCKS).forEach((t2) => {
         const isExtreme = Math.random() < 0.1;
-        const range = isExtreme ? 0.04 : 0.02;
-        const offset = isExtreme ? -0.02 : -0.01;
+        const range = isExtreme ? 0.01 : 4e-3;
+        const offset = isExtreme ? -5e-3 : -2e-3;
         ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * range + offset;
       });
       if (ctx.S.stock.debt && ctx.S.stock.debt > 0) {
@@ -57613,8 +57615,8 @@ var init_stock = __esm({
           // >$100 (x10) -> Đạp nát không cho lên nữa
           { above: 5, pull: -0.3 },
           // >$50 (x5) -> Lực bán xả mạnh
-          { below: 0.1, pull: 0.15 }
-          // <$1 -> Lực đỡ yếu hơn, bắt đáy vẫn có rủi ro chôn vốn
+          { below: 0.2, pull: 0.15 }
+          // <$2 (chia 5) -> Bắt đáy cực mạnh để cứu, nhưng dưới 10% vẫn sập
         ],
         swingCap: 0.3,
         // Occasional pump event: 2% chance per candle to ignite a strong uptrend

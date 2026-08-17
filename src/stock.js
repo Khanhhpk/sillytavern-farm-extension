@@ -70,7 +70,7 @@ export const STOCKS = {
     gravityZones: [
       { above: 10.0, pull: -1.0 }, // >$100 (x10) -> Đạp nát không cho lên nữa
       { above: 5.0, pull: -0.3 },  // >$50 (x5) -> Lực bán xả mạnh
-      { below: 0.1, pull: 0.15 }   // <$1 -> Lực đỡ yếu hơn, bắt đáy vẫn có rủi ro chôn vốn
+      { below: 0.2, pull: 0.15 }   // <$2 (chia 5) -> Bắt đáy cực mạnh để cứu, nhưng dưới 10% vẫn sập
     ],
     swingCap: 0.30,
     // Occasional pump event: 2% chance per candle to ignite a strong uptrend
@@ -136,7 +136,13 @@ function stepPrice(t) {
 
   let currentDrift = (ctx.S.stock && ctx.S.stock.currentDrifts && ctx.S.stock.currentDrifts[t] !== undefined) ? ctx.S.stock.currentDrifts[t] : S.drift;
   let change = currentDrift + S.vol * ((Math.random() - 0.5) + trend * 0.5);
-  //   Note: random range shifted slightly negative (0.48 vs 0.5) → house always has tiny edge
+  
+  // Lực hút từ tính liên tục về giá nền gốc (Elastic Gravity)
+  // Càng xa giá nền (priceRatio), lực kéo ngược về càng mạnh, tác động thẳng vào % thay đổi mỗi nến.
+  const elasticGravity = (1 - priceRatio) * 0.002;
+  change += elasticGravity;
+
+  // Cắt chóp biên độ tối đa
   change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
 
   // 5. CRISIS MECHANIC: Random sudden crash near bankruptcy threshold
@@ -236,10 +242,11 @@ export function updateMarket(now = Date.now()) {
     ctx.S.stock.candleCount = (ctx.S.stock.candleCount || 0) + 1;
     if (ctx.S.stock.candleCount % 100 === 0) {
       Object.keys(STOCKS).forEach(t => {
-        // 10% cơ hội nổ "Mùa Cực Đoan" (Extreme Season) với biên độ ±2% thay vì ±1%
+        // 10% cơ hội nổ "Mùa Cực Đoan" (Extreme Season)
         const isExtreme = Math.random() < 0.1;
-        const range = isExtreme ? 0.04 : 0.02;
-        const offset = isExtreme ? -0.02 : -0.01;
+        // Mùa bình thường dao động ±0.2% (0.004), Cực đoan ±0.5% (0.01)
+        const range = isExtreme ? 0.01 : 0.004;
+        const offset = isExtreme ? -0.005 : -0.002;
         ctx.S.stock.currentDrifts[t] = STOCKS[t].drift + (Math.random() * range) + offset;
       });
       // Lãi suất vay Margin (1% mỗi mùa 100 nến)
