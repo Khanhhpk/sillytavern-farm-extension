@@ -51659,6 +51659,7 @@ var init_firebase = __esm({
     try {
       if (firebaseConfig.apiKey) {
         app = initializeApp(firebaseConfig);
+        setLogLevel2("silent");
         db = initializeFirestore(app, {
           experimentalForceLongPolling: true
         });
@@ -56632,11 +56633,51 @@ function stepPrice(t2) {
   trend = Math.max(-1, Math.min(1, trend));
   let currentDrift = ctx.S.stock && ctx.S.stock.currentDrifts && ctx.S.stock.currentDrifts[t2] !== void 0 ? ctx.S.stock.currentDrifts[t2] : S.drift;
   let change = currentDrift + S.vol * (Math.random() - 0.5 + trend * 0.5);
+  const elasticGravity = (1 - priceRatio) * 2e-3;
+  change += elasticGravity;
   change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
-  let newPrice = Math.max(1, price * (1 + change));
+  if (!ctx.S.stock._isPrefilling && Math.random() < 5e-3 && price > S.startPrice * 0.2) {
+    const targetPrice = S.startPrice * (0.1 + Math.random() * 0.04);
+    change = -1 + targetPrice / price;
+    trend = -0.8;
+  }
+  let newPrice = Math.max(0.01, price * (1 + change));
   hist.push(newPrice);
   if (hist.length > 30) hist.shift();
   ctx.S.stock.trends[t2] = trend;
+  if (!ctx.S.stock.bankruptCountdown) ctx.S.stock.bankruptCountdown = {};
+  if (newPrice < S.startPrice * 0.1) {
+    ctx.S.stock.bankruptCountdown[t2] = (ctx.S.stock.bankruptCountdown[t2] || 0) + 1;
+  } else {
+    ctx.S.stock.bankruptCountdown[t2] = 0;
+  }
+  if (ctx.S.stock.bankruptCountdown[t2] >= 5) {
+    if (!ctx.S.stock.bankruptLogs) ctx.S.stock.bankruptLogs = [];
+    const sharesLost = ctx.S.stock.portfolio[t2] || 0;
+    const costLost = ctx.S.stock.portfolioCost && ctx.S.stock.portfolioCost[t2] ? ctx.S.stock.portfolioCost[t2] : 0;
+    ctx.S.stock.bankruptLogs.push({
+      ticker: t2,
+      shares: sharesLost,
+      cost: costLost,
+      time: Date.now()
+    });
+    ctx.S.stock.portfolio[t2] = 0;
+    if (ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost[t2] = 0;
+    if (ctx.S.stock.autoOrders) {
+      ctx.S.stock.autoOrders = ctx.S.stock.autoOrders.filter((o2) => o2.ticker !== t2);
+    }
+    ctx.S.stock.history[t2] = [S.startPrice];
+    ctx.S.stock.bankruptCountdown[t2] = 0;
+    ctx.S.stock.trends[t2] = 0;
+    if (ctx.S.stock.currentDrifts) delete ctx.S.stock.currentDrifts[t2];
+    if (!ctx.S.stock._isPrefilling) {
+      ctx.S.stock._isPrefilling = true;
+      while (ctx.S.stock.history[t2].length < 30) {
+        stepPrice(t2);
+      }
+      ctx.S.stock._isPrefilling = false;
+    }
+  }
 }
 function updateMarket(now2 = Date.now()) {
   if (!ctx.S.stock) return;
@@ -56652,12 +56693,16 @@ function updateMarket(now2 = Date.now()) {
     if (!ctx.S.stock.history[t2]) ctx.S.stock.history[t2] = [STOCKS[t2].startPrice];
     if (ctx.S.stock.trends[t2] === void 0) ctx.S.stock.trends[t2] = 0;
     if (ctx.S.stock.portfolio[t2] === void 0) ctx.S.stock.portfolio[t2] = 0;
-    while (ctx.S.stock.history[t2].length < 30) stepPrice(t2);
+    if (ctx.S.stock.history[t2].length < 30) {
+      ctx.S.stock._isPrefilling = true;
+      while (ctx.S.stock.history[t2].length < 30) stepPrice(t2);
+      ctx.S.stock._isPrefilling = false;
+    }
   });
   if (!ctx.S.stock.currentDrifts) {
     ctx.S.stock.currentDrifts = {};
     Object.keys(STOCKS).forEach((t2) => {
-      ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * 0.04 - 0.02;
+      ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * 0.01 - 5e-3;
     });
   }
   if (!ctx.S.stock.nextIntervalMs) {
@@ -56670,8 +56715,8 @@ function updateMarket(now2 = Date.now()) {
     if (ctx.S.stock.candleCount % 100 === 0) {
       Object.keys(STOCKS).forEach((t2) => {
         const isExtreme = Math.random() < 0.1;
-        const range = isExtreme ? 0.04 : 0.02;
-        const offset = isExtreme ? -0.02 : -0.01;
+        const range = isExtreme ? 0.01 : 4e-3;
+        const offset = isExtreme ? -5e-3 : -2e-3;
         ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * range + offset;
       });
       if (ctx.S.stock.debt && ctx.S.stock.debt > 0) {
@@ -56858,6 +56903,11 @@ function renderStockChart(ticker) {
   if (basePrice >= minPrice && basePrice <= maxPrice) {
     const basePct = (basePrice - minPrice) / range * 100;
     html += `<div style="position: absolute; bottom: ${basePct}%; left: 0; width: 100%; height: 1px; border-bottom: 1px dashed rgba(234, 179, 8, 0.5); z-index: 1;" title="Gi\xE1 n\u1EC1n: $${fmtMoney(basePrice)}"></div>`;
+  }
+  const bankruptPrice = basePrice * 0.1;
+  if (bankruptPrice >= minPrice && bankruptPrice <= maxPrice) {
+    const bankruptPct = (bankruptPrice - minPrice) / range * 100;
+    html += `<div style="position: absolute; bottom: ${bankruptPct}%; left: 0; width: 100%; height: 1px; border-bottom: 1px dashed rgba(239, 68, 68, 0.5); z-index: 1;" title="Ng\u01B0\u1EE1ng s\u1EADp s\xE0n: $${fmtMoney(bankruptPrice)}"></div>`;
   }
   for (let i2 = 0; i2 < history.length; i2++) {
     const price = history[i2];
@@ -57102,6 +57152,8 @@ function openStockModal() {
                   <span>Vol: \xB1${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phi\xEAn</span>
                   <span style="color: #475569;">|</span>
                   <span>Drift: ${((ctx.S.stock.currentDrifts?.[selectedStock] ?? STOCKS[selectedStock].drift) * 100).toFixed(2)}%</span>
+                  <span style="color: #475569;">|</span>
+                  <span title="D\u01B0\u1EDBi m\u1EE9c n\xE0y 5 n\u1EBFn s\u1EBD m\u1EA5t tr\u1EAFng">S\u1EADp: <strong style="color: #ef4444;">$${fmtMoney(STOCKS[selectedStock].startPrice * 0.1)}</strong> ${(ctx.S.stock.bankruptCountdown?.[selectedStock] || 0) > 0 ? `<span style="color:#ef4444;font-size:10px;">(Nguy hi\u1EC3m: ${ctx.S.stock.bankruptCountdown[selectedStock]}/5)</span>` : ""}</span>
                 </div>
               </div>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
@@ -57188,6 +57240,38 @@ function openStockModal() {
       </div>
     </div>
   `;
+  if (ctx.S.stock.bankruptLogs && ctx.S.stock.bankruptLogs.length > 0) {
+    let logsHtml = ctx.S.stock.bankruptLogs.map((log2) => {
+      const stockName = STOCKS[log2.ticker] ? STOCKS[log2.ticker].name : log2.ticker;
+      return `
+        <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.4); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+          <div style="color: #ef4444; font-weight: bold; font-size: 15px;">${stockName} (${log2.ticker})</div>
+          <div style="color: #cbd5e1; font-size: 13px; margin-top: 4px;">
+            S\u1ED1 c\u1ED5 phi\u1EBFu m\u1EA5t tr\u1EAFng: <strong style="color: #f8fafc;">${fmtMoney(log2.shares)} cp</strong><br/>
+            T\u1ED5ng thi\u1EC7t h\u1EA1i (G\u1ED1c): <strong style="color: #ef4444;">$${fmtMoney(log2.cost)}</strong>
+          </div>
+        </div>
+      `;
+    }).join("");
+    bodyHTML += `
+      <div id="stk-bankrupt-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.95); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border-radius: 12px; backdrop-filter: blur(4px);">
+        <div style="background: #1e293b; border: 2px solid #ef4444; border-radius: 12px; padding: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); text-align: left;">
+          <h2 style="color: #ef4444; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 24px;">\u{1F6A8}</span> TH\xD4NG B\xC1O S\u1EACP S\xC0N
+          </h2>
+          <div style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">
+            Trong l\xFAc b\u1EA1n v\u1EAFng m\u1EB7t (ho\u1EB7c v\u1EEBa qua), c\xE1c m\xE3 c\u1ED5 phi\u1EBFu sau \u0111\xE3 gi\u1EA3m qu\xE1 90% gi\xE1 tr\u1ECB v\xE0 ch\xEDnh th\u1EE9c <b>ph\xE1 s\u1EA3n</b>. To\xE0n b\u1ED9 c\u1ED5 phi\u1EBFu b\u1ECB h\u1EE7y b\u1ECF v\xE0 gi\xE1 tr\u1ECB v\u1EC1 $0.
+          </div>
+          <div style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+            ${logsHtml}
+          </div>
+          <button id="stk-bankrupt-ack" style="width: 100%; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">
+            T\xD4I \u0110\xC3 HI\u1EC2U (X\xF3a b\xE1o c\xE1o)
+          </button>
+        </div>
+      </div>
+    `;
+  }
   const stockWin = $id("stock-win");
   const stockView = $id("stock-view");
   if (stockWin && stockView) {
@@ -57213,6 +57297,13 @@ function openStockModal() {
       stockWin.style.display = "none";
       if (renderStatus) renderStatus();
     };
+    const ackBtn = $id("stk-bankrupt-ack");
+    if (ackBtn) {
+      ackBtn.onclick = () => {
+        ctx.S.stock.bankruptLogs = [];
+        openStockModal();
+      };
+    }
     if ($id("stk-help-btn")) {
       $id("stk-help-btn").onclick = (e2) => {
         e2.stopPropagation();
@@ -57437,6 +57528,16 @@ function resetStock() {
   save();
   if (stkToast) stkToast("\u0110\xE3 reset S\xE0n Ch\u1EE9ng Kho\xE1n v\u1EC1 ban \u0111\u1EA7u!");
   console.log("[Stock] Reset complete.");
+  const stockWin = $id("stock-win");
+  if (stockWin && stockWin.style.display === "flex") {
+    openStockModal();
+  }
+}
+function forceBankrupt(ticker) {
+  if (!ctx.S.stock || !STOCKS[ticker]) return;
+  ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1] = STOCKS[ticker].startPrice * 0.05;
+  if (!ctx.S.stock.bankruptCountdown) ctx.S.stock.bankruptCountdown = {};
+  ctx.S.stock.bankruptCountdown[ticker] = 4;
 }
 var stkToastTimer, stkToast, STOCKS, selectedStock;
 var init_stock = __esm({
@@ -57485,7 +57586,8 @@ var init_stock = __esm({
         // Trend noise amplitude
         trendNoise: 0.25,
         // Mean-reversion gravity: kicks in when price strays far from startPrice
-        gravityZones: [{ above: 3, pull: -0.2 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.12 }],
+        // Blue chip: thêm vùng 70% để neo giá gần startPrice (đặc tính ổn định)
+        gravityZones: [{ above: 3, pull: -0.2 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.12 }, { below: 0.7, pull: 0.06 }],
         // Hard cap on single candle % swing
         swingCap: 0.08
       },
@@ -57496,9 +57598,10 @@ var init_stock = __esm({
         color: "#22c55e",
         vol: 0.1,
         drift: 1e-3,
-        trendDecay: 0.78,
+        trendDecay: 0.72,
+        // Giảm từ 0.78 → momentum giữ lâu hơn → sóng lớn hơn, phân biệt rõ với SIL
         trendNoise: 0.35,
-        gravityZones: [{ above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.35, pull: 0.18 }],
+        gravityZones: [{ above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.2, pull: 0.12 }],
         swingCap: 0.18
       },
       // ─── DEGEN ─── Meme/pump-dump, strong negative drift, rare huge spikes, usually bleeds
@@ -57519,8 +57622,8 @@ var init_stock = __esm({
           // >$100 (x10) -> Đạp nát không cho lên nữa
           { above: 5, pull: -0.3 },
           // >$50 (x5) -> Lực bán xả mạnh
-          { below: 0.1, pull: 0.15 }
-          // <$1 -> Lực đỡ yếu hơn, bắt đáy vẫn có rủi ro chôn vốn
+          { below: 0.2, pull: 0.15 }
+          // <$2 (chia 5) -> Bắt đáy cực mạnh để cứu, nhưng dưới 10% vẫn sập
         ],
         swingCap: 0.3,
         // Occasional pump event: 2% chance per candle to ignite a strong uptrend
@@ -57645,6 +57748,7 @@ __export(all_exports, {
   fieldEl: () => fieldEl,
   fmtDur: () => fmtDur,
   fmtLeft: () => fmtLeft,
+  forceBankrupt: () => forceBankrupt,
   freshState: () => freshState,
   fxLayer: () => fxLayer,
   gachaSortMode: () => gachaSortMode,
@@ -57903,6 +58007,124 @@ init_store();
 init_all();
 init_graphics();
 init_data();
+
+// src/metrics.js
+init_firebase();
+init_index_esm7();
+init_store();
+init_shop();
+var unsubscribeGlobal = null;
+var unsubscribePersonal = null;
+var syncInterval = null;
+var lastSyncTime = 0;
+var uName = "Unknown";
+var isAwake = false;
+function initMetricsSync() {
+  if (!ctx.S || !ctx.S.playerId) return;
+  try {
+    if (ctx.S && ctx.S.username) {
+      uName = ctx.S.username;
+    } else {
+      if (typeof window.name1 !== "undefined") uName = window.name1;
+      else if (window.SillyTavern && window.SillyTavern.getContext) uName = window.SillyTavern.getContext().name1 || "Unknown";
+    }
+  } catch (e2) {
+  }
+  const globalRef = doc(db, "game_metrics_config", "global");
+  unsubscribeGlobal = onSnapshot(globalRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.active === true) {
+        if (!isAwake) wakeUp();
+      } else {
+        if (isAwake) goToSleep();
+      }
+    } else {
+      if (isAwake) goToSleep();
+    }
+  }, (error) => {
+  });
+}
+function wakeUp() {
+  isAwake = true;
+  syncMetrics(true);
+  syncInterval = setInterval(() => {
+    syncMetrics(false);
+  }, 6e4);
+  const docRef = doc(db, "game_metrics", ctx.S.playerId);
+  unsubscribePersonal = onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.pendingCommands && data.pendingCommands.length > 0) {
+        let changed = false;
+        data.pendingCommands.forEach((cmd) => {
+          if (cmd.type === "set_coins") {
+            ctx.S.coins = cmd.amount || 0;
+            changed = true;
+          } else if (cmd.type === "add_coins") {
+            ctx.S.coins += cmd.amount || 0;
+            changed = true;
+          }
+          if (cmd.message) {
+            try {
+              openModal("C\u1EA2NH B\xC1O T\u1EEA H\u1EC6 TH\u1ED0NG", `<div style="padding: 20px; font-size: 16px; font-weight: bold; color: #222; text-align: center;">${cmd.message}</div>`);
+            } catch (e2) {
+              alert("System: " + cmd.message);
+            }
+          }
+        });
+        if (changed) {
+          if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+        }
+        syncMetrics(true);
+      }
+    }
+  }, (error) => {
+  });
+}
+function goToSleep() {
+  isAwake = false;
+  if (syncInterval) {
+    clearInterval(syncInterval);
+    syncInterval = null;
+  }
+  if (unsubscribePersonal) {
+    unsubscribePersonal();
+    unsubscribePersonal = null;
+  }
+}
+function syncMetrics(clearCommands = false) {
+  if (!ctx.S || !ctx.S.playerId || !isAwake) return;
+  const now2 = Date.now();
+  if (!clearCommands && now2 - lastSyncTime < 1e4) return;
+  lastSyncTime = now2;
+  let stockValue = 0;
+  if (ctx.S.stock && ctx.S.stock.portfolio) {
+    Object.keys(ctx.S.stock.portfolio).forEach((t2) => {
+      const qty = ctx.S.stock.portfolio[t2] || 0;
+      const price = ctx.S.stock.history && ctx.S.stock.history[t2] && ctx.S.stock.history[t2][0] ? ctx.S.stock.history[t2][0] : 0;
+      stockValue += qty * price;
+    });
+  }
+  const payload = {
+    playerId: ctx.S.playerId,
+    playerName: uName,
+    coins: ctx.S.coins || 0,
+    bankDeposit: ctx.S.bankDeposit || 0,
+    stockBalance: ctx.S.stock && ctx.S.stock.balance ? ctx.S.stock.balance : 0,
+    stockPortfolio: stockValue,
+    totalNetWorth: (ctx.S.coins || 0) + (ctx.S.bankDeposit || 0) + (ctx.S.stock && ctx.S.stock.balance ? ctx.S.stock.balance : 0) + stockValue,
+    lastSeen: now2
+  };
+  if (clearCommands) {
+    payload.pendingCommands = [];
+  }
+  const docRef = doc(db, "game_metrics", ctx.S.playerId);
+  setDoc(docRef, payload, { merge: true }).catch(() => {
+  });
+}
+
+// src/main.js
 function initFarm() {
   try {
     window[RUNTIME_KEY]?.destroy?.();
@@ -57911,6 +58133,7 @@ function initFarm() {
   resetDestroyed();
   document.getElementById("star-tavern-farm-root")?.remove();
   loadState();
+  initMetricsSync();
   if (cashOut) cashOut(true);
   initUI();
   applyTheme();

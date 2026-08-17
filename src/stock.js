@@ -42,7 +42,8 @@ export const STOCKS = {
     // Trend noise amplitude
     trendNoise: 0.25,
     // Mean-reversion gravity: kicks in when price strays far from startPrice
-    gravityZones: [ { above: 3, pull: -0.20 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.12 } ],
+    // Blue chip: thêm vùng 70% để neo giá gần startPrice (đặc tính ổn định)
+    gravityZones: [ { above: 3, pull: -0.20 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.12 }, { below: 0.7, pull: 0.06 } ],
     // Hard cap on single candle % swing
     swingCap: 0.08,
   },
@@ -53,9 +54,9 @@ export const STOCKS = {
     color: '#22c55e',
     vol: 0.10,
     drift: 0.001,
-    trendDecay: 0.78,
+    trendDecay: 0.72, // Giảm từ 0.78 → momentum giữ lâu hơn → sóng lớn hơn, phân biệt rõ với SIL
     trendNoise: 0.35,
-    gravityZones: [ { above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.35, pull: 0.18 } ],
+    gravityZones: [ { above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.20, pull: 0.12 } ],
     swingCap: 0.18,
   },
   // ─── DEGEN ─── Meme/pump-dump, strong negative drift, rare huge spikes, usually bleeds
@@ -70,7 +71,7 @@ export const STOCKS = {
     gravityZones: [
       { above: 10.0, pull: -1.0 }, // >$100 (x10) -> Đạp nát không cho lên nữa
       { above: 5.0, pull: -0.3 },  // >$50 (x5) -> Lực bán xả mạnh
-      { below: 0.1, pull: 0.15 }   // <$1 -> Lực đỡ yếu hơn, bắt đáy vẫn có rủi ro chôn vốn
+      { below: 0.2, pull: 0.15 }   // <$2 (chia 5) -> Bắt đáy cực mạnh để cứu, nhưng dưới 10% vẫn sập
     ],
     swingCap: 0.30,
     // Occasional pump event: 2% chance per candle to ignite a strong uptrend
@@ -136,13 +137,70 @@ function stepPrice(t) {
 
   let currentDrift = (ctx.S.stock && ctx.S.stock.currentDrifts && ctx.S.stock.currentDrifts[t] !== undefined) ? ctx.S.stock.currentDrifts[t] : S.drift;
   let change = currentDrift + S.vol * ((Math.random() - 0.5) + trend * 0.5);
-  //   Note: random range shifted slightly negative (0.48 vs 0.5) → house always has tiny edge
+  
+  // Lực hút từ tính liên tục về giá nền gốc (Elastic Gravity)
+  // Càng xa giá nền (priceRatio), lực kéo ngược về càng mạnh, tác động thẳng vào % thay đổi mỗi nến.
+  const elasticGravity = (1 - priceRatio) * 0.002;
+  change += elasticGravity;
+
+  // Cắt chóp biên độ tối đa
   change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
 
-  let newPrice = Math.max(1, price * (1 + change));
+  // 5. CRISIS MECHANIC: Random sudden crash near bankruptcy threshold
+  // Tắt hoàn toàn trong giai đoạn khởi tạo 30 nến đầu (lúc mở game hoặc sau khi sàn sập)
+  if (!ctx.S.stock._isPrefilling && Math.random() < 0.005 && price > S.startPrice * 0.2) {
+    const targetPrice = S.startPrice * (0.10 + Math.random() * 0.04); // 10% - 14%
+    change = -1 + (targetPrice / price);
+    trend = -0.8; // Mang đà giảm cực mạnh, "tùy duyên" ở các nến sau
+  }
+
+  let newPrice = Math.max(0.01, price * (1 + change));
   hist.push(newPrice);
   if (hist.length > 30) hist.shift();
   ctx.S.stock.trends[t] = trend;
+
+  // BANKRUPT MECHANIC: 10% threshold
+  if (!ctx.S.stock.bankruptCountdown) ctx.S.stock.bankruptCountdown = {};
+  if (newPrice < S.startPrice * 0.1) {
+    ctx.S.stock.bankruptCountdown[t] = (ctx.S.stock.bankruptCountdown[t] || 0) + 1;
+  } else {
+    ctx.S.stock.bankruptCountdown[t] = 0;
+  }
+
+  // EXECUTE BANKRUPTCY
+  if (ctx.S.stock.bankruptCountdown[t] >= 5) {
+    if (!ctx.S.stock.bankruptLogs) ctx.S.stock.bankruptLogs = [];
+    const sharesLost = ctx.S.stock.portfolio[t] || 0;
+    const costLost = (ctx.S.stock.portfolioCost && ctx.S.stock.portfolioCost[t]) ? ctx.S.stock.portfolioCost[t] : 0;
+    
+    ctx.S.stock.bankruptLogs.push({
+      ticker: t,
+      shares: sharesLost,
+      cost: costLost,
+      time: Date.now()
+    });
+
+    ctx.S.stock.portfolio[t] = 0;
+    if (ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost[t] = 0;
+    
+    if (ctx.S.stock.autoOrders) {
+      ctx.S.stock.autoOrders = ctx.S.stock.autoOrders.filter(o => o.ticker !== t);
+    }
+
+    ctx.S.stock.history[t] = [S.startPrice];
+    ctx.S.stock.bankruptCountdown[t] = 0;
+    ctx.S.stock.trends[t] = 0;
+    if (ctx.S.stock.currentDrifts) delete ctx.S.stock.currentDrifts[t];
+    
+    // Sử dụng nguyên vẹn hàm stepPrice để tái tạo 30 nến chính xác như lúc mở game
+    if (!ctx.S.stock._isPrefilling) {
+      ctx.S.stock._isPrefilling = true;
+      while (ctx.S.stock.history[t].length < 30) {
+        stepPrice(t);
+      }
+      ctx.S.stock._isPrefilling = false;
+    }
+  }
 }
 
 export function updateMarket(now = Date.now()) {
@@ -162,15 +220,19 @@ export function updateMarket(now = Date.now()) {
     if (ctx.S.stock.trends[t] === undefined) ctx.S.stock.trends[t] = 0;
     if (ctx.S.stock.portfolio[t] === undefined) ctx.S.stock.portfolio[t] = 0;
     // Prefill 29 candles of history on first open
-    while (ctx.S.stock.history[t].length < 30) stepPrice(t);
+    if (ctx.S.stock.history[t].length < 30) {
+      ctx.S.stock._isPrefilling = true;
+      while (ctx.S.stock.history[t].length < 30) stepPrice(t);
+      ctx.S.stock._isPrefilling = false;
+    }
   });
 
   if (!ctx.S.stock.currentDrifts) {
     ctx.S.stock.currentDrifts = {};
     // Roll random drift immediately on first setup
     Object.keys(STOCKS).forEach(t => {
-      // Fluctuates between -2.0% to +2.0% around the base drift
-      ctx.S.stock.currentDrifts[t] = STOCKS[t].drift + (Math.random() * 0.04) - 0.02;
+      // Fluctuates up to ±0.5% around base drift — khớp với biên độ Mùa Cực Đoan
+      ctx.S.stock.currentDrifts[t] = STOCKS[t].drift + (Math.random() * 0.01) - 0.005;
     });
   }
 
@@ -185,10 +247,11 @@ export function updateMarket(now = Date.now()) {
     ctx.S.stock.candleCount = (ctx.S.stock.candleCount || 0) + 1;
     if (ctx.S.stock.candleCount % 100 === 0) {
       Object.keys(STOCKS).forEach(t => {
-        // 10% cơ hội nổ "Mùa Cực Đoan" (Extreme Season) với biên độ ±2% thay vì ±1%
+        // 10% cơ hội nổ "Mùa Cực Đoan" (Extreme Season)
         const isExtreme = Math.random() < 0.1;
-        const range = isExtreme ? 0.04 : 0.02;
-        const offset = isExtreme ? -0.02 : -0.01;
+        // Mùa bình thường dao động ±0.2% (0.004), Cực đoan ±0.5% (0.01)
+        const range = isExtreme ? 0.01 : 0.004;
+        const offset = isExtreme ? -0.005 : -0.002;
         ctx.S.stock.currentDrifts[t] = STOCKS[t].drift + (Math.random() * range) + offset;
       });
       // Lãi suất vay Margin (1% mỗi mùa 100 nến)
@@ -406,6 +469,12 @@ export function renderStockChart(ticker) {
   if (basePrice >= minPrice && basePrice <= maxPrice) {
     const basePct = ((basePrice - minPrice) / range) * 100;
     html += `<div style="position: absolute; bottom: ${basePct}%; left: 0; width: 100%; height: 1px; border-bottom: 1px dashed rgba(234, 179, 8, 0.5); z-index: 1;" title="Giá nền: $${fmtMoney(basePrice)}"></div>`;
+  }
+
+  const bankruptPrice = basePrice * 0.1;
+  if (bankruptPrice >= minPrice && bankruptPrice <= maxPrice) {
+    const bankruptPct = ((bankruptPrice - minPrice) / range) * 100;
+    html += `<div style="position: absolute; bottom: ${bankruptPct}%; left: 0; width: 100%; height: 1px; border-bottom: 1px dashed rgba(239, 68, 68, 0.5); z-index: 1;" title="Ngưỡng sập sàn: $${fmtMoney(bankruptPrice)}"></div>`;
   }
 
 
@@ -668,6 +737,8 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
                   <span>Vol: ±${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phiên</span>
                   <span style="color: #475569;">|</span>
                   <span>Drift: ${((ctx.S.stock.currentDrifts?.[selectedStock] ?? STOCKS[selectedStock].drift) * 100).toFixed(2)}%</span>
+                  <span style="color: #475569;">|</span>
+                  <span title="Dưới mức này 5 nến sẽ mất trắng">Sập: <strong style="color: #ef4444;">$${fmtMoney(STOCKS[selectedStock].startPrice * 0.1)}</strong> ${(ctx.S.stock.bankruptCountdown?.[selectedStock] || 0) > 0 ? `<span style="color:#ef4444;font-size:10px;">(Nguy hiểm: ${ctx.S.stock.bankruptCountdown[selectedStock]}/5)</span>` : ''}</span>
                 </div>
               </div>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
@@ -754,6 +825,40 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     </div>
   `;
 
+  if (ctx.S.stock.bankruptLogs && ctx.S.stock.bankruptLogs.length > 0) {
+    let logsHtml = ctx.S.stock.bankruptLogs.map(log => {
+      const stockName = STOCKS[log.ticker] ? STOCKS[log.ticker].name : log.ticker;
+      return `
+        <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.4); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+          <div style="color: #ef4444; font-weight: bold; font-size: 15px;">${stockName} (${log.ticker})</div>
+          <div style="color: #cbd5e1; font-size: 13px; margin-top: 4px;">
+            Số cổ phiếu mất trắng: <strong style="color: #f8fafc;">${fmtMoney(log.shares)} cp</strong><br/>
+            Tổng thiệt hại (Gốc): <strong style="color: #ef4444;">$${fmtMoney(log.cost)}</strong>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    bodyHTML += `
+      <div id="stk-bankrupt-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.95); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border-radius: 12px; backdrop-filter: blur(4px);">
+        <div style="background: #1e293b; border: 2px solid #ef4444; border-radius: 12px; padding: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); text-align: left;">
+          <h2 style="color: #ef4444; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 24px;">🚨</span> THÔNG BÁO SẬP SÀN
+          </h2>
+          <div style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">
+            Trong lúc bạn vắng mặt (hoặc vừa qua), các mã cổ phiếu sau đã giảm quá 90% giá trị và chính thức <b>phá sản</b>. Toàn bộ cổ phiếu bị hủy bỏ và giá trị về $0.
+          </div>
+          <div style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+            ${logsHtml}
+          </div>
+          <button id="stk-bankrupt-ack" style="width: 100%; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">
+            TÔI ĐÃ HIỂU (Xóa báo cáo)
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   const stockWin = All.$id('stock-win');
   const stockView = All.$id('stock-view');
   
@@ -785,6 +890,14 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       stockWin.style.display = 'none';
       if (All.renderStatus) All.renderStatus();
     };
+
+    const ackBtn = All.$id('stk-bankrupt-ack');
+    if (ackBtn) {
+      ackBtn.onclick = () => {
+        ctx.S.stock.bankruptLogs = [];
+        openStockModal(); // Re-render without the overlay
+      };
+    }
 
     if (All.$id('stk-help-btn')) {
       All.$id('stk-help-btn').onclick = (e) => {
@@ -1049,4 +1162,17 @@ export function resetStock() {
   All.save();
   if (stkToast) stkToast('Đã reset Sàn Chứng Khoán về ban đầu!');
   console.log('[Stock] Reset complete.');
+  
+  const stockWin = All.$id('stock-win');
+  if (stockWin && stockWin.style.display === 'flex') {
+    openStockModal();
+  }
+}
+
+// Console command: window.FarmAll.forceBankrupt('SIL')
+export function forceBankrupt(ticker) {
+  if (!ctx.S.stock || !STOCKS[ticker]) return;
+  ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1] = STOCKS[ticker].startPrice * 0.05;
+  if (!ctx.S.stock.bankruptCountdown) ctx.S.stock.bankruptCountdown = {};
+  ctx.S.stock.bankruptCountdown[ticker] = 4;
 }
