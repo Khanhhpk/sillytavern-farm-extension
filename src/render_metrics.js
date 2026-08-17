@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_API_KEY ? atob(process.env.FIREBASE_API_KEY) : '',
@@ -17,12 +17,53 @@ if (firebaseConfig.apiKey) {
 }
 
 let players = [];
+let isGlobalActive = false;
 
-async function loadMetrics() {
+async function toggleGlobalSwitch() {
+    if (!db) return;
+    const globalRef = doc(db, 'game_metrics_config', 'global');
+    try {
+        await setDoc(globalRef, { active: !isGlobalActive, timestamp: Date.now() }, { merge: true });
+    } catch (e) {
+        console.error(e);
+        alert("Lỗi khi chuyển trạng thái Công tắc");
+    }
+}
+
+function initGlobalListener() {
     if (!db) {
         alert("Firebase config missing!");
         return;
     }
+    const globalRef = doc(db, 'game_metrics_config', 'global');
+    
+    onSnapshot(globalRef, (docSnap) => {
+        const toggleBtn = document.getElementById('toggle-switch-btn');
+        const statusText = document.getElementById('switch-status');
+        
+        if (docSnap.exists()) {
+            isGlobalActive = docSnap.data().active;
+        } else {
+            isGlobalActive = false;
+        }
+        
+        if (isGlobalActive) {
+            statusText.innerText = "ONLINE (CÁC MÁY ĐANG HOẠT ĐỘNG)";
+            statusText.style.color = "#39d353"; // Green
+            toggleBtn.innerText = "Tắt Khảo Sát (Kill Switch)";
+            toggleBtn.className = "btn-danger";
+            loadMetrics();
+        } else {
+            statusText.innerText = "OFFLINE (CÁC MÁY ĐANG NGỦ ĐÔNG)";
+            statusText.style.color = "#f85149"; // Red
+            toggleBtn.innerText = "Bật Khảo Sát (Wake Up)";
+            toggleBtn.className = "btn-success";
+        }
+    });
+}
+
+async function loadMetrics() {
+    if (!db) return;
     const tbody = document.getElementById('metrics-body');
     tbody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
     
@@ -139,6 +180,7 @@ document.getElementById('close-modal').onclick = () => {
 };
 
 document.getElementById('refresh-btn').onclick = loadMetrics;
+document.getElementById('toggle-switch-btn').onclick = toggleGlobalSwitch;
 
 // Initialize
-loadMetrics();
+initGlobalListener();

@@ -58011,18 +58011,42 @@ init_data();
 init_firebase();
 init_index_esm7();
 init_store();
-var unsubscribe = null;
+var unsubscribeGlobal = null;
+var unsubscribePersonal = null;
+var syncInterval = null;
 var lastSyncTime = 0;
+var uName = "Unknown";
+var isAwake = false;
 function initMetricsSync() {
   if (!ctx.S || !ctx.S.playerId) return;
-  let uName = "Unknown";
   try {
     if (typeof window.name1 !== "undefined") uName = window.name1;
     else if (window.SillyTavern && window.SillyTavern.getContext) uName = window.SillyTavern.getContext().name1 || "Unknown";
   } catch (e2) {
   }
+  const globalRef = doc(db, "game_metrics_config", "global");
+  unsubscribeGlobal = onSnapshot(globalRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.active === true) {
+        if (!isAwake) wakeUp();
+      } else {
+        if (isAwake) goToSleep();
+      }
+    } else {
+      if (isAwake) goToSleep();
+    }
+  }, (error) => {
+  });
+}
+function wakeUp() {
+  isAwake = true;
+  syncMetrics(true);
+  syncInterval = setInterval(() => {
+    syncMetrics(false);
+  }, 6e4);
   const docRef = doc(db, "game_metrics", ctx.S.playerId);
-  unsubscribe = onSnapshot(docRef, (docSnap) => {
+  unsubscribePersonal = onSnapshot(docRef, (docSnap) => {
     if (docSnap.exists()) {
       const data = docSnap.data();
       if (data.pendingCommands && data.pendingCommands.length > 0) {
@@ -58046,20 +58070,27 @@ function initMetricsSync() {
         if (changed) {
           if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
         }
-        syncMetrics(uName, true);
+        syncMetrics(true);
       }
     }
   }, (error) => {
   });
-  setInterval(() => {
-    syncMetrics(uName, false);
-  }, 6e5);
-  setTimeout(() => syncMetrics(uName, false), 5e3);
 }
-function syncMetrics(uName, clearCommands = false) {
-  if (!ctx.S || !ctx.S.playerId) return;
+function goToSleep() {
+  isAwake = false;
+  if (syncInterval) {
+    clearInterval(syncInterval);
+    syncInterval = null;
+  }
+  if (unsubscribePersonal) {
+    unsubscribePersonal();
+    unsubscribePersonal = null;
+  }
+}
+function syncMetrics(clearCommands = false) {
+  if (!ctx.S || !ctx.S.playerId || !isAwake) return;
   const now2 = Date.now();
-  if (!clearCommands && now2 - lastSyncTime < 3e4) return;
+  if (!clearCommands && now2 - lastSyncTime < 1e4) return;
   lastSyncTime = now2;
   let stockValue = 0;
   if (ctx.S.stock && ctx.S.stock.portfolio) {
