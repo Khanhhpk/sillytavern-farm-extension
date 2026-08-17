@@ -442,6 +442,12 @@ export function renderStockChart(ticker) {
     html += `<div style="position: absolute; bottom: ${basePct}%; left: 0; width: 100%; height: 1px; border-bottom: 1px dashed rgba(234, 179, 8, 0.5); z-index: 1;" title="Giá nền: $${fmtMoney(basePrice)}"></div>`;
   }
 
+  const bankruptPrice = basePrice * 0.1;
+  if (bankruptPrice >= minPrice && bankruptPrice <= maxPrice) {
+    const bankruptPct = ((bankruptPrice - minPrice) / range) * 100;
+    html += `<div style="position: absolute; bottom: ${bankruptPct}%; left: 0; width: 100%; height: 1px; border-bottom: 1px dashed rgba(239, 68, 68, 0.5); z-index: 1;" title="Ngưỡng sập sàn: $${fmtMoney(bankruptPrice)}"></div>`;
+  }
+
 
   
   for (let i = 0; i < history.length; i++) {

@@ -56885,6 +56885,11 @@ function renderStockChart(ticker) {
     const basePct = (basePrice - minPrice) / range * 100;
     html += `<div style="position: absolute; bottom: ${basePct}%; left: 0; width: 100%; height: 1px; border-bottom: 1px dashed rgba(234, 179, 8, 0.5); z-index: 1;" title="Gi\xE1 n\u1EC1n: $${fmtMoney(basePrice)}"></div>`;
   }
+  const bankruptPrice = basePrice * 0.1;
+  if (bankruptPrice >= minPrice && bankruptPrice <= maxPrice) {
+    const bankruptPct = (bankruptPrice - minPrice) / range * 100;
+    html += `<div style="position: absolute; bottom: ${bankruptPct}%; left: 0; width: 100%; height: 1px; border-bottom: 1px dashed rgba(239, 68, 68, 0.5); z-index: 1;" title="Ng\u01B0\u1EE1ng s\u1EADp s\xE0n: $${fmtMoney(bankruptPrice)}"></div>`;
+  }
   for (let i2 = 0; i2 < history.length; i2++) {
     const price = history[i2];
     const prevPrice = i2 > 0 ? history[i2 - 1] : price;
