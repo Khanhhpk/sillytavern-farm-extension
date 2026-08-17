@@ -220,7 +220,11 @@ export function updateMarket(now = Date.now()) {
     if (ctx.S.stock.trends[t] === undefined) ctx.S.stock.trends[t] = 0;
     if (ctx.S.stock.portfolio[t] === undefined) ctx.S.stock.portfolio[t] = 0;
     // Prefill 29 candles of history on first open
-    while (ctx.S.stock.history[t].length < 30) stepPrice(t);
+    if (ctx.S.stock.history[t].length < 30) {
+      ctx.S.stock._isPrefilling = true;
+      while (ctx.S.stock.history[t].length < 30) stepPrice(t);
+      ctx.S.stock._isPrefilling = false;
+    }
   });
 
   if (!ctx.S.stock.currentDrifts) {

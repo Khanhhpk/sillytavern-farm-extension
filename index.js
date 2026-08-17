@@ -56692,7 +56692,11 @@ function updateMarket(now2 = Date.now()) {
     if (!ctx.S.stock.history[t2]) ctx.S.stock.history[t2] = [STOCKS[t2].startPrice];
     if (ctx.S.stock.trends[t2] === void 0) ctx.S.stock.trends[t2] = 0;
     if (ctx.S.stock.portfolio[t2] === void 0) ctx.S.stock.portfolio[t2] = 0;
-    while (ctx.S.stock.history[t2].length < 30) stepPrice(t2);
+    if (ctx.S.stock.history[t2].length < 30) {
+      ctx.S.stock._isPrefilling = true;
+      while (ctx.S.stock.history[t2].length < 30) stepPrice(t2);
+      ctx.S.stock._isPrefilling = false;
+    }
   });
   if (!ctx.S.stock.currentDrifts) {
     ctx.S.stock.currentDrifts = {};
