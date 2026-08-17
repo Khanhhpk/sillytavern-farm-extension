@@ -139,6 +139,14 @@ function stepPrice(t) {
   //   Note: random range shifted slightly negative (0.48 vs 0.5) → house always has tiny edge
   change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
 
+  // 5. CRISIS MECHANIC: Random sudden crash near bankruptcy threshold
+  // Có tỉ lệ nhỏ xảy ra khủng hoảng đột ngột, ép giá rơi thẳng xuống sát vạch 10%
+  if (Math.random() < 0.005 && price > S.startPrice * 0.2) {
+    const targetPrice = S.startPrice * (0.11 + Math.random() * 0.04); // 11% - 15%
+    change = -1 + (targetPrice / price);
+    trend = -0.5; // Mang đà giảm mạnh, "tùy duyên" ở các nến sau
+  }
+
   let newPrice = Math.max(1, price * (1 + change));
   hist.push(newPrice);
   if (hist.length > 30) hist.shift();
@@ -176,6 +184,7 @@ function stepPrice(t) {
     for (let i = 0; i < 30; i++) ctx.S.stock.history[t].push(S.startPrice);
     ctx.S.stock.bankruptCountdown[t] = 0;
     ctx.S.stock.trends[t] = 0;
+    if (ctx.S.stock.currentDrifts) delete ctx.S.stock.currentDrifts[t];
   }
 }
 

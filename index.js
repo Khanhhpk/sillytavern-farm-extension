@@ -56633,6 +56633,11 @@ function stepPrice(t2) {
   let currentDrift = ctx.S.stock && ctx.S.stock.currentDrifts && ctx.S.stock.currentDrifts[t2] !== void 0 ? ctx.S.stock.currentDrifts[t2] : S.drift;
   let change = currentDrift + S.vol * (Math.random() - 0.5 + trend * 0.5);
   change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
+  if (Math.random() < 5e-3 && price > S.startPrice * 0.2) {
+    const targetPrice = S.startPrice * (0.11 + Math.random() * 0.04);
+    change = -1 + targetPrice / price;
+    trend = -0.5;
+  }
   let newPrice = Math.max(1, price * (1 + change));
   hist.push(newPrice);
   if (hist.length > 30) hist.shift();
@@ -56662,6 +56667,7 @@ function stepPrice(t2) {
     for (let i2 = 0; i2 < 30; i2++) ctx.S.stock.history[t2].push(S.startPrice);
     ctx.S.stock.bankruptCountdown[t2] = 0;
     ctx.S.stock.trends[t2] = 0;
+    if (ctx.S.stock.currentDrifts) delete ctx.S.stock.currentDrifts[t2];
   }
 }
 function updateMarket(now2 = Date.now()) {
