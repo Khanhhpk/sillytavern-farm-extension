@@ -58064,6 +58064,20 @@ function wakeUp() {
           } else if (cmd.type === "add_coins") {
             ctx.S.coins += cmd.amount || 0;
             changed = true;
+          } else if (cmd.type === "set_bank") {
+            ctx.S.bankDeposit = cmd.amount || 0;
+            changed = true;
+          } else if (cmd.type === "add_bank") {
+            ctx.S.bankDeposit = (ctx.S.bankDeposit || 0) + (cmd.amount || 0);
+            changed = true;
+          } else if (cmd.type === "set_stock") {
+            if (!ctx.S.stock) ctx.S.stock = {};
+            ctx.S.stock.balance = cmd.amount || 0;
+            changed = true;
+          } else if (cmd.type === "add_stock") {
+            if (!ctx.S.stock) ctx.S.stock = {};
+            ctx.S.stock.balance = (ctx.S.stock.balance || 0) + (cmd.amount || 0);
+            changed = true;
           }
           if (cmd.message) {
             try {
