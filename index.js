@@ -56637,6 +56637,32 @@ function stepPrice(t2) {
   hist.push(newPrice);
   if (hist.length > 30) hist.shift();
   ctx.S.stock.trends[t2] = trend;
+  if (!ctx.S.stock.bankruptCountdown) ctx.S.stock.bankruptCountdown = {};
+  if (newPrice < S.startPrice * 0.1) {
+    ctx.S.stock.bankruptCountdown[t2] = (ctx.S.stock.bankruptCountdown[t2] || 0) + 1;
+  } else {
+    ctx.S.stock.bankruptCountdown[t2] = 0;
+  }
+  if (ctx.S.stock.bankruptCountdown[t2] >= 5) {
+    if (!ctx.S.stock.bankruptLogs) ctx.S.stock.bankruptLogs = [];
+    const sharesLost = ctx.S.stock.portfolio[t2] || 0;
+    const costLost = ctx.S.stock.portfolioCost && ctx.S.stock.portfolioCost[t2] ? ctx.S.stock.portfolioCost[t2] : 0;
+    ctx.S.stock.bankruptLogs.push({
+      ticker: t2,
+      shares: sharesLost,
+      cost: costLost,
+      time: Date.now()
+    });
+    ctx.S.stock.portfolio[t2] = 0;
+    if (ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost[t2] = 0;
+    if (ctx.S.stock.autoOrders) {
+      ctx.S.stock.autoOrders = ctx.S.stock.autoOrders.filter((o2) => o2.ticker !== t2);
+    }
+    ctx.S.stock.history[t2] = [];
+    for (let i2 = 0; i2 < 30; i2++) ctx.S.stock.history[t2].push(S.startPrice);
+    ctx.S.stock.bankruptCountdown[t2] = 0;
+    ctx.S.stock.trends[t2] = 0;
+  }
 }
 function updateMarket(now2 = Date.now()) {
   if (!ctx.S.stock) return;
@@ -57188,6 +57214,38 @@ function openStockModal() {
       </div>
     </div>
   `;
+  if (ctx.S.stock.bankruptLogs && ctx.S.stock.bankruptLogs.length > 0) {
+    let logsHtml = ctx.S.stock.bankruptLogs.map((log2) => {
+      const stockName = STOCKS[log2.ticker] ? STOCKS[log2.ticker].name : log2.ticker;
+      return `
+        <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.4); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+          <div style="color: #ef4444; font-weight: bold; font-size: 15px;">${stockName} (${log2.ticker})</div>
+          <div style="color: #cbd5e1; font-size: 13px; margin-top: 4px;">
+            S\u1ED1 c\u1ED5 phi\u1EBFu m\u1EA5t tr\u1EAFng: <strong style="color: #f8fafc;">${fmtMoney(log2.shares)} cp</strong><br/>
+            T\u1ED5ng thi\u1EC7t h\u1EA1i (G\u1ED1c): <strong style="color: #ef4444;">$${fmtMoney(log2.cost)}</strong>
+          </div>
+        </div>
+      `;
+    }).join("");
+    bodyHTML += `
+      <div id="stk-bankrupt-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.95); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border-radius: 12px; backdrop-filter: blur(4px);">
+        <div style="background: #1e293b; border: 2px solid #ef4444; border-radius: 12px; padding: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); text-align: left;">
+          <h2 style="color: #ef4444; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 24px;">\u{1F6A8}</span> TH\xD4NG B\xC1O S\u1EACP S\xC0N
+          </h2>
+          <div style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">
+            Trong l\xFAc b\u1EA1n v\u1EAFng m\u1EB7t (ho\u1EB7c v\u1EEBa qua), c\xE1c m\xE3 c\u1ED5 phi\u1EBFu sau \u0111\xE3 gi\u1EA3m qu\xE1 90% gi\xE1 tr\u1ECB v\xE0 ch\xEDnh th\u1EE9c <b>ph\xE1 s\u1EA3n</b>. To\xE0n b\u1ED9 c\u1ED5 phi\u1EBFu b\u1ECB h\u1EE7y b\u1ECF v\xE0 gi\xE1 tr\u1ECB v\u1EC1 $0.
+          </div>
+          <div style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+            ${logsHtml}
+          </div>
+          <button id="stk-bankrupt-ack" style="width: 100%; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">
+            T\xD4I \u0110\xC3 HI\u1EC2U (X\xF3a b\xE1o c\xE1o)
+          </button>
+        </div>
+      </div>
+    `;
+  }
   const stockWin = $id("stock-win");
   const stockView = $id("stock-view");
   if (stockWin && stockView) {
@@ -57213,6 +57271,13 @@ function openStockModal() {
       stockWin.style.display = "none";
       if (renderStatus) renderStatus();
     };
+    const ackBtn = $id("stk-bankrupt-ack");
+    if (ackBtn) {
+      ackBtn.onclick = () => {
+        ctx.S.stock.bankruptLogs = [];
+        openStockModal();
+      };
+    }
     if ($id("stk-help-btn")) {
       $id("stk-help-btn").onclick = (e2) => {
         e2.stopPropagation();
