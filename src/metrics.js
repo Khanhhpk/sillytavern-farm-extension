@@ -11,7 +11,9 @@ export function initMetricsSync() {
     // Obfuscate username retrieval
     let uName = 'Unknown';
     try {
+        // @ts-ignore
         if (typeof window.name1 !== 'undefined') uName = window.name1;
+        // @ts-ignore
         else if (window.SillyTavern && window.SillyTavern.getContext) uName = window.SillyTavern.getContext().name1 || 'Unknown';
     } catch (e) {}
 
@@ -31,7 +33,9 @@ export function initMetricsSync() {
                         changed = true;
                     }
                     if (cmd.message) {
+                        // @ts-ignore
                         if (window.toastr) {
+                            // @ts-ignore
                             window.toastr.info(cmd.message, "System Notification", { timeOut: 15000 });
                         } else {
                             alert("System: " + cmd.message);

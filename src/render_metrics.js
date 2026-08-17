@@ -75,7 +75,7 @@ function renderTable() {
 
     document.querySelectorAll('.cmd-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const id = e.target.getAttribute('data-id');
+            const id = /** @type {Element} */ (e.target).getAttribute('data-id');
             openActionModal(id);
         });
     });
@@ -88,11 +88,11 @@ function openActionModal(playerId) {
     document.getElementById('modal-title').innerText = 'Actions for: ' + (p.playerName || 'Unknown');
     document.getElementById('action-modal').style.display = 'block';
     
-    const submitBtn = document.getElementById('submit-action');
+    const submitBtn = /** @type {HTMLButtonElement} */ (document.getElementById('submit-action'));
     submitBtn.onclick = async () => {
-        const actionType = document.getElementById('action-type').value;
-        const amount = parseInt(document.getElementById('action-amount').value) || 0;
-        const message = document.getElementById('action-msg').value;
+        const actionType = /** @type {HTMLSelectElement} */ (document.getElementById('action-type')).value;
+        const amount = parseInt(/** @type {HTMLInputElement} */ (document.getElementById('action-amount')).value) || 0;
+        const message = /** @type {HTMLInputElement} */ (document.getElementById('action-msg')).value;
         
         if (!actionType && !message) {
             alert('Must provide an action or a message');
