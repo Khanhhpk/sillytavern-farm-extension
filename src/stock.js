@@ -708,6 +708,8 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
                   <span>Vol: ±${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phiên</span>
                   <span style="color: #475569;">|</span>
                   <span>Drift: ${((ctx.S.stock.currentDrifts?.[selectedStock] ?? STOCKS[selectedStock].drift) * 100).toFixed(2)}%</span>
+                  <span style="color: #475569;">|</span>
+                  <span title="Dưới mức này 5 nến sẽ mất trắng">Sập: <strong style="color: #ef4444;">$${fmtMoney(STOCKS[selectedStock].startPrice * 0.1)}</strong> ${(ctx.S.stock.bankruptCountdown?.[selectedStock] || 0) > 0 ? `<span style="color:#ef4444;font-size:10px;">(Nguy hiểm: ${ctx.S.stock.bankruptCountdown[selectedStock]}/5)</span>` : ''}</span>
                 </div>
               </div>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
@@ -1128,6 +1130,19 @@ setInterval(() => {
 export function resetStock() {
   ctx.S.stock = { balance: 0, debt: 0, portfolio: {}, history: {}, trends: {}, lastUpdate: Date.now(), totalDeposited: 0, totalWithdrawn: 0 };
   selectedStock = 'SIL';
+  const stockWin = All.$id('stock-win');
+  if (stockWin && stockWin.style.display === 'flex') {
+    openStockModal();
+  }
+}
+
+// Console command: window.FarmAll.forceBankrupt('SIL')
+export function forceBankrupt(ticker) {
+  if (!ctx.S.stock || !STOCKS[ticker]) return;
+  ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1] = STOCKS[ticker].startPrice * 0.05;
+  if (!ctx.S.stock.bankruptCountdown) ctx.S.stock.bankruptCountdown = {};
+  ctx.S.stock.bankruptCountdown[ticker] = 4;
+}
   All.save();
   if (stkToast) stkToast('Đã reset Sàn Chứng Khoán về ban đầu!');
   console.log('[Stock] Reset complete.');
