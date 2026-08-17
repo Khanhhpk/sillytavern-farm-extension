@@ -57133,6 +57133,8 @@ function openStockModal() {
                   <span>Vol: \xB1${(STOCKS[selectedStock].vol * 100).toFixed(1)}%/phi\xEAn</span>
                   <span style="color: #475569;">|</span>
                   <span>Drift: ${((ctx.S.stock.currentDrifts?.[selectedStock] ?? STOCKS[selectedStock].drift) * 100).toFixed(2)}%</span>
+                  <span style="color: #475569;">|</span>
+                  <span title="D\u01B0\u1EDBi m\u1EE9c n\xE0y 5 n\u1EBFn s\u1EBD m\u1EA5t tr\u1EAFng">S\u1EADp: <strong style="color: #ef4444;">$${fmtMoney(STOCKS[selectedStock].startPrice * 0.1)}</strong> ${(ctx.S.stock.bankruptCountdown?.[selectedStock] || 0) > 0 ? `<span style="color:#ef4444;font-size:10px;">(Nguy hi\u1EC3m: ${ctx.S.stock.bankruptCountdown[selectedStock]}/5)</span>` : ""}</span>
                 </div>
               </div>
               <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
@@ -57507,6 +57509,16 @@ function resetStock() {
   save();
   if (stkToast) stkToast("\u0110\xE3 reset S\xE0n Ch\u1EE9ng Kho\xE1n v\u1EC1 ban \u0111\u1EA7u!");
   console.log("[Stock] Reset complete.");
+  const stockWin = $id("stock-win");
+  if (stockWin && stockWin.style.display === "flex") {
+    openStockModal();
+  }
+}
+function forceBankrupt(ticker) {
+  if (!ctx.S.stock || !STOCKS[ticker]) return;
+  ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1] = STOCKS[ticker].startPrice * 0.05;
+  if (!ctx.S.stock.bankruptCountdown) ctx.S.stock.bankruptCountdown = {};
+  ctx.S.stock.bankruptCountdown[ticker] = 4;
 }
 var stkToastTimer, stkToast, STOCKS, selectedStock;
 var init_stock = __esm({
@@ -57715,6 +57727,7 @@ __export(all_exports, {
   fieldEl: () => fieldEl,
   fmtDur: () => fmtDur,
   fmtLeft: () => fmtLeft,
+  forceBankrupt: () => forceBankrupt,
   freshState: () => freshState,
   fxLayer: () => fxLayer,
   gachaSortMode: () => gachaSortMode,

@@ -1130,6 +1130,10 @@ setInterval(() => {
 export function resetStock() {
   ctx.S.stock = { balance: 0, debt: 0, portfolio: {}, history: {}, trends: {}, lastUpdate: Date.now(), totalDeposited: 0, totalWithdrawn: 0 };
   selectedStock = 'SIL';
+  All.save();
+  if (stkToast) stkToast('Đã reset Sàn Chứng Khoán về ban đầu!');
+  console.log('[Stock] Reset complete.');
+  
   const stockWin = All.$id('stock-win');
   if (stockWin && stockWin.style.display === 'flex') {
     openStockModal();
@@ -1142,8 +1146,4 @@ export function forceBankrupt(ticker) {
   ctx.S.stock.history[ticker][ctx.S.stock.history[ticker].length - 1] = STOCKS[ticker].startPrice * 0.05;
   if (!ctx.S.stock.bankruptCountdown) ctx.S.stock.bankruptCountdown = {};
   ctx.S.stock.bankruptCountdown[ticker] = 4;
-}
-  All.save();
-  if (stkToast) stkToast('Đã reset Sàn Chứng Khoán về ban đầu!');
-  console.log('[Stock] Reset complete.');
 }
