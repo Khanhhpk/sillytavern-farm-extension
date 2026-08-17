@@ -56640,7 +56640,7 @@ function stepPrice(t2) {
     change = -1 + targetPrice / price;
     trend = -0.5;
   }
-  let newPrice = Math.max(1, price * (1 + change));
+  let newPrice = Math.max(0.01, price * (1 + change));
   hist.push(newPrice);
   if (hist.length > 30) hist.shift();
   ctx.S.stock.trends[t2] = trend;

@@ -153,7 +153,7 @@ function stepPrice(t) {
     trend = -0.5; // Mang đà giảm mạnh, "tùy duyên" ở các nến sau
   }
 
-  let newPrice = Math.max(1, price * (1 + change));
+  let newPrice = Math.max(0.01, price * (1 + change));
   hist.push(newPrice);
   if (hist.length > 30) hist.shift();
   ctx.S.stock.trends[t] = trend;
