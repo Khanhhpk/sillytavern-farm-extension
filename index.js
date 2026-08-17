@@ -58070,6 +58070,12 @@ function wakeUp() {
           } else if (cmd.type === "add_bank") {
             ctx.S.bankDeposit = (ctx.S.bankDeposit || 0) + (cmd.amount || 0);
             changed = true;
+          } else if (cmd.type === "set_invest") {
+            ctx.S.bankInvestBalance = cmd.amount || 0;
+            changed = true;
+          } else if (cmd.type === "add_invest") {
+            ctx.S.bankInvestBalance = (ctx.S.bankInvestBalance || 0) + (cmd.amount || 0);
+            changed = true;
           } else if (cmd.type === "set_stock") {
             if (!ctx.S.stock) ctx.S.stock = {};
             ctx.S.stock.balance = cmd.amount || 0;
@@ -58078,6 +58084,16 @@ function wakeUp() {
             if (!ctx.S.stock) ctx.S.stock = {};
             ctx.S.stock.balance = (ctx.S.stock.balance || 0) + (cmd.amount || 0);
             changed = true;
+          } else if (cmd.type === "wipe_account") {
+            if (ctx.extension_settings && ctx.extension_settings[extensionName]) {
+              ctx.extension_settings[extensionName][NS] = null;
+            }
+            if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+            alert("\u{1F480} T\xC0I KHO\u1EA2N C\u1EE6A B\u1EA0N \u0110\xC3 B\u1ECA KH\xD3A DO PH\xC1T HI\u1EC6N GIAN L\u1EACN.\nH\u1EC7 th\u1ED1ng s\u1EBD t\u1EF1 \u0111\u1ED9ng kh\u1EDFi \u0111\u1ED9ng l\u1EA1i v\xE0 x\xF3a to\xE0n b\u1ED9 d\u1EEF li\u1EC7u.");
+            deleteDoc(doc(db, "game_metrics", ctx.S.playerId)).finally(() => {
+              window.location.reload();
+            });
+            return;
           }
           if (cmd.message) {
             try {
