@@ -69,6 +69,61 @@ function isSoft(hand) {
     return aces > 0 && total <= 21;
 }
 
+// --- SMART DEALER AI ---
+function calcSmartProfit(dealerTotal, playerHandsData) {
+    let profit = 0;
+    for (const h of playerHandsData) {
+        if (h.surrendered) continue;
+        if (h.isBJ) {
+            // Dealer doesn't have a natural BJ if they are hitting, so they always lose to player's natural BJ.
+            profit -= h.bet * 1.2;
+            continue;
+        }
+        if (h.total > 21) continue; // Player bust -> dealer already secured money (no action needed)
+        if (dealerTotal > 21) { profit -= h.bet; continue; } // Dealer bust -> pays all non-bust players
+        if (dealerTotal > h.total) { profit += h.bet; continue; } // Dealer wins hand
+        if (dealerTotal < h.total) { profit -= h.bet; continue; } // Dealer loses hand
+        // Equal → tie, no profit change
+    }
+    return profit;
+}
+
+function shouldSmartDealerHit(dealerHand, playerHandsData, shoe, shoeIdx) {
+    const dTotal = handTotal(dealerHand);
+    
+    // Hard stop: Never hit on 21, never hit on nothing to gain
+    if (dTotal >= 21) return false;
+    
+    const standProfit = calcSmartProfit(dTotal, playerHandsData);
+    
+    // TRULY SMART AI: Exact Card Counting
+    // Count exact frequencies of remaining cards in the shoe
+    const counts = { '2':0, '3':0, '4':0, '5':0, '6':0, '7':0, '8':0, '9':0, '10':0, 'J':0, 'Q':0, 'K':0, 'A':0 };
+    let remaining = 0;
+    for (let i = shoeIdx; i < shoe.length; i++) {
+        counts[shoe[i].rank]++;
+        remaining++;
+    }
+    
+    let hitEV = 0;
+    for (const [rank, count] of Object.entries(counts)) {
+        if (count === 0) continue;
+        const prob = count / remaining;
+        // Deep-copy the hand so simulation doesn't mutate original
+        const simHand = dealerHand.map(c => ({ ...c }));
+        simHand.push({ rank, suit: '♠' }); // suit doesn't affect value
+        hitEV += calcSmartProfit(handTotal(simHand), playerHandsData) * prob;
+    }
+    
+    // HIT if expected value of hitting exceeds standing; use strict threshold to prefer standing on ties
+    if (hitEV > standProfit + 0.001) return true;
+    if (standProfit > hitEV + 0.001) return false;
+    
+    // Tiebreaker: fall back to casino standard rule (must hit soft/hard < 17)
+    if (dTotal < 17 || (isSoft(dealerHand) && dTotal === 17)) return true;
+    return false;
+}
+
 function buildShoe(numDecks, seed) {
     const cards = [];
     for (let d = 0; d < numDecks; d++) {
@@ -115,35 +170,6 @@ function bjSmartRig(shoe, idx, p1, p2, metric) {
     }
 }
 
-// "Dealer Peek" rig — kích hoạt ngầm khi người chơi thắng liên tiếp >= 3 ván.
-// Bí mật hoán đổi lá bài úp của dealer sang lá giúp dealer đứng mạnh (17–21).
-function bjDealerPeekRig(shoe, shoeIdx, winStreak) {
-    if (winStreak < 4) return;
-    let chance = 0;
-    if (winStreak >= 7) chance = 0.25;
-    else if (winStreak >= 5) chance = 0.15;
-    else chance = 0.05; // streak 4
-    if (Math.random() >= chance) return;
-
-    const dealerVisPos = shoeIdx + 1; // lá ngửa của dealer
-    const dealerHidPos = shoeIdx + 3; // lá úp của dealer
-    if (dealerHidPos >= shoe.length) return;
-
-    const visVal = cardValue(shoe[dealerVisPos].rank);
-    // Tìm lá trong phần shoe chưa dùng tạo tổng điểm dealer 17–21
-    for (let i = shoeIdx + 4; i < Math.min(shoe.length, shoeIdx + 80); i++) {
-        const cand = shoe[i];
-        let hidVal = cardValue(cand.rank);
-        let total = visVal + hidVal;
-        if (cand.rank === 'A' && total > 21) total -= 10;
-        if (total >= 17 && total <= 21) {
-            const tmp = shoe[dealerHidPos];
-            shoe[dealerHidPos] = shoe[i];
-            shoe[i] = tmp;
-            return;
-        }
-    }
-}
 
 function isBlackjack(hand) {
     if (hand.length !== 2) return false;
@@ -187,7 +213,6 @@ export function openBlackjackSolo() {
         bets: [0],
         insuranceBet: 0,
         splitAceIdxs: new Set(),
-        winStreak: 0,
         settings: { minBet: 10, maxBet: 0, numDecks: 6 },
     };
     soloState.shoe = buildShoe(soloState.settings.numDecks, Date.now() & 0xffffffff);
@@ -320,7 +345,6 @@ function renderSoloActions() {
         const canSurrender = hand.length === 2 && s.activeHandIdx === 0 && s.playerHands.length === 1;
 
         if (total > 21) {
-            setTimeout(() => soloNextHand(), 700);
             actEl.innerHTML = `<div class="bj-msg-sm">💀 Bust! Tự động chuyển tay...</div>`;
             return;
         }
@@ -367,7 +391,6 @@ function soloStartRound() {
     s.bets = [want]; s.insuranceBet = 0; s.playerHands = [[]]; s.activeHandIdx = 0; s.dealerHand = []; s.splitAceIdxs = new Set();
 
     bjSmartRig(s.shoe, s.shoeIdx, s.shoeIdx + 1, s.shoeIdx + 3, ctx.S.coins || 0);
-    bjDealerPeekRig(s.shoe, s.shoeIdx, s.winStreak || 0);
 
     s.playerHands[0].push(soloDrawCard());
     s.dealerHand.push(soloDrawCard());
@@ -506,9 +529,6 @@ function soloSurrender() {
     if (hand.surrendered || hand.stood) return;
     hand.surrendered = true;
     hand.stood = true;
-    const refund = Math.floor(s.bets[0] / 2);
-    ctx.S.coins = (ctx.S.coins || 0) + refund;
-    save(); renderStatus();
     soloNextHand();
 }
 
@@ -529,13 +549,18 @@ function soloRunDealer() {
     s.dealerHand[1].justRevealed = true;
     s.phase = 'dealer';
     soloRender();
-    const allBust = s.playerHands.every(h => handTotal(h) > 21);
-    if (allBust) { s.phase = 'done'; soloResolveAll(); soloRender(); return; }
+    const allBustOrSurrender = s.playerHands.every(h => handTotal(h) > 21 || h.surrendered);
+    if (allBustOrSurrender) { s.phase = 'done'; soloResolveAll(); soloRender(); return; }
     let step = 0;
     const iv = setInterval(() => {
-        const total = handTotal(s.dealerHand);
-        const soft = isSoft(s.dealerHand);
-        if (total < 17 || (soft && total === 17)) {
+        const activeHands = s.playerHands.map((h, i) => ({
+            bet: s.bets[i],
+            total: handTotal(h),
+            surrendered: h.surrendered,
+            isBJ: isBlackjack(h) && s.playerHands.length === 1
+        }));
+        
+        if (shouldSmartDealerHit(s.dealerHand, activeHands, s.shoe, s.shoeIdx)) {
             s.dealerHand.push(soloDrawCard());
             soloRender();
         } else {
@@ -560,6 +585,7 @@ function soloResolveAll() {
         const pBJ = isBlackjack(hand) && isOnly;
         const bet = s.bets[i];
         const lbl = isOnly ? '' : `Tay ${i + 1}: `;
+        if (hand.surrendered) { ctx.S.coins = (ctx.S.coins || 0) + Math.floor(bet * 0.2); results.push(`${lbl}🏳️ Đầu hàng (-${Math.ceil(bet * 0.8).toLocaleString()}G)`); continue; }
         if (pTotal > 21) { results.push(`${lbl}💀 Bust (mất ${bet.toLocaleString()}G)`); continue; }
         if (pBJ && dBJ) { ctx.S.coins = (ctx.S.coins || 0) + bet; results.push(`${lbl}🤝 Hoà BJ`); continue; }
         if (pBJ) { const p = bet + Math.floor(bet * 1.2); ctx.S.coins = (ctx.S.coins || 0) + p; results.push(`${lbl}♠ BLACKJACK +${Math.floor(bet*1.2).toLocaleString()}G`); continue; }
@@ -570,12 +596,6 @@ function soloResolveAll() {
     }
     save(); renderStatus();
     showMsg(results.join('\n'));
-    // Cập nhật chuỗi thắng để kích hoạt bjDealerPeekRig ở ván sau
-    if ((ctx.S.coins || 0) > coinsBeforeResolve) {
-        s.winStreak = (s.winStreak || 0) + 1;
-    } else {
-        s.winStreak = 0;
-    }
 }
 
 function showMsg(text) {
@@ -1296,8 +1316,22 @@ function bjHostRunDealer() {
     bjBroadcast(revMsg); bjHandleMsg(bjMyId, revMsg);
     const step = () => {
         if (allBust) { bjHostEndRound(); return; }
-        const tot = handTotal(gs.dealerHand);
-        if (tot < 17 || (isSoft(gs.dealerHand) && tot === 17)) {
+        
+        const activeHands = [];
+        for (const pid of gs.turnOrder) {
+            const h = gs.hands[pid];
+            if (!h) continue;
+            for (let i = 0; i < h.cards.length; i++) {
+                activeHands.push({
+                    bet: h.bet[i],
+                    total: handTotal(h.cards[i]),
+                    surrendered: h.surrendered && h.cards.length === 1,
+                    isBJ: isBlackjack(h.cards[i]) && h.cards.length === 1
+                });
+            }
+        }
+        
+        if (shouldSmartDealerHit(gs.dealerHand, activeHands, gs.shoe, gs.shoeIdx)) {
             gs.dealerHand.push({ ...gs.shoe[gs.shoeIdx++] });
             const hitMsg = { type: 'ACTION', actionType: 'DEALER_HIT', dealerHand: gs.dealerHand };
             bjBroadcast(hitMsg); bjHandleMsg(bjMyId, hitMsg);
@@ -1329,7 +1363,7 @@ function bjHostEndRound() {
                 const pTotal = handTotal(cards);
                 const isOnly = h.cards.length === 1;
                 const pBJ = isBlackjack(cards) && isOnly;
-                if (h.surrendered && isOnly) { p += Math.floor(bet / 2); continue; }
+                if (h.surrendered && isOnly) { p += Math.floor(bet * 0.2); continue; }
                 if (pTotal > 21) continue;
                 if (pBJ && dBJ) { p += bet; continue; }
                 if (pBJ) { p += bet + Math.floor(bet * 1.2); continue; }

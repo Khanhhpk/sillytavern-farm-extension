@@ -52460,6 +52460,53 @@ function isSoft(hand) {
   }
   return aces > 0 && total <= 21;
 }
+function calcSmartProfit(dealerTotal, playerHandsData) {
+  let profit = 0;
+  for (const h of playerHandsData) {
+    if (h.surrendered) continue;
+    if (h.isBJ) {
+      profit -= h.bet * 1.2;
+      continue;
+    }
+    if (h.total > 21) continue;
+    if (dealerTotal > 21) {
+      profit -= h.bet;
+      continue;
+    }
+    if (dealerTotal > h.total) {
+      profit += h.bet;
+      continue;
+    }
+    if (dealerTotal < h.total) {
+      profit -= h.bet;
+      continue;
+    }
+  }
+  return profit;
+}
+function shouldSmartDealerHit(dealerHand, playerHandsData, shoe, shoeIdx) {
+  const dTotal = handTotal(dealerHand);
+  if (dTotal >= 21) return false;
+  const standProfit = calcSmartProfit(dTotal, playerHandsData);
+  const counts = { "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "J": 0, "Q": 0, "K": 0, "A": 0 };
+  let remaining = 0;
+  for (let i2 = shoeIdx; i2 < shoe.length; i2++) {
+    counts[shoe[i2].rank]++;
+    remaining++;
+  }
+  let hitEV = 0;
+  for (const [rank, count2] of Object.entries(counts)) {
+    if (count2 === 0) continue;
+    const prob = count2 / remaining;
+    const simHand = dealerHand.map((c2) => ({ ...c2 }));
+    simHand.push({ rank, suit: "\u2660" });
+    hitEV += calcSmartProfit(handTotal(simHand), playerHandsData) * prob;
+  }
+  if (hitEV > standProfit + 1e-3) return true;
+  if (standProfit > hitEV + 1e-3) return false;
+  if (dTotal < 17 || isSoft(dealerHand) && dTotal === 17) return true;
+  return false;
+}
 function buildShoe(numDecks, seed) {
   const cards = [];
   for (let d = 0; d < numDecks; d++) {
@@ -52507,30 +52554,6 @@ function bjSmartRig(shoe, idx, p1, p2, metric) {
     shoe[t2] = tmp;
   }
 }
-function bjDealerPeekRig(shoe, shoeIdx, winStreak) {
-  if (winStreak < 4) return;
-  let chance = 0;
-  if (winStreak >= 7) chance = 0.25;
-  else if (winStreak >= 5) chance = 0.15;
-  else chance = 0.05;
-  if (Math.random() >= chance) return;
-  const dealerVisPos = shoeIdx + 1;
-  const dealerHidPos = shoeIdx + 3;
-  if (dealerHidPos >= shoe.length) return;
-  const visVal = cardValue(shoe[dealerVisPos].rank);
-  for (let i2 = shoeIdx + 4; i2 < Math.min(shoe.length, shoeIdx + 80); i2++) {
-    const cand = shoe[i2];
-    let hidVal = cardValue(cand.rank);
-    let total = visVal + hidVal;
-    if (cand.rank === "A" && total > 21) total -= 10;
-    if (total >= 17 && total <= 21) {
-      const tmp = shoe[dealerHidPos];
-      shoe[dealerHidPos] = shoe[i2];
-      shoe[i2] = tmp;
-      return;
-    }
-  }
-}
 function isBlackjack(hand) {
   if (hand.length !== 2) return false;
   return handTotal(hand) === 21;
@@ -52569,7 +52592,6 @@ function openBlackjackSolo() {
     bets: [0],
     insuranceBet: 0,
     splitAceIdxs: /* @__PURE__ */ new Set(),
-    winStreak: 0,
     settings: { minBet: 10, maxBet: 0, numDecks: 6 }
   };
   soloState.shoe = buildShoe(soloState.settings.numDecks, Date.now() & 4294967295);
@@ -52694,7 +52716,6 @@ function renderSoloActions() {
     const canSplit = hand.length === 2 && hand[0].rank === hand[1].rank && coins >= bet && s2.playerHands.length < 4;
     const canSurrender = hand.length === 2 && s2.activeHandIdx === 0 && s2.playerHands.length === 1;
     if (total > 21) {
-      setTimeout(() => soloNextHand(), 700);
       actEl.innerHTML = `<div class="bj-msg-sm">\u{1F480} Bust! T\u1EF1 \u0111\u1ED9ng chuy\u1EC3n tay...</div>`;
       return;
     }
@@ -52740,7 +52761,6 @@ function soloStartRound() {
   s2.dealerHand = [];
   s2.splitAceIdxs = /* @__PURE__ */ new Set();
   bjSmartRig(s2.shoe, s2.shoeIdx, s2.shoeIdx + 1, s2.shoeIdx + 3, ctx.S.coins || 0);
-  bjDealerPeekRig(s2.shoe, s2.shoeIdx, s2.winStreak || 0);
   s2.playerHands[0].push(soloDrawCard());
   s2.dealerHand.push(soloDrawCard());
   s2.playerHands[0].push(soloDrawCard());
@@ -52889,10 +52909,6 @@ function soloSurrender() {
   if (hand.surrendered || hand.stood) return;
   hand.surrendered = true;
   hand.stood = true;
-  const refund = Math.floor(s2.bets[0] / 2);
-  ctx.S.coins = (ctx.S.coins || 0) + refund;
-  save();
-  renderStatus();
   soloNextHand();
 }
 function soloNextHand() {
@@ -52913,8 +52929,8 @@ function soloRunDealer() {
   s2.dealerHand[1].justRevealed = true;
   s2.phase = "dealer";
   soloRender();
-  const allBust = s2.playerHands.every((h) => handTotal(h) > 21);
-  if (allBust) {
+  const allBustOrSurrender = s2.playerHands.every((h) => handTotal(h) > 21 || h.surrendered);
+  if (allBustOrSurrender) {
     s2.phase = "done";
     soloResolveAll();
     soloRender();
@@ -52922,9 +52938,13 @@ function soloRunDealer() {
   }
   let step = 0;
   const iv = setInterval(() => {
-    const total = handTotal(s2.dealerHand);
-    const soft = isSoft(s2.dealerHand);
-    if (total < 17 || soft && total === 17) {
+    const activeHands = s2.playerHands.map((h, i2) => ({
+      bet: s2.bets[i2],
+      total: handTotal(h),
+      surrendered: h.surrendered,
+      isBJ: isBlackjack(h) && s2.playerHands.length === 1
+    }));
+    if (shouldSmartDealerHit(s2.dealerHand, activeHands, s2.shoe, s2.shoeIdx)) {
       s2.dealerHand.push(soloDrawCard());
       soloRender();
     } else {
@@ -52950,6 +52970,11 @@ function soloResolveAll() {
     const pBJ = isBlackjack(hand) && isOnly;
     const bet = s2.bets[i2];
     const lbl = isOnly ? "" : `Tay ${i2 + 1}: `;
+    if (hand.surrendered) {
+      ctx.S.coins = (ctx.S.coins || 0) + Math.floor(bet * 0.2);
+      results.push(`${lbl}\u{1F3F3}\uFE0F \u0110\u1EA7u h\xE0ng (-${Math.ceil(bet * 0.8).toLocaleString()}G)`);
+      continue;
+    }
     if (pTotal > 21) {
       results.push(`${lbl}\u{1F480} Bust (m\u1EA5t ${bet.toLocaleString()}G)`);
       continue;
@@ -52984,11 +53009,6 @@ function soloResolveAll() {
   save();
   renderStatus();
   showMsg(results.join("\n"));
-  if ((ctx.S.coins || 0) > coinsBeforeResolve) {
-    s2.winStreak = (s2.winStreak || 0) + 1;
-  } else {
-    s2.winStreak = 0;
-  }
 }
 function showMsg(text) {
   const el = $id("bj-message");
@@ -53776,8 +53796,20 @@ function bjHostRunDealer() {
       bjHostEndRound();
       return;
     }
-    const tot = handTotal(gs.dealerHand);
-    if (tot < 17 || isSoft(gs.dealerHand) && tot === 17) {
+    const activeHands = [];
+    for (const pid of gs.turnOrder) {
+      const h = gs.hands[pid];
+      if (!h) continue;
+      for (let i2 = 0; i2 < h.cards.length; i2++) {
+        activeHands.push({
+          bet: h.bet[i2],
+          total: handTotal(h.cards[i2]),
+          surrendered: h.surrendered && h.cards.length === 1,
+          isBJ: isBlackjack(h.cards[i2]) && h.cards.length === 1
+        });
+      }
+    }
+    if (shouldSmartDealerHit(gs.dealerHand, activeHands, gs.shoe, gs.shoeIdx)) {
       gs.dealerHand.push({ ...gs.shoe[gs.shoeIdx++] });
       const hitMsg = { type: "ACTION", actionType: "DEALER_HIT", dealerHand: gs.dealerHand };
       bjBroadcast(hitMsg);
@@ -53811,7 +53843,7 @@ function bjHostEndRound() {
         const isOnly = h.cards.length === 1;
         const pBJ = isBlackjack(cards) && isOnly;
         if (h.surrendered && isOnly) {
-          p2 += Math.floor(bet / 2);
+          p2 += Math.floor(bet * 0.2);
           continue;
         }
         if (pTotal > 21) continue;
