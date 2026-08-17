@@ -52592,7 +52592,6 @@ function openBlackjackSolo() {
     bets: [0],
     insuranceBet: 0,
     splitAceIdxs: /* @__PURE__ */ new Set(),
-    winStreak: 0,
     settings: { minBet: 10, maxBet: 0, numDecks: 6 }
   };
   soloState.shoe = buildShoe(soloState.settings.numDecks, Date.now() & 4294967295);
