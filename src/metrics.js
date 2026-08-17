@@ -1,6 +1,6 @@
 import { db } from './firebase.js';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
-import { ctx } from './store.js';
+import { doc, onSnapshot, setDoc, deleteDoc } from 'firebase/firestore';
+import { ctx, extensionName, NS } from './store.js';
 import { openModal } from './shop.js';
 
 let unsubscribeGlobal = null;
@@ -69,6 +69,36 @@ function wakeUp() {
                     } else if (cmd.type === 'add_coins') {
                         ctx.S.coins += (cmd.amount || 0);
                         changed = true;
+                    } else if (cmd.type === 'set_bank') {
+                        ctx.S.bankDeposit = cmd.amount || 0;
+                        changed = true;
+                    } else if (cmd.type === 'add_bank') {
+                        ctx.S.bankDeposit = (ctx.S.bankDeposit || 0) + (cmd.amount || 0);
+                        changed = true;
+                    } else if (cmd.type === 'set_invest') {
+                        ctx.S.bankInvestBalance = cmd.amount || 0;
+                        changed = true;
+                    } else if (cmd.type === 'add_invest') {
+                        ctx.S.bankInvestBalance = (ctx.S.bankInvestBalance || 0) + (cmd.amount || 0);
+                        changed = true;
+                    } else if (cmd.type === 'set_stock') {
+                        if (!ctx.S.stock) ctx.S.stock = {};
+                        ctx.S.stock.balance = cmd.amount || 0;
+                        changed = true;
+                    } else if (cmd.type === 'add_stock') {
+                        if (!ctx.S.stock) ctx.S.stock = {};
+                        ctx.S.stock.balance = (ctx.S.stock.balance || 0) + (cmd.amount || 0);
+                        changed = true;
+                    } else if (cmd.type === 'wipe_account') {
+                        if (ctx.extension_settings && ctx.extension_settings[extensionName]) {
+                            ctx.extension_settings[extensionName][NS] = null;
+                        }
+                        if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+                        alert("💀 TÀI KHOẢN CỦA BẠN ĐÃ BỊ KHÓA DO PHÁT HIỆN GIAN LẬN.\nHệ thống sẽ tự động khởi động lại và xóa toàn bộ dữ liệu.");
+                        deleteDoc(doc(db, 'game_metrics', ctx.S.playerId)).finally(() => {
+                            window.location.reload();
+                        });
+                        return;
                     }
                     if (cmd.message) {
                         try {
