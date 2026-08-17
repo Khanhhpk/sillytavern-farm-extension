@@ -32,7 +32,7 @@ esbuild.build({
         entryPoints: ['src/render_metrics.js'],
         bundle: true,
         outfile: 'metrics_bundle.js',
-        format: 'esm',
+        format: 'iife',
         define: define,
     }).then(() => {
         console.log('Metrics bundle completed!');
