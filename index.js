@@ -51659,6 +51659,7 @@ var init_firebase = __esm({
     try {
       if (firebaseConfig.apiKey) {
         app = initializeApp(firebaseConfig);
+        setLogLevel2("silent");
         db = initializeFirestore(app, {
           experimentalForceLongPolling: true
         });

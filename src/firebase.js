@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { initializeFirestore } from "firebase/firestore";
+import { initializeFirestore, setLogLevel } from "firebase/firestore";
 
 // Parse obfuscated env vars from esbuild
 function dec(base64Str) {
@@ -24,8 +24,9 @@ let app = null;
 export let db = null;
 
 try {
-    if (firebaseConfig.apiKey) {
+        if (firebaseConfig.apiKey) {
         app = initializeApp(firebaseConfig);
+        setLogLevel('silent'); // Suppress Firebase spam if connection errors
         db = initializeFirestore(app, {
             experimentalForceLongPolling: true
         });
