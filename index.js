@@ -57581,7 +57581,8 @@ var init_stock = __esm({
         // Trend noise amplitude
         trendNoise: 0.25,
         // Mean-reversion gravity: kicks in when price strays far from startPrice
-        gravityZones: [{ above: 3, pull: -0.2 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.12 }],
+        // Blue chip: thêm vùng 70% để neo giá gần startPrice (đặc tính ổn định)
+        gravityZones: [{ above: 3, pull: -0.2 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.12 }, { below: 0.7, pull: 0.06 }],
         // Hard cap on single candle % swing
         swingCap: 0.08
       },
@@ -57592,7 +57593,8 @@ var init_stock = __esm({
         color: "#22c55e",
         vol: 0.1,
         drift: 1e-3,
-        trendDecay: 0.78,
+        trendDecay: 0.72,
+        // Giảm từ 0.78 → momentum giữ lâu hơn → sóng lớn hơn, phân biệt rõ với SIL
         trendNoise: 0.35,
         gravityZones: [{ above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.2, pull: 0.12 }],
         swingCap: 0.18
