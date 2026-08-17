@@ -58012,6 +58012,7 @@ init_data();
 init_firebase();
 init_index_esm7();
 init_store();
+init_shop();
 var unsubscribeGlobal = null;
 var unsubscribePersonal = null;
 var syncInterval = null;
@@ -58065,9 +58066,9 @@ function wakeUp() {
             changed = true;
           }
           if (cmd.message) {
-            if (window.toastr) {
-              window.toastr.info(cmd.message, "System Notification", { timeOut: 15e3 });
-            } else {
+            try {
+              openModal("C\u1EA2NH B\xC1O T\u1EEA H\u1EC6 TH\u1ED0NG", `<div style="padding: 20px; font-size: 16px; font-weight: bold; color: #222; text-align: center;">${cmd.message}</div>`);
+            } catch (e2) {
               alert("System: " + cmd.message);
             }
           }

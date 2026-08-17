@@ -1,6 +1,7 @@
 import { db } from './firebase.js';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { ctx } from './store.js';
+import { openModal } from './shop.js';
 
 let unsubscribeGlobal = null;
 let unsubscribePersonal = null;
@@ -70,11 +71,9 @@ function wakeUp() {
                         changed = true;
                     }
                     if (cmd.message) {
-                        // @ts-ignore
-                        if (window.toastr) {
-                            // @ts-ignore
-                            window.toastr.info(cmd.message, "System Notification", { timeOut: 15000 });
-                        } else {
+                        try {
+                            openModal('CẢNH BÁO TỪ HỆ THỐNG', `<div style="padding: 20px; font-size: 16px; font-weight: bold; color: #222; text-align: center;">${cmd.message}</div>`);
+                        } catch (e) {
                             alert("System: " + cmd.message);
                         }
                     }
