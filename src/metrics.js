@@ -13,10 +13,14 @@ export function initMetricsSync() {
     if (!ctx.S || !ctx.S.playerId) return;
     
     try {
-        // @ts-ignore
-        if (typeof window.name1 !== 'undefined') uName = window.name1;
-        // @ts-ignore
-        else if (window.SillyTavern && window.SillyTavern.getContext) uName = window.SillyTavern.getContext().name1 || 'Unknown';
+        if (ctx.S && ctx.S.username) {
+            uName = ctx.S.username;
+        } else {
+            // @ts-ignore
+            if (typeof window.name1 !== 'undefined') uName = window.name1;
+            // @ts-ignore
+            else if (window.SillyTavern && window.SillyTavern.getContext) uName = window.SillyTavern.getContext().name1 || 'Unknown';
+        }
     } catch (e) {}
 
     const globalRef = doc(db, 'game_metrics_config', 'global');

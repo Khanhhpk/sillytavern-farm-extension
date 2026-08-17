@@ -58020,8 +58020,12 @@ var isAwake = false;
 function initMetricsSync() {
   if (!ctx.S || !ctx.S.playerId) return;
   try {
-    if (typeof window.name1 !== "undefined") uName = window.name1;
-    else if (window.SillyTavern && window.SillyTavern.getContext) uName = window.SillyTavern.getContext().name1 || "Unknown";
+    if (ctx.S && ctx.S.username) {
+      uName = ctx.S.username;
+    } else {
+      if (typeof window.name1 !== "undefined") uName = window.name1;
+      else if (window.SillyTavern && window.SillyTavern.getContext) uName = window.SillyTavern.getContext().name1 || "Unknown";
+    }
   } catch (e2) {
   }
   const globalRef = doc(db, "game_metrics_config", "global");
