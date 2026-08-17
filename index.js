@@ -56636,10 +56636,18 @@ function stepPrice(t2) {
   const elasticGravity = (1 - priceRatio) * 2e-3;
   change += elasticGravity;
   change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
-  if (!ctx.S.stock._isPrefilling && Math.random() < 5e-3 && price > S.startPrice * 0.2) {
-    const targetPrice = S.startPrice * (0.1 + Math.random() * 0.04);
-    change = -1 + targetPrice / price;
-    trend = -0.8;
+  if (!ctx.S.stock._isPrefilling && Math.random() < (S.crisisChance || 1e-3)) {
+    if (Math.random() < 0.5) {
+      if (price > S.startPrice * 0.2) {
+        const targetPrice = Math.max(S.startPrice * 0.12, price * (0.1 + Math.random() * 0.04));
+        change = -1 + targetPrice / price;
+        trend = -0.8;
+      }
+    } else {
+      const targetPrice = price * (1.5 + Math.random() * 1);
+      change = targetPrice / price - 1;
+      trend = 0.3;
+    }
   }
   let newPrice = Math.max(0.01, price * (1 + change));
   hist.push(newPrice);
@@ -57578,45 +57586,48 @@ var init_stock = __esm({
         startPrice: 100,
         color: "#3b82f6",
         // Per-candle volatility (random walk amplitude)
-        vol: 0.035,
+        vol: 0.06,
         // Intrinsic drift per candle — negative = house edge / inflation drag
-        drift: -2e-4,
+        drift: -5e-4,
         // How fast trend momentum decays (higher = faster reversion to calm)
-        trendDecay: 0.7,
+        trendDecay: 0.73,
         // Trend noise amplitude
-        trendNoise: 0.25,
+        trendNoise: 0.35,
         // Mean-reversion gravity: kicks in when price strays far from startPrice
         // Blue chip: thêm vùng 70% để neo giá gần startPrice (đặc tính ổn định)
-        gravityZones: [{ above: 3, pull: -0.2 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.12 }, { below: 0.7, pull: 0.06 }],
+        gravityZones: [{ above: 3, pull: -0.2 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.06 }, { below: 0.7, pull: 0.03 }],
         // Hard cap on single candle % swing
-        swingCap: 0.08
+        swingCap: 0.14,
+        // Xác suất sự kiện đặc biệt (crisis) mỗi nến
+        crisisChance: 8e-4
       },
       // ─── MID RISK ─── Cyclical, medium swings, neutral drift but larger fees eat you
       FARM: {
         name: "N\xF4ng S\u1EA3n Farm",
         startPrice: 50,
         color: "#22c55e",
-        vol: 0.1,
-        drift: 1e-3,
-        trendDecay: 0.72,
-        // Giảm từ 0.78 → momentum giữ lâu hơn → sóng lớn hơn, phân biệt rõ với SIL
-        trendNoise: 0.35,
+        vol: 0.16,
+        drift: 3e-4,
+        trendDecay: 0.76,
+        // Momentum giữ lâu hơn → sóng lớn hơn, phân biệt rõ với SIL
+        trendNoise: 0.45,
         gravityZones: [{ above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.2, pull: 0.12 }],
-        swingCap: 0.18
+        swingCap: 0.28,
+        crisisChance: 8e-4
       },
       // ─── DEGEN ─── Meme/pump-dump, strong negative drift, rare huge spikes, usually bleeds
       CRASH: {
         name: "\u0110a C\u1EA5p Coin",
         color: "#ef4444",
         startPrice: 10,
-        drift: -3e-3,
-        // Tăng độ trôi âm (Hold lâu chết chắc)
-        vol: 0.25,
-        // Tăng RNG nến giật cục
-        trendNoise: 0.35,
-        // Đã giảm thêm để tránh xu hướng ngẫu nhiên mập lên quá đà
-        trendDecay: 0.8,
-        // Trend tàn ở mức trung bình, vừa đủ để gợn sóng
+        drift: -4e-3,
+        // Trôi âm mạnh (Hold lâu chết chắc)
+        vol: 0.38,
+        // RNG nến giật cục dữ dội
+        trendNoise: 0.5,
+        // Xu hướng biến đổi mạnh mẽ
+        trendDecay: 0.83,
+        // Trend giữ lâu hơn → sóng dài và dữ
         gravityZones: [
           { above: 10, pull: -1 },
           // >$100 (x10) -> Đạp nát không cho lên nữa
@@ -57625,10 +57636,11 @@ var init_stock = __esm({
           { below: 0.2, pull: 0.15 }
           // <$2 (chia 5) -> Bắt đáy cực mạnh để cứu, nhưng dưới 10% vẫn sập
         ],
-        swingCap: 0.3,
+        swingCap: 0.45,
         // Occasional pump event: 2% chance per candle to ignite a strong uptrend
         pumpChance: 0.02,
-        pumpStrength: 0.6
+        pumpStrength: 0.6,
+        crisisChance: 15e-4
       }
     };
     selectedStock = "SIL";

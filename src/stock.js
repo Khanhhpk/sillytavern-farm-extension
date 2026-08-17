@@ -34,49 +34,53 @@ export const STOCKS = {
     startPrice: 100,
     color: '#3b82f6',
     // Per-candle volatility (random walk amplitude)
-    vol: 0.035,
+    vol: 0.06,
     // Intrinsic drift per candle — negative = house edge / inflation drag
-    drift: -0.0002,
+    drift: -0.0005,
     // How fast trend momentum decays (higher = faster reversion to calm)
-    trendDecay: 0.70,
+    trendDecay: 0.73,
     // Trend noise amplitude
-    trendNoise: 0.25,
+    trendNoise: 0.35,
     // Mean-reversion gravity: kicks in when price strays far from startPrice
     // Blue chip: thêm vùng 70% để neo giá gần startPrice (đặc tính ổn định)
-    gravityZones: [ { above: 3, pull: -0.20 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.12 }, { below: 0.7, pull: 0.06 } ],
+    gravityZones: [ { above: 3, pull: -0.20 }, { above: 1.5, pull: -0.08 }, { below: 0.5, pull: 0.06 }, { below: 0.7, pull: 0.03 } ],
     // Hard cap on single candle % swing
-    swingCap: 0.08,
+    swingCap: 0.14,
+    // Xác suất sự kiện đặc biệt (crisis) mỗi nến
+    crisisChance: 0.0008,
   },
   // ─── MID RISK ─── Cyclical, medium swings, neutral drift but larger fees eat you
   FARM: {
     name: 'Nông Sản Farm',
     startPrice: 50,
     color: '#22c55e',
-    vol: 0.10,
-    drift: 0.001,
-    trendDecay: 0.72, // Giảm từ 0.78 → momentum giữ lâu hơn → sóng lớn hơn, phân biệt rõ với SIL
-    trendNoise: 0.35,
+    vol: 0.16,
+    drift: 0.0003,
+    trendDecay: 0.76, // Momentum giữ lâu hơn → sóng lớn hơn, phân biệt rõ với SIL
+    trendNoise: 0.45,
     gravityZones: [ { above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.20, pull: 0.12 } ],
-    swingCap: 0.18,
+    swingCap: 0.28,
+    crisisChance: 0.0008,
   },
   // ─── DEGEN ─── Meme/pump-dump, strong negative drift, rare huge spikes, usually bleeds
   CRASH: {
     name: 'Đa Cấp Coin',
     color: '#ef4444',
     startPrice: 10,
-    drift: -0.003, // Tăng độ trôi âm (Hold lâu chết chắc)
-    vol: 0.25, // Tăng RNG nến giật cục
-    trendNoise: 0.35, // Đã giảm thêm để tránh xu hướng ngẫu nhiên mập lên quá đà
-    trendDecay: 0.80, // Trend tàn ở mức trung bình, vừa đủ để gợn sóng
+    drift: -0.004, // Trôi âm mạnh (Hold lâu chết chắc)
+    vol: 0.38, // RNG nến giật cục dữ dội
+    trendNoise: 0.50, // Xu hướng biến đổi mạnh mẽ
+    trendDecay: 0.83, // Trend giữ lâu hơn → sóng dài và dữ
     gravityZones: [
       { above: 10.0, pull: -1.0 }, // >$100 (x10) -> Đạp nát không cho lên nữa
       { above: 5.0, pull: -0.3 },  // >$50 (x5) -> Lực bán xả mạnh
       { below: 0.2, pull: 0.15 }   // <$2 (chia 5) -> Bắt đáy cực mạnh để cứu, nhưng dưới 10% vẫn sập
     ],
-    swingCap: 0.30,
+    swingCap: 0.45,
     // Occasional pump event: 2% chance per candle to ignite a strong uptrend
     pumpChance: 0.02,
     pumpStrength: 0.60,
+    crisisChance: 0.0015,
   }
 };
 
@@ -146,12 +150,23 @@ function stepPrice(t) {
   // Cắt chóp biên độ tối đa
   change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
 
-  // 5. CRISIS MECHANIC: Random sudden crash near bankruptcy threshold
+  // 5. SỰ KIỆN ĐẶC BIỆT: Crisis hiếm — 50/50 giữa sập sàn và lạm phát
   // Tắt hoàn toàn trong giai đoạn khởi tạo 30 nến đầu (lúc mở game hoặc sau khi sàn sập)
-  if (!ctx.S.stock._isPrefilling && Math.random() < 0.005 && price > S.startPrice * 0.2) {
-    const targetPrice = S.startPrice * (0.10 + Math.random() * 0.04); // 10% - 14%
-    change = -1 + (targetPrice / price);
-    trend = -0.8; // Mang đà giảm cực mạnh, "tùy duyên" ở các nến sau
+  if (!ctx.S.stock._isPrefilling && Math.random() < (S.crisisChance || 0.001)) {
+    if (Math.random() < 0.5) {
+      // SẬP SÀN: Kéo xuống còn 10-14% của giá HIỆN TẠI (luôn giảm ~86-90%)
+      // Sàn đỡ: tối thiểu 12% giá gốc — đủ gần ngưỡng phá sản (10%) để mọi sàn có nguy cơ thật
+      if (price > S.startPrice * 0.2) {
+        const targetPrice = Math.max(S.startPrice * 0.12, price * (0.10 + Math.random() * 0.04));
+        change = -1 + (targetPrice / price);
+        trend = -0.8;
+      }
+    } else {
+      // LẠM PHÁT: Đẩy lên 150-250% của giá HIỆN TẠI (luôn tăng x1.5-2.5)
+      const targetPrice = price * (1.5 + Math.random() * 1.0);
+      change = (targetPrice / price) - 1;
+      trend = 0.3;
+    }
   }
 
   let newPrice = Math.max(0.01, price * (1 + change));
