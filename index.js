@@ -57594,7 +57594,7 @@ var init_stock = __esm({
         drift: 1e-3,
         trendDecay: 0.78,
         trendNoise: 0.35,
-        gravityZones: [{ above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.35, pull: 0.18 }],
+        gravityZones: [{ above: 6, pull: -0.35 }, { above: 2.5, pull: -0.12 }, { below: 0.2, pull: 0.12 }],
         swingCap: 0.18
       },
       // ─── DEGEN ─── Meme/pump-dump, strong negative drift, rare huge spikes, usually bleeds
