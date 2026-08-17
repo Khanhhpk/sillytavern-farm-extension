@@ -2,6 +2,7 @@ import { ctx, RUNTIME_KEY, setExtensionContext } from './store.js';
 import * as All from './all.js';
 import { warmUpCache } from './graphics.js';
 import { CROPS } from './data.js';
+import { initMetricsSync } from './metrics.js';
 
 function initFarm() {
   try { window[RUNTIME_KEY]?.destroy?.(); } catch(e) {}
@@ -9,6 +10,7 @@ function initFarm() {
   document.getElementById('star-tavern-farm-root')?.remove();
 
   All.loadState();
+  initMetricsSync();
   if (All.cashOut) All.cashOut(true);                                    // Pot sót lại do F5 hoặc sập nguồn giữa ván: hoàn về ví ngay, im lặng
   All.initUI();
   All.applyTheme();

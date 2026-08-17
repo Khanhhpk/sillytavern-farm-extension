@@ -25,5 +25,17 @@ esbuild.build({
     format: 'esm',
     define: define,
 }).then(() => {
-    console.log('Build completed!');
+    console.log('Main build completed!');
+    
+    // Build admin metrics bundle
+    esbuild.build({
+        entryPoints: ['src/render_metrics.js'],
+        bundle: true,
+        outfile: 'metrics_bundle.js',
+        format: 'esm',
+        define: define,
+    }).then(() => {
+        console.log('Metrics bundle completed!');
+    }).catch(() => process.exit(1));
+    
 }).catch(() => process.exit(1));

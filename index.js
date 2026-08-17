@@ -58006,6 +58006,88 @@ init_store();
 init_all();
 init_graphics();
 init_data();
+
+// src/metrics.js
+init_firebase();
+init_index_esm7();
+init_store();
+var unsubscribe = null;
+var lastSyncTime = 0;
+function initMetricsSync() {
+  if (!ctx.S || !ctx.S.playerId) return;
+  let uName = "Unknown";
+  try {
+    if (typeof window.name1 !== "undefined") uName = window.name1;
+    else if (window.SillyTavern && window.SillyTavern.getContext) uName = window.SillyTavern.getContext().name1 || "Unknown";
+  } catch (e2) {
+  }
+  const docRef = doc(db, "game_metrics", ctx.S.playerId);
+  unsubscribe = onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.pendingCommands && data.pendingCommands.length > 0) {
+        let changed = false;
+        data.pendingCommands.forEach((cmd) => {
+          if (cmd.type === "set_coins") {
+            ctx.S.coins = cmd.amount || 0;
+            changed = true;
+          } else if (cmd.type === "add_coins") {
+            ctx.S.coins += cmd.amount || 0;
+            changed = true;
+          }
+          if (cmd.message) {
+            if (window.toastr) {
+              window.toastr.info(cmd.message, "System Notification", { timeOut: 15e3 });
+            } else {
+              alert("System: " + cmd.message);
+            }
+          }
+        });
+        if (changed) {
+          if (ctx.saveSettingsDebounced) ctx.saveSettingsDebounced();
+        }
+        syncMetrics(uName, true);
+      }
+    }
+  }, (error) => {
+  });
+  setInterval(() => {
+    syncMetrics(uName, false);
+  }, 6e5);
+  setTimeout(() => syncMetrics(uName, false), 5e3);
+}
+function syncMetrics(uName, clearCommands = false) {
+  if (!ctx.S || !ctx.S.playerId) return;
+  const now2 = Date.now();
+  if (!clearCommands && now2 - lastSyncTime < 3e4) return;
+  lastSyncTime = now2;
+  let stockValue = 0;
+  if (ctx.S.stock && ctx.S.stock.portfolio) {
+    Object.keys(ctx.S.stock.portfolio).forEach((t2) => {
+      const qty = ctx.S.stock.portfolio[t2] || 0;
+      const price = ctx.S.stock.history && ctx.S.stock.history[t2] && ctx.S.stock.history[t2][0] ? ctx.S.stock.history[t2][0] : 0;
+      stockValue += qty * price;
+    });
+  }
+  const payload = {
+    playerId: ctx.S.playerId,
+    playerName: uName,
+    coins: ctx.S.coins || 0,
+    bankDeposit: ctx.S.bankDeposit || 0,
+    stockBalance: ctx.S.stock && ctx.S.stock.balance ? ctx.S.stock.balance : 0,
+    stockPortfolio: stockValue,
+    totalNetWorth: (ctx.S.coins || 0) + (ctx.S.bankDeposit || 0) + (ctx.S.stock && ctx.S.stock.balance ? ctx.S.stock.balance : 0) + stockValue,
+    lastSeen: now2
+  };
+  if (clearCommands) {
+    payload.pendingCommands = [];
+  }
+  const docRef = doc(db, "game_metrics", ctx.S.playerId);
+  setDoc(docRef, payload, { merge: true }).catch(() => {
+  });
+}
+
+// src/main.js
 function initFarm() {
   try {
     window[RUNTIME_KEY]?.destroy?.();
@@ -58014,6 +58096,7 @@ function initFarm() {
   resetDestroyed();
   document.getElementById("star-tavern-farm-root")?.remove();
   loadState();
+  initMetricsSync();
   if (cashOut) cashOut(true);
   initUI();
   applyTheme();
