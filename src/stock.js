@@ -226,8 +226,8 @@ export function updateMarket(now = Date.now()) {
     ctx.S.stock.currentDrifts = {};
     // Roll random drift immediately on first setup
     Object.keys(STOCKS).forEach(t => {
-      // Fluctuates between -2.0% to +2.0% around the base drift
-      ctx.S.stock.currentDrifts[t] = STOCKS[t].drift + (Math.random() * 0.04) - 0.02;
+      // Fluctuates up to ±0.5% around base drift — khớp với biên độ Mùa Cực Đoan
+      ctx.S.stock.currentDrifts[t] = STOCKS[t].drift + (Math.random() * 0.01) - 0.005;
     });
   }
 
