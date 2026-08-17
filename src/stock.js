@@ -148,9 +148,9 @@ function stepPrice(t) {
   // 5. CRISIS MECHANIC: Random sudden crash near bankruptcy threshold
   // Có tỉ lệ nhỏ xảy ra khủng hoảng đột ngột, ép giá rơi thẳng xuống sát vạch 10%
   if (Math.random() < 0.005 && price > S.startPrice * 0.2) {
-    const targetPrice = S.startPrice * (0.11 + Math.random() * 0.04); // 11% - 15%
+    const targetPrice = S.startPrice * (0.10 + Math.random() * 0.04); // 10% - 14%
     change = -1 + (targetPrice / price);
-    trend = -0.5; // Mang đà giảm mạnh, "tùy duyên" ở các nến sau
+    trend = -0.8; // Mang đà giảm cực mạnh, "tùy duyên" ở các nến sau
   }
 
   let newPrice = Math.max(0.01, price * (1 + change));
