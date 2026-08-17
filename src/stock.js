@@ -180,11 +180,18 @@ function stepPrice(t) {
       ctx.S.stock.autoOrders = ctx.S.stock.autoOrders.filter(o => o.ticker !== t);
     }
 
-    ctx.S.stock.history[t] = [];
-    for (let i = 0; i < 30; i++) ctx.S.stock.history[t].push(S.startPrice);
+    ctx.S.stock.history[t] = [S.startPrice];
     ctx.S.stock.bankruptCountdown[t] = 0;
     ctx.S.stock.trends[t] = 0;
     if (ctx.S.stock.currentDrifts) delete ctx.S.stock.currentDrifts[t];
+    
+    // Random 29 nến để không bị đường thẳng đuột
+    for (let i = 0; i < 29; i++) {
+      let change = S.drift + S.vol * (Math.random() - 0.5);
+      change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
+      let lastP = ctx.S.stock.history[t][i];
+      ctx.S.stock.history[t].push(Math.max(1, lastP * (1 + change)));
+    }
   }
 }
 

@@ -56663,11 +56663,16 @@ function stepPrice(t2) {
     if (ctx.S.stock.autoOrders) {
       ctx.S.stock.autoOrders = ctx.S.stock.autoOrders.filter((o2) => o2.ticker !== t2);
     }
-    ctx.S.stock.history[t2] = [];
-    for (let i2 = 0; i2 < 30; i2++) ctx.S.stock.history[t2].push(S.startPrice);
+    ctx.S.stock.history[t2] = [S.startPrice];
     ctx.S.stock.bankruptCountdown[t2] = 0;
     ctx.S.stock.trends[t2] = 0;
     if (ctx.S.stock.currentDrifts) delete ctx.S.stock.currentDrifts[t2];
+    for (let i2 = 0; i2 < 29; i2++) {
+      let change2 = S.drift + S.vol * (Math.random() - 0.5);
+      change2 = Math.max(-S.swingCap, Math.min(S.swingCap, change2));
+      let lastP = ctx.S.stock.history[t2][i2];
+      ctx.S.stock.history[t2].push(Math.max(1, lastP * (1 + change2)));
+    }
   }
 }
 function updateMarket(now2 = Date.now()) {
