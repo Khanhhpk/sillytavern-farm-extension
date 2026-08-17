@@ -143,6 +143,40 @@ function stepPrice(t) {
   hist.push(newPrice);
   if (hist.length > 30) hist.shift();
   ctx.S.stock.trends[t] = trend;
+
+  // BANKRUPT MECHANIC: 10% threshold
+  if (!ctx.S.stock.bankruptCountdown) ctx.S.stock.bankruptCountdown = {};
+  if (newPrice < S.startPrice * 0.1) {
+    ctx.S.stock.bankruptCountdown[t] = (ctx.S.stock.bankruptCountdown[t] || 0) + 1;
+  } else {
+    ctx.S.stock.bankruptCountdown[t] = 0;
+  }
+
+  // EXECUTE BANKRUPTCY
+  if (ctx.S.stock.bankruptCountdown[t] >= 5) {
+    if (!ctx.S.stock.bankruptLogs) ctx.S.stock.bankruptLogs = [];
+    const sharesLost = ctx.S.stock.portfolio[t] || 0;
+    const costLost = (ctx.S.stock.portfolioCost && ctx.S.stock.portfolioCost[t]) ? ctx.S.stock.portfolioCost[t] : 0;
+    
+    ctx.S.stock.bankruptLogs.push({
+      ticker: t,
+      shares: sharesLost,
+      cost: costLost,
+      time: Date.now()
+    });
+
+    ctx.S.stock.portfolio[t] = 0;
+    if (ctx.S.stock.portfolioCost) ctx.S.stock.portfolioCost[t] = 0;
+    
+    if (ctx.S.stock.autoOrders) {
+      ctx.S.stock.autoOrders = ctx.S.stock.autoOrders.filter(o => o.ticker !== t);
+    }
+
+    ctx.S.stock.history[t] = [];
+    for (let i = 0; i < 30; i++) ctx.S.stock.history[t].push(S.startPrice);
+    ctx.S.stock.bankruptCountdown[t] = 0;
+    ctx.S.stock.trends[t] = 0;
+  }
 }
 
 export function updateMarket(now = Date.now()) {
@@ -754,6 +788,40 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
     </div>
   `;
 
+  if (ctx.S.stock.bankruptLogs && ctx.S.stock.bankruptLogs.length > 0) {
+    let logsHtml = ctx.S.stock.bankruptLogs.map(log => {
+      const stockName = STOCKS[log.ticker] ? STOCKS[log.ticker].name : log.ticker;
+      return `
+        <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.4); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+          <div style="color: #ef4444; font-weight: bold; font-size: 15px;">${stockName} (${log.ticker})</div>
+          <div style="color: #cbd5e1; font-size: 13px; margin-top: 4px;">
+            Số cổ phiếu mất trắng: <strong style="color: #f8fafc;">${fmtMoney(log.shares)} cp</strong><br/>
+            Tổng thiệt hại (Gốc): <strong style="color: #ef4444;">$${fmtMoney(log.cost)}</strong>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    bodyHTML += `
+      <div id="stk-bankrupt-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.95); z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border-radius: 12px; backdrop-filter: blur(4px);">
+        <div style="background: #1e293b; border: 2px solid #ef4444; border-radius: 12px; padding: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); text-align: left;">
+          <h2 style="color: #ef4444; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 24px;">🚨</span> THÔNG BÁO SẬP SÀN
+          </h2>
+          <div style="color: #94a3b8; font-size: 13px; margin-bottom: 15px;">
+            Trong lúc bạn vắng mặt (hoặc vừa qua), các mã cổ phiếu sau đã giảm quá 90% giá trị và chính thức <b>phá sản</b>. Toàn bộ cổ phiếu bị hủy bỏ và giá trị về $0.
+          </div>
+          <div style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+            ${logsHtml}
+          </div>
+          <button id="stk-bankrupt-ack" style="width: 100%; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 6px rgba(239,68,68,0.3);">
+            TÔI ĐÃ HIỂU (Xóa báo cáo)
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   const stockWin = All.$id('stock-win');
   const stockView = All.$id('stock-view');
   
@@ -785,6 +853,14 @@ totalPortfolioValue += (ctx.S.stock.portfolio[t] || 0) * price;
       stockWin.style.display = 'none';
       if (All.renderStatus) All.renderStatus();
     };
+
+    const ackBtn = All.$id('stk-bankrupt-ack');
+    if (ackBtn) {
+      ackBtn.onclick = () => {
+        ctx.S.stock.bankruptLogs = [];
+        openStockModal(); // Re-render without the overlay
+      };
+    }
 
     if (All.$id('stk-help-btn')) {
       All.$id('stk-help-btn').onclick = (e) => {
