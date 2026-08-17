@@ -170,35 +170,6 @@ function bjSmartRig(shoe, idx, p1, p2, metric) {
     }
 }
 
-// "Dealer Peek" rig — kích hoạt ngầm khi người chơi thắng liên tiếp >= 3 ván.
-// Bí mật hoán đổi lá bài úp của dealer sang lá giúp dealer đứng mạnh (17–21).
-function bjDealerPeekRig(shoe, shoeIdx, winStreak) {
-    if (winStreak < 4) return;
-    let chance = 0;
-    if (winStreak >= 7) chance = 0.25;
-    else if (winStreak >= 5) chance = 0.15;
-    else chance = 0.05; // streak 4
-    if (Math.random() >= chance) return;
-
-    const dealerVisPos = shoeIdx + 1; // lá ngửa của dealer
-    const dealerHidPos = shoeIdx + 3; // lá úp của dealer
-    if (dealerHidPos >= shoe.length) return;
-
-    const visVal = cardValue(shoe[dealerVisPos].rank);
-    // Tìm lá trong phần shoe chưa dùng tạo tổng điểm dealer 17–21
-    for (let i = shoeIdx + 4; i < Math.min(shoe.length, shoeIdx + 80); i++) {
-        const cand = shoe[i];
-        let hidVal = cardValue(cand.rank);
-        let total = visVal + hidVal;
-        if (cand.rank === 'A' && total > 21) total -= 10;
-        if (total >= 17 && total <= 21) {
-            const tmp = shoe[dealerHidPos];
-            shoe[dealerHidPos] = shoe[i];
-            shoe[i] = tmp;
-            return;
-        }
-    }
-}
 
 function isBlackjack(hand) {
     if (hand.length !== 2) return false;
@@ -421,7 +392,6 @@ function soloStartRound() {
     s.bets = [want]; s.insuranceBet = 0; s.playerHands = [[]]; s.activeHandIdx = 0; s.dealerHand = []; s.splitAceIdxs = new Set();
 
     bjSmartRig(s.shoe, s.shoeIdx, s.shoeIdx + 1, s.shoeIdx + 3, ctx.S.coins || 0);
-    bjDealerPeekRig(s.shoe, s.shoeIdx, s.winStreak || 0);
 
     s.playerHands[0].push(soloDrawCard());
     s.dealerHand.push(soloDrawCard());
@@ -627,12 +597,6 @@ function soloResolveAll() {
     }
     save(); renderStatus();
     showMsg(results.join('\n'));
-    // Cập nhật chuỗi thắng để kích hoạt bjDealerPeekRig ở ván sau
-    if ((ctx.S.coins || 0) > coinsBeforeResolve) {
-        s.winStreak = (s.winStreak || 0) + 1;
-    } else {
-        s.winStreak = 0;
-    }
 }
 
 function showMsg(text) {

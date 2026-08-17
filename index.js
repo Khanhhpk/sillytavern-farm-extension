@@ -52554,30 +52554,6 @@ function bjSmartRig(shoe, idx, p1, p2, metric) {
     shoe[t2] = tmp;
   }
 }
-function bjDealerPeekRig(shoe, shoeIdx, winStreak) {
-  if (winStreak < 4) return;
-  let chance = 0;
-  if (winStreak >= 7) chance = 0.25;
-  else if (winStreak >= 5) chance = 0.15;
-  else chance = 0.05;
-  if (Math.random() >= chance) return;
-  const dealerVisPos = shoeIdx + 1;
-  const dealerHidPos = shoeIdx + 3;
-  if (dealerHidPos >= shoe.length) return;
-  const visVal = cardValue(shoe[dealerVisPos].rank);
-  for (let i2 = shoeIdx + 4; i2 < Math.min(shoe.length, shoeIdx + 80); i2++) {
-    const cand = shoe[i2];
-    let hidVal = cardValue(cand.rank);
-    let total = visVal + hidVal;
-    if (cand.rank === "A" && total > 21) total -= 10;
-    if (total >= 17 && total <= 21) {
-      const tmp = shoe[dealerHidPos];
-      shoe[dealerHidPos] = shoe[i2];
-      shoe[i2] = tmp;
-      return;
-    }
-  }
-}
 function isBlackjack(hand) {
   if (hand.length !== 2) return false;
   return handTotal(hand) === 21;
@@ -52786,7 +52762,6 @@ function soloStartRound() {
   s2.dealerHand = [];
   s2.splitAceIdxs = /* @__PURE__ */ new Set();
   bjSmartRig(s2.shoe, s2.shoeIdx, s2.shoeIdx + 1, s2.shoeIdx + 3, ctx.S.coins || 0);
-  bjDealerPeekRig(s2.shoe, s2.shoeIdx, s2.winStreak || 0);
   s2.playerHands[0].push(soloDrawCard());
   s2.dealerHand.push(soloDrawCard());
   s2.playerHands[0].push(soloDrawCard());
@@ -53035,11 +53010,6 @@ function soloResolveAll() {
   save();
   renderStatus();
   showMsg(results.join("\n"));
-  if ((ctx.S.coins || 0) > coinsBeforeResolve) {
-    s2.winStreak = (s2.winStreak || 0) + 1;
-  } else {
-    s2.winStreak = 0;
-  }
 }
 function showMsg(text) {
   const el = $id("bj-message");
