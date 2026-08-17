@@ -56635,10 +56635,10 @@ function stepPrice(t2) {
   const elasticGravity = (1 - priceRatio) * 2e-3;
   change += elasticGravity;
   change = Math.max(-S.swingCap, Math.min(S.swingCap, change));
-  if (Math.random() < 5e-3 && price > S.startPrice * 0.2) {
-    const targetPrice = S.startPrice * (0.11 + Math.random() * 0.04);
+  if (!ctx.S.stock._isPrefilling && Math.random() < 5e-3 && price > S.startPrice * 0.2) {
+    const targetPrice = S.startPrice * (0.1 + Math.random() * 0.04);
     change = -1 + targetPrice / price;
-    trend = -0.5;
+    trend = -0.8;
   }
   let newPrice = Math.max(0.01, price * (1 + change));
   hist.push(newPrice);
@@ -56697,7 +56697,7 @@ function updateMarket(now2 = Date.now()) {
   if (!ctx.S.stock.currentDrifts) {
     ctx.S.stock.currentDrifts = {};
     Object.keys(STOCKS).forEach((t2) => {
-      ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * 0.04 - 0.02;
+      ctx.S.stock.currentDrifts[t2] = STOCKS[t2].drift + Math.random() * 0.01 - 5e-3;
     });
   }
   if (!ctx.S.stock.nextIntervalMs) {
